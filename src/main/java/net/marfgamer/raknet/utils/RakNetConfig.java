@@ -14,7 +14,7 @@ import com.google.gson.JsonParser;
  * Attempts to retrieve the configuration for JRakNet, if this fails it will
  * hard exit using <code>System.exit(1);</code>
  * 
- * @author Whirvis T. Wheatley
+ * @author MarfGamer
  */
 public class RakNetConfig {
 

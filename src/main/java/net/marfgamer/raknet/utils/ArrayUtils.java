@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Whirvis T. Wheatley
+ * Copyright (c) 2016 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,7 +36,7 @@ import java.util.Arrays;
 /**
  * Used for easily manipulation of arrays
  *
- * @author Whirvis T. Wheatley
+ * @author MarfGamer
  */
 public abstract class ArrayUtils {
 
