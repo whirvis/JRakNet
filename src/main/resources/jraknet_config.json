@@ -1,0 +1,4 @@
+{
+	"send_tick_ms": 50,
+	"logger_log_level": "info"
+}
