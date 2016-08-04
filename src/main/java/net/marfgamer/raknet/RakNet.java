@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 Trent Summerlin
+ * Copyright (c) 2016 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,7 +37,7 @@ import net.marfgamer.raknet.branding.MarfUtils;
 /**
  * Contains info for RakNet
  *
- * @author Trent Summerlin
+ * @author MarfGamer
  */
 public interface RakNet {
 
