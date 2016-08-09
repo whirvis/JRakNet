@@ -30,36 +30,17 @@
  */
 package net.marfgamer.raknet;
 
-import java.io.File;
-
-import net.marfgamer.raknet.branding.MarfUtils;
-
 /**
  * Contains info for RakNet
  *
  * @author MarfGamer
  */
 public interface RakNet {
-
-	// Library data
-	public static final File dataFolder = new File(MarfUtils.getDataFolder(), "JRakNet");
-	public static final File idFile = new File(dataFolder, "unique_id.json");
-
-	// Protocol version
+	
 	public static final int SERVER_NETWORK_PROTOCOL = 8;
 	public static final int CLIENT_NETWORK_PROTOCOL = 8;
-
-	// Transfer size
 	public static final int MINIMUM_TRANSFER_UNIT = 530;
-
-	// Split packet size
 	public static final int MAX_SPLITS_PER_QUEUE = 4;
 	public static final int MAX_SPLIT_COUNT = 128;
-
-	// Time conversion
-	public static final long SERVER_TIMEOUT = 10 * 1000L;
-	public static final long CLIENT_TIMEOUT = 10 * 1000L;
-	public static final long ONE_MINUTES_MILLIS = 60 * 1000L;
-	public static final long FIVE_MINUTES_MILLIS = 300 * 1000L;
 
 }
