@@ -30,16 +30,25 @@
  */
 package net.marfgamer.raknet;
 
+import java.util.UUID;
+
 /**
  * Contains info for RakNet
  *
  * @author MarfGamer
  */
 public interface RakNet {
-	
+
+	/**
+	 * Server takes higher bits, client takes lower bits
+	 */
+	public static final UUID UNIQUE_ID_BITS = UUID.randomUUID();
+
 	public static final int SERVER_NETWORK_PROTOCOL = 8;
 	public static final int CLIENT_NETWORK_PROTOCOL = 8;
+
 	public static final int MINIMUM_TRANSFER_UNIT = 530;
+
 	public static final int MAX_SPLITS_PER_QUEUE = 4;
 	public static final int MAX_SPLIT_COUNT = 128;
 
