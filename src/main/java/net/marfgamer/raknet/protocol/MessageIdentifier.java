@@ -10,61 +10,173 @@ import java.lang.reflect.Field;
  */
 public class MessageIdentifier {
 
-	public static int ID_CONNECTED_PING, ID_UNCONNECTED_PING, ID_UNCONNECTED_PING_OPEN_CONNECTIONS, ID_CONNECTED_PONG,
-			ID_DETECT_LOST_CONNECTIONS, ID_OPEN_CONNECTION_REQUEST_1, ID_OPEN_CONNECTION_REPLY_1,
-			ID_OPEN_CONNECTION_REQUEST_2, ID_OPEN_CONNECTION_REPLY_2, ID_CONNECTION_REQUEST,
-			ID_REMOTE_SYSTEM_REQUIRES_PUBLIC_KEY, ID_OUR_SYSTEM_REQUIRES_SECURITY, ID_PUBLIC_KEY_MISMATCH,
-			ID_OUT_OF_BAND_INTERNAL, ID_SND_RECEIPT_ACKED, ID_SND_RECEIPT_LOSS, ID_CONNECTION_REQUEST_ACCEPTED,
-			ID_CONNECTION_ATTEMPT_FAILED, ID_ALREADY_CONNECTED, ID_NEW_INCOMING_CONNECTION,
-			ID_NO_FREE_INCOMING_CONNECTIONS, ID_DISCONNECTION_NOTIFICATION, ID_CONNECTION_LOST, ID_CONNECTION_BANNED,
-			ID_INVALID_PASSWORD, ID_INCOMPATIBLE_PROTOCOL_VERSION, ID_IP_RECENTLY_CONNECTED, ID_TIMESTAMP,
-			ID_UNCONNECTED_PONG, ID_ADVERTISE_SYSTEM, ID_DOWNLOAD_PROGRESS, ID_REMOTE_DISCONNECTION_NOTIFICATION,
-			ID_REMOTE_CONNECTION_LOST, ID_REMOTE_NEW_INCOMING_CONNECTION, ID_FILE_LIST_TRANSFER_HEADER,
-			ID_FILE_LIST_TRANSFER_FILE, ID_FILE_LIST_REFERENCE_PUSH_ACK, ID_DDT_DOWNLOAD_REQUEST, ID_TRANSPORT_STRING,
-			ID_REPLICA_MANAGER_CONSTRUCTION, ID_REPLICA_MANAGER_SCOPE_CHANGE, ID_REPLICA_MANAGER_SERIALIZE,
-			ID_REPLICA_MANAGER_DOWNLOAD_STARTED, ID_REPLICA_MANAGER_DOWNLOAD_COMPLETE, ID_RAKVOICE_OPEN_CHANNEL_REQUEST,
-			ID_RAKVOICE_OPEN_CHANNEL_REPLY, ID_RAKVOICE_CLOSE_CHANNEL, ID_RAKVOICE_DATA,
-			ID_AUTOPATCHER_GET_CHANGELIST_SINCE_DATE, ID_AUTOPATCHER_CREATION_LIST, ID_AUTOPATCHER_DELETION_LIST,
-			ID_AUTOPATCHER_GET_PATCH, ID_AUTOPATCHER_PATCH_LIST, ID_AUTOPATCHER_REPOSITORY_FATAL_ERROR,
-			ID_AUTOPATCHER_CANNOT_DOWNLOAD_ORIGINAL_UNMODIFIED_FILES, ID_AUTOPATCHER_FINISHED_INTERNAL,
-			ID_AUTOPATCHER_FINISHED, ID_AUTOPATCHER_RESTART_APPLICATION, ID_NAT_PUNCHTHROUGH_REQUEST,
-			ID_NAT_CONNECT_AT_TIME, ID_NAT_GET_MOST_RECENT_PORT, ID_NAT_CLIENT_READY, ID_NAT_TARGET_NOT_CONNECTED,
-			ID_NAT_TARGET_UNRESPONSIVE, ID_NAT_CONNECTION_TO_TARGET_LOST, ID_NAT_ALREADY_IN_PROGRESS,
-			ID_NAT_PUNCHTHROUGH_FAILED, ID_NAT_PUNCHTHROUGH_SUCCEEDED, ID_READY_EVENT_SET, ID_READY_EVENT_UNSET,
-			ID_READY_EVENT_ALL_SET, ID_READY_EVENT_QUERY, ID_LOBBY_GENERAL, ID_RPC_REMOTE_ERROR, ID_RPC_PLUGIN,
-			ID_FILE_LIST_REFERENCE_PUSH, ID_READY_EVENT_FORCE_ALL_SET, ID_ROOMS_EXECUTE_FUNC, ID_ROOMS_LOGON_STATUS,
-			ID_ROOMS_HANDLE_CHANGE, ID_LOBBY2_SEND_MESSAGE, ID_LOBBY2_SERVER_ERROR, ID_FCM2_NEW_HOST,
-			ID_FCM2_REQUEST_FCMGUID, ID_FCM2_RESPOND_CONNECTION_COUNT, ID_FCM2_INFORM_FCMGUID,
-			ID_FCM2_UPDATE_MIN_TOTAL_CONNECTION_COUNT, ID_FCM2_VERIFIED_JOIN_START, ID_FCM2_VERIFIED_JOIN_CAPABLE,
-			ID_FCM2_VERIFIED_JOIN_FAILED, ID_FCM2_VERIFIED_JOIN_ACCEPTED, ID_FCM2_VERIFIED_JOIN_REJECTED,
-			ID_UDP_PROXY_GENERAL, ID_SQLite3_EXEC, ID_SQLite3_UNKNOWN_DB, ID_SQLLITE_LOGGER,
-			ID_NAT_TYPE_DETECTION_REQUEST, ID_NAT_TYPE_DETECTION_RESULT, ID_ROUTER_2_INTERNAL,
-			ID_ROUTER_2_FORWARDING_NO_PATH, ID_ROUTER_2_FORWARDING_ESTABLISHED, ID_ROUTER_2_REROUTED,
-			ID_TEAM_BALANCER_INTERNAL, ID_TEAM_BALANCER_REQUESTED_TEAM_FULL, ID_TEAM_BALANCER_REQUESTED_TEAM_LOCKED,
-			ID_TEAM_BALANCER_TEAM_REQUESTED_CANCELLED, ID_TEAM_BALANCER_TEAM_ASSIGNED, ID_LIGHTSPEED_INTEGRATION,
-			ID_XBOX_LOBBY, ID_TWO_WAY_AUTHENTICATION_INCOMING_CHALLENGE_SUCCESS,
-			ID_TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_SUCCESS, ID_TWO_WAY_AUTHENTICATION_INCOMING_CHALLENGE_FAILURE,
-			ID_TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_FAILURE, ID_TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_TIMEOUT,
-			ID_TWO_WAY_AUTHENTICATION_NEGOTIATION, ID_CLOUD_POST_REQUEST, ID_CLOUD_RELEASE_REQUEST,
-			ID_CLOUD_GET_REQUEST, ID_CLOUD_GET_RESPONSE, ID_CLOUD_UNSUBSCRIBE_REQUEST,
-			ID_CLOUD_SERVER_TO_SERVER_COMMAND, ID_CLOUD_SUBSCRIPTION_NOTIFICATION, ID_LIB_VOICE, ID_RELAY_PLUGIN,
-			ID_NAT_REQUEST_BOUND_ADDRESSES, ID_NAT_RESPOND_BOUND_ADDRESSES, ID_FCM2_UPDATE_USER_CONTEXT, ID_RESERVED_3,
-			ID_RESERVED_4, ID_RESERVED_5, ID_RESERVED_6, ID_RESERVED_7, ID_RESERVED_8, ID_RESERVED_9,
-			ID_USER_PACKET_ENUM;
+	public final static byte[] MAGIC = new byte[] { (byte) 0x00, (byte) 0xFF, (byte) 0xFF, 0x00, (byte) 0xFE,
+			(byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xFD, (byte) 0xFD, (byte) 0xFD, (byte) 0xFD, (byte) 0x12,
+			(byte) 0x34, (byte) 0x56, (byte) 0x78 };
+
+	public static final short ID_CONNECTED_PING = 0x00;
+	public static final short ID_UNCONNECTED_PING = 0x01;
+	public static final short ID_UNCONNECTED_PING_OPEN_CONNECTIONS = 0x02;
+	public static final short ID_CONNECTED_PONG = 0x03;
+	public static final short ID_DETECT_LOST_CONNECTIONS = 0x04;
+	public static final short ID_OPEN_CONNECTION_REQUEST_1 = 0x05;
+	public static final short ID_OPEN_CONNECTION_REPLY_1 = 0x06;
+	public static final short ID_OPEN_CONNECTION_REQUEST_2 = 0x07;
+	public static final short ID_OPEN_CONNECTION_REPLY_2 = 0x08;
+	public static final short ID_CONNECTION_REQUEST = 0x09;
+	public static final short ID_REMOTE_SYSTEM_REQUIRES_PUBLIC_KEY = 0x0A;
+	public static final short ID_OUR_SYSTEM_REQUIRES_SECURITY = 0x0B;
+	public static final short ID_PUBLIC_KEY_MISMATCH = 0x0C;
+	public static final short ID_OUT_OF_BAND_INTERNAL = 0x0D;
+	public static final short ID_SND_RECEIPT_ACKED = 0x0E;
+	public static final short ID_SND_RECEIPT_LOSS = 0x0F;
+	public static final short ID_CONNECTION_REQUEST_ACCEPTED = 0x10;
+	public static final short ID_CONNECTION_ATTEMPT_FAILED = 0x11;
+	public static final short ID_ALREADY_CONNECTED = 0x12;
+	public static final short ID_NEW_INCOMING_CONNECTION = 0x13;
+	public static final short ID_NO_FREE_INCOMING_CONNECTIONS = 0x14;
+	public static final short ID_DISCONNECTION_NOTIFICATION = 0x15;
+	public static final short ID_CONNECTION_LOST = 0x16;
+	public static final short ID_CONNECTION_BANNED = 0x17;
+	public static final short ID_INVALID_PASSWORD = 0x18;
+	public static final short ID_INCOMPATIBLE_PROTOCOL_VERSION = 0x19;
+	public static final short ID_IP_RECENTLY_CONNECTED = 0x1A;
+	public static final short ID_TIMESTAMP = 0x1B;
+	public static final short ID_UNCONNECTED_PONG = 0x1C;
+	public static final short ID_ADVERTISE_SYSTEM = 0x1D;
+	public static final short ID_DOWNLOAD_PROGRESS = 0x1E;
+	public static final short ID_REMOTE_DISCONNECTION_NOTIFICATION = 0x1F;
+	public static final short ID_REMOTE_CONNECTION_LOST = 0x20;
+	public static final short ID_REMOTE_NEW_INCOMING_CONNECTION = 0x21;
+	public static final short ID_FILE_LIST_TRANSFER_HEADER = 0x22;
+	public static final short ID_FILE_LIST_TRANSFER_FILE = 0x23;
+	public static final short ID_FILE_LIST_REFERENCE_PUSH_ACK = 0x24;
+	public static final short ID_DDT_DOWNLOAD_REQUEST = 0x25;
+	public static final short ID_TRANSPORT_STRING = 0x26;
+	public static final short ID_REPLICA_MANAGER_CONSTRUCTION = 0x27;
+	public static final short ID_REPLICA_MANAGER_SCOPE_CHANGE = 0x28;
+	public static final short ID_REPLICA_MANAGER_SERIALIZE = 0x29;
+	public static final short ID_REPLICA_MANAGER_DOWNLOAD_STARTED = 0x2A;
+	public static final short ID_REPLICA_MANAGER_DOWNLOAD_COMPLETE = 0x2B;
+	public static final short ID_RAKVOICE_OPEN_CHANNEL_REQUEST = 0x2C;
+	public static final short ID_RAKVOICE_OPEN_CHANNEL_REPLY = 0x2D;
+	public static final short ID_RAKVOICE_CLOSE_CHANNEL = 0x2E;
+	public static final short ID_RAKVOICE_DATA = 0x2F;
+	public static final short ID_AUTOPATCHER_GET_CHANGELIST_SINCE_DATE = 0x30;
+	public static final short ID_AUTOPATCHER_CREATION_LIST = 0x31;
+	public static final short ID_AUTOPATCHER_DELETION_LIST = 0x32;
+	public static final short ID_AUTOPATCHER_GET_PATCH = 0x33;
+	public static final short ID_AUTOPATCHER_PATCH_LIST = 0x34;
+	public static final short ID_AUTOPATCHER_REPOSITORY_FATAL_ERROR = 0x35;
+	public static final short ID_AUTOPATCHER_CANNOT_DOWNLOAD_ORIGINAL_UNMODIFIED_FILES = 0x36;
+	public static final short ID_AUTOPATCHER_FINISHED_INTERNAL = 0x37;
+	public static final short ID_AUTOPATCHER_FINISHED = 0x38;
+	public static final short ID_AUTOPATCHER_RESTART_APPLICATION = 0x39;
+	public static final short ID_NAT_PUNCHTHROUGH_REQUEST = 0x3A;
+	public static final short ID_NAT_CONNECT_AT_TIME = 0x3B;
+	public static final short ID_NAT_GET_MOST_RECENT_PORT = 0x3C;
+	public static final short ID_NAT_CLIENT_READY = 0x3D;
+	public static final short ID_NAT_TARGET_NOT_CONNECTED = 0x3E;
+	public static final short ID_NAT_TARGET_UNRESPONSIVE = 0x3F;
+	public static final short ID_NAT_CONNECTION_TO_TARGET_LOST = 0x40;
+	public static final short ID_NAT_ALREADY_IN_PROGRESS = 0x41;
+	public static final short ID_NAT_PUNCHTHROUGH_FAILED = 0x42;
+	public static final short ID_NAT_PUNCHTHROUGH_SUCCEEDED = 0x43;
+	public static final short ID_READY_EVENT_SET = 0x44;
+	public static final short ID_READY_EVENT_UNSET = 0x45;
+	public static final short ID_READY_EVENT_ALL_SET = 0x46;
+	public static final short ID_READY_EVENT_QUERY = 0x47;
+	public static final short ID_LOBBY_GENERAL = 0x48;
+	public static final short ID_RPC_REMOTE_ERROR = 0x49;
+	public static final short ID_RPC_PLUGIN = 0x4A;
+	public static final short ID_FILE_LIST_REFERENCE_PUSH = 0x4B;
+	public static final short ID_READY_EVENT_FORCE_ALL_SET = 0x4C;
+	public static final short ID_ROOMS_EXECUTE_FUNC = 0x4D;
+	public static final short ID_ROOMS_LOGON_STATUS = 0x4E;
+	public static final short ID_ROOMS_HANDLE_CHANGE = 0x4F;
+	public static final short ID_LOBBY2_SEND_MESSAGE = 0x50;
+	public static final short ID_LOBBY2_SERVER_ERROR = 0x51;
+	public static final short ID_FCM2_NEW_HOST = 0x52;
+	public static final short ID_FCM2_REQUEST_FCMGUID = 0x53;
+	public static final short ID_FCM2_RESPOND_CONNECTION_COUNT = 0x54;
+	public static final short ID_FCM2_INFORM_FCMGUID = 0x55;
+	public static final short ID_FCM2_UPDATE_MIN_TOTAL_CONNECTION_COUNT = 0x56;
+	public static final short ID_FCM2_VERIFIED_JOIN_START = 0x57;
+	public static final short ID_FCM2_VERIFIED_JOIN_CAPABLE = 0x58;
+	public static final short ID_FCM2_VERIFIED_JOIN_FAILED = 0x59;
+	public static final short ID_FCM2_VERIFIED_JOIN_ACCEPTED = 0x5A;
+	public static final short ID_FCM2_VERIFIED_JOIN_REJECTED = 0x5B;
+	public static final short ID_UDP_PROXY_GENERAL = 0x5C;
+	public static final short ID_SQLite3_EXEC = 0x5D;
+	public static final short ID_SQLite3_UNKNOWN_DB = 0x5E;
+	public static final short ID_SQLLITE_LOGGER = 0x5F;
+	public static final short ID_NAT_TYPE_DETECTION_REQUEST = 0x60;
+	public static final short ID_NAT_TYPE_DETECTION_RESULT = 0x61;
+	public static final short ID_ROUTER_2_INTERNAL = 0x62;
+	public static final short ID_ROUTER_2_FORWARDING_NO_PATH = 0x63;
+	public static final short ID_ROUTER_2_FORWARDING_ESTABLISHED = 0x64;
+	public static final short ID_ROUTER_2_REROUTED = 0x65;
+	public static final short ID_TEAM_BALANCER_INTERNAL = 0x66;
+	public static final short ID_TEAM_BALANCER_REQUESTED_TEAM_FULL = 0x67;
+	public static final short ID_TEAM_BALANCER_REQUESTED_TEAM_LOCKED = 0x68;
+	public static final short ID_TEAM_BALANCER_TEAM_REQUESTED_CANCELLED = 0x69;
+	public static final short ID_TEAM_BALANCER_TEAM_ASSIGNED = 0x6A;
+	public static final short ID_LIGHTSPEED_INTEGRATION = 0x6B;
+	public static final short ID_XBOX_LOBBY = 0x6C;
+	public static final short ID_TWO_WAY_AUTHENTICATION_INCOMING_CHALLENGE_SUCCESS = 0x6D;
+	public static final short ID_TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_SUCCESS = 0x6E;
+	public static final short ID_TWO_WAY_AUTHENTICATION_INCOMING_CHALLENGE_FAILURE = 0x6F;
+	public static final short ID_TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_FAILURE = 0x70;
+	public static final short ID_TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_TIMEOUT = 0x71;
+	public static final short ID_TWO_WAY_AUTHENTICATION_NEGOTIATION = 0x72;
+	public static final short ID_CLOUD_POST_REQUEST = 0x73;
+	public static final short ID_CLOUD_RELEASE_REQUEST = 0x74;
+	public static final short ID_CLOUD_GET_REQUEST = 0x75;
+	public static final short ID_CLOUD_GET_RESPONSE = 0x76;
+	public static final short ID_CLOUD_UNSUBSCRIBE_REQUEST = 0x77;
+	public static final short ID_CLOUD_SERVER_TO_SERVER_COMMAND = 0x78;
+	public static final short ID_CLOUD_SUBSCRIPTION_NOTIFICATION = 0x79;
+	public static final short ID_LIB_VOICE = 0x7A;
+	public static final short ID_RELAY_PLUGIN = 0x7B;
+	public static final short ID_NAT_REQUEST_BOUND_ADDRESSES = 0x7C;
+	public static final short ID_NAT_RESPOND_BOUND_ADDRESSES = 0x7D;
+	public static final short ID_FCM2_UPDATE_USER_CONTEXT = 0x7E;
+	public static final short ID_RESERVED_3 = 0x7F;
+	public static final short ID_RESERVED_4 = 0x80;
+	public static final short ID_RESERVED_5 = 0x81;
+	public static final short ID_RESERVED_6 = 0x82;
+	public static final short ID_RESERVED_7 = 0x83;
+	public static final short ID_RESERVED_8 = 0x84;
+	public static final short ID_RESERVED_9 = 0x85;
+	public static final short ID_USER_PACKET_ENUM = 0x86;
 
 	/**
-	 * Loads all the ID's for RakNet
+	 * Returns the packet's name based on it's ID
+	 * 
+	 * @param id
+	 * @return String
 	 */
-	public static void loadIds() {
-		Field[] fields = MessageIdentifier.class.getDeclaredFields();
-		for (int i = 0; i < fields.length; i++) {
-			try {
-				fields[i].set(null, i);
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
+	public static String getName(int id) {
+		short packetId = 0;
+		for (Field field : MessageIdentifier.class.getDeclaredFields()) {
+			if (packetId++ == id) {
+				return field.getName();
 			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the packet's ID based on it's name
+	 * 
+	 * @param name
+	 * @return int
+	 */
+	public static int getId(String name) {
+		try {
+			return MessageIdentifier.class.getDeclaredField(name.toUpperCase()).getInt(null);
+		} catch (Exception e) {
+			return -1;
 		}
 	}
 
