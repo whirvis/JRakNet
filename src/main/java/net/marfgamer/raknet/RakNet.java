@@ -51,5 +51,7 @@ public interface RakNet {
 
 	public static final int MAX_SPLITS_PER_QUEUE = 4;
 	public static final int MAX_SPLIT_COUNT = 128;
+	
+	public static final int MAX_CHANNELS = 32;
 
 }

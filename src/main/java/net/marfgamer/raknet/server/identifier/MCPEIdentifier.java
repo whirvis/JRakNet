@@ -1,6 +1,6 @@
 package net.marfgamer.raknet.server.identifier;
 
-import net.marfgamer.raknet.utils.RakNetUtils;
+import net.marfgamer.raknet.util.RakNetUtils;
 
 public class MCPEIdentifier extends Identifier {
 
