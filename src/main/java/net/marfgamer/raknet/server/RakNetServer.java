@@ -102,7 +102,7 @@ public class RakNetServer implements RakNet {
 	}
 
 	public void handleMessage(Packet packet, InetSocketAddress sender) {
-		short id = packet.getId();
+		short id = packet.readUByte();
 		if (id == ID_UNCONNECTED_PING || id == ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
 			UnconnectedPing ping = new UnconnectedPing(packet);
 			ping.decode();

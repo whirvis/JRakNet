@@ -1,10 +1,11 @@
 package net.marfgamer.raknet.protocol.unconnected;
 
+import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 import net.marfgamer.raknet.server.identifier.Identifier;
 
-public class UnconnectedPong extends Packet {
+public class UnconnectedPong extends RakNetPacket {
 
 	public long pingId;
 	public long pongId;
