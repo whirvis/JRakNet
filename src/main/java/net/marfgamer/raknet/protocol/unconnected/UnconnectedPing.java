@@ -1,9 +1,10 @@
 package net.marfgamer.raknet.protocol.unconnected;
 
+import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 
-public class UnconnectedPing extends Packet {
+public class UnconnectedPing extends RakNetPacket {
 
 	public long time;
 	public long pingId;

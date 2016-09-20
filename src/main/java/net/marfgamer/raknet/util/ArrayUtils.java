@@ -28,7 +28,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package net.marfgamer.raknet.utils;
+package net.marfgamer.raknet.util;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,7 +50,7 @@ public abstract class ArrayUtils {
 	 *            The max size for each array that has been split
 	 * @return byte[][]
 	 */
-	public static byte[][] splitArray(byte[] src, int size) {
+	public static final byte[][] splitArray(byte[] src, int size) {
 		if (size > 0) {
 			int index = 0;
 			ArrayList<byte[]> split = new ArrayList<byte[]>();
@@ -67,6 +67,27 @@ public abstract class ArrayUtils {
 		} else {
 			return new byte[0][0];
 		}
+	}
+
+	/**
+	 * Returns all the integers in between each other as a normal subtraction
+	 * 
+	 * @param low
+	 *            the starting point
+	 * @param high
+	 *            the ending point
+	 * @return the numbers in between high and low
+	 */
+	public static final int[] subtractionArray(int low, int high) {
+		if (low > high) {
+			return new int[0];
+		}
+
+		int[] arr = new int[high - low - 1];
+		for (int i = 0; i < arr.length; i++) {
+			arr[i] = i + low + 1;
+		}
+		return arr;
 	}
 
 }

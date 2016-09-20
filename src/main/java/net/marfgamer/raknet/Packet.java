@@ -13,22 +13,9 @@ import io.netty.channel.socket.DatagramPacket;
 public class Packet {
 
 	private final ByteBuf buffer;
-	private final short id;
 
 	public Packet(ByteBuf buffer) {
-		if (buffer.readableBytes() < 1) {
-			throw new IllegalArgumentException("The buffer must have at least one byte for the ID!");
-		}
 		this.buffer = buffer;
-		this.id = this.readUByte();
-	}
-
-	public Packet(int id) {
-		if (id < 0) {
-			throw new IllegalArgumentException("The packet ID is unsigned, it must be at least 0!");
-		}
-		this.buffer = Unpooled.buffer();
-		this.writeUByte(this.id = (short) id);
 	}
 
 	public Packet(DatagramPacket datagram) {
@@ -39,14 +26,8 @@ public class Packet {
 		this(Unpooled.copiedBuffer(packet.buffer));
 	}
 
-	public final short getId() {
-		return this.id;
-	}
-
-	public void encode() {
-	}
-
-	public void decode() {
+	public Packet() {
+		this(Unpooled.buffer());
 	}
 
 	public void read(byte[] dest) {
@@ -79,21 +60,44 @@ public class Packet {
 		return buffer.readShort();
 	}
 
+	public short readShortLE() {
+		return buffer.readShortLE();
+	}
+
 	public int readUShort() {
 		return (buffer.readShort() & 0xFFFF);
 	}
 
-	public int readLTriad() {
-		return (buffer.readByte() & 0xFF) | ((buffer.readByte() << 8) & 0xFF00)
-				| ((buffer.readByte() << 16) & 0xFF0000);
+	public int readUShortLE() {
+		return (buffer.readShortLE() & 0xFFFF);
+	}
+
+	public int readTriadLE() {
+		return (buffer.readByte() & 0xFF) | ((buffer.readByte() & 0xFF) << 8) | ((buffer.readByte() & 0x0F) << 16);
 	}
 
 	public int readInt() {
 		return buffer.readInt();
 	}
 
+	public int readIntLE() {
+		return buffer.readIntLE();
+	}
+
+	public int readUInt() {
+		return (buffer.readInt() & 0xFFFFFFFF);
+	}
+
+	public int readUIntLE() {
+		return (buffer.readIntLE() & 0xFFFFFFFF);
+	}
+
 	public long readLong() {
 		return buffer.readLong();
+	}
+
+	public long readLongLE() {
+		return buffer.readLongLE();
 	}
 
 	public float readFloat() {
@@ -111,6 +115,12 @@ public class Packet {
 
 	public String readString() {
 		int len = this.readUShort();
+		byte[] data = this.read(len);
+		return new String(data);
+	}
+
+	public String readStringLE() {
+		int len = this.readUShortLE();
 		byte[] data = this.read(len);
 		return new String(data);
 	}
@@ -163,15 +173,25 @@ public class Packet {
 		return this;
 	}
 
+	public Packet writeShortLE(int s) {
+		buffer.writeShortLE(s);
+		return this;
+	}
+
 	public Packet writeUShort(int s) {
 		buffer.writeShort(((short) s) & 0xFFFF);
 		return this;
 	}
 
-	public Packet writeLTriad(int t) {
-		this.writeByte((t & 0x0000FF) >> 0);
-		this.writeByte((t & 0x00FF00) >> 8);
-		this.writeByte((t & 0xFF0000) >> 16);
+	public Packet writeUShortLE(int s) {
+		buffer.writeShortLE(((short) s) & 0xFFFF);
+		return this;
+	}
+
+	public Packet writeTriadLE(int t) {
+		buffer.writeByte((byte) (t & 0xFF));
+		buffer.writeByte((byte) ((t >> 8) & 0xFF));
+		buffer.writeByte((byte) ((t >> 16) & 0xFF));
 		return this;
 	}
 
@@ -180,8 +200,28 @@ public class Packet {
 		return this;
 	}
 
+	public Packet writeUInt(long i) {
+		buffer.writeIntLE(((int) i) & 0xFFFFFFFF);
+		return this;
+	}
+
+	public Packet writeIntLE(int i) {
+		buffer.writeIntLE(i);
+		return this;
+	}
+
+	public Packet writeUIntLE(long i) {
+		buffer.writeIntLE(((int) i) & 0xFFFFFFFF);
+		return this;
+	}
+
 	public Packet writeLong(long l) {
 		buffer.writeLong(l);
+		return this;
+	}
+
+	public Packet writeLongLE(long l) {
+		buffer.writeLongLE(l);
 		return this;
 	}
 
@@ -203,6 +243,13 @@ public class Packet {
 	public Packet writeString(String s) {
 		byte[] data = s.getBytes();
 		this.writeUShort(data.length);
+		this.write(data);
+		return this;
+	}
+
+	public Packet writeStringLE(String s) {
+		byte[] data = s.getBytes();
+		this.writeUShortLE(data.length);
 		this.write(data);
 		return this;
 	}
@@ -233,13 +280,6 @@ public class Packet {
 
 	public int remaining() {
 		return buffer.readableBytes();
-	}
-
-	public static void main(String[] args) {
-		Packet t = new Packet(0x01);
-		t.writeLTriad(0xABCDEF);
-		Packet r = new Packet(t);
-		System.out.println(Integer.toHexString(r.readLTriad()));
 	}
 
 }

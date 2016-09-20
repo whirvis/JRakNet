@@ -37,8 +37,11 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			// Is the sender blocked?
 			if (blocked.containsKey(sender)) {
 				BlockedClient status = blocked.get(sender);
+				if(status.getTime() == -1) {
+					return; // Permanently blocked
+				}
 				if (System.currentTimeMillis() - status.getStartTime() < status.getTime()) {
-					return;
+					return; // Time hasn't expired
 				}
 				blocked.remove(sender);
 			}
