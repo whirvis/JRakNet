@@ -1,8 +1,10 @@
 package net.marfgamer.raknet.session;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 
 import io.netty.channel.Channel;
+import io.netty.channel.socket.DatagramPacket;
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.protocol.CustomPacket;
@@ -13,7 +15,9 @@ import net.marfgamer.raknet.protocol.acknowledge.Acknowledge;
 import net.marfgamer.raknet.util.ArrayUtils;
 import net.marfgamer.raknet.util.map.IntMap;
 
-public class RakNetSession {
+public abstract class RakNetSession {
+
+	private static final int GLOBAL_CHANNEL = 0x00;
 
 	// Netty data
 	private final InetSocketAddress address;
@@ -29,6 +33,9 @@ public class RakNetSession {
 	// Data ordering
 	private int sendSeqNumber = 0;
 	private int receiveSeqNumber = 0;
+	private int sendMessageIndex = 0;
+	private int receiveMessageIndex = 0;
+	private ArrayList<Integer> reliableHandledPackets;
 
 	// SplitPacket handling
 	private IntMap<SplitPacket> splitPackets;
@@ -55,7 +62,7 @@ public class RakNetSession {
 		int[] missing = ArrayUtils.subtractionArray(packet.seqNumber, this.receiveSeqNumber);
 		if (missing.length > 0) {
 			Acknowledge ack = new Acknowledge(Acknowledge.ACKNOWLEDGED);
-			for(int missingPacket : missing) {
+			for (int missingPacket : missing) {
 				ack.addRecord(missingPacket);
 			}
 			ack.encode();
@@ -68,26 +75,66 @@ public class RakNetSession {
 	}
 
 	public void handleMessage(EncapsulatedPacket packet) {
+		// Prevent duplicates
+		if (packet.reliability.isReliable()) {
+			if (reliableHandledPackets.contains(packet.messageIndex)) {
+				return; // We have already handled this packet!
+			}
+			reliableHandledPackets.add(packet.messageIndex);
+		}
 
-	}
+		// Update split packet data
+		if (packet.split == true) {
+			if (!splitPackets.containsKey(packet.splitIndex)) {
+				splitPackets.put(packet.splitId, new SplitPacket(packet.splitId, packet.splitCount));
+			}
+			SplitPacket split = splitPackets.get(packet.splitId);
 
-	public void sendMessage(Packet packet, Reliability reliability, int channel) {
-
+			// If this is not null the packet has been fully assembled
+			Packet handle = split.update(packet);
+			if (handle != null) {
+				this.handle(handle);
+			}
+		} else {
+			this.handle(packet.payload);
+		}
 	}
 
 	public void sendMessage(Packet packet, Reliability reliability) {
-		this.sendMessage(packet, reliability, 0);
+		CustomPacket custom = new CustomPacket();
+
+		// Generate encapsulated packet
+		EncapsulatedPacket encapsulated = new EncapsulatedPacket();
+		encapsulated.payload = packet;
+		encapsulated.reliability = reliability;
+		
+		// Bump message index
+		if (reliability.isReliable()) {
+			encapsulated.messageIndex = this.sendMessageIndex++;
+		}
+		
+		// Set channel and bump order index
+		if (reliability.isOrdered() || reliability.isSequenced()) {
+			encapsulated.orderChannel = GLOBAL_CHANNEL; // Not sure why we have
+														// this, TODO maybe?
+			encapsulated.orderIndex = (reliability.isOrdered() ? this.orderedSendIndex[encapsulated.orderChannel]++
+					: this.sequencedSendIndex[encapsulated.orderChannel]++);
+		}
+		
+
+		custom.messages.add(encapsulated);
+
+		custom.encode();
+		channel.writeAndFlush(new DatagramPacket(custom.buffer(), address));
 	}
 
-	public void sendMessage(Packet[] packets, Reliability reliability, int channel) {
+	public void sendMessage(Packet[] packets, Reliability reliability) {
 		CustomPacket custom = new CustomPacket();
 		custom.seqNumber = sendSeqNumber++;
 
 		custom.encode();
 	}
 
-	public void sendMessage(Packet[] packets, Reliability reliability) {
-		this.sendMessage(packets, reliability, 0);
-	}
-	
+	public abstract void handle(Packet packet);
+
 }

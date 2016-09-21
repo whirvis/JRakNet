@@ -14,11 +14,13 @@ import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNet;
+import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.protocol.unconnected.UnconnectedPing;
 import net.marfgamer.raknet.protocol.unconnected.UnconnectedPong;
 import net.marfgamer.raknet.server.identifier.Identifier;
 import net.marfgamer.raknet.server.identifier.MCPEIdentifier;
 import net.marfgamer.raknet.session.RakNetSession;
+import net.marfgamer.raknet.session.pre.RakNetPreSession;
 
 /**
  * 
@@ -40,8 +42,10 @@ public class RakNetServer implements RakNet {
 
 	private Channel channel;
 	private RakNetServerListener listener;
+	private volatile boolean running; // Volatile so other threads can modify it
 
 	private final HashMap<InetSocketAddress, RakNetSession> sessions;
+	private final HashMap<InetSocketAddress, RakNetPreSession> preSessions;
 
 	public RakNetServer(int port, int maxConnections, int maxTransferUnit, Identifier identifier) {
 		this.guid = UNIQUE_ID_BITS.getMostSignificantBits();
@@ -56,6 +60,7 @@ public class RakNetServer implements RakNet {
 		this.handler = new RakNetServerHandler(this);
 
 		this.sessions = new HashMap<InetSocketAddress, RakNetSession>();
+		this.preSessions = new HashMap<InetSocketAddress, RakNetPreSession>();
 	}
 
 	public RakNetServer(int port, int maxConnections, int maxTransferUnit) {
@@ -101,8 +106,10 @@ public class RakNetServer implements RakNet {
 		return this;
 	}
 
-	public void handleMessage(Packet packet, InetSocketAddress sender) {
-		short id = packet.readUByte();
+	public void handleMessage(RakNetPacket packet, InetSocketAddress sender) {
+		short id = packet.getId();
+		
+		// This packet does not require a session
 		if (id == ID_UNCONNECTED_PING || id == ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
 			UnconnectedPing ping = new UnconnectedPing(packet);
 			ping.decode();
@@ -121,13 +128,20 @@ public class RakNetServer implements RakNet {
 				}
 			}
 		}
+		
+		// These however do require a session
+		if(id == ID_OPEN_CONNECTION_REQUEST_1) {
+			
+		} else if(id == ID_OPEN_CONNECTION_REQUEST_2) {
+			
+		}
 	}
 
 	private void sendRaw(Packet packet, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
 	}
 
-	public RakNetServer start() {
+	public void start() {
 		// Make sure we have an adapter
 		if (listener == null) {
 			throw new RuntimeException("Handler has not been set!");
@@ -137,7 +151,16 @@ public class RakNetServer implements RakNet {
 		bootstrap.channel(NioDatagramChannel.class).group(group).handler(handler);
 		bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false);
 		this.channel = bootstrap.bind(port).channel();
-		return this;
+		this.running = true;
+
+		// Timer system
+		while (this.running == true) {
+
+		}
+	}
+
+	public void stop() {
+		this.running = false;
 	}
 
 	public static void main(String[] args) {
@@ -148,6 +171,7 @@ public class RakNetServer implements RakNet {
 			public void handlePing(ServerPing ping, RakNetServer server) {
 				ping.setIdentifier(new MCPEIdentifier("Hello!", 80, "0.15.0", 0, 10));
 			}
+
 		});
 		s.start();
 	}
