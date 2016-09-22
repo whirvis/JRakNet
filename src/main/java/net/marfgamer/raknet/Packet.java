@@ -1,6 +1,6 @@
 package net.marfgamer.raknet;
 
-import static net.marfgamer.raknet.protocol.MessageIdentifier.*;
+import static net.marfgamer.raknet.protocol.MessageIdentifier.MAGIC;
 
 import java.net.InetSocketAddress;
 import java.util.Arrays;
