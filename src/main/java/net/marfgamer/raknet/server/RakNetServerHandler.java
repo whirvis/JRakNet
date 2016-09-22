@@ -7,6 +7,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.DatagramPacket;
 import net.marfgamer.raknet.Packet;
+import net.marfgamer.raknet.RakNetPacket;
 
 public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 
@@ -32,7 +33,7 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			// Get packet and sender data
 			DatagramPacket datagram = (DatagramPacket) msg;
 			InetSocketAddress sender = datagram.sender();
-			Packet packet = new Packet(datagram);
+			RakNetPacket packet = new WrapperPacket(new Packet(datagram));
 
 			// Is the sender blocked?
 			if (blocked.containsKey(sender)) {
@@ -50,6 +51,24 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 		} else {
 			System.err.println("Got " + msg.getClass().getName());
 		}
+	}
+	
+	private class WrapperPacket extends RakNetPacket {
+		
+		public WrapperPacket(Packet packet) {
+			super(packet);
+		}
+
+		@Override
+		public void encode() {
+			// Nothing to encode/decode
+		}
+
+		@Override
+		public void decode() {
+			// Nothing to encode/decode
+		}
+		
 	}
 
 }

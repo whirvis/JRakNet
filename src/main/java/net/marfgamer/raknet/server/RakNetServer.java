@@ -1,9 +1,13 @@
 package net.marfgamer.raknet.server;
 
-import static net.marfgamer.raknet.protocol.MessageIdentifier.*;
+import static net.marfgamer.raknet.protocol.MessageIdentifier.ID_OPEN_CONNECTION_REQUEST_1;
+import static net.marfgamer.raknet.protocol.MessageIdentifier.ID_OPEN_CONNECTION_REQUEST_2;
+import static net.marfgamer.raknet.protocol.MessageIdentifier.ID_UNCONNECTED_PING;
+import static net.marfgamer.raknet.protocol.MessageIdentifier.ID_UNCONNECTED_PING_OPEN_CONNECTIONS;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
+import java.util.Iterator;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -15,11 +19,14 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.RakNetPacket;
+import net.marfgamer.raknet.protocol.unconnected.UnconnectedConnectionRequestOne;
+import net.marfgamer.raknet.protocol.unconnected.UnconnectedIncompatibleProtocol;
 import net.marfgamer.raknet.protocol.unconnected.UnconnectedPing;
 import net.marfgamer.raknet.protocol.unconnected.UnconnectedPong;
 import net.marfgamer.raknet.server.identifier.Identifier;
 import net.marfgamer.raknet.server.identifier.MCPEIdentifier;
 import net.marfgamer.raknet.session.RakNetSession;
+import net.marfgamer.raknet.session.pre.PreSessionStatus;
 import net.marfgamer.raknet.session.pre.RakNetPreSession;
 
 /**
@@ -108,7 +115,7 @@ public class RakNetServer implements RakNet {
 
 	public void handleMessage(RakNetPacket packet, InetSocketAddress sender) {
 		short id = packet.getId();
-		
+
 		// This packet does not require a session
 		if (id == ID_UNCONNECTED_PING || id == ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
 			UnconnectedPing ping = new UnconnectedPing(packet);
@@ -128,12 +135,49 @@ public class RakNetServer implements RakNet {
 				}
 			}
 		}
-		
+
 		// These however do require a session
-		if(id == ID_OPEN_CONNECTION_REQUEST_1) {
+		if (id == ID_OPEN_CONNECTION_REQUEST_1) {
+			UnconnectedConnectionRequestOne connectionRequestOne = new UnconnectedConnectionRequestOne(packet);
+			connectionRequestOne.decode();
+			System.out.println("E");
 			
-		} else if(id == ID_OPEN_CONNECTION_REQUEST_2) {
-			
+			if(connectionRequestOne.magic == true) { 
+				System.out.println("F");
+				
+				// Initialize status
+				RakNetPreSession preSession = preSessions.put(sender, new RakNetPreSession(sender, channel));
+				if(connectionRequestOne.protocolVersion != RakNet.SERVER_NETWORK_PROTOCOL+1000) {
+					preSession.setStatus(PreSessionStatus.INCOMPATIBLE_PROTOCOL);
+					
+					UnconnectedIncompatibleProtocol incompatibleProtocol = new UnconnectedIncompatibleProtocol();
+					incompatibleProtocol.networkProtocol = RakNet.SERVER_NETWORK_PROTOCOL;
+					incompatibleProtocol.serverGuid = this.guid;
+					incompatibleProtocol.encode();
+					preSession.sendPacket(incompatibleProtocol);
+				} else if(sessions.size() >= this.maxConnections) {
+					preSession.setStatus(PreSessionStatus.SERVER_FULL);					
+				} else {
+					preSession.setStatus(PreSessionStatus.CONNECTING_1);
+				}
+				
+				// Either continue or remove session
+				if(preSession.getStatus() == PreSessionStatus.CONNECTING_1) {
+					
+				} else {
+					preSessions.remove(sender);
+				}
+			}
+		} else if (id == ID_OPEN_CONNECTION_REQUEST_2) {
+			RakNetPreSession preSession = preSessions.get(sender);
+			if(preSession.getStatus() == PreSessionStatus.CONNECTING_1) {
+				
+			}
+		}
+		
+		// Update timestamp's for sessions
+		if(preSessions.containsKey(sender)) {
+			preSessions.get(sender).updateLastReceiveTime();
 		}
 	}
 
@@ -155,7 +199,7 @@ public class RakNetServer implements RakNet {
 
 		// Timer system
 		while (this.running == true) {
-
+			// TODO
 		}
 	}
 
