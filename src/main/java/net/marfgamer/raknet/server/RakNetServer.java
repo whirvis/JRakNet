@@ -1,13 +1,11 @@
 package net.marfgamer.raknet.server;
 
-import static net.marfgamer.raknet.protocol.MessageIdentifier.ID_OPEN_CONNECTION_REQUEST_1;
-import static net.marfgamer.raknet.protocol.MessageIdentifier.ID_OPEN_CONNECTION_REQUEST_2;
-import static net.marfgamer.raknet.protocol.MessageIdentifier.ID_UNCONNECTED_PING;
-import static net.marfgamer.raknet.protocol.MessageIdentifier.ID_UNCONNECTED_PING_OPEN_CONNECTIONS;
+import static net.marfgamer.raknet.protocol.MessageIdentifier.*;
 
 import java.net.InetSocketAddress;
+import java.text.DateFormatSymbols;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -19,15 +17,16 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.RakNetPacket;
-import net.marfgamer.raknet.protocol.unconnected.UnconnectedConnectionRequestOne;
 import net.marfgamer.raknet.protocol.unconnected.UnconnectedIncompatibleProtocol;
+import net.marfgamer.raknet.protocol.unconnected.UnconnectedNoFreeIncomingConnections;
+import net.marfgamer.raknet.protocol.unconnected.UnconnectedOpenConnectionRequestOne;
+import net.marfgamer.raknet.protocol.unconnected.UnconnectedOpenConnectionRequestTwo;
+import net.marfgamer.raknet.protocol.unconnected.UnconnectedOpenConnectionResponseOne;
 import net.marfgamer.raknet.protocol.unconnected.UnconnectedPing;
 import net.marfgamer.raknet.protocol.unconnected.UnconnectedPong;
 import net.marfgamer.raknet.server.identifier.Identifier;
 import net.marfgamer.raknet.server.identifier.MCPEIdentifier;
 import net.marfgamer.raknet.session.RakNetSession;
-import net.marfgamer.raknet.session.pre.PreSessionStatus;
-import net.marfgamer.raknet.session.pre.RakNetPreSession;
 
 /**
  * 
@@ -40,7 +39,7 @@ public class RakNetServer implements RakNet {
 
 	private final int port;
 	private final int maxConnections;
-	private final int maxTransferUnit;
+	private final int maximumTransferUnit;
 	private Identifier identifier;
 
 	private final Bootstrap bootstrap;
@@ -50,16 +49,14 @@ public class RakNetServer implements RakNet {
 	private Channel channel;
 	private RakNetServerListener listener;
 	private volatile boolean running; // Volatile so other threads can modify it
-
 	private final HashMap<InetSocketAddress, RakNetSession> sessions;
-	private final HashMap<InetSocketAddress, RakNetPreSession> preSessions;
 
-	public RakNetServer(int port, int maxConnections, int maxTransferUnit, Identifier identifier) {
+	public RakNetServer(int port, int maxConnections, int maximumTransferUnit, Identifier identifier) {
 		this.guid = UNIQUE_ID_BITS.getMostSignificantBits();
 
 		this.port = port;
 		this.maxConnections = maxConnections;
-		this.maxTransferUnit = maxTransferUnit;
+		this.maximumTransferUnit = maximumTransferUnit;
 		this.identifier = identifier;
 
 		this.bootstrap = new Bootstrap();
@@ -67,11 +64,10 @@ public class RakNetServer implements RakNet {
 		this.handler = new RakNetServerHandler(this);
 
 		this.sessions = new HashMap<InetSocketAddress, RakNetSession>();
-		this.preSessions = new HashMap<InetSocketAddress, RakNetPreSession>();
 	}
 
-	public RakNetServer(int port, int maxConnections, int maxTransferUnit) {
-		this(port, maxConnections, maxTransferUnit, null);
+	public RakNetServer(int port, int maxConnections, int maximumTransferUnit) {
+		this(port, maxConnections, maximumTransferUnit, null);
 	}
 
 	public RakNetServer(int port, int maxConnections) {
@@ -95,8 +91,8 @@ public class RakNetServer implements RakNet {
 		return this.maxConnections;
 	}
 
-	public int getMaxTransferUnit() {
-		return this.maxTransferUnit;
+	public int getMaximumTransferUnit() {
+		return this.maximumTransferUnit;
 	}
 
 	public Identifier getIdentifier() {
@@ -113,7 +109,7 @@ public class RakNetServer implements RakNet {
 		return this;
 	}
 
-	public void handleMessage(RakNetPacket packet, InetSocketAddress sender) {
+	public void handleMessage(RakNetPacket packet, InetSocketAddress sender) throws Exception {
 		short id = packet.getId();
 
 		// This packet does not require a session
@@ -134,50 +130,41 @@ public class RakNetServer implements RakNet {
 					this.sendRaw(pong, sender);
 				}
 			}
-		}
-
-		// These however do require a session
-		if (id == ID_OPEN_CONNECTION_REQUEST_1) {
-			UnconnectedConnectionRequestOne connectionRequestOne = new UnconnectedConnectionRequestOne(packet);
+		} else if (id == ID_OPEN_CONNECTION_REQUEST_1) {
+			UnconnectedOpenConnectionRequestOne connectionRequestOne = new UnconnectedOpenConnectionRequestOne(packet);
 			connectionRequestOne.decode();
-			System.out.println("E");
-			
-			if(connectionRequestOne.magic == true) { 
-				System.out.println("F");
-				
-				// Initialize status
-				RakNetPreSession preSession = preSessions.put(sender, new RakNetPreSession(sender, channel));
-				if(connectionRequestOne.protocolVersion != RakNet.SERVER_NETWORK_PROTOCOL+1000) {
-					preSession.setStatus(PreSessionStatus.INCOMPATIBLE_PROTOCOL);
-					
+
+			if (connectionRequestOne.magic == true) {
+				if (connectionRequestOne.protocolVersion != RakNet.SERVER_NETWORK_PROTOCOL) {
 					UnconnectedIncompatibleProtocol incompatibleProtocol = new UnconnectedIncompatibleProtocol();
 					incompatibleProtocol.networkProtocol = RakNet.SERVER_NETWORK_PROTOCOL;
 					incompatibleProtocol.serverGuid = this.guid;
 					incompatibleProtocol.encode();
-					preSession.sendPacket(incompatibleProtocol);
-				} else if(sessions.size() >= this.maxConnections) {
-					preSession.setStatus(PreSessionStatus.SERVER_FULL);					
+					this.sendRaw(incompatibleProtocol, sender);
+				} else if (sessions.size() >= this.maxConnections) {
+					UnconnectedNoFreeIncomingConnections noFreeIncomingConnections = new UnconnectedNoFreeIncomingConnections();
+					noFreeIncomingConnections.encode();
+					this.sendRaw(noFreeIncomingConnections, sender);
 				} else {
-					preSession.setStatus(PreSessionStatus.CONNECTING_1);
-				}
-				
-				// Either continue or remove session
-				if(preSession.getStatus() == PreSessionStatus.CONNECTING_1) {
-					
-				} else {
-					preSessions.remove(sender);
+					// Everything passed! One last check...
+					if (connectionRequestOne.maximumTransferUnit < this.maximumTransferUnit) {
+						UnconnectedOpenConnectionResponseOne connectionResponseOne = new UnconnectedOpenConnectionResponseOne();
+						connectionResponseOne.serverGuid = this.guid;
+						connectionResponseOne.maximumTransferUnit = connectionRequestOne.maximumTransferUnit;
+						connectionResponseOne.encode();
+						this.sendRaw(connectionResponseOne, sender);
+					}
 				}
 			}
 		} else if (id == ID_OPEN_CONNECTION_REQUEST_2) {
-			RakNetPreSession preSession = preSessions.get(sender);
-			if(preSession.getStatus() == PreSessionStatus.CONNECTING_1) {
-				
+			UnconnectedOpenConnectionRequestTwo connectionRequestTwo = new UnconnectedOpenConnectionRequestTwo(packet);
+			connectionRequestTwo.decode();
+
+			if (connectionRequestTwo.magic == true) {
+				if (connectionRequestTwo.maximumTransferUnit < this.maximumTransferUnit) {
+					
+				}
 			}
-		}
-		
-		// Update timestamp's for sessions
-		if(preSessions.containsKey(sender)) {
-			preSessions.get(sender).updateLastReceiveTime();
 		}
 	}
 
@@ -207,13 +194,20 @@ public class RakNetServer implements RakNet {
 		this.running = false;
 	}
 
+	@SuppressWarnings("deprecation")
 	public static void main(String[] args) {
 		MCPEIdentifier identifier = new MCPEIdentifier("A JRakNet Server", 80, "0.15.0", 0, 10);
 		RakNetServer s = new RakNetServer(19132, 10, identifier);
+
+		Date d = new Date(System.currentTimeMillis());
+		DateFormatSymbols dfs = new DateFormatSymbols();
+		final String timeCreation = ("It is " + dfs.getWeekdays()[d.getDay() + 1] + ", " + d.getHours() + ":"
+				+ d.getMinutes());
+
 		s.setListener(new RakNetServerListener() {
 			@Override
 			public void handlePing(ServerPing ping, RakNetServer server) {
-				ping.setIdentifier(new MCPEIdentifier("Hello!", 80, "0.15.0", 0, 10));
+				ping.setIdentifier(new MCPEIdentifier("Hello! " + timeCreation, 80, "0.15.0", 0, 10));
 			}
 
 		});

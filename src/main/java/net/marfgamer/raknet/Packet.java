@@ -1,16 +1,19 @@
 package net.marfgamer.raknet;
 
-import static net.marfgamer.raknet.protocol.MessageIdentifier.MAGIC;
+import static net.marfgamer.raknet.protocol.MessageIdentifier.*;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
-import java.util.regex.Pattern;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.socket.DatagramPacket;
 
 public class Packet {
+
+	public static final int ADDRESS_VERSION = 0x04;
 
 	private final ByteBuf buffer;
 
@@ -110,7 +113,7 @@ public class Packet {
 
 	public boolean checkMagic() {
 		byte[] magicCheck = this.read(MAGIC.length);
-		return Arrays.equals(magicCheck, MAGIC);
+		return Arrays.equals(MAGIC, magicCheck);
 	}
 
 	public String readString() {
@@ -125,17 +128,17 @@ public class Packet {
 		return new String(data);
 	}
 
-	public InetSocketAddress readAddress() {
+	public InetSocketAddress readAddress() throws UnknownHostException {
 		short version = this.readUByte();
-		if (version == 4) {
-			String address = ((~this.readByte()) & 0xFF) + "." + ((~this.readByte()) & 0xFF) + "."
-					+ ((~this.readByte()) & 0xFF) + "." + ((~this.readByte()) & 0xFF);
+		if (version == ADDRESS_VERSION) {
+			byte[] addressBytes = new byte[4];
+			for (int i = 0; i < addressBytes.length; i++) {
+				addressBytes[i] = (byte) (~this.readByte() & 0xFF);
+			}
 			int port = this.readUShort();
-			return new InetSocketAddress(address, port);
-		} else if (version == 6) {
-			throw new UnsupportedOperationException("Can't read IPv6 address: Not Implemented");
+			return new InetSocketAddress(InetAddress.getByAddress(addressBytes), port);
 		} else {
-			throw new UnsupportedOperationException("Can't read IPv" + version + " address: unknown");
+			throw new UnknownHostException("Unknown protocol IPv" + version + "!");
 		}
 	}
 
@@ -254,15 +257,20 @@ public class Packet {
 		return this;
 	}
 
-	public void writeAddress(InetSocketAddress address) {
-		this.writeUByte(4);
-		for (String part : address.getAddress().getHostAddress().split(Pattern.quote("."))) {
-			this.writeByte((byte) ((byte) ~(Integer.parseInt(part)) & 0xFF));
+	public void writeAddress(InetSocketAddress address) throws UnknownHostException {
+		byte[] addressBytes = address.getAddress().getAddress();
+		if (addressBytes.length == ADDRESS_VERSION) {
+			this.writeUByte(ADDRESS_VERSION);
+			for (int i = 0; i < ADDRESS_VERSION; i++) {
+				this.writeByte(~addressBytes[i] & 0xFF);
+			}
+			this.writeUShort(address.getPort());
+		} else {
+			throw new UnknownHostException("Unknown protocol IPv" + addressBytes.length + "!");
 		}
-		this.writeUShort(address.getPort());
 	}
 
-	public void writeAddress(String address, int port) {
+	public void writeAddress(String address, int port) throws UnknownHostException {
 		this.writeAddress(new InetSocketAddress(address, port));
 	}
 

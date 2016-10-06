@@ -3,7 +3,7 @@ package net.marfgamer.raknet.protocol.unconnected;
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
 
-public class UnconnectedConnectionRequestOne extends RakNetPacket {
+public class UnconnectedOpenConnectionRequestOne extends RakNetPacket {
 
 	public static final int MTU_PADDING = 18; // 1 for ID, 1 for protocol
 												// version, 16 for magic
@@ -12,7 +12,7 @@ public class UnconnectedConnectionRequestOne extends RakNetPacket {
 	public int protocolVersion;
 	public int maximumTransferUnit;
 
-	public UnconnectedConnectionRequestOne(Packet packet) {
+	public UnconnectedOpenConnectionRequestOne(Packet packet) {
 		super(packet);
 	}
 
@@ -25,7 +25,7 @@ public class UnconnectedConnectionRequestOne extends RakNetPacket {
 
 	@Override
 	public void decode() {
-		this.magic = true; this.checkMagic();
+		this.magic = this.checkMagic();
 		this.protocolVersion = this.readUByte();
 		this.maximumTransferUnit = (this.remaining() + MTU_PADDING);
 		this.read(this.remaining()); // Go ahead and get rid of those bytes
