@@ -47,11 +47,15 @@ public interface RakNet {
 	public static final int SERVER_NETWORK_PROTOCOL = 8;
 	public static final int CLIENT_NETWORK_PROTOCOL = 8;
 
-	public static final int MINIMUM_TRANSFER_UNIT = 530;
+	/*
+	 * Most computers these days have up to around 1400-1500 for their MTU, if
+	 * it's lower than that it is most likely outdated.
+	 */
+	public static final int MINIMUM_TRANSFER_UNIT = 1280;
 
 	public static final int MAX_SPLITS_PER_QUEUE = 4;
 	public static final int MAX_SPLIT_COUNT = 128;
-	
+
 	public static final int MAX_CHANNELS = 32;
 
 }
