@@ -6,7 +6,6 @@ import java.util.HashMap;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.DatagramPacket;
-import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
 
 public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
@@ -28,17 +27,17 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	}
 
 	@Override
-	public void channelRead(ChannelHandlerContext ctx, Object msg) {
+	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		if (msg instanceof DatagramPacket) {
 			// Get packet and sender data
 			DatagramPacket datagram = (DatagramPacket) msg;
 			InetSocketAddress sender = datagram.sender();
-			RakNetPacket packet = new WrapperPacket(new Packet(datagram));
+			RakNetPacket packet = new RakNetPacket(datagram);
 
 			// Is the sender blocked?
 			if (blocked.containsKey(sender)) {
 				BlockedClient status = blocked.get(sender);
-				if(status.getTime() == -1) {
+				if (status.getTime() == -1) {
 					return; // Permanently blocked
 				}
 				if (System.currentTimeMillis() - status.getStartTime() < status.getTime()) {
@@ -46,29 +45,11 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 				}
 				blocked.remove(sender);
 			}
-			
+
 			server.handleMessage(packet, sender);
 		} else {
 			System.err.println("Got " + msg.getClass().getName());
 		}
-	}
-	
-	private class WrapperPacket extends RakNetPacket {
-		
-		public WrapperPacket(Packet packet) {
-			super(packet);
-		}
-
-		@Override
-		public void encode() {
-			// Nothing to encode/decode
-		}
-
-		@Override
-		public void decode() {
-			// Nothing to encode/decode
-		}
-		
 	}
 
 }

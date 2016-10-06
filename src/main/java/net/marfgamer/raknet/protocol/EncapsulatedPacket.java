@@ -5,7 +5,7 @@ import net.marfgamer.raknet.Packet;
 
 public class EncapsulatedPacket {
 
-	public static final int MINIMUM_BUFFER_LENGTH = 0x04;
+	public static final int MINIMUM_BUFFER_LENGTH = 0x03;
 
 	// Bitflags
 	public static final byte RELIABILITY_POSITION = (byte) 0b00000101;

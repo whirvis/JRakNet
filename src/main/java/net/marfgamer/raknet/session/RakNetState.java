@@ -2,7 +2,7 @@ package net.marfgamer.raknet.session;
 
 public enum RakNetState {
 
-	DISCONNECTED(0), CONNECTING_1(1), CONNECTING_2(2), HANDSHAKING(3), CONNECTED(4);
+	DISCONNECTED(0), HANDSHAKING(1), CONNECTED(2);
 
 	private final int order;
 

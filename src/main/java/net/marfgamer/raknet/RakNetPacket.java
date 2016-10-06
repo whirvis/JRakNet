@@ -1,6 +1,9 @@
 package net.marfgamer.raknet;
 
-public abstract class RakNetPacket extends Packet {
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.socket.DatagramPacket;
+
+public class RakNetPacket extends Packet {
 
 	private final short id;
 
@@ -12,20 +15,37 @@ public abstract class RakNetPacket extends Packet {
 		this.writeUByte(this.id = (short) id);
 	}
 
-	public RakNetPacket(Packet packet) {
-		super(packet);
+	public RakNetPacket(ByteBuf buffer) {
+		super(buffer);
 		if (this.remaining() < 1) {
 			throw new IllegalArgumentException("The packet contains no data, it has no ID to be read!");
 		}
 		this.id = this.readUByte();
 	}
 
+	public RakNetPacket(DatagramPacket datagram) {
+		this(datagram.content());
+	}
+
+	public RakNetPacket(Packet packet) {
+		super(packet);
+
+		// Make sure this isn't an existing RakNetPacket!
+		if (packet instanceof RakNetPacket) {
+			this.id = ((RakNetPacket) packet).id;
+		} else {
+			this.id = this.readUByte();
+		}
+	}
+
 	public final short getId() {
 		return this.id;
 	}
 
-	public abstract void encode();
+	public void encode() throws Exception {
+	}
 
-	public abstract void decode();
+	public void decode() throws Exception {
+	}
 
 }
