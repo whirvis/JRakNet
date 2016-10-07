@@ -42,4 +42,12 @@ public class CustomPacket extends RakNetPacket {
 		}
 	}
 
+	public int calculateSize() {
+		int packetSize = 3; // Sequence number
+		for (EncapsulatedPacket message : this.messages) {
+			packetSize += message.calculateSize();
+		}
+		return packetSize;
+	}
+
 }
