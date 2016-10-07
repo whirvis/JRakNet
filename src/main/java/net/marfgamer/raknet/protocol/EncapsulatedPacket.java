@@ -28,7 +28,7 @@ public class EncapsulatedPacket {
 
 	public void encode() {
 		buffer.writeByte((byte) ((reliability.asByte() << RELIABILITY_POSITION) | (split ? FLAG_SPLIT : 0)));
-		buffer.writeUShort(payload.size());
+		buffer.writeUShort(payload.size() * 8);
 
 		if (reliability.isReliable()) {
 			buffer.writeTriadLE(messageIndex);
@@ -53,7 +53,7 @@ public class EncapsulatedPacket {
 		this.reliability = Reliability.lookup((byte) (byte) ((flags & 0b11100000) >> 5));
 		this.split = (flags & FLAG_SPLIT) > 0;
 
-		int length = buffer.readUShort();
+		int length = buffer.readUShort() / 8;
 
 		if (reliability.isReliable()) {
 			this.messageIndex = buffer.readTriadLE();
@@ -71,6 +71,25 @@ public class EncapsulatedPacket {
 		}
 
 		this.payload = new Packet(Unpooled.copiedBuffer(buffer.read(length)));
+	}
+
+	public int calculateSize() {
+		int packetSize = 3; // Bitflags and length
+
+		if (reliability.isReliable()) {
+			packetSize += 3;
+		}
+
+		if (reliability.isOrdered() || reliability.isSequenced()) {
+			packetSize += 4;
+		}
+
+		if (split == true) {
+			packetSize += 10;
+		}
+
+		packetSize += payload.array().length;
+		return packetSize;
 	}
 
 }

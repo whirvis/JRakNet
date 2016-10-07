@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 
 import io.netty.channel.Channel;
+import io.netty.channel.socket.DatagramPacket;
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.protocol.CustomPacket;
@@ -27,6 +28,9 @@ public abstract class RakNetSession {
 	private int sendSequenceNumber;
 	private int receiveSequenceNumber;
 
+	// Network queuing
+	private final ArrayList<EncapsulatedPacket> sendQueue;
+
 	public RakNetSession(long guid, int maximumTransferUnit, Channel channel, InetSocketAddress address) {
 		this.guid = guid;
 		this.maximumTransferUnit = maximumTransferUnit;
@@ -37,6 +41,7 @@ public abstract class RakNetSession {
 		this.receiveOrderIndex = new int[RakNet.MAX_CHANNELS];
 		this.sendSequenceNumber = 0;
 		this.receiveSequenceNumber = 0;
+		this.sendQueue = new ArrayList<EncapsulatedPacket>();
 	}
 
 	public final long getGUID() {
@@ -52,8 +57,6 @@ public abstract class RakNetSession {
 		encapsulated.reliability = reliability;
 		encapsulated.orderChannel = (byte) channel;
 		encapsulated.payload = packet;
-		
-		
 
 		/*
 		 * SYSTEM DEFINED
@@ -80,9 +83,33 @@ public abstract class RakNetSession {
 	}
 
 	public final void update() {
-		// TODO
+		CustomPacket packet = new CustomPacket();
+		while (packet.calculateSize() < this.maximumTransferUnit && !sendQueue.isEmpty()) {
+			packet.messages.add(sendQueue.iterator().next());
+		}
+		if (packet.messages.size() > 0) {
+			packet.seqNumber = this.sendSequenceNumber++;
+			packet.encode();
+			channel.writeAndFlush(new DatagramPacket(packet.buffer(), this.address));
+		}
 	}
 
 	public abstract void handle(Packet packet);
+
+	/**
+	 * PROCESS OF SPLITTING PACKETS
+	 * 
+	 * On the update, we go through all the packets and fill up one big
+	 * CustomPacket with it until it is a big as possible. When it comes time
+	 * that a single EncapsulatedPacket is too big to fit in it's own
+	 * EncapulatedPacket we will split it up.
+	 * 
+	 * Now when splitting it we need to split the actual buffer depending on the
+	 * MTU and lower the maximum buffer size depending on the CustomPacket size
+	 * and the EncapsulatedPacket size without the payload. Next, we add all the
+	 * CustomPackets to the update queue and when the time comes they are sent
+	 * out.
+	 * 
+	 */
 
 }
