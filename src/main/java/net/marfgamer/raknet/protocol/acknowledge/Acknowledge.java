@@ -14,7 +14,7 @@ public class Acknowledge extends RakNetPacket {
 	public Acknowledge(short type) {
 		super(type);
 		if (type != ACKNOWLEDGED && type != NOT_ACKNOWLEDGED) {
-			throw new IllegalArgumentException("Invalid ID!");
+			throw new IllegalArgumentException("Must be ACKNOWLEDGED or NOT_ACKNOWLEDGED!");
 		}
 		this.records = new ArrayList<Record>();
 	}
@@ -24,14 +24,13 @@ public class Acknowledge extends RakNetPacket {
 		this.writeUShort(records.size());
 		for (Record record : records) {
 			boolean ranged = record instanceof RangedRecord;
-			System.out.println(ranged);
 			if (ranged == false) {
 				this.writeByte(0x01); // Record is not ranged
 				this.writeUIntLE(record.getIndex());
 			} else {
 				throw new RuntimeException("Ranged records are currently not supported!");
-				/* TODO
-				 * RangedRecord rangedRecord = (RangedRecord) record;
+				/*
+				 * TODO RangedRecord rangedRecord = (RangedRecord) record;
 				 * this.writeByte(0x00); // Record is ranged
 				 * this.writeUIntLE(rangedRecord.getStartIndex());
 				 * this.writeUIntLE(rangedRecord.getEndIndex());
@@ -42,17 +41,24 @@ public class Acknowledge extends RakNetPacket {
 
 	@Override
 	public void decode() {
-
+		int size = this.readUShort();
+		for (int i = 0; i < size; i++) {
+			boolean ranged = (this.readUByte() == 0x00);
+			if (ranged == false) {
+				records.add(new Record(this.readUIntLE()));
+			} else {
+				throw new RuntimeException("Ranged records are currently not supported!");
+			}
+		}
 	}
 
 	public void addRecord(int index) {
 		records.add(new Record(index));
 	}
 
-	/* TODO
-	 * public void addRecord(int startIndex, int endIndex) {
-	 * 		records.add(new RangedRecord(startIndex, endIndex));
-	 * }
-	*/
+	/*
+	 * TODO public void addRecord(int startIndex, int endIndex) {
+	 * records.add(new RangedRecord(startIndex, endIndex)); }
+	 */
 
 }
