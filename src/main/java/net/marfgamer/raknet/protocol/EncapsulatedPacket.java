@@ -5,14 +5,20 @@ import net.marfgamer.raknet.Packet;
 
 public class EncapsulatedPacket {
 
+	// Length constants
 	public static final int MINIMUM_BUFFER_LENGTH = 0x03;
+	public static final int BITFLAG_LENGTH = 0x01;
+	public static final int PAYLOAD_LENGTH_LENGTH = 0x02;
+	public static final int MESSAGE_INDEX_LENGTH = 0x03;
+	public static final int ORDER_INDEX_ORDER_CHANNEL_LENGTH = 0x04;
+	public static final int SPLIT_COUNT_SPLIT_ID_SPLIT_INDEX_LENGTH = 0x0A;
 
 	// Bitflags
 	public static final byte RELIABILITY_POSITION = (byte) 0b00000101;
 	public static final byte FLAG_RELIABILITY = (byte) 0b11100000;
 	public static final byte FLAG_SPLIT = (byte) 0b00010000;
 
-	// Used to encode and decode, normally modified by CustomPacket
+	// Used to encode and decode, modified ONLY by CustomPacket
 	public Packet buffer = new Packet();
 
 	// Encapsulation data
@@ -74,22 +80,37 @@ public class EncapsulatedPacket {
 	}
 
 	public int calculateSize() {
-		int packetSize = 3; // Bitflags and length
+		int packetSize = 0;
+		packetSize += BITFLAG_LENGTH;
+		packetSize += PAYLOAD_LENGTH_LENGTH;
 
 		if (reliability.isReliable()) {
-			packetSize += 3;
+			packetSize += MESSAGE_INDEX_LENGTH;
 		}
 
 		if (reliability.isOrdered() || reliability.isSequenced()) {
-			packetSize += 4;
+			packetSize += ORDER_INDEX_ORDER_CHANNEL_LENGTH;
 		}
 
 		if (split == true) {
-			packetSize += 10;
+			packetSize += SPLIT_COUNT_SPLIT_ID_SPLIT_INDEX_LENGTH;
 		}
 
 		packetSize += payload.array().length;
 		return packetSize;
+	}
+
+	public static int calculateDummy(Reliability reliability, boolean split, Packet payload) {
+		EncapsulatedPacket dummy = new EncapsulatedPacket();
+		dummy.reliability = reliability;
+		dummy.payload = payload;
+		dummy.split = true;
+		dummy.encode();
+		return dummy.buffer.size();
+	}
+
+	public static int calculateDummy(Reliability reliability, boolean split) {
+		return EncapsulatedPacket.calculateDummy(reliability, split, new Packet());
 	}
 
 }
