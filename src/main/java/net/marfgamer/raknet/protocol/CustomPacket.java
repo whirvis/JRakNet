@@ -2,16 +2,24 @@ package net.marfgamer.raknet.protocol;
 
 import java.util.ArrayList;
 
-import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.Packet;
+import net.marfgamer.raknet.RakNetPacket;
 
 public class CustomPacket extends RakNetPacket {
+
+	public static final int SEQUENCE_NUMBER_LENGTH = 0x03;
 
 	public int seqNumber;
 	public ArrayList<EncapsulatedPacket> messages;
 
 	public CustomPacket() {
 		super(MessageIdentifier.ID_RESERVED_4);
+		this.messages = new ArrayList<EncapsulatedPacket>();
+	}
+	
+	public CustomPacket(Packet packet) {
+		super(packet);
+		this.messages = new ArrayList<EncapsulatedPacket>();
 	}
 
 	@Override
@@ -19,10 +27,10 @@ public class CustomPacket extends RakNetPacket {
 		this.writeTriadLE(seqNumber);
 		for (EncapsulatedPacket packet : messages) {
 			// Encode packet and write to buffer
+			packet.buffer = this;
 			packet.encode();
-			this.write(packet.buffer.array());
 
-			// Buffer is no longer needed
+			// Buffer is no longer needed, proceed
 			packet.buffer = null;
 		}
 	}
@@ -31,7 +39,7 @@ public class CustomPacket extends RakNetPacket {
 	public void decode() {
 		this.seqNumber = this.readTriadLE();
 		while (this.remaining() >= EncapsulatedPacket.MINIMUM_BUFFER_LENGTH) {
-			// Encode packet
+			// Decode packet
 			EncapsulatedPacket packet = new EncapsulatedPacket();
 			packet.buffer = new Packet(this.buffer());
 			packet.decode();
@@ -43,11 +51,18 @@ public class CustomPacket extends RakNetPacket {
 	}
 
 	public int calculateSize() {
-		int packetSize = 3; // Sequence number
+		int packetSize = 1; // Packet ID
+		packetSize += SEQUENCE_NUMBER_LENGTH;
 		for (EncapsulatedPacket message : this.messages) {
 			packetSize += message.calculateSize();
 		}
 		return packetSize;
+	}
+
+	public static int calculateDummy() {
+		CustomPacket custom = new CustomPacket();
+		custom.encode();
+		return custom.size();
 	}
 
 }
