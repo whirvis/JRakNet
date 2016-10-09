@@ -28,13 +28,10 @@ public class Acknowledge extends RakNetPacket {
 				this.writeByte(0x01); // Record is not ranged
 				this.writeUIntLE(record.getIndex());
 			} else {
-				throw new RuntimeException("Ranged records are currently not supported!");
-				/*
-				 * TODO RangedRecord rangedRecord = (RangedRecord) record;
-				 * this.writeByte(0x00); // Record is ranged
-				 * this.writeUIntLE(rangedRecord.getStartIndex());
-				 * this.writeUIntLE(rangedRecord.getEndIndex());
-				 */
+				RangedRecord rangedRecord = (RangedRecord) record;
+				this.writeByte(0x00); // Record is ranged
+				this.writeUIntLE(rangedRecord.getStartIndex());
+				this.writeUIntLE(rangedRecord.getEndIndex());
 			}
 		}
 	}
@@ -47,7 +44,7 @@ public class Acknowledge extends RakNetPacket {
 			if (ranged == false) {
 				records.add(new Record(this.readUIntLE()));
 			} else {
-				throw new RuntimeException("Ranged records are currently not supported!");
+				records.add(new RangedRecord(this.readUIntLE(), this.readUIntLE()));
 			}
 		}
 	}
@@ -56,9 +53,8 @@ public class Acknowledge extends RakNetPacket {
 		records.add(new Record(index));
 	}
 
-	/*
-	 * TODO public void addRecord(int startIndex, int endIndex) {
-	 * records.add(new RangedRecord(startIndex, endIndex)); }
-	 */
+	public void addRecord(int startIndex, int endIndex) {
+		records.add(new RangedRecord(startIndex, endIndex));
+	}
 
 }
