@@ -14,10 +14,12 @@ These are the features that are in-development or already finished, things can b
   - [ ] Client connection
 - [ ] Client
 - [ ] Protocol
-  - [x] Custom packets (Sending)
-  - [ ] Custom packets (Receiving)
-  - [x] Encapsulated packets (Sending)
-  - [ ] Encapsulated packets (Receiving)
+  - [ ] Custom packets
+    - [x] Sending
+    - [ ] Receiving
+  - [ ] Encapsulated packets
+    - [x] Sending
+    - [ ] Receiving
   - [ ] Acknowledgement packets
   - [ ] Client login
   - [ ] Server login
