@@ -21,6 +21,7 @@ These are the features that are in-development or already finished, things can b
     - [x] Sending
     - [ ] Receiving
   - [ ] Acknowledgement packets
-  - [ ] Client login
-  - [ ] Server login
+  - [ ] Login
+    - [ ] Client
+    - [ ] Server
   - [x] Server discovery
