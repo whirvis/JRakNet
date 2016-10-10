@@ -20,7 +20,7 @@ These are the features that are in-development or already finished, things can b
   - [ ] Encapsulated packets
     - [x] Sending
     - [ ] Receiving
-  - [ ] Acknowledgement packets
+  - [x] Acknowledgement packets
   - [ ] Login
     - [ ] Client
     - [ ] Server
