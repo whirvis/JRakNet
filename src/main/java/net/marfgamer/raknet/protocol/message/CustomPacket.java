@@ -1,13 +1,20 @@
-package net.marfgamer.raknet.protocol;
+package net.marfgamer.raknet.protocol.message;
 
 import java.util.ArrayList;
 
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
+import net.marfgamer.raknet.protocol.MessageIdentifier;
 
 public class CustomPacket extends RakNetPacket {
 
 	public static final int SEQUENCE_NUMBER_LENGTH = 0x03;
+
+	/**
+	 * This has nothing to do with encoding, it is meant for other internal
+	 * functions of the server and client
+	 */
+	public long sendTime = -1;
 
 	public int seqNumber;
 	public ArrayList<EncapsulatedPacket> messages;
@@ -16,7 +23,7 @@ public class CustomPacket extends RakNetPacket {
 		super(MessageIdentifier.ID_RESERVED_4);
 		this.messages = new ArrayList<EncapsulatedPacket>();
 	}
-	
+
 	public CustomPacket(Packet packet) {
 		super(packet);
 		this.messages = new ArrayList<EncapsulatedPacket>();

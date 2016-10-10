@@ -8,9 +8,9 @@ import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramPacket;
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNet;
-import net.marfgamer.raknet.protocol.CustomPacket;
-import net.marfgamer.raknet.protocol.EncapsulatedPacket;
 import net.marfgamer.raknet.protocol.Reliability;
+import net.marfgamer.raknet.protocol.message.CustomPacket;
+import net.marfgamer.raknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.raknet.util.ArrayUtils;
 
 public class RakNetSession {

@@ -1,7 +1,8 @@
-package net.marfgamer.raknet.protocol;
+package net.marfgamer.raknet.protocol.message;
 
 import io.netty.buffer.Unpooled;
 import net.marfgamer.raknet.Packet;
+import net.marfgamer.raknet.protocol.Reliability;
 
 public class EncapsulatedPacket {
 
@@ -58,7 +59,6 @@ public class EncapsulatedPacket {
 		byte flags = buffer.readByte();
 		this.reliability = Reliability.lookup((byte) (byte) ((flags & 0b11100000) >> 5));
 		this.split = (flags & FLAG_SPLIT) > 0;
-
 		int length = buffer.readUShort() / 8;
 
 		if (reliability.isReliable()) {
@@ -80,7 +80,8 @@ public class EncapsulatedPacket {
 	}
 
 	public int calculateSize() {
-		int packetSize = 0;
+		int packetSize = 0; // Unlike CustomPacket EncapsulatedPacket has no ID,
+							// so this starts at 0 instead of 1
 		packetSize += BITFLAG_LENGTH;
 		packetSize += PAYLOAD_LENGTH_LENGTH;
 
