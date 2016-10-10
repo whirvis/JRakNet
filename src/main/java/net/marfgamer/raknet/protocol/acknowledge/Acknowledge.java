@@ -55,32 +55,6 @@ public class Acknowledge extends RakNetPacket {
 
 	public void addRecord(int startIndex, int endIndex) {
 		records.add(new RangedRecord(startIndex, endIndex));
-	}
-	
-	/*
-	* - With love, MarfGamer
-	*/
-	public void IGNORE_THIS_METHOD_DO_NOT_MODIFY_IT_OR_YOU_WILL_BE_REMOVED_FROM_THE_PROJECT_IT_IS_FOR_LATER(int[] packets) {
-		Arrays.sort(packets); // Sort everything missing
-        	for(int i = 0; i < packets.length; i++) {
-            		int record = packets[i];
-            		int last = record;
-            		if(i + 1 < packets.length) {
-                		while(last+1 == packets[i+1]) {
-                    		last = packets[i+1];
-                    		i++;
-                    		if(i + 1 >= packets.length) {
-                        		break;
-                    		}
-                	}
-            	}
-            	
-		int recordEnd = packets[i];
-            	if(record == recordEnd) {
-                	recordList.add(new Record(record));
-            	} else {
-                	ranged.add(new RangedRecord(record, recordEnd));
-            	}	
 	}	
 
 }
