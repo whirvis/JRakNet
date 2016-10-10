@@ -8,7 +8,7 @@ These are the features that are in-development or already finished, things can b
 
 - [ ] Server
   - [ ] Event system
-  - [x] Message identifiers
+  - [x] Broadcast identifiers
     - [x] Raw encoders
     - [x] Custom encoders
   - [ ] Client connection
