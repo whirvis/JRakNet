@@ -1,6 +1,7 @@
 package net.marfgamer.raknet.protocol;
 
 import net.marfgamer.raknet.Packet;
+import net.marfgamer.raknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.raknet.util.map.IntMap;
 
 public class SplitPacket {
