@@ -16,7 +16,7 @@ public class CustomPacket extends RakNetPacket {
 	 */
 	public long sendTime = -1;
 
-	public int seqNumber;
+	public int sequenceNumber;
 	public ArrayList<EncapsulatedPacket> messages;
 
 	public CustomPacket() {
@@ -31,7 +31,7 @@ public class CustomPacket extends RakNetPacket {
 
 	@Override
 	public void encode() {
-		this.writeTriadLE(seqNumber);
+		this.writeTriadLE(sequenceNumber);
 		for (EncapsulatedPacket packet : messages) {
 			// Encode packet and write to buffer
 			packet.buffer = this;
@@ -44,7 +44,7 @@ public class CustomPacket extends RakNetPacket {
 
 	@Override
 	public void decode() {
-		this.seqNumber = this.readTriadLE();
+		this.sequenceNumber = this.readTriadLE();
 		while (this.remaining() >= EncapsulatedPacket.MINIMUM_BUFFER_LENGTH) {
 			// Decode packet
 			EncapsulatedPacket packet = new EncapsulatedPacket();
