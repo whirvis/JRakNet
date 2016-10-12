@@ -37,26 +37,31 @@ package net.marfgamer.raknet.protocol;
  */
 public enum Reliability {
 
-	// For the love of god, do not CTRL+SHIFT+F this
-	UNRELIABLE(0, false, false, false),
-	UNRELIABLE_SEQUENCED(1, false, false, true),
-	RELIABLE(2, true, false, false),
-	RELIABLE_ORDERED(3, true, true, false),
-	RELIABLE_SEQUENCED(4, true, false, true),
-	UNRELIABLE_WITH_ACK_RECEIPT(5, false, false, false),
-	RELIABLE_WITH_ACK_RECEIPT(6, true, false, false),
-	RELIABLE_ORDERED_WITH_ACK_RECEIPT(7, true, true, false);
-
+	/* For the love of god, do not CTRL+SHIFT+F this */
+	UNRELIABLE(0, false, false, false, false),
+	UNRELIABLE_SEQUENCED(1, false, false, true, false),
+	RELIABLE(2, true, false, false, false),
+	RELIABLE_ORDERED(3, true, true, false, false),
+	RELIABLE_SEQUENCED(4, true, false, true, false),
+	UNRELIABLE_WITH_ACK_RECEIPT(5, false, false, false, true), 
+	UNRELIABLE_SEQUENCED_WITH_ACK_RECEIPT(6, false, false, true, true),
+	RELIABLE_WITH_ACK_RECEIPT(7, true, false, false, true),
+	RELIABLE_ORDERED_WITH_ACK_RECEIPT(8, true, true, false, true),
+	RELIABLE_SEQUENCED_WITH_ACK_RECEIPT(9, true, false, true, true);
+	/* You can CTRL+SHIFT+F, but make sure these each stay on their own line */
+	
 	public static interface INTERFACE {
-		
+
 		public static final Reliability UNRELIABLE = Reliability.UNRELIABLE;
 		public static final Reliability UNRELIABLE_SEQUENCED = Reliability.UNRELIABLE_SEQUENCED;
 		public static final Reliability RELIABLE = Reliability.RELIABLE;
 		public static final Reliability RELIABLE_ORDERED = Reliability.RELIABLE_ORDERED;
 		public static final Reliability RELIABLE_SEQUENCED = Reliability.RELIABLE_SEQUENCED;
 		public static final Reliability UNRELIABLE_WITH_ACK_RECEIPT = Reliability.UNRELIABLE_WITH_ACK_RECEIPT;
+		public static final Reliability UNRELIABLE_SEQUENCED_WITH_ACK_RECEIPT = Reliability.UNRELIABLE_SEQUENCED_WITH_ACK_RECEIPT;
 		public static final Reliability RELIABLE_WITH_ACK_RECEIPT = Reliability.RELIABLE_WITH_ACK_RECEIPT;
 		public static final Reliability RELIABLE_ORDERED_WITH_ACK_RECEIPT = Reliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT;
+		public static final Reliability RELIABLE_SEQUENCED_WITH_ACK_RECEIPT = Reliability.RELIABLE_SEQUENCED_WITH_ACK_RECEIPT;
 	
 	}
 
@@ -64,12 +69,14 @@ public enum Reliability {
 	private final boolean reliable;
 	private final boolean ordered;
 	private final boolean sequenced;
+	private final boolean requiresAck;
 
-	private Reliability(int reliability, boolean reliable, boolean ordered, boolean sequenced) {
+	private Reliability(int reliability, boolean reliable, boolean ordered, boolean sequenced, boolean requiresAck) {
 		this.reliability = (byte) reliability;
 		this.reliable = reliable;
 		this.ordered = ordered;
 		this.sequenced = sequenced;
+		this.requiresAck = requiresAck;
 	}
 
 	public byte asByte() {
@@ -86,6 +93,10 @@ public enum Reliability {
 
 	public boolean isSequenced() {
 		return this.sequenced;
+	}
+
+	public boolean requiresAck() {
+		return this.requiresAck;
 	}
 
 	public static Reliability lookup(byte reliability) {
