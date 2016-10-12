@@ -19,6 +19,14 @@ public class Acknowledge extends RakNetPacket {
 		}
 		this.records = new ArrayList<Record>();
 	}
+	
+	public Acknowledge(AcknowledgeType type) {
+		this(type.getId());
+	}
+	
+	public AcknowledgeType getType() {
+		return AcknowledgeType.lookup(this.getId());
+	}
 
 	@Override
 	public void encode() {

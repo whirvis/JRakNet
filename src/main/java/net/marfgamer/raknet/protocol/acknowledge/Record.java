@@ -6,8 +6,6 @@ import java.util.Arrays;
 
 public class Record {
 
-	public static final RecordComparator COMPARATOR = new RecordComparator();
-
 	private final int index;
 	private final int endIndex;
 
@@ -46,6 +44,29 @@ public class Record {
 		}
 	}
 
+	@Override
+	public boolean equals(Object object) {
+		if (object instanceof Record) {
+			Record compare = (Record) object;
+			if (this.isRanged() == true) {
+				return this.getIndex() == compare.getIndex() && this.getEndIndex() == compare.getEndIndex();
+			} else {
+				return this.getIndex() == compare.getIndex();
+			}
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	public String toString() {
+		if (this.isRanged() == true) {
+			return (this.getIndex() + ":" + this.getEndIndex());
+		} else {
+			return Integer.toString(this.getIndex());
+		}
+	}
+	
 	public static final int[] toArray(Record... records) {
 		// Store all integers into ArrayList as boxed integers
 		ArrayList<Integer> boxedPacketsOld = new ArrayList<Integer>();

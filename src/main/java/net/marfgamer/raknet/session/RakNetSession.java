@@ -9,9 +9,14 @@ import io.netty.channel.socket.DatagramPacket;
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.protocol.Reliability;
+import net.marfgamer.raknet.protocol.acknowledge.Acknowledge;
+import net.marfgamer.raknet.protocol.acknowledge.AcknowledgeType;
+import net.marfgamer.raknet.protocol.acknowledge.Record;
 import net.marfgamer.raknet.protocol.message.CustomPacket;
 import net.marfgamer.raknet.protocol.message.EncapsulatedPacket;
+import net.marfgamer.raknet.protocol.message.MessageIndex;
 import net.marfgamer.raknet.util.ArrayUtils;
+import net.marfgamer.raknet.util.map.IntMap;
 
 public class RakNetSession {
 
@@ -32,13 +37,17 @@ public class RakNetSession {
 	private final int[] sendSequenceIndex;
 	private final int[] receiveSequenceIndex;
 	private int sendSequenceNumber;
-	private int receiveSequenceNumber;
+	private int receiveSequeneNumber;
+	
+	// Duplication prevention
 	private int splitId;
 	private int messageIndex;
+	private final ArrayList<MessageIndex> messageIndexQueue;
 
 	// Network queuing
-	private final ArrayList<CustomPacket> ackQueue;
+	private final IntMap<CustomPacket> ackQueue;
 	private final ArrayList<EncapsulatedPacket> sendQueue;
+	private final ArrayList<Record> nackQueue;
 
 	public RakNetSession(long guid, int maximumTransferUnit, Channel channel, InetSocketAddress address) {
 		this.guid = guid;
@@ -52,9 +61,12 @@ public class RakNetSession {
 		this.receiveOrderIndex = new int[RakNet.MAX_CHANNELS];
 		this.sendSequenceIndex = new int[RakNet.MAX_CHANNELS];
 		this.receiveSequenceIndex = new int[RakNet.MAX_CHANNELS];
+		
+		this.messageIndexQueue = new ArrayList<MessageIndex>();
 
-		this.ackQueue = new ArrayList<CustomPacket>();
+		this.ackQueue = new IntMap<CustomPacket>();
 		this.sendQueue = new ArrayList<EncapsulatedPacket>();
+		this.nackQueue = new ArrayList<Record>();
 	}
 
 	public final long getGUID() {
@@ -142,7 +154,43 @@ public class RakNetSession {
 	}
 
 	public final void handleCustom0(CustomPacket custom) {
+		// Generate NACK queue if needed
+		int difference = custom.sequenceNumber - this.receiveSequeneNumber;
+		if (difference > 0) { // Prevent negative array crash exploit
+			for (int i = 0; i < difference; i++) {
+				nackQueue.add(new Record(this.receiveSequeneNumber + i));
+			}
+		}
+		this.receiveSequeneNumber = custom.sequenceNumber;
+		
+		// Handle the messages accordingly
+		for (EncapsulatedPacket encapsulated : custom.messages) {
+			this.handleEncapsulated0(encapsulated);
+		}
+	}
 
+	private final void handleEncapsulated0(EncapsulatedPacket encapsulated) {
+		
+	}
+
+	public final void handleAcknowledge(Acknowledge acknowledge) {
+		// Acknowledge converts ranged records to single records when decoded
+		for (Record record : acknowledge.records) {
+			if (record.isRanged()) {
+				// TODO: Throw error, this should never happen!
+			}
+		}
+
+		if (acknowledge.getType() == AcknowledgeType.ACKNOWLEDGED) {
+			for (Record record : acknowledge.records) {
+				ackQueue.remove(record.getIndex());
+				// TODO: notify API for *_WITH_ACK_RECEIPT packets
+			}
+		} else if (acknowledge.getType() == AcknowledgeType.NOT_ACKNOWLEDGED) {
+			for (Record record : acknowledge.records) {
+				channel.writeAndFlush(ackQueue.get(record.getIndex()));
+			}
+		}
 	}
 
 	public final void update() {
@@ -161,20 +209,20 @@ public class RakNetSession {
 
 		if (custom.messages.size() > 0) {
 			// Send this once, then store modified version for later
-			custom.seqNumber = this.sendSequenceNumber++;
+			custom.sequenceNumber = this.sendSequenceNumber++;
 			custom.encode();
 			channel.writeAndFlush(new DatagramPacket(custom.buffer(), this.address));
 
 			// Create copy without UNRELIABLE packet types if it was not ACK'ed
 			CustomPacket customAck = new CustomPacket();
-			customAck.seqNumber = custom.seqNumber;
+			customAck.sequenceNumber = custom.sequenceNumber;
 			for (EncapsulatedPacket encapsulated : sent) {
 				if (encapsulated.reliability.isReliable()) {
 					customAck.messages.add(encapsulated);
 				}
 			}
 			customAck.encode();
-			ackQueue.add(customAck);
+			ackQueue.put(customAck.sequenceNumber, customAck);
 		}
 	}
 
