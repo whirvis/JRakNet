@@ -10,12 +10,6 @@ public class CustomPacket extends RakNetPacket {
 
 	public static final int SEQUENCE_NUMBER_LENGTH = 0x03;
 
-	/**
-	 * This has nothing to do with encoding, it is meant for other internal
-	 * functions of the server and client
-	 */
-	public long sendTime = -1;
-
 	public int sequenceNumber;
 	public ArrayList<EncapsulatedPacket> messages;
 
@@ -64,6 +58,23 @@ public class CustomPacket extends RakNetPacket {
 			packetSize += message.calculateSize();
 		}
 		return packetSize;
+	}
+	
+	public boolean containsUnreliables() {
+		for (EncapsulatedPacket encapsulated : this.messages) {
+			if (!encapsulated.reliability.isReliable()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public void removeUnreliables() {
+		for (EncapsulatedPacket encapsulated : this.messages) {
+			if (!encapsulated.reliability.isReliable()) {
+				messages.remove(encapsulated);
+			}
+		}
 	}
 
 	public static int calculateDummy() {

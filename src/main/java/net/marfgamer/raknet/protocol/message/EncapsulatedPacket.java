@@ -25,7 +25,7 @@ public class EncapsulatedPacket {
 	// Encapsulation data
 	public Reliability reliability;
 	public boolean split;
-	public int messageIndex;
+	public MessageIndex messageIndex;
 	public int orderIndex;
 	public byte orderChannel;
 	public int splitCount;
@@ -38,7 +38,7 @@ public class EncapsulatedPacket {
 		buffer.writeUShort(payload.size() * 8);
 
 		if (reliability.isReliable()) {
-			buffer.writeTriadLE(messageIndex);
+			buffer.writeTriadLE(messageIndex.getIndex());
 		}
 
 		if (reliability.isOrdered() || reliability.isSequenced()) {
@@ -62,7 +62,7 @@ public class EncapsulatedPacket {
 		int length = buffer.readUShort() / 8;
 
 		if (reliability.isReliable()) {
-			this.messageIndex = buffer.readTriadLE();
+			this.messageIndex = new MessageIndex(buffer.readTriadLE());
 		}
 
 		if (reliability.isOrdered() || reliability.isSequenced()) {

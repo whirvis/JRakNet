@@ -9,6 +9,7 @@ import io.netty.channel.socket.DatagramPacket;
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.protocol.Reliability;
+import net.marfgamer.raknet.protocol.SplitPacket;
 import net.marfgamer.raknet.protocol.acknowledge.Acknowledge;
 import net.marfgamer.raknet.protocol.acknowledge.AcknowledgeType;
 import net.marfgamer.raknet.protocol.acknowledge.Record;
@@ -18,7 +19,7 @@ import net.marfgamer.raknet.protocol.message.MessageIndex;
 import net.marfgamer.raknet.util.ArrayUtils;
 import net.marfgamer.raknet.util.map.IntMap;
 
-public class RakNetSession {
+public abstract class RakNetSession {
 
 	public static final int DEFAULT_ORDER_CHANNEL = 0x00;
 
@@ -32,41 +33,53 @@ public class RakNetSession {
 	private final InetSocketAddress address;
 
 	// Ordering data
+	private int splitId;
+	private int messageIndex;
+	private int nextSequenceNumber;
+	private int lastSequenceNumber;
 	private final int[] sendOrderIndex;
 	private final int[] receiveOrderIndex;
 	private final int[] sendSequenceIndex;
 	private final int[] receiveSequenceIndex;
-	private int sendSequenceNumber;
-	private int receiveSequeneNumber;
-	
-	// Duplication prevention
-	private int splitId;
-	private int messageIndex;
+
+	// Handling data
 	private final ArrayList<MessageIndex> messageIndexQueue;
+	private final IntMap<IntMap<EncapsulatedPacket>> orderedHandleQueue;
 
 	// Network queuing
 	private final IntMap<CustomPacket> ackQueue;
 	private final ArrayList<EncapsulatedPacket> sendQueue;
 	private final ArrayList<Record> nackQueue;
+	private final IntMap<SplitPacket> splitQueue;
 
 	public RakNetSession(long guid, int maximumTransferUnit, Channel channel, InetSocketAddress address) {
+		// Session data
 		this.guid = guid;
 		this.maximumTransferUnit = maximumTransferUnit;
 		this.state = RakNetState.DISCONNECTED;
 
+		// Networking data
 		this.channel = channel;
 		this.address = address;
 
+		// Ordering data
 		this.sendOrderIndex = new int[RakNet.MAX_CHANNELS];
 		this.receiveOrderIndex = new int[RakNet.MAX_CHANNELS];
 		this.sendSequenceIndex = new int[RakNet.MAX_CHANNELS];
 		this.receiveSequenceIndex = new int[RakNet.MAX_CHANNELS];
-		
-		this.messageIndexQueue = new ArrayList<MessageIndex>();
 
+		// Handling data
+		this.messageIndexQueue = new ArrayList<MessageIndex>();
+		this.orderedHandleQueue = new IntMap<IntMap<EncapsulatedPacket>>();
+		for (int i = 0; i < receiveOrderIndex.length; i++) {
+			orderedHandleQueue.put(i, new IntMap<EncapsulatedPacket>());
+		}
+
+		// Networking queuing
 		this.ackQueue = new IntMap<CustomPacket>();
 		this.sendQueue = new ArrayList<EncapsulatedPacket>();
 		this.nackQueue = new ArrayList<Record>();
+		this.splitQueue = new IntMap<SplitPacket>();
 	}
 
 	public final long getGUID() {
@@ -75,6 +88,111 @@ public class RakNetSession {
 
 	public final InetSocketAddress getAddress() {
 		return this.address;
+	}
+
+	public int getMaximumTransferUnit() {
+		return this.maximumTransferUnit;
+	}
+
+	public RakNetState getState() {
+		return this.state;
+	}
+
+	public void setState(RakNetState state) {
+		this.state = state;
+	}
+
+	public final void handleCustom0(CustomPacket custom) {
+		// Generate NACK queue if needed
+		int difference = custom.sequenceNumber - this.lastSequenceNumber;
+		if (difference > 0) {
+			if (difference > 1) {
+				nackQueue.add(new Record(this.lastSequenceNumber, custom.sequenceNumber - 1));
+			} else {
+				nackQueue.add(new Record(custom.sequenceNumber - 1));
+			}
+		}
+		this.lastSequenceNumber = (custom.sequenceNumber + 1);
+
+		// Handle the messages accordingly
+		for (EncapsulatedPacket encapsulated : custom.messages) {
+			this.handleEncapsulated0(encapsulated);
+		}
+	}
+
+	private final void handleEncapsulated0(EncapsulatedPacket encapsulated) {
+		Reliability reliability = encapsulated.reliability;
+
+		// Make sure we are not handling a duplicate
+		if (reliability.isReliable()) {
+			if (messageIndexQueue.contains(encapsulated.messageIndex)) {
+				return; // Do not handle, it is a duplicate!
+			}
+			messageIndexQueue.add(encapsulated.messageIndex);
+		}
+
+		// Make sure we are handling everything in an ordered/sequenced fashion
+		int orderIndex = encapsulated.orderIndex;
+		int orderChannel = encapsulated.orderChannel;
+		if (reliability.isOrdered()) {
+			orderedHandleQueue.get(orderChannel).put(orderIndex, encapsulated);
+			if (orderedHandleQueue.get(orderChannel).containsKey(receiveOrderIndex[orderChannel])) {
+				receiveOrderIndex[orderChannel]++;
+			} else {
+				return; // Do not handle, it is not ordered yet!
+			}
+		} else if (reliability.isSequenced()) {
+			if (orderIndex > receiveSequenceIndex[orderChannel]) {
+				receiveSequenceIndex[orderChannel] = orderIndex;
+			} else {
+				return; // Do not handle, it is outdated!
+			}
+		}
+
+		// Put together split packet
+		if (encapsulated.split == true) {
+			if (!splitQueue.containsKey(encapsulated.splitId)) {
+				SplitPacket split = splitQueue.get(encapsulated.splitId);
+				split.update(encapsulated);
+			}
+		}
+	}
+
+	public final void handleAcknowledge(Acknowledge acknowledge) {
+		// Make sure the ranged records were converted to single records
+		acknowledge.simplifyRecords();
+
+		// Handle Acknowledged based on it's type
+		if (acknowledge.getType() == AcknowledgeType.ACKNOWLEDGED) {
+			for (Record record : acknowledge.records) {
+				// Notify API that it the receiving-side has received the packet
+				for (EncapsulatedPacket encapsulated : ackQueue.get(record.getIndex()).messages) {
+					if (encapsulated.reliability.requiresAck()) {
+						this.onAcknowledge(record, encapsulated.reliability, encapsulated.payload,
+								encapsulated.orderChannel);
+					}
+				}
+
+				// The packet successfully sent, no need to store it anymore
+				ackQueue.remove(record.getIndex());
+			}
+		} else if (acknowledge.getType() == AcknowledgeType.NOT_ACKNOWLEDGED) {
+			for (Record record : acknowledge.records) {
+				// Remove all unreliable packets from the queue
+				CustomPacket custom = ackQueue.get(record.getIndex());
+				custom.removeUnreliables();
+
+				// Resend the modified version
+				this.sendRawPacket(custom);
+			}
+		}
+	}
+
+	public final void sendNacknowledge() {
+		Acknowledge nack = new Acknowledge(AcknowledgeType.NOT_ACKNOWLEDGED);
+		nack.records = this.nackQueue;
+		nack.encode();
+		this.sendRawPacket(nack);
 	}
 
 	public final void sendPacket(Reliability reliability, int channel, Packet packet) {
@@ -94,7 +212,7 @@ public class RakNetSession {
 
 			// Set reliability specific parameters
 			if (reliability.isReliable()) {
-				encapsulated.messageIndex = this.messageIndex++;
+				encapsulated.messageIndex = new MessageIndex(this.messageIndex++);
 			}
 			if (reliability.isOrdered() || reliability.isSequenced()) {
 				encapsulated.orderIndex = (reliability.isOrdered() ? this.sendOrderIndex[channel]++
@@ -119,7 +237,7 @@ public class RakNetSession {
 
 				// Set reliability specific parameters
 				if (reliability.isReliable()) {
-					encapsulatedSplit.messageIndex = splitMessageIndex;
+					encapsulatedSplit.messageIndex = new MessageIndex(splitMessageIndex);
 				}
 				if (reliability.isOrdered() || reliability.isSequenced()) {
 					encapsulatedSplit.orderIndex = splitOrderIndex;
@@ -153,77 +271,37 @@ public class RakNetSession {
 		}
 	}
 
-	public final void handleCustom0(CustomPacket custom) {
-		// Generate NACK queue if needed
-		int difference = custom.sequenceNumber - this.receiveSequeneNumber;
-		if (difference > 0) { // Prevent negative array crash exploit
-			for (int i = 0; i < difference; i++) {
-				nackQueue.add(new Record(this.receiveSequeneNumber + i));
-			}
-		}
-		this.receiveSequeneNumber = custom.sequenceNumber;
-		
-		// Handle the messages accordingly
-		for (EncapsulatedPacket encapsulated : custom.messages) {
-			this.handleEncapsulated0(encapsulated);
-		}
-	}
-
-	private final void handleEncapsulated0(EncapsulatedPacket encapsulated) {
-		
-	}
-
-	public final void handleAcknowledge(Acknowledge acknowledge) {
-		// Acknowledge converts ranged records to single records when decoded
-		for (Record record : acknowledge.records) {
-			if (record.isRanged()) {
-				// TODO: Throw error, this should never happen!
-			}
-		}
-
-		if (acknowledge.getType() == AcknowledgeType.ACKNOWLEDGED) {
-			for (Record record : acknowledge.records) {
-				ackQueue.remove(record.getIndex());
-				// TODO: notify API for *_WITH_ACK_RECEIPT packets
-			}
-		} else if (acknowledge.getType() == AcknowledgeType.NOT_ACKNOWLEDGED) {
-			for (Record record : acknowledge.records) {
-				channel.writeAndFlush(ackQueue.get(record.getIndex()));
-			}
-		}
+	public void sendRawPacket(Packet packet) {
+		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
 	}
 
 	public final void update() {
-		CustomPacket custom = new CustomPacket();
+		if (sendQueue.isEmpty() == false) {
+			CustomPacket custom = new CustomPacket();
 
-		// Add packets to the CustomPacket until it's full or there are no more
-		ArrayList<EncapsulatedPacket> sent = new ArrayList<EncapsulatedPacket>();
-		for (EncapsulatedPacket encapsulated : this.sendQueue) {
-			if (custom.calculateSize() + encapsulated.calculateSize() > this.maximumTransferUnit) {
-				break; // The packet is full, break out of the loop!
-			}
-			sent.add(encapsulated);
-			custom.messages.add(encapsulated);
-		}
-		sendQueue.removeAll(sent); // We no longer need these, remove them
-
-		if (custom.messages.size() > 0) {
-			// Send this once, then store modified version for later
-			custom.sequenceNumber = this.sendSequenceNumber++;
-			custom.encode();
-			channel.writeAndFlush(new DatagramPacket(custom.buffer(), this.address));
-
-			// Create copy without UNRELIABLE packet types if it was not ACK'ed
-			CustomPacket customAck = new CustomPacket();
-			customAck.sequenceNumber = custom.sequenceNumber;
-			for (EncapsulatedPacket encapsulated : sent) {
-				if (encapsulated.reliability.isReliable()) {
-					customAck.messages.add(encapsulated);
+			// Add packets to the CustomPacket until it's full or there's none
+			ArrayList<EncapsulatedPacket> sent = new ArrayList<EncapsulatedPacket>();
+			for (EncapsulatedPacket encapsulated : this.sendQueue) {
+				if (custom.calculateSize() + encapsulated.calculateSize() > this.maximumTransferUnit) {
+					break; // The packet is full, break out of the loop!
 				}
+				sent.add(encapsulated);
+				custom.messages.add(encapsulated);
 			}
-			customAck.encode();
-			ackQueue.put(customAck.sequenceNumber, customAck);
+			sendQueue.removeAll(sent); // We no longer need these, remove them
+
+			// Only send if we have something to send
+			if (custom.messages.size() > 0) {
+				custom.sequenceNumber = this.nextSequenceNumber++;
+				custom.encode();
+				this.sendRawPacket(custom);
+				ackQueue.put(custom.sequenceNumber, custom);
+			}
 		}
 	}
+
+	public abstract void onAcknowledge(Record record, Reliability reliability, Packet packet, int channel);
+
+	public abstract void handlePacket(Packet packet, int channel);
 
 }
