@@ -17,7 +17,7 @@ public class SplitPacket {
 		this.payloads = new IntMap<Packet>();
 	}
 
-	public Packet update(EncapsulatedPacket encapsulated) {
+	public EncapsulatedPacket update(EncapsulatedPacket encapsulated) {
 		// Update payload data
 		if (encapsulated.split != true || encapsulated.splitId != this.splitId
 				|| encapsulated.splitCount != this.splitCount) {
@@ -27,11 +27,14 @@ public class SplitPacket {
 
 		// If the map is large enough then put the packet together and return it
 		if (payloads.size() >= this.splitCount) {
+			EncapsulatedPacket finalEncapsulated = new EncapsulatedPacket();
+			// TODO
+			
 			Packet finalPayload = new Packet();
 			for (int i = 0; i < payloads.size(); i++) {
 				finalPayload.write(payloads.get(i).array());
 			}
-			return finalPayload;
+			
 		}
 		
 		// The packet is not yet ready
