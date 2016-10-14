@@ -15,7 +15,6 @@ import net.marfgamer.raknet.protocol.acknowledge.AcknowledgeType;
 import net.marfgamer.raknet.protocol.acknowledge.Record;
 import net.marfgamer.raknet.protocol.message.CustomPacket;
 import net.marfgamer.raknet.protocol.message.EncapsulatedPacket;
-import net.marfgamer.raknet.protocol.message.MessageIndex;
 import net.marfgamer.raknet.util.ArrayUtils;
 import net.marfgamer.raknet.util.map.IntMap;
 
@@ -43,7 +42,7 @@ public abstract class RakNetSession {
 	private final int[] receiveSequenceIndex;
 
 	// Handling data
-	private final ArrayList<MessageIndex> messageIndexQueue;
+	private final ArrayList<Integer> messageIndexQueue;
 	private final IntMap<IntMap<EncapsulatedPacket>> orderedHandleQueue;
 
 	// Network queuing
@@ -67,9 +66,12 @@ public abstract class RakNetSession {
 		this.receiveOrderIndex = new int[RakNet.MAX_CHANNELS];
 		this.sendSequenceIndex = new int[RakNet.MAX_CHANNELS];
 		this.receiveSequenceIndex = new int[RakNet.MAX_CHANNELS];
+		for(int i = 0; i < receiveSequenceIndex.length; i++) {
+			this.receiveSequenceIndex[i] = -1; // 0 is greater than -1
+		}
 
 		// Handling data
-		this.messageIndexQueue = new ArrayList<MessageIndex>();
+		this.messageIndexQueue = new ArrayList<Integer>();
 		this.orderedHandleQueue = new IntMap<IntMap<EncapsulatedPacket>>();
 		for (int i = 0; i < receiveOrderIndex.length; i++) {
 			orderedHandleQueue.put(i, new IntMap<EncapsulatedPacket>());
@@ -123,6 +125,24 @@ public abstract class RakNetSession {
 	private final void handleEncapsulated0(EncapsulatedPacket encapsulated) {
 		Reliability reliability = encapsulated.reliability;
 
+		// Put together split packet
+		if (encapsulated.split == true) {
+			if (!splitQueue.containsKey(encapsulated.splitId)) {
+				SplitPacket split = splitQueue.get(encapsulated.splitId);
+				Packet finalPayload = split.update(encapsulated);
+				if (finalPayload == null) {
+					return; // Do not handle, the split packet is not complete!
+				}
+
+				/*
+				 * It is safe to set the payload here because the old payload is
+				 * no longer needed and split EncapsulatedPackets share the
+				 * exact same data except for split data and payload.
+				 */
+				encapsulated.payload = finalPayload;
+			}
+		}
+
 		// Make sure we are not handling a duplicate
 		if (reliability.isReliable()) {
 			if (messageIndexQueue.contains(encapsulated.messageIndex)) {
@@ -136,25 +156,18 @@ public abstract class RakNetSession {
 		int orderChannel = encapsulated.orderChannel;
 		if (reliability.isOrdered()) {
 			orderedHandleQueue.get(orderChannel).put(orderIndex, encapsulated);
-			if (orderedHandleQueue.get(orderChannel).containsKey(receiveOrderIndex[orderChannel])) {
-				receiveOrderIndex[orderChannel]++;
-			} else {
-				return; // Do not handle, it is not ordered yet!
+			while (orderedHandleQueue.get(orderChannel).containsKey(receiveOrderIndex[orderChannel])) {
+				EncapsulatedPacket orderedEncapsulated = orderedHandleQueue.get(orderChannel)
+						.get(receiveOrderIndex[orderChannel]++);
+				this.handlePacket(orderedEncapsulated.payload, orderedEncapsulated.orderChannel);
 			}
 		} else if (reliability.isSequenced()) {
 			if (orderIndex > receiveSequenceIndex[orderChannel]) {
 				receiveSequenceIndex[orderChannel] = orderIndex;
-			} else {
-				return; // Do not handle, it is outdated!
+				this.handlePacket(encapsulated.payload, encapsulated.orderChannel);
 			}
-		}
-
-		// Put together split packet
-		if (encapsulated.split == true) {
-			if (!splitQueue.containsKey(encapsulated.splitId)) {
-				SplitPacket split = splitQueue.get(encapsulated.splitId);
-				split.update(encapsulated);
-			}
+		} else {
+			this.handlePacket(encapsulated.payload, encapsulated.orderChannel);
 		}
 	}
 
@@ -168,8 +181,8 @@ public abstract class RakNetSession {
 				// Notify API that it the receiving-side has received the packet
 				for (EncapsulatedPacket encapsulated : ackQueue.get(record.getIndex()).messages) {
 					if (encapsulated.reliability.requiresAck()) {
-						this.onAcknowledge(record, encapsulated.reliability, encapsulated.payload,
-								encapsulated.orderChannel);
+						this.onAcknowledge(record, encapsulated.reliability, encapsulated.orderChannel,
+								encapsulated.payload);
 					}
 				}
 
@@ -212,7 +225,7 @@ public abstract class RakNetSession {
 
 			// Set reliability specific parameters
 			if (reliability.isReliable()) {
-				encapsulated.messageIndex = new MessageIndex(this.messageIndex++);
+				encapsulated.messageIndex = this.messageIndex++;
 			}
 			if (reliability.isOrdered() || reliability.isSequenced()) {
 				encapsulated.orderIndex = (reliability.isOrdered() ? this.sendOrderIndex[channel]++
@@ -237,7 +250,7 @@ public abstract class RakNetSession {
 
 				// Set reliability specific parameters
 				if (reliability.isReliable()) {
-					encapsulatedSplit.messageIndex = new MessageIndex(splitMessageIndex);
+					encapsulatedSplit.messageIndex = splitMessageIndex;
 				}
 				if (reliability.isOrdered() || reliability.isSequenced()) {
 					encapsulatedSplit.orderIndex = splitOrderIndex;
@@ -271,7 +284,7 @@ public abstract class RakNetSession {
 		}
 	}
 
-	public void sendRawPacket(Packet packet) {
+	public final void sendRawPacket(Packet packet) {
 		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
 	}
 
@@ -300,7 +313,7 @@ public abstract class RakNetSession {
 		}
 	}
 
-	public abstract void onAcknowledge(Record record, Reliability reliability, Packet packet, int channel);
+	public abstract void onAcknowledge(Record record, Reliability reliability, int channel, Packet packet);
 
 	public abstract void handlePacket(Packet packet, int channel);
 
