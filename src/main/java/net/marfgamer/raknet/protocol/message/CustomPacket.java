@@ -59,8 +59,12 @@ public class CustomPacket extends RakNetPacket {
 		}
 		return packetSize;
 	}
-	
+
 	public boolean containsUnreliables() {
+		if (messages.size() <= 0) {
+			return false; // Nothing to check
+		}
+
 		for (EncapsulatedPacket encapsulated : this.messages) {
 			if (!encapsulated.reliability.isReliable()) {
 				return true;
@@ -68,8 +72,12 @@ public class CustomPacket extends RakNetPacket {
 		}
 		return false;
 	}
-	
+
 	public void removeUnreliables() {
+		if (messages.size() <= 0) {
+			return; // Nothing to remove
+		}
+
 		for (EncapsulatedPacket encapsulated : this.messages) {
 			if (!encapsulated.reliability.isReliable()) {
 				messages.remove(encapsulated);

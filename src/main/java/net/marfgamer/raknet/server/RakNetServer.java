@@ -22,10 +22,12 @@ import net.marfgamer.raknet.protocol.unconnected.UnconnectedNoFreeIncomingConnec
 import net.marfgamer.raknet.protocol.unconnected.UnconnectedOpenConnectionRequestOne;
 import net.marfgamer.raknet.protocol.unconnected.UnconnectedOpenConnectionRequestTwo;
 import net.marfgamer.raknet.protocol.unconnected.UnconnectedOpenConnectionResponseOne;
+import net.marfgamer.raknet.protocol.unconnected.UnconnectedOpenConnectionResponseTwo;
 import net.marfgamer.raknet.protocol.unconnected.UnconnectedPing;
 import net.marfgamer.raknet.protocol.unconnected.UnconnectedPong;
 import net.marfgamer.raknet.server.identifier.Identifier;
 import net.marfgamer.raknet.server.identifier.MCPEIdentifier;
+import net.marfgamer.raknet.session.RakNetClientSession;
 import net.marfgamer.raknet.session.RakNetSession;
 
 /**
@@ -104,6 +106,10 @@ public class RakNetServer implements RakNet {
 		return this;
 	}
 
+	public RakNetServerListener getListener() {
+		return this.listener;
+	}
+
 	public RakNetServer setListener(RakNetServerListener listener) {
 		this.listener = listener;
 		return this;
@@ -119,7 +125,7 @@ public class RakNetServer implements RakNet {
 
 			if ((id == ID_UNCONNECTED_PING || sessions.size() < this.maxConnections) && identifier != null) {
 				ServerPing pingEvent = new ServerPing(sender, identifier);
-				listener.handlePing(pingEvent, this);
+				listener.handlePing(pingEvent);
 				if (pingEvent.getIdentifier() != null) {
 					UnconnectedPong pong = new UnconnectedPong();
 					pong.pingId = ping.pingId;
@@ -162,9 +168,25 @@ public class RakNetServer implements RakNet {
 
 			if (connectionRequestTwo.magic == true) {
 				if (connectionRequestTwo.maximumTransferUnit < this.maximumTransferUnit) {
-					
+					// Create response
+					UnconnectedOpenConnectionResponseTwo connectionResponseTwo = new UnconnectedOpenConnectionResponseTwo();
+					connectionResponseTwo.serverGuid = this.guid;
+					connectionResponseTwo.clientAddress = sender;
+					connectionResponseTwo.maximumTransferUnit = connectionRequestTwo.maximumTransferUnit;
+					connectionResponseTwo.encryptionEnabled = false;
+					connectionResponseTwo.encode();
+
+					// Create session
+					RakNetClientSession clientSession = new RakNetClientSession(this, connectionRequestTwo.clientGuid,
+							connectionRequestTwo.maximumTransferUnit, channel, sender);
+					sessions.put(sender, clientSession);
+
+					// Send response, we are ready for login!
+					this.sendRaw(connectionResponseTwo, sender);
 				}
 			}
+		} else {
+			System.out.println("RECEIVED UNKNOWN PACKET! ID: 0x" + Integer.toHexString(id).toUpperCase());
 		}
 	}
 
@@ -186,7 +208,11 @@ public class RakNetServer implements RakNet {
 
 		// Timer system
 		while (this.running == true) {
-			// TODO
+			synchronized (sessions) {
+				for (RakNetSession session : sessions.values()) {
+					session.update();
+				}
+			}
 		}
 	}
 
@@ -206,10 +232,9 @@ public class RakNetServer implements RakNet {
 
 		s.setListener(new RakNetServerListener() {
 			@Override
-			public void handlePing(ServerPing ping, RakNetServer server) {
+			public void handlePing(ServerPing ping) {
 				ping.setIdentifier(new MCPEIdentifier("Hello! " + timeCreation, 80, "0.15.0", 0, 10));
 			}
-
 		});
 		s.start();
 	}

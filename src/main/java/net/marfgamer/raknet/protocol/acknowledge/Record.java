@@ -53,9 +53,13 @@ public class Record {
 			} else {
 				return this.getIndex() == compare.getIndex();
 			}
-		} else {
-			return false;
+		} else if (object instanceof Byte || object instanceof Short || object instanceof Integer
+				|| object instanceof Long) {
+			if (this.isRanged() == false) {
+				return (this.getIndex() == (long) object);
+			}
 		}
+		return false;
 	}
 
 	@Override
@@ -66,7 +70,7 @@ public class Record {
 			return Integer.toString(this.getIndex());
 		}
 	}
-	
+
 	public static final int[] toArray(Record... records) {
 		// Store all integers into ArrayList as boxed integers
 		ArrayList<Integer> boxedPacketsOld = new ArrayList<Integer>();
@@ -95,6 +99,11 @@ public class Record {
 
 	public static final int[] toArray(List<Record> records) {
 		return Record.toArray(records.toArray(new Record[records.size()]));
+	}
+
+	public static void main(String[] args) {
+		Record r = new Record(14);
+		System.out.println(r.equals(14L));
 	}
 
 }
