@@ -17,6 +17,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.RakNetPacket;
+import net.marfgamer.raknet.protocol.acknowledge.Acknowledge;
 import net.marfgamer.raknet.protocol.message.CustomPacket;
 import net.marfgamer.raknet.protocol.unconnected.UnconnectedIncompatibleProtocol;
 import net.marfgamer.raknet.protocol.unconnected.UnconnectedNoFreeIncomingConnections;
@@ -87,7 +88,7 @@ public class RakNetServer implements RakNet {
 	public long getGlobalilyUniqueId() {
 		return this.guid;
 	}
-	
+
 	public long getTimestamp() {
 		return this.timestamp;
 	}
@@ -199,6 +200,14 @@ public class RakNetServer implements RakNet {
 				RakNetClientSession session = sessions.get(sender);
 				session.handleCustom0(custom);
 			}
+		} else if (id == Acknowledge.ACKNOWLEDGED || id == Acknowledge.NOT_ACKNOWLEDGED) {
+			if (sessions.containsKey(sender) == true) {
+				Acknowledge acknowledge = new Acknowledge(packet);
+				acknowledge.decode();
+
+				RakNetClientSession session = sessions.get(sender);
+				session.handleAcknowledge(acknowledge);
+			}
 		}
 	}
 
@@ -212,6 +221,15 @@ public class RakNetServer implements RakNet {
 
 	public RakNetClientSession getSession(InetSocketAddress address) {
 		return sessions.get(address);
+	}
+
+	public void removeSession(RakNetClientSession session, String reason) {
+		sessions.remove(session.getAddress());
+		this.getListener().clientDisconnected(session, reason);
+	}
+
+	public void removeSession(InetSocketAddress address, String reason) {
+		this.removeSession(sessions.get(address), reason);
 	}
 
 	public void start() {
@@ -258,6 +276,11 @@ public class RakNetServer implements RakNet {
 			public void handlePacket(RakNetClientSession session, Packet packet, int channel) {
 				System.out.println("Received packet with ID 0x" + Integer.toHexString(packet.readUByte()).toUpperCase()
 						+ " from " + session.getAddress());
+			}
+
+			@Override
+			public void clientDisconnected(RakNetClientSession session, String reason) {
+				System.out.println("Client " + session.getAddress() + " because \"" + reason + "\"");
 			}
 		});
 		s.start();
