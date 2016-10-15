@@ -18,12 +18,13 @@ import net.marfgamer.raknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.raknet.util.ArrayUtils;
 import net.marfgamer.raknet.util.map.IntMap;
 
-public abstract class RakNetSession {
+public abstract class RakNetSession implements Reliability.INTERFACE {
 
 	public static final int DEFAULT_ORDER_CHANNEL = 0x00;
+	public static final int ACK_SEND_WAIT_TIME_MILLIS = 3000;
 
 	// Session data
-	private final long guid;
+	private /* final? */ long guid;
 	private final int maximumTransferUnit;
 	private RakNetState state;
 
@@ -42,14 +43,17 @@ public abstract class RakNetSession {
 	private final int[] receiveSequenceIndex;
 
 	// Handling data
+	private final ArrayList<Integer> customIndexQueue;
 	private final ArrayList<Integer> messageIndexQueue;
 	private final IntMap<IntMap<EncapsulatedPacket>> orderedHandleQueue;
 
 	// Network queuing
-	private final IntMap<CustomPacket> ackQueue;
-	private final ArrayList<EncapsulatedPacket> sendQueue;
-	private final ArrayList<Record> nackQueue;
+	private final ArrayList<Record> missingQueue;
+	private final ArrayList<Record> acknowledgedQueue;
+	private final IntMap<CustomPacket> unacknowledgedQueue;
 	private final IntMap<SplitPacket> splitQueue;
+	private final ArrayList<EncapsulatedPacket> sendQueue;
+	private long lastAckSend;
 
 	public RakNetSession(long guid, int maximumTransferUnit, Channel channel, InetSocketAddress address) {
 		// Session data
@@ -66,11 +70,9 @@ public abstract class RakNetSession {
 		this.receiveOrderIndex = new int[RakNet.MAX_CHANNELS];
 		this.sendSequenceIndex = new int[RakNet.MAX_CHANNELS];
 		this.receiveSequenceIndex = new int[RakNet.MAX_CHANNELS];
-		for(int i = 0; i < receiveSequenceIndex.length; i++) {
-			this.receiveSequenceIndex[i] = -1; // 0 is greater than -1
-		}
 
 		// Handling data
+		this.customIndexQueue = new ArrayList<Integer>();
 		this.messageIndexQueue = new ArrayList<Integer>();
 		this.orderedHandleQueue = new IntMap<IntMap<EncapsulatedPacket>>();
 		for (int i = 0; i < receiveOrderIndex.length; i++) {
@@ -78,14 +80,20 @@ public abstract class RakNetSession {
 		}
 
 		// Networking queuing
-		this.ackQueue = new IntMap<CustomPacket>();
-		this.sendQueue = new ArrayList<EncapsulatedPacket>();
-		this.nackQueue = new ArrayList<Record>();
+		this.missingQueue = new ArrayList<Record>();
+		this.acknowledgedQueue = new ArrayList<Record>();
+		this.unacknowledgedQueue = new IntMap<CustomPacket>();
 		this.splitQueue = new IntMap<SplitPacket>();
+		this.sendQueue = new ArrayList<EncapsulatedPacket>();
+		this.lastAckSend = System.currentTimeMillis();
 	}
 
 	public final long getGUID() {
 		return this.guid;
+	}
+
+	public final void setGUID(long guid) {
+		this.guid = guid;
 	}
 
 	public final InetSocketAddress getAddress() {
@@ -104,17 +112,26 @@ public abstract class RakNetSession {
 		this.state = state;
 	}
 
-	public final void handleCustom0(CustomPacket custom) {
+	public final void handleCustom0(CustomPacket custom) throws Exception {
+		// Only handle if we haven't handled it before
+		System.out.println("CPS: " + custom.sequenceNumber);
+		if (customIndexQueue.contains(custom.sequenceNumber)) {
+			return; // We have handle it before!
+		}
+		customIndexQueue.add(custom.sequenceNumber);
+
 		// Generate NACK queue if needed
 		int difference = custom.sequenceNumber - this.lastSequenceNumber;
 		if (difference > 0) {
 			if (difference > 1) {
-				nackQueue.add(new Record(this.lastSequenceNumber, custom.sequenceNumber - 1));
+				missingQueue.add(new Record(this.lastSequenceNumber, custom.sequenceNumber - 1));
 			} else {
-				nackQueue.add(new Record(custom.sequenceNumber - 1));
+				missingQueue.add(new Record(custom.sequenceNumber - 1));
 			}
 		}
 		this.lastSequenceNumber = (custom.sequenceNumber + 1);
+		acknowledgedQueue.add(new Record(custom.sequenceNumber));
+		this.updateAcknowledge(true);
 
 		// Handle the messages accordingly
 		for (EncapsulatedPacket encapsulated : custom.messages) {
@@ -122,25 +139,31 @@ public abstract class RakNetSession {
 		}
 	}
 
-	private final void handleEncapsulated0(EncapsulatedPacket encapsulated) {
+	private final void handleEncapsulated0(EncapsulatedPacket encapsulated) throws Exception {
 		Reliability reliability = encapsulated.reliability;
-
+		
+		System.out.println(encapsulated.orderChannel + ":" + encapsulated.orderIndex);
+		
 		// Put together split packet
 		if (encapsulated.split == true) {
 			if (!splitQueue.containsKey(encapsulated.splitId)) {
-				SplitPacket split = splitQueue.get(encapsulated.splitId);
-				Packet finalPayload = split.update(encapsulated);
-				if (finalPayload == null) {
-					return; // Do not handle, the split packet is not complete!
-				}
-
-				/*
-				 * It is safe to set the payload here because the old payload is
-				 * no longer needed and split EncapsulatedPackets share the
-				 * exact same data except for split data and payload.
-				 */
-				encapsulated.payload = finalPayload;
+				splitQueue.put(encapsulated.splitId,
+						new SplitPacket(encapsulated.splitId, encapsulated.splitCount, encapsulated.reliability));
 			}
+
+			SplitPacket split = splitQueue.get(encapsulated.splitId);
+			Packet finalPayload = split.update(encapsulated);
+			if (finalPayload == null) {
+				return; // Do not handle, the split packet is not complete!
+			}
+
+			/*
+			 * It is safe to set the payload here because the old payload is no
+			 * longer needed and split EncapsulatedPackets share the exact same
+			 * data except for split data and payload.
+			 */
+			encapsulated.payload = finalPayload;
+
 		}
 
 		// Make sure we are not handling a duplicate
@@ -163,7 +186,7 @@ public abstract class RakNetSession {
 			}
 		} else if (reliability.isSequenced()) {
 			if (orderIndex > receiveSequenceIndex[orderChannel]) {
-				receiveSequenceIndex[orderChannel] = orderIndex;
+				receiveSequenceIndex[orderChannel] = orderIndex + 1;
 				this.handlePacket(encapsulated.payload, encapsulated.orderChannel);
 			}
 		} else {
@@ -171,7 +194,7 @@ public abstract class RakNetSession {
 		}
 	}
 
-	public final void handleAcknowledge(Acknowledge acknowledge) {
+	public final void handleAcknowledge(Acknowledge acknowledge) throws Exception {
 		// Make sure the ranged records were converted to single records
 		acknowledge.simplifyRecords();
 
@@ -179,7 +202,7 @@ public abstract class RakNetSession {
 		if (acknowledge.getType() == AcknowledgeType.ACKNOWLEDGED) {
 			for (Record record : acknowledge.records) {
 				// Notify API that it the receiving-side has received the packet
-				for (EncapsulatedPacket encapsulated : ackQueue.get(record.getIndex()).messages) {
+				for (EncapsulatedPacket encapsulated : unacknowledgedQueue.get(record.getIndex()).messages) {
 					if (encapsulated.reliability.requiresAck()) {
 						this.onAcknowledge(record, encapsulated.reliability, encapsulated.orderChannel,
 								encapsulated.payload);
@@ -187,25 +210,18 @@ public abstract class RakNetSession {
 				}
 
 				// The packet successfully sent, no need to store it anymore
-				ackQueue.remove(record.getIndex());
+				unacknowledgedQueue.remove(record.getIndex());
 			}
 		} else if (acknowledge.getType() == AcknowledgeType.NOT_ACKNOWLEDGED) {
 			for (Record record : acknowledge.records) {
 				// Remove all unreliable packets from the queue
-				CustomPacket custom = ackQueue.get(record.getIndex());
+				CustomPacket custom = unacknowledgedQueue.get(record.getIndex());
 				custom.removeUnreliables();
 
 				// Resend the modified version
 				this.sendRawPacket(custom);
 			}
 		}
-	}
-
-	public final void sendNacknowledge() {
-		Acknowledge nack = new Acknowledge(AcknowledgeType.NOT_ACKNOWLEDGED);
-		nack.records = this.nackQueue;
-		nack.encode();
-		this.sendRawPacket(nack);
 	}
 
 	public final void sendPacket(Reliability reliability, int channel, Packet packet) {
@@ -288,6 +304,36 @@ public abstract class RakNetSession {
 		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
 	}
 
+	private final void updateAcknowledge(boolean forceSend) {
+		long currentTime = System.currentTimeMillis();
+		if (currentTime - lastAckSend >= ACK_SEND_WAIT_TIME_MILLIS || forceSend == true) {
+			// Have we not acknowledge some packets?
+			if (acknowledgedQueue.isEmpty() == false) {
+				Acknowledge ack = new Acknowledge(AcknowledgeType.ACKNOWLEDGED);
+				ack.records = this.acknowledgedQueue;
+				ack.encode();
+				this.sendRawPacket(ack);
+			}
+
+			// Are we missing any packets?
+			if (missingQueue.isEmpty() == false) {
+				Acknowledge nack = new Acknowledge(AcknowledgeType.NOT_ACKNOWLEDGED);
+				nack.records = this.missingQueue;
+				nack.encode();
+				this.sendRawPacket(nack);
+			}
+
+			// Resend the next unacknowledged packet
+			for (CustomPacket custom : unacknowledgedQueue.values()) {
+				this.sendRawPacket(custom);
+				break; // Only send one at a time
+			}
+
+			// Update timing
+			this.lastAckSend = currentTime;
+		}
+	}
+
 	public final void update() {
 		if (sendQueue.isEmpty() == false) {
 			CustomPacket custom = new CustomPacket();
@@ -295,7 +341,7 @@ public abstract class RakNetSession {
 			// Add packets to the CustomPacket until it's full or there's none
 			ArrayList<EncapsulatedPacket> sent = new ArrayList<EncapsulatedPacket>();
 			for (EncapsulatedPacket encapsulated : this.sendQueue) {
-				if (custom.calculateSize() + encapsulated.calculateSize() > this.maximumTransferUnit) {
+				if (custom.calculateSize() + encapsulated.calculateSize() >= this.maximumTransferUnit) {
 					break; // The packet is full, break out of the loop!
 				}
 				sent.add(encapsulated);
@@ -308,13 +354,17 @@ public abstract class RakNetSession {
 				custom.sequenceNumber = this.nextSequenceNumber++;
 				custom.encode();
 				this.sendRawPacket(custom);
-				ackQueue.put(custom.sequenceNumber, custom);
+				unacknowledgedQueue.put(custom.sequenceNumber, custom);
 			}
+
+			// Are we missing any packets?
+			this.updateAcknowledge(false);
 		}
 	}
 
-	public abstract void onAcknowledge(Record record, Reliability reliability, int channel, Packet packet);
+	public abstract void onAcknowledge(Record record, Reliability reliability, int channel, Packet packet)
+			throws Exception;
 
-	public abstract void handlePacket(Packet packet, int channel);
+	public abstract void handlePacket(Packet packet, int channel) throws Exception;
 
 }

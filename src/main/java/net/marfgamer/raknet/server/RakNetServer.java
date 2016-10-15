@@ -5,7 +5,7 @@ import static net.marfgamer.raknet.protocol.MessageIdentifier.*;
 import java.net.InetSocketAddress;
 import java.text.DateFormatSymbols;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -17,6 +17,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.RakNetPacket;
+import net.marfgamer.raknet.protocol.message.CustomPacket;
 import net.marfgamer.raknet.protocol.unconnected.UnconnectedIncompatibleProtocol;
 import net.marfgamer.raknet.protocol.unconnected.UnconnectedNoFreeIncomingConnections;
 import net.marfgamer.raknet.protocol.unconnected.UnconnectedOpenConnectionRequestOne;
@@ -38,6 +39,7 @@ import net.marfgamer.raknet.session.RakNetSession;
 public class RakNetServer implements RakNet {
 
 	private final long guid;
+	private final long timestamp;
 
 	private final int port;
 	private final int maxConnections;
@@ -51,10 +53,11 @@ public class RakNetServer implements RakNet {
 	private Channel channel;
 	private RakNetServerListener listener;
 	private volatile boolean running; // Volatile so other threads can modify it
-	private final HashMap<InetSocketAddress, RakNetSession> sessions;
+	private final ConcurrentHashMap<InetSocketAddress, RakNetClientSession> sessions;
 
 	public RakNetServer(int port, int maxConnections, int maximumTransferUnit, Identifier identifier) {
 		this.guid = UNIQUE_ID_BITS.getMostSignificantBits();
+		this.timestamp = System.currentTimeMillis();
 
 		this.port = port;
 		this.maxConnections = maxConnections;
@@ -65,7 +68,7 @@ public class RakNetServer implements RakNet {
 		this.group = new NioEventLoopGroup();
 		this.handler = new RakNetServerHandler(this);
 
-		this.sessions = new HashMap<InetSocketAddress, RakNetSession>();
+		this.sessions = new ConcurrentHashMap<InetSocketAddress, RakNetClientSession>();
 	}
 
 	public RakNetServer(int port, int maxConnections, int maximumTransferUnit) {
@@ -81,8 +84,12 @@ public class RakNetServer implements RakNet {
 		this.identifier = identifier;
 	}
 
-	public long getGloabilyUniqueId() {
+	public long getGlobalilyUniqueId() {
 		return this.guid;
+	}
+	
+	public long getTimestamp() {
+		return this.timestamp;
 	}
 
 	public int getPort() {
@@ -118,7 +125,6 @@ public class RakNetServer implements RakNet {
 	public void handleMessage(RakNetPacket packet, InetSocketAddress sender) throws Exception {
 		short id = packet.getId();
 
-		// This packet does not require a session
 		if (id == ID_UNCONNECTED_PING || id == ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
 			UnconnectedPing ping = new UnconnectedPing(packet);
 			ping.decode();
@@ -185,13 +191,27 @@ public class RakNetServer implements RakNet {
 					this.sendRaw(connectionResponseTwo, sender);
 				}
 			}
-		} else {
-			System.out.println("RECEIVED UNKNOWN PACKET! ID: 0x" + Integer.toHexString(id).toUpperCase());
+		} else if (id >= ID_RESERVED_3 && id <= ID_RESERVED_9) {
+			if (sessions.containsKey(sender) == true) {
+				CustomPacket custom = new CustomPacket(packet);
+				custom.decode();
+
+				RakNetClientSession session = sessions.get(sender);
+				session.handleCustom0(custom);
+			}
 		}
 	}
 
 	private void sendRaw(Packet packet, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
+	}
+
+	public boolean hasSession(InetSocketAddress address) {
+		return sessions.containsKey(address);
+	}
+
+	public RakNetClientSession getSession(InetSocketAddress address) {
+		return sessions.get(address);
 	}
 
 	public void start() {
@@ -208,10 +228,8 @@ public class RakNetServer implements RakNet {
 
 		// Timer system
 		while (this.running == true) {
-			synchronized (sessions) {
-				for (RakNetSession session : sessions.values()) {
-					session.update();
-				}
+			for (RakNetSession session : sessions.values()) {
+				session.update();
 			}
 		}
 	}
@@ -234,6 +252,12 @@ public class RakNetServer implements RakNet {
 			@Override
 			public void handlePing(ServerPing ping) {
 				ping.setIdentifier(new MCPEIdentifier("Hello! " + timeCreation, 80, "0.15.0", 0, 10));
+			}
+
+			@Override
+			public void handlePacket(RakNetClientSession session, Packet packet, int channel) {
+				System.out.println("Received packet with ID 0x" + Integer.toHexString(packet.readUByte()).toUpperCase()
+						+ " from " + session.getAddress());
 			}
 		});
 		s.start();
