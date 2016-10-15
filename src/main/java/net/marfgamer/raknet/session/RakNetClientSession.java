@@ -8,7 +8,6 @@ import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.protocol.acknowledge.Record;
-import net.marfgamer.raknet.protocol.client.ConnectedClientHandshake;
 import net.marfgamer.raknet.protocol.client.ConnectedConnectionRequest;
 import net.marfgamer.raknet.protocol.client.ConnectedServerHandshake;
 import net.marfgamer.raknet.server.RakNetServer;
@@ -48,10 +47,21 @@ public class RakNetClientSession extends RakNetSession {
 			this.sendPacket(RELIABLE_ORDERED, serverHandshake);
 			this.setState(RakNetState.HANDSHAKING);
 		} else if (id == MessageIdentifier.ID_NEW_INCOMING_CONNECTION) {
+			// TODO: Handle this packet
 			this.setState(RakNetState.CONNECTED);
 			server.getListener().clientConnected(this);
+		} else if (id == MessageIdentifier.ID_DISCONNECTION_NOTIFICATION) {
+			server.removeSession(this, "Client disconnected");
 		} else if (id >= MessageIdentifier.ID_USER_PACKET_ENUM) {
-			server.getListener().handlePacket(this, packet, channel);
+			/*
+			 * We already read the ID so we need to artificially re-add the ID
+			 * uBtye back the Packet
+			 */
+			Packet rewrap = new Packet();
+			rewrap.writeUByte(id);
+			rewrap.write(packet.array());
+
+			server.getListener().handlePacket(this, rewrap, channel);
 		}
 		// TODO: Ping and Pong
 	}
