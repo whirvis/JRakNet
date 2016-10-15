@@ -3,6 +3,7 @@ package net.marfgamer.raknet.protocol.acknowledge;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
 
 public class Acknowledge extends RakNetPacket {
@@ -24,6 +25,11 @@ public class Acknowledge extends RakNetPacket {
 		this(type.getId());
 	}
 	
+	public Acknowledge(Packet packet) {
+		super(packet);
+		this.records = new ArrayList<Record>();
+	}
+	
 	public AcknowledgeType getType() {
 		return AcknowledgeType.lookup(this.getId());
 	}
@@ -35,11 +41,11 @@ public class Acknowledge extends RakNetPacket {
 		for (Record record : records) {
 			if (record.isRanged() == false) {
 				this.writeByte(0x01); // Record is not ranged
-				this.writeUIntLE(record.getIndex());
+				this.writeTriadLE(record.getIndex());
 			} else {
 				this.writeByte(0x00); // Record is indeed ranged
-				this.writeUIntLE(record.getIndex());
-				this.writeUIntLE(record.getEndIndex());
+				this.writeTriadLE(record.getIndex());
+				this.writeTriadLE(record.getEndIndex());
 			}
 		}
 	}
@@ -50,9 +56,9 @@ public class Acknowledge extends RakNetPacket {
 		for (int i = 0; i < size; i++) {
 			boolean ranged = (this.readUByte() == 0x00);
 			if (ranged == false) {
-				records.add(new Record(this.readUIntLE()));
+				records.add(new Record(this.readTriadLE()));
 			} else {
-				records.add(new Record(this.readUIntLE(), this.readUIntLE()));
+				records.add(new Record(this.readTriadLE(), this.readTriadLE()));
 			}
 		}
 		this.simplifyRecords();
@@ -111,7 +117,6 @@ public class Acknowledge extends RakNetPacket {
 	 * 12:17]</code>. The output will now be
 	 * <code>[1, 2, 3, 4, 5, 6, 7, 12, 13, 14, 15, 16,
 	 * 17]</code>.
-	 * 
 	 */
 	public void simplifyRecords() {
 		// Clone the list then clear it to prevent duplicates

@@ -47,6 +47,7 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			}
 
 			server.handleMessage(packet, sender);
+			datagram.content().release(); // No longer needed
 		} else {
 			System.err.println("Got " + msg.getClass().getName());
 		}

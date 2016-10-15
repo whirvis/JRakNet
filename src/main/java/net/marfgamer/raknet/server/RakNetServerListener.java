@@ -6,7 +6,6 @@ import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.protocol.acknowledge.Record;
 import net.marfgamer.raknet.session.RakNetClientSession;
-import net.marfgamer.raknet.session.RakNetSession;
 
 public abstract class RakNetServerListener {
 	
@@ -19,10 +18,10 @@ public abstract class RakNetServerListener {
 	public void clientPreConnection(InetSocketAddress address) {
 	}
 	
-	public void clientConnected(RakNetSession session) {
+	public void clientConnected(RakNetClientSession session) {
 	}
 	
-	public void clientDisconnected(RakNetSession session, String reason) {
+	public void clientDisconnected(RakNetClientSession session, String reason) {
 	}
 	
 	public void onAcknowledge(RakNetClientSession session, Record record, Reliability reliability, int channel, Packet packet) {
