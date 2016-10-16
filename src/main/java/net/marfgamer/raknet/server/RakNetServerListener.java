@@ -7,27 +7,28 @@ import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.protocol.acknowledge.Record;
 import net.marfgamer.raknet.session.RakNetClientSession;
 
-public abstract class RakNetServerListener {
-	
-	public void handlePing(ServerPing ping) {
+public interface RakNetServerListener {
+
+	public default void handlePing(ServerPing ping) {
 	}
-	
-	public void serverShutdown() {
+
+	public default void serverShutdown() {
 	}
-	
-	public void clientPreConnection(InetSocketAddress address) {
+
+	public default void clientPreConnection(InetSocketAddress address) {
 	}
-	
-	public void clientConnected(RakNetClientSession session) {
+
+	public default void clientConnected(RakNetClientSession session) {
 	}
-	
-	public void clientDisconnected(RakNetClientSession session, String reason) {
+
+	public default void clientDisconnected(RakNetClientSession session, String reason) {
 	}
-	
-	public void onAcknowledge(RakNetClientSession session, Record record, Reliability reliability, int channel, RakNetPacket packet) {
+
+	public default void onAcknowledge(RakNetClientSession session, Record record, Reliability reliability, int channel,
+			RakNetPacket packet) {
 	}
-	
-	public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
+
+	public default void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
 	}
-	
+
 }

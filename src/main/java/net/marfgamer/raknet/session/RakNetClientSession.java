@@ -67,11 +67,8 @@ public class RakNetClientSession extends RakNetSession {
 		} else if (id == MessageIdentifier.ID_DISCONNECTION_NOTIFICATION) {
 			server.removeSession(this, "Client disconnected");
 		} else if (id >= MessageIdentifier.ID_USER_PACKET_ENUM) {
-			RakNetPacket wrapped = new RakNetPacket(id);
-			wrapped.write(packet.array());
-			server.getListener().handlePacket(this, wrapped, channel);
+			server.getListener().handlePacket(this, packet, channel);
 		}
-		// TODO: Ping and Pong
 	}
 
 	@Override
