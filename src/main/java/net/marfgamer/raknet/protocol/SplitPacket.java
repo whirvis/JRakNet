@@ -1,6 +1,7 @@
 package net.marfgamer.raknet.protocol;
 
 import net.marfgamer.raknet.Packet;
+import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.raknet.util.map.IntMap;
 
@@ -17,6 +18,10 @@ public class SplitPacket {
 		this.splitCount = splitCount;
 		this.reliability = reliability;
 		this.payloads = new IntMap<Packet>();
+		
+		if(this.splitCount > RakNet.MAX_SPLIT_COUNT) {
+			throw new IllegalArgumentException("Split count can be no greater than " + RakNet.MAX_SPLIT_COUNT + "!");
+		}
 	}
 
 	public Packet update(EncapsulatedPacket encapsulated) {
