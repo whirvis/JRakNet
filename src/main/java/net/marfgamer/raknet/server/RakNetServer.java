@@ -3,8 +3,6 @@ package net.marfgamer.raknet.server;
 import static net.marfgamer.raknet.protocol.MessageIdentifier.*;
 
 import java.net.InetSocketAddress;
-import java.text.DateFormatSymbols;
-import java.util.Date;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.netty.bootstrap.Bootstrap;
@@ -30,7 +28,6 @@ import net.marfgamer.raknet.protocol.unconnected.UnconnectedPong;
 import net.marfgamer.raknet.server.identifier.Identifier;
 import net.marfgamer.raknet.server.identifier.MCPEIdentifier;
 import net.marfgamer.raknet.session.RakNetClientSession;
-import net.marfgamer.raknet.session.RakNetSession;
 
 /**
  * 
@@ -183,6 +180,9 @@ public class RakNetServer implements RakNet {
 					connectionResponseTwo.encryptionEnabled = false;
 					connectionResponseTwo.encode();
 
+					// Call event
+					this.getListener().clientPreConnection(sender);
+
 					// Create session
 					RakNetClientSession clientSession = new RakNetClientSession(this, connectionRequestTwo.clientGuid,
 							connectionRequestTwo.maximumTransferUnit, channel, sender);
@@ -198,6 +198,7 @@ public class RakNetServer implements RakNet {
 				custom.decode();
 
 				RakNetClientSession session = sessions.get(sender);
+				session.bumpLastPacketReceiveTime();
 				session.handleCustom0(custom);
 			}
 		} else if (id == Acknowledge.ACKNOWLEDGED || id == Acknowledge.NOT_ACKNOWLEDGED) {
@@ -206,6 +207,7 @@ public class RakNetServer implements RakNet {
 				acknowledge.decode();
 
 				RakNetClientSession session = sessions.get(sender);
+				session.bumpLastPacketReceiveTime();
 				session.handleAcknowledge(acknowledge);
 			}
 		}
@@ -224,8 +226,11 @@ public class RakNetServer implements RakNet {
 	}
 
 	public void removeSession(RakNetClientSession session, String reason) {
-		sessions.remove(session.getAddress());
-		this.getListener().clientDisconnected(session, reason);
+		// We don't want to call clientDisconnected for a non-existent client
+		if (sessions.containsKey(session.getAddress())) {
+			sessions.remove(session.getAddress());
+			this.getListener().clientDisconnected(session, reason);
+		}
 	}
 
 	public void removeSession(InetSocketAddress address, String reason) {
@@ -246,36 +251,57 @@ public class RakNetServer implements RakNet {
 
 		// Timer system
 		while (this.running == true) {
-			for (RakNetSession session : sessions.values()) {
-				session.update();
+			for (RakNetClientSession session : sessions.values()) {
+				try {
+					session.update();
+				} catch (Exception e) {
+					this.removeSession(session, e.getMessage());
+				}
 			}
 		}
 	}
 
-	public void stop() {
-		this.running = false;
+	public synchronized Thread startThreaded() {
+		// Give the thread a reference
+		RakNetServer server = this;
+
+		// Create thread and start it
+		Thread thread = new Thread() {
+			@Override
+			public synchronized void run() {
+				server.start();
+			}
+		};
+		thread.start();
+
+		// Return the thread so it can be modified
+		return thread;
 	}
 
-	@SuppressWarnings("deprecation")
+	public void stop() {
+		this.running = false;
+		this.getListener().serverShutdown();
+	}
+
 	public static void main(String[] args) {
 		MCPEIdentifier identifier = new MCPEIdentifier("A JRakNet Server", 80, "0.15.0", 0, 10);
 		RakNetServer s = new RakNetServer(19132, 10, identifier);
 
-		Date d = new Date(System.currentTimeMillis());
-		DateFormatSymbols dfs = new DateFormatSymbols();
-		final String timeCreation = ("It is " + dfs.getWeekdays()[d.getDay() + 1] + ", " + d.getHours() + ":"
-				+ d.getMinutes());
-
 		s.setListener(new RakNetServerListener() {
 			@Override
 			public void handlePing(ServerPing ping) {
-				ping.setIdentifier(new MCPEIdentifier("Hello! " + timeCreation, 80, "0.15.0", 0, 10));
+				ping.setIdentifier(new MCPEIdentifier("Un servidor JRakNet v2.0", 80, "0.15.0", 0, 10));
 			}
 
 			@Override
-			public void handlePacket(RakNetClientSession session, Packet packet, int channel) {
-				System.out.println("Received packet with ID 0x" + Integer.toHexString(packet.readUByte()).toUpperCase()
+			public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
+				System.out.println("Received packet with ID 0x" + Integer.toHexString(packet.getId()).toUpperCase()
 						+ " from " + session.getAddress());
+			}
+
+			@Override
+			public void clientConnected(RakNetClientSession session) {
+				System.out.println("Client from " + session.getAddress() + " has connected");
 			}
 
 			@Override

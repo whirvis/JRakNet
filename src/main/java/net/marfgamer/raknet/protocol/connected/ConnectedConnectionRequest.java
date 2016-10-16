@@ -1,4 +1,4 @@
-package net.marfgamer.raknet.protocol.client;
+package net.marfgamer.raknet.protocol.connected;
 
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;

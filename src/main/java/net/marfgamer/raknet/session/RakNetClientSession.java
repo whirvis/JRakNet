@@ -4,17 +4,19 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 import io.netty.channel.Channel;
-import net.marfgamer.raknet.Packet;
+import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.protocol.acknowledge.Record;
-import net.marfgamer.raknet.protocol.client.ConnectedConnectionRequest;
-import net.marfgamer.raknet.protocol.client.ConnectedServerHandshake;
+import net.marfgamer.raknet.protocol.connected.ConnectedClientHandshake;
+import net.marfgamer.raknet.protocol.connected.ConnectedConnectionRequest;
+import net.marfgamer.raknet.protocol.connected.ConnectedServerHandshake;
 import net.marfgamer.raknet.server.RakNetServer;
 
 public class RakNetClientSession extends RakNetSession {
 
 	private final RakNetServer server;
+	private long timestamp;
 
 	public RakNetClientSession(RakNetServer server, long guid, int maximumTransferUnit, Channel channel,
 			InetSocketAddress address) {
@@ -26,44 +28,55 @@ public class RakNetClientSession extends RakNetSession {
 		return this.server;
 	}
 
+	public long getTimestamp() {
+		return this.timestamp;
+	}
+
 	@Override
-	public void onAcknowledge(Record record, Reliability reliability, int channel, Packet packet) {
+	public void onAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet) {
 		server.getListener().onAcknowledge(this, record, reliability, channel, packet);
 	}
 
 	@Override
-	public void handlePacket(Packet packet, int channel) throws UnknownHostException {
-		short id = packet.readUByte();
+	public void handlePacket(RakNetPacket packet, int channel) throws UnknownHostException {
+		short id = packet.getId();
 		if (id == MessageIdentifier.ID_CONNECTION_REQUEST) {
 			ConnectedConnectionRequest connectionRequest = new ConnectedConnectionRequest(packet);
 			connectionRequest.decode();
-			this.setGUID(connectionRequest.clientGuid);
 
-			ConnectedServerHandshake serverHandshake = new ConnectedServerHandshake();
-			serverHandshake.clientAddress = this.getAddress();
-			serverHandshake.clientTimestamp = connectionRequest.timestamp;
-			serverHandshake.serverTimestamp = server.getTimestamp();
-			serverHandshake.encode();
-			this.sendPacket(RELIABLE_ORDERED, serverHandshake);
-			this.setState(RakNetState.HANDSHAKING);
+			if (connectionRequest.clientGuid == this.getGUID()) {
+				ConnectedServerHandshake serverHandshake = new ConnectedServerHandshake();
+				serverHandshake.clientAddress = this.getAddress();
+				serverHandshake.clientTimestamp = connectionRequest.timestamp;
+				serverHandshake.serverTimestamp = server.getTimestamp();
+				serverHandshake.encode();
+
+				this.sendPacket(RELIABLE_ORDERED, serverHandshake);
+				this.setState(RakNetState.HANDSHAKING);
+			}
 		} else if (id == MessageIdentifier.ID_NEW_INCOMING_CONNECTION) {
-			// TODO: Handle this packet
-			this.setState(RakNetState.CONNECTED);
-			server.getListener().clientConnected(this);
+			ConnectedClientHandshake clientHandshake = new ConnectedClientHandshake(packet);
+			clientHandshake.decode();
+
+			if (clientHandshake.serverTimestamp == server.getTimestamp()) {
+				this.timestamp = (System.currentTimeMillis() - clientHandshake.clientTimestamp);
+
+				this.setState(RakNetState.CONNECTED);
+				server.getListener().clientConnected(this);
+			}
 		} else if (id == MessageIdentifier.ID_DISCONNECTION_NOTIFICATION) {
 			server.removeSession(this, "Client disconnected");
 		} else if (id >= MessageIdentifier.ID_USER_PACKET_ENUM) {
-			/*
-			 * We already read the ID so we need to artificially re-add the ID
-			 * uBtye back the Packet
-			 */
-			Packet rewrap = new Packet();
-			rewrap.writeUByte(id);
-			rewrap.write(packet.array());
-
-			server.getListener().handlePacket(this, rewrap, channel);
+			RakNetPacket wrapped = new RakNetPacket(id);
+			wrapped.write(packet.array());
+			server.getListener().handlePacket(this, wrapped, channel);
 		}
 		// TODO: Ping and Pong
+	}
+
+	@Override
+	public void onTimeout() throws Exception {
+		server.removeSession(this, "Timeout");
 	}
 
 }
