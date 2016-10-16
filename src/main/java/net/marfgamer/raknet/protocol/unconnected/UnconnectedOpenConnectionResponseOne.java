@@ -1,7 +1,5 @@
 package net.marfgamer.raknet.protocol.unconnected;
 
-import java.io.IOException;
-
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 
@@ -32,7 +30,7 @@ public class UnconnectedOpenConnectionResponseOne extends RakNetPacket {
 		byte securityFlags = 0x00;
 		securityFlags |= (useSecurity ? USE_SECURITY_BIT : 0x00);
 		this.writeUByte(securityFlags);
-		if (useSecurity) { // TODO: == true but Eclipse throws warning
+		if (useSecurity) { // We would use == true but Eclipse throws warning
 			throw new RuntimeException("Security is not yet supported!");
 		}
 

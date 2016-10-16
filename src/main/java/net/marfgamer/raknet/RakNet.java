@@ -49,13 +49,16 @@ public interface RakNet {
 
 	/*
 	 * Most computers these days have up to around 1400-1500 for their MTU, if
-	 * it's lower than that it is most likely outdated.
+	 * it's lower than that it is most likely outdated. It is suspected that the
+	 * minimum MTU is 530, but I am not exactly sure. The client seems to go
+	 * that low but I am also not sure what it's algorithm for selecting it's
+	 * MTU is either.
 	 */
 	public static final int MINIMUM_TRANSFER_UNIT = 1280;
 
-	public static final int MAX_SPLITS_PER_QUEUE = 4;
-	public static final int MAX_SPLIT_COUNT = 128;
-
 	public static final int MAX_CHANNELS = 32;
+	public static final int MAX_SPLIT_COUNT = 128;
+	public static final int MAX_SPLITS_PER_QUEUE = 4;
+	public static final int MAX_PACKETS_PER_SECOND = 500;
 
 }

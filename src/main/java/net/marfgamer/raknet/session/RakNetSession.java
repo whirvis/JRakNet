@@ -8,11 +8,15 @@ import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramPacket;
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNet;
+import net.marfgamer.raknet.RakNetPacket;
+import net.marfgamer.raknet.protocol.MessageIdentifier;
 import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.protocol.SplitPacket;
 import net.marfgamer.raknet.protocol.acknowledge.Acknowledge;
 import net.marfgamer.raknet.protocol.acknowledge.AcknowledgeType;
 import net.marfgamer.raknet.protocol.acknowledge.Record;
+import net.marfgamer.raknet.protocol.connected.ConnectedPing;
+import net.marfgamer.raknet.protocol.connected.ConnectedPong;
 import net.marfgamer.raknet.protocol.message.CustomPacket;
 import net.marfgamer.raknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.raknet.util.ArrayUtils;
@@ -22,11 +26,15 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 
 	public static final int DEFAULT_ORDER_CHANNEL = 0x00;
 	public static final int ACK_SEND_WAIT_TIME_MILLIS = 3000;
+	public static final int PING_SEND_WAIT_TIME_MILLIS = 3000;
+	public static final int SESSION_TIMEOUT = PING_SEND_WAIT_TIME_MILLIS * 5;
 
 	// Session data
-	private /* final? */ long guid;
+	private final long guid;
 	private final int maximumTransferUnit;
 	private RakNetState state;
+	private long lastPacketReceiveTime;
+	private long latency;
 
 	// Networking data
 	private final Channel channel;
@@ -54,12 +62,18 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 	private final IntMap<SplitPacket> splitQueue;
 	private final ArrayList<EncapsulatedPacket> sendQueue;
 	private long lastAckSend;
+	private long lastPingSend;
+	private long pongsReceived;
+	private long pongsTotalLatency;
+	private long pingIdentifier;
 
 	public RakNetSession(long guid, int maximumTransferUnit, Channel channel, InetSocketAddress address) {
 		// Session data
 		this.guid = guid;
 		this.maximumTransferUnit = maximumTransferUnit;
 		this.state = RakNetState.DISCONNECTED;
+		this.lastPacketReceiveTime = System.currentTimeMillis();
+		this.latency = -1; // We can't predict them
 
 		// Networking data
 		this.channel = channel;
@@ -86,14 +100,11 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 		this.splitQueue = new IntMap<SplitPacket>();
 		this.sendQueue = new ArrayList<EncapsulatedPacket>();
 		this.lastAckSend = System.currentTimeMillis();
+		this.lastPingSend = System.currentTimeMillis();
 	}
 
 	public final long getGUID() {
 		return this.guid;
-	}
-
-	public final void setGUID(long guid) {
-		this.guid = guid;
 	}
 
 	public final InetSocketAddress getAddress() {
@@ -110,6 +121,18 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 
 	public void setState(RakNetState state) {
 		this.state = state;
+	}
+
+	public long getLastPacketReceiveTime() {
+		return this.lastPacketReceiveTime;
+	}
+
+	public void bumpLastPacketReceiveTime() {
+		this.lastPacketReceiveTime = System.currentTimeMillis();
+	}
+
+	public long getLatency() {
+		return this.latency;
 	}
 
 	public final void handleCustom0(CustomPacket custom) throws Exception {
@@ -159,6 +182,9 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 			if (!splitQueue.containsKey(encapsulated.splitId)) {
 				splitQueue.put(encapsulated.splitId,
 						new SplitPacket(encapsulated.splitId, encapsulated.splitCount, encapsulated.reliability));
+				if (splitQueue.size() > RakNet.MAX_SPLITS_PER_QUEUE) {
+					throw new IllegalArgumentException("Too many split packets in the queue!");
+				}
 			}
 
 			SplitPacket split = splitQueue.get(encapsulated.splitId);
@@ -192,15 +218,50 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 			while (orderedHandleQueue.get(orderChannel).containsKey(receiveOrderIndex[orderChannel])) {
 				EncapsulatedPacket orderedEncapsulated = orderedHandleQueue.get(orderChannel)
 						.get(receiveOrderIndex[orderChannel]++);
-				this.handlePacket(orderedEncapsulated.payload, orderedEncapsulated.orderChannel);
+				this.handlePacket0(new RakNetPacket(orderedEncapsulated.payload), orderedEncapsulated.orderChannel);
 			}
 		} else if (reliability.isSequenced()) {
 			if (orderIndex > receiveSequenceIndex[orderChannel]) {
 				receiveSequenceIndex[orderChannel] = orderIndex + 1;
-				this.handlePacket(encapsulated.payload, encapsulated.orderChannel);
+				this.handlePacket0(new RakNetPacket(encapsulated.payload), encapsulated.orderChannel);
 			}
 		} else {
-			this.handlePacket(encapsulated.payload, encapsulated.orderChannel);
+			this.handlePacket0(new RakNetPacket(encapsulated.payload), encapsulated.orderChannel);
+		}
+	}
+
+	/**
+	 * This method is called to see if the packet is meant for the server and
+	 * the client before passing it on to a specific type
+	 * 
+	 * @param packet
+	 * @param channel
+	 * @throws Exception
+	 */
+	private final void handlePacket0(RakNetPacket packet, int channel) throws Exception {
+		int id = packet.getId();
+
+		if (id == MessageIdentifier.ID_CONNECTED_PING) {
+			ConnectedPing ping = new ConnectedPing(packet);
+			ping.decode();
+
+			ConnectedPong pong = new ConnectedPong();
+			pong.identifier = ping.identifier;
+			pong.encode();
+			this.sendPacket(UNRELIABLE, pong);
+		} else if (id == MessageIdentifier.ID_CONNECTED_PONG) {
+			ConnectedPong pong = new ConnectedPong(packet);
+			pong.decode();
+
+			if (this.pingIdentifier - pong.identifier == 1) {
+				// Get average latency to provide more stable results
+				long latencyRaw = (this.lastPacketReceiveTime - this.lastPingSend);
+				pongsReceived++;
+				pongsTotalLatency += latencyRaw;
+				this.latency = (pongsTotalLatency / pongsReceived);
+			}
+		} else {
+			this.handlePacket(packet, channel);
 		}
 	}
 
@@ -215,7 +276,7 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 				for (EncapsulatedPacket encapsulated : recoveryQueue.get(record.getIndex()).messages) {
 					if (encapsulated.reliability.requiresAck()) {
 						this.onAcknowledge(record, encapsulated.reliability, encapsulated.orderChannel,
-								encapsulated.payload);
+								new RakNetPacket(encapsulated.payload));
 					}
 				}
 
@@ -226,7 +287,14 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 			for (Record record : acknowledge.records) {
 				// Remove all unreliable packets from the queue
 				CustomPacket custom = recoveryQueue.get(record.getIndex());
-				custom.removeUnreliables();
+
+				// Odd, we already resent it. Let's fake 'em out!
+				if (custom == null) {
+					custom = new CustomPacket();
+					custom.sequenceNumber = record.getIndex();
+				} else {
+					custom.removeUnreliables();
+				}
 
 				// Resend the modified version
 				this.sendRawPacket(custom);
@@ -314,8 +382,10 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
 	}
 
-	private final void updateAcknowledge(boolean forceSend) {
+	private final void updateAcknowledge(boolean forceSend) throws Exception {
 		long currentTime = System.currentTimeMillis();
+
+		// Check for missing packets
 		if (currentTime - lastAckSend >= ACK_SEND_WAIT_TIME_MILLIS || forceSend == true) {
 			// Have we not acknowledge some packets?
 			if (acknowledgeQueue.isEmpty() == false) {
@@ -334,7 +404,7 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 				nack.encode();
 				this.sendRawPacket(nack);
 			}
-			
+
 			// Only do this naturally
 			if (forceSend == false) {
 				for (CustomPacket custom : recoveryQueue.values()) {
@@ -348,7 +418,13 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 		}
 	}
 
-	public final void update() {
+	public final void update() throws Exception {
+		long currentTime = System.currentTimeMillis();
+
+		// Are we missing any packets?
+		this.updateAcknowledge(false);
+
+		// Are there any packets to send?
 		if (sendQueue.isEmpty() == false) {
 			CustomPacket custom = new CustomPacket();
 
@@ -372,13 +448,28 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 			}
 		}
 
-		// Are we missing any packets?
-		this.updateAcknowledge(false);
+		// Send a ping to try and wake up the receiving side
+		if (currentTime - lastPingSend >= PING_SEND_WAIT_TIME_MILLIS
+				&& currentTime - this.lastPacketReceiveTime >= PING_SEND_WAIT_TIME_MILLIS) {
+			ConnectedPing ping = new ConnectedPing();
+			ping.identifier = this.pingIdentifier++;
+			ping.encode();
+			this.sendPacket(UNRELIABLE, ping);
+			this.lastPingSend = currentTime;
+		}
+
+		// The client timed out
+		if (currentTime - lastPacketReceiveTime >= SESSION_TIMEOUT) {
+			this.onTimeout();
+		}
+
 	}
 
-	public abstract void onAcknowledge(Record record, Reliability reliability, int channel, Packet packet)
+	public abstract void onAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet)
 			throws Exception;
 
-	public abstract void handlePacket(Packet packet, int channel) throws Exception;
+	public abstract void handlePacket(RakNetPacket packet, int channel) throws Exception;
+
+	public abstract void onTimeout() throws Exception;
 
 }
