@@ -35,6 +35,8 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 	private RakNetState state;
 	private long lastPacketReceiveTime;
 	private long latency;
+	private long lowestLatency;
+	private long highestLatency;
 
 	// Networking data
 	private final Channel channel;
@@ -62,6 +64,8 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 	private final IntMap<SplitPacket> splitQueue;
 	private final ArrayList<EncapsulatedPacket> sendQueue;
 	private long lastAckSend;
+
+	// Latency detection
 	private long lastPingSend;
 	private long pongsReceived;
 	private long pongsTotalLatency;
@@ -133,6 +137,14 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 
 	public long getLatency() {
 		return this.latency;
+	}
+
+	public long getLowestLatency() {
+		return this.lowestLatency;
+	}
+
+	public long getHighestLatency() {
+		return this.highestLatency;
 	}
 
 	public final void handleCustom0(CustomPacket custom) throws Exception {
@@ -254,8 +266,21 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 			pong.decode();
 
 			if (this.pingIdentifier - pong.identifier == 1) {
-				// Get average latency to provide more stable results
 				long latencyRaw = (this.lastPacketReceiveTime - this.lastPingSend);
+
+				// Get lowest and highest latency for users who like that more
+				if (this.pongsReceived == 0) {
+					this.lowestLatency = latencyRaw;
+					this.highestLatency = latencyRaw;
+				} else {
+					if (latencyRaw < lowestLatency) {
+						this.lowestLatency = latencyRaw;
+					} else if (latencyRaw > highestLatency) {
+						this.highestLatency = latencyRaw;
+					}
+				}
+
+				// Get average latency to provide more stable results
 				pongsReceived++;
 				pongsTotalLatency += latencyRaw;
 				this.latency = (pongsTotalLatency / pongsReceived);
@@ -443,7 +468,11 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 			if (custom.messages.size() > 0) {
 				custom.sequenceNumber = this.nextSequenceNumber++;
 				custom.encode();
-				this.sendRawPacket(custom);
+
+				// Let all unacknowledged packets be handled first
+				if (recoveryQueue.isEmpty() == true) {
+					this.sendRawPacket(custom);
+				}
 				recoveryQueue.put(custom.sequenceNumber, custom);
 			}
 		}
@@ -460,7 +489,7 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 
 		// The client timed out
 		if (currentTime - lastPacketReceiveTime >= SESSION_TIMEOUT) {
-			this.onTimeout();
+			this.closeConnection("Timeout");
 		}
 
 	}
@@ -470,6 +499,6 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 
 	public abstract void handlePacket(RakNetPacket packet, int channel) throws Exception;
 
-	public abstract void onTimeout() throws Exception;
+	public abstract void closeConnection(String reason) throws Exception;
 
 }

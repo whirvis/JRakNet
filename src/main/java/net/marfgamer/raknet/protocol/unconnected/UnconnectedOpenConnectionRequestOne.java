@@ -2,6 +2,7 @@ package net.marfgamer.raknet.protocol.unconnected;
 
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
+import net.marfgamer.raknet.protocol.MessageIdentifier;
 
 public class UnconnectedOpenConnectionRequestOne extends RakNetPacket {
 
@@ -15,7 +16,11 @@ public class UnconnectedOpenConnectionRequestOne extends RakNetPacket {
 	public UnconnectedOpenConnectionRequestOne(Packet packet) {
 		super(packet);
 	}
-
+	
+	public UnconnectedOpenConnectionRequestOne() {
+		super(MessageIdentifier.ID_OPEN_CONNECTION_REQUEST_1);
+	}
+	
 	@Override
 	public void encode() {
 		this.writeMagic();

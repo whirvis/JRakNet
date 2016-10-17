@@ -54,7 +54,8 @@ public interface RakNet {
 	 * that low but I am also not sure what it's algorithm for selecting it's
 	 * MTU is either.
 	 */
-	public static final int MINIMUM_TRANSFER_UNIT = 1280;
+	public static final int MINIMUM_TRANSFER_UNIT = 530;
+	public static final int DEFAULT_MAXIMUM_TRANSFER_UNIT = 1280;
 
 	public static final int MAX_CHANNELS = 32;
 	public static final int MAX_SPLIT_COUNT = 128;

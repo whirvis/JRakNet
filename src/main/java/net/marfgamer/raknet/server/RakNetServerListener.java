@@ -15,7 +15,7 @@ public interface RakNetServerListener {
 	public default void serverShutdown() {
 	}
 
-	public default void clientPreConnection(InetSocketAddress address) {
+	public default void clientPreConnected(InetSocketAddress address) {
 	}
 
 	public default void clientConnected(RakNetClientSession session) {
