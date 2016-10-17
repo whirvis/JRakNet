@@ -1,5 +1,6 @@
 package net.marfgamer.raknet.protocol.unconnected;
 
+import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 
@@ -16,6 +17,10 @@ public class UnconnectedOpenConnectionResponseOne extends RakNetPacket {
 	 * poorly documented!
 	 */
 	public final boolean useSecurity = false;
+
+	public UnconnectedOpenConnectionResponseOne(Packet packet) {
+		super(packet);
+	}
 
 	public UnconnectedOpenConnectionResponseOne() {
 		super(MessageIdentifier.ID_OPEN_CONNECTION_REPLY_1);

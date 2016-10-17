@@ -40,6 +40,7 @@ public class RakNetClientSession extends RakNetSession {
 	@Override
 	public void handlePacket(RakNetPacket packet, int channel) throws UnknownHostException {
 		short id = packet.getId();
+		System.out.println(id);
 		if (id == MessageIdentifier.ID_CONNECTION_REQUEST) {
 			ConnectedConnectionRequest connectionRequest = new ConnectedConnectionRequest(packet);
 			connectionRequest.decode();
@@ -70,10 +71,10 @@ public class RakNetClientSession extends RakNetSession {
 			server.getListener().handlePacket(this, packet, channel);
 		}
 	}
-
+	
 	@Override
-	public void onTimeout() throws Exception {
-		server.removeSession(this, "Timeout");
+	public void closeConnection(String reason) throws Exception {
+		server.removeSession(this, reason);
 	}
 
 }
