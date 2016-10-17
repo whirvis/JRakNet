@@ -28,6 +28,7 @@ import net.marfgamer.raknet.protocol.unconnected.UnconnectedPong;
 import net.marfgamer.raknet.server.identifier.Identifier;
 import net.marfgamer.raknet.server.identifier.MCPEIdentifier;
 import net.marfgamer.raknet.session.RakNetClientSession;
+import net.marfgamer.raknet.session.RakNetState;
 
 /**
  * 
@@ -67,6 +68,11 @@ public class RakNetServer implements RakNet {
 		this.handler = new RakNetServerHandler(this);
 
 		this.sessions = new ConcurrentHashMap<InetSocketAddress, RakNetClientSession>();
+
+		if (this.maximumTransferUnit < RakNet.MINIMUM_TRANSFER_UNIT) {
+			throw new IllegalArgumentException(
+					"Maximum transfer unit can be no smaller than " + RakNet.MINIMUM_TRANSFER_UNIT + "!");
+		}
 	}
 
 	public RakNetServer(int port, int maxConnections, int maximumTransferUnit) {
@@ -74,7 +80,7 @@ public class RakNetServer implements RakNet {
 	}
 
 	public RakNetServer(int port, int maxConnections) {
-		this(port, maxConnections, MINIMUM_TRANSFER_UNIT);
+		this(port, maxConnections, DEFAULT_MAXIMUM_TRANSFER_UNIT);
 	}
 
 	public RakNetServer(int port, int maxConnections, Identifier identifier) {
@@ -181,7 +187,7 @@ public class RakNetServer implements RakNet {
 					connectionResponseTwo.encode();
 
 					// Call event
-					this.getListener().clientPreConnection(sender);
+					this.getListener().clientPreConnected(sender);
 
 					// Create session
 					RakNetClientSession clientSession = new RakNetClientSession(this, connectionRequestTwo.clientGuid,
@@ -226,10 +232,12 @@ public class RakNetServer implements RakNet {
 	}
 
 	public void removeSession(RakNetClientSession session, String reason) {
-		// We don't want to call clientDisconnected for a non-existent client
+		// We don't want to call clientDisconnected for an unconnected client
 		if (sessions.containsKey(session.getAddress())) {
 			sessions.remove(session.getAddress());
-			this.getListener().clientDisconnected(session, reason);
+			if (session.getState() == RakNetState.CONNECTED) {
+				this.getListener().clientDisconnected(session, reason);
+			}
 		}
 	}
 
@@ -297,6 +305,12 @@ public class RakNetServer implements RakNet {
 			public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
 				System.out.println("Received packet with ID 0x" + Integer.toHexString(packet.getId()).toUpperCase()
 						+ " from " + session.getAddress());
+			}
+
+			@Override
+			public void clientPreConnected(InetSocketAddress address) {
+				System.out.println("Client from " + address
+						+ " has instantiated the connection, waiting for NEW_INCOMING_CONNECTION packet");
 			}
 
 			@Override

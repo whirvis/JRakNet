@@ -23,8 +23,11 @@ public class UnconnectedOpenConnectionRequestTwo extends RakNetPacket {
 	}
 
 	@Override
-	public void encode() {
+	public void encode() throws UnknownHostException {
 		this.writeMagic();
+		this.writeAddress(address);
+		this.writeShort(maximumTransferUnit);
+		this.writeLong(clientGuid);
 	}
 
 	@Override
