@@ -16,16 +16,22 @@ import net.marfgamer.raknet.server.RakNetServer;
 public class RakNetClientSession extends RakNetSession {
 
 	private final RakNetServer server;
+	private final long timeCreated;
 	private long timestamp;
 
-	public RakNetClientSession(RakNetServer server, long guid, int maximumTransferUnit, Channel channel,
-			InetSocketAddress address) {
+	public RakNetClientSession(RakNetServer server, long timeCreated, long guid, int maximumTransferUnit,
+			Channel channel, InetSocketAddress address) {
 		super(guid, maximumTransferUnit, channel, address);
 		this.server = server;
+		this.timeCreated = timeCreated;
 	}
 
 	public RakNetServer getServer() {
 		return this.server;
+	}
+
+	public long getTimeCreated() {
+		return this.timeCreated;
 	}
 
 	public long getTimestamp() {
@@ -54,6 +60,8 @@ public class RakNetClientSession extends RakNetSession {
 
 				this.sendPacket(RELIABLE_ORDERED, serverHandshake);
 				this.setState(RakNetState.HANDSHAKING);
+			} else {
+				System.out.println("SFHE");
 			}
 		} else if (id == MessageIdentifier.ID_NEW_INCOMING_CONNECTION) {
 			ConnectedClientHandshake clientHandshake = new ConnectedClientHandshake(packet);
@@ -71,9 +79,9 @@ public class RakNetClientSession extends RakNetSession {
 			server.getListener().handlePacket(this, packet, channel);
 		}
 	}
-	
+
 	@Override
-	public void closeConnection(String reason) throws Exception {
+	public void closeConnection(String reason) {
 		server.removeSession(this, reason);
 	}
 

@@ -30,11 +30,12 @@ public class RakNetServerSession extends RakNetSession {
 	@Override
 	public void handlePacket(RakNetPacket packet, int channel) throws Exception {
 		short packetId = packet.getId();
+		System.out.println(packetId);
 		if(packetId == MessageIdentifier.ID_CONNECTION_REQUEST_ACCEPTED) {
 			ConnectedServerHandshake serverHandshake = new ConnectedServerHandshake(packet);
 			serverHandshake.decode();
 			
-			ConnectedClientHandshake clientHandshake = new ConnectedClientHandshake(packet);
+			ConnectedClientHandshake clientHandshake = new ConnectedClientHandshake();
 			clientHandshake.clientTimestamp = serverHandshake.clientTimestamp;
 			clientHandshake.serverTimestamp = serverHandshake.serverTimestamp;
 			clientHandshake.serverAddress = client.getSession().getAddress();
@@ -46,7 +47,7 @@ public class RakNetServerSession extends RakNetSession {
 	}
 
 	@Override
-	public void closeConnection(String reason) throws Exception {
+	public void closeConnection(String reason) {
 
 	}
 
