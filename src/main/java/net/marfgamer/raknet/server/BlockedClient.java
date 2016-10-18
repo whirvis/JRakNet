@@ -2,6 +2,8 @@ package net.marfgamer.raknet.server;
 
 public class BlockedClient {
 
+	public static final int PERMANENT_BLOCK = -1;
+
 	private final long startTime;
 	private final long time;
 

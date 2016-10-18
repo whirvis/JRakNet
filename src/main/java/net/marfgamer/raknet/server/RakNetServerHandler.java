@@ -1,5 +1,6 @@
 package net.marfgamer.raknet.server;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 
@@ -11,18 +12,18 @@ import net.marfgamer.raknet.RakNetPacket;
 public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 
 	private final RakNetServer server;
-	private final HashMap<InetSocketAddress, BlockedClient> blocked;
+	private final HashMap<InetAddress, BlockedClient> blocked;
 
 	public RakNetServerHandler(RakNetServer server) {
 		this.server = server;
-		this.blocked = new HashMap<InetSocketAddress, BlockedClient>();
+		this.blocked = new HashMap<InetAddress, BlockedClient>();
 	}
 
-	public void blockAddress(InetSocketAddress address, long time) {
+	public void blockAddress(InetAddress address, long time) {
 		blocked.put(address, new BlockedClient(System.currentTimeMillis(), time));
 	}
 
-	public void unblockAddress(InetSocketAddress address) {
+	public void unblockAddress(InetAddress address) {
 		blocked.remove(address);
 	}
 
@@ -35,15 +36,15 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			RakNetPacket packet = new RakNetPacket(datagram);
 
 			// Is the sender blocked?
-			if (blocked.containsKey(sender)) {
-				BlockedClient status = blocked.get(sender);
+			if (blocked.containsKey(sender.getAddress())) {
+				BlockedClient status = blocked.get(sender.getAddress());
 				if (status.getTime() == -1) {
 					return; // Permanently blocked
 				}
 				if (System.currentTimeMillis() - status.getStartTime() < status.getTime()) {
 					return; // Time hasn't expired
 				}
-				blocked.remove(sender);
+				blocked.remove(sender.getAddress());
 			}
 
 			server.handleMessage(packet, sender);
