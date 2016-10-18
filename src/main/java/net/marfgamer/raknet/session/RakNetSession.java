@@ -299,6 +299,10 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 			for (Record record : acknowledge.records) {
 				// Notify API that it the receiving-side has received the packet
 				for (EncapsulatedPacket encapsulated : recoveryQueue.get(record.getIndex()).messages) {
+					if (encapsulated == null) {
+						continue; // This is rare, but continue on
+					}
+
 					if (encapsulated.reliability.requiresAck()) {
 						this.onAcknowledge(record, encapsulated.reliability, encapsulated.orderChannel,
 								new RakNetPacket(encapsulated.payload));
@@ -499,6 +503,6 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 
 	public abstract void handlePacket(RakNetPacket packet, int channel) throws Exception;
 
-	public abstract void closeConnection(String reason) throws Exception;
+	public abstract void closeConnection(String reason);
 
 }

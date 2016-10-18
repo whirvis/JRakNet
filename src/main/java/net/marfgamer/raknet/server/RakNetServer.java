@@ -190,8 +190,8 @@ public class RakNetServer implements RakNet {
 					this.getListener().clientPreConnected(sender);
 
 					// Create session
-					RakNetClientSession clientSession = new RakNetClientSession(this, connectionRequestTwo.clientGuid,
-							connectionRequestTwo.maximumTransferUnit, channel, sender);
+					RakNetClientSession clientSession = new RakNetClientSession(this, System.currentTimeMillis(),
+							connectionRequestTwo.clientGuid, connectionRequestTwo.maximumTransferUnit, channel, sender);
 					sessions.put(sender, clientSession);
 
 					// Send response, we are ready for login!
@@ -296,11 +296,6 @@ public class RakNetServer implements RakNet {
 		RakNetServer s = new RakNetServer(19132, 10, identifier);
 
 		s.setListener(new RakNetServerListener() {
-			@Override
-			public void handlePing(ServerPing ping) {
-				ping.setIdentifier(new MCPEIdentifier("Un servidor JRakNet v2.0", 80, "0.15.0", 0, 10));
-			}
-
 			@Override
 			public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
 				System.out.println("Received packet with ID 0x" + Integer.toHexString(packet.getId()).toUpperCase()

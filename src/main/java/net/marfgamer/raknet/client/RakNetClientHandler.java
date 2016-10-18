@@ -22,9 +22,13 @@ public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 			DatagramPacket datagram = (DatagramPacket) msg;
 			InetSocketAddress sender = datagram.sender();
 			RakNetPacket packet = new RakNetPacket(datagram);
-			
-			client.handleMessage(packet, sender);
-			datagram.content().release(); // No longer needed
+
+			try {
+				client.handleMessage(packet, sender);
+				datagram.content().release(); // No longer needed
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		} else {
 			System.err.println("Got " + msg.getClass().getName());
 		}
