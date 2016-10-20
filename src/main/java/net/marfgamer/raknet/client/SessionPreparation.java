@@ -3,6 +3,7 @@ package net.marfgamer.raknet.client;
 import java.net.InetSocketAddress;
 
 import io.netty.channel.Channel;
+import net.marfgamer.raknet.exception.RakNetException;
 import net.marfgamer.raknet.session.RakNetServerSession;
 
 public class SessionPreparation {
@@ -10,7 +11,7 @@ public class SessionPreparation {
 	private final RakNetClient client;
 
 	public boolean cancelled;
-	public Exception cancelException;
+	public RakNetException cancelReason;
 
 	public long guid = -1;
 	public int maximumTransferUnit = -1;

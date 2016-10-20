@@ -15,16 +15,19 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.RakNetPacket;
-import net.marfgamer.raknet.protocol.acknowledge.Acknowledge;
+import net.marfgamer.raknet.exception.NoListenerException;
+import net.marfgamer.raknet.exception.RakNetException;
+import net.marfgamer.raknet.protocol.login.OpenConnectionRequestOne;
+import net.marfgamer.raknet.protocol.login.OpenConnectionRequestTwo;
+import net.marfgamer.raknet.protocol.login.OpenConnectionResponseOne;
+import net.marfgamer.raknet.protocol.login.OpenConnectionResponseTwo;
+import net.marfgamer.raknet.protocol.login.error.IncompatibleProtocol;
+import net.marfgamer.raknet.protocol.login.error.NoFreeIncomingConnections;
 import net.marfgamer.raknet.protocol.message.CustomPacket;
-import net.marfgamer.raknet.protocol.unconnected.UnconnectedIncompatibleProtocol;
-import net.marfgamer.raknet.protocol.unconnected.UnconnectedNoFreeIncomingConnections;
-import net.marfgamer.raknet.protocol.unconnected.UnconnectedOpenConnectionRequestOne;
-import net.marfgamer.raknet.protocol.unconnected.UnconnectedOpenConnectionRequestTwo;
-import net.marfgamer.raknet.protocol.unconnected.UnconnectedOpenConnectionResponseOne;
-import net.marfgamer.raknet.protocol.unconnected.UnconnectedOpenConnectionResponseTwo;
-import net.marfgamer.raknet.protocol.unconnected.UnconnectedPing;
-import net.marfgamer.raknet.protocol.unconnected.UnconnectedPong;
+import net.marfgamer.raknet.protocol.message.acknowledge.Acknowledge;
+import net.marfgamer.raknet.protocol.message.acknowledge.AcknowledgeReceipt;
+import net.marfgamer.raknet.protocol.status.UnconnectedPing;
+import net.marfgamer.raknet.protocol.status.UnconnectedPong;
 import net.marfgamer.raknet.server.identifier.Identifier;
 import net.marfgamer.raknet.server.identifier.MCPEIdentifier;
 import net.marfgamer.raknet.session.RakNetClientSession;
@@ -51,7 +54,7 @@ public class RakNetServer implements RakNet {
 
 	private Channel channel;
 	private RakNetServerListener listener;
-	private volatile boolean running; // Volatile so other threads can modify it
+	private volatile boolean running; // Allow other threads to modify this
 	private final ConcurrentHashMap<InetSocketAddress, RakNetClientSession> sessions;
 
 	public RakNetServer(int port, int maxConnections, int maximumTransferUnit, Identifier identifier) {
@@ -126,14 +129,18 @@ public class RakNetServer implements RakNet {
 		return this;
 	}
 
-	public void handleMessage(RakNetPacket packet, InetSocketAddress sender) throws Exception {
-		short id = packet.getId();
+	public RakNetClientSession[] getSessions() {
+		return sessions.values().toArray(new RakNetClientSession[sessions.size()]);
+	}
 
-		if (id == ID_UNCONNECTED_PING || id == ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
+	protected void handleMessage(RakNetPacket packet, InetSocketAddress sender) throws Exception {
+		short packetId = packet.getId();
+
+		if (packetId == ID_UNCONNECTED_PING || packetId == ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
 			UnconnectedPing ping = new UnconnectedPing(packet);
 			ping.decode();
 
-			if ((id == ID_UNCONNECTED_PING || sessions.size() < this.maxConnections) && identifier != null) {
+			if ((packetId == ID_UNCONNECTED_PING || sessions.size() < this.maxConnections) && identifier != null) {
 				ServerPing pingEvent = new ServerPing(sender, identifier);
 				listener.handlePing(pingEvent);
 				if (pingEvent.getIdentifier() != null) {
@@ -146,25 +153,25 @@ public class RakNetServer implements RakNet {
 					this.sendRaw(pong, sender);
 				}
 			}
-		} else if (id == ID_OPEN_CONNECTION_REQUEST_1) {
-			UnconnectedOpenConnectionRequestOne connectionRequestOne = new UnconnectedOpenConnectionRequestOne(packet);
+		} else if (packetId == ID_OPEN_CONNECTION_REQUEST_1) {
+			OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne(packet);
 			connectionRequestOne.decode();
 
 			if (connectionRequestOne.magic == true) {
 				if (connectionRequestOne.protocolVersion != RakNet.SERVER_NETWORK_PROTOCOL) {
-					UnconnectedIncompatibleProtocol incompatibleProtocol = new UnconnectedIncompatibleProtocol();
+					IncompatibleProtocol incompatibleProtocol = new IncompatibleProtocol();
 					incompatibleProtocol.networkProtocol = RakNet.SERVER_NETWORK_PROTOCOL;
 					incompatibleProtocol.serverGuid = this.guid;
 					incompatibleProtocol.encode();
 					this.sendRaw(incompatibleProtocol, sender);
 				} else if (sessions.size() >= this.maxConnections) {
-					UnconnectedNoFreeIncomingConnections noFreeIncomingConnections = new UnconnectedNoFreeIncomingConnections();
+					NoFreeIncomingConnections noFreeIncomingConnections = new NoFreeIncomingConnections();
 					noFreeIncomingConnections.encode();
 					this.sendRaw(noFreeIncomingConnections, sender);
 				} else {
 					// Everything passed! One last check...
 					if (connectionRequestOne.maximumTransferUnit < this.maximumTransferUnit) {
-						UnconnectedOpenConnectionResponseOne connectionResponseOne = new UnconnectedOpenConnectionResponseOne();
+						OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne();
 						connectionResponseOne.serverGuid = this.guid;
 						connectionResponseOne.maximumTransferUnit = connectionRequestOne.maximumTransferUnit;
 						connectionResponseOne.encode();
@@ -172,14 +179,14 @@ public class RakNetServer implements RakNet {
 					}
 				}
 			}
-		} else if (id == ID_OPEN_CONNECTION_REQUEST_2) {
-			UnconnectedOpenConnectionRequestTwo connectionRequestTwo = new UnconnectedOpenConnectionRequestTwo(packet);
+		} else if (packetId == ID_OPEN_CONNECTION_REQUEST_2) {
+			OpenConnectionRequestTwo connectionRequestTwo = new OpenConnectionRequestTwo(packet);
 			connectionRequestTwo.decode();
 
 			if (connectionRequestTwo.magic == true) {
 				if (connectionRequestTwo.maximumTransferUnit < this.maximumTransferUnit) {
 					// Create response
-					UnconnectedOpenConnectionResponseTwo connectionResponseTwo = new UnconnectedOpenConnectionResponseTwo();
+					OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo();
 					connectionResponseTwo.serverGuid = this.guid;
 					connectionResponseTwo.clientAddress = sender;
 					connectionResponseTwo.maximumTransferUnit = connectionRequestTwo.maximumTransferUnit;
@@ -198,7 +205,7 @@ public class RakNetServer implements RakNet {
 					this.sendRaw(connectionResponseTwo, sender);
 				}
 			}
-		} else if (id >= ID_RESERVED_3 && id <= ID_RESERVED_9) {
+		} else if (packetId >= ID_RESERVED_3 && packetId <= ID_RESERVED_9) {
 			if (sessions.containsKey(sender) == true) {
 				CustomPacket custom = new CustomPacket(packet);
 				custom.decode();
@@ -207,7 +214,15 @@ public class RakNetServer implements RakNet {
 				session.bumpLastPacketReceiveTime();
 				session.handleCustom0(custom);
 			}
-		} else if (id == Acknowledge.ACKNOWLEDGED || id == Acknowledge.NOT_ACKNOWLEDGED) {
+		} else if (packetId == ID_SND_RECEIPT_ACKED || packetId == ID_SND_RECEIPT_LOSS) {
+			if (sessions.containsKey(sender) == true) {
+				AcknowledgeReceipt acknowledgeReceipt = new AcknowledgeReceipt(packet);
+				acknowledgeReceipt.decode();
+
+				RakNetClientSession session = sessions.get(sender);
+				session.handleAcknowledgeReceipt(acknowledgeReceipt);
+			}
+		} else if (packetId == Acknowledge.ACKNOWLEDGED || packetId == Acknowledge.NOT_ACKNOWLEDGED) {
 			if (sessions.containsKey(sender) == true) {
 				Acknowledge acknowledge = new Acknowledge(packet);
 				acknowledge.decode();
@@ -245,10 +260,10 @@ public class RakNetServer implements RakNet {
 		this.removeSession(sessions.get(address), reason);
 	}
 
-	public void start() {
+	public void start() throws RakNetException {
 		// Make sure we have an adapter
 		if (listener == null) {
-			throw new RuntimeException("Handler has not been set!");
+			throw new NoListenerException("The listener must be set in order to start the server!");
 		}
 
 		// Create bootstrap and bind the channel
@@ -277,7 +292,11 @@ public class RakNetServer implements RakNet {
 		Thread thread = new Thread() {
 			@Override
 			public synchronized void run() {
-				server.start();
+				try {
+					server.start();
+				} catch (RakNetException e) {
+					e.printStackTrace();
+				}
 			}
 		};
 		thread.start();
@@ -291,7 +310,7 @@ public class RakNetServer implements RakNet {
 		this.getListener().serverShutdown();
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws RakNetException {
 		MCPEIdentifier identifier = new MCPEIdentifier("A JRakNet Server", 80, "0.15.0", 0, 10);
 		RakNetServer s = new RakNetServer(19132, 10, identifier);
 

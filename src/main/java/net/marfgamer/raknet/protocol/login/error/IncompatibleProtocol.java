@@ -1,19 +1,19 @@
-package net.marfgamer.raknet.protocol.unconnected;
+package net.marfgamer.raknet.protocol.login.error;
 
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 
-public class UnconnectedIncompatibleProtocol extends RakNetPacket {
+public class IncompatibleProtocol extends RakNetPacket {
 
 	public int networkProtocol;
 	public long serverGuid;
 
-	public UnconnectedIncompatibleProtocol(Packet packet) {
+	public IncompatibleProtocol(Packet packet) {
 		super(packet);
 	}
 
-	public UnconnectedIncompatibleProtocol() {
+	public IncompatibleProtocol() {
 		super(MessageIdentifier.ID_INCOMPATIBLE_PROTOCOL_VERSION);
 	}
 

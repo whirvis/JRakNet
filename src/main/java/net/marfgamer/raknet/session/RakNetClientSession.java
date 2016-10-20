@@ -1,16 +1,18 @@
 package net.marfgamer.raknet.session;
 
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 
 import io.netty.channel.Channel;
 import net.marfgamer.raknet.RakNetPacket;
+import net.marfgamer.raknet.exception.RakNetException;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 import net.marfgamer.raknet.protocol.Reliability;
-import net.marfgamer.raknet.protocol.acknowledge.Record;
-import net.marfgamer.raknet.protocol.connected.ConnectedClientHandshake;
-import net.marfgamer.raknet.protocol.connected.ConnectedConnectionRequest;
-import net.marfgamer.raknet.protocol.connected.ConnectedServerHandshake;
+import net.marfgamer.raknet.protocol.login.ConnectionRequest;
+import net.marfgamer.raknet.protocol.login.ConnectionRequestAccepted;
+import net.marfgamer.raknet.protocol.login.NewIncomingConnection;
+import net.marfgamer.raknet.protocol.login.error.ConnectionAttemptFailed;
+import net.marfgamer.raknet.protocol.message.acknowledge.Record;
+import net.marfgamer.raknet.protocol.session.DisconnectionNotification;
 import net.marfgamer.raknet.server.RakNetServer;
 
 public class RakNetClientSession extends RakNetSession {
@@ -44,27 +46,32 @@ public class RakNetClientSession extends RakNetSession {
 	}
 
 	@Override
-	public void handlePacket(RakNetPacket packet, int channel) throws UnknownHostException {
+	public void handlePacket(RakNetPacket packet, int channel) throws RakNetException {
 		short id = packet.getId();
 		System.out.println(id);
-		if (id == MessageIdentifier.ID_CONNECTION_REQUEST) {
-			ConnectedConnectionRequest connectionRequest = new ConnectedConnectionRequest(packet);
-			connectionRequest.decode();
+		if (id == MessageIdentifier.ID_CONNECTION_REQUEST && this.getState() == RakNetState.DISCONNECTED) {
+			ConnectionRequest request = new ConnectionRequest(packet);
+			request.decode();
 
-			if (connectionRequest.clientGuid == this.getGUID()) {
-				ConnectedServerHandshake serverHandshake = new ConnectedServerHandshake();
-				serverHandshake.clientAddress = this.getAddress();
-				serverHandshake.clientTimestamp = connectionRequest.timestamp;
-				serverHandshake.serverTimestamp = server.getTimestamp();
-				serverHandshake.encode();
+			if (request.clientGuid == this.getGUID()) {
+				ConnectionRequestAccepted requestAccepted = new ConnectionRequestAccepted();
+				requestAccepted.clientAddress = this.getAddress();
+				requestAccepted.clientTimestamp = request.timestamp;
+				requestAccepted.serverTimestamp = server.getTimestamp();
+				requestAccepted.encode();
 
-				this.sendPacket(RELIABLE_ORDERED, serverHandshake);
+				this.sendPacket(RELIABLE_ORDERED, requestAccepted);
 				this.setState(RakNetState.HANDSHAKING);
 			} else {
-				System.out.println("SFHE");
+				ConnectionAttemptFailed attemptFailed = new ConnectionAttemptFailed();
+				attemptFailed.encode();
+
+				this.sendPacket(RELIABLE_ORDERED, attemptFailed);
+				this.setState(RakNetState.DISCONNECTED);
+				server.removeSession(this, "Connection failed, invalid GUID");
 			}
-		} else if (id == MessageIdentifier.ID_NEW_INCOMING_CONNECTION) {
-			ConnectedClientHandshake clientHandshake = new ConnectedClientHandshake(packet);
+		} else if (id == MessageIdentifier.ID_NEW_INCOMING_CONNECTION && this.getState() == RakNetState.HANDSHAKING) {
+			NewIncomingConnection clientHandshake = new NewIncomingConnection(packet);
 			clientHandshake.decode();
 
 			if (clientHandshake.serverTimestamp == server.getTimestamp()) {
@@ -72,8 +79,18 @@ public class RakNetClientSession extends RakNetSession {
 
 				this.setState(RakNetState.CONNECTED);
 				server.getListener().clientConnected(this);
+			} else {
+				ConnectionAttemptFailed attemptFailed = new ConnectionAttemptFailed();
+				attemptFailed.encode();
+
+				this.sendPacket(RELIABLE_ORDERED, attemptFailed);
+				this.setState(RakNetState.DISCONNECTED);
+				server.removeSession(this, "Connection failed, invalid timestamp");
 			}
 		} else if (id == MessageIdentifier.ID_DISCONNECTION_NOTIFICATION) {
+			DisconnectionNotification disconnectionNotification = new DisconnectionNotification(packet);
+			disconnectionNotification.decode();
+
 			server.removeSession(this, "Client disconnected");
 		} else if (id >= MessageIdentifier.ID_USER_PACKET_ENUM) {
 			server.getListener().handlePacket(this, packet, channel);

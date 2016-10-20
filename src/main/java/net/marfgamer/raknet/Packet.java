@@ -128,7 +128,7 @@ public class Packet {
 		return new String(data);
 	}
 
-	public InetSocketAddress readAddress() throws UnknownHostException {
+	public InetSocketAddress readAddress() {
 		short version = this.readUByte();
 		if (version == ADDRESS_VERSION) {
 			byte[] addressBytes = new byte[4];
@@ -136,9 +136,14 @@ public class Packet {
 				addressBytes[i] = (byte) (~this.readByte() & 0xFF);
 			}
 			int port = this.readUShort();
-			return new InetSocketAddress(InetAddress.getByAddress(addressBytes), port);
+
+			try {
+				return new InetSocketAddress(InetAddress.getByAddress(addressBytes), port);
+			} catch (UnknownHostException e) {
+				return null;
+			}
 		} else {
-			throw new UnknownHostException("Unknown protocol IPv" + version + "!");
+			throw new IllegalArgumentException("Unknown protocol IPv" + version + "!");
 		}
 	}
 
@@ -257,7 +262,7 @@ public class Packet {
 		return this;
 	}
 
-	public void writeAddress(InetSocketAddress address) throws UnknownHostException {
+	public void writeAddress(InetSocketAddress address) {
 		byte[] addressBytes = address.getAddress().getAddress();
 		if (addressBytes.length == ADDRESS_VERSION) {
 			this.writeUByte(ADDRESS_VERSION);
@@ -266,11 +271,11 @@ public class Packet {
 			}
 			this.writeUShort(address.getPort());
 		} else {
-			throw new UnknownHostException("Unknown protocol IPv" + addressBytes.length + "!");
+			throw new IllegalArgumentException("Unknown protocol IPv" + addressBytes.length + "!");
 		}
 	}
 
-	public void writeAddress(String address, int port) throws UnknownHostException {
+	public void writeAddress(String address, int port) {
 		this.writeAddress(new InetSocketAddress(address, port));
 	}
 

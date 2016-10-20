@@ -12,13 +12,15 @@ import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.protocol.SplitPacket;
-import net.marfgamer.raknet.protocol.acknowledge.Acknowledge;
-import net.marfgamer.raknet.protocol.acknowledge.AcknowledgeType;
-import net.marfgamer.raknet.protocol.acknowledge.Record;
-import net.marfgamer.raknet.protocol.connected.ConnectedPing;
-import net.marfgamer.raknet.protocol.connected.ConnectedPong;
 import net.marfgamer.raknet.protocol.message.CustomPacket;
 import net.marfgamer.raknet.protocol.message.EncapsulatedPacket;
+import net.marfgamer.raknet.protocol.message.acknowledge.Acknowledge;
+import net.marfgamer.raknet.protocol.message.acknowledge.AcknowledgeReceipt;
+import net.marfgamer.raknet.protocol.message.acknowledge.AcknowledgeReceiptType;
+import net.marfgamer.raknet.protocol.message.acknowledge.AcknowledgeType;
+import net.marfgamer.raknet.protocol.message.acknowledge.Record;
+import net.marfgamer.raknet.protocol.status.ConnectedPing;
+import net.marfgamer.raknet.protocol.status.ConnectedPong;
 import net.marfgamer.raknet.util.ArrayUtils;
 import net.marfgamer.raknet.util.map.IntMap;
 
@@ -61,6 +63,7 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 	private final IntMap<CustomPacket> recoveryQueue;
 	private final ArrayList<Record> acknowledgeQueue;
 	private final ArrayList<Record> nacknowledgeQueue;
+	private final IntMap<EncapsulatedPacket[]> requireAcknowledgeQueue;
 	private final IntMap<SplitPacket> splitQueue;
 	private final ArrayList<EncapsulatedPacket> sendQueue;
 	private long lastAckSend;
@@ -101,6 +104,7 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 		this.recoveryQueue = new IntMap<CustomPacket>();
 		this.acknowledgeQueue = new ArrayList<Record>();
 		this.nacknowledgeQueue = new ArrayList<Record>();
+		this.requireAcknowledgeQueue = new IntMap<EncapsulatedPacket[]>();
 		this.splitQueue = new IntMap<SplitPacket>();
 		this.sendQueue = new ArrayList<EncapsulatedPacket>();
 		this.lastAckSend = System.currentTimeMillis();
@@ -297,18 +301,6 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 		// Handle Acknowledged based on it's type
 		if (acknowledge.getType() == AcknowledgeType.ACKNOWLEDGED) {
 			for (Record record : acknowledge.records) {
-				// Notify API that it the receiving-side has received the packet
-				for (EncapsulatedPacket encapsulated : recoveryQueue.get(record.getIndex()).messages) {
-					if (encapsulated == null) {
-						continue; // This is rare, but continue on
-					}
-
-					if (encapsulated.reliability.requiresAck()) {
-						this.onAcknowledge(record, encapsulated.reliability, encapsulated.orderChannel,
-								new RakNetPacket(encapsulated.payload));
-					}
-				}
-
 				// The packet successfully sent, no need to store it anymore
 				recoveryQueue.remove(record.getIndex());
 			}
@@ -317,7 +309,7 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 				// Remove all unreliable packets from the queue
 				CustomPacket custom = recoveryQueue.get(record.getIndex());
 
-				// Odd, we already resent it. Let's fake 'em out!
+				// We already sent it, we will need to send a fake
 				if (custom == null) {
 					custom = new CustomPacket();
 					custom.sequenceNumber = record.getIndex();
@@ -327,6 +319,15 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 
 				// Resend the modified version
 				this.sendRawPacket(custom);
+			}
+		}
+	}
+
+	public final void handleAcknowledgeReceipt(AcknowledgeReceipt acknowledgeReceipt) throws Exception {
+		if (acknowledgeReceipt.getType() == AcknowledgeReceiptType.ACKNOWLEDGED) {
+			for (EncapsulatedPacket encapsulated : requireAcknowledgeQueue.get(acknowledgeReceipt.record)) {
+				this.onAcknowledge(new Record(acknowledgeReceipt.record), encapsulated.reliability,
+						encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
 			}
 		}
 	}

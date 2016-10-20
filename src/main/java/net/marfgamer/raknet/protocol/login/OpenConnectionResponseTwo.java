@@ -1,13 +1,12 @@
-package net.marfgamer.raknet.protocol.unconnected;
+package net.marfgamer.raknet.protocol.login;
 
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 
-public class UnconnectedOpenConnectionResponseTwo extends RakNetPacket {
+public class OpenConnectionResponseTwo extends RakNetPacket {
 
 	public boolean magic;
 	public long serverGuid;
@@ -15,16 +14,16 @@ public class UnconnectedOpenConnectionResponseTwo extends RakNetPacket {
 	public int maximumTransferUnit;
 	public boolean encryptionEnabled;
 
-	public UnconnectedOpenConnectionResponseTwo(Packet packet) {
+	public OpenConnectionResponseTwo(Packet packet) {
 		super(packet);
 	}
 
-	public UnconnectedOpenConnectionResponseTwo() {
+	public OpenConnectionResponseTwo() {
 		super(MessageIdentifier.ID_OPEN_CONNECTION_REPLY_2);
 	}
 
 	@Override
-	public void encode() throws UnknownHostException {
+	public void encode() {
 		this.writeMagic();
 		this.writeLong(serverGuid);
 		this.writeAddress(clientAddress);
@@ -33,7 +32,7 @@ public class UnconnectedOpenConnectionResponseTwo extends RakNetPacket {
 	}
 
 	@Override
-	public void decode() throws UnknownHostException {
+	public void decode() {
 		this.magic = this.checkMagic();
 		this.serverGuid = this.readLong();
 		this.clientAddress = this.readAddress();
