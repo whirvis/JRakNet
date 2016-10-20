@@ -1,4 +1,4 @@
-package net.marfgamer.raknet.protocol.unconnected;
+package net.marfgamer.raknet.protocol.status;
 
 import net.marfgamer.raknet.Packet;
 

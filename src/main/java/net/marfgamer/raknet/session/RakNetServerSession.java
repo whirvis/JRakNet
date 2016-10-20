@@ -7,9 +7,9 @@ import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.client.RakNetClient;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 import net.marfgamer.raknet.protocol.Reliability;
-import net.marfgamer.raknet.protocol.acknowledge.Record;
-import net.marfgamer.raknet.protocol.connected.ConnectedClientHandshake;
-import net.marfgamer.raknet.protocol.connected.ConnectedServerHandshake;
+import net.marfgamer.raknet.protocol.login.NewIncomingConnection;
+import net.marfgamer.raknet.protocol.login.ConnectionRequestAccepted;
+import net.marfgamer.raknet.protocol.message.acknowledge.Record;
 
 public class RakNetServerSession extends RakNetSession {
 
@@ -32,10 +32,10 @@ public class RakNetServerSession extends RakNetSession {
 		short packetId = packet.getId();
 		System.out.println(packetId);
 		if(packetId == MessageIdentifier.ID_CONNECTION_REQUEST_ACCEPTED) {
-			ConnectedServerHandshake serverHandshake = new ConnectedServerHandshake(packet);
+			ConnectionRequestAccepted serverHandshake = new ConnectionRequestAccepted(packet);
 			serverHandshake.decode();
 			
-			ConnectedClientHandshake clientHandshake = new ConnectedClientHandshake();
+			NewIncomingConnection clientHandshake = new NewIncomingConnection();
 			clientHandshake.clientTimestamp = serverHandshake.clientTimestamp;
 			clientHandshake.serverTimestamp = serverHandshake.serverTimestamp;
 			clientHandshake.serverAddress = client.getSession().getAddress();

@@ -1,10 +1,10 @@
-package net.marfgamer.raknet.protocol.unconnected;
+package net.marfgamer.raknet.protocol.login;
 
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 
-public class UnconnectedOpenConnectionRequestOne extends RakNetPacket {
+public class OpenConnectionRequestOne extends RakNetPacket {
 
 	public static final int MTU_PADDING = 18; // 1 for ID, 1 for protocol
 												// version, 16 for magic
@@ -13,11 +13,11 @@ public class UnconnectedOpenConnectionRequestOne extends RakNetPacket {
 	public int protocolVersion;
 	public int maximumTransferUnit;
 
-	public UnconnectedOpenConnectionRequestOne(Packet packet) {
+	public OpenConnectionRequestOne(Packet packet) {
 		super(packet);
 	}
 	
-	public UnconnectedOpenConnectionRequestOne() {
+	public OpenConnectionRequestOne() {
 		super(MessageIdentifier.ID_OPEN_CONNECTION_REQUEST_1);
 	}
 	

@@ -1,4 +1,4 @@
-package net.marfgamer.raknet.protocol.acknowledge;
+package net.marfgamer.raknet.protocol.message.acknowledge;
 
 import java.util.Comparator;
 

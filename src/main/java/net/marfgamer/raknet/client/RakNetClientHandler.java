@@ -24,6 +24,7 @@ public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 			RakNetPacket packet = new RakNetPacket(datagram);
 
 			try {
+				System.out.println("RECEIVED " + packet.getId());
 				client.handleMessage(packet, sender);
 				datagram.content().release(); // No longer needed
 			} catch (Exception e) {
@@ -32,6 +33,11 @@ public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 		} else {
 			System.err.println("Got " + msg.getClass().getName());
 		}
+	}
+	
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+		client.handleHandlerException(cause);
 	}
 
 }

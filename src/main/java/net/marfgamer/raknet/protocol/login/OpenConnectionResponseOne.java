@@ -1,10 +1,10 @@
-package net.marfgamer.raknet.protocol.unconnected;
+package net.marfgamer.raknet.protocol.login;
 
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 
-public class UnconnectedOpenConnectionResponseOne extends RakNetPacket {
+public class OpenConnectionResponseOne extends RakNetPacket {
 
 	public static final byte USE_SECURITY_BIT = 0x01;
 
@@ -18,11 +18,11 @@ public class UnconnectedOpenConnectionResponseOne extends RakNetPacket {
 	 */
 	public final boolean useSecurity = false;
 
-	public UnconnectedOpenConnectionResponseOne(Packet packet) {
+	public OpenConnectionResponseOne(Packet packet) {
 		super(packet);
 	}
 
-	public UnconnectedOpenConnectionResponseOne() {
+	public OpenConnectionResponseOne() {
 		super(MessageIdentifier.ID_OPEN_CONNECTION_REPLY_1);
 	}
 

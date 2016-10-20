@@ -42,10 +42,10 @@ public class RakNetPacket extends Packet {
 		return this.id;
 	}
 
-	public void encode() throws Exception {
+	public void encode() {
 	}
 
-	public void decode() throws Exception {
+	public void decode() {
 	}
 
 }
