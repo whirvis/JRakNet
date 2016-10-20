@@ -1,28 +1,27 @@
-package net.marfgamer.raknet.protocol.connected;
+package net.marfgamer.raknet.protocol.login;
 
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 
-public class ConnectedServerHandshake extends RakNetPacket {
-	
+public class ConnectionRequestAccepted extends RakNetPacket {
+
 	public InetSocketAddress clientAddress;
 	public long clientTimestamp;
 	public long serverTimestamp;
-	
-	public ConnectedServerHandshake() {
+
+	public ConnectionRequestAccepted() {
 		super(MessageIdentifier.ID_CONNECTION_REQUEST_ACCEPTED);
 	}
-	
-	public ConnectedServerHandshake(Packet packet) {
+
+	public ConnectionRequestAccepted(Packet packet) {
 		super(packet);
 	}
-	
+
 	@Override
-	public void encode() throws UnknownHostException {
+	public void encode() {
 		this.writeAddress(clientAddress);
 		this.writeShort(0);
 		for (int i = 0; i < 10; i++) {
@@ -33,7 +32,7 @@ public class ConnectedServerHandshake extends RakNetPacket {
 	}
 
 	@Override
-	public void decode() throws UnknownHostException {
+	public void decode() {
 		this.clientAddress = this.readAddress();
 		this.readShort(); // Unknown use
 		for (int i = 0; i < 10; i++) {

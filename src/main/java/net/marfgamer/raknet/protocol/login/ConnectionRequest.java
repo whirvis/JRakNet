@@ -1,19 +1,19 @@
-package net.marfgamer.raknet.protocol.connected;
+package net.marfgamer.raknet.protocol.login;
 
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 
-public class ConnectedConnectionRequest extends RakNetPacket {
+public class ConnectionRequest extends RakNetPacket {
 
 	public long clientGuid;
 	public long timestamp;
 
-	public ConnectedConnectionRequest() {
+	public ConnectionRequest() {
 		super(MessageIdentifier.ID_CONNECTION_REQUEST);
 	}
 
-	public ConnectedConnectionRequest(Packet packet) {
+	public ConnectionRequest(Packet packet) {
 		super(packet);
 	}
 

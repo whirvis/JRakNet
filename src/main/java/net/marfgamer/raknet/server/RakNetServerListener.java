@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.protocol.Reliability;
-import net.marfgamer.raknet.protocol.acknowledge.Record;
+import net.marfgamer.raknet.protocol.message.acknowledge.Record;
 import net.marfgamer.raknet.session.RakNetClientSession;
 
 public interface RakNetServerListener {
