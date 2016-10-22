@@ -185,6 +185,7 @@ class DocumentedClass {
 
 #Comments
 Single lines comments use ```//```, while multiline comments must use ```/* */```. A correct example of this would be:
+
 ```java
 // This is correct, as this uses only one line to comment
 
@@ -200,3 +201,5 @@ Single lines comments use ```//```, while multiline comments must use ```/* */``
  // This is incorrect, as I use not only one line to comment
  // I use this second line to prove that the first one is true.
 ```
+
+The exception to this rule is javadoc comments, which must use multiline comments.
