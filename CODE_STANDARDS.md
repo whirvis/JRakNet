@@ -15,7 +15,7 @@ variable.anotherVariable
 variable.anotherFunction()
 ```
 
-# Condition (If/White/For) statements
+# Condition (If/While/For) statements
 When using condition statements, if the variable being referenced to is a native type (Or an enum which can be considered
 a synthetic native type) always use:
 
