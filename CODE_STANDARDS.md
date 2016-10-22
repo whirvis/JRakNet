@@ -155,7 +155,7 @@ public static final long EXAMPLE_LONG = 1L;
 # Documentation
 Every single class and method must be documented for the javadoc even if it is obvious through their name.
 Every class must have their @author set. For methods, they must have their @param names and their use set and
-all of the @throws listed and why they would be thrown (Constructors follow the same rules). An example of this would be:
+all of the @throws listed and why they would be thrown (Constructors do not require these). An example of this would be:
 
 ```java
 /**
