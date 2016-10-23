@@ -185,6 +185,31 @@ class DocumentedClass {
 }
 ```
 
+However, if a method is documented but is overriden by another class there is no need to document it. An example of this would be:
+
+```java
+
+abstract class AbstractClassExample {
+
+    /**
+     * This is an abstract method with documentation 
+     */
+    public abstract void theAbstractMethod();
+
+}
+
+class NotAbstractClassExample extends AbstractClassExample {
+
+   // Look ma, no docs!
+   @Override
+   public void theAbstractMethod() {
+       // The code
+   }
+
+}
+
+```
+
 #Comments
 Single lines comments use ```//```, while multiline comments must use ```/* */```. A correct example of this would be:
 
