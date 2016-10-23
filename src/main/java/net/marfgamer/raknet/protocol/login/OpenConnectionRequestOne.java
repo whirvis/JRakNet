@@ -16,11 +16,11 @@ public class OpenConnectionRequestOne extends RakNetPacket {
 	public OpenConnectionRequestOne(Packet packet) {
 		super(packet);
 	}
-	
+
 	public OpenConnectionRequestOne() {
 		super(MessageIdentifier.ID_OPEN_CONNECTION_REQUEST_1);
 	}
-	
+
 	@Override
 	public void encode() {
 		this.writeMagic();
@@ -35,5 +35,5 @@ public class OpenConnectionRequestOne extends RakNetPacket {
 		this.maximumTransferUnit = (this.remaining() + MTU_PADDING);
 		this.read(this.remaining()); // Go ahead and get rid of those bytes
 	}
-	
+
 }

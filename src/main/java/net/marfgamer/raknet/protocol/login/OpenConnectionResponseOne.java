@@ -16,7 +16,7 @@ public class OpenConnectionResponseOne extends RakNetPacket {
 	 * JRakNet does not support RakNet's built in security function, it is
 	 * poorly documented!
 	 */
-	public final boolean useSecurity = false;
+	public boolean useSecurity = false;
 
 	public OpenConnectionResponseOne(Packet packet) {
 		super(packet);
@@ -35,10 +35,6 @@ public class OpenConnectionResponseOne extends RakNetPacket {
 		byte securityFlags = 0x00;
 		securityFlags |= (useSecurity ? USE_SECURITY_BIT : 0x00);
 		this.writeUByte(securityFlags);
-		if (useSecurity) { // We would use == true but Eclipse throws warning
-			throw new RuntimeException("Security is not yet supported!");
-		}
-
 		this.writeUShort(maximumTransferUnit);
 	}
 
@@ -50,9 +46,8 @@ public class OpenConnectionResponseOne extends RakNetPacket {
 		byte securityFlags = 0x00;
 		securityFlags |= this.readUByte(); // Use security
 		if ((securityFlags & USE_SECURITY_BIT) == USE_SECURITY_BIT) {
-			throw new RuntimeException("Security is not yet supported!");
+			this.useSecurity = true;
 		}
-
 		this.maximumTransferUnit = this.readUShort();
 	}
 
