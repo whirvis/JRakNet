@@ -7,9 +7,16 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.DatagramPacket;
 import net.marfgamer.raknet.RakNetPacket;
 
+/**
+ * This class is instantiated by the client with the sole purpose of sending
+ * received packets to the client so they can be properly handled
+ *
+ * @author MarfGamer
+ */
 public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 
 	private final RakNetClient client;
+	private InetSocketAddress causeAddress;
 
 	public RakNetClientHandler(RakNetClient client) {
 		this.client = client;
@@ -23,21 +30,18 @@ public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 			InetSocketAddress sender = datagram.sender();
 			RakNetPacket packet = new RakNetPacket(datagram);
 
-			try {
-				System.out.println("RECEIVED " + packet.getId());
-				client.handleMessage(packet, sender);
-				datagram.content().release(); // No longer needed
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} else {
-			System.err.println("Got " + msg.getClass().getName());
+			// If an exception happens it's because of this address
+			this.causeAddress = sender;
+
+			// Handle the packet and release the buffer
+			client.handleMessage(packet, sender);
+			datagram.content().release();
 		}
 	}
-	
+
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-		client.handleHandlerException(cause);
+		client.handleHandlerException(this.causeAddress, cause);
 	}
 
 }

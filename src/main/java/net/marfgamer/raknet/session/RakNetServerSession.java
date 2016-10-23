@@ -22,13 +22,12 @@ public class RakNetServerSession extends RakNetSession {
 	}
 
 	@Override
-	public void onAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet)
-			throws Exception {
+	public void onAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet) {
 
 	}
 
 	@Override
-	public void handlePacket(RakNetPacket packet, int channel) throws Exception {
+	public void handlePacket(RakNetPacket packet, int channel) {
 		short packetId = packet.getId();
 		System.out.println(packetId);
 		if(packetId == MessageIdentifier.ID_CONNECTION_REQUEST_ACCEPTED) {

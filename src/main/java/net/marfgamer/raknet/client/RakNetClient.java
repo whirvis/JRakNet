@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -16,31 +19,38 @@ import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.RakNetPacket;
+import net.marfgamer.raknet.client.discovery.DiscoveredServer;
+import net.marfgamer.raknet.client.discovery.DiscoveryMode;
+import net.marfgamer.raknet.client.discovery.DiscoveryThread;
+import net.marfgamer.raknet.exception.NoListenerException;
 import net.marfgamer.raknet.exception.RakNetException;
-import net.marfgamer.raknet.exception.client.DiscoveryDisabledException;
-import net.marfgamer.raknet.exception.client.IncompatibleProtocolException;
 import net.marfgamer.raknet.exception.client.NettyHandlerException;
-import net.marfgamer.raknet.exception.client.NoFreeIncomingConnectionsException;
 import net.marfgamer.raknet.exception.client.ServerOfflineException;
+import net.marfgamer.raknet.identifier.Identifier;
+import net.marfgamer.raknet.identifier.MCPEIdentifier;
 import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.protocol.login.ConnectionRequest;
 import net.marfgamer.raknet.protocol.login.OpenConnectionRequestOne;
 import net.marfgamer.raknet.protocol.login.OpenConnectionRequestTwo;
-import net.marfgamer.raknet.protocol.login.OpenConnectionResponseOne;
-import net.marfgamer.raknet.protocol.login.OpenConnectionResponseTwo;
-import net.marfgamer.raknet.protocol.login.error.IncompatibleProtocol;
-import net.marfgamer.raknet.protocol.login.error.NoFreeIncomingConnections;
 import net.marfgamer.raknet.protocol.message.CustomPacket;
 import net.marfgamer.raknet.protocol.message.acknowledge.Acknowledge;
 import net.marfgamer.raknet.protocol.status.UnconnectedPing;
 import net.marfgamer.raknet.protocol.status.UnconnectedPingOpenConnections;
+import net.marfgamer.raknet.protocol.status.UnconnectedPong;
 import net.marfgamer.raknet.session.RakNetServerSession;
+import net.marfgamer.raknet.session.RakNetSession;
+import net.marfgamer.raknet.util.RakNetUtils;
 
+/**
+ * This class is used to connection to servers using the RakNet protocol
+ *
+ * @author MarfGamer
+ */
 public class RakNetClient {
 
 	// JRakNet plans to use it's own dynamic MTU system later
-	private static int PHYSICAL_MAXIMUM_TRANSFER_UNIT = -1;
-	private static final MaximumTransferUnit[] units = new MaximumTransferUnit[] { new MaximumTransferUnit(1172, 4),
+	protected static int PHYSICAL_MAXIMUM_TRANSFER_UNIT = -1;
+	protected static final MaximumTransferUnit[] units = new MaximumTransferUnit[] { new MaximumTransferUnit(1172, 4),
 			new MaximumTransferUnit(548, 5) };
 
 	// Attempt to detect the MTU
@@ -54,15 +64,17 @@ public class RakNetClient {
 		}
 	}
 
-	// Discovery system (static because we only need one)
+	// Used to discover systems without relying on the main thread
 	private static final DiscoveryThread discoverySystem = new DiscoveryThread();
 
 	// Client data
 	private final long guid;
 	private final long timestamp;
 	private final boolean threaded;
-	private DiscoverMode discoverMode;
-	private long pingId;
+
+	private final int discoveryPort;
+	private DiscoveryMode mode;
+	private final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> discovered;
 
 	// Networking data
 	private final Bootstrap bootstrap;
@@ -76,69 +88,247 @@ public class RakNetClient {
 	private volatile RakNetServerSession session; // Allow other threads to
 													// modify this
 
-	public RakNetClient(boolean threaded) {
+	public RakNetClient(int discoveryPort, boolean threaded) {
+		// Set client data
 		this.guid = RakNet.UNIQUE_ID_BITS.getLeastSignificantBits();
 		this.timestamp = System.currentTimeMillis();
 		this.threaded = threaded;
 
+		// Set discovery data
+		this.discoveryPort = discoveryPort;
+		this.mode = (discoveryPort > -1 ? DiscoveryMode.ALL_CONNECTIONS : DiscoveryMode.NONE);
+		this.discovered = new ConcurrentHashMap<InetSocketAddress, DiscoveredServer>();
+
+		// Set networking data
 		this.bootstrap = new Bootstrap();
 		this.group = new NioEventLoopGroup();
 		this.handler = new RakNetClientHandler(this);
 
-		// Create bootstrap for server discovery
+		// Initiate bootstrap data
 		bootstrap.channel(NioDatagramChannel.class).group(group).handler(handler);
 		bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false);
 		this.channel = bootstrap.bind(0).channel();
 
-		try {
-			discoverySystem.addClient(this);
-			if (discoverySystem.isRunning() == false) {
-				discoverySystem.start();
-			}
-		} catch (RakNetException e) {
-			e.printStackTrace();
-		}
+		// Initiate discovery system if it is not yet started
+		if (discoverySystem.isRunning() == false)
+			discoverySystem.start();
+		discoverySystem.addClient(this);
+	}
+
+	public RakNetClient(int discoveryPort) {
+		this(discoveryPort, true);
 	}
 
 	public RakNetClient() {
-		this(true);
+		this(-1);
 	}
 
-	public void enableDiscovery(DiscoverMode discoverMode) {
-		this.discoverMode = discoverMode;
+	/**
+	 * Returns the client's timestamp (how long ago it started in milliseconds)
+	 * 
+	 * @return The client's timestamp
+	 */
+	public long getTimestamp() {
+		return (System.currentTimeMillis() - this.timestamp);
 	}
 
-	public void enableDiscovery() {
-		this.enableDiscovery(DiscoverMode.ALL_CONNECTIONS);
+	/**
+	 * Sets the client's discovery mode
+	 * 
+	 * @param mode
+	 *            - How the client will discover servers on the local network
+	 */
+	public void setDiscoveryMode(DiscoveryMode mode) {
+		this.mode = (mode != null ? mode : DiscoveryMode.NONE);
 	}
 
-	public void disableDiscovery() {
-		this.discoverMode = null;
+	/**
+	 * Returns the client's discovery mode
+	 * 
+	 * @return The client's discovery mode
+	 */
+	public DiscoveryMode getDiscoveryMode() {
+		return this.mode;
 	}
 
-	public boolean discoveryEnabled() {
-		return (this.discoverMode != null);
-	}
-
+	/**
+	 * Returns the client's listener
+	 * 
+	 * @return The client's listener
+	 */
 	public RakNetClientListener getListener() {
 		return this.listener;
 	}
-	
+
+	/**
+	 * Sets the client's listener
+	 * 
+	 * @param listener
+	 *            - The client's new listener
+	 */
 	public void setListener(RakNetClientListener listener) {
 		this.listener = listener;
 	}
 
+	/**
+	 * Returns the session the client is connected to
+	 * 
+	 * @return The session the client is connected to
+	 */
 	public RakNetServerSession getSession() {
 		return this.session;
 	}
 
+	/**
+	 * Called whenever the handler catches an exception in Netty
+	 * 
+	 * @param causeAddress
+	 *            - The address that caused the exception
+	 * @param cause
+	 *            - The exception caught by the handler
+	 */
+	protected void handleHandlerException(InetSocketAddress causeAddress, Throwable cause) {
+		if (preparation != null) {
+			preparation.cancelReason = new NettyHandlerException(this, handler, cause);
+			preparation.cancelled = true;
+		} else {
+			cause.printStackTrace();
+		}
+	}
+
+	/**
+	 * Handles a packet received by the handler
+	 * 
+	 * @param packet
+	 *            - The received packet to handler
+	 * @param sender
+	 *            - The address of the sender
+	 */
+	public void handleMessage(RakNetPacket packet, InetSocketAddress sender) {
+		short packetId = packet.getId();
+
+		// This packet has to do with server discovery so it isn't handled here
+		if (packetId == ID_UNCONNECTED_PONG) {
+			UnconnectedPong pong = new UnconnectedPong(packet);
+			pong.decode();
+			this.updateDiscoveryData(sender, pong);
+		}
+
+		// Are we still logging in?
+		if (preparation != null) {
+			if (!sender.equals(preparation.address)) {
+				preparation.handlePacket(packet);
+				return;
+			}
+		}
+
+		// Only handle these from the server we're connected to!
+		if (session != null) {
+			if (sender.equals(session.getAddress())) {
+				if (packetId >= ID_RESERVED_3 && packetId <= ID_RESERVED_9) {
+					CustomPacket custom = new CustomPacket(packet);
+					custom.decode();
+
+					session.handleCustom0(custom);
+				} else if (packetId == Acknowledge.ACKNOWLEDGED || packetId == Acknowledge.NOT_ACKNOWLEDGED) {
+					Acknowledge acknowledge = new Acknowledge(packet);
+					acknowledge.decode();
+
+					session.handleAcknowledge(acknowledge);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Sends a raw packet to the specified address
+	 * 
+	 * @param packet
+	 *            - The packet to send
+	 * @param address
+	 *            - The address to send the packet to
+	 */
+	private void sendRawMessage(RakNetPacket packet, InetSocketAddress address) {
+		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
+	}
+
+	/**
+	 * Updates the discovery data in the client by sending pings and removing
+	 * servers that have taken too long to respond to a ping
+	 */
+	public void updateDiscoveryData() {
+		// Make sure we have a listener
+		if (listener == null)
+			throw new NoListenerException("There must be a client to start the listener!");
+
+		// Remove all servers that have timed out
+		ArrayList<InetSocketAddress> forgottenServers = new ArrayList<InetSocketAddress>();
+		for (InetSocketAddress discoveredServerAddress : discovered.keySet()) {
+			DiscoveredServer discoveredServer = discovered.get(discoveredServerAddress);
+			if (System.currentTimeMillis()
+					- discoveredServer.getDiscoveryTimestamp() >= DiscoveredServer.SERVER_TIMEOUT_MILLI) {
+				forgottenServers.add(discoveredServerAddress);
+				listener.onServerForgotten(discoveredServerAddress);
+			}
+		}
+		discovered.keySet().removeAll(forgottenServers);
+
+		// Broadcast ping
+		if (mode != DiscoveryMode.NONE && discoveryPort > -1) {
+			UnconnectedPing ping = new UnconnectedPing();
+			if (mode == DiscoveryMode.OPEN_CONNECTIONS)
+				ping = new UnconnectedPingOpenConnections();
+
+			ping.timestamp = this.getTimestamp();
+			ping.encode();
+
+			this.sendRawMessage(ping, new InetSocketAddress("255.255.255.255", discoveryPort));
+		}
+	}
+
+	/**
+	 * This method handles the specified pong packet and updates the discovery
+	 * data accordingly
+	 * 
+	 * @param sender
+	 *            - The sender of the pong packet
+	 * @param pong
+	 *            - The pong packet to handle
+	 */
+	public void updateDiscoveryData(InetSocketAddress sender, UnconnectedPong pong) {
+		if (!discovered.containsKey(sender)) {
+			// Server discovered
+			discovered.put(sender, new DiscoveredServer(sender, System.currentTimeMillis(), pong.identifier));
+			if (listener != null)
+				listener.onServerDiscovered(sender, pong.identifier);
+		} else {
+			// Server already discovered, but data has changed
+			DiscoveredServer server = discovered.get(sender);
+			server.setDiscoveryTimestamp(System.currentTimeMillis());
+			if (server.getIdentifier().equals(pong.identifier) == false) {
+				server.setIdentifier(pong.identifier);
+				if (listener != null)
+					listener.onServerIdentifierUpdate(sender, pong.identifier);
+			}
+		}
+	}
+
+	/**
+	 * Connects the client to a server with the specified address
+	 * 
+	 * @param address
+	 *            - The address of the server to connect to
+	 * @throws RakNetException
+	 *             - Thrown if an error occurs during connection or login
+	 */
 	public void connect(InetSocketAddress address) throws RakNetException {
+		// Make sure we have a listener
+		if (this.listener == null)
+			throw new NoListenerException("Unable to start client, there is no listener!");
+
 		// Reset client data
 		this.preparation = new SessionPreparation(this);
 		preparation.address = address;
-
-		// Set handler data
-		this.channel = bootstrap.connect(address).channel();
 
 		// Send OPEN_CONNECTION_REQUEST_ONE with a decreasing MTU
 		int retries = 0;
@@ -149,9 +339,9 @@ public class RakNetClient {
 				connectionRequestOne.maximumTransferUnit = unit.getMaximumTransferUnit();
 				connectionRequestOne.protocolVersion = RakNet.CLIENT_NETWORK_PROTOCOL;
 				connectionRequestOne.encode();
-				this.sendRaw(connectionRequestOne, address);
+				this.sendRawMessage(connectionRequestOne, address);
 
-				this.loopSleep(500);
+				RakNetUtils.passiveSleep(500);
 			}
 		}
 
@@ -168,13 +358,13 @@ public class RakNetClient {
 			connectionRequestTwo.address = preparation.address;
 			connectionRequestTwo.maximumTransferUnit = preparation.maximumTransferUnit;
 			connectionRequestTwo.encode();
-			this.sendRaw(connectionRequestTwo, address);
+			this.sendRawMessage(connectionRequestTwo, address);
 
-			this.loopSleep(500);
+			RakNetUtils.passiveSleep(500);
 		}
 
 		// If the session was set we are connected
-		if (preparation.readyForSession() == true) {
+		if (preparation.readyForSession()) {
 			// Set session and delete preparation data
 			this.session = preparation.createSession(channel);
 			this.preparation = null;
@@ -187,11 +377,10 @@ public class RakNetClient {
 			session.sendPacket(Reliability.RELIABLE_ORDERED, connectionRequest);
 
 			// Initiate connection loop required for the session to function
-			if (this.threaded == true) {
+			if (this.threaded == true)
 				this.initConnectionThreaded();
-			} else {
+			else
 				this.initConnection();
-			}
 		} else {
 			// Reset the connection data, the connection failed
 			InetSocketAddress preparationAddress = preparation.address;
@@ -199,62 +388,75 @@ public class RakNetClient {
 			this.preparation = null;
 
 			// Why was the exception cancelled?
-			if (preparationCancelReason != null) {
+			if (preparationCancelReason != null)
 				throw preparationCancelReason;
-			} else {
-				// We assume the server is offline
+			else
 				throw new ServerOfflineException(this, preparationAddress);
-			}
+
 		}
 	}
 
-	public void connect(InetAddress address, int port) throws Throwable {
+	/**
+	 * Connects the client to a server with the specified address
+	 * 
+	 * @param address
+	 *            - The address of the server to connect to
+	 * @param port
+	 *            - The port of the server to connect to
+	 * @throws RakNetException
+	 *             - Thrown if an error occurs during connection or login
+	 */
+	public void connect(InetAddress address, int port) throws RakNetException {
 		this.connect(new InetSocketAddress(address, port));
 	}
 
-	public void connect(String address, int port) throws Throwable {
+	/**
+	 * Connects the client to a server with the specified address
+	 * 
+	 * @param address
+	 *            - The address of the server to connect to
+	 * @param port
+	 *            - The port of the server to connect to
+	 * @throws RakNetException
+	 *             - Thrown if an error occurs during connection or login
+	 * @throws UnknownHostException
+	 *             - Thrown if the specified address is an unknown host
+	 */
+	public void connect(String address, int port) throws RakNetException, UnknownHostException {
 		this.connect(InetAddress.getByName(address), port);
 	}
 
-	protected void handleHandlerException(Throwable cause) {
-		if (preparation != null) {
-			preparation.cancelReason = new NettyHandlerException(this, handler, cause);
-			preparation.cancelled = true;
-		}
+	/**
+	 * Connects the the client to the specified discovered server
+	 * 
+	 * @param server
+	 *            - The discovered server to connect to
+	 * @throws RakNetException
+	 *             - Thrown if an error occurs during connection or login
+	 */
+	public void connect(DiscoveredServer server) throws RakNetException {
+		this.connect(server.getAddress());
 	}
 
-	private void sendRaw(RakNetPacket packet, InetSocketAddress address) {
-		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
-	}
-
-	private void broadcastRaw(RakNetPacket packet) {
-		channel.writeAndFlush(new DatagramPacket(packet.buffer(), new InetSocketAddress("255.255.255.255", 19132)));
-	}
-
-	public void sendPing() throws RakNetException {
-		if (this.discoveryEnabled() == false) {
-			throw new DiscoveryDisabledException(this);
-		}
-
-		UnconnectedPing ping = (discoverMode == DiscoverMode.ALL_CONNECTIONS ? new UnconnectedPing()
-				: new UnconnectedPingOpenConnections());
-		ping.time = System.currentTimeMillis();
-		ping.pingId = pingId++;
-		ping.encode();
-
-		this.broadcastRaw(ping);
-	}
-
+	/**
+	 * Starts the loop needed for the client to stay connected to the server
+	 */
 	private void initConnection() {
 		while (session != null) {
 			try {
 				session.update();
+				if (System.currentTimeMillis() - session.getLastPacketReceiveTime() > RakNetSession.SESSION_TIMEOUT)
+					this.disconnect();
 			} catch (Exception e) {
 				session.closeConnection(e.getMessage());
 			}
 		}
 	}
 
+	/**
+	 * Starts the loop needed for the client to stay connected to the server on
+	 * it's own thread
+	 */
 	private void initConnectionThreaded() {
 		// Give the thread a reference
 		RakNetClient client = this;
@@ -269,93 +471,45 @@ public class RakNetClient {
 		thread.start();
 	}
 
-	public void handleMessage(RakNetPacket packet, InetSocketAddress sender) throws Exception {
-		short packetId = packet.getId();
-
-		// Handle the packets in this block only when we are connecting!
-		if (preparation != null) {
-			if (sender.equals(preparation.address) == false) {
-				return; // Only handle these packets from the actual sender!
-			}
-
-			if (packetId == ID_OPEN_CONNECTION_REPLY_1) {
-				OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne(packet);
-				connectionResponseOne.decode();
-
-				if (connectionResponseOne.magic == true && connectionResponseOne.useSecurity == false
-						&& connectionResponseOne.maximumTransferUnit > RakNet.MINIMUM_TRANSFER_UNIT
-						&& connectionResponseOne.maximumTransferUnit < PHYSICAL_MAXIMUM_TRANSFER_UNIT) {
-					preparation.maximumTransferUnit = connectionResponseOne.maximumTransferUnit;
-					preparation.guid = connectionResponseOne.serverGuid;
-					preparation.loginPackets[0] = true;
-				} else {
-					preparation.cancelled = true;
-				}
-			} else if (packetId == ID_OPEN_CONNECTION_REPLY_2) {
-				OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo(packet);
-				connectionResponseTwo.decode();
-
-				if (connectionResponseTwo.magic == true && connectionResponseTwo.encryptionEnabled == false
-						&& connectionResponseTwo.serverGuid == preparation.guid
-						&& connectionResponseTwo.maximumTransferUnit == preparation.maximumTransferUnit) {
-					preparation.loginPackets[1] = true;
-				} else {
-					preparation.cancelled = true;
-				}
-			} else if (packetId == ID_ALREADY_CONNECTED) {
-
-			} else if (packetId == ID_NO_FREE_INCOMING_CONNECTIONS) {
-				NoFreeIncomingConnections noFreeIncomingConnections = new NoFreeIncomingConnections(packet);
-				noFreeIncomingConnections.decode();
-
-				preparation.cancelReason = new NoFreeIncomingConnectionsException(this);
-				preparation.cancelled = true;
-			} else if (packetId == ID_CONNECTION_BANNED) {
-
-			} else if (packetId == ID_INCOMPATIBLE_PROTOCOL_VERSION) {
-				IncompatibleProtocol incompatibleProtocol = new IncompatibleProtocol(packet);
-				incompatibleProtocol.decode();
-
-				if (incompatibleProtocol.serverGuid == preparation.guid) {
-					preparation.cancelReason = new IncompatibleProtocolException(this, RakNet.CLIENT_NETWORK_PROTOCOL,
-							incompatibleProtocol.networkProtocol);
-					preparation.cancelled = true;
-				}
-			}
-			return; // We can't handle anything else until we're logged in!
+	/**
+	 * Disconnects the client from the server if it is connected to one
+	 * 
+	 * @param reason
+	 *            - The reason the client disconnected from the server
+	 */
+	public void disconnect(String reason) {
+		if (session != null) {
+			session.closeConnection(reason);
+			listener.onDisconnect(session, reason);
 		}
-
-		// Like login packets, we only handle these packets from the server
-		if (session == null) {
-			return; // We are not connected
-		}
-
-		if (sender.equals(session.getAddress())) {
-			if (packetId >= ID_RESERVED_3 && packetId <= ID_RESERVED_9) {
-				CustomPacket custom = new CustomPacket(packet);
-				custom.decode();
-
-				session.handleCustom0(custom);
-			} else if (packetId == Acknowledge.ACKNOWLEDGED || packetId == Acknowledge.NOT_ACKNOWLEDGED) {
-				Acknowledge acknowledge = new Acknowledge(packet);
-				acknowledge.decode();
-
-				session.handleAcknowledge(acknowledge);
-			}
-		}
-
+		this.session = null;
+		this.preparation = null;
 	}
 
-	private void loopSleep(int time) {
-		long waitStart = System.currentTimeMillis();
-		while (System.currentTimeMillis() - waitStart < time)
-			;
+	/**
+	 * Disconnects the client from the server if it is connected to one
+	 */
+	public void disconnect() {
+		this.disconnect("Client disconnected");
 	}
 
-	public static void main(String[] args) throws Throwable {
-		RakNetClient client = new RakNetClient();
-		client.enableDiscovery();
-		// client.connect("127.0.0.1", 19132);
+	@Override
+	public void finalize() {
+		discoverySystem.removeClient(this);
+	}
+
+	public static void main(String[] args) throws Exception {
+		RakNetClient client = new RakNetClient(19132);
+		client.setListener(new RakNetClientListener() {
+			@Override
+			public void onServerDiscovered(InetSocketAddress address, Identifier identifier) {
+				MCPEIdentifier mcpeIdentifier = new MCPEIdentifier(identifier);
+				System.out.println(identifier.toString());
+				System.out.println("Discovered server \"" + mcpeIdentifier.getServerName() + "\" on version "
+						+ mcpeIdentifier.getVersionTag());
+			}
+		});
+		client.connect("127.0.0.1", 19132);
 	}
 
 }

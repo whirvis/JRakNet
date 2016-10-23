@@ -13,5 +13,5 @@ public class ConnectionAttemptFailed extends RakNetPacket {
 	public ConnectionAttemptFailed(Packet packet) {
 		super(packet);
 	}
-	
+
 }

@@ -31,7 +31,7 @@
 package net.marfgamer.raknet.protocol;
 
 /**
- * Contains all the reliability types for RakNet.
+ * Contains all the reliability types for RakNet
  * 
  * @author MarfGamer
  */
@@ -43,27 +43,12 @@ public enum Reliability {
 	RELIABLE(2, true, false, false, false),
 	RELIABLE_ORDERED(3, true, true, false, false),
 	RELIABLE_SEQUENCED(4, true, false, true, false),
-	UNRELIABLE_WITH_ACK_RECEIPT(5, false, false, false, true), 
+	UNRELIABLE_WITH_ACK_RECEIPT(5, false, false, false, true),
 	UNRELIABLE_SEQUENCED_WITH_ACK_RECEIPT(6, false, false, true, true),
 	RELIABLE_WITH_ACK_RECEIPT(7, true, false, false, true),
 	RELIABLE_ORDERED_WITH_ACK_RECEIPT(8, true, true, false, true),
 	RELIABLE_SEQUENCED_WITH_ACK_RECEIPT(9, true, false, true, true);
 	/* You can CTRL+SHIFT+F, but make sure these each stay on their own line */
-	
-	public static interface INTERFACE {
-
-		public static final Reliability UNRELIABLE = Reliability.UNRELIABLE;
-		public static final Reliability UNRELIABLE_SEQUENCED = Reliability.UNRELIABLE_SEQUENCED;
-		public static final Reliability RELIABLE = Reliability.RELIABLE;
-		public static final Reliability RELIABLE_ORDERED = Reliability.RELIABLE_ORDERED;
-		public static final Reliability RELIABLE_SEQUENCED = Reliability.RELIABLE_SEQUENCED;
-		public static final Reliability UNRELIABLE_WITH_ACK_RECEIPT = Reliability.UNRELIABLE_WITH_ACK_RECEIPT;
-		public static final Reliability UNRELIABLE_SEQUENCED_WITH_ACK_RECEIPT = Reliability.UNRELIABLE_SEQUENCED_WITH_ACK_RECEIPT;
-		public static final Reliability RELIABLE_WITH_ACK_RECEIPT = Reliability.RELIABLE_WITH_ACK_RECEIPT;
-		public static final Reliability RELIABLE_ORDERED_WITH_ACK_RECEIPT = Reliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT;
-		public static final Reliability RELIABLE_SEQUENCED_WITH_ACK_RECEIPT = Reliability.RELIABLE_SEQUENCED_WITH_ACK_RECEIPT;
-	
-	}
 
 	private final byte reliability;
 	private final boolean reliable;
@@ -79,27 +64,59 @@ public enum Reliability {
 		this.requiresAck = requiresAck;
 	}
 
+	/**
+	 * Returns the reliability as a byte
+	 * 
+	 * @return The reliability as a byte
+	 */
 	public byte asByte() {
 		return this.reliability;
 	}
 
+	/**
+	 * Returns whether or not the reliability is reliable
+	 * 
+	 * @return Whether or not the reliability is reliable
+	 */
 	public boolean isReliable() {
 		return this.reliable;
 	}
 
+	/**
+	 * Returns whether or not the reliability is ordered
+	 * 
+	 * @return Whether or not the reliability is ordered
+	 */
 	public boolean isOrdered() {
 		return this.ordered;
 	}
 
+	/**
+	 * Returns whether or not the reliability is sequenced
+	 * 
+	 * @return Whether or not the reliability is sequenced
+	 */
 	public boolean isSequenced() {
 		return this.sequenced;
 	}
 
+	/**
+	 * Returns whether or not the reliability requires Acknowledgement
+	 * 
+	 * @return Whether or not the reliability requires Acknowledgement
+	 */
 	public boolean requiresAck() {
 		return this.requiresAck;
 	}
 
-	public static Reliability lookup(byte reliability) {
+	/**
+	 * Returns the reliability based on it's ID
+	 * 
+	 * @param reliability
+	 *            - The ID of the reliability to lookup
+	 * @return The reliability based on it's ID
+	 */
+	public static Reliability lookup(int reliability) {
 		Reliability[] reliabilities = Reliability.values();
 		for (Reliability sReliability : reliabilities) {
 			if (sReliability.asByte() == reliability) {
