@@ -4,13 +4,13 @@ import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 
-public class ConnectionBanned extends RakNetPacket {
+public class AlreadyConnected extends RakNetPacket {
 
-	public ConnectionBanned() {
-		super(MessageIdentifier.ID_CONNECTION_BANNED);
+	public AlreadyConnected() {
+		super(MessageIdentifier.ID_ALREADY_CONNECTED);
 	}
 
-	public ConnectionBanned(Packet packet) {
+	public AlreadyConnected(Packet packet) {
 		super(packet);
 	}
 

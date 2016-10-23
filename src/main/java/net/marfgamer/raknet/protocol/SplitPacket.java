@@ -5,6 +5,12 @@ import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.raknet.util.map.IntMap;
 
+/**
+ * Used to easily assemble split packets received from a
+ * <code>RakNetSession</code>
+ *
+ * @author MarfGamer
+ */
 public class SplitPacket {
 
 	private final int splitId;
@@ -18,12 +24,21 @@ public class SplitPacket {
 		this.splitCount = splitCount;
 		this.reliability = reliability;
 		this.payloads = new IntMap<Packet>();
-		
-		if(this.splitCount > RakNet.MAX_SPLIT_COUNT) {
+
+		if (this.splitCount > RakNet.MAX_SPLIT_COUNT) {
 			throw new IllegalArgumentException("Split count can be no greater than " + RakNet.MAX_SPLIT_COUNT + "!");
 		}
 	}
 
+	/**
+	 * Updates the data for the split packet while also verifying that the
+	 * specified <code>EncapsulatedPacket</code> belongs to this split packet
+	 * 
+	 * @param encapsulated
+	 *            - The <code>EncapsulatedPacket</code> being used to update the
+	 *            data
+	 * @return The packet if finished, null if data is still missing
+	 */
 	public Packet update(EncapsulatedPacket encapsulated) {
 		// Update payload data
 		if (encapsulated.split != true || encapsulated.splitId != this.splitId

@@ -143,7 +143,8 @@ public class Packet {
 				return null;
 			}
 		} else {
-			throw new IllegalArgumentException("Unknown protocol IPv" + version + "!");
+			this.read(version); // Still read the bytes to prevent other errors
+			return null;
 		}
 	}
 

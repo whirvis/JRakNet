@@ -2,7 +2,7 @@ package net.marfgamer.raknet.server;
 
 import java.net.InetSocketAddress;
 
-import net.marfgamer.raknet.server.identifier.Identifier;
+import net.marfgamer.raknet.identifier.Identifier;
 
 public class ServerPing {
 

@@ -6,14 +6,14 @@ import net.marfgamer.raknet.protocol.MessageIdentifier;
 
 public class UnconnectedPing extends RakNetPacket {
 
-	public long time;
-	public long pingId;
+	public long timestamp;
+	public boolean magic;
 
 	protected UnconnectedPing(boolean requiresOpenConnections) {
 		super((requiresOpenConnections ? MessageIdentifier.ID_UNCONNECTED_PING_OPEN_CONNECTIONS
 				: MessageIdentifier.ID_UNCONNECTED_PING));
 	}
-	
+
 	public UnconnectedPing(Packet packet) {
 		super(packet);
 	}
@@ -24,14 +24,14 @@ public class UnconnectedPing extends RakNetPacket {
 
 	@Override
 	public void encode() {
-		this.writeLong(time);
-		this.writeLong(pingId);
+		this.writeLong(timestamp);
+		this.writeMagic();
 	}
 
 	@Override
 	public void decode() {
-		this.time = this.readLong();
-		this.pingId = this.readLong();
+		this.timestamp = this.readLong();
+		this.magic = this.checkMagic();
 	}
 
 }

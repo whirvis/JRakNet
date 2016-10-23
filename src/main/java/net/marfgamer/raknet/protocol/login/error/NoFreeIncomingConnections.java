@@ -13,5 +13,5 @@ public class NoFreeIncomingConnections extends RakNetPacket {
 	public NoFreeIncomingConnections(Packet packet) {
 		super(packet);
 	}
-	
+
 }

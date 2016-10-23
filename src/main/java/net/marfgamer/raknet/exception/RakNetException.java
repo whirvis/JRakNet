@@ -30,6 +30,11 @@
  */
 package net.marfgamer.raknet.exception;
 
+/**
+ * This class represents an exception related to RakNet
+ *
+ * @author MarfGamer
+ */
 public class RakNetException extends Exception {
 
 	private static final long serialVersionUID = -685945306592443928L;

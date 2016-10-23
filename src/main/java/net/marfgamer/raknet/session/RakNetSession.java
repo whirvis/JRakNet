@@ -9,6 +9,8 @@ import io.netty.channel.socket.DatagramPacket;
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.RakNetPacket;
+import net.marfgamer.raknet.exception.session.InvalidChannelException;
+import net.marfgamer.raknet.exception.session.SplitQueueOverloadException;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.protocol.SplitPacket;
@@ -24,7 +26,7 @@ import net.marfgamer.raknet.protocol.status.ConnectedPong;
 import net.marfgamer.raknet.util.ArrayUtils;
 import net.marfgamer.raknet.util.map.IntMap;
 
-public abstract class RakNetSession implements Reliability.INTERFACE {
+public abstract class RakNetSession {
 
 	public static final int DEFAULT_ORDER_CHANNEL = 0x00;
 	public static final int ACK_SEND_WAIT_TIME_MILLIS = 3000;
@@ -151,7 +153,7 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 		return this.highestLatency;
 	}
 
-	public final void handleCustom0(CustomPacket custom) throws Exception {
+	public final void handleCustom0(CustomPacket custom) {
 		// Only handle if we haven't handled it before
 		if (customIndexQueue.contains(custom.sequenceNumber)) {
 			return; // We have handle it before!
@@ -190,7 +192,7 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 		}
 	}
 
-	private final void handleEncapsulated0(EncapsulatedPacket encapsulated) throws Exception {
+	private final void handleEncapsulated0(EncapsulatedPacket encapsulated) throws SplitQueueOverloadException {
 		Reliability reliability = encapsulated.reliability;
 
 		// Put together split packet
@@ -199,7 +201,7 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 				splitQueue.put(encapsulated.splitId,
 						new SplitPacket(encapsulated.splitId, encapsulated.splitCount, encapsulated.reliability));
 				if (splitQueue.size() > RakNet.MAX_SPLITS_PER_QUEUE) {
-					throw new IllegalArgumentException("Too many split packets in the queue!");
+					throw new SplitQueueOverloadException();
 				}
 			}
 
@@ -252,9 +254,8 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 	 * 
 	 * @param packet
 	 * @param channel
-	 * @throws Exception
 	 */
-	private final void handlePacket0(RakNetPacket packet, int channel) throws Exception {
+	private final void handlePacket0(RakNetPacket packet, int channel) {
 		int id = packet.getId();
 
 		if (id == MessageIdentifier.ID_CONNECTED_PING) {
@@ -264,7 +265,7 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 			ConnectedPong pong = new ConnectedPong();
 			pong.identifier = ping.identifier;
 			pong.encode();
-			this.sendPacket(UNRELIABLE, pong);
+			this.sendPacket(Reliability.UNRELIABLE, pong);
 		} else if (id == MessageIdentifier.ID_CONNECTED_PONG) {
 			ConnectedPong pong = new ConnectedPong(packet);
 			pong.decode();
@@ -294,7 +295,7 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 		}
 	}
 
-	public final void handleAcknowledge(Acknowledge acknowledge) throws Exception {
+	public final void handleAcknowledge(Acknowledge acknowledge) {
 		// Make sure the ranged records were converted to single records
 		acknowledge.simplifyRecords();
 
@@ -323,7 +324,7 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 		}
 	}
 
-	public final void handleAcknowledgeReceipt(AcknowledgeReceipt acknowledgeReceipt) throws Exception {
+	public final void handleAcknowledgeReceipt(AcknowledgeReceipt acknowledgeReceipt) {
 		if (acknowledgeReceipt.getType() == AcknowledgeReceiptType.ACKNOWLEDGED) {
 			for (EncapsulatedPacket encapsulated : requireAcknowledgeQueue.get(acknowledgeReceipt.record)) {
 				this.onAcknowledge(new Record(acknowledgeReceipt.record), encapsulated.reliability,
@@ -332,10 +333,10 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 		}
 	}
 
-	public final void sendPacket(Reliability reliability, int channel, Packet packet) {
+	public final void sendPacket(Reliability reliability, int channel, Packet packet) throws InvalidChannelException {
 		// Make sure channel doesn't exceed RakNet limit
 		if (channel > RakNet.MAX_CHANNELS) {
-			throw new IllegalArgumentException("Channel number can be no larger than " + RakNet.MAX_CHANNELS + "!");
+			throw new InvalidChannelException();
 		}
 
 		// Make sure the EncapsulatedPacket fits inside a CustomPacket
@@ -392,17 +393,18 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 		}
 	}
 
-	public final void sendPacket(Reliability reliability, int channel, Packet... packets) {
+	public final void sendPacket(Reliability reliability, int channel, Packet... packets)
+			throws InvalidChannelException {
 		for (Packet packet : packets) {
 			this.sendPacket(reliability, channel, packet);
 		}
 	}
 
-	public final void sendPacket(Reliability reliability, Packet packet) {
+	public final void sendPacket(Reliability reliability, Packet packet) throws InvalidChannelException {
 		this.sendPacket(reliability, DEFAULT_ORDER_CHANNEL, packet);
 	}
 
-	public final void sendPacket(Reliability reliability, Packet... packets) {
+	public final void sendPacket(Reliability reliability, Packet... packets) throws InvalidChannelException {
 		for (Packet packet : packets) {
 			this.sendPacket(reliability, DEFAULT_ORDER_CHANNEL, packet);
 		}
@@ -412,7 +414,7 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
 	}
 
-	private final void updateAcknowledge(boolean forceSend) throws Exception {
+	private final void updateAcknowledge(boolean forceSend) {
 		long currentTime = System.currentTimeMillis();
 
 		// Check for missing packets
@@ -448,7 +450,7 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 		}
 	}
 
-	public final void update() throws Exception {
+	public final void update() {
 		long currentTime = System.currentTimeMillis();
 
 		// Are we missing any packets?
@@ -488,7 +490,7 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 			ConnectedPing ping = new ConnectedPing();
 			ping.identifier = this.pingIdentifier++;
 			ping.encode();
-			this.sendPacket(UNRELIABLE, ping);
+			this.sendPacket(Reliability.UNRELIABLE, ping);
 			this.lastPingSend = currentTime;
 		}
 
@@ -499,10 +501,9 @@ public abstract class RakNetSession implements Reliability.INTERFACE {
 
 	}
 
-	public abstract void onAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet)
-			throws Exception;
+	public abstract void onAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet);
 
-	public abstract void handlePacket(RakNetPacket packet, int channel) throws Exception;
+	public abstract void handlePacket(RakNetPacket packet, int channel);
 
 	public abstract void closeConnection(String reason);
 

@@ -3,8 +3,7 @@ package net.marfgamer.raknet.protocol;
 import java.lang.reflect.Field;
 
 /**
- * Contains all the ID's for RakNet, in order to make use of them
- * <code>loadIds</code> must first be called
+ * Contains all the IDs for RakNet
  *
  * @author MarfGamer
  */

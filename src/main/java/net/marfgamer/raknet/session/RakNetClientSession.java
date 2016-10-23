@@ -4,7 +4,6 @@ import java.net.InetSocketAddress;
 
 import io.netty.channel.Channel;
 import net.marfgamer.raknet.RakNetPacket;
-import net.marfgamer.raknet.exception.RakNetException;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.protocol.login.ConnectionRequest;
@@ -37,7 +36,7 @@ public class RakNetClientSession extends RakNetSession {
 	}
 
 	public long getTimestamp() {
-		return this.timestamp;
+		return (System.currentTimeMillis() - this.timestamp);
 	}
 
 	@Override
@@ -46,7 +45,7 @@ public class RakNetClientSession extends RakNetSession {
 	}
 
 	@Override
-	public void handlePacket(RakNetPacket packet, int channel) throws RakNetException {
+	public void handlePacket(RakNetPacket packet, int channel) {
 		short id = packet.getId();
 		System.out.println(id);
 		if (id == MessageIdentifier.ID_CONNECTION_REQUEST && this.getState() == RakNetState.DISCONNECTED) {
@@ -60,13 +59,13 @@ public class RakNetClientSession extends RakNetSession {
 				requestAccepted.serverTimestamp = server.getTimestamp();
 				requestAccepted.encode();
 
-				this.sendPacket(RELIABLE_ORDERED, requestAccepted);
+				this.sendPacket(Reliability.RELIABLE_ORDERED, requestAccepted);
 				this.setState(RakNetState.HANDSHAKING);
 			} else {
 				ConnectionAttemptFailed attemptFailed = new ConnectionAttemptFailed();
 				attemptFailed.encode();
 
-				this.sendPacket(RELIABLE_ORDERED, attemptFailed);
+				this.sendPacket(Reliability.RELIABLE_ORDERED, attemptFailed);
 				this.setState(RakNetState.DISCONNECTED);
 				server.removeSession(this, "Connection failed, invalid GUID");
 			}
@@ -83,7 +82,7 @@ public class RakNetClientSession extends RakNetSession {
 				ConnectionAttemptFailed attemptFailed = new ConnectionAttemptFailed();
 				attemptFailed.encode();
 
-				this.sendPacket(RELIABLE_ORDERED, attemptFailed);
+				this.sendPacket(Reliability.RELIABLE_ORDERED, attemptFailed);
 				this.setState(RakNetState.DISCONNECTED);
 				server.removeSession(this, "Connection failed, invalid timestamp");
 			}

@@ -16,7 +16,8 @@ import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.exception.NoListenerException;
-import net.marfgamer.raknet.exception.RakNetException;
+import net.marfgamer.raknet.identifier.Identifier;
+import net.marfgamer.raknet.identifier.MCPEIdentifier;
 import net.marfgamer.raknet.protocol.login.OpenConnectionRequestOne;
 import net.marfgamer.raknet.protocol.login.OpenConnectionRequestTwo;
 import net.marfgamer.raknet.protocol.login.OpenConnectionResponseOne;
@@ -28,8 +29,6 @@ import net.marfgamer.raknet.protocol.message.acknowledge.Acknowledge;
 import net.marfgamer.raknet.protocol.message.acknowledge.AcknowledgeReceipt;
 import net.marfgamer.raknet.protocol.status.UnconnectedPing;
 import net.marfgamer.raknet.protocol.status.UnconnectedPong;
-import net.marfgamer.raknet.server.identifier.Identifier;
-import net.marfgamer.raknet.server.identifier.MCPEIdentifier;
 import net.marfgamer.raknet.session.RakNetClientSession;
 import net.marfgamer.raknet.session.RakNetState;
 
@@ -133,7 +132,7 @@ public class RakNetServer implements RakNet {
 		return sessions.values().toArray(new RakNetClientSession[sessions.size()]);
 	}
 
-	protected void handleMessage(RakNetPacket packet, InetSocketAddress sender) throws Exception {
+	protected void handleMessage(RakNetPacket packet, InetSocketAddress sender) {
 		short packetId = packet.getId();
 
 		if (packetId == ID_UNCONNECTED_PING || packetId == ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
@@ -143,10 +142,10 @@ public class RakNetServer implements RakNet {
 			if ((packetId == ID_UNCONNECTED_PING || sessions.size() < this.maxConnections) && identifier != null) {
 				ServerPing pingEvent = new ServerPing(sender, identifier);
 				listener.handlePing(pingEvent);
-				if (pingEvent.getIdentifier() != null) {
+				if (ping.magic == true && pingEvent.getIdentifier() != null) {
 					UnconnectedPong pong = new UnconnectedPong();
-					pong.pingId = ping.pingId;
-					pong.pongId = this.guid;
+					pong.pingId = ping.timestamp;
+					pong.pongId = this.getTimestamp();
 					pong.identifier = pingEvent.getIdentifier();
 
 					pong.encode();
@@ -260,7 +259,7 @@ public class RakNetServer implements RakNet {
 		this.removeSession(sessions.get(address), reason);
 	}
 
-	public void start() throws RakNetException {
+	public void start() throws NoListenerException {
 		// Make sure we have an adapter
 		if (listener == null) {
 			throw new NoListenerException("The listener must be set in order to start the server!");
@@ -292,11 +291,7 @@ public class RakNetServer implements RakNet {
 		Thread thread = new Thread() {
 			@Override
 			public synchronized void run() {
-				try {
-					server.start();
-				} catch (RakNetException e) {
-					e.printStackTrace();
-				}
+				server.start();
 			}
 		};
 		thread.start();
@@ -307,11 +302,16 @@ public class RakNetServer implements RakNet {
 
 	public void stop() {
 		this.running = false;
+		for (RakNetClientSession session : sessions.values()) {
+			session.closeConnection("Server shutdown");
+		}
+		sessions.clear();
 		this.getListener().serverShutdown();
 	}
 
-	public static void main(String[] args) throws RakNetException {
-		MCPEIdentifier identifier = new MCPEIdentifier("A JRakNet Server", 80, "0.15.0", 0, 10);
+	public static void main(String[] args) {
+		MCPEIdentifier identifier = new MCPEIdentifier("A JRakNet Server", 80, "0.15.0", 0, 10, -1, "TheBestWorld",
+				"Developer");
 		RakNetServer s = new RakNetServer(19132, 10, identifier);
 
 		s.setListener(new RakNetServerListener() {
