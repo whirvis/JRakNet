@@ -1,9 +1,40 @@
+/*
+ *       _   _____            _      _   _          _   
+ *      | | |  __ \          | |    | \ | |        | |  
+ *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_ 
+ *  _   | | |  _  /   / _` | | |/ / | . ` |  / _ \ | __|
+ * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
+ *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
+ *                                                  
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2016 MarfGamer
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.  
+ */
 package net.marfgamer.raknet.util;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
+import java.net.UnknownHostException;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -19,58 +50,212 @@ import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.identifier.Identifier;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
+import net.marfgamer.raknet.protocol.login.OpenConnectionRequestOne;
+import net.marfgamer.raknet.protocol.login.OpenConnectionResponseOne;
+import net.marfgamer.raknet.protocol.login.error.IncompatibleProtocol;
 import net.marfgamer.raknet.protocol.status.UnconnectedPing;
 import net.marfgamer.raknet.protocol.status.UnconnectedPong;
 
+/**
+ * This class is used to accomplish tasks related to the RakNet protocol without
+ * needing a dedicated client or server
+ *
+ * @author MarfGamer
+ */
 public class RakNetUtils {
 
 	private static final long UTILS_TIMESTAMP = System.currentTimeMillis();
+	private static final int SERVER_PING_RETRIES = 5;
+	private static final int IDENTIFIER_RETRIES = 3;
 
-	public static int getMaximumTransferUnit() {
-		try {
-			return NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getMTU();
-		} catch (IOException e) {
-			return -1;
-		}
-	}
+	/**
+	 * Sends a raw message to the specified address for the specified amount of
+	 * times in the specified interval until the packet is received or there is
+	 * a timeout
+	 * 
+	 * @param address
+	 *            - The address to send the packet to
+	 * @param packet
+	 *            - The packet to send
+	 * @param timeout
+	 *            - The interval of which the packet is sent
+	 * @param retries
+	 *            - How many times the packet will be sent
+	 * @return The received packet if it was received
+	 */
+	private static RakNetPacket createBootstrapAndSend(InetSocketAddress address, Packet packet, long timeout,
+			int retries) {
+		RakNetPacket packetReceived = null;
 
-	public static RakNetPacket createBootstrapAndSend(InetSocketAddress address, Packet packet, long timeout) {
+		// Create bootstrap and bind
 		EventLoopGroup group = new NioEventLoopGroup();
-		try {
-			// Create bootstrap and bind
-			Bootstrap bootstrap = new Bootstrap();
-			BootstrapHandler handler = new BootstrapHandler();
-			bootstrap.group(group).channel(NioDatagramChannel.class).option(ChannelOption.SO_BROADCAST, true)
-					.option(ChannelOption.SO_RCVBUF, RakNet.MINIMUM_TRANSFER_UNIT)
-					.option(ChannelOption.SO_SNDBUF, RakNet.MINIMUM_TRANSFER_UNIT).handler(handler);
+		Bootstrap bootstrap = new Bootstrap();
+		BootstrapHandler handler = new BootstrapHandler();
+		bootstrap.group(group).channel(NioDatagramChannel.class).option(ChannelOption.SO_BROADCAST, true)
+				.option(ChannelOption.SO_RCVBUF, RakNet.MINIMUM_TRANSFER_UNIT)
+				.option(ChannelOption.SO_SNDBUF, RakNet.MINIMUM_TRANSFER_UNIT).handler(handler);
 
-			// Create channel, send packet, and close it
-			Channel channel = bootstrap.bind(0).sync().channel();
-			channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
-			//channel.close();
-			
-			// Wait for packet to come in, return null on timeout
+		// Create channel, send packet, and close it
+		Channel channel = bootstrap.bind(0).channel();
+		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
+
+		// Wait for packet to come in, return null on timeout
+		while (retries > 0) {
 			long sendTime = System.currentTimeMillis();
 			while (System.currentTimeMillis() - sendTime < timeout) {
 				if (handler.packet != null) {
-					return handler.packet;
+					packetReceived = handler.packet;
+					break; // We found the packet
 				}
 			}
-			group.shutdownGracefully();
-		} catch (Exception e) {
-			group.shutdownGracefully();
+			if (packetReceived != null) {
+				break; // The master loop is no longer needed
+			}
+			retries--;
 		}
-		return null;
+
+		group.shutdownGracefully();
+		return packetReceived;
 	}
 
-	public static Identifier getIdentifier(InetAddress address, int port) {
+	/**
+	 * Returns whether or not the server is online
+	 * 
+	 * @param address
+	 *            - The address of the server
+	 * @return Whether or not the server is online
+	 */
+	public static boolean isServerOnline(InetSocketAddress address) {
+		// Create connection packet
+		OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne();
+		connectionRequestOne.maximumTransferUnit = RakNet.MINIMUM_TRANSFER_UNIT;
+		connectionRequestOne.protocolVersion = RakNet.CLIENT_NETWORK_PROTOCOL;
+		connectionRequestOne.encode();
+
+		// Wait for response to come in
+		RakNetPacket packet = createBootstrapAndSend(address, connectionRequestOne, 1000, SERVER_PING_RETRIES);
+		if (packet != null) {
+			if (packet.getId() == MessageIdentifier.ID_OPEN_CONNECTION_REPLY_1) {
+				OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne(packet);
+				connectionResponseOne.decode();
+				if (connectionResponseOne.magic == true) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns whether or not the server is online
+	 * 
+	 * @param address
+	 *            - The address of the server
+	 * @param port
+	 *            - The port of the server
+	 * @return Whether or not the server is online
+	 */
+	public static boolean isServerOnline(InetAddress address, int port) {
+		return isServerOnline(new InetSocketAddress(address, port));
+	}
+
+	/**
+	 * Returns whether or not the server is online
+	 * 
+	 * @param address
+	 *            - The address of the server
+	 * @param port
+	 *            - The port of the server
+	 * @return Whether or not the server is online
+	 * @throws UnknownHostException
+	 *             - Thrown if the specified address is an unknown host
+	 */
+	public static boolean isServerOnline(String address, int port) throws UnknownHostException {
+		return isServerOnline(InetAddress.getByName(address), port);
+	}
+
+	/**
+	 * Returns whether or not the server is compatible to the current client
+	 * protocol
+	 * 
+	 * @param address
+	 *            - The address of the server
+	 * @return Whether or not the server is compatible to the current client
+	 *         protocol
+	 */
+	public static boolean isServerCompatible(InetSocketAddress address) {
+		// Create connection packet
+		OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne();
+		connectionRequestOne.maximumTransferUnit = RakNet.MINIMUM_TRANSFER_UNIT;
+		connectionRequestOne.protocolVersion = RakNet.CLIENT_NETWORK_PROTOCOL;
+		connectionRequestOne.encode();
+
+		// Wait for response to come in
+		RakNetPacket packet = createBootstrapAndSend(address, connectionRequestOne, 1000, SERVER_PING_RETRIES);
+		if (packet != null) {
+			if (packet.getId() == MessageIdentifier.ID_OPEN_CONNECTION_REPLY_1) {
+				OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne(packet);
+				connectionResponseOne.decode();
+				if (connectionResponseOne.magic == true) {
+					return true;
+				}
+			} else if (packet.getId() == MessageIdentifier.ID_INCOMPATIBLE_PROTOCOL_VERSION) {
+				IncompatibleProtocol incompatibleProtocol = new IncompatibleProtocol(packet);
+				incompatibleProtocol.decode();
+
+				return false;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns whether or not the server is compatible to the current client
+	 * protocol
+	 * 
+	 * @param address
+	 *            - The address of the server
+	 * @param port
+	 *            - The port of the server
+	 * @return Whether or not the server is compatible to the current client
+	 *         protocol
+	 */
+	public static boolean isServerCompatible(InetAddress address, int port) {
+		return isServerCompatible(new InetSocketAddress(address, port));
+	}
+
+	/**
+	 * Returns whether or not the server is compatible to the current client
+	 * protocol
+	 * 
+	 * @param address
+	 *            - The address of the server
+	 * @param port
+	 *            - The port of the server
+	 * @return Whether or not the server is compatible to the current client
+	 *         protocol
+	 * @throws UnknownHostException
+	 *             - Thrown if the specified address is an unknown host
+	 */
+	public static boolean isServerCompatible(String address, int port) throws UnknownHostException {
+		return isServerCompatible(InetAddress.getByName(address), port);
+	}
+
+	/**
+	 * Returns the specified server's identifier
+	 * 
+	 * @param address
+	 *            - The address of the server
+	 * @return The specified server's identifier
+	 */
+	public static Identifier getServerIdentifier(InetSocketAddress address) {
 		// Create ping packet
 		UnconnectedPing ping = new UnconnectedPing();
 		ping.timestamp = (System.currentTimeMillis() - UTILS_TIMESTAMP);
 		ping.encode();
 
 		// Wait for response to come in
-		RakNetPacket packet = createBootstrapAndSend(new InetSocketAddress(address, port), ping, 1000);
+		RakNetPacket packet = createBootstrapAndSend(address, ping, 1000, IDENTIFIER_RETRIES);
 		if (packet != null) {
 			if (packet.getId() == MessageIdentifier.ID_UNCONNECTED_PONG) {
 				UnconnectedPong pong = new UnconnectedPong(packet);
@@ -83,10 +268,57 @@ public class RakNetUtils {
 		return null;
 	}
 
-	public static void main(String[] args) throws Exception {
-		System.out.println(getIdentifier(InetAddress.getByName("192.168.1.21"), 19132));
+	/**
+	 * Returns the specified server's identifier
+	 * 
+	 * @param address
+	 *            - The address of the server
+	 * @param port
+	 *            - The port of the server
+	 * @return The specified server's identifier
+	 */
+	public static Identifier getServerIdentifier(InetAddress address, int port) {
+		return getServerIdentifier(new InetSocketAddress(address, port));
 	}
 
+	/**
+	 * Returns the specified server's identifier
+	 * 
+	 * @param address
+	 *            - The address of the server
+	 * @param port
+	 *            - The port of the server
+	 * @return The specified server's identifier
+	 * @throws UnknownHostException
+	 *             - Thrown if the specified address is an unknown host
+	 */
+	public static Identifier getServerIdentifier(String address, int port) throws UnknownHostException {
+		return getServerIdentifier(InetAddress.getByName(address), port);
+	}
+
+	/**
+	 * Returns the maximum transfer unit of the network interface binded to the
+	 * localhost
+	 * 
+	 * @return The maximum transfer unit of the network interface binded to the
+	 *         localhost
+	 */
+	public static int getMaximumTransferUnit() {
+		try {
+			return NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getMTU();
+		} catch (IOException e) {
+			return -1;
+		}
+	}
+
+	/**
+	 * Parses a String as a long and returns -1 in the case of a
+	 * NumberFormatException
+	 * 
+	 * @param longStr
+	 *            - The String to parse
+	 * @return The String as a long
+	 */
 	public static long parseLongPassive(String longStr) {
 		try {
 			return Long.parseLong(longStr);
@@ -95,24 +327,61 @@ public class RakNetUtils {
 		}
 	}
 
+	/**
+	 * Parses a String as an int and returns -1 in the case of a
+	 * NumberFormatException
+	 * 
+	 * @param intStr
+	 *            - The String to parse
+	 * @return The String as an int
+	 */
 	public static int parseIntPassive(String intStr) {
 		return (int) RakNetUtils.parseLongPassive(intStr);
 	}
 
+	/**
+	 * Parses a String as a short and returns -1 in the case of a
+	 * NumberFormatException
+	 * 
+	 * @param shortStr
+	 *            - The String to parse
+	 * @return The String as a short
+	 */
 	public static short parseShortPassive(String shortStr) {
 		return (short) RakNetUtils.parseLongPassive(shortStr);
 	}
 
+	/**
+	 * Parses a String as a byte and returns -1 in the case of a
+	 * NumberFormatException
+	 * 
+	 * @param byteStr
+	 *            - The String to parse
+	 * @return The String as a byte
+	 */
 	public static byte parseBytePassive(String byteStr) {
 		return (byte) RakNetUtils.parseLongPassive(byteStr);
 	}
 
+	/**
+	 * Causes a sleep on the main thread using a simple while loop
+	 * 
+	 * @param time
+	 *            - How long the thread will sleep in milliseconds
+	 */
 	public static void passiveSleep(long time) {
 		long sleepStart = System.currentTimeMillis();
 		while (System.currentTimeMillis() - sleepStart < time)
 			;
 	}
 
+	/**
+	 * Used by
+	 * <code>createBootstrapAndSend(InetSocketAddress, Packet, long, int)</code>
+	 * to wait for the packet and return it
+	 *
+	 * @author MarfGamer
+	 */
 	private static class BootstrapHandler extends ChannelInboundHandlerAdapter {
 
 		public volatile RakNetPacket packet;
