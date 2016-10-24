@@ -2,10 +2,8 @@ package net.marfgamer.raknet.client;
 
 import static net.marfgamer.raknet.protocol.MessageIdentifier.*;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,6 +37,7 @@ import net.marfgamer.raknet.protocol.status.UnconnectedPingOpenConnections;
 import net.marfgamer.raknet.protocol.status.UnconnectedPong;
 import net.marfgamer.raknet.session.RakNetServerSession;
 import net.marfgamer.raknet.session.RakNetSession;
+import net.marfgamer.raknet.session.RakNetState;
 import net.marfgamer.raknet.util.RakNetUtils;
 
 /**
@@ -49,20 +48,8 @@ import net.marfgamer.raknet.util.RakNetUtils;
 public class RakNetClient {
 
 	// JRakNet plans to use it's own dynamic MTU system later
-	protected static int PHYSICAL_MAXIMUM_TRANSFER_UNIT = -1;
 	protected static final MaximumTransferUnit[] units = new MaximumTransferUnit[] { new MaximumTransferUnit(1172, 4),
 			new MaximumTransferUnit(548, 5) };
-
-	// Attempt to detect the MTU
-	static {
-		try {
-			PHYSICAL_MAXIMUM_TRANSFER_UNIT = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getMTU();
-		} catch (IOException e) {
-			System.err.println("Warning: Failed to locate the physical maximum transfer unit! Defaulting to "
-					+ units[0].getMaximumTransferUnit() + "...");
-			PHYSICAL_MAXIMUM_TRANSFER_UNIT = units[0].getMaximumTransferUnit();
-		}
-	}
 
 	// Used to discover systems without relying on the main thread
 	private static final DiscoveryThread discoverySystem = new DiscoveryThread();
@@ -110,8 +97,9 @@ public class RakNetClient {
 		this.channel = bootstrap.bind(0).channel();
 
 		// Initiate discovery system if it is not yet started
-		if (discoverySystem.isRunning() == false)
+		if (discoverySystem.isRunning() == false) {
 			discoverySystem.start();
+		}
 		discoverySystem.addClient(this);
 	}
 
@@ -124,6 +112,15 @@ public class RakNetClient {
 	}
 
 	/**
+	 * Returns the client's globally unique ID (GUID)
+	 * 
+	 * @return The client's globally unique ID
+	 */
+	public long getGloballyUniqueId() {
+		return this.guid;
+	}
+
+	/**
 	 * Returns the client's timestamp (how long ago it started in milliseconds)
 	 * 
 	 * @return The client's timestamp
@@ -133,22 +130,24 @@ public class RakNetClient {
 	}
 
 	/**
-	 * Sets the client's discovery mode
-	 * 
-	 * @param mode
-	 *            - How the client will discover servers on the local network
-	 */
-	public void setDiscoveryMode(DiscoveryMode mode) {
-		this.mode = (mode != null ? mode : DiscoveryMode.NONE);
-	}
-
-	/**
 	 * Returns the client's discovery mode
 	 * 
 	 * @return The client's discovery mode
 	 */
 	public DiscoveryMode getDiscoveryMode() {
 		return this.mode;
+	}
+
+	/**
+	 * Sets the client's discovery mode
+	 * 
+	 * @param mode
+	 *            - How the client will discover servers on the local network
+	 * @return The client
+	 */
+	public RakNetClient setDiscoveryMode(DiscoveryMode mode) {
+		this.mode = (mode != null ? mode : DiscoveryMode.NONE);
+		return this;
 	}
 
 	/**
@@ -165,9 +164,14 @@ public class RakNetClient {
 	 * 
 	 * @param listener
 	 *            - The client's new listener
+	 * @return The client
 	 */
-	public void setListener(RakNetClientListener listener) {
+	public RakNetClient setListener(RakNetClientListener listener) {
+		if (listener == null) {
+			throw new NullPointerException("Listener must not be null!");
+		}
 		this.listener = listener;
+		return this;
 	}
 
 	/**
@@ -177,6 +181,18 @@ public class RakNetClient {
 	 */
 	public RakNetServerSession getSession() {
 		return this.session;
+	}
+
+	/**
+	 * Returns whether or not the client is connected
+	 * 
+	 * @return Whether or not the client is connected
+	 */
+	public boolean isConnected() {
+		if (session != null) {
+			return (session.getState() == RakNetState.CONNECTED);
+		}
+		return false;
 	}
 
 	/**
@@ -200,7 +216,7 @@ public class RakNetClient {
 	 * Handles a packet received by the handler
 	 * 
 	 * @param packet
-	 *            - The received packet to handler
+	 *            - The packet to handle
 	 * @param sender
 	 *            - The address of the sender
 	 */
@@ -258,8 +274,9 @@ public class RakNetClient {
 	 */
 	public void updateDiscoveryData() {
 		// Make sure we have a listener
-		if (listener == null)
+		if (listener == null) {
 			throw new NoListenerException("There must be a client to start the listener!");
+		}
 
 		// Remove all servers that have timed out
 		ArrayList<InetSocketAddress> forgottenServers = new ArrayList<InetSocketAddress>();
@@ -276,8 +293,9 @@ public class RakNetClient {
 		// Broadcast ping
 		if (mode != DiscoveryMode.NONE && discoveryPort > -1) {
 			UnconnectedPing ping = new UnconnectedPing();
-			if (mode == DiscoveryMode.OPEN_CONNECTIONS)
+			if (mode == DiscoveryMode.OPEN_CONNECTIONS) {
 				ping = new UnconnectedPingOpenConnections();
+			}
 
 			ping.timestamp = this.getTimestamp();
 			ping.encode();
@@ -299,16 +317,18 @@ public class RakNetClient {
 		if (!discovered.containsKey(sender)) {
 			// Server discovered
 			discovered.put(sender, new DiscoveredServer(sender, System.currentTimeMillis(), pong.identifier));
-			if (listener != null)
+			if (listener != null) {
 				listener.onServerDiscovered(sender, pong.identifier);
+			}
 		} else {
 			// Server already discovered, but data has changed
 			DiscoveredServer server = discovered.get(sender);
 			server.setDiscoveryTimestamp(System.currentTimeMillis());
 			if (server.getIdentifier().equals(pong.identifier) == false) {
 				server.setIdentifier(pong.identifier);
-				if (listener != null)
+				if (listener != null) {
 					listener.onServerIdentifierUpdate(sender, pong.identifier);
+				}
 			}
 		}
 	}
@@ -323,8 +343,9 @@ public class RakNetClient {
 	 */
 	public void connect(InetSocketAddress address) throws RakNetException {
 		// Make sure we have a listener
-		if (this.listener == null)
+		if (this.listener == null) {
 			throw new NoListenerException("Unable to start client, there is no listener!");
+		}
 
 		// Reset client data
 		this.preparation = new SessionPreparation(this);
@@ -374,13 +395,14 @@ public class RakNetClient {
 			connectionRequest.clientGuid = this.guid;
 			connectionRequest.timestamp = (System.currentTimeMillis() - this.timestamp);
 			connectionRequest.encode();
-			session.sendPacket(Reliability.RELIABLE_ORDERED, connectionRequest);
+			session.sendMessage(Reliability.RELIABLE_ORDERED, connectionRequest);
 
 			// Initiate connection loop required for the session to function
-			if (this.threaded == true)
+			if (this.threaded == true) {
 				this.initConnectionThreaded();
-			else
+			} else {
 				this.initConnection();
+			}
 		} else {
 			// Reset the connection data, the connection failed
 			InetSocketAddress preparationAddress = preparation.address;
@@ -388,11 +410,11 @@ public class RakNetClient {
 			this.preparation = null;
 
 			// Why was the exception cancelled?
-			if (preparationCancelReason != null)
+			if (preparationCancelReason != null) {
 				throw preparationCancelReason;
-			else
+			} else {
 				throw new ServerOfflineException(this, preparationAddress);
-
+			}
 		}
 	}
 
@@ -445,10 +467,11 @@ public class RakNetClient {
 		while (session != null) {
 			try {
 				session.update();
-				if (System.currentTimeMillis() - session.getLastPacketReceiveTime() > RakNetSession.SESSION_TIMEOUT)
+				if (System.currentTimeMillis() - session.getLastPacketReceiveTime() > RakNetSession.SESSION_TIMEOUT) {
 					this.disconnect();
+				}
 			} catch (Exception e) {
-				session.closeConnection(e.getMessage());
+				this.disconnect(e.getMessage());
 			}
 		}
 	}
@@ -478,10 +501,6 @@ public class RakNetClient {
 	 *            - The reason the client disconnected from the server
 	 */
 	public void disconnect(String reason) {
-		if (session != null) {
-			session.closeConnection(reason);
-			listener.onDisconnect(session, reason);
-		}
 		this.session = null;
 		this.preparation = null;
 	}

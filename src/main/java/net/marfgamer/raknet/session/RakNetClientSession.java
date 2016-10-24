@@ -14,6 +14,12 @@ import net.marfgamer.raknet.protocol.message.acknowledge.Record;
 import net.marfgamer.raknet.protocol.session.DisconnectionNotification;
 import net.marfgamer.raknet.server.RakNetServer;
 
+/**
+ * This class represents a client connection and handles the login sequence
+ * packets
+ *
+ * @author MarfGamer
+ */
 public class RakNetClientSession extends RakNetSession {
 
 	private final RakNetServer server;
@@ -25,16 +31,33 @@ public class RakNetClientSession extends RakNetSession {
 		super(guid, maximumTransferUnit, channel, address);
 		this.server = server;
 		this.timeCreated = timeCreated;
+		// The timestamp is determined during login
 	}
 
+	/**
+	 * Returns the server this session is connected to
+	 * 
+	 * @return The server this session is connected to
+	 */
 	public RakNetServer getServer() {
 		return this.server;
 	}
 
+	/**
+	 * Returns the time this session was created
+	 * 
+	 * @return The time this session was created
+	 */
 	public long getTimeCreated() {
 		return this.timeCreated;
 	}
 
+	/**
+	 * Returns the client's timestamp<br>
+	 * Note: This is not determined during creation but rather during login
+	 * 
+	 * @return The client's timestamp
+	 */
 	public long getTimestamp() {
 		return (System.currentTimeMillis() - this.timestamp);
 	}
@@ -52,20 +75,21 @@ public class RakNetClientSession extends RakNetSession {
 			ConnectionRequest request = new ConnectionRequest(packet);
 			request.decode();
 
-			if (request.clientGuid == this.getGUID()) {
+			if (request.clientGuid == this.getGloballyUniqueId()) {
 				ConnectionRequestAccepted requestAccepted = new ConnectionRequestAccepted();
 				requestAccepted.clientAddress = this.getAddress();
 				requestAccepted.clientTimestamp = request.timestamp;
 				requestAccepted.serverTimestamp = server.getTimestamp();
 				requestAccepted.encode();
 
-				this.sendPacket(Reliability.RELIABLE_ORDERED, requestAccepted);
+				this.timestamp = (System.currentTimeMillis() - request.timestamp);
+				this.sendMessage(Reliability.RELIABLE_ORDERED, requestAccepted);
 				this.setState(RakNetState.HANDSHAKING);
 			} else {
 				ConnectionAttemptFailed attemptFailed = new ConnectionAttemptFailed();
 				attemptFailed.encode();
 
-				this.sendPacket(Reliability.RELIABLE_ORDERED, attemptFailed);
+				this.sendMessage(Reliability.RELIABLE_ORDERED, attemptFailed);
 				this.setState(RakNetState.DISCONNECTED);
 				server.removeSession(this, "Connection failed, invalid GUID");
 			}
@@ -77,12 +101,12 @@ public class RakNetClientSession extends RakNetSession {
 				this.timestamp = (System.currentTimeMillis() - clientHandshake.clientTimestamp);
 
 				this.setState(RakNetState.CONNECTED);
-				server.getListener().clientConnected(this);
+				server.getListener().onClientConnect(this);
 			} else {
 				ConnectionAttemptFailed attemptFailed = new ConnectionAttemptFailed();
 				attemptFailed.encode();
 
-				this.sendPacket(Reliability.RELIABLE_ORDERED, attemptFailed);
+				this.sendMessage(Reliability.RELIABLE_ORDERED, attemptFailed);
 				this.setState(RakNetState.DISCONNECTED);
 				server.removeSession(this, "Connection failed, invalid timestamp");
 			}
@@ -94,11 +118,6 @@ public class RakNetClientSession extends RakNetSession {
 		} else if (id >= MessageIdentifier.ID_USER_PACKET_ENUM) {
 			server.getListener().handlePacket(this, packet, channel);
 		}
-	}
-
-	@Override
-	public void closeConnection(String reason) {
-		server.removeSession(this, reason);
 	}
 
 }

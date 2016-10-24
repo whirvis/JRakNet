@@ -11,6 +11,12 @@ import net.marfgamer.raknet.protocol.login.NewIncomingConnection;
 import net.marfgamer.raknet.protocol.login.ConnectionRequestAccepted;
 import net.marfgamer.raknet.protocol.message.acknowledge.Record;
 
+/**
+ * This class represents a server connection and handles the login sequence
+ * packets
+ *
+ * @author MarfGamer
+ */
 public class RakNetServerSession extends RakNetSession {
 
 	private final RakNetClient client;
@@ -29,25 +35,20 @@ public class RakNetServerSession extends RakNetSession {
 	@Override
 	public void handlePacket(RakNetPacket packet, int channel) {
 		short packetId = packet.getId();
-		System.out.println(packetId);
-		if(packetId == MessageIdentifier.ID_CONNECTION_REQUEST_ACCEPTED) {
+		if (packetId == MessageIdentifier.ID_CONNECTION_REQUEST_ACCEPTED) {
 			ConnectionRequestAccepted serverHandshake = new ConnectionRequestAccepted(packet);
 			serverHandshake.decode();
-			
+
 			NewIncomingConnection clientHandshake = new NewIncomingConnection();
 			clientHandshake.clientTimestamp = serverHandshake.clientTimestamp;
 			clientHandshake.serverTimestamp = serverHandshake.serverTimestamp;
 			clientHandshake.serverAddress = client.getSession().getAddress();
 			clientHandshake.encode();
-			
-			this.sendPacket(Reliability.RELIABLE, clientHandshake);
-			System.out.println("Received 0x10 and sent response");
+
+			this.sendMessage(Reliability.RELIABLE, clientHandshake);
+		} else {
+			client.getListener().handlePacket(this, packet, channel);
 		}
-	}
-
-	@Override
-	public void closeConnection(String reason) {
-
 	}
 
 }

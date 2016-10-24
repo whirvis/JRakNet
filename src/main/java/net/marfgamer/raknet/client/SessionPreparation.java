@@ -114,18 +114,20 @@ public class SessionPreparation {
 	 */
 	public boolean readyForSession() {
 		// It was cancelled, why are we finishing?
-		if (cancelled == true)
+		if (cancelled == true) {
 			return false;
+		}
 
 		// Not all of the data has been set
-		if (this.guid == -1 || this.maximumTransferUnit == -1 || this.address == null)
+		if (this.guid == -1 || this.maximumTransferUnit == -1 || this.address == null) {
 			return false;
+		}
 
 		// Not all of the packets needed to connect have been handled
 		for (boolean handled : loginPackets) {
-			if (handled == false)
+			if (handled == false) {
 				return false;
-
+			}
 		}
 
 		// Nothing returned false, everything is ready!

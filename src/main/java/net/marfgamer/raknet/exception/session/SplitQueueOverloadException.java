@@ -6,7 +6,7 @@ package net.marfgamer.raknet.exception.session;
  *
  * @author MarfGamer
  */
-public class SplitQueueOverloadException extends IllegalArgumentException {
+public class SplitQueueOverloadException extends RuntimeException {
 
 	private static final long serialVersionUID = 969985052588965615L;
 
