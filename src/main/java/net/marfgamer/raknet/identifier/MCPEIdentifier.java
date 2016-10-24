@@ -33,8 +33,9 @@ public class MCPEIdentifier extends Identifier {
 				}
 			}
 
-			if (valid == false)
+			if (valid == false) {
 				return false;
+			}
 		}
 		return true;
 	}
