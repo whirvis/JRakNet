@@ -44,19 +44,14 @@ public interface RakNet {
 	 */
 	public static final UUID UNIQUE_ID_BITS = UUID.randomUUID();
 
+	// Network protocol data
 	public static final int SERVER_NETWORK_PROTOCOL = 8;
 	public static final int CLIENT_NETWORK_PROTOCOL = 8;
 
-	/*
-	 * Most computers these days have up to around 1400-1500 for their MTU, if
-	 * it's lower than that it is most likely outdated. It is suspected that the
-	 * minimum MTU is 530, but I am not exactly sure. The client seems to go
-	 * that low but I am also not sure what it's algorithm for selecting it's
-	 * MTU is either.
-	 */
+	// Maximum Transfer Unit data
 	public static final int MINIMUM_TRANSFER_UNIT = 530;
-	public static final int DEFAULT_MAXIMUM_TRANSFER_UNIT = 1280;
 
+	// Session limit data
 	public static final int MAX_CHANNELS = 32;
 	public static final int MAX_SPLIT_COUNT = 128;
 	public static final int MAX_SPLITS_PER_QUEUE = 4;

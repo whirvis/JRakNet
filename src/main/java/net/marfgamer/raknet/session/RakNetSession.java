@@ -11,6 +11,7 @@ import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.exception.session.InvalidChannelException;
 import net.marfgamer.raknet.exception.session.SplitQueueOverloadException;
+import net.marfgamer.raknet.exception.session.TimeoutException;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.protocol.SplitPacket;
@@ -26,17 +27,26 @@ import net.marfgamer.raknet.protocol.status.ConnectedPong;
 import net.marfgamer.raknet.util.ArrayUtils;
 import net.marfgamer.raknet.util.map.IntMap;
 
+/**
+ * This class is used to easily manage connections in RakNet
+ *
+ * @author MarfGamer
+ */
 public abstract class RakNetSession {
 
-	public static final int DEFAULT_ORDER_CHANNEL = 0x00;
-	public static final int ACK_SEND_WAIT_TIME_MILLIS = 3000;
-	public static final int PING_SEND_WAIT_TIME_MILLIS = 3000;
-	public static final int SESSION_TIMEOUT = PING_SEND_WAIT_TIME_MILLIS * 5;
+	public static final byte DEFAULT_ORDER_CHANNEL = 0x00;
+	public static final long MAX_PACKETS_PER_SECOND_BLOCK = 1000L * 300L;
+	public static final long ACK_SEND_WAIT_TIME_MILLIS = 3000L;
+	public static final long PING_SEND_WAIT_TIME_MILLIS = 3000L;
+	public static final long SESSION_TIMEOUT = PING_SEND_WAIT_TIME_MILLIS * 5L;
 
 	// Session data
 	private final long guid;
 	private final int maximumTransferUnit;
 	private RakNetState state;
+	private int packetsSentThisSecond;
+	private int packetsReceivedThisSecond;
+	private long packetSentReceiveCounter;
 	private long lastPacketReceiveTime;
 	private long latency;
 	private long lowestLatency;
@@ -81,6 +91,7 @@ public abstract class RakNetSession {
 		this.guid = guid;
 		this.maximumTransferUnit = maximumTransferUnit;
 		this.state = RakNetState.DISCONNECTED;
+		this.packetSentReceiveCounter = System.currentTimeMillis();
 		this.lastPacketReceiveTime = System.currentTimeMillis();
 		this.latency = -1; // We can't predict them
 
@@ -113,47 +124,116 @@ public abstract class RakNetSession {
 		this.lastPingSend = System.currentTimeMillis();
 	}
 
-	public final long getGUID() {
+	/**
+	 * Returns the session's globally unique ID (GUID)
+	 * 
+	 * @return The session's globally unique ID
+	 */
+	public final long getGloballyUniqueId() {
 		return this.guid;
 	}
 
+	/**
+	 * Returns the session's address
+	 * 
+	 * @return The session's address
+	 */
 	public final InetSocketAddress getAddress() {
 		return this.address;
 	}
 
+	/**
+	 * Returns the session's maximum transfer unit
+	 * 
+	 * @return The session's maximum transfer unit
+	 */
 	public int getMaximumTransferUnit() {
 		return this.maximumTransferUnit;
 	}
 
+	/**
+	 * Returns the session's current state
+	 * 
+	 * @return The session's current state
+	 */
 	public RakNetState getState() {
 		return this.state;
 	}
 
+	/**
+	 * Sets the session's current state
+	 * 
+	 * @param state
+	 *            - The new state
+	 */
 	public void setState(RakNetState state) {
 		this.state = state;
 	}
 
+	/**
+	 * Returns the amount of packets sent this second
+	 * 
+	 * @return The amount of packets sent this second
+	 */
+	public int getPacketsSentThisSecond() {
+		return this.packetsSentThisSecond;
+	}
+
+	/**
+	 * Returns the amount of packet received this second
+	 * 
+	 * @return The amount of packets received this second
+	 */
+	public int getPacketsReceivedThisSecond() {
+		return this.packetsReceivedThisSecond;
+	}
+
+	/**
+	 * Returns the last time a packet(CustomPacket, Acknowledgement, or
+	 * AcknowledgementReceipt) was received by the session
+	 * 
+	 * @return The last time a packet was received by the session
+	 */
 	public long getLastPacketReceiveTime() {
 		return this.lastPacketReceiveTime;
 	}
 
-	public void bumpLastPacketReceiveTime() {
-		this.lastPacketReceiveTime = System.currentTimeMillis();
-	}
-
+	/**
+	 * Returns the average latency for the session
+	 * 
+	 * @return The average latency for the session
+	 */
 	public long getLatency() {
 		return this.latency;
 	}
 
+	/**
+	 * Returns the lowest recorded latency for the session
+	 * 
+	 * @return The lowest recorded latency for the session
+	 */
 	public long getLowestLatency() {
 		return this.lowestLatency;
 	}
 
+	/**
+	 * Returns the highest recorded latency for the session
+	 * 
+	 * @return The highest recorded latency for the session
+	 */
 	public long getHighestLatency() {
 		return this.highestLatency;
 	}
 
+	/**
+	 * Handles a CustomPacket and updates the session's data accordingly
+	 * 
+	 * @param custom
+	 *            - The CustomPacket to handle
+	 */
 	public final void handleCustom0(CustomPacket custom) {
+		this.lastPacketReceiveTime = System.currentTimeMillis();
+
 		// Only handle if we haven't handled it before
 		if (customIndexQueue.contains(custom.sequenceNumber)) {
 			return; // We have handle it before!
@@ -187,12 +267,25 @@ public abstract class RakNetSession {
 		this.updateAcknowledge(true);
 
 		// Handle the messages accordingly
+		this.packetsReceivedThisSecond++;
 		for (EncapsulatedPacket encapsulated : custom.messages) {
 			this.handleEncapsulated0(encapsulated);
 		}
 	}
 
-	private final void handleEncapsulated0(EncapsulatedPacket encapsulated) throws SplitQueueOverloadException {
+	/**
+	 * Handles an EncapsulatedPacket retrieved from a CustomPacket and updates
+	 * the session's data accordingly
+	 * 
+	 * @param encapsulated
+	 *            - The EncapsulatedPacket to handle
+	 * @throws SplitQueueOverloadException
+	 *             - Thrown if the split queue has been overloaded
+	 * @throws InvalidChannelException
+	 *             - Thrown if the channel is higher than the maximum
+	 */
+	private final void handleEncapsulated0(EncapsulatedPacket encapsulated)
+			throws SplitQueueOverloadException, InvalidChannelException {
 		Reliability reliability = encapsulated.reliability;
 
 		// Put together split packet
@@ -200,7 +293,8 @@ public abstract class RakNetSession {
 			if (!splitQueue.containsKey(encapsulated.splitId)) {
 				splitQueue.put(encapsulated.splitId,
 						new SplitPacket(encapsulated.splitId, encapsulated.splitCount, encapsulated.reliability));
-				if (splitQueue.size() > RakNet.MAX_SPLITS_PER_QUEUE) {
+				if (splitQueue.size() > RakNet.MAX_SPLITS_PER_QUEUE
+						|| encapsulated.splitCount > RakNet.MAX_SPLIT_COUNT) {
 					throw new SplitQueueOverloadException();
 				}
 			}
@@ -231,29 +325,37 @@ public abstract class RakNetSession {
 		// Make sure we are handling everything in an ordered/sequenced fashion
 		int orderIndex = encapsulated.orderIndex;
 		int orderChannel = encapsulated.orderChannel;
-		if (reliability.isOrdered()) {
-			orderedHandleQueue.get(orderChannel).put(orderIndex, encapsulated);
-			while (orderedHandleQueue.get(orderChannel).containsKey(receiveOrderIndex[orderChannel])) {
-				EncapsulatedPacket orderedEncapsulated = orderedHandleQueue.get(orderChannel)
-						.get(receiveOrderIndex[orderChannel]++);
-				this.handlePacket0(new RakNetPacket(orderedEncapsulated.payload), orderedEncapsulated.orderChannel);
-			}
-		} else if (reliability.isSequenced()) {
-			if (orderIndex > receiveSequenceIndex[orderChannel]) {
-				receiveSequenceIndex[orderChannel] = orderIndex + 1;
+		if (orderChannel > RakNet.MAX_CHANNELS) {
+			throw new InvalidChannelException();
+		} else {
+			// Channel is valid, it is safe to handle
+			if (reliability.isOrdered()) {
+				orderedHandleQueue.get(orderChannel).put(orderIndex, encapsulated);
+				while (orderedHandleQueue.get(orderChannel).containsKey(receiveOrderIndex[orderChannel])) {
+					EncapsulatedPacket orderedEncapsulated = orderedHandleQueue.get(orderChannel)
+							.get(receiveOrderIndex[orderChannel]++);
+					this.handlePacket0(new RakNetPacket(orderedEncapsulated.payload), orderedEncapsulated.orderChannel);
+				}
+			} else if (reliability.isSequenced()) {
+				if (orderIndex > receiveSequenceIndex[orderChannel]) {
+					receiveSequenceIndex[orderChannel] = orderIndex + 1;
+					this.handlePacket0(new RakNetPacket(encapsulated.payload), encapsulated.orderChannel);
+				}
+			} else {
 				this.handlePacket0(new RakNetPacket(encapsulated.payload), encapsulated.orderChannel);
 			}
-		} else {
-			this.handlePacket0(new RakNetPacket(encapsulated.payload), encapsulated.orderChannel);
 		}
 	}
 
 	/**
-	 * This method is called to see if the packet is meant for the server and
-	 * the client before passing it on to a specific type
+	 * This method is method is called before
+	 * <code>handlePacket(RakNetPacket, int)</code> so we can handle packets
+	 * that are sent by the server and the client
 	 * 
 	 * @param packet
+	 *            - The packet to handle
 	 * @param channel
+	 *            - The channel the packet was sent on
 	 */
 	private final void handlePacket0(RakNetPacket packet, int channel) {
 		int id = packet.getId();
@@ -265,7 +367,7 @@ public abstract class RakNetSession {
 			ConnectedPong pong = new ConnectedPong();
 			pong.identifier = ping.identifier;
 			pong.encode();
-			this.sendPacket(Reliability.UNRELIABLE, pong);
+			this.sendMessage(Reliability.UNRELIABLE, pong);
 		} else if (id == MessageIdentifier.ID_CONNECTED_PONG) {
 			ConnectedPong pong = new ConnectedPong(packet);
 			pong.decode();
@@ -295,7 +397,15 @@ public abstract class RakNetSession {
 		}
 	}
 
+	/**
+	 * Handles an Acknowledge packet and updates the session's data accordingly
+	 * 
+	 * @param acknowledge
+	 *            - The acknowledge packet to handle
+	 */
 	public final void handleAcknowledge(Acknowledge acknowledge) {
+		this.lastPacketReceiveTime = System.currentTimeMillis();
+
 		// Make sure the ranged records were converted to single records
 		acknowledge.simplifyRecords();
 
@@ -319,21 +429,41 @@ public abstract class RakNetSession {
 				}
 
 				// Resend the modified version
-				this.sendRawPacket(custom);
+				this.sendRawMessage(custom);
 			}
 		}
 	}
 
+	/**
+	 * Handles an acknowledge receipt and notifies the API accordingly
+	 * 
+	 * @param acknowledgeReceipt
+	 *            - The acknowledge receipt to handle
+	 */
 	public final void handleAcknowledgeReceipt(AcknowledgeReceipt acknowledgeReceipt) {
+		this.lastPacketReceiveTime = System.currentTimeMillis();
 		if (acknowledgeReceipt.getType() == AcknowledgeReceiptType.ACKNOWLEDGED) {
 			for (EncapsulatedPacket encapsulated : requireAcknowledgeQueue.get(acknowledgeReceipt.record)) {
 				this.onAcknowledge(new Record(acknowledgeReceipt.record), encapsulated.reliability,
 						encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
 			}
 		}
+		// TODO: Add onNotAcknowledge method?
 	}
 
-	public final void sendPacket(Reliability reliability, int channel, Packet packet) throws InvalidChannelException {
+	/**
+	 * Sends a message with the specified reliability on the specified channel
+	 * 
+	 * @param reliability
+	 *            - The reliability of the packet
+	 * @param channel
+	 *            - The channel to send the packet on
+	 * @param packet
+	 *            - The packet to send
+	 * @throws InvalidChannelException
+	 *             - Thrown if the channel is higher than the maximum
+	 */
+	public final void sendMessage(Reliability reliability, int channel, Packet packet) throws InvalidChannelException {
 		// Make sure channel doesn't exceed RakNet limit
 		if (channel > RakNet.MAX_CHANNELS) {
 			throw new InvalidChannelException();
@@ -393,27 +523,75 @@ public abstract class RakNetSession {
 		}
 	}
 
-	public final void sendPacket(Reliability reliability, int channel, Packet... packets)
+	/**
+	 * Sends the specified messages with the specified reliability on the
+	 * specified channel
+	 * 
+	 * @param reliability
+	 *            - The reliability of the packet
+	 * @param channel
+	 *            - The channel to send the packet on
+	 * @param packets
+	 *            - The packets to send
+	 * @throws InvalidChannelException
+	 *             - Thrown if the channel is higher than the maximum
+	 */
+	public final void sendMessage(Reliability reliability, int channel, Packet... packets)
 			throws InvalidChannelException {
 		for (Packet packet : packets) {
-			this.sendPacket(reliability, channel, packet);
+			this.sendMessage(reliability, channel, packet);
 		}
 	}
 
-	public final void sendPacket(Reliability reliability, Packet packet) throws InvalidChannelException {
-		this.sendPacket(reliability, DEFAULT_ORDER_CHANNEL, packet);
+	/**
+	 * Sends a message with the specified reliability on the default channel
+	 * 
+	 * @param reliability
+	 *            - The reliability of the packet
+	 * @param packet
+	 *            - The packet to send
+	 * @throws InvalidChannelException
+	 *             - Thrown if the channel is higher than the maximum
+	 */
+	public final void sendMessage(Reliability reliability, Packet packet) throws InvalidChannelException {
+		this.sendMessage(reliability, DEFAULT_ORDER_CHANNEL, packet);
 	}
 
-	public final void sendPacket(Reliability reliability, Packet... packets) throws InvalidChannelException {
+	/**
+	 * Sends the specified messages with the specified reliability on the
+	 * default channel
+	 * 
+	 * @param reliability
+	 *            - The reliability of the packet
+	 * @param packets
+	 *            - The packets to send
+	 * @throws InvalidChannelException
+	 *             - Thrown if the channel is higher than the maximum
+	 */
+	public final void sendMessage(Reliability reliability, Packet... packets) throws InvalidChannelException {
 		for (Packet packet : packets) {
-			this.sendPacket(reliability, DEFAULT_ORDER_CHANNEL, packet);
+			this.sendMessage(reliability, DEFAULT_ORDER_CHANNEL, packet);
 		}
 	}
 
-	public final void sendRawPacket(Packet packet) {
+	/**
+	 * Sends a raw message
+	 * 
+	 * @param packet
+	 *            - The packet to send
+	 */
+	public final void sendRawMessage(Packet packet) {
 		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
 	}
 
+	/**
+	 * Updates acknowledgement data by resending unacknowledged packets along
+	 * with sending ACK and NACK packets
+	 * 
+	 * @param forceSend
+	 *            - Determines whether or not the functions will be done
+	 *            immediately or be handled based on the timer system
+	 */
 	private final void updateAcknowledge(boolean forceSend) {
 		long currentTime = System.currentTimeMillis();
 
@@ -424,7 +602,7 @@ public abstract class RakNetSession {
 				Acknowledge ack = new Acknowledge(AcknowledgeType.ACKNOWLEDGED);
 				ack.records = this.acknowledgeQueue;
 				ack.encode();
-				this.sendRawPacket(ack);
+				this.sendRawMessage(ack);
 
 				acknowledgeQueue.clear(); // No longer needed
 			}
@@ -434,13 +612,13 @@ public abstract class RakNetSession {
 				Acknowledge nack = new Acknowledge(AcknowledgeType.NOT_ACKNOWLEDGED);
 				nack.records = this.nacknowledgeQueue;
 				nack.encode();
-				this.sendRawPacket(nack);
+				this.sendRawMessage(nack);
 			}
 
 			// Only do this naturally
 			if (forceSend == false) {
 				for (CustomPacket custom : recoveryQueue.values()) {
-					this.sendRawPacket(custom);
+					this.sendRawMessage(custom);
 					break; // Only send one at a time
 				}
 			}
@@ -450,6 +628,9 @@ public abstract class RakNetSession {
 		}
 	}
 
+	/**
+	 * Updates the session
+	 */
 	public final void update() {
 		long currentTime = System.currentTimeMillis();
 
@@ -476,12 +657,20 @@ public abstract class RakNetSession {
 				custom.sequenceNumber = this.nextSequenceNumber++;
 				custom.encode();
 
-				// Let all unacknowledged packets be handled first
-				if (recoveryQueue.isEmpty() == true) {
-					this.sendRawPacket(custom);
+				// Let all unacknowledged packets be handled first and don't DOS
+				if (recoveryQueue.isEmpty() == true && this.packetsSentThisSecond < RakNet.MAX_PACKETS_PER_SECOND) {
+					this.sendRawMessage(custom);
+					this.packetsSentThisSecond++;
 				}
 				recoveryQueue.put(custom.sequenceNumber, custom);
 			}
+		}
+
+		// Reset the amount of packets sent and received in this second
+		if (currentTime - packetSentReceiveCounter >= RakNet.MAX_PACKETS_PER_SECOND) {
+			this.packetsSentThisSecond = 0;
+			this.packetsReceivedThisSecond = 0;
+			this.packetSentReceiveCounter = currentTime;
 		}
 
 		// Send a ping to try and wake up the receiving side
@@ -490,21 +679,39 @@ public abstract class RakNetSession {
 			ConnectedPing ping = new ConnectedPing();
 			ping.identifier = this.pingIdentifier++;
 			ping.encode();
-			this.sendPacket(Reliability.UNRELIABLE, ping);
+			this.sendMessage(Reliability.UNRELIABLE, ping);
 			this.lastPingSend = currentTime;
 		}
 
 		// The client timed out
 		if (currentTime - lastPacketReceiveTime >= SESSION_TIMEOUT) {
-			this.closeConnection("Timeout");
+			throw new TimeoutException();
 		}
-
 	}
 
+	/**
+	 * This function is called when a acknowledge receipt is received for the
+	 * packet
+	 * 
+	 * @param record
+	 *            - The record of the packet
+	 * @param reliability
+	 *            - The reliability of the acknowledged packet
+	 * @param channel
+	 *            - The channel of the acknowledged packet
+	 * @param packet
+	 *            - The acknowledged packet
+	 */
 	public abstract void onAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet);
 
+	/**
+	 * This function is called when a packet is received by the session
+	 * 
+	 * @param packet
+	 *            - The packet to handle
+	 * @param channel
+	 *            - The packet the channel was sent on
+	 */
 	public abstract void handlePacket(RakNetPacket packet, int channel);
-
-	public abstract void closeConnection(String reason);
 
 }
