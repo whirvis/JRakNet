@@ -128,18 +128,9 @@ public class RakNetClientSession extends RakNetSession {
 			NewIncomingConnection clientHandshake = new NewIncomingConnection(packet);
 			clientHandshake.decode();
 
-			if (clientHandshake.serverTimestamp == server.getTimestamp()) {
-				this.timestamp = (System.currentTimeMillis() - clientHandshake.clientTimestamp);
-				this.setState(RakNetState.CONNECTED);
-				server.getListener().onClientConnect(this);
-			} else {
-				ConnectionAttemptFailed attemptFailed = new ConnectionAttemptFailed();
-				attemptFailed.encode();
-
-				this.sendMessage(Reliability.RELIABLE_ORDERED, attemptFailed);
-				this.setState(RakNetState.DISCONNECTED);
-				server.removeSession(this, "Connection failed, invalid timestamp");
-			}
+			this.timestamp = (System.currentTimeMillis() - clientHandshake.clientTimestamp);
+			this.setState(RakNetState.CONNECTED);
+			server.getListener().onClientConnect(this);
 		} else if (packetId == MessageIdentifier.ID_DISCONNECTION_NOTIFICATION) {
 			DisconnectionNotification disconnectionNotification = new DisconnectionNotification(packet);
 			disconnectionNotification.decode();

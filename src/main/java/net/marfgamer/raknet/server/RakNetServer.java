@@ -48,7 +48,6 @@ import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.exception.NoListenerException;
 import net.marfgamer.raknet.identifier.Identifier;
-import net.marfgamer.raknet.identifier.MCPEIdentifier;
 import net.marfgamer.raknet.protocol.login.OpenConnectionRequestOne;
 import net.marfgamer.raknet.protocol.login.OpenConnectionRequestTwo;
 import net.marfgamer.raknet.protocol.login.OpenConnectionResponseOne;
@@ -89,7 +88,7 @@ public class RakNetServer implements RakNet {
 
 	// Session data
 	private Channel channel;
-	private RakNetServerListener listener;
+	private volatile RakNetServerListener listener;
 	private volatile boolean running; // Allow other threads to modify this
 	private final ConcurrentHashMap<InetSocketAddress, RakNetClientSession> sessions;
 
@@ -404,9 +403,10 @@ public class RakNetServer implements RakNet {
 			UnconnectedPing ping = new UnconnectedPing(packet);
 			ping.decode();
 
-			if ((packetId == ID_UNCONNECTED_PING || sessions.size() < this.maxConnections) && identifier != null) {
+			if ((packetId == ID_UNCONNECTED_PING || sessions.size() < this.maxConnections)) {
 				ServerPing pingEvent = new ServerPing(sender, identifier);
 				listener.handlePing(pingEvent);
+
 				if (ping.magic == true && pingEvent.getIdentifier() != null) {
 					UnconnectedPong pong = new UnconnectedPong();
 					pong.pingId = ping.timestamp;
@@ -557,14 +557,19 @@ public class RakNetServer implements RakNet {
 	public void start() throws NoListenerException {
 		// Make sure we have an adapter
 		if (listener == null) {
-			throw new NoListenerException("The listener must be set in order to start the server!");
+			throw new NoListenerException("Unable to start server, there is no listener!");
 		}
 
 		// Create bootstrap and bind the channel
-		bootstrap.channel(NioDatagramChannel.class).group(group).handler(handler);
-		bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false);
-		this.channel = bootstrap.bind(port).channel();
-		this.running = true;
+		try {
+			bootstrap.channel(NioDatagramChannel.class).group(group).handler(handler);
+			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false);
+			this.channel = bootstrap.bind(port).sync().channel();
+			this.running = true;
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			this.running = false;
+		}
 
 		// Notify API
 		listener.onServerStart();
@@ -619,42 +624,6 @@ public class RakNetServer implements RakNet {
 		}
 		sessions.clear();
 		this.getListener().onServerShutdown();
-	}
-
-	public static void main(String[] args) {
-		MCPEIdentifier identifier = new MCPEIdentifier("A JRakNet Server", 80, "0.15.0", 0, 10, -1, "TheBestWorld",
-				"Developer");
-		RakNetServer s = new RakNetServer(19132, 10, identifier);
-
-		s.setListener(new RakNetServerListener() {
-			@Override
-			public void onAddressUnblocked(InetAddress address) {
-				System.out.println(address + " has been unblocked");
-			}
-
-			@Override
-			public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
-				System.out.println("Received packet with ID 0x" + Integer.toHexString(packet.getId()).toUpperCase()
-						+ " from " + session.getAddress());
-			}
-
-			@Override
-			public void onClientPreConnect(InetSocketAddress address) {
-				System.out.println("Client from " + address
-						+ " has instantiated the connection, waiting for NEW_INCOMING_CONNECTION packet");
-			}
-
-			@Override
-			public void onClientConnect(RakNetClientSession session) {
-				System.out.println("Client from " + session.getAddress() + " has connected");
-			}
-
-			@Override
-			public void onClientDisconnect(RakNetClientSession session, String reason) {
-				System.out.println("Client " + session.getAddress() + " because \"" + reason + "\"");
-			}
-		});
-		s.start();
 	}
 
 }

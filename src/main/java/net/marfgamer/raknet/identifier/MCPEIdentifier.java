@@ -43,7 +43,8 @@ public class MCPEIdentifier extends Identifier {
 			'.' };
 	private static final String HEADER = "MCPE";
 	private static final String SEPERATOR = ";";
-	private static final int DATA_COUNT = 5;
+	private static final int DATA_COUNT_LEGACY = 6;
+	private static final int DATA_COUNT = 9;
 
 	/**
 	 * Returns whether or not the specified version tag is valid
@@ -78,6 +79,7 @@ public class MCPEIdentifier extends Identifier {
 	private long timestamp; // Not really sure what this is
 	private String worldName;
 	private String gamemode;
+	private boolean legacy;
 
 	public MCPEIdentifier(String serverName, int serverProtocol, String versionTag, int onlinePlayerCount,
 			int maxPlayerCount, long timestamp, String worldName, String gamemode) {
@@ -91,9 +93,12 @@ public class MCPEIdentifier extends Identifier {
 		this.timestamp = timestamp;
 		this.worldName = worldName;
 		this.gamemode = gamemode;
+		this.legacy = false;
 
-		if (verifyVersionTag(this.versionTag) == false) {
-			throw new IllegalArgumentException("Invalid version tag!");
+		if (this.versionTag != null) {
+			if (verifyVersionTag(this.versionTag) == false) {
+				throw new IllegalArgumentException("Invalid version tag!");
+			}
 		}
 
 		this.updateBuild(); // Now we have data
@@ -102,7 +107,7 @@ public class MCPEIdentifier extends Identifier {
 	public MCPEIdentifier(Identifier identifier) {
 		super(null); // We don't have any data yet
 		String[] data = identifier.build().split(SEPERATOR);
-		if (data.length >= DATA_COUNT) {
+		if (data.length >= DATA_COUNT_LEGACY) {
 			if (data[0].equals(HEADER) == false) {
 				throw new IllegalArgumentException("Invalid header!");
 			}
@@ -112,9 +117,14 @@ public class MCPEIdentifier extends Identifier {
 			this.versionTag = data[3];
 			this.onlinePlayerCount = RakNetUtils.parseIntPassive(data[4]);
 			this.maxPlayerCount = RakNetUtils.parseIntPassive(data[5]);
-			this.timestamp = RakNetUtils.parseLongPassive(data[6]);
-			this.worldName = data[7];
-			this.gamemode = data[8];
+			this.legacy = true;
+
+			if (data.length >= DATA_COUNT) {
+				this.timestamp = RakNetUtils.parseLongPassive(data[6]);
+				this.worldName = data[7];
+				this.gamemode = data[8];
+				this.legacy = false;
+			}
 
 			if (verifyVersionTag(this.versionTag) == false) {
 				throw new IllegalArgumentException("Invalid version tag!");
@@ -289,12 +299,36 @@ public class MCPEIdentifier extends Identifier {
 	}
 
 	/**
+	 * Enables/Disables the legacy builder
+	 * 
+	 * @param legacy
+	 *            - The legacy toggle
+	 */
+	public void setLegacy(boolean legacy) {
+		this.legacy = legacy;
+	}
+
+	/**
+	 * Returns whether or not the identifier is legacy
+	 * 
+	 * @return Whether or not the identifier is legacy
+	 */
+	public boolean isLegacy() {
+		return this.legacy;
+	}
+
+	/**
 	 * Updates the identifier
 	 */
 	private void updateBuild() {
-		this.identifier = (HEADER + SEPERATOR + serverName + SEPERATOR + serverProtocol + SEPERATOR + versionTag
-				+ SEPERATOR + onlinePlayerCount + SEPERATOR + maxPlayerCount + SEPERATOR + timestamp + SEPERATOR
-				+ worldName + SEPERATOR + gamemode);
+		if (legacy == true) {
+			this.identifier = (HEADER + SEPERATOR + serverName + SEPERATOR + serverProtocol + SEPERATOR + versionTag
+					+ SEPERATOR + onlinePlayerCount + SEPERATOR + maxPlayerCount + SEPERATOR + timestamp + SEPERATOR
+					+ worldName + SEPERATOR + gamemode);
+		} else {
+			this.identifier = (HEADER + SEPERATOR + serverName + SEPERATOR + serverProtocol + SEPERATOR + versionTag
+					+ SEPERATOR + onlinePlayerCount + SEPERATOR + maxPlayerCount);
+		}
 	}
 
 }

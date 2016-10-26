@@ -66,8 +66,7 @@ public class UnconnectedPong extends RakNetPacket {
 
 		try {
 			this.identifier = new Identifier(this.readString());
-		} catch (Exception e) {
-			e.printStackTrace(); // TODO: Find exception type
+		} catch (IndexOutOfBoundsException e) {
 			this.identifier = null;
 		}
 	}

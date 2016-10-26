@@ -89,29 +89,34 @@ public class RakNetUtils {
 
 		// Create bootstrap and bind
 		EventLoopGroup group = new NioEventLoopGroup();
-		Bootstrap bootstrap = new Bootstrap();
-		BootstrapHandler handler = new BootstrapHandler();
-		bootstrap.group(group).channel(NioDatagramChannel.class).option(ChannelOption.SO_BROADCAST, true)
-				.option(ChannelOption.SO_RCVBUF, RakNet.MINIMUM_TRANSFER_UNIT)
-				.option(ChannelOption.SO_SNDBUF, RakNet.MINIMUM_TRANSFER_UNIT).handler(handler);
 
-		// Create channel, send packet, and close it
-		Channel channel = bootstrap.bind(0).channel();
-		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
+		try {
+			Bootstrap bootstrap = new Bootstrap();
+			BootstrapHandler handler = new BootstrapHandler();
+			bootstrap.group(group).channel(NioDatagramChannel.class).option(ChannelOption.SO_BROADCAST, true)
+					.option(ChannelOption.SO_RCVBUF, RakNet.MINIMUM_TRANSFER_UNIT)
+					.option(ChannelOption.SO_SNDBUF, RakNet.MINIMUM_TRANSFER_UNIT).handler(handler);
 
-		// Wait for packet to come in, return null on timeout
-		while (retries > 0) {
-			long sendTime = System.currentTimeMillis();
-			while (System.currentTimeMillis() - sendTime < timeout) {
-				if (handler.packet != null) {
-					packetReceived = handler.packet;
-					break; // We found the packet
+			// Create channel, send packet, and close it
+			Channel channel = bootstrap.bind(0).sync().channel();
+			channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
+
+			// Wait for packet to come in, return null on timeout
+			while (retries > 0) {
+				long sendTime = System.currentTimeMillis();
+				while (System.currentTimeMillis() - sendTime < timeout) {
+					if (handler.packet != null) {
+						packetReceived = handler.packet;
+						break; // We found the packet
+					}
 				}
+				if (packetReceived != null) {
+					break; // The master loop is no longer needed
+				}
+				retries--;
 			}
-			if (packetReceived != null) {
-				break; // The master loop is no longer needed
-			}
-			retries--;
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 
 		group.shutdownGracefully();

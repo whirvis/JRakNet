@@ -30,37 +30,44 @@
  */
 package net.marfgamer.raknet;
 
-import java.util.UUID;
+import java.net.InetSocketAddress;
 
-/**
- * Contains info for RakNet
- *
- * @author MarfGamer
- */
-public interface RakNet {
+import net.marfgamer.raknet.client.RakNetClient;
+import net.marfgamer.raknet.client.RakNetClientListener;
+import net.marfgamer.raknet.exception.RakNetException;
+import net.marfgamer.raknet.session.RakNetServerSession;
 
-	/**
-	 * If this is set to true, the server and client will log as much as they
-	 * can for debugging data
-	 */
-	public static boolean LOGGER_ENABLED = false;
+public class RakNetClientTest {
 
-	/**
-	 * Server takes higher bits, client takes lower bits
-	 */
-	public static final UUID UNIQUE_ID_BITS = UUID.randomUUID();
+	private static final InetSocketAddress LIFEBOAT_SURVIVAL_GAMES_ADDRESS = new InetSocketAddress("sg.lbsg.net",
+			19132);
 
-	// Network protocol data
-	public static final int SERVER_NETWORK_PROTOCOL = 8;
-	public static final int CLIENT_NETWORK_PROTOCOL = 8;
+	public static void main(String[] args) throws RakNetException {
+		RakNetClient client = new RakNetClient();
+		client.setListener(new RakNetClientListener() {
 
-	// Maximum Transfer Unit data
-	public static final int MINIMUM_TRANSFER_UNIT = 530;
+			@Override
+			public void onConnect(RakNetServerSession session) {
+				System.out.println("Connected to server with address " + session.getAddress() + "!");
+				client.disconnect();
+			}
 
-	// Session limit data
-	public static final int MAX_CHANNELS = 32;
-	public static final int MAX_SPLIT_COUNT = 128;
-	public static final int MAX_SPLITS_PER_QUEUE = 4;
-	public static final int MAX_PACKETS_PER_SECOND = 500;
+			@Override
+			public void onConnectionFailure(InetSocketAddress address, RakNetException cause) {
+				System.out.println("Failed to connect to server with address " + address + " ["
+						+ cause.getClass().getSimpleName() + "]");
+			}
+
+			@Override
+			public void onDisconnect(RakNetServerSession session, String reason) {
+				System.out.println("Disconnected from server with address " + session.getAddress() + " for reason \""
+						+ reason + "\"");
+			}
+
+		});
+		System.out.println("Created client, connecting to " + LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
+
+		client.connect(LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
+	}
 
 }

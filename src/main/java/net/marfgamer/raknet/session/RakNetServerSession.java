@@ -80,14 +80,26 @@ public class RakNetServerSession extends RakNetSession {
 
 			this.sendMessage(Reliability.RELIABLE, clientHandshake);
 			this.setState(RakNetState.CONNECTED);
+			client.getListener().onConnect(this);
 		} else if (packetId == MessageIdentifier.ID_DISCONNECTION_NOTIFICATION) {
 			DisconnectionNotification disconnectionNotification = new DisconnectionNotification(packet);
 			disconnectionNotification.decode();
 
+			this.setState(RakNetState.DISCONNECTED);
 			client.disconnect("Server disconnected");
 		} else if (packetId >= MessageIdentifier.ID_USER_PACKET_ENUM) {
 			client.getListener().handlePacket(this, packet, channel);
 		}
+	}
+
+	/**
+	 * Called by the client when the connection is closed
+	 */
+	public void closeConnection() {
+		DisconnectionNotification disconnectionNotification = new DisconnectionNotification();
+		disconnectionNotification.encode();
+
+		this.sendMessage(Reliability.UNRELIABLE, disconnectionNotification);
 	}
 
 }
