@@ -108,11 +108,13 @@ public class CustomPacket extends RakNetPacket {
 			return; // Nothing to remove
 		}
 
+		ArrayList<EncapsulatedPacket> unreliables = new ArrayList<EncapsulatedPacket>();
 		for (EncapsulatedPacket encapsulated : this.messages) {
 			if (!encapsulated.reliability.isReliable()) {
-				messages.remove(encapsulated);
+				unreliables.add(encapsulated);
 			}
 		}
+		messages.removeAll(unreliables);
 	}
 
 	public static int calculateDummy() {

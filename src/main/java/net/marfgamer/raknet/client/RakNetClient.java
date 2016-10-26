@@ -54,8 +54,6 @@ import net.marfgamer.raknet.exception.NoListenerException;
 import net.marfgamer.raknet.exception.RakNetException;
 import net.marfgamer.raknet.exception.client.NettyHandlerException;
 import net.marfgamer.raknet.exception.client.ServerOfflineException;
-import net.marfgamer.raknet.identifier.Identifier;
-import net.marfgamer.raknet.identifier.MCPEIdentifier;
 import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.protocol.login.ConnectionRequest;
 import net.marfgamer.raknet.protocol.login.OpenConnectionRequestOne;
@@ -100,10 +98,9 @@ public class RakNetClient {
 
 	// Session management
 	private Channel channel;
-	private RakNetClientListener listener;
 	private SessionPreparation preparation;
-	private volatile RakNetServerSession session; // Allow other threads to
-													// modify this
+	private volatile RakNetServerSession session;
+	private volatile RakNetClientListener listener;
 
 	public RakNetClient(int discoveryPort, boolean threaded) {
 		// Set client data
@@ -122,9 +119,13 @@ public class RakNetClient {
 		this.handler = new RakNetClientHandler(this);
 
 		// Initiate bootstrap data
-		bootstrap.channel(NioDatagramChannel.class).group(group).handler(handler);
-		bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false);
-		this.channel = bootstrap.bind(0).channel();
+		try {
+			bootstrap.channel(NioDatagramChannel.class).group(group).handler(handler);
+			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false);
+			this.channel = bootstrap.bind(0).sync().channel();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 
 		// Initiate discovery system if it is not yet started
 		if (discoverySystem.isRunning() == false) {
@@ -177,7 +178,19 @@ public class RakNetClient {
 	 */
 	public RakNetClient setDiscoveryMode(DiscoveryMode mode) {
 		this.mode = (mode != null ? mode : DiscoveryMode.NONE);
+		if (this.mode == DiscoveryMode.NONE) {
+			discovered.clear(); // We are not discovering servers anymore!
+		}
 		return this;
+	}
+
+	/**
+	 * Returns the session the client is connected to
+	 * 
+	 * @return The session the client is connected to
+	 */
+	public RakNetServerSession getSession() {
+		return this.session;
 	}
 
 	/**
@@ -205,15 +218,6 @@ public class RakNetClient {
 	}
 
 	/**
-	 * Returns the session the client is connected to
-	 * 
-	 * @return The session the client is connected to
-	 */
-	public RakNetServerSession getSession() {
-		return this.session;
-	}
-
-	/**
 	 * Returns whether or not the client is connected
 	 * 
 	 * @return Whether or not the client is connected
@@ -235,8 +239,11 @@ public class RakNetClient {
 	 */
 	protected void handleHandlerException(InetSocketAddress causeAddress, Throwable cause) {
 		if (preparation != null) {
-			preparation.cancelReason = new NettyHandlerException(this, handler, cause);
-			preparation.cancelled = true;
+			listener.onHandlerException(causeAddress, cause);
+			if (causeAddress.equals(preparation.address)) {
+				preparation.cancelReason = new NettyHandlerException(this, handler, cause);
+				preparation.cancelled = true;
+			}
 		} else {
 			cause.printStackTrace();
 		}
@@ -257,12 +264,14 @@ public class RakNetClient {
 		if (packetId == ID_UNCONNECTED_PONG) {
 			UnconnectedPong pong = new UnconnectedPong(packet);
 			pong.decode();
-			this.updateDiscoveryData(sender, pong);
+			if (pong.identifier != null) {
+				this.updateDiscoveryData(sender, pong);
+			}
 		}
 
 		// Are we still logging in?
 		if (preparation != null) {
-			if (!sender.equals(preparation.address)) {
+			if (sender.equals(preparation.address)) {
 				preparation.handlePacket(packet);
 				return;
 			}
@@ -305,7 +314,8 @@ public class RakNetClient {
 	public void updateDiscoveryData() {
 		// Make sure we have a listener
 		if (listener == null) {
-			throw new NoListenerException("There must be a client to start the listener!");
+			return;// throw new NoListenerException("Unable to start client,
+					// there is no listener!");
 		}
 
 		// Remove all servers that have timed out
@@ -378,6 +388,7 @@ public class RakNetClient {
 		}
 
 		// Reset client data
+		this.disconnect("Disconnected");
 		this.preparation = new SessionPreparation(this, units[0].getMaximumTransferUnit());
 		preparation.address = address;
 
@@ -397,7 +408,7 @@ public class RakNetClient {
 		}
 
 		// If the server didn't respond then it is offline
-		if (retries <= 0 && preparation.cancelled == false) {
+		if (preparation.loginPackets[0] == false && preparation.cancelled == false) {
 			preparation.cancelReason = new ServerOfflineException(this, preparation.address);
 			preparation.cancelled = true;
 		}
@@ -434,17 +445,12 @@ public class RakNetClient {
 				this.initConnection();
 			}
 		} else {
-			// Reset the connection data, the connection failed
-			InetSocketAddress preparationAddress = preparation.address;
-			RakNetException preparationCancelReason = preparation.cancelReason;
-			this.preparation = null;
-
-			// Why was the exception cancelled?
-			if (preparationCancelReason != null) {
-				throw preparationCancelReason;
-			} else {
-				throw new ServerOfflineException(this, preparationAddress);
+			// Reset the connection data, it failed
+			if (preparation.cancelReason == null) {
+				preparation.cancelReason = new ServerOfflineException(this, preparation.address);
 			}
+			listener.onConnectionFailure(preparation.address, preparation.cancelReason);
+			this.preparation = null;
 		}
 	}
 
@@ -531,6 +537,10 @@ public class RakNetClient {
 	 *            - The reason the client disconnected from the server
 	 */
 	public void disconnect(String reason) {
+		if (session != null) {
+			session.closeConnection();
+			this.getListener().onDisconnect(session, reason);
+		}
 		this.session = null;
 		this.preparation = null;
 	}
@@ -539,26 +549,12 @@ public class RakNetClient {
 	 * Disconnects the client from the server if it is connected to one
 	 */
 	public void disconnect() {
-		this.disconnect("Client disconnected");
+		this.disconnect("Disconnected");
 	}
 
 	@Override
 	public void finalize() {
 		discoverySystem.removeClient(this);
-	}
-
-	public static void main(String[] args) throws Exception {
-		RakNetClient client = new RakNetClient(19132);
-		client.setListener(new RakNetClientListener() {
-			@Override
-			public void onServerDiscovered(InetSocketAddress address, Identifier identifier) {
-				MCPEIdentifier mcpeIdentifier = new MCPEIdentifier(identifier);
-				System.out.println(identifier.toString());
-				System.out.println("Discovered server \"" + mcpeIdentifier.getServerName() + "\" on version "
-						+ mcpeIdentifier.getVersionTag());
-			}
-		});
-		client.connect("127.0.0.1", 19132);
 	}
 
 }
