@@ -6,22 +6,34 @@ and clients for other video games with ease.
 # Task list
 These are the features that are in-development or already finished, things can be added or removed at any time.
 
-- [ ] Server
-  - [ ] Event system
+- [x] Server
+  - [x] Event system
   - [x] Broadcast identifiers
     - [x] Raw encoders
     - [x] Custom encoders
-  - [ ] Client connection
-- [ ] Client
-- [ ] Protocol
-  - [ ] Custom packets
-    - [x] Sending
-    - [ ] Receiving
-  - [ ] Encapsulated packets
-    - [x] Sending
-    - [ ] Receiving
-  - [x] Acknowledgement packets
-  - [ ] Login
-    - [ ] Client
-    - [ ] Server
+  - [x] Client connection
+- [x] Client
+  - [x] Event system
   - [x] Server discovery
+  - [x] Server connection
+- [x] Protocol
+  - [x] Custom packets
+    - [x] Sending
+    - [x] Receiving
+  - [x] Encapsulated packets
+    - [x] Sending
+    - [x] Receiving
+  - [x] Acknowledgement packets
+  - [x] Login
+    - [x] Client
+    - [x] Server
+- [ ] Test
+  - [ ] Server test
+  - [ ] Client test
+  - [x] Utilities test
+  - [ ] Server discovery test
+  - [ ] Latency detection test
+  - [ ] Examples
+    - [ ] Server example
+    - [ ] Client example
+    - [ ] Chat example
