@@ -42,12 +42,9 @@ import net.marfgamer.raknet.exception.client.AlreadyConnectedException;
 import net.marfgamer.raknet.exception.client.ConnectionBannedException;
 import net.marfgamer.raknet.exception.client.IncompatibleProtocolException;
 import net.marfgamer.raknet.exception.client.NoFreeIncomingConnectionsException;
+import net.marfgamer.raknet.protocol.login.IncompatibleProtocol;
 import net.marfgamer.raknet.protocol.login.OpenConnectionResponseOne;
 import net.marfgamer.raknet.protocol.login.OpenConnectionResponseTwo;
-import net.marfgamer.raknet.protocol.login.error.AlreadyConnected;
-import net.marfgamer.raknet.protocol.login.error.ConnectionBanned;
-import net.marfgamer.raknet.protocol.login.error.IncompatibleProtocol;
-import net.marfgamer.raknet.protocol.login.error.NoFreeIncomingConnections;
 import net.marfgamer.raknet.session.RakNetServerSession;
 
 /**
@@ -109,21 +106,12 @@ public class SessionPreparation {
 				this.cancelled = true;
 			}
 		} else if (packetId == ID_ALREADY_CONNECTED) {
-			AlreadyConnected alreadyConnected = new AlreadyConnected(packet);
-			alreadyConnected.decode();
-
 			this.cancelReason = new AlreadyConnectedException(client);
 			this.cancelled = true;
 		} else if (packetId == ID_NO_FREE_INCOMING_CONNECTIONS) {
-			NoFreeIncomingConnections noFreeIncomingConnections = new NoFreeIncomingConnections(packet);
-			noFreeIncomingConnections.decode();
-
 			this.cancelReason = new NoFreeIncomingConnectionsException(client);
 			this.cancelled = true;
 		} else if (packetId == ID_CONNECTION_BANNED) {
-			ConnectionBanned connectionBanned = new ConnectionBanned(packet);
-			connectionBanned.decode();
-
 			this.cancelReason = new ConnectionBannedException(client);
 			this.cancelled = true;
 		} else if (packetId == ID_INCOMPATIBLE_PROTOCOL_VERSION) {

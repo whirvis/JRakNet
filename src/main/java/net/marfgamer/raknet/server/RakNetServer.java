@@ -48,14 +48,11 @@ import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.exception.NoListenerException;
 import net.marfgamer.raknet.identifier.Identifier;
+import net.marfgamer.raknet.protocol.login.IncompatibleProtocol;
 import net.marfgamer.raknet.protocol.login.OpenConnectionRequestOne;
 import net.marfgamer.raknet.protocol.login.OpenConnectionRequestTwo;
 import net.marfgamer.raknet.protocol.login.OpenConnectionResponseOne;
 import net.marfgamer.raknet.protocol.login.OpenConnectionResponseTwo;
-import net.marfgamer.raknet.protocol.login.error.AlreadyConnected;
-import net.marfgamer.raknet.protocol.login.error.ConnectionBanned;
-import net.marfgamer.raknet.protocol.login.error.IncompatibleProtocol;
-import net.marfgamer.raknet.protocol.login.error.NoFreeIncomingConnections;
 import net.marfgamer.raknet.protocol.message.CustomPacket;
 import net.marfgamer.raknet.protocol.message.acknowledge.Acknowledge;
 import net.marfgamer.raknet.protocol.message.acknowledge.AcknowledgeReceipt;
@@ -247,6 +244,24 @@ public class RakNetServer implements RakNet {
 	}
 
 	/**
+	 * Returns whether or not the server has a session with the specified
+	 * Globally Unique ID
+	 * 
+	 * @param address
+	 *            - The Globally Unique ID to check
+	 * @return - Whether or not the server has a session with the specified
+	 *         Globally Unique ID
+	 */
+	public boolean hasSession(long guid) {
+		for (RakNetClientSession session : sessions.values()) {
+			if (session.getGloballyUniqueId() == guid) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Returns a session connected to the server by their address
 	 * 
 	 * @param address
@@ -255,6 +270,22 @@ public class RakNetServer implements RakNet {
 	 */
 	public RakNetClientSession getSession(InetSocketAddress address) {
 		return sessions.get(address);
+	}
+
+	/**
+	 * Returns a session connected to the server by their Globally Unique ID
+	 * 
+	 * @param guid
+	 *            - The Globally Unique ID of the session
+	 * @return A session connected to the server by their address
+	 */
+	public RakNetClientSession getSession(long guid) {
+		for (RakNetClientSession session : sessions.values()) {
+			if (session.getGloballyUniqueId() == guid) {
+				return session;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -389,6 +420,29 @@ public class RakNetServer implements RakNet {
 	}
 
 	/**
+	 * Returns whether or not the specified address is blocked
+	 * 
+	 * @param address
+	 *            - The address to check
+	 * @return Whether or not the specified address is blocked
+	 */
+	public boolean addressBlocked(InetAddress address) {
+		return handler.addressBlocked(address);
+	}
+
+	/**
+	 * Called whenever the handler catches an exception in Netty
+	 * 
+	 * @param address
+	 *            - The address that caused the exception
+	 * @param cause
+	 *            - The exception caught by the handler
+	 */
+	protected void handleHandlerException(InetSocketAddress address, Throwable cause) {
+		listener.onHandlerException(address, cause);
+	}
+
+	/**
 	 * Handles a packet received by the handler
 	 * 
 	 * @param packet
@@ -454,26 +508,32 @@ public class RakNetServer implements RakNet {
 				// Are there any problems?
 				RakNetPacket errorPacket = this.validateSender(sender);
 				if (errorPacket == null) {
-					if (connectionRequestTwo.maximumTransferUnit <= this.maximumTransferUnit) {
-						// Create response
-						OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo();
-						connectionResponseTwo.serverGuid = this.guid;
-						connectionResponseTwo.clientAddress = sender;
-						connectionResponseTwo.maximumTransferUnit = connectionRequestTwo.maximumTransferUnit;
-						connectionResponseTwo.encryptionEnabled = false;
-						connectionResponseTwo.encode();
+					if (this.hasSession(connectionRequestTwo.clientGuid)) {
+						// This client is already connected!
+						this.sendRawMessage(ID_ALREADY_CONNECTED, sender);
+					} else {
+						// Everything passed! One last check...
+						if (connectionRequestTwo.maximumTransferUnit <= this.maximumTransferUnit) {
+							// Create response
+							OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo();
+							connectionResponseTwo.serverGuid = this.guid;
+							connectionResponseTwo.clientAddress = sender;
+							connectionResponseTwo.maximumTransferUnit = connectionRequestTwo.maximumTransferUnit;
+							connectionResponseTwo.encryptionEnabled = false;
+							connectionResponseTwo.encode();
 
-						// Call event
-						this.getListener().onClientPreConnect(sender);
+							// Call event
+							this.getListener().onClientPreConnect(sender);
 
-						// Create session
-						RakNetClientSession clientSession = new RakNetClientSession(this, System.currentTimeMillis(),
-								connectionRequestTwo.clientGuid, connectionRequestTwo.maximumTransferUnit, channel,
-								sender);
-						sessions.put(sender, clientSession);
+							// Create session
+							RakNetClientSession clientSession = new RakNetClientSession(this,
+									System.currentTimeMillis(), connectionRequestTwo.clientGuid,
+									connectionRequestTwo.maximumTransferUnit, channel, sender);
+							sessions.put(sender, clientSession);
 
-						// Send response, we are ready for login!
-						this.sendRawMessage(connectionResponseTwo, sender);
+							// Send response, we are ready for login!
+							this.sendRawMessage(connectionResponseTwo, sender);
+						}
 					}
 				} else {
 					this.sendRawMessage(errorPacket, sender);
@@ -515,21 +575,14 @@ public class RakNetServer implements RakNet {
 	 */
 	private RakNetPacket validateSender(InetSocketAddress sender) {
 		// Checked throughout all login
-		if (sessions.containsKey(sender)) {
-			// This client is already connected!
-			AlreadyConnected alreadyConnected = new AlreadyConnected();
-			alreadyConnected.encode();
-			return alreadyConnected;
-		} else if (sessions.size() >= this.maxConnections) {
+		if (this.hasSession(sender)) {
+			return new RakNetPacket(ID_ALREADY_CONNECTED);
+		} else if (this.getSessionCount() >= this.maxConnections) {
 			// We have no free connections!
-			NoFreeIncomingConnections noFreeIncomingConnections = new NoFreeIncomingConnections();
-			noFreeIncomingConnections.encode();
-			return noFreeIncomingConnections;
-		} else if (handler.addressBlocked(sender.getAddress())) {
+			return new RakNetPacket(ID_NO_FREE_INCOMING_CONNECTIONS);
+		} else if (this.addressBlocked(sender.getAddress())) {
 			// Address is blocked!
-			ConnectionBanned connectionBanned = new ConnectionBanned();
-			connectionBanned.encode();
-			return connectionBanned;
+			return new RakNetPacket(ID_CONNECTION_BANNED);
 		}
 
 		// There were no errors
@@ -546,6 +599,18 @@ public class RakNetServer implements RakNet {
 	 */
 	private void sendRawMessage(Packet packet, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
+	}
+
+	/**
+	 * Sends a single ID to the specified address
+	 * 
+	 * @param packetId
+	 *            - The ID of the packet to send
+	 * @param address
+	 *            - The address to send the packet to
+	 */
+	private void sendRawMessage(int packetId, InetSocketAddress address) {
+		this.sendRawMessage(new RakNetPacket(packetId), address);
 	}
 
 	/**
@@ -595,9 +660,11 @@ public class RakNetServer implements RakNet {
 	/**
 	 * Starts the server on it's own Thread
 	 * 
+	 * @throws NoListenerException
+	 *             - Thrown if the listener has not yet been set
 	 * @return The Thread the server is running on
 	 */
-	public synchronized Thread startThreaded() {
+	public synchronized Thread startThreaded() throws NoListenerException {
 		// Give the thread a reference
 		RakNetServer server = this;
 

@@ -83,8 +83,6 @@ public class MCPEIdentifier extends Identifier {
 
 	public MCPEIdentifier(String serverName, int serverProtocol, String versionTag, int onlinePlayerCount,
 			int maxPlayerCount, long timestamp, String worldName, String gamemode) {
-		super(null); // We don't have any data yet
-
 		this.serverName = serverName;
 		this.serverProtocol = serverProtocol;
 		this.versionTag = versionTag;
@@ -100,12 +98,9 @@ public class MCPEIdentifier extends Identifier {
 				throw new IllegalArgumentException("Invalid version tag!");
 			}
 		}
-
-		this.updateBuild(); // Now we have data
 	}
 
 	public MCPEIdentifier(Identifier identifier) {
-		super(null); // We don't have any data yet
 		String[] data = identifier.build().split(SEPERATOR);
 		if (data.length >= DATA_COUNT_LEGACY) {
 			if (data[0].equals(HEADER) == false) {
@@ -133,7 +128,7 @@ public class MCPEIdentifier extends Identifier {
 	}
 
 	public MCPEIdentifier() {
-		this(null, -1, null, -1, -1, -1, null, null);
+		this("", -1, "", -1, -1, -1, "", "");
 	}
 
 	/**
@@ -216,7 +211,6 @@ public class MCPEIdentifier extends Identifier {
 	 */
 	public void setServerName(String serverName) {
 		this.serverName = serverName;
-		this.updateBuild();
 	}
 
 	/**
@@ -227,7 +221,6 @@ public class MCPEIdentifier extends Identifier {
 	 */
 	public void setServerProtocol(int serverProtocol) {
 		this.serverProtocol = serverProtocol;
-		this.updateBuild();
 	}
 
 	/**
@@ -240,7 +233,6 @@ public class MCPEIdentifier extends Identifier {
 	public boolean setVersionTag(String versionTag) {
 		if (verifyVersionTag(versionTag)) {
 			this.versionTag = versionTag;
-			this.updateBuild();
 			return true;
 		}
 		return false;
@@ -254,7 +246,6 @@ public class MCPEIdentifier extends Identifier {
 	 */
 	public void setOnlinePlayerCount(int onlinePlayerCount) {
 		this.onlinePlayerCount = onlinePlayerCount;
-		this.updateBuild();
 	}
 
 	/**
@@ -265,7 +256,6 @@ public class MCPEIdentifier extends Identifier {
 	 */
 	public void setMaxPlayerCount(int maxPlayerCount) {
 		this.maxPlayerCount = maxPlayerCount;
-		this.updateBuild();
 	}
 
 	/**
@@ -317,17 +307,15 @@ public class MCPEIdentifier extends Identifier {
 		return this.legacy;
 	}
 
-	/**
-	 * Updates the identifier
-	 */
-	private void updateBuild() {
-		if (legacy == true) {
-			this.identifier = (HEADER + SEPERATOR + serverName + SEPERATOR + serverProtocol + SEPERATOR + versionTag
-					+ SEPERATOR + onlinePlayerCount + SEPERATOR + maxPlayerCount + SEPERATOR + timestamp + SEPERATOR
-					+ worldName + SEPERATOR + gamemode);
+	@Override
+	public String build() {
+		if (this.legacy == true) {
+			return (HEADER + SEPERATOR + serverName + SEPERATOR + serverProtocol + SEPERATOR + versionTag + SEPERATOR
+					+ onlinePlayerCount + SEPERATOR + maxPlayerCount);
 		} else {
-			this.identifier = (HEADER + SEPERATOR + serverName + SEPERATOR + serverProtocol + SEPERATOR + versionTag
-					+ SEPERATOR + onlinePlayerCount + SEPERATOR + maxPlayerCount);
+			return (HEADER + SEPERATOR + serverName + SEPERATOR + serverProtocol + SEPERATOR + versionTag + SEPERATOR
+					+ onlinePlayerCount + SEPERATOR + maxPlayerCount + SEPERATOR + timestamp + SEPERATOR + worldName
+					+ SEPERATOR + gamemode);
 		}
 	}
 

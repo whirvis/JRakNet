@@ -73,7 +73,6 @@ public class SplitPacket {
 		// Update payload data
 		if (encapsulated.split != true || encapsulated.splitId != this.splitId
 				|| encapsulated.splitCount != this.splitCount || encapsulated.reliability != this.reliability) {
-			System.exit(0);
 			throw new IllegalArgumentException("This split packet does not belong to this one!");
 		}
 		payloads.put(encapsulated.splitIndex, encapsulated.payload);

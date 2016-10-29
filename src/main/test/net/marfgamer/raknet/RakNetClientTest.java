@@ -37,10 +37,13 @@ import net.marfgamer.raknet.client.RakNetClientListener;
 import net.marfgamer.raknet.exception.RakNetException;
 import net.marfgamer.raknet.session.RakNetServerSession;
 
+/**
+ * Used to test the RakNetClient by connecting to the Lifeboat Survival Games
+ * server and then disconnecting afterwards
+ *
+ * @author MarfGamer
+ */
 public class RakNetClientTest {
-
-	private static final InetSocketAddress LIFEBOAT_SURVIVAL_GAMES_ADDRESS = new InetSocketAddress("sg.lbsg.net",
-			19132);
 
 	public static void main(String[] args) throws RakNetException {
 		RakNetClient client = new RakNetClient();
@@ -53,21 +56,21 @@ public class RakNetClientTest {
 			}
 
 			@Override
-			public void onConnectionFailure(InetSocketAddress address, RakNetException cause) {
-				System.out.println("Failed to connect to server with address " + address + " ["
-						+ cause.getClass().getSimpleName() + "]");
-			}
-
-			@Override
 			public void onDisconnect(RakNetServerSession session, String reason) {
 				System.out.println("Disconnected from server with address " + session.getAddress() + " for reason \""
 						+ reason + "\"");
 			}
+			
+			@Override
+			public void onHandlerException(InetSocketAddress address, Throwable cause) {
+				System.err.println("Exception caused by " + address);
+				cause.printStackTrace();
+			}
 
 		});
-		System.out.println("Created client, connecting to " + LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
+		System.out.println("Created client, connecting to " + UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
 
-		client.connect(LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
+		client.connect(UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
 	}
 
 }
