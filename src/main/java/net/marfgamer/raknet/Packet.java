@@ -191,7 +191,7 @@ public class Packet {
 	 * @return An unsigned integer
 	 */
 	public long readUInt() {
-		return (buffer.readInt() & 0xFFFFFFFF);
+		return (buffer.readInt() & 0x00000000FFFFFFFFL);
 	}
 
 	/**
@@ -200,7 +200,7 @@ public class Packet {
 	 * @return An unsigned little endian integer
 	 */
 	public long readUIntLE() {
-		return (buffer.readIntLE() & 0xFFFFFFFF);
+		return (buffer.readIntLE() & 0x00000000FFFFFFFFL);
 	}
 
 	/**
@@ -443,7 +443,7 @@ public class Packet {
 	 * @return The packet
 	 */
 	public Packet writeUInt(long i) {
-		buffer.writeIntLE(((int) i) & 0xFFFFFFFF);
+		buffer.writeInt(((int) i) & 0xFFFFFFFF);
 		return this;
 	}
 
