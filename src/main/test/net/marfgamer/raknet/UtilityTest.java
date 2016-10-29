@@ -46,8 +46,9 @@ import net.marfgamer.raknet.util.RakNetUtils;
 public class UtilityTest {
 
 	private static final char UNICODE_MINECRAFT_COLOR_SYMBOL = '\u00A7';
-	private static final InetSocketAddress LIFEBOAT_SURVIVAL_GAMES_ADDRESS = new InetSocketAddress("sg.lbsg.net",
-			19132);
+	protected static final int MINECRAFT_POCKET_EDITION_DEFAULT_PORT = 19132;
+	protected static final InetSocketAddress LIFEBOAT_SURVIVAL_GAMES_ADDRESS = new InetSocketAddress("sg.lbsg.net",
+			MINECRAFT_POCKET_EDITION_DEFAULT_PORT);
 
 	public static void main(String[] args) throws RakNetException {
 		// Tell the user the sever we are pinging
@@ -59,7 +60,6 @@ public class UtilityTest {
 		if (isServerOnline(LIFEBOAT_SURVIVAL_GAMES_ADDRESS)) {
 			System.out.println("Success!");
 		} else {
-			System.out.println("Failure!");
 			throw new RakNetException("Failed to connect to server, unable to proceed with testing!");
 		}
 
@@ -67,7 +67,6 @@ public class UtilityTest {
 		if (isServerCompatible(LIFEBOAT_SURVIVAL_GAMES_ADDRESS)) {
 			System.out.println("Success!");
 		} else {
-			System.out.println("Invalid protocol!");
 			throw new RakNetException("Invalid protocol, we are unable to continue with testing!");
 		}
 

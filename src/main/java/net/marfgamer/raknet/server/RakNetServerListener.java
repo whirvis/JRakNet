@@ -125,6 +125,18 @@ public interface RakNetServerListener {
 	}
 
 	/**
+	 * Called when a handler exception has occurred, these normally do not
+	 * matter as long as the server handles them on it's own
+	 * 
+	 * @param address
+	 *            - The address that caused the exception
+	 * @param throwable
+	 *            - The throwable exception that was caught
+	 */
+	public default void onHandlerException(InetSocketAddress address, Throwable throwable) {
+	}
+
+	/**
 	 * Called when an address is blocked by the server
 	 * 
 	 * @param address

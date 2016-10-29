@@ -30,16 +30,16 @@
  */
 package net.marfgamer.raknet.session;
 
+import static net.marfgamer.raknet.protocol.MessageIdentifier.*;
+
 import java.net.InetSocketAddress;
 
 import io.netty.channel.Channel;
 import net.marfgamer.raknet.RakNetPacket;
-import net.marfgamer.raknet.protocol.MessageIdentifier;
 import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.protocol.login.ConnectionRequest;
 import net.marfgamer.raknet.protocol.login.ConnectionRequestAccepted;
 import net.marfgamer.raknet.protocol.login.NewIncomingConnection;
-import net.marfgamer.raknet.protocol.login.error.ConnectionAttemptFailed;
 import net.marfgamer.raknet.protocol.message.acknowledge.Record;
 import net.marfgamer.raknet.protocol.session.DisconnectionNotification;
 import net.marfgamer.raknet.server.RakNetServer;
@@ -101,7 +101,7 @@ public class RakNetClientSession extends RakNetSession {
 	public void handlePacket(RakNetPacket packet, int channel) {
 		short packetId = packet.getId();
 
-		if (packetId == MessageIdentifier.ID_CONNECTION_REQUEST && this.getState() == RakNetState.DISCONNECTED) {
+		if (packetId == ID_CONNECTION_REQUEST && this.getState() == RakNetState.DISCONNECTED) {
 			ConnectionRequest request = new ConnectionRequest(packet);
 			request.decode();
 
@@ -116,27 +116,23 @@ public class RakNetClientSession extends RakNetSession {
 				this.sendMessage(Reliability.RELIABLE_ORDERED, requestAccepted);
 				this.setState(RakNetState.HANDSHAKING);
 			} else {
-				ConnectionAttemptFailed attemptFailed = new ConnectionAttemptFailed();
-				attemptFailed.encode();
-
-				this.sendMessage(Reliability.RELIABLE_ORDERED, attemptFailed);
+				this.sendMessage(Reliability.RELIABLE_ORDERED, new RakNetPacket(ID_CONNECTION_ATTEMPT_FAILED));
 				this.setState(RakNetState.DISCONNECTED);
 				server.removeSession(this, "Connection failed, invalid GUID");
 			}
-		} else if (packetId == MessageIdentifier.ID_NEW_INCOMING_CONNECTION
-				&& this.getState() == RakNetState.HANDSHAKING) {
+		} else if (packetId == ID_NEW_INCOMING_CONNECTION && this.getState() == RakNetState.HANDSHAKING) {
 			NewIncomingConnection clientHandshake = new NewIncomingConnection(packet);
 			clientHandshake.decode();
 
 			this.timestamp = (System.currentTimeMillis() - clientHandshake.clientTimestamp);
 			this.setState(RakNetState.CONNECTED);
 			server.getListener().onClientConnect(this);
-		} else if (packetId == MessageIdentifier.ID_DISCONNECTION_NOTIFICATION) {
+		} else if (packetId == ID_DISCONNECTION_NOTIFICATION) {
 			DisconnectionNotification disconnectionNotification = new DisconnectionNotification(packet);
 			disconnectionNotification.decode();
 
 			server.removeSession(this, "Client disconnected");
-		} else if (packetId >= MessageIdentifier.ID_USER_PACKET_ENUM) {
+		} else if (packetId >= ID_USER_PACKET_ENUM) {
 			server.getListener().handlePacket(this, packet, channel);
 		}
 	}
