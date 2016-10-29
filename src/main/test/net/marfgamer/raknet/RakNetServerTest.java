@@ -35,22 +35,28 @@ import java.net.InetSocketAddress;
 
 import net.marfgamer.raknet.exception.RakNetException;
 import net.marfgamer.raknet.identifier.MCPEIdentifier;
+import net.marfgamer.raknet.protocol.login.NewIncomingConnection;
 import net.marfgamer.raknet.server.RakNetServer;
 import net.marfgamer.raknet.server.RakNetServerListener;
 import net.marfgamer.raknet.server.ServerPing;
 import net.marfgamer.raknet.session.RakNetClientSession;
 
+/**
+ * Used to test the RakNetServer by starting a server on the default
+ *
+ * @author MarfGamer
+ */
 public class RakNetServerTest {
 
 	public static void main(String[] args) throws RakNetException {
-		RakNetServer server = new RakNetServer(19132, 10);
+		RakNetServer server = new RakNetServer(UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT, 10);
 
 		server.setListener(new RakNetServerListener() {
 
 			@Override
 			public void onClientPreConnect(InetSocketAddress address) {
-				System.out.println("Client from " + address
-						+ " has instantiated the connection, waiting for NEW_INCOMING_CONNECTION packet");
+				System.out.println("Client from " + address + " has instantiated the connection, waiting for "
+						+ NewIncomingConnection.class.getSimpleName() + " packet");
 			}
 
 			@Override
@@ -74,15 +80,26 @@ public class RakNetServerTest {
 			@Override
 			public void handlePing(ServerPing ping) {
 				MCPEIdentifier identifier = new MCPEIdentifier();
-				identifier.setServerProtocol(91);
-				identifier.setTimestamp(System.currentTimeMillis());
-				identifier.setServerName("A JRakNet server test");
-				identifier.setVersionTag("0.16.0");
-				identifier.setWorldName("New World");
-				identifier.setGamemode("Developer");
-				identifier.setOnlinePlayerCount(server.getSessionCount());
-				identifier.setMaxPlayerCount(server.getMaxConnections());
+
+				// Set identifier properties
+				{
+					identifier.setServerProtocol(91);
+					identifier.setTimestamp(System.currentTimeMillis());
+					identifier.setServerName("A JRakNet server test");
+					identifier.setVersionTag("0.16.0");
+					identifier.setWorldName("New World");
+					identifier.setGamemode("Developer");
+					identifier.setOnlinePlayerCount(server.getSessionCount());
+					identifier.setMaxPlayerCount(server.getMaxConnections());
+				}
+				
 				ping.setIdentifier(identifier);
+			}
+			
+			@Override
+			public void onHandlerException(InetSocketAddress address, Throwable cause) {
+				System.err.println("Exception caused by " + address);
+				cause.printStackTrace();
 			}
 
 			@Override
@@ -97,7 +114,7 @@ public class RakNetServerTest {
 
 		});
 
-		server.start();
+		server.startThreaded();
 		System.out.println("Started server!");
 	}
 

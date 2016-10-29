@@ -85,10 +85,9 @@ public class RakNetClient {
 	// Client data
 	private final long guid;
 	private final long timestamp;
-	private final boolean threaded;
 
 	private final int discoveryPort;
-	private DiscoveryMode mode;
+	private DiscoveryMode discoveryMode;
 	private final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> discovered;
 
 	// Networking data
@@ -102,15 +101,17 @@ public class RakNetClient {
 	private volatile RakNetServerSession session;
 	private volatile RakNetClientListener listener;
 
-	public RakNetClient(int discoveryPort, boolean threaded) {
+	public RakNetClient(DiscoveryMode discoveryMode, int discoveryPort) {
 		// Set client data
 		this.guid = RakNet.UNIQUE_ID_BITS.getLeastSignificantBits();
 		this.timestamp = System.currentTimeMillis();
-		this.threaded = threaded;
 
 		// Set discovery data
 		this.discoveryPort = discoveryPort;
-		this.mode = (discoveryPort > -1 ? DiscoveryMode.ALL_CONNECTIONS : DiscoveryMode.NONE);
+		this.discoveryMode = discoveryMode;
+		if (discoveryMode == null) {
+			this.discoveryMode = (discoveryPort > -1 ? DiscoveryMode.ALL_CONNECTIONS : DiscoveryMode.NONE);
+		}
 		this.discovered = new ConcurrentHashMap<InetSocketAddress, DiscoveredServer>();
 
 		// Set networking data
@@ -135,7 +136,7 @@ public class RakNetClient {
 	}
 
 	public RakNetClient(int discoveryPort) {
-		this(discoveryPort, true);
+		this(null, discoveryPort);
 	}
 
 	public RakNetClient() {
@@ -166,7 +167,7 @@ public class RakNetClient {
 	 * @return The client's discovery mode
 	 */
 	public DiscoveryMode getDiscoveryMode() {
-		return this.mode;
+		return this.discoveryMode;
 	}
 
 	/**
@@ -177,8 +178,8 @@ public class RakNetClient {
 	 * @return The client
 	 */
 	public RakNetClient setDiscoveryMode(DiscoveryMode mode) {
-		this.mode = (mode != null ? mode : DiscoveryMode.NONE);
-		if (this.mode == DiscoveryMode.NONE) {
+		this.discoveryMode = (mode != null ? mode : DiscoveryMode.NONE);
+		if (this.discoveryMode == DiscoveryMode.NONE) {
 			discovered.clear(); // We are not discovering servers anymore!
 		}
 		return this;
@@ -232,20 +233,24 @@ public class RakNetClient {
 	/**
 	 * Called whenever the handler catches an exception in Netty
 	 * 
-	 * @param causeAddress
+	 * @param address
 	 *            - The address that caused the exception
 	 * @param cause
 	 *            - The exception caught by the handler
 	 */
-	protected void handleHandlerException(InetSocketAddress causeAddress, Throwable cause) {
+	protected void handleHandlerException(InetSocketAddress address, Throwable cause) {
+		listener.onHandlerException(address, cause);
 		if (preparation != null) {
-			listener.onHandlerException(causeAddress, cause);
-			if (causeAddress.equals(preparation.address)) {
+			if (address.equals(preparation.address)) {
 				preparation.cancelReason = new NettyHandlerException(this, handler, cause);
 				preparation.cancelled = true;
 			}
 		} else {
-			cause.printStackTrace();
+			if (session != null) {
+				if (address.equals(preparation.address)) {
+					this.disconnect(cause.getClass().getName() + ": " + cause.getLocalizedMessage());
+				}
+			}
 		}
 	}
 
@@ -308,6 +313,19 @@ public class RakNetClient {
 	}
 
 	/**
+	 * Sends a single ID to the specified address
+	 * 
+	 * @param packetId
+	 *            - The ID of the packet to send
+	 * @param address
+	 *            - The address to send the packet to
+	 */
+	@SuppressWarnings("unused") // Currently not needed by the client
+	private void sendRawMessage(int packetId, InetSocketAddress address) {
+		this.sendRawMessage(new RakNetPacket(packetId), address);
+	}
+
+	/**
 	 * Updates the discovery data in the client by sending pings and removing
 	 * servers that have taken too long to respond to a ping
 	 */
@@ -331,9 +349,9 @@ public class RakNetClient {
 		discovered.keySet().removeAll(forgottenServers);
 
 		// Broadcast ping
-		if (mode != DiscoveryMode.NONE && discoveryPort > -1) {
+		if (discoveryMode != DiscoveryMode.NONE && discoveryPort > -1) {
 			UnconnectedPing ping = new UnconnectedPing();
-			if (mode == DiscoveryMode.OPEN_CONNECTIONS) {
+			if (discoveryMode == DiscoveryMode.OPEN_CONNECTIONS) {
 				ping = new UnconnectedPingOpenConnections();
 			}
 
@@ -388,7 +406,9 @@ public class RakNetClient {
 		}
 
 		// Reset client data
-		this.disconnect("Disconnected");
+		if (this.isConnected()) {
+			this.disconnect("Disconnected");
+		}
 		this.preparation = new SessionPreparation(this, units[0].getMaximumTransferUnit());
 		preparation.address = address;
 
@@ -439,18 +459,15 @@ public class RakNetClient {
 			session.sendMessage(Reliability.RELIABLE_ORDERED, connectionRequest);
 
 			// Initiate connection loop required for the session to function
-			if (this.threaded == true) {
-				this.initConnectionThreaded();
-			} else {
-				this.initConnection();
-			}
+			this.initConnection();
 		} else {
 			// Reset the connection data, it failed
 			if (preparation.cancelReason == null) {
 				preparation.cancelReason = new ServerOfflineException(this, preparation.address);
 			}
-			listener.onConnectionFailure(preparation.address, preparation.cancelReason);
+			RakNetException cancelReason = preparation.cancelReason;
 			this.preparation = null;
+			throw cancelReason;
 		}
 	}
 
@@ -497,26 +514,16 @@ public class RakNetClient {
 	}
 
 	/**
-	 * Starts the loop needed for the client to stay connected to the server
+	 * Connects the client to a server with the specified address on it's own
+	 * Thread
+	 * 
+	 * @param address
+	 *            - The address of the server to connect to
+	 * @throws RakNetException
+	 *             - Thrown if an error occurs during connection or login
+	 * @return The Thread the client is running on
 	 */
-	private void initConnection() {
-		while (session != null) {
-			try {
-				session.update();
-				if (System.currentTimeMillis() - session.getLastPacketReceiveTime() > RakNetSession.SESSION_TIMEOUT) {
-					this.disconnect();
-				}
-			} catch (Exception e) {
-				this.disconnect(e.getMessage());
-			}
-		}
-	}
-
-	/**
-	 * Starts the loop needed for the client to stay connected to the server on
-	 * it's own thread
-	 */
-	private void initConnectionThreaded() {
+	public Thread connectThreaded(InetSocketAddress address) throws RakNetException {
 		// Give the thread a reference
 		RakNetClient client = this;
 
@@ -524,10 +531,77 @@ public class RakNetClient {
 		Thread thread = new Thread() {
 			@Override
 			public synchronized void run() {
-				client.initConnection();
+				try {
+					client.connect(address);
+				} catch (RakNetException e) {
+					e.printStackTrace();
+				}
 			}
 		};
 		thread.start();
+
+		// Return the thread so it can be modified
+		return thread;
+	}
+
+	/**
+	 * Connects the client to a server with the specified address on it's own
+	 * Thread
+	 * 
+	 * @param address
+	 *            - The address of the server to connect to
+	 * @param port
+	 *            - The port of the server to connect to
+	 * @throws RakNetException
+	 *             - Thrown if an error occurs during connection or login
+	 * @return The Thread the client is running on
+	 */
+	public Thread connectThreaded(InetAddress address, int port) throws RakNetException {
+		return this.connectThreaded(new InetSocketAddress(address, port));
+	}
+
+	/**
+	 * Connects the client to a server with the specified address on it's own
+	 * Thread
+	 * 
+	 * @param address
+	 *            - The address of the server to connect to
+	 * @param port
+	 *            - The port of the server to connect to
+	 * @throws RakNetException
+	 *             - Thrown if an error occurs during connection or login
+	 * @throws UnknownHostException
+	 *             - Thrown if the specified address is an unknown host
+	 * @return The Thread the client is running on
+	 */
+	public Thread connectThreaded(String address, int port) throws RakNetException, UnknownHostException {
+		return this.connectThreaded(InetAddress.getByName(address), port);
+	}
+
+	/**
+	 * Connects the the client to the specified discovered server on it's own
+	 * Thread
+	 * 
+	 * @param server
+	 *            - The discovered server to connect to
+	 * @throws RakNetException
+	 *             - Thrown if an error occurs during connection or login
+	 * @return The Thread the client is running on
+	 */
+	public Thread connectThreaded(DiscoveredServer server) throws RakNetException {
+		return this.connectThreaded(server.getAddress());
+	}
+
+	/**
+	 * Starts the loop needed for the client to stay connected to the server
+	 */
+	private void initConnection() throws RakNetException {
+		while (session != null) {
+			session.update();
+			if (System.currentTimeMillis() - session.getLastPacketReceiveTime() > RakNetSession.SESSION_TIMEOUT) {
+				this.disconnect("The session has timed out!");
+			}
+		}
 	}
 
 	/**

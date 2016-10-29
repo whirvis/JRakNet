@@ -30,6 +30,8 @@
  */
 package net.marfgamer.raknet.session;
 
+import static net.marfgamer.raknet.protocol.MessageIdentifier.*;
+
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 
@@ -39,10 +41,10 @@ import io.netty.channel.socket.DatagramPacket;
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.RakNetPacket;
+import net.marfgamer.raknet.exception.RakNetException;
 import net.marfgamer.raknet.exception.session.InvalidChannelException;
 import net.marfgamer.raknet.exception.session.SplitQueueOverloadException;
 import net.marfgamer.raknet.exception.session.TimeoutException;
-import net.marfgamer.raknet.protocol.MessageIdentifier;
 import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.protocol.SplitPacket;
 import net.marfgamer.raknet.protocol.message.CustomPacket;
@@ -297,7 +299,7 @@ public abstract class RakNetSession {
 		// Update acknowledgement queues
 		acknowledgeQueue.add(new Record(custom.sequenceNumber));
 		this.updateAcknowledge(true);
-
+		
 		// Handle the messages accordingly
 		this.packetsReceivedThisSecond++;
 		for (EncapsulatedPacket encapsulated : custom.messages) {
@@ -325,8 +327,7 @@ public abstract class RakNetSession {
 			if (!splitQueue.containsKey(encapsulated.splitId)) {
 				splitQueue.put(encapsulated.splitId,
 						new SplitPacket(encapsulated.splitId, encapsulated.splitCount, encapsulated.reliability));
-				if (splitQueue.size() > RakNet.MAX_SPLITS_PER_QUEUE
-						|| encapsulated.splitCount > RakNet.MAX_SPLIT_COUNT) {
+				if (splitQueue.size() > RakNet.MAX_SPLITS_PER_QUEUE) {
 					throw new SplitQueueOverloadException();
 				}
 			}
@@ -392,7 +393,7 @@ public abstract class RakNetSession {
 	private final void handlePacket0(RakNetPacket packet, int channel) {
 		int id = packet.getId();
 
-		if (id == MessageIdentifier.ID_CONNECTED_PING) {
+		if (id == ID_CONNECTED_PING) {
 			ConnectedPing ping = new ConnectedPing(packet);
 			ping.decode();
 
@@ -400,7 +401,7 @@ public abstract class RakNetSession {
 			pong.identifier = ping.identifier;
 			pong.encode();
 			this.sendMessage(Reliability.UNRELIABLE, pong);
-		} else if (id == MessageIdentifier.ID_CONNECTED_PONG) {
+		} else if (id == ID_CONNECTED_PONG) {
 			ConnectedPong pong = new ConnectedPong(packet);
 			pong.decode();
 
@@ -495,7 +496,8 @@ public abstract class RakNetSession {
 	 * @throws InvalidChannelException
 	 *             - Thrown if the channel is higher than the maximum
 	 */
-	public final void sendMessage(Reliability reliability, int channel, Packet packet) throws InvalidChannelException {
+	public final synchronized void sendMessage(Reliability reliability, int channel, Packet packet)
+			throws InvalidChannelException {
 		// Make sure channel doesn't exceed RakNet limit
 		if (channel > RakNet.MAX_CHANNELS) {
 			throw new InvalidChannelException();
@@ -522,12 +524,14 @@ public abstract class RakNetSession {
 			// Add to buffer, CustomPacket encodes it
 			sendQueue.add(encapsulated);
 		} else {
+			// Get split packet data
 			byte[][] split = ArrayUtils.splitArray(packet.array(), this.maximumTransferUnit
 					- CustomPacket.calculateDummy() - EncapsulatedPacket.calculateDummy(reliability, true));
 			int splitMessageIndex = this.messageIndex;
 			int splitOrderIndex = (reliability.isOrdered() ? this.sendOrderIndex[channel]++
 					: this.sendSequenceIndex[channel]++);
 
+			// Encode encapsulated packets
 			for (int i = 0; i < split.length; i++) {
 				// Set the normal parameters
 				EncapsulatedPacket encapsulatedSplit = new EncapsulatedPacket();
@@ -546,12 +550,15 @@ public abstract class RakNetSession {
 				// Set the split related parameters
 				encapsulatedSplit.split = true;
 				encapsulatedSplit.splitCount = split.length;
-				encapsulatedSplit.splitId = this.splitId++;
+				encapsulatedSplit.splitId = this.splitId;
 				encapsulatedSplit.splitIndex = i;
 
 				// Add to buffer, CustomPacket encodes it
 				sendQueue.add(encapsulatedSplit);
 			}
+
+			// Bump split ID for next split packet
+			this.splitId++;
 		}
 	}
 
@@ -605,6 +612,8 @@ public abstract class RakNetSession {
 			this.sendMessage(reliability, DEFAULT_ORDER_CHANNEL, packet);
 		}
 	}
+
+	// TODO: Packet ID only sending
 
 	/**
 	 * Sends a raw message
@@ -662,8 +671,11 @@ public abstract class RakNetSession {
 
 	/**
 	 * Updates the session
+	 * 
+	 * @throws RakNetException
+	 *             - Thrown if an error occurs during the updating process
 	 */
-	public final void update() {
+	public final synchronized void update() throws RakNetException {
 		long currentTime = System.currentTimeMillis();
 
 		// Are we missing any packets?
@@ -676,8 +688,12 @@ public abstract class RakNetSession {
 			// Add packets to the CustomPacket until it's full or there's none
 			ArrayList<EncapsulatedPacket> sent = new ArrayList<EncapsulatedPacket>();
 			for (EncapsulatedPacket encapsulated : this.sendQueue) {
-				if (custom.calculateSize() + encapsulated.calculateSize() >= this.maximumTransferUnit) {
-					break; // The packet is full, break out of the loop!
+				if (custom.calculateSize() + encapsulated.calculateSize() > this.maximumTransferUnit) {
+					if (sent.isEmpty()) {
+						throw new RakNetException(
+								"Payload is too big to fit in a single packet! Was it split correctly?");
+					}
+					break; // If we add this next packet we'll exceed the MTU!
 				}
 				sent.add(encapsulated);
 				custom.messages.add(encapsulated);
@@ -692,7 +708,6 @@ public abstract class RakNetSession {
 				// Let all unacknowledged packets be handled first and don't DOS
 				if (recoveryQueue.isEmpty() == true && this.packetsSentThisSecond < RakNet.MAX_PACKETS_PER_SECOND) {
 					this.sendRawMessage(custom);
-					this.packetsSentThisSecond++;
 				}
 				recoveryQueue.put(custom.sequenceNumber, custom);
 			}

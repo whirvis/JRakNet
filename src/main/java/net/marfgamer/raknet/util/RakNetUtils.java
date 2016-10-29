@@ -50,9 +50,9 @@ import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.identifier.Identifier;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
+import net.marfgamer.raknet.protocol.login.IncompatibleProtocol;
 import net.marfgamer.raknet.protocol.login.OpenConnectionRequestOne;
 import net.marfgamer.raknet.protocol.login.OpenConnectionResponseOne;
-import net.marfgamer.raknet.protocol.login.error.IncompatibleProtocol;
 import net.marfgamer.raknet.protocol.status.UnconnectedPing;
 import net.marfgamer.raknet.protocol.status.UnconnectedPong;
 

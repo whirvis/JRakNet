@@ -33,7 +33,6 @@ package net.marfgamer.raknet.client;
 import java.net.InetSocketAddress;
 
 import net.marfgamer.raknet.RakNetPacket;
-import net.marfgamer.raknet.exception.RakNetException;
 import net.marfgamer.raknet.identifier.Identifier;
 import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.protocol.message.acknowledge.Record;
@@ -77,17 +76,6 @@ public interface RakNetClientListener {
 	 *            - The address of the server
 	 */
 	public default void onServerForgotten(InetSocketAddress address) {
-	}
-
-	/**
-	 * Called when the client fails to connect to a server
-	 * 
-	 * @param address
-	 *            - The address of the server
-	 * @param cause
-	 *            - The cause for failure
-	 */
-	public default void onConnectionFailure(InetSocketAddress address, RakNetException cause) {
 	}
 
 	/**
