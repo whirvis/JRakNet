@@ -30,6 +30,61 @@
  */
 package net.marfgamer.raknet.interactive;
 
+import javax.swing.JFrame;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
+import net.marfgamer.raknet.UtilityTest;
+import net.marfgamer.raknet.identifier.MCPEIdentifier;
+import net.marfgamer.raknet.server.RakNetServer;
+import net.marfgamer.raknet.server.RakNetServerListener;
+import net.marfgamer.raknet.util.RakNetUtils;
+
+/**
+ * Used to test the latency feature in <code>RakNetSession</code>
+ *
+ * @author MarfGamer
+ */
 public class LatencyTest {
+
+	private static final MCPEIdentifier LATENCY_TEST_IDENTIFIER = new MCPEIdentifier("JRakNet Latency Test", 91,
+			"0.16.0", 0, 5, System.currentTimeMillis(), "New World", "Developer");
+
+	private final RakNetServer server;
+	private final LatencyFrame frame;
+
+	public LatencyTest() {
+		this.server = new RakNetServer(UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT,
+				LATENCY_TEST_IDENTIFIER.getMaxPlayerCount());
+		this.frame = new LatencyFrame();
+	}
+
+	/**
+	 * Starts the test
+	 */
+	public void start() {
+		// Set server options and start it
+		server.setListener(new RakNetServerListener() {
+		});
+		server.setIdentifier(LATENCY_TEST_IDENTIFIER);
+		server.startThreaded();
+
+		// Create window
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setVisible(true);
+		while (true) {
+			synchronized (server) {
+				frame.updatePaneText(server.getSessions());
+				RakNetUtils.passiveSleep(500);
+			}
+		}
+	}
+
+	public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
+			IllegalAccessException, UnsupportedLookAndFeelException {
+		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		LatencyTest test = new LatencyTest();
+		test.start();
+	}
 
 }

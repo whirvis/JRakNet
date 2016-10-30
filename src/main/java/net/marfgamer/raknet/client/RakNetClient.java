@@ -268,7 +268,6 @@ public class RakNetClient {
 		if (preparation != null) {
 			if (address.equals(preparation.address)) {
 				preparation.cancelReason = new NettyHandlerException(this, handler, cause);
-				preparation.cancelled = true;
 			}
 		} else {
 			if (session != null) {
@@ -441,7 +440,7 @@ public class RakNetClient {
 		int retries = 0;
 		for (MaximumTransferUnit unit : units) {
 			retries += unit.getRetries();
-			while (unit.retry() > 0 && preparation.loginPackets[0] == false && preparation.cancelled == false) {
+			while (unit.retry() > 0 && preparation.loginPackets[0] == false && preparation.cancelReason == null) {
 				OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne();
 				connectionRequestOne.maximumTransferUnit = unit.getMaximumTransferUnit();
 				connectionRequestOne.protocolVersion = RakNet.CLIENT_NETWORK_PROTOCOL;
@@ -453,13 +452,12 @@ public class RakNetClient {
 		}
 
 		// If the server didn't respond then it is offline
-		if (preparation.loginPackets[0] == false && preparation.cancelled == false) {
+		if (preparation.loginPackets[0] == false && preparation.cancelReason == null) {
 			preparation.cancelReason = new ServerOfflineException(this, preparation.address);
-			preparation.cancelled = true;
 		}
 
 		// Send OPEN_CONNECTION_REQUEST_TWO until a response is received
-		while (retries > 0 && preparation.loginPackets[1] == false && preparation.cancelled == false) {
+		while (retries > 0 && preparation.loginPackets[1] == false && preparation.cancelReason == null) {
 			OpenConnectionRequestTwo connectionRequestTwo = new OpenConnectionRequestTwo();
 			connectionRequestTwo.clientGuid = this.guid;
 			connectionRequestTwo.address = preparation.address;
@@ -468,6 +466,11 @@ public class RakNetClient {
 			this.sendRawMessage(connectionRequestTwo, address);
 
 			RakNetUtils.passiveSleep(500);
+		}
+
+		// If the server didn't respond then it is offline
+		if (preparation.loginPackets[1] == false && preparation.cancelReason == null) {
+			preparation.cancelReason = new ServerOfflineException(this, preparation.address);
 		}
 
 		// If the session was set we are connected
@@ -488,7 +491,9 @@ public class RakNetClient {
 		} else {
 			// Reset the connection data, it failed
 			if (preparation.cancelReason == null) {
-				preparation.cancelReason = new ServerOfflineException(this, preparation.address);
+				System.err.println("FATAL ERROR: CONNECTION FAILED FOR UNKNOWN REASONS");
+				this.shutdown();
+				return;
 			}
 			RakNetException cancelReason = preparation.cancelReason;
 			this.preparation = null;
@@ -651,8 +656,20 @@ public class RakNetClient {
 		this.disconnect("Disconnected");
 	}
 
+	/**
+	 * Shuts down the client for good, once this is called the client can no
+	 * longer connect to servers
+	 */
+	public void shutdown() {
+		this.disconnect("Client shutdown");
+		group.shutdownGracefully();
+		this.channel = null;
+		this.listener = null;
+	}
+
 	@Override
 	public void finalize() {
+		this.shutdown();
 		discoverySystem.removeClient(this);
 	}
 

@@ -40,8 +40,11 @@ import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.exception.RakNetException;
 import net.marfgamer.raknet.exception.client.AlreadyConnectedException;
 import net.marfgamer.raknet.exception.client.ConnectionBannedException;
+import net.marfgamer.raknet.exception.client.EncryptionEnabledException;
 import net.marfgamer.raknet.exception.client.IncompatibleProtocolException;
+import net.marfgamer.raknet.exception.client.InvalidProtocolException;
 import net.marfgamer.raknet.exception.client.NoFreeIncomingConnectionsException;
+import net.marfgamer.raknet.exception.client.UseSecurityException;
 import net.marfgamer.raknet.protocol.login.IncompatibleProtocol;
 import net.marfgamer.raknet.protocol.login.OpenConnectionResponseOne;
 import net.marfgamer.raknet.protocol.login.OpenConnectionResponseTwo;
@@ -58,7 +61,6 @@ public class SessionPreparation {
 	// Preparation data
 	private final RakNetClient client;
 	private final int initialMaximumTransferUnit;
-	public boolean cancelled;
 	public RakNetException cancelReason;
 
 	// Server data
@@ -92,7 +94,11 @@ public class SessionPreparation {
 				this.guid = connectionResponseOne.serverGuid;
 				this.loginPackets[0] = true;
 			} else {
-				this.cancelled = true;
+				if(connectionResponseOne.useSecurity == true) {
+					this.cancelReason = new UseSecurityException(client);
+				} else {
+					this.cancelReason = new InvalidProtocolException(client);
+				}
 			}
 		} else if (packetId == ID_OPEN_CONNECTION_REPLY_2) {
 			OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo(packet);
@@ -103,17 +109,18 @@ public class SessionPreparation {
 					&& connectionResponseTwo.maximumTransferUnit == this.maximumTransferUnit) {
 				this.loginPackets[1] = true;
 			} else {
-				this.cancelled = true;
+				if(connectionResponseTwo.encryptionEnabled == true) {
+					this.cancelReason = new EncryptionEnabledException(client);
+				} else {
+					this.cancelReason = new InvalidProtocolException(client);
+				}
 			}
 		} else if (packetId == ID_ALREADY_CONNECTED) {
 			this.cancelReason = new AlreadyConnectedException(client);
-			this.cancelled = true;
 		} else if (packetId == ID_NO_FREE_INCOMING_CONNECTIONS) {
 			this.cancelReason = new NoFreeIncomingConnectionsException(client);
-			this.cancelled = true;
 		} else if (packetId == ID_CONNECTION_BANNED) {
 			this.cancelReason = new ConnectionBannedException(client);
-			this.cancelled = true;
 		} else if (packetId == ID_INCOMPATIBLE_PROTOCOL_VERSION) {
 			IncompatibleProtocol incompatibleProtocol = new IncompatibleProtocol(packet);
 			incompatibleProtocol.decode();
@@ -121,7 +128,6 @@ public class SessionPreparation {
 			if (incompatibleProtocol.serverGuid == this.guid) {
 				this.cancelReason = new IncompatibleProtocolException(client, RakNet.CLIENT_NETWORK_PROTOCOL,
 						incompatibleProtocol.networkProtocol);
-				this.cancelled = true;
 			}
 		}
 	}
@@ -134,18 +140,20 @@ public class SessionPreparation {
 	 */
 	public boolean readyForSession() {
 		// It was cancelled, why are we finishing?
-		if (cancelled == true) {
+		if (cancelReason != null) {
 			return false;
 		}
 
 		// Not all of the data has been set
 		if (this.guid == -1 || this.maximumTransferUnit == -1 || this.address == null) {
+			System.out.println("NOt enough data");
 			return false;
 		}
 
 		// Not all of the packets needed to connect have been handled
 		for (boolean handled : loginPackets) {
 			if (handled == false) {
+				System.out.println("Unhandled packets");
 				return false;
 			}
 		}

@@ -43,7 +43,7 @@ public interface RakNet {
 	 * If this is set to true, the server and client will log as much as they
 	 * can for debugging data
 	 */
-	public static boolean LOGGER_ENABLED = false;
+	// TODO? public static boolean LOGGER_ENABLED = false;
 
 	/**
 	 * Server takes higher bits, client takes lower bits

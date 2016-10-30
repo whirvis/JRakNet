@@ -28,23 +28,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package net.marfgamer.raknet.interactive;
+package net.marfgamer.raknet.example;
 
-import javax.swing.ImageIcon;
+import java.net.UnknownHostException;
+
+import net.marfgamer.raknet.client.RakNetClient;
+import net.marfgamer.raknet.client.RakNetClientListener;
+import net.marfgamer.raknet.exception.RakNetException;
+import net.marfgamer.raknet.session.RakNetServerSession;
 
 /**
- * The resources typically used by JRakNet unit tests with <code>JFrame</code>
- * integration
- *
+ * A simple <code>RakNetClient</code> that connects to the LifeBoat Survival
+ * Games server, when it is connected the client disconnects and shuts down
+ * 
  * @author MarfGamer
  */
-public class FrameResources {
+public class RakNetClientExample {
 
-	public static ImageIcon TERRARIA_RAKNET_ICON = null;
+	// Server address and port
+	private static final String SERVER_ADDRESS = "sg.lbsg.net";
+	private static final int SERVER_PORT = 19132;
 
-	static {
-		TERRARIA_RAKNET_ICON = new ImageIcon(
-				BroadcastFrame.class.getResource("/net/marfgamer/raknet/TERRARIA_RAKNET_ICON.png"));
+	public static void main(String[] args) throws RakNetException, UnknownHostException {
+		// Create client
+		RakNetClient client = new RakNetClient();
+
+		client.setListener(new RakNetClientListener() {
+
+			// Server connected
+			@Override
+			public void onConnect(RakNetServerSession session) {
+				System.out.println("Successfully connected to server with address " + session.getAddress());
+				client.disconnect();
+			}
+
+			// Server disconnected
+			@Override
+			public void onDisconnect(RakNetServerSession session, String reason) {
+				System.out.println("Successfully disconnected from server with address " + session.getAddress()
+						+ " for the reason \"" + reason + "\"");
+				System.exit(0);
+			}
+
+		});
+
+		// Connect to server
+		client.connect(SERVER_ADDRESS, SERVER_PORT);
 	}
 
 }
