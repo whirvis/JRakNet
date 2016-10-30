@@ -40,7 +40,10 @@ import net.marfgamer.raknet.session.RakNetClientSession;
 
 /**
  * This interface is used by the server to let the user know when specific
- * events are triggered
+ * events are triggered<br>
+ * <br>
+ * Note: Do <b>NOT</b> use <code>Thread.sleep(long)</code> in any of these
+ * methods, as it will cause the server to timeout!
  *
  * @author MarfGamer
  */

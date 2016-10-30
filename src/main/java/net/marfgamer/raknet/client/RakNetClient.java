@@ -85,7 +85,6 @@ public class RakNetClient {
 	// Client data
 	private final long guid;
 	private final long timestamp;
-
 	private int discoveryPort;
 	private DiscoveryMode discoveryMode;
 	private final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> discovered;
@@ -100,6 +99,7 @@ public class RakNetClient {
 	private SessionPreparation preparation;
 	private volatile RakNetServerSession session;
 	private volatile RakNetClientListener listener;
+	private volatile Thread thread;
 
 	public RakNetClient(DiscoveryMode discoveryMode, int discoveryPort) {
 		// Set client data
@@ -571,6 +571,7 @@ public class RakNetClient {
 		thread.start();
 
 		// Return the thread so it can be modified
+		this.thread = thread;
 		return thread;
 	}
 
@@ -627,9 +628,12 @@ public class RakNetClient {
 	 */
 	private void initConnection() throws RakNetException {
 		while (session != null) {
+			long lastPacketReceiveTime = session.getLastPacketReceiveTime();
 			session.update();
-			if (System.currentTimeMillis() - session.getLastPacketReceiveTime() > RakNetSession.SESSION_TIMEOUT) {
+
+			if (System.currentTimeMillis() - lastPacketReceiveTime > RakNetSession.SESSION_TIMEOUT) {
 				this.disconnect("The session has timed out!");
+				break;
 			}
 		}
 	}
@@ -661,10 +665,27 @@ public class RakNetClient {
 	 * longer connect to servers
 	 */
 	public void shutdown() {
-		this.disconnect("Client shutdown");
-		group.shutdownGracefully();
-		this.channel = null;
-		this.listener = null;
+		throw new RuntimeException("This method is not yet implemented!");
+	}
+
+	/**
+	 * Disconnects from the server and shuts down the client for good, once this
+	 * is called the client can no longer connect to servers
+	 * 
+	 * @param reason
+	 *            - The reason the client shutdown
+	 */
+	public void disconnectAndShutdown(String reason) {
+		this.disconnect(reason);
+		this.shutdown();
+	}
+
+	/**
+	 * Disconnects from the server and shuts down the client for good, once this
+	 * is called the client can no longer connect to servers
+	 */
+	public void disconnectAndShutdown() {
+		this.disconnectAndShutdown("Shutdown");
 	}
 
 	@Override
