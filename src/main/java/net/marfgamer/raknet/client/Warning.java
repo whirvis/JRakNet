@@ -28,55 +28,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package net.marfgamer.raknet;
-
-import java.net.InetSocketAddress;
-
-import net.marfgamer.raknet.client.RakNetClient;
-import net.marfgamer.raknet.client.RakNetClientListener;
-import net.marfgamer.raknet.client.Warning;
-import net.marfgamer.raknet.exception.RakNetException;
-import net.marfgamer.raknet.session.RakNetServerSession;
+package net.marfgamer.raknet.client;
 
 /**
- * Used to test <code>RakNetClient</code> by connecting to the Lifeboat Survival
- * Games server and then disconnecting afterwards
+ * Represents a warning sent from the client when it is afraid an error will
+ * occur but is not sure if it will or not
  *
  * @author MarfGamer
  */
-public class RakNetClientTest {
+public enum Warning {
 
-	public static void main(String[] args) throws RakNetException {
-		RakNetClient client = new RakNetClient();
-		client.setListener(new RakNetClientListener() {
+	SECURITY_ENABLED("The server has security enabled"), ENCRYPTION_ENABLED("The server has encryption enabled");
 
-			@Override
-			public void onConnect(RakNetServerSession session) {
-				System.out.println("Connected to server with address " + session.getAddress() + "!");
-				client.disconnect();
-			}
+	private String message;
 
-			@Override
-			public void onDisconnect(RakNetServerSession session, String reason) {
-				System.out.println("Disconnected from server with address " + session.getAddress() + " for reason \""
-						+ reason + "\"");
-			}
+	private Warning(String message) {
+		this.message = message;
+	}
 
-			@Override
-			public void onWarning(Warning warning) {
-				System.err.println("Warning: " + warning.getMessage());
-			}
-
-			@Override
-			public void onHandlerException(InetSocketAddress address, Throwable cause) {
-				System.err.println("Exception caused by " + address);
-				cause.printStackTrace();
-			}
-
-		});
-		System.out.println("Created client, connecting to " + UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
-
-		client.connect(UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
+	public String getMessage() {
+		return this.message;
 	}
 
 }

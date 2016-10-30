@@ -40,7 +40,10 @@ import net.marfgamer.raknet.session.RakNetServerSession;
 
 /**
  * This interface is used by the client to let the user know when specific
- * events are triggered
+ * events are triggered <br>
+ * <br>
+ * Note: Do <b>NOT</b> use <code>Thread.sleep(long)</code> in any of these
+ * methods, as it will cause the client to timeout!
  *
  * @author MarfGamer
  */
@@ -115,6 +118,16 @@ public interface RakNetClientListener {
 	 */
 	public default void onAcknowledge(RakNetServerSession session, Record record, Reliability reliability, int channel,
 			RakNetPacket packet) {
+	}
+
+	/**
+	 * Called whenever the client is afraid an error will occur but is not
+	 * absolutely positive one will occur
+	 * 
+	 * @param warning
+	 *            - The warning
+	 */
+	public default void onWarning(Warning warning) {
 	}
 
 	/**

@@ -30,6 +30,7 @@
  */
 package net.marfgamer.raknet.example;
 
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 import net.marfgamer.raknet.client.RakNetClient;
@@ -65,7 +66,7 @@ public class RakNetClientExample {
 			// Server disconnected
 			@Override
 			public void onDisconnect(RakNetServerSession session, String reason) {
-				System.out.println("Successfully disconnected from server with address " + session.getAddress()
+				System.out.println("Sucessfully disconnected from server with address " + session.getAddress()
 						+ " for the reason \"" + reason + "\"");
 				System.exit(0);
 			}
@@ -73,6 +74,7 @@ public class RakNetClientExample {
 		});
 
 		// Connect to server
+		System.out.println("Connecting to " + new InetSocketAddress(SERVER_ADDRESS, SERVER_PORT) + "...");
 		client.connect(SERVER_ADDRESS, SERVER_PORT);
 	}
 

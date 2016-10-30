@@ -40,11 +40,9 @@ import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.exception.RakNetException;
 import net.marfgamer.raknet.exception.client.AlreadyConnectedException;
 import net.marfgamer.raknet.exception.client.ConnectionBannedException;
-import net.marfgamer.raknet.exception.client.EncryptionEnabledException;
 import net.marfgamer.raknet.exception.client.IncompatibleProtocolException;
 import net.marfgamer.raknet.exception.client.InvalidProtocolException;
 import net.marfgamer.raknet.exception.client.NoFreeIncomingConnectionsException;
-import net.marfgamer.raknet.exception.client.UseSecurityException;
 import net.marfgamer.raknet.protocol.login.IncompatibleProtocol;
 import net.marfgamer.raknet.protocol.login.OpenConnectionResponseOne;
 import net.marfgamer.raknet.protocol.login.OpenConnectionResponseTwo;
@@ -87,33 +85,30 @@ public class SessionPreparation {
 			OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne(packet);
 			connectionResponseOne.decode();
 
-			if (connectionResponseOne.magic == true && connectionResponseOne.useSecurity == false
+			if (connectionResponseOne.magic == true
 					&& connectionResponseOne.maximumTransferUnit >= RakNet.MINIMUM_TRANSFER_UNIT
 					&& connectionResponseOne.maximumTransferUnit <= this.initialMaximumTransferUnit) {
 				this.maximumTransferUnit = connectionResponseOne.maximumTransferUnit;
 				this.guid = connectionResponseOne.serverGuid;
 				this.loginPackets[0] = true;
-			} else {
-				if(connectionResponseOne.useSecurity == true) {
-					this.cancelReason = new UseSecurityException(client);
-				} else {
-					this.cancelReason = new InvalidProtocolException(client);
+				if (connectionResponseOne.useSecurity == true) {
+					client.getListener().onWarning(Warning.SECURITY_ENABLED);
 				}
+			} else {
+				this.cancelReason = new InvalidProtocolException(client);
 			}
 		} else if (packetId == ID_OPEN_CONNECTION_REPLY_2) {
 			OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo(packet);
 			connectionResponseTwo.decode();
 
-			if (connectionResponseTwo.magic == true && connectionResponseTwo.encryptionEnabled == false
-					&& connectionResponseTwo.serverGuid == this.guid
+			if (connectionResponseTwo.magic == true && connectionResponseTwo.serverGuid == this.guid
 					&& connectionResponseTwo.maximumTransferUnit == this.maximumTransferUnit) {
 				this.loginPackets[1] = true;
-			} else {
-				if(connectionResponseTwo.encryptionEnabled == true) {
-					this.cancelReason = new EncryptionEnabledException(client);
-				} else {
-					this.cancelReason = new InvalidProtocolException(client);
+				if (connectionResponseTwo.encryptionEnabled == true) {
+					client.getListener().onWarning(Warning.ENCRYPTION_ENABLED);
 				}
+			} else {
+				this.cancelReason = new InvalidProtocolException(client);
 			}
 		} else if (packetId == ID_ALREADY_CONNECTED) {
 			this.cancelReason = new AlreadyConnectedException(client);
