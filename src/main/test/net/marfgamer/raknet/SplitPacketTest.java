@@ -44,6 +44,7 @@ import net.marfgamer.raknet.server.RakNetServer;
 import net.marfgamer.raknet.server.RakNetServerListener;
 import net.marfgamer.raknet.session.RakNetClientSession;
 import net.marfgamer.raknet.session.RakNetServerSession;
+import net.marfgamer.raknet.util.RakNetUtils;
 
 /**
  * Used to test the split packet feature of <code>RakNetSession</code> through a
@@ -60,12 +61,12 @@ public class SplitPacketTest {
 
 	private static long startSend = -1;
 
-	public static void main(String[] args) throws RakNetException, UnknownHostException, InterruptedException {
+	public static void main(String[] args) throws RakNetException, UnknownHostException {
 		System.out.println("Creating server...");
 		createServer();
 
 		System.out.println("Sleeping 5000MS...");
-		Thread.sleep(5000);
+		RakNetUtils.passiveSleep(5000);
 
 		System.out.println("Creating client...");
 		createClient();
