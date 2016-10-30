@@ -42,7 +42,7 @@ import net.marfgamer.raknet.server.ServerPing;
 import net.marfgamer.raknet.session.RakNetClientSession;
 
 /**
- * Used to test the RakNetServer by starting a server on the default
+ * Used to test <code>RakNetServer</code> by starting a server on the default
  *
  * @author MarfGamer
  */
@@ -92,10 +92,10 @@ public class RakNetServerTest {
 					identifier.setOnlinePlayerCount(server.getSessionCount());
 					identifier.setMaxPlayerCount(server.getMaxConnections());
 				}
-				
+
 				ping.setIdentifier(identifier);
 			}
-			
+
 			@Override
 			public void onHandlerException(InetSocketAddress address, Throwable cause) {
 				System.err.println("Exception caused by " + address);
