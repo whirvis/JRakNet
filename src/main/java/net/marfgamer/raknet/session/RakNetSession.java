@@ -68,7 +68,7 @@ public abstract class RakNetSession {
 
 	public static final byte DEFAULT_ORDER_CHANNEL = 0x00;
 	public static final long MAX_PACKETS_PER_SECOND_BLOCK = 1000L * 300L;
-	public static final long RESEND_SEND_WAIT_TIME_MILLIS = 50L;
+	public static final long RECOVERY_SEND_WAIT_TIME_MILLIS = 50L;
 	public static final long ACK_SEND_WAIT_TIME_MILLIS = 3000L;
 	public static final long PING_SEND_WAIT_TIME_MILLIS = 3000L;
 	public static final long SESSION_TIMEOUT = PING_SEND_WAIT_TIME_MILLIS * 5L;
@@ -111,7 +111,7 @@ public abstract class RakNetSession {
 	private final IntMap<EncapsulatedPacket[]> requireAcknowledgeQueue;
 	private final IntMap<SplitPacket> splitQueue;
 	private final ArrayList<EncapsulatedPacket> sendQueue;
-	private long lastLostSend;
+	private long lastRecoverySend;
 	private long lastAckSend;
 
 	// Latency detection
@@ -638,6 +638,15 @@ public abstract class RakNetSession {
 	private final void updateAcknowledge(boolean forceSend) {
 		long currentTime = System.currentTimeMillis();
 
+		// Resend unacknowledged packets
+		if (currentTime - this.lastRecoverySend >= RECOVERY_SEND_WAIT_TIME_MILLIS) {
+			for (CustomPacket custom : recoveryQueue.values()) {
+				this.sendRawMessage(custom);
+				break; // Only send one at a time
+			}
+			this.lastRecoverySend = currentTime;
+		}
+
 		// Check for missing packets
 		if (currentTime - lastAckSend >= ACK_SEND_WAIT_TIME_MILLIS || forceSend == true) {
 			// Have we not acknowledge some packets?
@@ -656,20 +665,10 @@ public abstract class RakNetSession {
 				nack.records = this.nacknowledgeQueue;
 				nack.encode();
 				this.sendRawMessage(nack);
-				System.out.println(nacknowledgeQueue.size());
 			}
 
 			// Update timing
 			this.lastAckSend = currentTime;
-		}
-
-		// Only do this naturally
-		if (currentTime - this.lastLostSend >= RESEND_SEND_WAIT_TIME_MILLIS) {
-			for (CustomPacket custom : recoveryQueue.values()) {
-				this.sendRawMessage(custom);
-				break; // Only send one at a time
-			}
-			this.lastLostSend = currentTime;
 		}
 	}
 

@@ -63,15 +63,6 @@ public class BroadcastTest {
 	}
 
 	/**
-	 * Starts the test
-	 */
-	public void start() {
-		client.setListener(new ServerDiscoveryListener());
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setVisible(true);
-	}
-
-	/**
 	 * The class used to listen for server discovery updates
 	 *
 	 * @author MarfGamer
@@ -100,6 +91,18 @@ public class BroadcastTest {
 			frame.updatePaneText(discovered.values().toArray(new MCPEIdentifier[discovered.size()]));
 		}
 
+	}
+
+	/**
+	 * Starts the test
+	 */
+	public void start() {
+		// Set client options
+		client.setListener(new ServerDiscoveryListener());
+
+		// Create window
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setVisible(true);
 	}
 
 	public static void main(String[] args) throws ClassNotFoundException, InstantiationException,

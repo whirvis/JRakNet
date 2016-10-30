@@ -28,23 +28,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package net.marfgamer.raknet.interactive;
+package net.marfgamer.raknet.exception.client;
 
-import javax.swing.ImageIcon;
+import net.marfgamer.raknet.client.RakNetClient;
+import net.marfgamer.raknet.exception.RakNetClientException;
 
 /**
- * The resources typically used by JRakNet unit tests with <code>JFrame</code>
- * integration
+ * This exception is thrown when the server the client is connecting to has
+ * security enabled, which JRakNet does not yet support
  *
  * @author MarfGamer
  */
-public class FrameResources {
+public class UseSecurityException extends RakNetClientException {
 
-	public static ImageIcon TERRARIA_RAKNET_ICON = null;
+	private static final long serialVersionUID = 5287717235922196735L;
 
-	static {
-		TERRARIA_RAKNET_ICON = new ImageIcon(
-				BroadcastFrame.class.getResource("/net/marfgamer/raknet/TERRARIA_RAKNET_ICON.png"));
+	public UseSecurityException(RakNetClient client) {
+		super(client, "Server has security enabled!");
 	}
 
 }

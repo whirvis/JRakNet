@@ -28,23 +28,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package net.marfgamer.raknet.interactive;
+package net.marfgamer.raknet.exception.client;
 
-import javax.swing.ImageIcon;
+import net.marfgamer.raknet.client.RakNetClient;
+import net.marfgamer.raknet.exception.RakNetClientException;
 
 /**
- * The resources typically used by JRakNet unit tests with <code>JFrame</code>
- * integration
+ * This exception is thrown whenever the client receives a broken login packet
+ * from an online server during login, it is important that this is
+ * distinguished from <code>IncompatibleProtocolException</code>, as this
+ * exception means that the expected packet format/data was invalid while
+ * <code>IncompatibleProtocolException</code> means that the server or client is
+ * outdated
  *
  * @author MarfGamer
  */
-public class FrameResources {
+public class InvalidProtocolException extends RakNetClientException {
 
-	public static ImageIcon TERRARIA_RAKNET_ICON = null;
+	private static final long serialVersionUID = -5025319984358819345L;
 
-	static {
-		TERRARIA_RAKNET_ICON = new ImageIcon(
-				BroadcastFrame.class.getResource("/net/marfgamer/raknet/TERRARIA_RAKNET_ICON.png"));
+	public InvalidProtocolException(RakNetClient client) {
+		super(client, "Received invalid packet from server during login!");
 	}
 
 }

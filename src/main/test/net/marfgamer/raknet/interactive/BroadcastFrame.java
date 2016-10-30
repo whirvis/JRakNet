@@ -77,7 +77,7 @@ public class BroadcastFrame extends JFrame {
 		txtpnDiscoveredMcpeServers.setEditable(false);
 		txtpnDiscoveredMcpeServers.setBackground(UIManager.getColor("Button.background"));
 		txtpnDiscoveredMcpeServers.setText("Discovered servers");
-		txtpnDiscoveredMcpeServers.setBounds(10, 10, 165, 20);
+		txtpnDiscoveredMcpeServers.setBounds(10, 10, 350, 20);
 		getContentPane().add(txtpnDiscoveredMcpeServers);
 
 		// The text containing the discovered MCPE servers
