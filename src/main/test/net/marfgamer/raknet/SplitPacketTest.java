@@ -46,9 +46,9 @@ import net.marfgamer.raknet.session.RakNetClientSession;
 import net.marfgamer.raknet.session.RakNetServerSession;
 
 /**
- * Used to test the split packet feature of the RakNetSession through a stress
- * test by sending a packet as big as possible (Average packet size is over
- * 146,000 bytes!)
+ * Used to test the split packet feature of <code>RakNetSession</code> through a
+ * stress test by sending a packet as big as possible (Average packet size is
+ * over 146,000 bytes!)
  *
  * @author MarfGamer
  */

@@ -28,49 +28,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package net.marfgamer.raknet;
+package net.marfgamer.raknet.interactive;
 
-import java.net.InetSocketAddress;
-
-import net.marfgamer.raknet.client.RakNetClient;
-import net.marfgamer.raknet.client.RakNetClientListener;
-import net.marfgamer.raknet.exception.RakNetException;
-import net.marfgamer.raknet.session.RakNetServerSession;
-
-/**
- * Used to test <code>RakNetClient</code> by connecting to the Lifeboat Survival
- * Games server and then disconnecting afterwards
- *
- * @author MarfGamer
- */
-public class RakNetClientTest {
-
-	public static void main(String[] args) throws RakNetException {
-		RakNetClient client = new RakNetClient();
-		client.setListener(new RakNetClientListener() {
-
-			@Override
-			public void onConnect(RakNetServerSession session) {
-				System.out.println("Connected to server with address " + session.getAddress() + "!");
-				client.disconnect();
-			}
-
-			@Override
-			public void onDisconnect(RakNetServerSession session, String reason) {
-				System.out.println("Disconnected from server with address " + session.getAddress() + " for reason \""
-						+ reason + "\"");
-			}
-
-			@Override
-			public void onHandlerException(InetSocketAddress address, Throwable cause) {
-				System.err.println("Exception caused by " + address);
-				cause.printStackTrace();
-			}
-
-		});
-		System.out.println("Created client, connecting to " + UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
-
-		client.connect(UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
-	}
+public class LatencyTest {
 
 }

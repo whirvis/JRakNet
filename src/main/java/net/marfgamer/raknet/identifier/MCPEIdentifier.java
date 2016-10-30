@@ -71,6 +71,18 @@ public class MCPEIdentifier extends Identifier {
 		return true;
 	}
 
+	/**
+	 * Returns whether or not the specified identifier is a Minecraft: Pocket
+	 * Edition identifier
+	 * 
+	 * @param identifier
+	 * @return Whether or not the specified identifier is a Miencraft: Pocket
+	 *         Edition identifier
+	 */
+	public static boolean isMCPEIdentifier(Identifier identifier) {
+		return identifier.build().startsWith(HEADER);
+	}
+
 	private String serverName;
 	private int serverProtocol;
 	private String versionTag;
@@ -125,6 +137,10 @@ public class MCPEIdentifier extends Identifier {
 				throw new IllegalArgumentException("Invalid version tag!");
 			}
 		}
+	}
+
+	public MCPEIdentifier(String identifier) {
+		this(new Identifier(identifier));
 	}
 
 	public MCPEIdentifier() {
