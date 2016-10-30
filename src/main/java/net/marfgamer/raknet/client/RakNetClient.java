@@ -86,7 +86,7 @@ public class RakNetClient {
 	private final long guid;
 	private final long timestamp;
 
-	private final int discoveryPort;
+	private int discoveryPort;
 	private DiscoveryMode discoveryMode;
 	private final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> discovered;
 
@@ -162,6 +162,26 @@ public class RakNetClient {
 	}
 
 	/**
+	 * Returns the client's discovery port
+	 * 
+	 * @return The client's discovery port
+	 */
+	public int getDiscoveryPort() {
+		return this.discoveryPort;
+	}
+
+	/**
+	 * Sets the client's discovery port
+	 * 
+	 * @param discoveryPort
+	 *            - The new discovery port
+	 */
+	public RakNetClient setDiscoveryPort(int discoveryPort) {
+		this.discoveryPort = discoveryPort;
+		return this;
+	}
+
+	/**
 	 * Returns the client's discovery mode
 	 * 
 	 * @return The client's discovery mode
@@ -180,6 +200,11 @@ public class RakNetClient {
 	public RakNetClient setDiscoveryMode(DiscoveryMode mode) {
 		this.discoveryMode = (mode != null ? mode : DiscoveryMode.NONE);
 		if (this.discoveryMode == DiscoveryMode.NONE) {
+			if (listener != null) {
+				for (InetSocketAddress address : discovered.keySet()) {
+					listener.onServerForgotten(address);
+				}
+			}
 			discovered.clear(); // We are not discovering servers anymore!
 		}
 		return this;

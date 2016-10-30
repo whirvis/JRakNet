@@ -39,15 +39,15 @@ import net.marfgamer.raknet.identifier.MCPEIdentifier;
 import net.marfgamer.raknet.util.RakNetUtils;
 
 /**
- * Used to test the various functions in the RakNetUtils class
+ * Used to test the various functions in <code>RakNetUtils</code>
  *
  * @author MarfGamer
  */
 public class UtilityTest {
 
 	private static final char UNICODE_MINECRAFT_COLOR_SYMBOL = '\u00A7';
-	protected static final int MINECRAFT_POCKET_EDITION_DEFAULT_PORT = 19132;
-	protected static final InetSocketAddress LIFEBOAT_SURVIVAL_GAMES_ADDRESS = new InetSocketAddress("sg.lbsg.net",
+	public static final int MINECRAFT_POCKET_EDITION_DEFAULT_PORT = 19132;
+	public static final InetSocketAddress LIFEBOAT_SURVIVAL_GAMES_ADDRESS = new InetSocketAddress("sg.lbsg.net",
 			MINECRAFT_POCKET_EDITION_DEFAULT_PORT);
 
 	public static void main(String[] args) throws RakNetException {
@@ -73,7 +73,18 @@ public class UtilityTest {
 		// Get the server identifier
 		System.out.print("Server identifier: ");
 		MCPEIdentifier identifier = new MCPEIdentifier(getServerIdentifier(LIFEBOAT_SURVIVAL_GAMES_ADDRESS));
-		System.out.println("[Name: " + identifier.getServerName().replaceAll(UNICODE_MINECRAFT_COLOR_SYMBOL + ".", "")
+		System.out.println(formatMCPEIdentifier(identifier));
+	}
+
+	/**
+	 * Converts an MCPE identifier to a formatted String
+	 * 
+	 * @param identifier
+	 *            - The identifier to format
+	 * @return A formated MCPE identifier
+	 */
+	public static String formatMCPEIdentifier(MCPEIdentifier identifier) {
+		return ("[Name: " + identifier.getServerName().replaceAll(UNICODE_MINECRAFT_COLOR_SYMBOL + ".", "")
 				+ "] [Version: " + identifier.getVersionTag() + "] [Player count: " + identifier.getOnlinePlayerCount()
 				+ "/" + identifier.getMaxPlayerCount() + "]");
 	}
