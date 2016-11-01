@@ -386,7 +386,7 @@ public class RakNetUtils {
 	 * @return A parsed InetSocketAddress
 	 */
 	public static InetSocketAddress parseAddressPassive(String address) {
-		return parseAddressPassive(address);
+		return parseAddressPassive(address, -1);
 	}
 
 	/**
