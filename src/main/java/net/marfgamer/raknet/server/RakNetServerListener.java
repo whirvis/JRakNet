@@ -164,5 +164,16 @@ public interface RakNetServerListener {
 	 */
 	public default void onServerShutdown() {
 	}
+	
+	/**
+	 * Called when an exception is caught in the external thread the server is
+	 * running on, this method is only called when the server is started through
+	 * <code>startThreaded()</code>
+	 * 
+	 * @param throwable
+	 *            - The throwable exception that was caught
+	 */
+	public default void onThreadException(Throwable throwable) {
+	}
 
 }

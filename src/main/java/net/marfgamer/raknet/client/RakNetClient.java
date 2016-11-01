@@ -99,7 +99,6 @@ public class RakNetClient {
 	private SessionPreparation preparation;
 	private volatile RakNetServerSession session;
 	private volatile RakNetClientListener listener;
-	private volatile Thread thread;
 
 	public RakNetClient(DiscoveryMode discoveryMode, int discoveryPort) {
 		// Set client data
@@ -421,7 +420,7 @@ public class RakNetClient {
 	 * @param address
 	 *            - The address of the server to connect to
 	 * @throws RakNetException
-	 *             - Thrown if an error occurs during connection or login
+	 *             Thrown if an error occurs during connection or login
 	 */
 	public void connect(InetSocketAddress address) throws RakNetException {
 		// Make sure we have a listener
@@ -509,7 +508,7 @@ public class RakNetClient {
 	 * @param port
 	 *            - The port of the server to connect to
 	 * @throws RakNetException
-	 *             - Thrown if an error occurs during connection or login
+	 *             Thrown if an error occurs during connection or login
 	 */
 	public void connect(InetAddress address, int port) throws RakNetException {
 		this.connect(new InetSocketAddress(address, port));
@@ -523,9 +522,9 @@ public class RakNetClient {
 	 * @param port
 	 *            - The port of the server to connect to
 	 * @throws RakNetException
-	 *             - Thrown if an error occurs during connection or login
+	 *             Thrown if an error occurs during connection or login
 	 * @throws UnknownHostException
-	 *             - Thrown if the specified address is an unknown host
+	 *             Thrown if the specified address is an unknown host
 	 */
 	public void connect(String address, int port) throws RakNetException, UnknownHostException {
 		this.connect(InetAddress.getByName(address), port);
@@ -537,7 +536,7 @@ public class RakNetClient {
 	 * @param server
 	 *            - The discovered server to connect to
 	 * @throws RakNetException
-	 *             - Thrown if an error occurs during connection or login
+	 *             Thrown if an error occurs during connection or login
 	 */
 	public void connect(DiscoveredServer server) throws RakNetException {
 		this.connect(server.getAddress());
@@ -549,11 +548,9 @@ public class RakNetClient {
 	 * 
 	 * @param address
 	 *            - The address of the server to connect to
-	 * @throws RakNetException
-	 *             - Thrown if an error occurs during connection or login
 	 * @return The Thread the client is running on
 	 */
-	public Thread connectThreaded(InetSocketAddress address) throws RakNetException {
+	public Thread connectThreaded(InetSocketAddress address) {
 		// Give the thread a reference
 		RakNetClient client = this;
 
@@ -563,15 +560,14 @@ public class RakNetClient {
 			public synchronized void run() {
 				try {
 					client.connect(address);
-				} catch (RakNetException e) {
-					e.printStackTrace();
+				} catch (Exception e) {
+					client.getListener().onThreadException(e);
 				}
 			}
 		};
 		thread.start();
 
 		// Return the thread so it can be modified
-		this.thread = thread;
 		return thread;
 	}
 
@@ -583,11 +579,9 @@ public class RakNetClient {
 	 *            - The address of the server to connect to
 	 * @param port
 	 *            - The port of the server to connect to
-	 * @throws RakNetException
-	 *             - Thrown if an error occurs during connection or login
 	 * @return The Thread the client is running on
 	 */
-	public Thread connectThreaded(InetAddress address, int port) throws RakNetException {
+	public Thread connectThreaded(InetAddress address, int port) {
 		return this.connectThreaded(new InetSocketAddress(address, port));
 	}
 
@@ -599,13 +593,11 @@ public class RakNetClient {
 	 *            - The address of the server to connect to
 	 * @param port
 	 *            - The port of the server to connect to
-	 * @throws RakNetException
-	 *             - Thrown if an error occurs during connection or login
 	 * @throws UnknownHostException
-	 *             - Thrown if the specified address is an unknown host
+	 *             Thrown if the specified address is an unknown host
 	 * @return The Thread the client is running on
 	 */
-	public Thread connectThreaded(String address, int port) throws RakNetException, UnknownHostException {
+	public Thread connectThreaded(String address, int port) throws UnknownHostException {
 		return this.connectThreaded(InetAddress.getByName(address), port);
 	}
 
@@ -615,11 +607,9 @@ public class RakNetClient {
 	 * 
 	 * @param server
 	 *            - The discovered server to connect to
-	 * @throws RakNetException
-	 *             - Thrown if an error occurs during connection or login
 	 * @return The Thread the client is running on
 	 */
-	public Thread connectThreaded(DiscoveredServer server) throws RakNetException {
+	public Thread connectThreaded(DiscoveredServer server) {
 		return this.connectThreaded(server.getAddress());
 	}
 

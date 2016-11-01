@@ -617,7 +617,7 @@ public class RakNetServer implements RakNet {
 	 * Starts the server
 	 * 
 	 * @throws NoListenerException
-	 *             - Thrown if the listener has not yet been set
+	 *             Thrown if the listener has not yet been set
 	 */
 	public void start() throws NoListenerException {
 		// Make sure we have an adapter
@@ -660,11 +660,9 @@ public class RakNetServer implements RakNet {
 	/**
 	 * Starts the server on it's own Thread
 	 * 
-	 * @throws NoListenerException
-	 *             - Thrown if the listener has not yet been set
 	 * @return The Thread the server is running on
 	 */
-	public synchronized Thread startThreaded() throws NoListenerException {
+	public synchronized Thread startThreaded() {
 		// Give the thread a reference
 		RakNetServer server = this;
 
@@ -672,7 +670,11 @@ public class RakNetServer implements RakNet {
 		Thread thread = new Thread() {
 			@Override
 			public synchronized void run() {
-				server.start();
+				try {
+					server.start();
+				} catch (Exception e) {
+					server.getListener().onThreadException(e);
+				}
 			}
 		};
 		thread.start();

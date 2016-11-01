@@ -55,7 +55,6 @@ import net.marfgamer.raknet.util.RakNetUtils;
  */
 public class SplitPacketTest {
 
-	private static final int MARFGAMER_DEVELOPMENT_PORT = 30851;
 	private static final short SPLIT_START_ID = 0xFE;
 	private static final short SPLIT_END_ID = 0xFF;
 
@@ -77,12 +76,12 @@ public class SplitPacketTest {
 	 * 
 	 * @return The server that will receive the giant packet
 	 * @throws RakNetException
-	 *             - Thrown if any problems occur during the stress test
+	 *             Thrown if any problems occur during the stress test
 	 * @throws UnknownHostException
-	 *             - Thrown if the localhost address cannot be found
+	 *             Thrown if the localhost address cannot be found
 	 */
 	private static RakNetServer createServer() throws RakNetException {
-		RakNetServer server = new RakNetServer(MARFGAMER_DEVELOPMENT_PORT, 1);
+		RakNetServer server = new RakNetServer(UtilityTest.MARFGAMER_DEVELOPMENT_PORT, 1);
 
 		// Client connected
 		server.setListener(new RakNetServerListener() {
@@ -164,9 +163,9 @@ public class SplitPacketTest {
 	 * 
 	 * @return The client that will be sending the giant packet
 	 * @throws RakNetException
-	 *             - Thrown if any problems occur during the stress test
+	 *             Thrown if any problems occur during the stress test
 	 * @throws UnknownHostException
-	 *             - Thrown if the localhost address cannot be found
+	 *             Thrown if the localhost address cannot be found
 	 */
 	private static RakNetClient createClient() throws RakNetException, UnknownHostException {
 		// Create client and add hooks
@@ -215,7 +214,7 @@ public class SplitPacketTest {
 		});
 
 		// Connect to server
-		client.connectThreaded(InetAddress.getLocalHost(), MARFGAMER_DEVELOPMENT_PORT);
+		client.connectThreaded(InetAddress.getLocalHost(), UtilityTest.MARFGAMER_DEVELOPMENT_PORT);
 		return client;
 	}
 

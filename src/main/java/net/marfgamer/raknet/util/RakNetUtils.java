@@ -173,7 +173,7 @@ public class RakNetUtils {
 	 *            - The port of the server
 	 * @return Whether or not the server is online
 	 * @throws UnknownHostException
-	 *             - Thrown if the specified address is an unknown host
+	 *             Thrown if the specified address is an unknown host
 	 */
 	public static boolean isServerOnline(String address, int port) throws UnknownHostException {
 		return isServerOnline(InetAddress.getByName(address), port);
@@ -240,7 +240,7 @@ public class RakNetUtils {
 	 * @return Whether or not the server is compatible to the current client
 	 *         protocol
 	 * @throws UnknownHostException
-	 *             - Thrown if the specified address is an unknown host
+	 *             Thrown if the specified address is an unknown host
 	 */
 	public static boolean isServerCompatible(String address, int port) throws UnknownHostException {
 		return isServerCompatible(InetAddress.getByName(address), port);
@@ -295,7 +295,7 @@ public class RakNetUtils {
 	 *            - The port of the server
 	 * @return The specified server's identifier
 	 * @throws UnknownHostException
-	 *             - Thrown if the specified address is an unknown host
+	 *             Thrown if the specified address is an unknown host
 	 */
 	public static Identifier getServerIdentifier(String address, int port) throws UnknownHostException {
 		return getServerIdentifier(InetAddress.getByName(address), port);
@@ -314,6 +314,79 @@ public class RakNetUtils {
 		} catch (IOException e) {
 			return -1;
 		}
+	}
+
+	/**
+	 * Parses a single <code>String</code> as an address and port and converts
+	 * it to an <code>InetSocketAddress</code>
+	 * 
+	 * @param address
+	 *            - The address to convert
+	 * @param defaultPort
+	 *            - The default port to use if one is not specified
+	 * @return A parsed InetSocketAddress
+	 * @throws UnknownHostException
+	 *             Thrown if the address is in an invalid format or if the host
+	 *             cannot be found
+	 */
+	public static InetSocketAddress parseAddress(String address, int defaultPort) throws UnknownHostException {
+		String[] addressSplit = address.split(":");
+		if (addressSplit.length == 1 || addressSplit.length == 2) {
+			InetAddress inetAddress = InetAddress.getByName(addressSplit[0]);
+			int port = (addressSplit.length == 2 ? parseIntPassive(addressSplit[1]) : defaultPort);
+			if (port >= 0 && port <= 65535) {
+				return new InetSocketAddress(inetAddress, port);
+			} else {
+				throw new UnknownHostException("Invalid port! Must be between 0-65535");
+			}
+		} else {
+			throw new UnknownHostException("Invalid address! Format must follow address:port");
+		}
+	}
+
+	/**
+	 * Parses a single <code>String</code> as an address and port and converts
+	 * it to an <code>InetSocketAddress</code>
+	 * 
+	 * @param address
+	 *            - The address to convert
+	 * @return A parsed InetSocketAddress
+	 * @throws UnknownHostException
+	 *             Thrown if the address is in an invalid format or if the host
+	 *             cannot be found
+	 */
+	public static InetSocketAddress parseAddress(String address) throws UnknownHostException {
+		return parseAddress(address, -1);
+	}
+
+	/**
+	 * Parses a single <code>String</code> as an address and port and converts
+	 * it to an <code>InetSocketAddress</code>
+	 * 
+	 * @param address
+	 *            - The address to convert
+	 * @param defaultPort
+	 *            - The default port to use if one is not specified
+	 * @return A parsed InetSocketAddress
+	 */
+	public static InetSocketAddress parseAddressPassive(String address, int defaultPort) {
+		try {
+			return parseAddress(address, defaultPort);
+		} catch (UnknownHostException e) {
+			return null;
+		}
+	}
+
+	/**
+	 * Parses a single <code>String</code> as an address and port and converts
+	 * it to an <code>InetSocketAddress</code>
+	 * 
+	 * @param address
+	 *            - The address to convert
+	 * @return A parsed InetSocketAddress
+	 */
+	public static InetSocketAddress parseAddressPassive(String address) {
+		return parseAddressPassive(address);
 	}
 
 	/**
