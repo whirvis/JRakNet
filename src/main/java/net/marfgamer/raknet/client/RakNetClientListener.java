@@ -157,4 +157,15 @@ public interface RakNetClientListener {
 	public default void handlePacket(RakNetServerSession session, RakNetPacket packet, int channel) {
 	}
 
+	/**
+	 * Called when an exception is caught in the external thread the client is
+	 * running on, this method is only called when the client is started through
+	 * <code>connectThreaded()</code>
+	 * 
+	 * @param throwable
+	 *            - The throwable exception that was caught
+	 */
+	public default void onThreadException(Throwable throwable) {
+	}
+
 }

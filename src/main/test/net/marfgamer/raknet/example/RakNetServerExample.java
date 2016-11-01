@@ -30,50 +30,53 @@
  */
 package net.marfgamer.raknet.example;
 
-import java.net.UnknownHostException;
-
-import net.marfgamer.raknet.client.RakNetClient;
-import net.marfgamer.raknet.client.RakNetClientListener;
+import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.exception.RakNetException;
-import net.marfgamer.raknet.session.RakNetServerSession;
+import net.marfgamer.raknet.identifier.MCPEIdentifier;
+import net.marfgamer.raknet.server.RakNetServer;
+import net.marfgamer.raknet.server.RakNetServerListener;
+import net.marfgamer.raknet.session.RakNetClientSession;
 
 /**
- * A simple <code>RakNetClient</code> that connects to the LifeBoat Survival
- * Games server, when it is connected the client disconnects and shuts down
- * 
+ * A simple <code>RakNetServer</code> that can be tested through a Minecraft:
+ * Pocket Edition client using the local multiplayer features built into the
+ * game
+ *
  * @author MarfGamer
  */
-public class RakNetClientExample {
+public class RakNetServerExample {
 
-	// Server address and port
-	private static final String SERVER_ADDRESS = "sg.lbsg.net";
-	private static final int SERVER_PORT = 19132;
+	public static void main(String[] args) throws RakNetException {
+		// Create server
+		RakNetServer server = new RakNetServer(19132, 10, new MCPEIdentifier("JRakNet Latency Test", 91, "0.16.0", 0,
+				10, System.currentTimeMillis(), "New World", "Survival"));
 
-	public static void main(String[] args) throws RakNetException, UnknownHostException {
-		// Create client
-		RakNetClient client = new RakNetClient();
+		server.setListener(new RakNetServerListener() {
 
-		client.setListener(new RakNetClientListener() {
-
-			// Server connected
+			// Client connected
 			@Override
-			public void onConnect(RakNetServerSession session) {
-				System.out.println("Successfully connected to server with address " + session.getAddress());
-				client.disconnect();
+			public void onClientConnect(RakNetClientSession session) {
+				System.out.println("Client from address " + session.getAddress() + " has connected to the server");
 			}
 
-			// Server disconnected
+			// Client disconnected
 			@Override
-			public void onDisconnect(RakNetServerSession session, String reason) {
-				System.out.println("Sucessfully disconnected from server with address " + session.getAddress()
-						+ " for the reason \"" + reason + "\"");
-				System.exit(0);
+			public void onClientDisconnect(RakNetClientSession session, String reason) {
+				System.out.println("Client from address " + session.getAddress()
+						+ " has disconnected from the server for the reason \"" + reason + "\"");
+			}
+
+			// Packet received
+			@Override
+			public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
+				System.out.println("Client from address " + session.getAddress() + " sent packet with ID 0x"
+						+ Integer.toHexString(packet.getId()).toUpperCase() + " on channel " + channel);
 			}
 
 		});
 
-		// Connect to server
-		client.connect(SERVER_ADDRESS, SERVER_PORT);
+		// Start server
+		server.start();
 	}
 
 }

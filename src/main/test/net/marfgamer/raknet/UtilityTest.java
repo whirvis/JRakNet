@@ -45,12 +45,20 @@ import net.marfgamer.raknet.util.RakNetUtils;
  */
 public class UtilityTest {
 
+	private static final String ADDRESS_TEST_VALID = "255.255.255.255:65535";
+	private static final String ADDRESS_TEST_INVALID = "275.3.6.28:83245";
 	private static final char UNICODE_MINECRAFT_COLOR_SYMBOL = '\u00A7';
+	public static final int MARFGAMER_DEVELOPMENT_PORT = 30851;
 	public static final int MINECRAFT_POCKET_EDITION_DEFAULT_PORT = 19132;
 	public static final InetSocketAddress LIFEBOAT_SURVIVAL_GAMES_ADDRESS = new InetSocketAddress("sg.lbsg.net",
 			MINECRAFT_POCKET_EDITION_DEFAULT_PORT);
 
 	public static void main(String[] args) throws RakNetException {
+		System.out.println("Parsing valid address " + ADDRESS_TEST_VALID + " ?= "
+				+ RakNetUtils.parseAddressPassive(ADDRESS_TEST_VALID));
+		System.out.println("Parsing invalid address " + ADDRESS_TEST_INVALID + " ?= "
+				+ RakNetUtils.parseAddressPassive(ADDRESS_TEST_INVALID));
+
 		// Tell the user the sever we are pinging
 		System.out.println("Server address: " + LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
 		System.out.println("Maximum Transfer Unit: " + RakNetUtils.getMaximumTransferUnit());
