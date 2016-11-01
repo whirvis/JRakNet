@@ -80,14 +80,6 @@ public class BroadcastFrame extends JFrame {
 		txtpnDiscoveredMcpeServers.setBounds(10, 10, 350, 20);
 		getContentPane().add(txtpnDiscoveredMcpeServers);
 
-		// The text containing the discovered MCPE servers
-		txtPnDiscoveredMcpeServerList = new JTextPane();
-		txtPnDiscoveredMcpeServerList.setToolTipText("This is the list of the discovered servers on the local network");
-		txtPnDiscoveredMcpeServerList.setEditable(false);
-		txtPnDiscoveredMcpeServerList.setBackground(UIManager.getColor("Button.background"));
-		txtPnDiscoveredMcpeServerList.setBounds(10, 30, 350, 165);
-		getContentPane().add(txtPnDiscoveredMcpeServerList);
-
 		// How the client will discover servers on the local network
 		JComboBox<String> comboBoxDiscoveryType = new JComboBox<String>();
 		comboBoxDiscoveryType.setToolTipText(
@@ -107,6 +99,14 @@ public class BroadcastFrame extends JFrame {
 		btnUpdatePort.setBounds(370, 76, 114, 23);
 		btnUpdatePort.addActionListener(new RakNetBroadcastUpdatePortListener(client, textFieldDiscoveryPort));
 		getContentPane().add(btnUpdatePort);
+
+		// The text containing the discovered MCPE servers
+		txtPnDiscoveredMcpeServerList = new JTextPane();
+		txtPnDiscoveredMcpeServerList.setToolTipText("This is the list of the discovered servers on the local network");
+		txtPnDiscoveredMcpeServerList.setEditable(false);
+		txtPnDiscoveredMcpeServerList.setBackground(UIManager.getColor("Button.background"));
+		txtPnDiscoveredMcpeServerList.setBounds(10, 30, 350, 165);
+		getContentPane().add(txtPnDiscoveredMcpeServerList);
 	}
 
 	/**

@@ -316,9 +316,9 @@ public abstract class RakNetSession {
 	 * @param encapsulated
 	 *            - The EncapsulatedPacket to handle
 	 * @throws SplitQueueOverloadException
-	 *             - Thrown if the split queue has been overloaded
+	 *             Thrown if the split queue has been overloaded
 	 * @throws InvalidChannelException
-	 *             - Thrown if the channel is higher than the maximum
+	 *             Thrown if the channel is higher than the maximum
 	 */
 	private final void handleEncapsulated0(EncapsulatedPacket encapsulated)
 			throws SplitQueueOverloadException, InvalidChannelException {
@@ -496,7 +496,7 @@ public abstract class RakNetSession {
 	 * @param packet
 	 *            - The packet to send
 	 * @throws InvalidChannelException
-	 *             - Thrown if the channel is higher than the maximum
+	 *             Thrown if the channel is higher than the maximum
 	 */
 	public final synchronized void sendMessage(Reliability reliability, int channel, Packet packet)
 			throws InvalidChannelException {
@@ -575,7 +575,7 @@ public abstract class RakNetSession {
 	 * @param packets
 	 *            - The packets to send
 	 * @throws InvalidChannelException
-	 *             - Thrown if the channel is higher than the maximum
+	 *             Thrown if the channel is higher than the maximum
 	 */
 	public final void sendMessage(Reliability reliability, int channel, Packet... packets)
 			throws InvalidChannelException {
@@ -592,7 +592,7 @@ public abstract class RakNetSession {
 	 * @param packet
 	 *            - The packet to send
 	 * @throws InvalidChannelException
-	 *             - Thrown if the channel is higher than the maximum
+	 *             Thrown if the channel is higher than the maximum
 	 */
 	public final void sendMessage(Reliability reliability, Packet packet) throws InvalidChannelException {
 		this.sendMessage(reliability, DEFAULT_ORDER_CHANNEL, packet);
@@ -607,7 +607,7 @@ public abstract class RakNetSession {
 	 * @param packets
 	 *            - The packets to send
 	 * @throws InvalidChannelException
-	 *             - Thrown if the channel is higher than the maximum
+	 *             Thrown if the channel is higher than the maximum
 	 */
 	public final void sendMessage(Reliability reliability, Packet... packets) throws InvalidChannelException {
 		for (Packet packet : packets) {
@@ -621,7 +621,7 @@ public abstract class RakNetSession {
 	 * Sends a raw message
 	 * 
 	 * @param packet
-	 *            - The packet to send
+	 *            The packet to send
 	 */
 	public final void sendRawMessage(Packet packet) {
 		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
@@ -676,7 +676,7 @@ public abstract class RakNetSession {
 	 * Updates the session
 	 * 
 	 * @throws RakNetException
-	 *             - Thrown if an error occurs during the updating process
+	 *             Thrown if an error occurs during the updating process
 	 */
 	public final synchronized void update() throws RakNetException {
 		long currentTime = System.currentTimeMillis();
