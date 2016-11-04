@@ -450,6 +450,11 @@ public class RakNetClient {
 			}
 		}
 
+		// Reset MaximumTransferUnit's so they can be used again
+		for (MaximumTransferUnit unit : units) {
+			unit.reset();
+		}
+
 		// If the server didn't respond then it is offline
 		if (preparation.loginPackets[0] == false && preparation.cancelReason == null) {
 			preparation.cancelReason = new ServerOfflineException(this, preparation.address);
@@ -489,13 +494,9 @@ public class RakNetClient {
 			this.initConnection();
 		} else {
 			// Reset the connection data, it failed
-			if (preparation.cancelReason == null) {
-				System.err.println("FATAL ERROR: CONNECTION FAILED FOR UNKNOWN REASONS");
-				this.shutdown();
-				return;
-			}
 			RakNetException cancelReason = preparation.cancelReason;
 			this.preparation = null;
+			this.session = null;
 			throw cancelReason;
 		}
 	}

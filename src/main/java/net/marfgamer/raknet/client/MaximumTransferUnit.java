@@ -38,11 +38,13 @@ package net.marfgamer.raknet.client;
 public class MaximumTransferUnit {
 
 	private final int maximumTransferUnit;
-	private int retries;
+	private final int retries;
+	private int retriesLeft;
 
 	public MaximumTransferUnit(int maximumTransferUnit, int retries) {
 		this.maximumTransferUnit = maximumTransferUnit;
 		this.retries = retries;
+		this.retriesLeft = retries;
 	}
 
 	/**
@@ -55,14 +57,25 @@ public class MaximumTransferUnit {
 	}
 
 	/**
-	 * Returns the amount of retries before the client stops using this maximum
-	 * transfer unit and lowers it
+	 * Returns the default amount of retries before the client stops using this
+	 * maximum transfer unit and lowers it
 	 * 
-	 * @return The amount of retries before the client stops using this maximum
-	 *         transfer unit and lowers it
+	 * @return The default amount of retries before the client stops using this
+	 *         maximum transfer unit and lowers it
 	 */
 	public int getRetries() {
 		return this.retries;
+	}
+
+	/**
+	 * Returns how many times <code>retry()</code> can be called before yielding
+	 * 0 or lower
+	 * 
+	 * @return How many times <code>retry()</code> can be called before yielding
+	 *         0 or lower without calling <code>reset()</code>
+	 */
+	public int getRetriesLeft() {
+		return this.retriesLeft;
 	}
 
 	/**
@@ -71,7 +84,14 @@ public class MaximumTransferUnit {
 	 * @return How many retries are left
 	 */
 	public int retry() {
-		return this.retries--;
+		return this.retriesLeft--;
+	}
+
+	/**
+	 * Sets the amount of retries left back to it's default
+	 */
+	public void reset() {
+		this.retriesLeft = this.retries;
 	}
 
 }

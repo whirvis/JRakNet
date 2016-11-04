@@ -43,7 +43,7 @@ public class InvalidChannelException extends IllegalArgumentException {
 	private static final long serialVersionUID = -8690545139286694469L;
 
 	public InvalidChannelException() {
-		super("The channel can be no larger than " + RakNet.MAX_CHANNELS);
+		super("The channel must be lower than " + RakNet.MAX_CHANNELS);
 	}
 
 }

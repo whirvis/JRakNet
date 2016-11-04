@@ -3,7 +3,7 @@ package net.marfgamer.raknet.example.chat;
 public class ServerChannel {
 
 	private final int channel;
-	private final String name;
+	private String name;
 	private final StringBuilder channelText;
 
 	public ServerChannel(int channel, String name) {
@@ -20,6 +20,10 @@ public class ServerChannel {
 		return this.name;
 	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	public String appendText(String text) {
 		channelText.append(text + "\n");
 		return channelText.toString();
@@ -27,6 +31,11 @@ public class ServerChannel {
 
 	public String getChannelText() {
 		return channelText.toString();
+	}
+
+	@Override
+	public String toString() {
+		return this.name;
 	}
 
 }
