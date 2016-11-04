@@ -360,7 +360,7 @@ public abstract class RakNetSession {
 		// Make sure we are handling everything in an ordered/sequenced fashion
 		int orderIndex = encapsulated.orderIndex;
 		int orderChannel = encapsulated.orderChannel;
-		if (orderChannel > RakNet.MAX_CHANNELS) {
+		if (orderChannel >= RakNet.MAX_CHANNELS) {
 			throw new InvalidChannelException();
 		} else {
 			// Channel is valid, it is safe to handle
@@ -501,7 +501,7 @@ public abstract class RakNetSession {
 	public final synchronized void sendMessage(Reliability reliability, int channel, Packet packet)
 			throws InvalidChannelException {
 		// Make sure channel doesn't exceed RakNet limit
-		if (channel > RakNet.MAX_CHANNELS) {
+		if (channel >= RakNet.MAX_CHANNELS) {
 			throw new InvalidChannelException();
 		}
 
