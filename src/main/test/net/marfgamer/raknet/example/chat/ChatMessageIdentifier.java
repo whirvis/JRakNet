@@ -108,7 +108,7 @@ public class ChatMessageIdentifier {
 	 * String: channel name
 	 * </code>
 	 */
-	public static final int ADD_CHANNEL = 0x93;
+	public static final int ID_ADD_CHANNEL = 0x93;
 
 	/**
 	 * Sent from the server to tell the client the channel has been renamed <br>
@@ -119,7 +119,7 @@ public class ChatMessageIdentifier {
 	 * String: new channel name
 	 * </code>
 	 */
-	public static final int RENAME_CHANNEL = 0x94;
+	public static final int ID_RENAME_CHANNEL = 0x94;
 
 	/**
 	 * Removes a channel from the list of current channels<br>
@@ -128,39 +128,7 @@ public class ChatMessageIdentifier {
 	 * unsigned byte: channel
 	 * </code>
 	 */
-	public static final int REMOVE_CHANNEL = 0x95;
-
-	/**
-	 * Sent from the server to the client to let it know a user has joined <br>
-	 * <br>
-	 * <code>
-	 * UUID: user id
-	 * <br>
-	 * String: username
-	 * </code>
-	 */
-	public static final int ADD_USER = 0x96;
-
-	/**
-	 * Sent from the server to the client to let it know a users username has
-	 * been updated <br>
-	 * <br>
-	 * <code>
-	 * UUID: user id
-	 * <br>
-	 * String: new username
-	 * </code>
-	 */
-	public static final int USER_USERNAME_UPDATED = 0x97;
-
-	/**
-	 * Sent from the server to the client to let it know a user has left <br>
-	 * <br>
-	 * <code>
-	 * UUID: user id
-	 * </code>
-	 */
-	public static final int REMOVE_USER = 0x98;
+	public static final int ID_REMOVE_CHANNEL = 0x95;
 
 	/**
 	 * Sent by the server to let the client know it's been kicked <br>
@@ -169,6 +137,6 @@ public class ChatMessageIdentifier {
 	 * String: Reason for kick
 	 * </code>
 	 */
-	public static final int ID_KICK = 0x99;
+	public static final int ID_KICK = 0x96;
 
 }
