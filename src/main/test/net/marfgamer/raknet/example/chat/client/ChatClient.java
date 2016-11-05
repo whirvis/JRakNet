@@ -1,3 +1,33 @@
+/*
+ *       _   _____            _      _   _          _   
+ *      | | |  __ \          | |    | \ | |        | |  
+ *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_ 
+ *  _   | | |  _  /   / _` | | |/ / | . ` |  / _ \ | __|
+ * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
+ *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
+ *                                                  
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2016 MarfGamer
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.  
+ */
 package net.marfgamer.raknet.example.chat.client;
 
 import java.net.InetSocketAddress;
@@ -14,19 +44,22 @@ import net.marfgamer.raknet.client.RakNetClientListener;
 import net.marfgamer.raknet.example.chat.ChatMessageIdentifier;
 import net.marfgamer.raknet.example.chat.ServerChannel;
 import net.marfgamer.raknet.example.chat.client.frame.ChatFrame;
-import net.marfgamer.raknet.example.chat.exception.ChatException;
-import net.marfgamer.raknet.example.chat.protocol.ChatPacket;
+import net.marfgamer.raknet.example.chat.protocol.AddChannel;
+import net.marfgamer.raknet.example.chat.protocol.ChatMessage;
+import net.marfgamer.raknet.example.chat.protocol.Kick;
 import net.marfgamer.raknet.example.chat.protocol.LoginAccepted;
 import net.marfgamer.raknet.example.chat.protocol.LoginFailure;
 import net.marfgamer.raknet.example.chat.protocol.LoginRequest;
-import net.marfgamer.raknet.example.chat.protocol.UpdateUsernameRequest;
+import net.marfgamer.raknet.example.chat.protocol.RemoveChannel;
+import net.marfgamer.raknet.example.chat.protocol.RenameChannel;
+import net.marfgamer.raknet.example.chat.protocol.UpdateUsername;
 import net.marfgamer.raknet.exception.session.InvalidChannelException;
 import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.session.RakNetServerSession;
 import net.marfgamer.raknet.util.RakNetUtils;
 
 /**
- * A simple chat client built using JRakNet and a JFrame
+ * A simple chat client built using JRakNet and a <code>JFrame</code>
  *
  * @author MarfGamer
  */
@@ -91,7 +124,7 @@ public class ChatClient implements RakNetClientListener {
 			throw new InvalidChannelException();
 		}
 
-		ChatPacket messagePacket = new ChatPacket();
+		ChatMessage messagePacket = new ChatMessage();
 		messagePacket.message = message;
 		messagePacket.encode();
 		session.sendMessage(Reliability.RELIABLE_ORDERED, channel, messagePacket);
@@ -117,7 +150,7 @@ public class ChatClient implements RakNetClientListener {
 		this.newUsername = newUsername;
 
 		// Send the request
-		UpdateUsernameRequest request = new UpdateUsernameRequest();
+		UpdateUsername request = new UpdateUsername();
 		request.newUsername = newUsername;
 		request.encode();
 		session.sendMessage(Reliability.RELIABLE_ORDERED, request);
@@ -256,13 +289,13 @@ public class ChatClient implements RakNetClientListener {
 			frame.toggleServerInteraction(false);
 			this.disconnect(failure.reason);
 		} else if (packetId == ChatMessageIdentifier.ID_CHAT_MESSAGE) {
-			ChatPacket message = new ChatPacket(packet);
-			message.decode();
+			ChatMessage chat = new ChatMessage(packet);
+			chat.decode();
 
 			// Update channel text if the channel is valid
 			if (channels[channel] != null) {
 				// TODO: Display error if invalid channel
-				channels[channel].appendText(message.message);
+				channels[channel].appendText(chat.message);
 				this.updateChannelText();
 			}
 		} else if (packetId == ChatMessageIdentifier.ID_UPDATE_USERNAME_ACCEPTED) {
@@ -282,22 +315,33 @@ public class ChatClient implements RakNetClientListener {
 			}
 		} else if (packetId == ChatMessageIdentifier.ID_ADD_CHANNEL) {
 			// Add the channel
-			this.addChannel(new ServerChannel(packet.readUByte(), packet.readString()));
+			AddChannel addChannel = new AddChannel(packet);
+			addChannel.decode();
+			this.addChannel(new ServerChannel(addChannel.channel, addChannel.channelName));
 		} else if (packetId == ChatMessageIdentifier.ID_RENAME_CHANNEL) {
 			// Does this channel exist?
-			short channelId = packet.readUByte();
-			if(channels[channelId] != null) {
-				String newName = packet.readString();
-				channels[channelId].setName(newName);
+			RenameChannel renameChannel = new RenameChannel(packet);
+			renameChannel.decode();
+			if (channels[renameChannel.channel] != null) {
+				channels[renameChannel.channel].setName(renameChannel.newChannelName);
 			}
 		} else if (packetId == ChatMessageIdentifier.ID_REMOVE_CHANNEL) {
 			// Remove the channel
-			this.removeChannel(packet.readUByte());
+			RemoveChannel removeChannel = new RemoveChannel(packet);
+			removeChannel.decode();
+			this.removeChannel(removeChannel.channel);
+		} else if (packetId == ChatMessageIdentifier.ID_KICK) {
+			// We were kicked from the server, disconnect
+			Kick kick = new Kick(packet);
+			kick.decode();
+			frame.displayError("Kicked from server", kick.reason);
+			this.disconnect(kick.reason);
 		}
 	}
 
 	@Override
 	public void onDisconnect(RakNetServerSession session, String reason) {
+		// Set on screen instructions and disable server interactions
 		this.session = null;
 		frame.setInstructions(CHAT_INSTRUCTIONS_DISCONNECTED);
 		frame.toggleServerInteraction(false);
@@ -305,7 +349,7 @@ public class ChatClient implements RakNetClientListener {
 
 	@Override
 	public void onThreadException(Throwable throwable) {
-		frame.setInstructions(CHAT_INSTRUCTIONS_DISCONNECTED);
+		// Display error and disconnect from server
 		frame.displayError(throwable);
 		this.disconnect(throwable.getClass().getName() + ": " + throwable.getMessage());
 	}

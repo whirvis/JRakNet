@@ -28,47 +28,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package net.marfgamer.raknet.example.chat.client.frame;
+package net.marfgamer.raknet.example.chat.client;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-
-import net.marfgamer.raknet.example.chat.ServerChannel;
-import net.marfgamer.raknet.example.chat.client.ChatClient;
+import net.marfgamer.raknet.exception.RakNetException;
 
 /**
- * Listens for presses to the enter button in the chat box, used to signal the
- * client to send a chat message
+ * A generic exception used by the client to warn the user of a problem that has
+ * occured
  *
  * @author MarfGamer
  */
-public class ChatBoxKeyListener implements KeyListener {
+public class ChatException extends Exception {
 
-	private final ChatFrame frame;
-	private final ChatClient client;
+	private static final long serialVersionUID = 4497482433048975592L;
 
-	public ChatBoxKeyListener(ChatFrame frame, ChatClient client) {
-		this.frame = frame;
-		this.client = client;
+	private final String exception;
+
+	public ChatException(String exception) {
+		super(exception);
+		this.exception = exception;
+	}
+
+	public ChatException(RakNetException exception) {
+		this(exception.getMessage());
 	}
 
 	@Override
-	public void keyPressed(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-			ServerChannel channel = (ServerChannel) frame.cmbServerChannels.getSelectedItem();
-			client.sendChatMessage(frame.txtChatBox.getText(), channel.getChannel());
-			frame.txtChatBox.setText("");
-		}
+	public String getMessage() {
+		return this.exception;
 	}
 
 	@Override
-	public void keyReleased(KeyEvent e) {
-		// not used
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-		// Not used
+	public String getLocalizedMessage() {
+		return this.exception;
 	}
 
 }

@@ -28,47 +28,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package net.marfgamer.raknet.example.chat.client.frame;
+package net.marfgamer.raknet.example.chat.protocol;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import net.marfgamer.raknet.Packet;
+import net.marfgamer.raknet.example.chat.ChatMessageIdentifier;
 
-import net.marfgamer.raknet.example.chat.ServerChannel;
-import net.marfgamer.raknet.example.chat.client.ChatClient;
+public class RenameChannel extends ChatPacket {
 
-/**
- * Listens for presses to the enter button in the chat box, used to signal the
- * client to send a chat message
- *
- * @author MarfGamer
- */
-public class ChatBoxKeyListener implements KeyListener {
+	public int channel;
+	public String newChannelName;
 
-	private final ChatFrame frame;
-	private final ChatClient client;
+	public RenameChannel(Packet packet) {
+		super(packet);
+	}
 
-	public ChatBoxKeyListener(ChatFrame frame, ChatClient client) {
-		this.frame = frame;
-		this.client = client;
+	public RenameChannel() {
+		super(ChatMessageIdentifier.ID_RENAME_CHANNEL);
 	}
 
 	@Override
-	public void keyPressed(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-			ServerChannel channel = (ServerChannel) frame.cmbServerChannels.getSelectedItem();
-			client.sendChatMessage(frame.txtChatBox.getText(), channel.getChannel());
-			frame.txtChatBox.setText("");
-		}
+	public void encode() {
+		this.writeUByte(channel);
+		this.writeString(newChannelName);
 	}
 
 	@Override
-	public void keyReleased(KeyEvent e) {
-		// not used
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-		// Not used
+	public void decode() {
+		this.channel = this.readUByte();
+		this.newChannelName = this.readString();
 	}
 
 }

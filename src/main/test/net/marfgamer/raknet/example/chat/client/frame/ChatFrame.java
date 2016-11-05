@@ -1,3 +1,33 @@
+/*
+ *       _   _____            _      _   _          _   
+ *      | | |  __ \          | |    | \ | |        | |  
+ *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_ 
+ *  _   | | |  _  /   / _` | | |/ / | . ` |  / _ \ | __|
+ * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
+ *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
+ *                                                  
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2016 MarfGamer
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.  
+ */
 package net.marfgamer.raknet.example.chat.client.frame;
 
 import java.util.ArrayList;
@@ -14,9 +44,13 @@ import javax.swing.UIManager;
 
 import net.marfgamer.raknet.example.chat.ServerChannel;
 import net.marfgamer.raknet.example.chat.client.ChatClient;
-import net.marfgamer.raknet.exception.RakNetException;
 import net.marfgamer.raknet.interactive.FrameResources;
 
+/**
+ * The frame used by the <code>ChatClient</code> to visualize it's data
+ *
+ * @author MarfGamer
+ */
 public class ChatFrame extends JFrame {
 
 	private static final long serialVersionUID = -5459540662852804663L;
@@ -28,6 +62,7 @@ public class ChatFrame extends JFrame {
 	private static final String DEFAULT_SERVER_NAME = "Server name";
 	private static final String DEFAULT_SERVER_MOTD = "Server MOTD";
 	private static final String DEFAULT_CLIENT_USERNAME = "Username";
+	private static final String DEFAULT_CLIENT_INSTRUCTIONS = "Waiting for data...";
 	private static final String CONNECT_BUTTON_TEXT = "Connect to server";
 	private static final String DISCONNECT_BUTTON_TEXT = "Disconnect";
 	private static final String UPDATE_USERNAME_BUTTON_TEXT = "Update username";
@@ -58,7 +93,7 @@ public class ChatFrame extends JFrame {
 		// Content settings
 		getContentPane().setLayout(null);
 
-		// Current server address
+		// Current server name
 		this.txtServerName = new JTextField(DEFAULT_SERVER_NAME);
 		txtServerName.setBounds(10, 40, 205, 20);
 		txtServerName.setEditable(false);
@@ -72,9 +107,9 @@ public class ChatFrame extends JFrame {
 		getContentPane().add(txtServerMotd);
 		txtServerMotd.setColumns(10);
 
-		// Server address to connect to
+		// Current server address
 		this.txtServerAddress = new JTextField();
-		txtServerAddress.setText("localhost");
+		txtServerAddress.setText(DEFAULT_SERVER_ADDRESS);
 		txtServerAddress.setToolTipText("The address of the server to connect to");
 		txtServerAddress.setBounds(359, 10, 125, 20);
 		getContentPane().add(txtServerAddress);
@@ -87,6 +122,18 @@ public class ChatFrame extends JFrame {
 		txtClientUsername.setBounds(360, 40, 125, 20);
 		getContentPane().add(txtClientUsername);
 		txtClientUsername.setColumns(10);
+
+		// Box to list channels
+		this.cmbServerChannels = new JComboBox<ServerChannel>();
+		cmbServerChannels.setBounds(224, 72, 260, 20);
+		cmbServerChannels.setEnabled(false);
+		getContentPane().add(cmbServerChannels);
+
+		// The container for the channel box
+		this.serverChannelPane = new JScrollPane();
+		serverChannelPane.setBounds(10, 102, 474, 150);
+		serverChannelPane.setAutoscrolls(true);
+		getContentPane().add(serverChannelPane);
 
 		// Button to trigger connection request
 		this.btnConnectServer = new JButton(CONNECT_BUTTON_TEXT);
@@ -103,22 +150,10 @@ public class ChatFrame extends JFrame {
 		// Current instructions
 		this.txtpnInstructions = new JTextPane();
 		txtpnInstructions.setEditable(false);
-		txtpnInstructions.setText("Waiting for data...");
+		txtpnInstructions.setText(DEFAULT_CLIENT_INSTRUCTIONS);
 		txtpnInstructions.setBackground(UIManager.getColor("Button.background"));
 		txtpnInstructions.setBounds(10, 10, 205, 20);
 		getContentPane().add(txtpnInstructions);
-
-		// Box to list channels
-		this.cmbServerChannels = new JComboBox<ServerChannel>();
-		cmbServerChannels.setBounds(224, 72, 260, 20);
-		cmbServerChannels.setEnabled(false);
-		getContentPane().add(cmbServerChannels);
-
-		// The container for the channel box
-		this.serverChannelPane = new JScrollPane();
-		serverChannelPane.setBounds(10, 102, 474, 150);
-		serverChannelPane.setAutoscrolls(true);
-		getContentPane().add(serverChannelPane);
 
 		// The text on the current selected channel
 		this.txtPaneServerChannel = new JTextPane();
@@ -134,18 +169,41 @@ public class ChatFrame extends JFrame {
 		getContentPane().add(txtChatBox);
 	}
 
+	/**
+	 * Returns the text in the username box
+	 * 
+	 * @return The text in the username box
+	 */
 	public String getUsername() {
 		return txtClientUsername.getText();
 	}
 
+	/**
+	 * Sets the displayed server name
+	 * 
+	 * @param serverName
+	 *            - The name to display
+	 */
 	public void setServerName(String serverName) {
 		txtServerName.setText(serverName);
 	}
 
+	/**
+	 * Sets the displayed server message of the day
+	 * 
+	 * @param serverMotd
+	 *            - The message of the day to display
+	 */
 	public void setServerMotd(String serverMotd) {
 		txtServerMotd.setText(serverMotd);
 	}
 
+	/**
+	 * Sets the current displayed channels
+	 * 
+	 * @param channels
+	 *            - The channels to display
+	 */
 	public void setChannels(ServerChannel[] channels) {
 		ArrayList<ServerChannel> cleaned = new ArrayList<ServerChannel>();
 		for (ServerChannel channel : channels) {
@@ -157,14 +215,33 @@ public class ChatFrame extends JFrame {
 				.setModel(new DefaultComboBoxModel<ServerChannel>(cleaned.toArray(new ServerChannel[cleaned.size()])));
 	}
 
+	/**
+	 * Sets the current channel
+	 * 
+	 * @param channel
+	 *            - The channel to display
+	 */
 	public void setCurrentChannel(ServerChannel channel) {
 		txtPaneServerChannel.setText(channel.getChannelText());
 	}
 
+	/**
+	 * Sets the displayed instructions
+	 * 
+	 * @param instructions
+	 *            - The instructions to display
+	 */
 	public void setInstructions(String instructions) {
 		txtpnInstructions.setText(instructions);
 	}
 
+	/**
+	 * Enables or disables server interaction, and is used to easily reset the
+	 * displayed client data
+	 * 
+	 * @param connected
+	 *            - Whether or not the client is connected
+	 */
 	public void toggleServerInteraction(boolean connected) {
 		this.connected = connected;
 
@@ -187,6 +264,13 @@ public class ChatFrame extends JFrame {
 		}
 	}
 
+	/**
+	 * Updates the listeners required for the frame to function properly based
+	 * on the client
+	 * 
+	 * @param client
+	 *            - The client to assign the listeners to
+	 */
 	public void updateListeners(ChatClient client) {
 		btnConnectServer.addActionListener(new ConnectServerListener(this, client));
 		btnUpdateUsername.addActionListener(new UpdateUsernameBoxListener(this, client));
@@ -194,24 +278,36 @@ public class ChatFrame extends JFrame {
 		txtChatBox.addKeyListener(new ChatBoxKeyListener(this, client));
 	}
 
+	/**
+	 * Displays a message
+	 * 
+	 * @param message
+	 *            - The message to display
+	 */
 	public void displayMessage(String message) {
 		JOptionPane.showMessageDialog(this, message);
 	}
 
+	/**
+	 * Displays an error with the specified title and message
+	 * 
+	 * @param title
+	 *            - The title of the error
+	 * @param error
+	 *            - The error message
+	 */
 	public void displayError(String title, String error) {
 		JOptionPane.showMessageDialog(this, error, title, JOptionPane.ERROR_MESSAGE);
 	}
 
+	/**
+	 * Displays an error using the specified exception
+	 * 
+	 * @param throwable
+	 *            - The caught exception
+	 */
 	public void displayError(Throwable throwable) {
 		this.displayError("Error: " + throwable.getClass().getName(), throwable.getMessage());
-	}
-
-	public static void main(String[] args) throws Exception {
-		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		ChatFrame frame = new ChatFrame();
-		frame.setVisible(true);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.displayError(new RakNetException("I AM TRIGGERED"));
 	}
 
 }
