@@ -615,7 +615,73 @@ public abstract class RakNetSession {
 		}
 	}
 
-	// TODO: Packet ID only sending
+	/**
+	 * Sends a message identifier with the specified reliability on the
+	 * specified channel
+	 * 
+	 * @param reliability
+	 *            - The reliability of the packet
+	 * @param channel
+	 *            - The channel to send the packet on
+	 * @param packetId
+	 *            - The packet ID to send
+	 * @throws InvalidChannelException
+	 *             Thrown if the channel is higher than the maximum
+	 */
+	public final void sendMessage(Reliability reliability, int channel, int packetId) {
+		this.sendMessage(reliability, channel, new RakNetPacket(packetId));
+	}
+
+	/**
+	 * Sends the specified message identifiers with the specified reliability on
+	 * the specified channel
+	 * 
+	 * @param reliability
+	 *            - The reliability of the packet
+	 * @param channel
+	 *            - The channel to send the packet on
+	 * @param packetIds
+	 *            - The packet IDs to send
+	 * @throws InvalidChannelException
+	 *             Thrown if the channel is higher than the maximum
+	 */
+	public final void sendMessage(Reliability reliability, int channel, int... packetIds) {
+		for (int packetId : packetIds) {
+			this.sendMessage(reliability, channel, packetId);
+		}
+	}
+
+	/**
+	 * Sends a message identifier with the specified reliability on the default
+	 * channel
+	 * 
+	 * @param reliability
+	 *            - The reliability of the packet
+	 * @param packetId
+	 *            - The packet ID to send
+	 * @throws InvalidChannelException
+	 *             Thrown if the channel is higher than the maximum
+	 */
+	public final void sendMessage(Reliability reliability, int packetId) {
+		this.sendMessage(reliability, new RakNetPacket(packetId));
+	}
+
+	/**
+	 * Sends the specified message identifiers with the specified reliability on
+	 * the default channel
+	 * 
+	 * @param reliability
+	 *            - The reliability of the packet
+	 * @param packetIds
+	 *            - The packet IDs to send
+	 * @throws InvalidChannelException
+	 *             Thrown if the channel is higher than the maximum
+	 */
+	public final void sendMessage(Reliability reliability, int... packetIds) {
+		for (int packetId : packetIds) {
+			this.sendMessage(reliability, packetId);
+		}
+	}
 
 	/**
 	 * Sends a raw message
