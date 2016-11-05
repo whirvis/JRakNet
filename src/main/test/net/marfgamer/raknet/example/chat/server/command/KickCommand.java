@@ -28,47 +28,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package net.marfgamer.raknet.example.chat.client.frame;
+package net.marfgamer.raknet.example.chat.server.command;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-
-import net.marfgamer.raknet.example.chat.ServerChannel;
-import net.marfgamer.raknet.example.chat.client.ChatClient;
+import net.marfgamer.raknet.example.chat.server.ChatServer;
 
 /**
- * Listens for presses to the enter button in the chat box, used to signal the
- * client to send a chat message
+ * Allows the server to kick players from the server
  *
  * @author MarfGamer
  */
-public class ChatBoxKeyListener implements KeyListener {
+public class KickCommand extends Command {
 
-	private final ChatFrame frame;
-	private final ChatClient client;
+	private final ChatServer server;
 
-	public ChatBoxKeyListener(ChatFrame frame, ChatClient client) {
-		this.frame = frame;
-		this.client = client;
+	public KickCommand(ChatServer server) {
+		super("kick", "<player> [reason]");
+		this.server = server;
 	}
 
 	@Override
-	public void keyPressed(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-			ServerChannel channel = (ServerChannel) frame.cmbServerChannels.getSelectedItem();
-			client.sendChatMessage(frame.txtChatBox.getText(), channel.getChannel());
-			frame.txtChatBox.setText("");
+	public boolean handleCommand(String[] args) {
+		if (args.length >= 1) {
+			String reason = (args.length >= 2 ? remainingArguments(1, args) : "Kicked from server");
+			if (server.hasClient(args[0])) {
+				server.kickClient(args[0], reason);
+				System.out.println("Kicked client \"" + args[0] + "\" with reason \"" + reason + "\"");
+			} else {
+				System.err.println("Client \"" + args[0] + "\" is not online!");
+			}
+			return true;
 		}
-	}
-
-	@Override
-	public void keyReleased(KeyEvent e) {
-		// not used
-	}
-
-	@Override
-	public void keyTyped(KeyEvent e) {
-		// Not used
+		return false;
 	}
 
 }

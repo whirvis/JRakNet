@@ -116,7 +116,7 @@ public class RakNetClientSession extends RakNetSession {
 				this.sendMessage(Reliability.RELIABLE_ORDERED, requestAccepted);
 				this.setState(RakNetState.HANDSHAKING);
 			} else {
-				this.sendMessage(Reliability.RELIABLE_ORDERED, new RakNetPacket(ID_CONNECTION_ATTEMPT_FAILED));
+				this.sendMessage(Reliability.RELIABLE_ORDERED, ID_CONNECTION_ATTEMPT_FAILED);
 				this.setState(RakNetState.DISCONNECTED);
 				server.removeSession(this, "Connection failed, invalid GUID");
 			}

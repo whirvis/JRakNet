@@ -1,3 +1,33 @@
+/*
+ *       _   _____            _      _   _          _   
+ *      | | |  __ \          | |    | \ | |        | |  
+ *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_ 
+ *  _   | | |  _  /   / _` | | |/ / | . ` |  / _ \ | __|
+ * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
+ *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
+ *                                                  
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2016 MarfGamer
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.  
+ */
 package net.marfgamer.raknet.example.chat.server;
 
 import java.net.InetSocketAddress;
@@ -11,10 +41,12 @@ import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.UtilityTest;
 import net.marfgamer.raknet.example.chat.ChatMessageIdentifier;
 import net.marfgamer.raknet.example.chat.ServerChannel;
-import net.marfgamer.raknet.example.chat.protocol.UpdateUsernameRequest;
+import net.marfgamer.raknet.example.chat.protocol.LoginFailure;
+import net.marfgamer.raknet.example.chat.protocol.UpdateUsername;
 import net.marfgamer.raknet.example.chat.server.command.BroadcastCommand;
 import net.marfgamer.raknet.example.chat.server.command.ChannelCommand;
 import net.marfgamer.raknet.example.chat.server.command.CommandHandler;
+import net.marfgamer.raknet.example.chat.server.command.KickCommand;
 import net.marfgamer.raknet.example.chat.server.command.StopCommand;
 import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.server.RakNetServer;
@@ -35,7 +67,6 @@ public class ChatServer implements RakNetServerListener {
 		this.server = new RakNetServer(port, maxConnections);
 		this.serverChannels = new ServerChannel[RakNet.MAX_CHANNELS];
 		serverChannels[0] = new ServerChannel(0, "Main hall");
-		serverChannels[1] = new ServerChannel(1, "The bathroom ( ͡° ͜ʖ ͡°)");
 		this.connected = new HashMap<InetSocketAddress, ConnectedClient>();
 	}
 
@@ -49,10 +80,9 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	private void denyLogin(RakNetClientSession session, String reason) {
-		RakNetPacket loginFailPacket = new RakNetPacket(ChatMessageIdentifier.ID_LOGIN_FAILURE);
-		loginFailPacket.writeString(reason);
-		session.sendMessage(Reliability.UNRELIABLE, loginFailPacket);
-		System.out.println("Denied login from address " + session.getAddress() + " (" + reason + ")");
+		LoginFailure loginFailure = new LoginFailure();
+		loginFailure.reason = reason;
+		session.sendMessage(Reliability.UNRELIABLE, loginFailure);
 	}
 
 	private boolean hasUsername(String username) {
@@ -80,6 +110,13 @@ public class ChatServer implements RakNetServerListener {
 		}
 	}
 
+	public void renameChannel(int channel, String name) {
+		serverChannels[channel].setName(name);
+		for (ConnectedClient client : connected.values()) {
+			client.renameChannel(channel, name);
+		}
+	}
+
 	public void removeChannel(int channel) {
 		serverChannels[channel] = null;
 		for (ConnectedClient client : connected.values()) {
@@ -87,8 +124,12 @@ public class ChatServer implements RakNetServerListener {
 		}
 	}
 
-	public ServerChannel getChannel(int channel) {
-		return this.serverChannels[channel];
+	public boolean hasChannel(int channel) {
+		return (serverChannels[channel] != null);
+	}
+
+	public String getChannelName(int channel) {
+		return serverChannels[channel].getName();
 	}
 
 	private ServerChannel[] getChannels() {
@@ -119,6 +160,27 @@ public class ChatServer implements RakNetServerListener {
 			this.broadcastMessage(message + " [Global]", channel.getChannel(), false);
 		}
 		System.out.println(message + " [Global]");
+	}
+
+	public ConnectedClient getClient(String username) {
+		for (ConnectedClient client : connected.values()) {
+			if (client.getUsername().equals(username)) {
+				return client;
+			}
+		}
+		return null;
+	}
+
+	public boolean hasClient(String username) {
+		return (getClient(username) != null);
+	}
+
+	public void kickClient(String username, String reason) {
+		if (hasClient(username)) {
+			ConnectedClient toKick = getClient(username);
+			toKick.kick(reason);
+			connected.remove(toKick.getSession().getAddress());
+		}
 	}
 
 	@Override
@@ -158,7 +220,7 @@ public class ChatServer implements RakNetServerListener {
 		} else if (packetId == ChatMessageIdentifier.ID_UPDATE_USERNAME_REQUEST) {
 			if (connected.containsKey(sender)) {
 				ConnectedClient client = connected.get(sender);
-				UpdateUsernameRequest request = new UpdateUsernameRequest(packet);
+				UpdateUsername request = new UpdateUsername(packet);
 				request.decode();
 
 				if (!this.hasUsername(request.newUsername)) {
@@ -180,6 +242,7 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	public static void main(String[] args) {
+		// Create and start server
 		ChatServer server = new ChatServer("JRakNet Server Example", "This is a test server made for JRakNet",
 				UtilityTest.MARFGAMER_DEVELOPMENT_PORT, 10);
 		server.start();
@@ -188,8 +251,12 @@ public class ChatServer implements RakNetServerListener {
 		// Register commands
 		CommandHandler commandHandler = new CommandHandler();
 		commandHandler.registerCommand(new StopCommand(server));
+		commandHandler.registerCommand(new KickCommand(server));
 		commandHandler.registerCommand(new ChannelCommand(server));
 		commandHandler.registerCommand(new BroadcastCommand(server));
+
+		// Listen for commands
+		@SuppressWarnings("resource")
 		Scanner commandScanner = new Scanner(System.in);
 		while (true) {
 			if (commandScanner.hasNextLine()) {
