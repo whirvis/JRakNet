@@ -1,36 +1,84 @@
 # JRakNet
 JRakNet is a networking library for Java which implements the UDP based protocol [RakNet](https://github.com/OculusVR/RakNet).
-This library was meant to be used for Minecraft: Pocket Edition servers and clients, but can still be used to create game servers
-and clients for other video games with ease.
+This library was meant to be used for Minecraft: Pocket Edition servers and clients, but can still be used to create game servers and clients for other video games with ease.
 
-- [x] Server
-  - [x] Event system
-  - [x] Broadcast identifiers
-    - [x] Raw encoders
-    - [x] Custom encoders
-  - [x] Client connection
-- [x] Client
-  - [x] Event system
-  - [x] Server discovery
-  - [x] Server connection
-- [x] Protocol
-  - [x] Custom packets
-    - [x] Sending
-    - [x] Receiving
-  - [x] Encapsulated packets
-    - [x] Sending
-    - [x] Receiving
-  - [x] Acknowledgement packets
-  - [x] Login
-    - [x] Client
-    - [x] Server
-- [ ] Test
-  - [x] Server test
-  - [x] Client test
-  - [x] Utilities test
-  - [x] Server discovery test
-  - [x] Latency detection test
-  - [ ] Examples
-    - [x] Server example
-    - [x] Client example
-    - [ ] Chat example
+| Protocol Info             | Version |
+| --------------------------|:-------:|
+| Current Protocol          | 8       |
+| Supported Server Protocol | 8       |
+| Supported Client Protocol | 8       |
+
+# How to create a server
+Creating a server in JRakNet is extremely easy, all it takes to create one can be seen right here
+
+```java
+// Create server and set listener
+RakNetServer server = new RakNetServer(19132, 10, new MCPEIdentifier("JRakNet Latency Test", 91, "0.16.0", 0,
+		10, System.currentTimeMillis(), "New World", "Survival"));
+server.setListener(new RakNetServerListener() {
+	// Client connected
+	@Override
+	public void onClientConnect(RakNetClientSession session) {
+		System.out.println("Client from address " + session.getAddress() + " has connected to the server");
+	}
+
+	// Client disconnected
+	@Override
+	public void onClientDisconnect(RakNetClientSession session, String reason) {
+		System.out.println("Client from address " + session.getAddress()
+				+ " has disconnected from the server for the reason \"" + reason + "\"");
+	}
+
+	// Packet received
+	@Override
+	public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
+		System.out.println("Client from address " + session.getAddress() + " sent packet with ID 0x"
+				+ Integer.toHexString(packet.getId()).toUpperCase() + " on channel " + channel);
+	}
+});
+
+// Start server
+server.start();
+```
+
+This is a simple RakNet server that can be tested through Minecraft: Pocket Edition by going to the "Friends tab" where the server should show up. After that you should be able to click on it and the connection and packet hooks should start to trigger.
+
+# How to create a client
+Creating a client in JRakNet is also very easy. The code required to create a client can be seen here
+
+```java
+// Server address and port
+private static final String SERVER_ADDRESS = "sg.lbsg.net";
+private static final int SERVER_PORT = 19132;
+
+// Create client and set listener
+RakNetClient client = new RakNetClient();
+client.setListener(new RakNetClientListener() {
+	// Server connected
+	public void onConnect(RakNetServerSession session) {
+		System.out.println("Successfully connected to server with address " + session.getAddress());
+		client.disconnect();
+	}
+
+	// Server disconnected
+	@Override
+	public void onDisconnect(RakNetServerSession session, String reason) {
+		System.out.println("Sucessfully disconnected from server with address " + session.getAddress()
+			+ " for the reason \"" + reason + "\"");
+		System.exit(0);
+	}
+});
+
+// Connect to server
+client.connect(SERVER_ADDRESS, SERVER_PORT);
+```
+
+A simple RakNet client, this example attempts to connect to the main [LBSG](http://lbsg.net/) server. When it is connected, it closes the connection and shuts down.
+
+# How to contact
+This project has a twitter page, [@JRakNet](https://twitter.com/JRakNet). There all github commits and releases are tweeted. There is also a G-Mail account, [jraknet@gmail.com](https://gmail.com) for anything related specifically to JRakNet :)
+
+# Notes
+Some DataPacket ID's are reserved by RakNet. Because of this, it is recommended that all game packets not relating to RakNet begin with their own special ID, Minecraft: Pocket Edition does this. It is also recommended that game servers and game clients do not use raw packets at all. Also, if you thread is locking when creating a server or client, try using their threaded counterparts. 
+
+<img src="http://i.imgur.com/w0EZCZS.png" width="135" height="145">

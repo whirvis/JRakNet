@@ -67,7 +67,7 @@ public class BroadcastFrame extends JFrame {
 		setResizable(false);
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		setTitle("JRakNet Broadcast Test");
-		setIconImage(FrameResources.TERRARIA_RAKNET_ICON.getImage());
+		setIconImage(FrameResources.RAKNET_ICON.getImage());
 
 		// Content settings
 		getContentPane().setLayout(null);
