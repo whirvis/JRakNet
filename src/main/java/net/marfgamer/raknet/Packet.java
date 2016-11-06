@@ -586,7 +586,6 @@ public class Packet {
 	 *            - The address
 	 * @param port
 	 *            - The port
-	 * @return The packet
 	 */
 	public void writeAddress(InetAddress address, int port) {
 		this.writeAddress(new InetSocketAddress(address, port));
@@ -599,7 +598,6 @@ public class Packet {
 	 *            - The address
 	 * @param port
 	 *            - The port
-	 * @return The packet
 	 */
 	public void writeAddress(String address, int port) {
 		this.writeAddress(new InetSocketAddress(address, port));
