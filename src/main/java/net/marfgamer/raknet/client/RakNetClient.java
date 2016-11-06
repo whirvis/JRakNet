@@ -176,6 +176,7 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * 
 	 * @param discoveryPort
 	 *            - The new discovery port
+	 * @return The client
 	 */
 	public RakNetClient setDiscoveryPort(int discoveryPort) {
 		this.discoveryPort = discoveryPort;

@@ -76,6 +76,7 @@ public class MCPEIdentifier extends Identifier {
 	 * Edition identifier
 	 * 
 	 * @param identifier
+	 *            - The identifier to check
 	 * @return Whether or not the specified identifier is a Miencraft: Pocket
 	 *         Edition identifier
 	 */

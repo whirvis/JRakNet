@@ -183,6 +183,8 @@ public interface GeminusRakNetPeer {
 	 * Sends the specified message identifiers with the specified reliability on
 	 * the default channel to the session with the specified globally unique ID
 	 * 
+	 * @param guid
+	 *            - The globally unique ID of the session
 	 * @param reliability
 	 *            - The reliability of the packet
 	 * @param packetIds

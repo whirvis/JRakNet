@@ -142,8 +142,8 @@ public class Acknowledge extends RakNetPacket {
 	 * This method simplifies the records, converting the single records and the
 	 * ranged records to an ordered array of single records. <br>
 	 * <br>
-	 * Example: Let's say we have records
-	 * <code>[1, 2, 3]<code> and the ranged records <code>[4:7,
+	 * Example: Let's say we have records <code>[1, 2, 3]</code> and the ranged
+	 * records <code>[4:7,
 	 * 12:17]</code>. The output will now be
 	 * <code>[1, 2, 3, 4, 5, 6, 7, 12, 13, 14, 15, 16,
 	 * 17]</code>.
