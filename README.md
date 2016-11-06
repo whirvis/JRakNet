@@ -41,7 +41,7 @@ server.setListener(new RakNetServerListener() {
 server.start();
 ```
 
-This is a simple RakNet server that can be tested through Minecraft: Pocket Edition by going to the "Friends tab" where the server should show up. After that you should be able to click on it and the connection and packet hooks should start to trigger.
+This is a simple RakNet server that can be tested through Minecraft: Pocket Edition by going to the "Friends tab" where the server should show up. Once the server pops up, you should be able to click on it to trigger the connection and packet hooks.
 
 # How to create a client
 Creating a client in JRakNet is also very easy. The code required to create a client can be seen here
@@ -79,6 +79,6 @@ A simple RakNet client, this example attempts to connect to the main [LBSG](http
 This project has a twitter page, [@JRakNet](https://twitter.com/JRakNet). There all github commits and releases are tweeted. There is also a G-Mail account, [jraknet@gmail.com](https://gmail.com) for anything related specifically to JRakNet :)
 
 # Notes
-Some DataPacket ID's are reserved by RakNet. Because of this, it is recommended that all game packets not relating to RakNet begin with their own special ID, Minecraft: Pocket Edition does this. It is also recommended that game servers and game clients do not use raw packets at all. Also, if you thread is locking when creating a server or client, try using their threaded counterparts. 
+Some DataPacket ID's are reserved by RakNet. Because of this, it is recommended that all game packets not relating to RakNet begin with their own special ID, Minecraft: Pocket Edition does this (It's header byte is currently 0xFE). It is also recommended that game servers and game clients do not use raw packets at all.
 
 <img src="http://i.imgur.com/w0EZCZS.png" width="135" height="145">
