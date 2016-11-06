@@ -48,6 +48,7 @@ import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.exception.NoListenerException;
 import net.marfgamer.raknet.identifier.Identifier;
+import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.protocol.login.IncompatibleProtocol;
 import net.marfgamer.raknet.protocol.login.OpenConnectionRequestOne;
 import net.marfgamer.raknet.protocol.login.OpenConnectionRequestTwo;
@@ -58,6 +59,7 @@ import net.marfgamer.raknet.protocol.message.acknowledge.Acknowledge;
 import net.marfgamer.raknet.protocol.message.acknowledge.AcknowledgeReceipt;
 import net.marfgamer.raknet.protocol.status.UnconnectedPing;
 import net.marfgamer.raknet.protocol.status.UnconnectedPong;
+import net.marfgamer.raknet.session.GeminusRakNetPeer;
 import net.marfgamer.raknet.session.RakNetClientSession;
 import net.marfgamer.raknet.session.RakNetSession;
 import net.marfgamer.raknet.session.RakNetState;
@@ -68,7 +70,7 @@ import net.marfgamer.raknet.util.RakNetUtils;
  *
  * @author MarfGamer
  */
-public class RakNetServer implements RakNet {
+public class RakNetServer implements RakNet, GeminusRakNetPeer {
 
 	// Server data
 	private final long guid;
@@ -286,6 +288,13 @@ public class RakNetServer implements RakNet {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public void sendMessage(long guid, Reliability reliability, int channel, Packet packet) {
+		if (this.hasSession(guid)) {
+			this.getSession(guid).sendMessage(reliability, channel, packet);
+		}
 	}
 
 	/**
