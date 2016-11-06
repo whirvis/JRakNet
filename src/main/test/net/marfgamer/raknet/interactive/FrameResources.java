@@ -40,11 +40,10 @@ import javax.swing.ImageIcon;
  */
 public class FrameResources {
 
-	public static ImageIcon TERRARIA_RAKNET_ICON = null;
+	public static ImageIcon RAKNET_ICON = null;
 
 	static {
-		TERRARIA_RAKNET_ICON = new ImageIcon(
-				BroadcastFrame.class.getResource("/net/marfgamer/raknet/TERRARIA_RAKNET_ICON.png"));
+		RAKNET_ICON = new ImageIcon(BroadcastFrame.class.getResource("/net/marfgamer/raknet/RAKNET_LOGO.png"));
 	}
 
 }

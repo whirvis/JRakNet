@@ -51,7 +51,7 @@ public class KickCommand extends Command {
 		if (args.length >= 1) {
 			String reason = (args.length >= 2 ? remainingArguments(1, args) : "Kicked from server");
 			if (server.hasClient(args[0])) {
-				server.kickClient(args[0], reason);
+				server.kickClient(server.getClient(args[0]), reason);
 				System.out.println("Kicked client \"" + args[0] + "\" with reason \"" + reason + "\"");
 			} else {
 				System.err.println("Client \"" + args[0] + "\" is not online!");

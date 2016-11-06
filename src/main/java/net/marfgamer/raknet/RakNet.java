@@ -37,7 +37,7 @@ import java.util.UUID;
  *
  * @author MarfGamer
  */
-public interface RakNet {
+public class RakNet {
 
 	/**
 	 * If this is set to true, the server and client will log as much as they

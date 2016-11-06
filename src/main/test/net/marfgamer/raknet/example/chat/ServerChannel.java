@@ -30,6 +30,9 @@
  */
 package net.marfgamer.raknet.example.chat;
 
+import net.marfgamer.raknet.RakNet;
+import net.marfgamer.raknet.exception.session.InvalidChannelException;
+
 /**
  * Represents a channel on a <code>ChatServer</code>, used by both the
  * <code>ChatServer</code> and <code>ChatClient</code> to manage the chat rooms
@@ -42,10 +45,14 @@ public class ServerChannel {
 	private String name;
 	private final StringBuilder channelText;
 
-	public ServerChannel(int channel, String name) {
+	public ServerChannel(int channel, String name) throws InvalidChannelException {
 		this.channel = channel;
 		this.name = name;
 		this.channelText = new StringBuilder();
+
+		if (channel >= RakNet.MAX_CHANNELS) {
+			throw new InvalidChannelException();
+		}
 	}
 
 	/**
@@ -79,11 +86,11 @@ public class ServerChannel {
 	/**
 	 * Adds a chat message to the server channel
 	 * 
-	 * @param text
-	 *            - The message to append
+	 * @param message
+	 *            - The message to add
 	 */
-	public void appendText(String text) {
-		channelText.append(text + "\n");
+	public void addChatMessage(String message) {
+		channelText.append(message + "\n");
 	}
 
 	/**

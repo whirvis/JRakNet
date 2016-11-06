@@ -70,7 +70,7 @@ import net.marfgamer.raknet.util.RakNetUtils;
  *
  * @author MarfGamer
  */
-public class RakNetServer implements RakNet, GeminusRakNetPeer {
+public class RakNetServer implements GeminusRakNetPeer {
 
 	// Server data
 	private final long guid;
@@ -92,7 +92,7 @@ public class RakNetServer implements RakNet, GeminusRakNetPeer {
 	private final ConcurrentHashMap<InetSocketAddress, RakNetClientSession> sessions;
 
 	public RakNetServer(int port, int maxConnections, int maximumTransferUnit, Identifier identifier) {
-		this.guid = UNIQUE_ID_BITS.getMostSignificantBits();
+		this.guid = RakNet.UNIQUE_ID_BITS.getMostSignificantBits();
 		this.timestamp = System.currentTimeMillis();
 		this.port = port;
 		this.maxConnections = maxConnections;
@@ -448,6 +448,9 @@ public class RakNetServer implements RakNet, GeminusRakNetPeer {
 	 *            - The exception caught by the handler
 	 */
 	protected void handleHandlerException(InetSocketAddress address, Throwable cause) {
+		if (this.hasSession(address)) {
+			this.removeSession(address, cause.getClass().getName());
+		}
 		listener.onHandlerException(address, cause);
 	}
 

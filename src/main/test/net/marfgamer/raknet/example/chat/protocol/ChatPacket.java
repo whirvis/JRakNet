@@ -36,6 +36,12 @@ import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 
+/**
+ * Used to read and write data related to the chat protocol used for the example
+ * with ease
+ *
+ * @author MarfGamer
+ */
 public class ChatPacket extends RakNetPacket {
 
 	public ChatPacket(int id) {
@@ -49,15 +55,28 @@ public class ChatPacket extends RakNetPacket {
 		super(packet);
 	}
 
+	/**
+	 * Reads a UUID
+	 * 
+	 * @return A single UUID
+	 */
 	public UUID readUUID() {
 		long mostSigBits = this.readLong();
 		long leastSigBits = this.readLong();
 		return new UUID(mostSigBits, leastSigBits);
 	}
 
-	public void writeUUID(UUID uuid) {
+	/**
+	 * Writes a UUID
+	 * 
+	 * @param uuid
+	 *            - The UUID
+	 * @return The packet
+	 */
+	public ChatPacket writeUUID(UUID uuid) {
 		this.writeLong(uuid.getMostSignificantBits());
 		this.writeLong(uuid.getLeastSignificantBits());
+		return this;
 	}
 
 }
