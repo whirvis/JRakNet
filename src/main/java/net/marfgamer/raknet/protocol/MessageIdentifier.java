@@ -183,7 +183,8 @@ public class MessageIdentifier {
 	 * Returns the packet's name based on it's ID
 	 * 
 	 * @param id
-	 * @return String
+	 *            - The ID of the packet
+	 * @return The packet's name based on it's ID
 	 */
 	public static String getName(int id) {
 		short packetId = 0;
@@ -199,7 +200,8 @@ public class MessageIdentifier {
 	 * Returns the packet's ID based on it's name
 	 * 
 	 * @param name
-	 * @return int
+	 *            - The name of the packet
+	 * @return The packet's ID based on it's name
 	 */
 	public static int getId(String name) {
 		try {

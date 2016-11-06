@@ -247,10 +247,10 @@ public class RakNetServer implements GeminusRakNetPeer {
 
 	/**
 	 * Returns whether or not the server has a session with the specified
-	 * Globally Unique ID
+	 * globally unique ID
 	 * 
-	 * @param address
-	 *            - The Globally Unique ID to check
+	 * @param guid
+	 *            - The globally unique ID to check
 	 * @return - Whether or not the server has a session with the specified
 	 *         Globally Unique ID
 	 */

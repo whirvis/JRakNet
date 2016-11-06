@@ -300,7 +300,8 @@ public class ChatServer implements RakNetServerListener {
 	 * 
 	 * @param username
 	 *            - The username to check
-	 * @return
+	 * @return Whether or not the server has a client with the specified
+	 *         username
 	 */
 	public boolean hasClient(String username) {
 		return (getClient(username) != null);
