@@ -81,4 +81,6 @@ This project has a twitter page, [@JRakNet](https://twitter.com/JRakNet). There 
 # Notes
 Some DataPacket ID's are reserved by RakNet. Because of this, it is recommended that all game packets not relating to RakNet begin with their own special ID, Minecraft: Pocket Edition does this (It's header byte is currently 0xFE). It is also recommended that game servers and game clients do not use raw packets at all.
 
-<img src="http://i.imgur.com/w0EZCZS.png" width="135" height="145">
+<br>
+
+<img src="http://i.imgur.com/w0EZCZS.png" width="135" height="145"> <img src="http://imgur.com/9p1asD8.png" width="135" height="145" hspace="50"> <img src="https://www1.oculus.com/wp-content/uploads/2013/03/oculus_vr_logo_small.png">
