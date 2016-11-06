@@ -88,7 +88,7 @@ public class ChatFrame extends JFrame {
 		setResizable(false);
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		setTitle("JRakNet Client Example");
-		setIconImage(FrameResources.TERRARIA_RAKNET_ICON.getImage());
+		setIconImage(FrameResources.RAKNET_ICON.getImage());
 
 		// Content settings
 		getContentPane().setLayout(null);

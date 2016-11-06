@@ -161,6 +161,10 @@ public class ChatClient implements RakNetClientListener {
 	 * 
 	 * @param channel
 	 *            - The new channel to display
+	 * @throws InvalidChannelException
+	 *             Thrown if the channel exceeds the limit
+	 * @throws ChatException
+	 *             Thrown if an error occurs when setting the channel
 	 */
 	public void setChannel(int channel) throws InvalidChannelException, ChatException {
 		// Make sure the channel is valid
@@ -199,8 +203,13 @@ public class ChatClient implements RakNetClientListener {
 	 * 
 	 * @param channel
 	 *            - The ID of the channel to remove
+	 * @throws InvalidChannelException
+	 *             Thrown if the channel exceeds the limit
 	 */
-	public void removeChannel(int channel) {
+	public void removeChannel(int channel) throws InvalidChannelException {
+		if (channel >= RakNet.MAX_CHANNELS) {
+			throw new InvalidChannelException();
+		}
 		this.channels[channel] = null;
 		frame.setChannels(channels);
 	}
@@ -295,7 +304,7 @@ public class ChatClient implements RakNetClientListener {
 			// Update channel text if the channel is valid
 			if (channels[channel] != null) {
 				// TODO: Display error if invalid channel
-				channels[channel].appendText(chat.message);
+				channels[channel].addChatMessage(chat.message);
 				this.updateChannelText();
 			}
 		} else if (packetId == ChatMessageIdentifier.ID_UPDATE_USERNAME_ACCEPTED) {
