@@ -64,9 +64,8 @@ import net.marfgamer.raknet.util.map.IntMap;
  *
  * @author MarfGamer
  */
-public abstract class RakNetSession {
+public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer {
 
-	public static final byte DEFAULT_ORDER_CHANNEL = 0x00;
 	public static final long MAX_PACKETS_PER_SECOND_BLOCK = 1000L * 300L;
 	public static final long RECOVERY_SEND_WAIT_TIME_MILLIS = 50L;
 	public static final long ACK_SEND_WAIT_TIME_MILLIS = 3000L;
@@ -293,7 +292,7 @@ public abstract class RakNetSession {
 			}
 		}
 
-		// Make sure we don't set an old packet to the knew one
+		// Make sure we don't set an old packet to the new one
 		if (difference >= 0) {
 			this.lastSequenceNumber = (custom.sequenceNumber + 1);
 		}
@@ -452,18 +451,8 @@ public abstract class RakNetSession {
 			}
 		} else if (acknowledge.getType() == AcknowledgeType.NOT_ACKNOWLEDGED) {
 			for (Record record : acknowledge.records) {
-				// Remove all unreliable packets from the queue
+				// Resend the lost packets
 				CustomPacket custom = recoveryQueue.get(record.getIndex());
-
-				// We already sent it, we will need to send a fake
-				if (custom == null) {
-					custom = new CustomPacket();
-					custom.sequenceNumber = record.getIndex();
-				} else {
-					custom.removeUnreliables();
-				}
-
-				// Resend the modified version
 				this.sendRawMessage(custom);
 			}
 		}
@@ -486,18 +475,7 @@ public abstract class RakNetSession {
 		// TODO: Add onNotAcknowledge method?
 	}
 
-	/**
-	 * Sends a message with the specified reliability on the specified channel
-	 * 
-	 * @param reliability
-	 *            - The reliability of the packet
-	 * @param channel
-	 *            - The channel to send the packet on
-	 * @param packet
-	 *            - The packet to send
-	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
-	 */
+	@Override
 	public final synchronized void sendMessage(Reliability reliability, int channel, Packet packet)
 			throws InvalidChannelException {
 		// Make sure channel doesn't exceed RakNet limit
@@ -564,122 +542,10 @@ public abstract class RakNetSession {
 		}
 	}
 
-	/**
-	 * Sends the specified messages with the specified reliability on the
-	 * specified channel
-	 * 
-	 * @param reliability
-	 *            - The reliability of the packet
-	 * @param channel
-	 *            - The channel to send the packet on
-	 * @param packets
-	 *            - The packets to send
-	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
-	 */
-	public final void sendMessage(Reliability reliability, int channel, Packet... packets)
-			throws InvalidChannelException {
-		for (Packet packet : packets) {
+	@Override
+	public void sendMessage(long guid, Reliability reliability, int channel, Packet packet) {
+		if (this.guid == guid) {
 			this.sendMessage(reliability, channel, packet);
-		}
-	}
-
-	/**
-	 * Sends a message with the specified reliability on the default channel
-	 * 
-	 * @param reliability
-	 *            - The reliability of the packet
-	 * @param packet
-	 *            - The packet to send
-	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
-	 */
-	public final void sendMessage(Reliability reliability, Packet packet) throws InvalidChannelException {
-		this.sendMessage(reliability, DEFAULT_ORDER_CHANNEL, packet);
-	}
-
-	/**
-	 * Sends the specified messages with the specified reliability on the
-	 * default channel
-	 * 
-	 * @param reliability
-	 *            - The reliability of the packet
-	 * @param packets
-	 *            - The packets to send
-	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
-	 */
-	public final void sendMessage(Reliability reliability, Packet... packets) throws InvalidChannelException {
-		for (Packet packet : packets) {
-			this.sendMessage(reliability, DEFAULT_ORDER_CHANNEL, packet);
-		}
-	}
-
-	/**
-	 * Sends a message identifier with the specified reliability on the
-	 * specified channel
-	 * 
-	 * @param reliability
-	 *            - The reliability of the packet
-	 * @param channel
-	 *            - The channel to send the packet on
-	 * @param packetId
-	 *            - The packet ID to send
-	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
-	 */
-	public final void sendMessage(Reliability reliability, int channel, int packetId) {
-		this.sendMessage(reliability, channel, new RakNetPacket(packetId));
-	}
-
-	/**
-	 * Sends the specified message identifiers with the specified reliability on
-	 * the specified channel
-	 * 
-	 * @param reliability
-	 *            - The reliability of the packet
-	 * @param channel
-	 *            - The channel to send the packet on
-	 * @param packetIds
-	 *            - The packet IDs to send
-	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
-	 */
-	public final void sendMessage(Reliability reliability, int channel, int... packetIds) {
-		for (int packetId : packetIds) {
-			this.sendMessage(reliability, channel, packetId);
-		}
-	}
-
-	/**
-	 * Sends a message identifier with the specified reliability on the default
-	 * channel
-	 * 
-	 * @param reliability
-	 *            - The reliability of the packet
-	 * @param packetId
-	 *            - The packet ID to send
-	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
-	 */
-	public final void sendMessage(Reliability reliability, int packetId) {
-		this.sendMessage(reliability, new RakNetPacket(packetId));
-	}
-
-	/**
-	 * Sends the specified message identifiers with the specified reliability on
-	 * the default channel
-	 * 
-	 * @param reliability
-	 *            - The reliability of the packet
-	 * @param packetIds
-	 *            - The packet IDs to send
-	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
-	 */
-	public final void sendMessage(Reliability reliability, int... packetIds) {
-		for (int packetId : packetIds) {
-			this.sendMessage(reliability, packetId);
 		}
 	}
 
@@ -778,6 +644,7 @@ public abstract class RakNetSession {
 				if (recoveryQueue.isEmpty() == true && this.packetsSentThisSecond < RakNet.MAX_PACKETS_PER_SECOND) {
 					this.sendRawMessage(custom);
 				}
+				custom.removeUnreliables();
 				recoveryQueue.put(custom.sequenceNumber, custom);
 			}
 		}

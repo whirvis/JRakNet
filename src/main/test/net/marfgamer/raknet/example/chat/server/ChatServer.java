@@ -53,6 +53,11 @@ import net.marfgamer.raknet.server.RakNetServer;
 import net.marfgamer.raknet.server.RakNetServerListener;
 import net.marfgamer.raknet.session.RakNetClientSession;
 
+/**
+ * A simple chat server built using JRakNet
+ *
+ * @author MarfGamer
+ */
 public class ChatServer implements RakNetServerListener {
 
 	private final String name;
@@ -70,21 +75,44 @@ public class ChatServer implements RakNetServerListener {
 		this.connected = new HashMap<InetSocketAddress, ConnectedClient>();
 	}
 
+	/**
+	 * Starts the server
+	 */
 	public void start() {
 		server.setListener(this);
 		server.startThreaded();
 	}
 
+	/**
+	 * Stops the server
+	 */
 	public void stop() {
 		server.stop();
 	}
 
+	/**
+	 * Denies a login to the specified client with the specified reason
+	 * 
+	 * @param session
+	 *            - The session to deny the login to
+	 * @param reason
+	 *            - The reason the login was denied
+	 */
 	private void denyLogin(RakNetClientSession session, String reason) {
 		LoginFailure loginFailure = new LoginFailure();
 		loginFailure.reason = reason;
 		session.sendMessage(Reliability.UNRELIABLE, loginFailure);
 	}
 
+	/**
+	 * Returns whether or not the server has a client with the specified
+	 * username
+	 * 
+	 * @param username
+	 *            - The username to check
+	 * @return Whether or not the server has a client with the specified
+	 *         username
+	 */
 	private boolean hasUsername(String username) {
 		for (ConnectedClient client : connected.values()) {
 			if (client.getUsername().equalsIgnoreCase(username)) {
@@ -94,15 +122,14 @@ public class ChatServer implements RakNetServerListener {
 		return false;
 	}
 
-	@SuppressWarnings("unused")
-	private ConnectedClient[] getClients() {
-		ArrayList<ConnectedClient> clients = new ArrayList<ConnectedClient>();
-		for (ConnectedClient client : connected.values()) {
-			clients.add(client);
-		}
-		return clients.toArray(new ConnectedClient[clients.size()]);
-	}
-
+	/**
+	 * Adds a channel to the server with the specified ID and name
+	 * 
+	 * @param channel
+	 *            - The channel ID
+	 * @param name
+	 *            - The name of the channel
+	 */
 	public void addChannel(int channel, String name) {
 		serverChannels[channel] = new ServerChannel(channel, name);
 		for (ConnectedClient client : connected.values()) {
@@ -110,6 +137,14 @@ public class ChatServer implements RakNetServerListener {
 		}
 	}
 
+	/**
+	 * Renames the channel with the specified ID a new name
+	 * 
+	 * @param channel
+	 *            - The channel ID
+	 * @param name
+	 *            - The new name of the channel
+	 */
 	public void renameChannel(int channel, String name) {
 		serverChannels[channel].setName(name);
 		for (ConnectedClient client : connected.values()) {
@@ -117,6 +152,12 @@ public class ChatServer implements RakNetServerListener {
 		}
 	}
 
+	/**
+	 * Removes the channel with the specified ID
+	 * 
+	 * @param channel
+	 *            - The channel ID
+	 */
 	public void removeChannel(int channel) {
 		serverChannels[channel] = null;
 		for (ConnectedClient client : connected.values()) {
@@ -124,6 +165,13 @@ public class ChatServer implements RakNetServerListener {
 		}
 	}
 
+	/**
+	 * Returns whether or not the server has a channel with the specified ID
+	 * 
+	 * @param channel
+	 *            - The channel ID
+	 * @return Whether or not the server has a channel with the specified ID
+	 */
 	public boolean hasChannel(int channel) {
 		return (serverChannels[channel] != null);
 	}

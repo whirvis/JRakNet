@@ -45,6 +45,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNet;
 import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.client.discovery.DiscoveredServer;
@@ -63,6 +64,7 @@ import net.marfgamer.raknet.protocol.message.acknowledge.Acknowledge;
 import net.marfgamer.raknet.protocol.status.UnconnectedPing;
 import net.marfgamer.raknet.protocol.status.UnconnectedPingOpenConnections;
 import net.marfgamer.raknet.protocol.status.UnconnectedPong;
+import net.marfgamer.raknet.session.UnumRakNetPeer;
 import net.marfgamer.raknet.session.RakNetServerSession;
 import net.marfgamer.raknet.session.RakNetSession;
 import net.marfgamer.raknet.session.RakNetState;
@@ -73,7 +75,7 @@ import net.marfgamer.raknet.util.RakNetUtils;
  *
  * @author MarfGamer
  */
-public class RakNetClient {
+public class RakNetClient implements UnumRakNetPeer {
 
 	// JRakNet plans to use it's own dynamic MTU system later
 	protected static final MaximumTransferUnit[] units = new MaximumTransferUnit[] { new MaximumTransferUnit(1172, 4),
@@ -626,6 +628,13 @@ public class RakNetClient {
 				this.disconnect("The session has timed out!");
 				break;
 			}
+		}
+	}
+
+	@Override
+	public void sendMessage(Reliability reliability, int channel, Packet packet) {
+		if (this.isConnected()) {
+			session.sendMessage(reliability, channel, packet);
 		}
 	}
 

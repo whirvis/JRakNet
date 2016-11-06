@@ -59,6 +59,7 @@ public interface RakNet {
 
 	// Session limit data
 	public static final int MAX_CHANNELS = 32;
+	public static final byte DEFAULT_CHANNEL = 0x00;
 	public static final int MAX_SPLIT_COUNT = 128;
 	public static final int MAX_SPLITS_PER_QUEUE = 4;
 	public static final int MAX_PACKETS_PER_SECOND = 500;

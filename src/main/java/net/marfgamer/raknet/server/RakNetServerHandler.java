@@ -49,6 +49,7 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 
 	private final RakNetServer server;
 	private final HashMap<InetAddress, BlockedClient> blocked;
+	private InetSocketAddress causeAddress;
 
 	public RakNetServerHandler(RakNetServer server) {
 		this.server = server;
@@ -98,6 +99,9 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			InetSocketAddress sender = datagram.sender();
 			RakNetPacket packet = new RakNetPacket(datagram);
 
+			// If an exception happens it's because of this address
+			this.causeAddress = sender;
+
 			// Is the sender blocked?
 			if (this.addressBlocked(sender.getAddress())) {
 				BlockedClient status = blocked.get(sender.getAddress());
@@ -113,6 +117,11 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			server.handleMessage(packet, sender);
 			datagram.content().release(); // No longer needed
 		}
+	}
+
+	@Override
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+		server.handleHandlerException(this.causeAddress, cause);
 	}
 
 }
