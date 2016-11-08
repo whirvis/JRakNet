@@ -60,6 +60,10 @@ public class Packet {
 		this(Unpooled.copiedBuffer(datagram.content()));
 	}
 
+	public Packet(byte[] data) {
+		this(Unpooled.copiedBuffer(data));
+	}
+
 	public Packet(Packet packet) {
 		this(Unpooled.copiedBuffer(packet.buffer));
 	}
