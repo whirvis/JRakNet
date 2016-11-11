@@ -172,7 +172,7 @@ public class BroadcastFrame extends JFrame {
 	 * Updates the text in the JFrame according to the discovered servers
 	 * 
 	 * @param identifiers
-	 *            - The identifiers of the discovered servers
+	 *            The identifiers of the discovered servers
 	 */
 	public void updatePaneText(MCPEIdentifier[] identifiers) {
 		StringBuilder discoverString = new StringBuilder();

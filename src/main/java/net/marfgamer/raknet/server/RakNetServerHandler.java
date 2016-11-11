@@ -60,9 +60,9 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	 * Blocks the specified address for the specified amount of time
 	 * 
 	 * @param address
-	 *            - The address to block
+	 *            The address to block
 	 * @param time
-	 *            - How long the address will be blocked in milliseconds
+	 *            How long the address will be blocked in milliseconds
 	 */
 	public void blockAddress(InetAddress address, long time) {
 		blocked.put(address, new BlockedClient(System.currentTimeMillis(), time));
@@ -73,7 +73,7 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	 * Unblocks the specified address
 	 * 
 	 * @param address
-	 *            - The address to unblock
+	 *            The address to unblock
 	 */
 	public void unblockAddress(InetAddress address) {
 		blocked.remove(address);
@@ -84,7 +84,7 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	 * Returns whether or not the specified address is blocked
 	 * 
 	 * @param address
-	 *            - The address to check
+	 *            The address to check
 	 * @return Whether or not the specified address is blocked
 	 */
 	public boolean addressBlocked(InetAddress address) {
@@ -105,7 +105,7 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			// Is the sender blocked?
 			if (this.addressBlocked(sender.getAddress())) {
 				BlockedClient status = blocked.get(sender.getAddress());
-				if (status.getTime() == -1) {
+				if (status.getTime() <= BlockedClient.PERMANENT_BLOCK) {
 					return; // Permanently blocked
 				}
 				if (System.currentTimeMillis() - status.getStartTime() < status.getTime()) {

@@ -59,7 +59,7 @@ public enum RakNetState {
 	 * 
 	 * @param order
 	 *            The order of the state
-	 * @return the state by it's numerical order
+	 * @return The state by it's numerical order
 	 */
 	public static RakNetState getState(int order) {
 		for (RakNetState state : RakNetState.values()) {

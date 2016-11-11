@@ -74,13 +74,13 @@ public class RakNetUtils {
 	 * a timeout
 	 * 
 	 * @param address
-	 *            - The address to send the packet to
+	 *            The address to send the packet to
 	 * @param packet
-	 *            - The packet to send
+	 *            The packet to send
 	 * @param timeout
-	 *            - The interval of which the packet is sent
+	 *            The interval of which the packet is sent
 	 * @param retries
-	 *            - How many times the packet will be sent
+	 *            How many times the packet will be sent
 	 * @return The received packet if it was received
 	 */
 	private static RakNetPacket createBootstrapAndSend(InetSocketAddress address, Packet packet, long timeout,
@@ -127,7 +127,7 @@ public class RakNetUtils {
 	 * Returns whether or not the server is online
 	 * 
 	 * @param address
-	 *            - The address of the server
+	 *            The address of the server
 	 * @return Whether or not the server is online
 	 */
 	public static boolean isServerOnline(InetSocketAddress address) {
@@ -155,9 +155,9 @@ public class RakNetUtils {
 	 * Returns whether or not the server is online
 	 * 
 	 * @param address
-	 *            - The address of the server
+	 *            The address of the server
 	 * @param port
-	 *            - The port of the server
+	 *            The port of the server
 	 * @return Whether or not the server is online
 	 */
 	public static boolean isServerOnline(InetAddress address, int port) {
@@ -168,9 +168,9 @@ public class RakNetUtils {
 	 * Returns whether or not the server is online
 	 * 
 	 * @param address
-	 *            - The address of the server
+	 *            The address of the server
 	 * @param port
-	 *            - The port of the server
+	 *            The port of the server
 	 * @return Whether or not the server is online
 	 * @throws UnknownHostException
 	 *             Thrown if the specified address is an unknown host
@@ -184,7 +184,7 @@ public class RakNetUtils {
 	 * protocol
 	 * 
 	 * @param address
-	 *            - The address of the server
+	 *            The address of the server
 	 * @return Whether or not the server is compatible to the current client
 	 *         protocol
 	 */
@@ -219,9 +219,9 @@ public class RakNetUtils {
 	 * protocol
 	 * 
 	 * @param address
-	 *            - The address of the server
+	 *            The address of the server
 	 * @param port
-	 *            - The port of the server
+	 *            The port of the server
 	 * @return Whether or not the server is compatible to the current client
 	 *         protocol
 	 */
@@ -234,9 +234,9 @@ public class RakNetUtils {
 	 * protocol
 	 * 
 	 * @param address
-	 *            - The address of the server
+	 *            The address of the server
 	 * @param port
-	 *            - The port of the server
+	 *            The port of the server
 	 * @return Whether or not the server is compatible to the current client
 	 *         protocol
 	 * @throws UnknownHostException
@@ -250,7 +250,7 @@ public class RakNetUtils {
 	 * Returns the specified server's identifier
 	 * 
 	 * @param address
-	 *            - The address of the server
+	 *            The address of the server
 	 * @return The specified server's identifier
 	 */
 	public static Identifier getServerIdentifier(InetSocketAddress address) {
@@ -277,9 +277,9 @@ public class RakNetUtils {
 	 * Returns the specified server's identifier
 	 * 
 	 * @param address
-	 *            - The address of the server
+	 *            The address of the server
 	 * @param port
-	 *            - The port of the server
+	 *            The port of the server
 	 * @return The specified server's identifier
 	 */
 	public static Identifier getServerIdentifier(InetAddress address, int port) {
@@ -290,9 +290,9 @@ public class RakNetUtils {
 	 * Returns the specified server's identifier
 	 * 
 	 * @param address
-	 *            - The address of the server
+	 *            The address of the server
 	 * @param port
-	 *            - The port of the server
+	 *            The port of the server
 	 * @return The specified server's identifier
 	 * @throws UnknownHostException
 	 *             Thrown if the specified address is an unknown host
@@ -321,9 +321,9 @@ public class RakNetUtils {
 	 * it to an <code>InetSocketAddress</code>
 	 * 
 	 * @param address
-	 *            - The address to convert
+	 *            The address to convert
 	 * @param defaultPort
-	 *            - The default port to use if one is not specified
+	 *            The default port to use if one is not specified
 	 * @return A parsed InetSocketAddress
 	 * @throws UnknownHostException
 	 *             Thrown if the address is in an invalid format or if the host
@@ -349,7 +349,7 @@ public class RakNetUtils {
 	 * it to an <code>InetSocketAddress</code>
 	 * 
 	 * @param address
-	 *            - The address to convert
+	 *            The address to convert
 	 * @return A parsed InetSocketAddress
 	 * @throws UnknownHostException
 	 *             Thrown if the address is in an invalid format or if the host
@@ -364,9 +364,9 @@ public class RakNetUtils {
 	 * it to an <code>InetSocketAddress</code>
 	 * 
 	 * @param address
-	 *            - The address to convert
+	 *            The address to convert
 	 * @param defaultPort
-	 *            - The default port to use if one is not specified
+	 *            The default port to use if one is not specified
 	 * @return A parsed InetSocketAddress
 	 */
 	public static InetSocketAddress parseAddressPassive(String address, int defaultPort) {
@@ -382,7 +382,7 @@ public class RakNetUtils {
 	 * it to an <code>InetSocketAddress</code>
 	 * 
 	 * @param address
-	 *            - The address to convert
+	 *            The address to convert
 	 * @return A parsed InetSocketAddress
 	 */
 	public static InetSocketAddress parseAddressPassive(String address) {
@@ -394,7 +394,7 @@ public class RakNetUtils {
 	 * NumberFormatException
 	 * 
 	 * @param longStr
-	 *            - The String to parse
+	 *            The String to parse
 	 * @return The String as a long
 	 */
 	public static long parseLongPassive(String longStr) {
@@ -410,7 +410,7 @@ public class RakNetUtils {
 	 * NumberFormatException
 	 * 
 	 * @param intStr
-	 *            - The String to parse
+	 *            The String to parse
 	 * @return The String as an int
 	 */
 	public static int parseIntPassive(String intStr) {
@@ -422,7 +422,7 @@ public class RakNetUtils {
 	 * NumberFormatException
 	 * 
 	 * @param shortStr
-	 *            - The String to parse
+	 *            The String to parse
 	 * @return The String as a short
 	 */
 	public static short parseShortPassive(String shortStr) {
@@ -434,7 +434,7 @@ public class RakNetUtils {
 	 * NumberFormatException
 	 * 
 	 * @param byteStr
-	 *            - The String to parse
+	 *            The String to parse
 	 * @return The String as a byte
 	 */
 	public static byte parseBytePassive(String byteStr) {
@@ -445,7 +445,7 @@ public class RakNetUtils {
 	 * Causes a sleep on the main thread using a simple while loop
 	 * 
 	 * @param time
-	 *            - How long the thread will sleep in milliseconds
+	 *            How long the thread will sleep in milliseconds
 	 */
 	public static void passiveSleep(long time) {
 		long sleepStart = System.currentTimeMillis();
@@ -461,7 +461,6 @@ public class RakNetUtils {
 	 * @author MarfGamer
 	 */
 	private static class BootstrapHandler extends ChannelInboundHandlerAdapter {
-
 		public volatile RakNetPacket packet;
 
 		@Override
@@ -475,7 +474,6 @@ public class RakNetUtils {
 		public void channelReadComplete(ChannelHandlerContext ctx) {
 			ctx.flush();
 		}
-
 	}
 
 }

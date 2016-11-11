@@ -95,9 +95,9 @@ public class ChatServer implements RakNetServerListener {
 	 * Denies a login to the specified client with the specified reason
 	 * 
 	 * @param session
-	 *            - The session to deny the login to
+	 *            The session to deny the login to
 	 * @param reason
-	 *            - The reason the login was denied
+	 *            The reason the login was denied
 	 */
 	private void denyLogin(RakNetClientSession session, String reason) {
 		LoginFailure loginFailure = new LoginFailure();
@@ -110,7 +110,7 @@ public class ChatServer implements RakNetServerListener {
 	 * username
 	 * 
 	 * @param username
-	 *            - The username to check
+	 *            The username to check
 	 * @return Whether or not the server has a client with the specified
 	 *         username
 	 */
@@ -127,9 +127,9 @@ public class ChatServer implements RakNetServerListener {
 	 * Adds a channel to the server with the specified ID and name
 	 * 
 	 * @param channel
-	 *            - The channel ID
+	 *            The channel ID
 	 * @param name
-	 *            - The name of the channel
+	 *            The name of the channel
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel exceeds the limit
 	 */
@@ -147,9 +147,9 @@ public class ChatServer implements RakNetServerListener {
 	 * Renames the channel with the specified ID a new name
 	 * 
 	 * @param channel
-	 *            - The channel ID
+	 *            The channel ID
 	 * @param name
-	 *            - The new name of the channel
+	 *            The new name of the channel
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel exceeds the limit
 	 */
@@ -167,7 +167,7 @@ public class ChatServer implements RakNetServerListener {
 	 * Removes the channel with the specified ID
 	 * 
 	 * @param channel
-	 *            - The channel ID
+	 *            The channel ID
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel exceeds the limit
 	 */
@@ -185,7 +185,7 @@ public class ChatServer implements RakNetServerListener {
 	 * Returns whether or not the server has a channel with the specified ID
 	 * 
 	 * @param channel
-	 *            - The channel ID
+	 *            The channel ID
 	 * @return Whether or not the server has a channel with the specified ID
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel exceeds the limit
@@ -201,7 +201,7 @@ public class ChatServer implements RakNetServerListener {
 	 * Returns a channel's name based on it's ID
 	 * 
 	 * @param channel
-	 *            - The channel ID
+	 *            The channel ID
 	 * @return The channel's name
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel exceeds the limit
@@ -233,11 +233,11 @@ public class ChatServer implements RakNetServerListener {
 	 * out to the console if needed
 	 * 
 	 * @param message
-	 *            - The message to send
+	 *            The message to send
 	 * @param channel
-	 *            - The channel to send the message to
+	 *            The channel to send the message to
 	 * @param print
-	 *            - Whether or not the message should be printed to the console
+	 *            Whether or not the message should be printed to the console
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel exceeds the limit
 	 */
@@ -257,9 +257,9 @@ public class ChatServer implements RakNetServerListener {
 	 * Broadcasts the specified message on the specified channel
 	 * 
 	 * @param message
-	 *            - The message to send
+	 *            The message to send
 	 * @param channel
-	 *            - The channel to send the message to
+	 *            The channel to send the message to
 	 */
 	public void broadcastMessage(String message, int channel) {
 		this.broadcastMessage(message, channel, true);
@@ -269,7 +269,7 @@ public class ChatServer implements RakNetServerListener {
 	 * Broadcasts the specified message on every channel possible
 	 * 
 	 * @param message
-	 *            - The message to send
+	 *            The message to send
 	 */
 	public void broadcastMessage(String message) {
 		for (ServerChannel channel : getChannels()) {
@@ -282,7 +282,7 @@ public class ChatServer implements RakNetServerListener {
 	 * Returns a client based on it's username
 	 * 
 	 * @param username
-	 *            - The client's username
+	 *            The client's username
 	 * @return The client based on it's username
 	 */
 	public ConnectedClient getClient(String username) {
@@ -299,7 +299,7 @@ public class ChatServer implements RakNetServerListener {
 	 * username
 	 * 
 	 * @param username
-	 *            - The username to check
+	 *            The username to check
 	 * @return Whether or not the server has a client with the specified
 	 *         username
 	 */
@@ -311,9 +311,9 @@ public class ChatServer implements RakNetServerListener {
 	 * Kicks a client from the server with the specified reason
 	 * 
 	 * @param client
-	 *            - The client to kick
+	 *            The client to kick
 	 * @param reason
-	 *            - The reason the client was kicked
+	 *            The reason the client was kicked
 	 */
 	public void kickClient(ConnectedClient client, String reason) {
 		if (connected.containsKey(client.getSession().getAddress())) {

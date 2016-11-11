@@ -66,6 +66,11 @@ public class RakNetServerSession extends RakNetSession {
 	}
 
 	@Override
+	public void onNotAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet) {
+		client.getListener().onNotAcknowledge(this, record, reliability, channel, packet);
+	}
+
+	@Override
 	public void handlePacket(RakNetPacket packet, int channel) {
 		short packetId = packet.getId();
 

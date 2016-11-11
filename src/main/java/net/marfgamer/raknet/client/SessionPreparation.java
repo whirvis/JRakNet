@@ -43,6 +43,7 @@ import net.marfgamer.raknet.exception.client.ConnectionBannedException;
 import net.marfgamer.raknet.exception.client.IncompatibleProtocolException;
 import net.marfgamer.raknet.exception.client.InvalidProtocolException;
 import net.marfgamer.raknet.exception.client.NoFreeIncomingConnectionsException;
+import net.marfgamer.raknet.protocol.login.ConnectionBanned;
 import net.marfgamer.raknet.protocol.login.IncompatibleProtocol;
 import net.marfgamer.raknet.protocol.login.OpenConnectionResponseOne;
 import net.marfgamer.raknet.protocol.login.OpenConnectionResponseTwo;
@@ -77,7 +78,7 @@ public class SessionPreparation {
 	 * data
 	 * 
 	 * @param packet
-	 *            - The packet to handle
+	 *            The packet to handle
 	 */
 	public void handlePacket(RakNetPacket packet) {
 		short packetId = packet.getId();
@@ -115,7 +116,11 @@ public class SessionPreparation {
 		} else if (packetId == ID_NO_FREE_INCOMING_CONNECTIONS) {
 			this.cancelReason = new NoFreeIncomingConnectionsException(client);
 		} else if (packetId == ID_CONNECTION_BANNED) {
-			this.cancelReason = new ConnectionBannedException(client);
+			ConnectionBanned connectionBanned = new ConnectionBanned(packet);
+			connectionBanned.decode();
+			if (connectionBanned.serverGuid == this.guid) {
+				this.cancelReason = new ConnectionBannedException(client);
+			}
 		} else if (packetId == ID_INCOMPATIBLE_PROTOCOL_VERSION) {
 			IncompatibleProtocol incompatibleProtocol = new IncompatibleProtocol(packet);
 			incompatibleProtocol.decode();
@@ -161,7 +166,7 @@ public class SessionPreparation {
 	 * Creates the session with the data set during login
 	 * 
 	 * @param channel
-	 *            - The channel the session will send data through
+	 *            The channel the session will send data through
 	 * @return RakNetServerSession
 	 */
 	public RakNetServerSession createSession(Channel channel) {

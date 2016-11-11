@@ -199,7 +199,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 * Sets the session's current state
 	 * 
 	 * @param state
-	 *            - The new state
+	 *            The new state
 	 */
 	public void setState(RakNetState state) {
 		this.state = state;
@@ -264,7 +264,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 * Handles a CustomPacket and updates the session's data accordingly
 	 * 
 	 * @param custom
-	 *            - The CustomPacket to handle
+	 *            The CustomPacket to handle
 	 */
 	public final void handleCustom0(CustomPacket custom) {
 		this.lastPacketReceiveTime = System.currentTimeMillis();
@@ -313,7 +313,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 * the session's data accordingly
 	 * 
 	 * @param encapsulated
-	 *            - The EncapsulatedPacket to handle
+	 *            The EncapsulatedPacket to handle
 	 * @throws SplitQueueOverloadException
 	 *             Thrown if the split queue has been overloaded
 	 * @throws InvalidChannelException
@@ -387,9 +387,9 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 * that are sent by the server and the client
 	 * 
 	 * @param packet
-	 *            - The packet to handle
+	 *            The packet to handle
 	 * @param channel
-	 *            - The channel the packet was sent on
+	 *            The channel the packet was sent on
 	 */
 	private final void handlePacket0(RakNetPacket packet, int channel) {
 		int id = packet.getId();
@@ -435,7 +435,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 * Handles an Acknowledge packet and updates the session's data accordingly
 	 * 
 	 * @param acknowledge
-	 *            - The acknowledge packet to handle
+	 *            The acknowledge packet to handle
 	 */
 	public final void handleAcknowledge(Acknowledge acknowledge) {
 		this.lastPacketReceiveTime = System.currentTimeMillis();
@@ -462,17 +462,26 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 * Handles an acknowledge receipt and notifies the API accordingly
 	 * 
 	 * @param acknowledgeReceipt
-	 *            - The acknowledge receipt to handle
+	 *            The acknowledge receipt to handle
 	 */
 	public final void handleAcknowledgeReceipt(AcknowledgeReceipt acknowledgeReceipt) {
 		this.lastPacketReceiveTime = System.currentTimeMillis();
-		if (acknowledgeReceipt.getType() == AcknowledgeReceiptType.ACKNOWLEDGED) {
-			for (EncapsulatedPacket encapsulated : requireAcknowledgeQueue.get(acknowledgeReceipt.record)) {
+		for (EncapsulatedPacket encapsulated : requireAcknowledgeQueue.get(acknowledgeReceipt.record)) {
+			// Do we have this packet registered?
+			if (encapsulated == null) {
+				continue; // We never sent a packet requiring an acknowledge
+							// receipt with this ID!
+			}
+
+			// Was the packet received or was it lost?
+			if (acknowledgeReceipt.getType() == AcknowledgeReceiptType.ACKNOWLEDGED) {
 				this.onAcknowledge(new Record(acknowledgeReceipt.record), encapsulated.reliability,
+						encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
+			} else if (acknowledgeReceipt.getType() == AcknowledgeReceiptType.LOSS) {
+				this.onNotAcknowledge(new Record(acknowledgeReceipt.record), encapsulated.reliability,
 						encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
 			}
 		}
-		// TODO: Add onNotAcknowledge method?
 	}
 
 	@Override
@@ -564,7 +573,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 * with sending ACK and NACK packets
 	 * 
 	 * @param forceSend
-	 *            - Determines whether or not the functions will be done
+	 *            Determines whether or not the functions will be done
 	 *            immediately or be handled based on the timer system
 	 */
 	private final void updateAcknowledge(boolean forceSend) {
@@ -677,23 +686,38 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 * packet
 	 * 
 	 * @param record
-	 *            - The record of the packet
+	 *            The record of the packet
 	 * @param reliability
-	 *            - The reliability of the acknowledged packet
+	 *            The reliability of the packet
 	 * @param channel
-	 *            - The channel of the acknowledged packet
+	 *            The channel of the packet
 	 * @param packet
-	 *            - The acknowledged packet
+	 *            The acknowledged packet
 	 */
 	public abstract void onAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet);
+
+	/**
+	 * This function is called when a not acknowledged receipt is received for
+	 * the packet
+	 * 
+	 * @param record
+	 *            The record of the packet
+	 * @param reliability
+	 *            The reliability of the packet
+	 * @param channel
+	 *            The channel of the packet
+	 * @param packet
+	 *            The not acknowledged packet
+	 */
+	public abstract void onNotAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet);
 
 	/**
 	 * This function is called when a packet is received by the session
 	 * 
 	 * @param packet
-	 *            - The packet to handle
+	 *            The packet to handle
 	 * @param channel
-	 *            - The packet the channel was sent on
+	 *            The packet the channel was sent on
 	 */
 	public abstract void handlePacket(RakNetPacket packet, int channel);
 

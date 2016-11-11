@@ -183,14 +183,20 @@ public class MessageIdentifier {
 	 * Returns the packet's name based on it's ID
 	 * 
 	 * @param id
-	 *            - The ID of the packet
+	 *            The ID of the packet
 	 * @return The packet's name based on it's ID
 	 */
 	public static String getName(int id) {
-		short packetId = 0;
 		for (Field field : MessageIdentifier.class.getDeclaredFields()) {
-			if (packetId++ == id) {
-				return field.getName();
+			if (field.getType().equals(short.class)) {
+				try {
+					short packetId = field.getShort(null);
+					if (packetId == id) {
+						return field.getName();
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			}
 		}
 		return null;
@@ -200,7 +206,7 @@ public class MessageIdentifier {
 	 * Returns the packet's ID based on it's name
 	 * 
 	 * @param name
-	 *            - The name of the packet
+	 *            The name of the packet
 	 * @return The packet's ID based on it's name
 	 */
 	public static int getId(String name) {

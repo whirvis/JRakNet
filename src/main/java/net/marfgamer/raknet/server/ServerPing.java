@@ -73,7 +73,7 @@ public class ServerPing {
 	 * Sets the identifier being sent back to the sender
 	 * 
 	 * @param identifier
-	 *            - The new identifier
+	 *            The new identifier
 	 */
 	public void setIdentifier(Identifier identifier) {
 		this.identifier = identifier;
