@@ -113,9 +113,9 @@ public class ChatClient implements RakNetClientListener {
 	 * Sends a chat message to the specified channel
 	 * 
 	 * @param message
-	 *            - The message to send
+	 *            The message to send
 	 * @param channel
-	 *            - The channel to send it to
+	 *            The channel to send it to
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel exceeds the limit
 	 */
@@ -134,7 +134,7 @@ public class ChatClient implements RakNetClientListener {
 	 * Requests to change the username mid-session
 	 * 
 	 * @param newUsername
-	 *            - The new username
+	 *            The new username
 	 * @throws ChatException
 	 *             Thrown if an error occurs during the request
 	 */
@@ -160,7 +160,7 @@ public class ChatClient implements RakNetClientListener {
 	 * Sets the current displayed channel
 	 * 
 	 * @param channel
-	 *            - The new channel to display
+	 *            The new channel to display
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel exceeds the limit
 	 * @throws ChatException
@@ -191,7 +191,7 @@ public class ChatClient implements RakNetClientListener {
 	 * Adds a channel to the client
 	 * 
 	 * @param channel
-	 *            - The new channel
+	 *            The new channel
 	 */
 	public void addChannel(ServerChannel channel) {
 		this.channels[channel.getChannel()] = channel;
@@ -202,7 +202,7 @@ public class ChatClient implements RakNetClientListener {
 	 * Removes a channel from the client
 	 * 
 	 * @param channel
-	 *            - The ID of the channel to remove
+	 *            The ID of the channel to remove
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel exceeds the limit
 	 */
@@ -228,7 +228,7 @@ public class ChatClient implements RakNetClientListener {
 	 * Connects to a chat server at the specified address
 	 * 
 	 * @param address
-	 *            - The address of the server
+	 *            The address of the server
 	 */
 	public void connect(String address) {
 		try {
@@ -247,7 +247,7 @@ public class ChatClient implements RakNetClientListener {
 	 * Disconnects from the server with the specified reason
 	 * 
 	 * @param reason
-	 *            - The reason the client disconnected from the server
+	 *            The reason the client disconnected from the server
 	 */
 	public void disconnect(String reason) {
 		client.disconnect(reason);

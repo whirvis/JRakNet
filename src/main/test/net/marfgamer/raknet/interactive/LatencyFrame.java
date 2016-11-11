@@ -80,7 +80,7 @@ public class LatencyFrame extends JFrame {
 	 * Updates the text in the JFrame according to the connecting clients
 	 * 
 	 * @param sessions
-	 *            - The sessions of the clients connected to the server
+	 *            The sessions of the clients connected to the server
 	 */
 	public void updatePaneText(RakNetClientSession[] sessions) {
 		StringBuilder discoverString = new StringBuilder();

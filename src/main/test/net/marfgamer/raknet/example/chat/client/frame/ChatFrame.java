@@ -182,7 +182,7 @@ public class ChatFrame extends JFrame {
 	 * Sets the displayed server name
 	 * 
 	 * @param serverName
-	 *            - The name to display
+	 *            The name to display
 	 */
 	public void setServerName(String serverName) {
 		txtServerName.setText(serverName);
@@ -192,7 +192,7 @@ public class ChatFrame extends JFrame {
 	 * Sets the displayed server message of the day
 	 * 
 	 * @param serverMotd
-	 *            - The message of the day to display
+	 *            The message of the day to display
 	 */
 	public void setServerMotd(String serverMotd) {
 		txtServerMotd.setText(serverMotd);
@@ -202,7 +202,7 @@ public class ChatFrame extends JFrame {
 	 * Sets the current displayed channels
 	 * 
 	 * @param channels
-	 *            - The channels to display
+	 *            The channels to display
 	 */
 	public void setChannels(ServerChannel[] channels) {
 		ArrayList<ServerChannel> cleaned = new ArrayList<ServerChannel>();
@@ -219,7 +219,7 @@ public class ChatFrame extends JFrame {
 	 * Sets the current channel
 	 * 
 	 * @param channel
-	 *            - The channel to display
+	 *            The channel to display
 	 */
 	public void setCurrentChannel(ServerChannel channel) {
 		txtPaneServerChannel.setText(channel.getChannelText());
@@ -229,7 +229,7 @@ public class ChatFrame extends JFrame {
 	 * Sets the displayed instructions
 	 * 
 	 * @param instructions
-	 *            - The instructions to display
+	 *            The instructions to display
 	 */
 	public void setInstructions(String instructions) {
 		txtpnInstructions.setText(instructions);
@@ -240,7 +240,7 @@ public class ChatFrame extends JFrame {
 	 * displayed client data
 	 * 
 	 * @param connected
-	 *            - Whether or not the client is connected
+	 *            Whether or not the client is connected
 	 */
 	public void toggleServerInteraction(boolean connected) {
 		this.connected = connected;
@@ -269,7 +269,7 @@ public class ChatFrame extends JFrame {
 	 * on the client
 	 * 
 	 * @param client
-	 *            - The client to assign the listeners to
+	 *            The client to assign the listeners to
 	 */
 	public void updateListeners(ChatClient client) {
 		btnConnectServer.addActionListener(new ConnectServerListener(this, client));
@@ -282,7 +282,7 @@ public class ChatFrame extends JFrame {
 	 * Displays a message
 	 * 
 	 * @param message
-	 *            - The message to display
+	 *            The message to display
 	 */
 	public void displayMessage(String message) {
 		JOptionPane.showMessageDialog(this, message);
@@ -292,9 +292,9 @@ public class ChatFrame extends JFrame {
 	 * Displays an error with the specified title and message
 	 * 
 	 * @param title
-	 *            - The title of the error
+	 *            The title of the error
 	 * @param error
-	 *            - The error message
+	 *            The error message
 	 */
 	public void displayError(String title, String error) {
 		JOptionPane.showMessageDialog(this, error, title, JOptionPane.ERROR_MESSAGE);
@@ -304,7 +304,7 @@ public class ChatFrame extends JFrame {
 	 * Displays an error using the specified exception
 	 * 
 	 * @param throwable
-	 *            - The caught exception
+	 *            The caught exception
 	 */
 	public void displayError(Throwable throwable) {
 		this.displayError("Error: " + throwable.getClass().getName(), throwable.getMessage());

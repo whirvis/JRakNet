@@ -31,6 +31,7 @@
 package net.marfgamer.raknet;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.socket.DatagramPacket;
 
 /**
@@ -61,6 +62,10 @@ public class RakNetPacket extends Packet {
 
 	public RakNetPacket(DatagramPacket datagram) {
 		this(datagram.content());
+	}
+
+	public RakNetPacket(byte[] data) {
+		this(Unpooled.copiedBuffer(data));
 	}
 
 	public RakNetPacket(Packet packet) {

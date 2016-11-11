@@ -98,11 +98,11 @@ public class ConnectedClient {
 	 * client to display the server data properly
 	 * 
 	 * @param name
-	 *            - The name of the server
+	 *            The name of the server
 	 * @param motd
-	 *            - The server message of the day
+	 *            The server message of the day
 	 * @param channels
-	 *            - The channels the client can use
+	 *            The channels the client can use
 	 */
 	public void acceptLogin(String name, String motd, ServerChannel[] channels) {
 		LoginAccepted accepted = new LoginAccepted();
@@ -118,7 +118,7 @@ public class ConnectedClient {
 	 * Tells the client its new username has been accepted
 	 * 
 	 * @param username
-	 *            - The client's new username
+	 *            The client's new username
 	 */
 	public void acceptUsernameUpdate(String username) {
 		this.username = username;
@@ -136,9 +136,9 @@ public class ConnectedClient {
 	 * Sends a chat message to the client on the specified channel
 	 * 
 	 * @param message
-	 *            - The message to send
+	 *            The message to send
 	 * @param channel
-	 *            - The channel to send the message on
+	 *            The channel to send the message on
 	 */
 	public void sendChatMessage(String message, int channel) {
 		if (channel >= RakNet.MAX_CHANNELS) {
@@ -155,9 +155,9 @@ public class ConnectedClient {
 	 * Notifies the client of a new channel
 	 * 
 	 * @param channel
-	 *            - The ID of the channel
+	 *            The ID of the channel
 	 * @param name
-	 *            - The name of the channel
+	 *            The name of the channel
 	 */
 	public void addChannel(int channel, String name) {
 		AddChannel addChannel = new AddChannel();
@@ -171,9 +171,9 @@ public class ConnectedClient {
 	 * Notifies the client of a channel rename
 	 * 
 	 * @param channel
-	 *            - The ID of the channel
+	 *            The ID of the channel
 	 * @param name
-	 *            - The new name of the channel
+	 *            The new name of the channel
 	 */
 	public void renameChannel(int channel, String name) {
 		RenameChannel renameChannel = new RenameChannel();
@@ -187,7 +187,7 @@ public class ConnectedClient {
 	 * Notifies the client of a removed channel
 	 * 
 	 * @param channel
-	 *            - The ID of the channel
+	 *            The ID of the channel
 	 */
 	public void removeChannel(int channel) {
 		RemoveChannel removeChannel = new RemoveChannel();
@@ -200,7 +200,7 @@ public class ConnectedClient {
 	 * Kicks the client
 	 * 
 	 * @param reason
-	 *            - The reason the client was kicked
+	 *            The reason the client was kicked
 	 */
 	public void kick(String reason) {
 		Kick kick = new Kick();

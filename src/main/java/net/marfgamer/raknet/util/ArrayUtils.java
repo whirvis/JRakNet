@@ -48,7 +48,7 @@ public abstract class ArrayUtils {
 	 *            The original array
 	 * @param size
 	 *            The max size for each array that has been split
-	 * @return byte[][]
+	 * @return The split byte array's no bigger than the maximum size
 	 */
 	public static final byte[][] splitArray(byte[] src, int size) {
 		if (size > 0) {
@@ -73,10 +73,10 @@ public abstract class ArrayUtils {
 	 * Returns all the integers in between each other as a normal subtraction
 	 * 
 	 * @param low
-	 *            the starting point
+	 *            The starting point
 	 * @param high
-	 *            the ending point
-	 * @return the numbers in between high and low
+	 *            The ending point
+	 * @return The numbers in between high and low
 	 */
 	public static final int[] subtractionArray(int low, int high) {
 		if (low > high) {

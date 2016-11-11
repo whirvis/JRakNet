@@ -49,11 +49,11 @@ public interface UnumRakNetPeer {
 	 * Sends a message with the specified reliability on the specified channel
 	 * 
 	 * @param reliability
-	 *            - The reliability of the packet
+	 *            The reliability of the packet
 	 * @param channel
-	 *            - The channel to send the packet on
+	 *            The channel to send the packet on
 	 * @param packet
-	 *            - The packet to send
+	 *            The packet to send
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel is higher than the maximum
 	 */
@@ -64,11 +64,11 @@ public interface UnumRakNetPeer {
 	 * specified channel
 	 * 
 	 * @param reliability
-	 *            - The reliability of the packet
+	 *            The reliability of the packet
 	 * @param channel
-	 *            - The channel to send the packet on
+	 *            The channel to send the packet on
 	 * @param packets
-	 *            - The packets to send
+	 *            The packets to send
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel is higher than the maximum
 	 */
@@ -83,9 +83,9 @@ public interface UnumRakNetPeer {
 	 * Sends a message with the specified reliability on the default channel
 	 * 
 	 * @param reliability
-	 *            - The reliability of the packet
+	 *            The reliability of the packet
 	 * @param packet
-	 *            - The packet to send
+	 *            The packet to send
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel is higher than the maximum
 	 */
@@ -98,9 +98,9 @@ public interface UnumRakNetPeer {
 	 * default channel
 	 * 
 	 * @param reliability
-	 *            - The reliability of the packet
+	 *            The reliability of the packet
 	 * @param packets
-	 *            - The packets to send
+	 *            The packets to send
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel is higher than the maximum
 	 */
@@ -115,11 +115,11 @@ public interface UnumRakNetPeer {
 	 * specified channel
 	 * 
 	 * @param reliability
-	 *            - The reliability of the packet
+	 *            The reliability of the packet
 	 * @param channel
-	 *            - The channel to send the packet on
+	 *            The channel to send the packet on
 	 * @param packetId
-	 *            - The packet ID to send
+	 *            The packet ID to send
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel is higher than the maximum
 	 */
@@ -132,11 +132,11 @@ public interface UnumRakNetPeer {
 	 * the specified channel
 	 * 
 	 * @param reliability
-	 *            - The reliability of the packet
+	 *            The reliability of the packet
 	 * @param channel
-	 *            - The channel to send the packet on
+	 *            The channel to send the packet on
 	 * @param packetIds
-	 *            - The packet IDs to send
+	 *            The packet IDs to send
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel is higher than the maximum
 	 */
@@ -151,9 +151,9 @@ public interface UnumRakNetPeer {
 	 * channel
 	 * 
 	 * @param reliability
-	 *            - The reliability of the packet
+	 *            The reliability of the packet
 	 * @param packetId
-	 *            - The packet ID to send
+	 *            The packet ID to send
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel is higher than the maximum
 	 */
@@ -166,9 +166,9 @@ public interface UnumRakNetPeer {
 	 * the default channel
 	 * 
 	 * @param reliability
-	 *            - The reliability of the packet
+	 *            The reliability of the packet
 	 * @param packetIds
-	 *            - The packet IDs to send
+	 *            The packet IDs to send
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel is higher than the maximum
 	 */
