@@ -156,6 +156,7 @@ public interface RakNetServerListener {
 	 *            The throwable exception that was caught
 	 */
 	public default void onHandlerException(InetSocketAddress address, Throwable throwable) {
+		throwable.printStackTrace();
 	}
 
 	/**
@@ -193,6 +194,7 @@ public interface RakNetServerListener {
 	 *            The throwable exception that was caught
 	 */
 	public default void onThreadException(Throwable throwable) {
+		throwable.printStackTrace();
 	}
 
 }
