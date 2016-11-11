@@ -50,13 +50,13 @@ public interface GeminusRakNetPeer {
 	 * to the session with the specified globally unique ID
 	 * 
 	 * @param guid
-	 *            - The globally unique ID of the session
+	 *            The globally unique ID of the session
 	 * @param reliability
-	 *            - The reliability of the packet
+	 *            The reliability of the packet
 	 * @param channel
-	 *            - The channel to send the packet on
+	 *            The channel to send the packet on
 	 * @param packet
-	 *            - The packet to send
+	 *            The packet to send
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel is higher than the maximum
 	 */
@@ -67,13 +67,13 @@ public interface GeminusRakNetPeer {
 	 * specified channel to the session with the specified globally unique ID
 	 * 
 	 * @param guid
-	 *            - The globally unique ID of the session
+	 *            The globally unique ID of the session
 	 * @param reliability
-	 *            - The reliability of the packet
+	 *            The reliability of the packet
 	 * @param channel
-	 *            - The channel to send the packet on
+	 *            The channel to send the packet on
 	 * @param packets
-	 *            - The packets to send
+	 *            The packets to send
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel is higher than the maximum
 	 */
@@ -89,11 +89,11 @@ public interface GeminusRakNetPeer {
 	 * the session with the specified globally unique ID
 	 * 
 	 * @param guid
-	 *            - The globally unique ID of the session
+	 *            The globally unique ID of the session
 	 * @param reliability
-	 *            - The reliability of the packet
+	 *            The reliability of the packet
 	 * @param packet
-	 *            - The packet to send
+	 *            The packet to send
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel is higher than the maximum
 	 */
@@ -106,11 +106,11 @@ public interface GeminusRakNetPeer {
 	 * default channel to the session with the specified globally unique ID
 	 * 
 	 * @param guid
-	 *            - The globally unique ID of the session
+	 *            The globally unique ID of the session
 	 * @param reliability
-	 *            - The reliability of the packet
+	 *            The reliability of the packet
 	 * @param packets
-	 *            - The packets to send
+	 *            The packets to send
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel is higher than the maximum
 	 */
@@ -126,13 +126,13 @@ public interface GeminusRakNetPeer {
 	 * specified channel to the session with the specified globally unique ID
 	 * 
 	 * @param guid
-	 *            - The globally unique ID of the session
+	 *            The globally unique ID of the session
 	 * @param reliability
-	 *            - The reliability of the packet
+	 *            The reliability of the packet
 	 * @param channel
-	 *            - The channel to send the packet on
+	 *            The channel to send the packet on
 	 * @param packetId
-	 *            - The packet ID to send
+	 *            The packet ID to send
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel is higher than the maximum
 	 */
@@ -146,13 +146,13 @@ public interface GeminusRakNetPeer {
 	 * ID
 	 * 
 	 * @param guid
-	 *            - The globally unique ID of the session
+	 *            The globally unique ID of the session
 	 * @param reliability
-	 *            - The reliability of the packet
+	 *            The reliability of the packet
 	 * @param channel
-	 *            - The channel to send the packet on
+	 *            The channel to send the packet on
 	 * @param packetIds
-	 *            - The packet IDs to send
+	 *            The packet IDs to send
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel is higher than the maximum
 	 */
@@ -167,11 +167,11 @@ public interface GeminusRakNetPeer {
 	 * channel to the session with the specified globally unique ID
 	 * 
 	 * @param guid
-	 *            - The globally unique ID of the session
+	 *            The globally unique ID of the session
 	 * @param reliability
-	 *            - The reliability of the packet
+	 *            The reliability of the packet
 	 * @param packetId
-	 *            - The packet ID to send
+	 *            The packet ID to send
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel is higher than the maximum
 	 */
@@ -184,11 +184,11 @@ public interface GeminusRakNetPeer {
 	 * the default channel to the session with the specified globally unique ID
 	 * 
 	 * @param guid
-	 *            - The globally unique ID of the session
+	 *            The globally unique ID of the session
 	 * @param reliability
-	 *            - The reliability of the packet
+	 *            The reliability of the packet
 	 * @param packetIds
-	 *            - The packet IDs to send
+	 *            The packet IDs to send
 	 * @throws InvalidChannelException
 	 *             Thrown if the channel is higher than the maximum
 	 */

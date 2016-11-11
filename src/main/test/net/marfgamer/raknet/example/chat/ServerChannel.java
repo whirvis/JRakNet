@@ -77,7 +77,7 @@ public class ServerChannel {
 	 * Sets the name of the channel
 	 * 
 	 * @param name
-	 *            - The new channel name
+	 *            The new channel name
 	 */
 	public void setName(String name) {
 		this.name = name;
@@ -87,7 +87,7 @@ public class ServerChannel {
 	 * Adds a chat message to the server channel
 	 * 
 	 * @param message
-	 *            - The message to add
+	 *            The message to add
 	 */
 	public void addChatMessage(String message) {
 		channelText.append(message + "\n");

@@ -88,7 +88,7 @@ public class UtilityTest {
 	 * Converts an MCPE identifier to a formatted String
 	 * 
 	 * @param identifier
-	 *            - The identifier to format
+	 *            The identifier to format
 	 * @return A formated MCPE identifier
 	 */
 	public static String formatMCPEIdentifier(MCPEIdentifier identifier) {

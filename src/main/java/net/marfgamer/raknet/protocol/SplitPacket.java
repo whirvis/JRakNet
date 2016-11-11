@@ -65,7 +65,7 @@ public class SplitPacket {
 	 * specified <code>EncapsulatedPacket</code> belongs to this split packet
 	 * 
 	 * @param encapsulated
-	 *            - The <code>EncapsulatedPacket</code> being used to update the
+	 *            The <code>EncapsulatedPacket</code> being used to update the
 	 *            data
 	 * @return The packet if finished, null if data is still missing
 	 */

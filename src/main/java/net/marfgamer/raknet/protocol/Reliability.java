@@ -113,7 +113,7 @@ public enum Reliability {
 	 * Returns the reliability based on it's ID
 	 * 
 	 * @param reliability
-	 *            - The ID of the reliability to lookup
+	 *            The ID of the reliability to lookup
 	 * @return The reliability based on it's ID
 	 */
 	public static Reliability lookup(int reliability) {

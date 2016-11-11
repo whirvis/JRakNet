@@ -49,6 +49,7 @@ import net.marfgamer.raknet.RakNetPacket;
 import net.marfgamer.raknet.exception.NoListenerException;
 import net.marfgamer.raknet.identifier.Identifier;
 import net.marfgamer.raknet.protocol.Reliability;
+import net.marfgamer.raknet.protocol.login.ConnectionBanned;
 import net.marfgamer.raknet.protocol.login.IncompatibleProtocol;
 import net.marfgamer.raknet.protocol.login.OpenConnectionRequestOne;
 import net.marfgamer.raknet.protocol.login.OpenConnectionRequestTwo;
@@ -182,7 +183,7 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * Sets the server's identifier used for discovery
 	 * 
 	 * @param identifier
-	 *            - The new identifier
+	 *            The new identifier
 	 * @return The server
 	 */
 	public RakNetServer setIdentifier(Identifier identifier) {
@@ -203,7 +204,7 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * Sets the server's listener
 	 * 
 	 * @param listener
-	 *            - The new listener
+	 *            The new listener
 	 * @return The server
 	 */
 	public RakNetServer setListener(RakNetServerListener listener) {
@@ -237,8 +238,8 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * address
 	 * 
 	 * @param address
-	 *            - The address to check
-	 * @return - Whether or not the server has a session with the specified
+	 *            The address to check
+	 * @return Whether or not the server has a session with the specified
 	 *         address
 	 */
 	public boolean hasSession(InetSocketAddress address) {
@@ -250,8 +251,8 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * globally unique ID
 	 * 
 	 * @param guid
-	 *            - The globally unique ID to check
-	 * @return - Whether or not the server has a session with the specified
+	 *            The globally unique ID to check
+	 * @return Whether or not the server has a session with the specified
 	 *         Globally Unique ID
 	 */
 	public boolean hasSession(long guid) {
@@ -267,7 +268,7 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * Returns a session connected to the server by their address
 	 * 
 	 * @param address
-	 *            - The address of the session
+	 *            The address of the session
 	 * @return A session connected to the server by their address
 	 */
 	public RakNetClientSession getSession(InetSocketAddress address) {
@@ -278,7 +279,7 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * Returns a session connected to the server by their Globally Unique ID
 	 * 
 	 * @param guid
-	 *            - The Globally Unique ID of the session
+	 *            The Globally Unique ID of the session
 	 * @return A session connected to the server by their address
 	 */
 	public RakNetClientSession getSession(long guid) {
@@ -301,9 +302,9 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * Removes a session from the server with the specified reason
 	 * 
 	 * @param address
-	 *            - The address of the session
+	 *            The address of the session
 	 * @param reason
-	 *            - The reason the session was removed
+	 *            The reason the session was removed
 	 */
 	public void removeSession(InetSocketAddress address, String reason) {
 		if (sessions.containsKey(address)) {
@@ -319,7 +320,7 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * Removes a session from the server
 	 * 
 	 * @param address
-	 *            - The address of the session
+	 *            The address of the session
 	 */
 	public void removeSession(InetSocketAddress address) {
 		this.removeSession(address, "Disconnected from server");
@@ -329,9 +330,9 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * Removes a session from the server with the specified reason
 	 * 
 	 * @param session
-	 *            - The session to remove
+	 *            The session to remove
 	 * @param reason
-	 *            - The reason the session was removed
+	 *            The reason the session was removed
 	 */
 	public void removeSession(RakNetClientSession session, String reason) {
 		this.removeSession(session.getAddress(), reason);
@@ -341,7 +342,7 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * Removes a session from the server
 	 * 
 	 * @param session
-	 *            - The session to remove
+	 *            The session to remove
 	 */
 	public void removeSession(RakNetClientSession session) {
 		this.removeSession(session, "Disconnected from server");
@@ -352,11 +353,11 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * the specified reason for the specified amount of time
 	 * 
 	 * @param address
-	 *            - The address to block
+	 *            The address to block
 	 * @param reason
-	 *            - The reason the address was blocked
+	 *            The reason the address was blocked
 	 * @param time
-	 *            - How long the address will blocked in milliseconds
+	 *            How long the address will blocked in milliseconds
 	 */
 	public void blockAddress(InetAddress address, String reason, long time) {
 		for (InetSocketAddress clientAddress : sessions.keySet()) {
@@ -372,9 +373,9 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * specified amount of time
 	 * 
 	 * @param address
-	 *            - The address to block
+	 *            The address to block
 	 * @param time
-	 *            - How long the address will blocked in milliseconds
+	 *            How long the address will blocked in milliseconds
 	 */
 	public void blockAddress(InetAddress address, long time) {
 		this.blockAddress(address, "Blocked", time);
@@ -384,7 +385,7 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * Unblocks the specified address
 	 * 
 	 * @param address
-	 *            - The address to unblock
+	 *            The address to unblock
 	 */
 	public void unblockAddress(InetAddress address) {
 		handler.unblockAddress(address);
@@ -395,11 +396,11 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * the specified reason for the specified amount of time
 	 * 
 	 * @param address
-	 *            - The address to block
+	 *            The address to block
 	 * @param reason
-	 *            - The reason the address was blocked
+	 *            The reason the address was blocked
 	 * @param time
-	 *            - How long the address will blocked in milliseconds
+	 *            How long the address will blocked in milliseconds
 	 */
 	public void blockAddress(InetSocketAddress address, String reason, long time) {
 		this.blockAddress(address.getAddress(), reason, time);
@@ -410,9 +411,9 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * specified amount of time
 	 * 
 	 * @param address
-	 *            - The address to block
+	 *            The address to block
 	 * @param time
-	 *            - How long the address will blocked in milliseconds
+	 *            How long the address will blocked in milliseconds
 	 */
 	public void blockAddress(InetSocketAddress address, long time) {
 		this.blockAddress(address, "Blocked", time);
@@ -422,7 +423,7 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * Unblocks the specified address
 	 * 
 	 * @param address
-	 *            - The address to unblock
+	 *            The address to unblock
 	 */
 	public void unblockAddress(InetSocketAddress address) {
 		this.unblockAddress(address.getAddress());
@@ -432,7 +433,7 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * Returns whether or not the specified address is blocked
 	 * 
 	 * @param address
-	 *            - The address to check
+	 *            The address to check
 	 * @return Whether or not the specified address is blocked
 	 */
 	public boolean addressBlocked(InetAddress address) {
@@ -443,9 +444,9 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * Called whenever the handler catches an exception in Netty
 	 * 
 	 * @param address
-	 *            - The address that caused the exception
+	 *            The address that caused the exception
 	 * @param cause
-	 *            - The exception caught by the handler
+	 *            The exception caught by the handler
 	 */
 	protected void handleHandlerException(InetSocketAddress address, Throwable cause) {
 		if (this.hasSession(address)) {
@@ -458,9 +459,9 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * Handles a packet received by the handler
 	 * 
 	 * @param packet
-	 *            - The packet to handle
+	 *            The packet to handle
 	 * @param sender
-	 *            - The address of the sender
+	 *            The address of the sender
 	 */
 	protected void handleMessage(RakNetPacket packet, InetSocketAddress sender) {
 		short packetId = packet.getId();
@@ -582,7 +583,7 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * Validates the sender during login to make sure there are no problems
 	 * 
 	 * @param sender
-	 *            - The address of the packet sender
+	 *            The address of the packet sender
 	 * @return The packet to respond with if there was an error
 	 */
 	private RakNetPacket validateSender(InetSocketAddress sender) {
@@ -594,7 +595,10 @@ public class RakNetServer implements GeminusRakNetPeer {
 			return new RakNetPacket(ID_NO_FREE_INCOMING_CONNECTIONS);
 		} else if (this.addressBlocked(sender.getAddress())) {
 			// Address is blocked!
-			return new RakNetPacket(ID_CONNECTION_BANNED);
+			ConnectionBanned connectionBanned = new ConnectionBanned();
+			connectionBanned.serverGuid = this.guid;
+			connectionBanned.encode();
+			return connectionBanned;
 		}
 
 		// There were no errors
@@ -605,9 +609,9 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * Sends a raw message to the specified address
 	 * 
 	 * @param packet
-	 *            - The packet to send
+	 *            The packet to send
 	 * @param address
-	 *            - The address to send the packet to
+	 *            The address to send the packet to
 	 */
 	private void sendRawMessage(Packet packet, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
@@ -617,9 +621,9 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * Sends a single ID to the specified address
 	 * 
 	 * @param packetId
-	 *            - The ID of the packet to send
+	 *            The ID of the packet to send
 	 * @param address
-	 *            - The address to send the packet to
+	 *            The address to send the packet to
 	 */
 	private void sendRawMessage(int packetId, InetSocketAddress address) {
 		this.sendRawMessage(new RakNetPacket(packetId), address);

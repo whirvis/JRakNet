@@ -55,7 +55,7 @@ public class DiscoveryThread extends Thread {
 	 * Adds a client to the discovery system so it can discover servers
 	 * 
 	 * @param client
-	 *            - The client enabling its discovery system
+	 *            The client enabling its discovery system
 	 */
 	public void addClient(RakNetClient client) {
 		if (clients.contains(client)) {
@@ -70,7 +70,7 @@ public class DiscoveryThread extends Thread {
 	 * Note: This method is normally called when a client is garbage collected
 	 * 
 	 * @param client
-	 *            - The client disabling its discovery system
+	 *            The client disabling its discovery system
 	 */
 	public void removeClient(RakNetClient client) {
 		clients.remove(client);

@@ -40,6 +40,8 @@ import java.util.Arrays;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.socket.DatagramPacket;
+import net.marfgamer.raknet.stream.PacketDataInput;
+import net.marfgamer.raknet.stream.PacketDataOutput;
 
 /**
  * Used to read and write data with ease
@@ -51,9 +53,13 @@ public class Packet {
 	public static final int ADDRESS_VERSION = 0x04;
 
 	private final ByteBuf buffer;
+	private final PacketDataInput input;
+	private final PacketDataOutput output;
 
 	public Packet(ByteBuf buffer) {
 		this.buffer = buffer;
+		this.input = new PacketDataInput(this);
+		this.output = new PacketDataOutput(this);
 	}
 
 	public Packet(DatagramPacket datagram) {
@@ -76,7 +82,7 @@ public class Packet {
 	 * Reads data into the specified byte array
 	 * 
 	 * @param dest
-	 *            - The bytes to read the data into
+	 *            The bytes to read the data into
 	 */
 	public void read(byte[] dest) {
 		for (int i = 0; i < dest.length; i++) {
@@ -88,7 +94,7 @@ public class Packet {
 	 * Returns a byte array of the read data with the specified size
 	 * 
 	 * @param length
-	 *            - The amount of bytes to read
+	 *            The amount of bytes to read
 	 * @return A byte array of the read data with the specified size
 	 */
 	public byte[] read(int length) {
@@ -305,7 +311,7 @@ public class Packet {
 	 * Writes the specified byte array to the packet
 	 * 
 	 * @param data
-	 *            - The data to write
+	 *            The data to write
 	 * @return The packet
 	 */
 	public Packet write(byte[] data) {
@@ -319,7 +325,7 @@ public class Packet {
 	 * Writes the specified amount of null (0x00) bytes to the packet
 	 * 
 	 * @param length
-	 *            - The amount of bytes to write
+	 *            The amount of bytes to write
 	 * @return The packet
 	 */
 	public Packet pad(int length) {
@@ -333,7 +339,7 @@ public class Packet {
 	 * Writes a byte to the packet
 	 * 
 	 * @param b
-	 *            - The byte
+	 *            The byte
 	 * @return The packet
 	 */
 	public Packet writeByte(int b) {
@@ -345,7 +351,7 @@ public class Packet {
 	 * Writes an unsigned by to the packet
 	 * 
 	 * @param b
-	 *            - The unsigned byte
+	 *            The unsigned byte
 	 * @return The packet
 	 */
 	public Packet writeUByte(int b) {
@@ -357,7 +363,7 @@ public class Packet {
 	 * Writes a boolean value to the packet
 	 * 
 	 * @param b
-	 *            - The boolean
+	 *            The boolean
 	 * @return The packet
 	 */
 	public Packet writeBoolean(boolean b) {
@@ -369,7 +375,7 @@ public class Packet {
 	 * Writes a short to the packet
 	 * 
 	 * @param s
-	 *            - The short
+	 *            The short
 	 * @return The packet
 	 */
 	public Packet writeShort(int s) {
@@ -381,7 +387,7 @@ public class Packet {
 	 * Writes a little endian short to the packet
 	 * 
 	 * @param s
-	 *            - The short
+	 *            The short
 	 * @return The packet
 	 */
 	public Packet writeShortLE(int s) {
@@ -393,7 +399,7 @@ public class Packet {
 	 * Writes a unsigned short to the packet
 	 * 
 	 * @param s
-	 *            - The short
+	 *            The short
 	 * @return The packet
 	 */
 	public Packet writeUShort(int s) {
@@ -405,7 +411,7 @@ public class Packet {
 	 * Writes an unsigned little endian short to the packet
 	 * 
 	 * @param s
-	 *            - The short
+	 *            The short
 	 * @return The packet
 	 */
 	public Packet writeUShortLE(int s) {
@@ -417,7 +423,7 @@ public class Packet {
 	 * Writes a little endian triad to the packet
 	 * 
 	 * @param t
-	 *            - The triad
+	 *            The triad
 	 * @return The packet
 	 */
 	public Packet writeTriadLE(int t) {
@@ -431,7 +437,7 @@ public class Packet {
 	 * Writes an integer to the packet
 	 * 
 	 * @param i
-	 *            - The integer
+	 *            The integer
 	 * @return The packet
 	 */
 	public Packet writeInt(int i) {
@@ -443,7 +449,7 @@ public class Packet {
 	 * Writes an unsigned integer to the packet
 	 * 
 	 * @param i
-	 *            - The integer
+	 *            The integer
 	 * @return The packet
 	 */
 	public Packet writeUInt(long i) {
@@ -455,7 +461,7 @@ public class Packet {
 	 * Writes a little endian integer to the packet
 	 * 
 	 * @param i
-	 *            - The integer
+	 *            The integer
 	 * @return The packet
 	 */
 	public Packet writeIntLE(int i) {
@@ -467,7 +473,7 @@ public class Packet {
 	 * Writes an unsigned little endian integer to the packet
 	 * 
 	 * @param i
-	 *            - The integer
+	 *            The integer
 	 * @return The packet
 	 */
 	public Packet writeUIntLE(long i) {
@@ -479,7 +485,7 @@ public class Packet {
 	 * Writes a long to the packet
 	 * 
 	 * @param l
-	 *            - The long
+	 *            The long
 	 * @return The packet
 	 */
 	public Packet writeLong(long l) {
@@ -491,7 +497,7 @@ public class Packet {
 	 * Writes a little endian long to the packet
 	 * 
 	 * @param l
-	 *            - The long
+	 *            The long
 	 * @return The packet
 	 */
 	public Packet writeLongLE(long l) {
@@ -503,7 +509,7 @@ public class Packet {
 	 * Writes a float to the packet
 	 * 
 	 * @param f
-	 *            - The float
+	 *            The float
 	 * @return The packet
 	 */
 	public Packet writeFloat(double f) {
@@ -515,7 +521,7 @@ public class Packet {
 	 * Writes a double to the packet
 	 * 
 	 * @param d
-	 *            - The double
+	 *            The double
 	 * @return The packet
 	 */
 	public Packet writeDouble(double d) {
@@ -537,7 +543,7 @@ public class Packet {
 	 * Writes a UTF-8 String prefixed by an unsigned short to the packet
 	 * 
 	 * @param s
-	 *            - The String
+	 *            The String
 	 * @return The packet
 	 */
 	public Packet writeString(String s) {
@@ -552,7 +558,7 @@ public class Packet {
 	 * packet
 	 * 
 	 * @param s
-	 *            - The String
+	 *            The String
 	 * @return The packet
 	 */
 	public Packet writeStringLE(String s) {
@@ -566,7 +572,7 @@ public class Packet {
 	 * Writes an IPv4 address to the packet (IPv6 is not yet supported)
 	 * 
 	 * @param address
-	 *            - The address
+	 *            The address
 	 * @return The packet
 	 */
 	public Packet writeAddress(InetSocketAddress address) {
@@ -587,9 +593,9 @@ public class Packet {
 	 * Writes an IPv4 address to the packet (IPv6 is not yet supported)
 	 * 
 	 * @param address
-	 *            - The address
+	 *            The address
 	 * @param port
-	 *            - The port
+	 *            The port
 	 */
 	public void writeAddress(InetAddress address, int port) {
 		this.writeAddress(new InetSocketAddress(address, port));
@@ -599,9 +605,9 @@ public class Packet {
 	 * Writes an IPv4 address to the packet (IPv6 is not yet supported)
 	 * 
 	 * @param address
-	 *            - The address
+	 *            The address
 	 * @param port
-	 *            - The port
+	 *            The port
 	 */
 	public void writeAddress(String address, int port) {
 		this.writeAddress(new InetSocketAddress(address, port));
@@ -632,6 +638,24 @@ public class Packet {
 	 */
 	public ByteBuf buffer() {
 		return this.buffer.retain();
+	}
+
+	/**
+	 * Returns the packet's input
+	 * 
+	 * @return The packet's input
+	 */
+	public PacketDataInput getDataInput() {
+		return this.input;
+	}
+
+	/**
+	 * Returns the packet's output
+	 * 
+	 * @return The packet's output
+	 */
+	public PacketDataOutput getDataOutput() {
+		return this.output;
 	}
 
 	/**

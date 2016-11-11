@@ -21,5 +21,6 @@ net.marfgamer.raknet.protocol.session
 net.marfgamer.raknet.protocol.status
 net.marfgamer.raknet.server
 net.marfgamer.raknet.session
+net.marfgamer.raknet.stream
 net.marfgamer.raknet.util
 net.marfgamer.raknet.util.map

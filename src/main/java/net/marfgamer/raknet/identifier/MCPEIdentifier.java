@@ -50,7 +50,7 @@ public class MCPEIdentifier extends Identifier {
 	 * Returns whether or not the specified version tag is valid
 	 * 
 	 * @param versionTag
-	 *            - The version tag to validate
+	 *            The version tag to validate
 	 * @return Whether or not the version tag is valid
 	 */
 	private static boolean verifyVersionTag(String versionTag) {
@@ -76,7 +76,7 @@ public class MCPEIdentifier extends Identifier {
 	 * Edition identifier
 	 * 
 	 * @param identifier
-	 *            - The identifier to check
+	 *            The identifier to check
 	 * @return Whether or not the specified identifier is a Miencraft: Pocket
 	 *         Edition identifier
 	 */
@@ -224,7 +224,7 @@ public class MCPEIdentifier extends Identifier {
 	 * Sets the server name
 	 * 
 	 * @param serverName
-	 *            - The new server name
+	 *            The new server name
 	 */
 	public void setServerName(String serverName) {
 		this.serverName = serverName;
@@ -234,7 +234,7 @@ public class MCPEIdentifier extends Identifier {
 	 * Sets the server protocol
 	 * 
 	 * @param serverProtocol
-	 *            - The new server protocol
+	 *            The new server protocol
 	 */
 	public void setServerProtocol(int serverProtocol) {
 		this.serverProtocol = serverProtocol;
@@ -244,7 +244,7 @@ public class MCPEIdentifier extends Identifier {
 	 * Sets the version tag
 	 * 
 	 * @param versionTag
-	 *            - The new version tag
+	 *            The new version tag
 	 * @return Whether or not the version tag was set
 	 */
 	public boolean setVersionTag(String versionTag) {
@@ -259,7 +259,7 @@ public class MCPEIdentifier extends Identifier {
 	 * Sets the online player count
 	 * 
 	 * @param onlinePlayerCount
-	 *            - The new online player count
+	 *            The new online player count
 	 */
 	public void setOnlinePlayerCount(int onlinePlayerCount) {
 		this.onlinePlayerCount = onlinePlayerCount;
@@ -269,7 +269,7 @@ public class MCPEIdentifier extends Identifier {
 	 * Sets the max player count
 	 * 
 	 * @param maxPlayerCount
-	 *            - The new max player count
+	 *            The new max player count
 	 */
 	public void setMaxPlayerCount(int maxPlayerCount) {
 		this.maxPlayerCount = maxPlayerCount;
@@ -279,7 +279,7 @@ public class MCPEIdentifier extends Identifier {
 	 * Sets the timestamp
 	 * 
 	 * @param timestamp
-	 *            - The new timestamp
+	 *            The new timestamp
 	 */
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
@@ -289,7 +289,7 @@ public class MCPEIdentifier extends Identifier {
 	 * Sets the world name
 	 * 
 	 * @param worldName
-	 *            - The new world name
+	 *            The new world name
 	 */
 	public void setWorldName(String worldName) {
 		this.worldName = worldName;
@@ -299,7 +299,7 @@ public class MCPEIdentifier extends Identifier {
 	 * Sets the gamemode
 	 * 
 	 * @param gamemode
-	 *            - The new gamemode
+	 *            The new gamemode
 	 */
 	public void setGamemode(String gamemode) {
 		this.gamemode = gamemode;
@@ -309,7 +309,7 @@ public class MCPEIdentifier extends Identifier {
 	 * Enables/Disables the legacy builder
 	 * 
 	 * @param legacy
-	 *            - The legacy toggle
+	 *            The legacy toggle
 	 */
 	public void setLegacy(boolean legacy) {
 		this.legacy = legacy;

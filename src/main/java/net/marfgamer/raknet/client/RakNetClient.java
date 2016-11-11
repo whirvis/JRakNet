@@ -175,7 +175,7 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * Sets the client's discovery port
 	 * 
 	 * @param discoveryPort
-	 *            - The new discovery port
+	 *            The new discovery port
 	 * @return The client
 	 */
 	public RakNetClient setDiscoveryPort(int discoveryPort) {
@@ -196,7 +196,7 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * Sets the client's discovery mode
 	 * 
 	 * @param mode
-	 *            - How the client will discover servers on the local network
+	 *            How the client will discover servers on the local network
 	 * @return The client
 	 */
 	public RakNetClient setDiscoveryMode(DiscoveryMode mode) {
@@ -234,7 +234,7 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * Sets the client's listener
 	 * 
 	 * @param listener
-	 *            - The client's new listener
+	 *            The client's new listener
 	 * @return The client
 	 */
 	public RakNetClient setListener(RakNetClientListener listener) {
@@ -261,9 +261,9 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * Called whenever the handler catches an exception in Netty
 	 * 
 	 * @param address
-	 *            - The address that caused the exception
+	 *            The address that caused the exception
 	 * @param cause
-	 *            - The exception caught by the handler
+	 *            The exception caught by the handler
 	 */
 	protected void handleHandlerException(InetSocketAddress address, Throwable cause) {
 		listener.onHandlerException(address, cause);
@@ -284,9 +284,9 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * Handles a packet received by the handler
 	 * 
 	 * @param packet
-	 *            - The packet to handle
+	 *            The packet to handle
 	 * @param sender
-	 *            - The address of the sender
+	 *            The address of the sender
 	 */
 	public void handleMessage(RakNetPacket packet, InetSocketAddress sender) {
 		short packetId = packet.getId();
@@ -330,9 +330,9 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * Sends a raw packet to the specified address
 	 * 
 	 * @param packet
-	 *            - The packet to send
+	 *            The packet to send
 	 * @param address
-	 *            - The address to send the packet to
+	 *            The address to send the packet to
 	 */
 	private void sendRawMessage(RakNetPacket packet, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
@@ -342,9 +342,9 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * Sends a single ID to the specified address
 	 * 
 	 * @param packetId
-	 *            - The ID of the packet to send
+	 *            The ID of the packet to send
 	 * @param address
-	 *            - The address to send the packet to
+	 *            The address to send the packet to
 	 */
 	@SuppressWarnings("unused") // Currently not needed by the client
 	private void sendRawMessage(int packetId, InetSocketAddress address) {
@@ -393,9 +393,9 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * data accordingly
 	 * 
 	 * @param sender
-	 *            - The sender of the pong packet
+	 *            The sender of the pong packet
 	 * @param pong
-	 *            - The pong packet to handle
+	 *            The pong packet to handle
 	 */
 	public void updateDiscoveryData(InetSocketAddress sender, UnconnectedPong pong) {
 		if (!discovered.containsKey(sender)) {
@@ -421,7 +421,7 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * Connects the client to a server with the specified address
 	 * 
 	 * @param address
-	 *            - The address of the server to connect to
+	 *            The address of the server to connect to
 	 * @throws RakNetException
 	 *             Thrown if an error occurs during connection or login
 	 */
@@ -508,9 +508,9 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * Connects the client to a server with the specified address
 	 * 
 	 * @param address
-	 *            - The address of the server to connect to
+	 *            The address of the server to connect to
 	 * @param port
-	 *            - The port of the server to connect to
+	 *            The port of the server to connect to
 	 * @throws RakNetException
 	 *             Thrown if an error occurs during connection or login
 	 */
@@ -522,9 +522,9 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * Connects the client to a server with the specified address
 	 * 
 	 * @param address
-	 *            - The address of the server to connect to
+	 *            The address of the server to connect to
 	 * @param port
-	 *            - The port of the server to connect to
+	 *            The port of the server to connect to
 	 * @throws RakNetException
 	 *             Thrown if an error occurs during connection or login
 	 * @throws UnknownHostException
@@ -538,7 +538,7 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * Connects the the client to the specified discovered server
 	 * 
 	 * @param server
-	 *            - The discovered server to connect to
+	 *            The discovered server to connect to
 	 * @throws RakNetException
 	 *             Thrown if an error occurs during connection or login
 	 */
@@ -551,7 +551,7 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * Thread
 	 * 
 	 * @param address
-	 *            - The address of the server to connect to
+	 *            The address of the server to connect to
 	 * @return The Thread the client is running on
 	 */
 	public Thread connectThreaded(InetSocketAddress address) {
@@ -580,9 +580,9 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * Thread
 	 * 
 	 * @param address
-	 *            - The address of the server to connect to
+	 *            The address of the server to connect to
 	 * @param port
-	 *            - The port of the server to connect to
+	 *            The port of the server to connect to
 	 * @return The Thread the client is running on
 	 */
 	public Thread connectThreaded(InetAddress address, int port) {
@@ -594,9 +594,9 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * Thread
 	 * 
 	 * @param address
-	 *            - The address of the server to connect to
+	 *            The address of the server to connect to
 	 * @param port
-	 *            - The port of the server to connect to
+	 *            The port of the server to connect to
 	 * @throws UnknownHostException
 	 *             Thrown if the specified address is an unknown host
 	 * @return The Thread the client is running on
@@ -610,7 +610,7 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * Thread
 	 * 
 	 * @param server
-	 *            - The discovered server to connect to
+	 *            The discovered server to connect to
 	 * @return The Thread the client is running on
 	 */
 	public Thread connectThreaded(DiscoveredServer server) {
@@ -643,7 +643,7 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * Disconnects the client from the server if it is connected to one
 	 * 
 	 * @param reason
-	 *            - The reason the client disconnected from the server
+	 *            The reason the client disconnected from the server
 	 */
 	public void disconnect(String reason) {
 		if (session != null) {
@@ -674,7 +674,7 @@ public class RakNetClient implements UnumRakNetPeer {
 	 * is called the client can no longer connect to servers
 	 * 
 	 * @param reason
-	 *            - The reason the client shutdown
+	 *            The reason the client shutdown
 	 */
 	public void disconnectAndShutdown(String reason) {
 		this.disconnect(reason);

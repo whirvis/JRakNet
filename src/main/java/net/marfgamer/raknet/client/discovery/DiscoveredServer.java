@@ -75,7 +75,7 @@ public class DiscoveredServer {
 	 * Updates the last time the server sent a response back
 	 * 
 	 * @param discoveryTimestamp
-	 *            - The new discovery timestamp
+	 *            The new discovery timestamp
 	 */
 	public void setDiscoveryTimestamp(long discoveryTimestamp) {
 		this.discoveryTimestamp = discoveryTimestamp;
@@ -94,7 +94,7 @@ public class DiscoveredServer {
 	 * Updates the identifier sent in the response
 	 * 
 	 * @param identifier
-	 *            - The new identifier sent in the response
+	 *            The new identifier sent in the response
 	 */
 	public void setIdentifier(Identifier identifier) {
 		this.identifier = identifier;

@@ -46,6 +46,11 @@ public enum Warning {
 		this.message = message;
 	}
 
+	/**
+	 * Returns the warning message
+	 * 
+	 * @return The warning message
+	 */
 	public String getMessage() {
 		return this.message;
 	}
