@@ -39,9 +39,7 @@ The first release of JRakNet v2
 #JRakNet v2.1.0
 A minor tweak update that will probably save some memory in the JVM and clean up the javadocs.
 
-[ ] Session
-	[ ] Bump nextSequenceNumber even if the packet is a lost packet that was resent
-	[ ] When a lost packet is resent, remove it's record and set it to the bumped one
+[x] Session
 	[x] Add onNotAcknowledge method
 [x] Protocol
 	[x] Fix ConnectionBanned (0x17) packet by adding server GUID (long) to it
