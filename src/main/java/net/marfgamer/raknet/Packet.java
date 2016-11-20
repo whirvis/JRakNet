@@ -50,7 +50,7 @@ import net.marfgamer.raknet.stream.PacketDataOutput;
  */
 public class Packet {
 
-	public static final int ADDRESS_VERSION = 0x04;
+	public static final int ADDRESS_VERSION_IPV4 = 0x04;
 
 	private final ByteBuf buffer;
 	private final PacketDataInput input;
@@ -289,7 +289,7 @@ public class Packet {
 	 */
 	public InetSocketAddress readAddress() {
 		short version = this.readUByte();
-		if (version == ADDRESS_VERSION) {
+		if (version == ADDRESS_VERSION_IPV4) {
 			byte[] addressBytes = new byte[4];
 			for (int i = 0; i < addressBytes.length; i++) {
 				addressBytes[i] = (byte) (~this.readByte() & 0xFF);
@@ -577,9 +577,9 @@ public class Packet {
 	 */
 	public Packet writeAddress(InetSocketAddress address) {
 		byte[] addressBytes = address.getAddress().getAddress();
-		if (addressBytes.length == ADDRESS_VERSION) {
-			this.writeUByte(ADDRESS_VERSION);
-			for (int i = 0; i < ADDRESS_VERSION; i++) {
+		if (addressBytes.length == ADDRESS_VERSION_IPV4) {
+			this.writeUByte(ADDRESS_VERSION_IPV4);
+			for (int i = 0; i < ADDRESS_VERSION_IPV4; i++) {
 				this.writeByte(~addressBytes[i] & 0xFF);
 			}
 			this.writeUShort(address.getPort());
