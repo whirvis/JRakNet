@@ -89,19 +89,19 @@ public class MCPEIdentifier extends Identifier {
 	private String versionTag;
 	private int onlinePlayerCount;
 	private int maxPlayerCount;
-	private long timestamp; // Not really sure what this is
+	private long guid;
 	private String worldName;
 	private String gamemode;
 	private boolean legacy;
 
 	public MCPEIdentifier(String serverName, int serverProtocol, String versionTag, int onlinePlayerCount,
-			int maxPlayerCount, long timestamp, String worldName, String gamemode) {
+			int maxPlayerCount, long guid, String worldName, String gamemode) {
 		this.serverName = serverName;
 		this.serverProtocol = serverProtocol;
 		this.versionTag = versionTag;
 		this.onlinePlayerCount = onlinePlayerCount;
 		this.maxPlayerCount = maxPlayerCount;
-		this.timestamp = timestamp;
+		this.guid = guid;
 		this.worldName = worldName;
 		this.gamemode = gamemode;
 		this.legacy = false;
@@ -128,7 +128,7 @@ public class MCPEIdentifier extends Identifier {
 			this.legacy = true;
 
 			if (data.length >= DATA_COUNT) {
-				this.timestamp = RakNetUtils.parseLongPassive(data[6]);
+				this.guid = RakNetUtils.parseLongPassive(data[6]);
 				this.worldName = data[7];
 				this.gamemode = data[8];
 				this.legacy = false;
@@ -194,12 +194,12 @@ public class MCPEIdentifier extends Identifier {
 	}
 
 	/**
-	 * Returns the timestamp
+	 * Returns the globally unique ID (GUID)
 	 * 
-	 * @return The timestamp
+	 * @return The globally unique ID
 	 */
-	public long getTimestamp() {
-		return this.timestamp;
+	public long getGloballyUniqueId() {
+		return this.guid;
 	}
 
 	/**
@@ -276,13 +276,13 @@ public class MCPEIdentifier extends Identifier {
 	}
 
 	/**
-	 * Sets the timestamp
+	 * Sets the globally unique ID (GUID)
 	 * 
-	 * @param timestamp
-	 *            The new timestamp
+	 * @param guid
+	 *            The new globally unique ID
 	 */
-	public void setTimestamp(long timestamp) {
-		this.timestamp = timestamp;
+	public void setServerGloballyUniqueId(long guid) {
+		this.guid = guid;
 	}
 
 	/**
@@ -331,7 +331,7 @@ public class MCPEIdentifier extends Identifier {
 					+ onlinePlayerCount + SEPERATOR + maxPlayerCount);
 		} else {
 			return (HEADER + SEPERATOR + serverName + SEPERATOR + serverProtocol + SEPERATOR + versionTag + SEPERATOR
-					+ onlinePlayerCount + SEPERATOR + maxPlayerCount + SEPERATOR + timestamp + SEPERATOR + worldName
+					+ onlinePlayerCount + SEPERATOR + maxPlayerCount + SEPERATOR + guid + SEPERATOR + worldName
 					+ SEPERATOR + gamemode);
 		}
 	}

@@ -37,7 +37,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 import net.marfgamer.raknet.UtilityTest;
 import net.marfgamer.raknet.identifier.MCPEIdentifier;
 import net.marfgamer.raknet.server.RakNetServer;
-import net.marfgamer.raknet.server.RakNetServerListener;
 import net.marfgamer.raknet.util.RakNetUtils;
 
 /**
@@ -48,7 +47,7 @@ import net.marfgamer.raknet.util.RakNetUtils;
 public class LatencyTest {
 
 	private static final MCPEIdentifier LATENCY_TEST_IDENTIFIER = new MCPEIdentifier("JRakNet Latency Test", 91,
-			"0.16.0", 0, 5, System.currentTimeMillis(), "New World", "Developer");
+			"0.16.2", 0, 10, -1 /* We don't know the GUID yet */, "New World", "Developer");
 
 	private final RakNetServer server;
 	private final LatencyFrame frame;
@@ -64,8 +63,7 @@ public class LatencyTest {
 	 */
 	public void start() {
 		// Set server options and start it
-		server.setListener(new RakNetServerListener() {
-		});
+		LATENCY_TEST_IDENTIFIER.setServerGloballyUniqueId(server.getGloballyUniqueId());
 		server.setIdentifier(LATENCY_TEST_IDENTIFIER);
 		server.startThreaded();
 
@@ -75,7 +73,7 @@ public class LatencyTest {
 		while (true) {
 			synchronized (server) {
 				frame.updatePaneText(server.getSessions());
-				RakNetUtils.passiveSleep(500);
+				RakNetUtils.threadLock(500);
 			}
 		}
 	}
