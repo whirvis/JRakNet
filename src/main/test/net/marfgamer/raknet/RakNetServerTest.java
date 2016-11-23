@@ -49,7 +49,7 @@ import net.marfgamer.raknet.session.RakNetClientSession;
 public class RakNetServerTest {
 
 	public static void main(String[] args) throws RakNetException {
-		RakNetServer server = new RakNetServer(UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT, 10);
+		RakNetServer server = new RakNetServer(19135, 10);
 
 		server.setListener(new RakNetServerListener() {
 
@@ -79,20 +79,9 @@ public class RakNetServerTest {
 
 			@Override
 			public void handlePing(ServerPing ping) {
-				MCPEIdentifier identifier = new MCPEIdentifier();
-
-				// Set identifier properties
-				{
-					identifier.setServerProtocol(91);
-					identifier.setTimestamp(System.currentTimeMillis());
-					identifier.setServerName("A JRakNet server test");
-					identifier.setVersionTag("0.16.0");
-					identifier.setWorldName("New World");
-					identifier.setGamemode("Developer");
-					identifier.setOnlinePlayerCount(server.getSessionCount());
-					identifier.setMaxPlayerCount(server.getMaxConnections());
-				}
-
+				MCPEIdentifier identifier = new MCPEIdentifier("A JRakNet server test", 91, "0.16.2",
+						server.getSessionCount(), server.getMaxConnections(), server.getGloballyUniqueId(), "New World",
+						"Survival");
 				ping.setIdentifier(identifier);
 			}
 

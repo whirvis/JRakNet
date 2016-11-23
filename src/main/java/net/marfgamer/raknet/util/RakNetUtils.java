@@ -447,7 +447,7 @@ public class RakNetUtils {
 	 * @param time
 	 *            How long the thread will sleep in milliseconds
 	 */
-	public static void passiveSleep(long time) {
+	public static void threadLock(long time) {
 		long sleepStart = System.currentTimeMillis();
 		while (System.currentTimeMillis() - sleepStart < time)
 			;

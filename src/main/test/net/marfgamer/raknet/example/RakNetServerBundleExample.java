@@ -28,55 +28,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package net.marfgamer.raknet.protocol.login;
+package net.marfgamer.raknet.example;
 
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-
-import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
-import net.marfgamer.raknet.protocol.MessageIdentifier;
+import net.marfgamer.raknet.identifier.MCPEIdentifier;
+import net.marfgamer.raknet.server.RakNetServer;
+import net.marfgamer.raknet.session.RakNetClientSession;
 
-public class OpenConnectionResponseTwo extends RakNetPacket {
+/**
+ * A simple <code>RakNetServer</code> that is extending
+ * <code>RakNetServer</code> and can be tested through a Minecraft: Pocket
+ * Edition client using the local multiplayer features built into the game
+ *
+ * @author MarfGamer
+ */
+public class RakNetServerBundleExample extends RakNetServer {
 
-	public boolean magic;
-	public long serverGuid;
-	public InetSocketAddress clientAddress;
-	public int maximumTransferUnit;
-	public boolean encryptionEnabled;
-
-	public OpenConnectionResponseTwo(Packet packet) {
-		super(packet);
+	public RakNetServerBundleExample() {
+		super(19132, 10, new MCPEIdentifier("JRakNet Example Server", 91, "0.16.2", 0, 10, System.currentTimeMillis(),
+				"New World", "Survival"));
 	}
 
-	public OpenConnectionResponseTwo() {
-		super(MessageIdentifier.ID_OPEN_CONNECTION_REPLY_2);
-	}
-
+	// Client connected
 	@Override
-	public void encode() {
-		try {
-			this.writeMagic();
-			this.writeLong(serverGuid);
-			this.writeAddress(clientAddress);
-			this.writeUShort(maximumTransferUnit);
-			this.writeBoolean(encryptionEnabled);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
+	public void onClientConnect(RakNetClientSession session) {
+		System.out.println("Client from address " + session.getAddress() + " has connected to the server");
 	}
 
+	// Client disconnected
 	@Override
-	public void decode() {
-		try {
-			this.magic = this.checkMagic();
-			this.serverGuid = this.readLong();
-			this.clientAddress = this.readAddress();
-			this.maximumTransferUnit = this.readUShort();
-			this.encryptionEnabled = this.readBoolean();
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		}
+	public void onClientDisconnect(RakNetClientSession session, String reason) {
+		System.out.println("Client from address " + session.getAddress()
+				+ " has disconnected from the server for the reason \"" + reason + "\"");
+	}
+
+	// Packet received
+	@Override
+	public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
+		System.out.println("Client from address " + session.getAddress() + " sent packet with ID 0x"
+				+ Integer.toHexString(packet.getId()).toUpperCase() + " on channel " + channel);
+	}
+
+	public static void main(String[] args) {
+		// Create server
+		RakNetServerBundleExample bundle = new RakNetServerBundleExample();
+
+		// Start server
+		bundle.start();
 	}
 
 }

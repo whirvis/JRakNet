@@ -71,7 +71,7 @@ import net.marfgamer.raknet.util.RakNetUtils;
  *
  * @author MarfGamer
  */
-public class RakNetServer implements GeminusRakNetPeer {
+public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 	// Server data
 	private final long guid;
@@ -93,6 +93,7 @@ public class RakNetServer implements GeminusRakNetPeer {
 	private final ConcurrentHashMap<InetSocketAddress, RakNetClientSession> sessions;
 
 	public RakNetServer(int port, int maxConnections, int maximumTransferUnit, Identifier identifier) {
+		// Set server data
 		this.guid = RakNet.UNIQUE_ID_BITS.getMostSignificantBits();
 		this.timestamp = System.currentTimeMillis();
 		this.port = port;
@@ -100,12 +101,18 @@ public class RakNetServer implements GeminusRakNetPeer {
 		this.maximumTransferUnit = maximumTransferUnit;
 		this.identifier = identifier;
 
+		// Initiate bootstrap data
 		this.bootstrap = new Bootstrap();
 		this.group = new NioEventLoopGroup();
 		this.handler = new RakNetServerHandler(this);
 
+		// Set listener
+		this.listener = this;
+
+		// Create session map
 		this.sessions = new ConcurrentHashMap<InetSocketAddress, RakNetClientSession>();
 
+		// Check maximum transfer unit
 		if (this.maximumTransferUnit < RakNet.MINIMUM_TRANSFER_UNIT) {
 			throw new IllegalArgumentException(
 					"Maximum transfer unit can be no smaller than " + RakNet.MINIMUM_TRANSFER_UNIT + "!");
@@ -130,7 +137,7 @@ public class RakNetServer implements GeminusRakNetPeer {
 	 * 
 	 * @return The server's globally unique ID
 	 */
-	public long getGlobalilyUniqueId() {
+	public long getGloballyUniqueId() {
 		return this.guid;
 	}
 
