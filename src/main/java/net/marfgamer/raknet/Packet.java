@@ -51,6 +51,10 @@ import net.marfgamer.raknet.stream.PacketDataOutput;
 public class Packet {
 
 	public static final int ADDRESS_VERSION_IPV4 = 0x04;
+	public static final int ADDRESS_VERSION_IPV6 = 0x06;
+	public static final int ADDRESS_VERSION_IPV4_LENGTH = 0x04;
+	public static final int ADDRESS_VERSION_IPV6_LENGTH = 0x10;
+	public static final int ADDRESS_VERSION_IPV6_MYSTERY_LENGTH = 0x0A;
 
 	private final ByteBuf buffer;
 	private final PacketDataInput input;
@@ -121,6 +125,32 @@ public class Packet {
 	 */
 	public short readUByte() {
 		return (short) (buffer.readByte() & 0xFF);
+	}
+
+	/**
+	 * Reads a flipped unsigned byte casted back to a byte
+	 * 
+	 * @return A flipped unsigned byte casted back to a byte
+	 */
+	private byte readCFUByte() {
+		return (byte) (~buffer.readByte() & 0xFF);
+	}
+
+	/**
+	 * Returns a byte array of the read flipped unsigned byte's casted back to a
+	 * byte
+	 * 
+	 * @param length
+	 *            The amount of bytes to read
+	 * @return A byte array of the read flipped unsigned byte's casted back to a
+	 *         byte with the specified size
+	 */
+	private byte[] readCFU(int length) {
+		byte[] data = new byte[length];
+		for (int i = 0; i < data.length; i++) {
+			data[0] = this.readCFUByte();
+		}
+		return data;
 	}
 
 	/**
@@ -283,27 +313,26 @@ public class Packet {
 	}
 
 	/**
-	 * Reads an IPv4 address (IPv6 is currently not supported)
+	 * Reads an IPv4/IPv6 address
 	 * 
-	 * @return An IPv4 address
+	 * @return An IPv4/IPv6 address
+	 * @throws UnknownHostException
+	 *             Thrown if an error occurs when reading the address
 	 */
-	public InetSocketAddress readAddress() {
+	public InetSocketAddress readAddress() throws UnknownHostException {
 		short version = this.readUByte();
 		if (version == ADDRESS_VERSION_IPV4) {
-			byte[] addressBytes = new byte[4];
-			for (int i = 0; i < addressBytes.length; i++) {
-				addressBytes[i] = (byte) (~this.readByte() & 0xFF);
-			}
+			byte[] addressBytes = this.readCFU(ADDRESS_VERSION_IPV4_LENGTH);
 			int port = this.readUShort();
-
-			try {
-				return new InetSocketAddress(InetAddress.getByAddress(addressBytes), port);
-			} catch (UnknownHostException e) {
-				return null;
-			}
+			return new InetSocketAddress(InetAddress.getByAddress(addressBytes), port);
+		} else if (version == ADDRESS_VERSION_IPV6) {
+			// Read data
+			byte[] addressBytes = this.readCFU(ADDRESS_VERSION_IPV6_LENGTH);
+			this.read(ADDRESS_VERSION_IPV6_MYSTERY_LENGTH); // Mystery bytes
+			int port = this.readUShort();
+			return new InetSocketAddress(InetAddress.getByAddress(Arrays.copyOfRange(addressBytes, 0, 16)), port);
 		} else {
-			this.read(version); // Still read the bytes to prevent other errors
-			return null;
+			throw new UnknownHostException("Unknown protocol IPv" + version + "!");
 		}
 	}
 
@@ -356,6 +385,33 @@ public class Packet {
 	 */
 	public Packet writeUByte(int b) {
 		buffer.writeByte(((byte) b) & 0xFF);
+		return this;
+	}
+
+	/**
+	 * Writes a flipped unsigned byte casted back into a byte to the packet
+	 * 
+	 * @param b
+	 *            The byte
+	 * @return The packet
+	 */
+	private Packet writeCFUByte(byte b) {
+		buffer.writeByte(~b & 0xFF);
+		return this;
+	}
+
+	/**
+	 * Writes a byte array of the specified flipped unsigned byte's casted back
+	 * to a byte to the packet
+	 * 
+	 * @param data
+	 *            The data to write
+	 * @return The packet
+	 */
+	private Packet writeCFU(byte[] data) {
+		for (int i = 0; i < data.length; i++) {
+			this.writeCFUByte(data[i]);
+		}
 		return this;
 	}
 
@@ -569,22 +625,27 @@ public class Packet {
 	}
 
 	/**
-	 * Writes an IPv4 address to the packet (IPv6 is not yet supported)
+	 * Writes an IPv4 address to the packet (Writing IPv6 is not yet supported)
 	 * 
 	 * @param address
 	 *            The address
 	 * @return The packet
+	 * @throws UnknownHostException
+	 *             Thrown if an error occurs when reading the address
 	 */
-	public Packet writeAddress(InetSocketAddress address) {
+	public Packet writeAddress(InetSocketAddress address) throws UnknownHostException {
 		byte[] addressBytes = address.getAddress().getAddress();
-		if (addressBytes.length == ADDRESS_VERSION_IPV4) {
+		if (addressBytes.length == ADDRESS_VERSION_IPV4_LENGTH) {
 			this.writeUByte(ADDRESS_VERSION_IPV4);
-			for (int i = 0; i < ADDRESS_VERSION_IPV4; i++) {
-				this.writeByte(~addressBytes[i] & 0xFF);
-			}
+			this.writeCFU(addressBytes);
+			this.writeUShort(address.getPort());
+		} else if (addressBytes.length == ADDRESS_VERSION_IPV6_LENGTH) {
+			this.writeUByte(ADDRESS_VERSION_IPV6);
+			this.writeCFU(addressBytes);
+			this.pad(ADDRESS_VERSION_IPV6_MYSTERY_LENGTH); // Mystery bytes
 			this.writeUShort(address.getPort());
 		} else {
-			throw new IllegalArgumentException("Unknown protocol IPv" + addressBytes.length + "!");
+			throw new UnknownHostException("Unknown protocol IPv" + addressBytes.length + "!");
 		}
 		return this;
 	}
@@ -596,8 +657,10 @@ public class Packet {
 	 *            The address
 	 * @param port
 	 *            The port
+	 * @throws UnknownHostException
+	 *             Thrown if an error occurs when reading the address
 	 */
-	public void writeAddress(InetAddress address, int port) {
+	public void writeAddress(InetAddress address, int port) throws UnknownHostException {
 		this.writeAddress(new InetSocketAddress(address, port));
 	}
 
@@ -608,8 +671,10 @@ public class Packet {
 	 *            The address
 	 * @param port
 	 *            The port
+	 * @throws UnknownHostException
+	 *             Thrown if an error occurs when reading the address
 	 */
-	public void writeAddress(String address, int port) {
+	public void writeAddress(String address, int port) throws UnknownHostException {
 		this.writeAddress(new InetSocketAddress(address, port));
 	}
 

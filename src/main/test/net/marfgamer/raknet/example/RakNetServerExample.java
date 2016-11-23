@@ -48,9 +48,10 @@ public class RakNetServerExample {
 
 	public static void main(String[] args) throws RakNetException {
 		// Create server
-		RakNetServer server = new RakNetServer(19132, 10, new MCPEIdentifier("JRakNet Latency Test", 91, "0.16.0", 0,
+		RakNetServer server = new RakNetServer(19132, 10, new MCPEIdentifier("JRakNet Example Server", 91, "0.16.2", 0,
 				10, System.currentTimeMillis(), "New World", "Survival"));
 
+		// Set listener
 		server.setListener(new RakNetServerListener() {
 
 			// Client connected

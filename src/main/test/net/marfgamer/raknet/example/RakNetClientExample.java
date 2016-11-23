@@ -53,6 +53,7 @@ public class RakNetClientExample {
 		// Create client
 		RakNetClient client = new RakNetClient();
 
+		// Set listener
 		client.setListener(new RakNetClientListener() {
 
 			// Server connected

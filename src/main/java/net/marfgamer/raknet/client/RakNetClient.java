@@ -64,10 +64,10 @@ import net.marfgamer.raknet.protocol.message.acknowledge.Acknowledge;
 import net.marfgamer.raknet.protocol.status.UnconnectedPing;
 import net.marfgamer.raknet.protocol.status.UnconnectedPingOpenConnections;
 import net.marfgamer.raknet.protocol.status.UnconnectedPong;
-import net.marfgamer.raknet.session.UnumRakNetPeer;
 import net.marfgamer.raknet.session.RakNetServerSession;
 import net.marfgamer.raknet.session.RakNetSession;
 import net.marfgamer.raknet.session.RakNetState;
+import net.marfgamer.raknet.session.UnumRakNetPeer;
 import net.marfgamer.raknet.util.RakNetUtils;
 
 /**
@@ -75,7 +75,7 @@ import net.marfgamer.raknet.util.RakNetUtils;
  *
  * @author MarfGamer
  */
-public class RakNetClient implements UnumRakNetPeer {
+public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	// JRakNet plans to use it's own dynamic MTU system later
 	protected static final MaximumTransferUnit[] units = new MaximumTransferUnit[] { new MaximumTransferUnit(1172, 4),
@@ -128,6 +128,9 @@ public class RakNetClient implements UnumRakNetPeer {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
+
+		// Set listener
+		this.listener = this;
 
 		// Initiate discovery system if it is not yet started
 		if (discoverySystem.isRunning() == false) {
@@ -449,7 +452,7 @@ public class RakNetClient implements UnumRakNetPeer {
 				connectionRequestOne.encode();
 				this.sendRawMessage(connectionRequestOne, address);
 
-				RakNetUtils.passiveSleep(500);
+				RakNetUtils.threadLock(500);
 			}
 		}
 
@@ -472,7 +475,7 @@ public class RakNetClient implements UnumRakNetPeer {
 			connectionRequestTwo.encode();
 			this.sendRawMessage(connectionRequestTwo, address);
 
-			RakNetUtils.passiveSleep(500);
+			RakNetUtils.threadLock(500);
 		}
 
 		// If the server didn't respond then it is offline

@@ -4,7 +4,7 @@
 
   <groupId>net.marfgamer</groupId>
   <artifactId>raknet</artifactId>
-  <version>2.1-RELEASE</version>
+  <version>2.2-RELEASE</version>
   <packaging>jar</packaging>
 
   <name>JRakNet</name>

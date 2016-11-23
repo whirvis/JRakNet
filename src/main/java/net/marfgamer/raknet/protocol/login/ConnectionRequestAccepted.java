@@ -31,6 +31,7 @@
 package net.marfgamer.raknet.protocol.login;
 
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
@@ -52,24 +53,32 @@ public class ConnectionRequestAccepted extends RakNetPacket {
 
 	@Override
 	public void encode() {
-		this.writeAddress(clientAddress);
-		this.writeShort(0);
-		for (int i = 0; i < 10; i++) {
-			this.writeAddress("255.255.255.255", 19132);
+		try {
+			this.writeAddress(clientAddress);
+			this.writeShort(0);
+			for (int i = 0; i < 10; i++) {
+				this.writeAddress("255.255.255.255", 19132);
+			}
+			this.writeLong(clientTimestamp);
+			this.writeLong(serverTimestamp);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
 		}
-		this.writeLong(clientTimestamp);
-		this.writeLong(serverTimestamp);
 	}
 
 	@Override
 	public void decode() {
-		this.clientAddress = this.readAddress();
-		this.readShort(); // Unknown use
-		for (int i = 0; i < 10; i++) {
-			this.readAddress(); // Unknown use
+		try {
+			this.clientAddress = this.readAddress();
+			this.readShort(); // Unknown use
+			for (int i = 0; i < 10; i++) {
+				this.readAddress(); // Unknown use
+			}
+			this.clientTimestamp = this.readLong();
+			this.serverTimestamp = this.readLong();
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
 		}
-		this.clientTimestamp = this.readLong();
-		this.serverTimestamp = this.readLong();
 	}
 
 }
