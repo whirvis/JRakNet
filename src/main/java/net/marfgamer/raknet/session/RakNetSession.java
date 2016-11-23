@@ -580,7 +580,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		long currentTime = System.currentTimeMillis();
 
 		// Resend unacknowledged packets
-		if (currentTime - this.lastRecoverySend >= RECOVERY_SEND_WAIT_TIME_MILLIS) {
+		if (currentTime - this.lastRecoverySend >= RECOVERY_SEND_WAIT_TIME_MILLIS && !recoveryQueue.isEmpty()) {
 			for (CustomPacket custom : recoveryQueue.values()) {
 				this.sendRawMessage(custom);
 				break; // Only send one at a time
