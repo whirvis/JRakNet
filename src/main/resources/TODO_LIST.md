@@ -48,11 +48,6 @@ A minor tweak update that will probably save some memory in the JVM and clean up
 	[x] Remove all the annoying " - " from @param definitions
 	
 #JRakNet v2.2.0
-[ ] Session
-	[ ] Make ping check-ups optional
-	[ ] Instead of using pings and pongs, use DETECT_LOST_CONNECTIONS (0x14)
-	[ ] Clear ACK and NACK queues on sends
-	[ ] Bump sequenceNumbers for lost packets on resends instead of storing them permanently
 [x] Packet
 	[x] Fix IPv6 reading/writing
 [x] Identifiers
@@ -61,5 +56,9 @@ A minor tweak update that will probably save some memory in the JVM and clean up
 [x] Examples
 	[x] Add client bundle example
 	[x] Add server bundle example
+	
+#JRakNet v2.2.1
+[ ] Session
+	[ ] Instead of using pings and pongs, use DETECT_LOST_CONNECTIONS (0x14)
 [ ] Tests
 	[ ] Add acknowledgement test
