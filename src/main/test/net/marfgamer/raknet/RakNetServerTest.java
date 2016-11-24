@@ -49,7 +49,7 @@ import net.marfgamer.raknet.session.RakNetClientSession;
 public class RakNetServerTest {
 
 	public static void main(String[] args) throws RakNetException {
-		RakNetServer server = new RakNetServer(19135, 10);
+		RakNetServer server = new RakNetServer(UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT, 10);
 
 		server.setListener(new RakNetServerListener() {
 
