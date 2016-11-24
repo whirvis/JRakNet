@@ -3,8 +3,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>net.marfgamer</groupId>
-  <artifactId>raknet</artifactId>
-  <version>2.2-RELEASE</version>
+  <artifactId>jraknet</artifactId>
+  <version>2.2</version>
   <packaging>jar</packaging>
 
   <name>JRakNet</name>
