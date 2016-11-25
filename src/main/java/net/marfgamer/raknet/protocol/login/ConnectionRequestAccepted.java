@@ -57,7 +57,7 @@ public class ConnectionRequestAccepted extends RakNetPacket {
 			this.writeAddress(clientAddress);
 			this.writeShort(0);
 			for (int i = 0; i < 10; i++) {
-				this.writeAddress("255.255.255.255", 19132);
+				this.writeAddress("0.0.0.0", 0);
 			}
 			this.writeLong(clientTimestamp);
 			this.writeLong(serverTimestamp);

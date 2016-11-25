@@ -38,6 +38,23 @@ import net.marfgamer.raknet.protocol.MessageIdentifier;
 
 public class CustomPacket extends RakNetPacket {
 
+	public static final short ID_CUSTOM_0 = 0x80;
+	public static final short ID_CUSTOM_1 = 0x81;
+	public static final short ID_CUSTOM_2 = 0x82;
+	public static final short ID_CUSTOM_3 = 0x83;
+	public static final short ID_CUSTOM_4 = 0x84;
+	public static final short ID_CUSTOM_5 = 0x85;
+	public static final short ID_CUSTOM_6 = 0x86;
+	public static final short ID_CUSTOM_7 = 0x87;
+	public static final short ID_CUSTOM_8 = 0x88;
+	public static final short ID_CUSTOM_9 = 0x89;
+	public static final short ID_CUSTOM_A = 0x8A;
+	public static final short ID_CUSTOM_B = 0x8B;
+	public static final short ID_CUSTOM_C = 0x8C;
+	public static final short ID_CUSTOM_D = 0x8D;
+	public static final short ID_CUSTOM_E = 0x8E;
+	public static final short ID_CUSTOM_F = 0x8F;
+
 	public static final int SEQUENCE_NUMBER_LENGTH = 0x03;
 
 	public int sequenceNumber;
