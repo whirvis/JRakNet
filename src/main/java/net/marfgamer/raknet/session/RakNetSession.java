@@ -70,6 +70,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	public static final long RECOVERY_SEND_WAIT_TIME_MILLIS = 50L;
 	public static final long ACK_SEND_WAIT_TIME_MILLIS = 3000L;
 	public static final long PING_SEND_WAIT_TIME_MILLIS = 3000L;
+	public static final long DETECTION_SEND_WAIT_TIME_MILLIS = 5000L;
 	public static final long SESSION_TIMEOUT = PING_SEND_WAIT_TIME_MILLIS * 5L;
 
 	// Session data
@@ -81,6 +82,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	private long packetSentReceiveCounter;
 	private long lastPacketReceiveTime;
 	private long latency;
+	private long lastLatency;
 	private long lowestLatency;
 	private long highestLatency;
 
@@ -114,10 +116,14 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	private long lastAckSend;
 
 	// Latency detection
+	private boolean latencyEnabled;
 	private long lastPingSend;
 	private long pongsReceived;
 	private long pongsTotalLatency;
 	private long pingIdentifier;
+
+	// Connection loss prevention
+	private long lastDetectionSend;
 
 	public RakNetSession(long guid, int maximumTransferUnit, Channel channel, InetSocketAddress address) {
 		// Session data
@@ -155,8 +161,14 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		this.lastAckSend = System.currentTimeMillis();
 
 		// Latency detection
-		this.lastPingSend = System.currentTimeMillis();
+		this.latencyEnabled = true;
 		this.latency = -1; // We can't predict them
+		this.lastLatency = -1;
+		this.lowestLatency = -1;
+		this.highestLatency = -1;
+
+		// Connection loss prevention
+		this.lastDetectionSend = System.currentTimeMillis();
 	}
 
 	/**
@@ -234,12 +246,42 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	}
 
 	/**
+	 * Enables/disables latency detection, when disabled the latency will always
+	 * return -1
+	 * 
+	 * @param enabled
+	 *            Whether or not latency detection is enabled
+	 */
+	public void enableLatencyDetection(boolean enabled) {
+		this.latencyEnabled = enabled;
+		this.latency = (enabled ? this.latency : -1);
+	}
+
+	/**
+	 * Returns whether or not latency detection is enabled
+	 * 
+	 * @return Whether or not latency detection is enabled
+	 */
+	public boolean latencyDetectionEnabled() {
+		return this.latencyEnabled;
+	}
+
+	/**
 	 * Returns the average latency for the session
 	 * 
 	 * @return The average latency for the session
 	 */
 	public long getLatency() {
 		return this.latency;
+	}
+
+	/**
+	 * Returns the last latency for the session
+	 * 
+	 * @return The last latency for the session
+	 */
+	public long getLastLatency() {
+		return this.lastLatency;
 	}
 
 	/**
@@ -392,9 +434,9 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 *            The channel the packet was sent on
 	 */
 	private final void handlePacket0(RakNetPacket packet, int channel) {
-		int id = packet.getId();
+		int packetId = packet.getId();
 
-		if (id == ID_CONNECTED_PING) {
+		if (packetId == ID_CONNECTED_PING) {
 			ConnectedPing ping = new ConnectedPing(packet);
 			ping.decode();
 
@@ -402,30 +444,37 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 			pong.identifier = ping.identifier;
 			pong.encode();
 			this.sendMessage(Reliability.UNRELIABLE, pong);
-		} else if (id == ID_CONNECTED_PONG) {
+		} else if (packetId == ID_CONNECTED_PONG) {
 			ConnectedPong pong = new ConnectedPong(packet);
 			pong.decode();
 
-			if (this.pingIdentifier - pong.identifier == 1) {
-				long latencyRaw = (this.lastPacketReceiveTime - this.lastPingSend);
+			if (latencyEnabled == true) {
+				if (this.pingIdentifier - pong.identifier == 1) {
+					long latencyRaw = (this.lastPacketReceiveTime - this.lastPingSend);
 
-				// Get lowest and highest latency for users who like that more
-				if (this.pongsReceived == 0) {
-					this.lowestLatency = latencyRaw;
-					this.highestLatency = latencyRaw;
-				} else {
-					if (latencyRaw < lowestLatency) {
+					// Get last latency result
+					this.lastLatency = latencyRaw;
+
+					// Get lowest and highest latency
+					if (this.pongsReceived == 0) {
 						this.lowestLatency = latencyRaw;
-					} else if (latencyRaw > highestLatency) {
 						this.highestLatency = latencyRaw;
+					} else {
+						if (latencyRaw < lowestLatency) {
+							this.lowestLatency = latencyRaw;
+						} else if (latencyRaw > highestLatency) {
+							this.highestLatency = latencyRaw;
+						}
 					}
-				}
 
-				// Get average latency to provide more stable results
-				pongsReceived++;
-				pongsTotalLatency += latencyRaw;
-				this.latency = (pongsTotalLatency / pongsReceived);
+					// Get average latency
+					pongsReceived++;
+					pongsTotalLatency += latencyRaw;
+					this.latency = (pongsTotalLatency / pongsReceived);
+				}
 			}
+
+			this.pingIdentifier = pong.identifier + 1;
 		} else {
 			this.handlePacket(packet, channel);
 		}
@@ -665,14 +714,21 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 			this.packetSentReceiveCounter = currentTime;
 		}
 
-		// Send a ping to try and wake up the receiving side
-		if (currentTime - lastPingSend >= PING_SEND_WAIT_TIME_MILLIS
-				&& currentTime - this.lastPacketReceiveTime >= PING_SEND_WAIT_TIME_MILLIS) {
+		// Send a CONNECTED_PING to get the latency
+		if (currentTime - lastPingSend >= PING_SEND_WAIT_TIME_MILLIS && latencyEnabled == true) {
 			ConnectedPing ping = new ConnectedPing();
 			ping.identifier = this.pingIdentifier++;
 			ping.encode();
 			this.sendMessage(Reliability.UNRELIABLE, ping);
 			this.lastPingSend = currentTime;
+			;
+		}
+
+		// Send a DETECT_LOST_CONNECTIONS to make sure the client is still there
+		if (currentTime - lastDetectionSend >= DETECTION_SEND_WAIT_TIME_MILLIS
+				&& currentTime - this.lastPacketReceiveTime >= DETECTION_SEND_WAIT_TIME_MILLIS) {
+			this.sendMessage(Reliability.RELIABLE, ID_DETECT_LOST_CONNECTIONS);
+			this.lastDetectionSend = currentTime;
 		}
 
 		// The client timed out
