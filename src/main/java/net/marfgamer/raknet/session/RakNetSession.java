@@ -721,7 +721,6 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 			ping.encode();
 			this.sendMessage(Reliability.UNRELIABLE, ping);
 			this.lastPingSend = currentTime;
-			;
 		}
 
 		// Send a DETECT_LOST_CONNECTIONS to make sure the client is still there
