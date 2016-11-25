@@ -79,9 +79,9 @@ public class RakNetServerSession extends RakNetSession {
 			serverHandshake.decode();
 
 			NewIncomingConnection clientHandshake = new NewIncomingConnection();
+			clientHandshake.serverAddress = client.getSession().getAddress();
 			clientHandshake.clientTimestamp = serverHandshake.clientTimestamp;
 			clientHandshake.serverTimestamp = serverHandshake.serverTimestamp;
-			clientHandshake.serverAddress = client.getSession().getAddress();
 			clientHandshake.encode();
 
 			this.sendMessage(Reliability.RELIABLE, clientHandshake);

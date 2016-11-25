@@ -56,7 +56,7 @@ public class NewIncomingConnection extends RakNetPacket {
 		try {
 			this.writeAddress(serverAddress);
 			for (int i = 0; i < 10; i++) {
-				this.writeAddress("255.255.255.255", 19132);
+				this.writeAddress("255.255.255.255", serverAddress.getPort());
 			}
 			this.writeLong(serverTimestamp);
 			this.writeLong(clientTimestamp);
