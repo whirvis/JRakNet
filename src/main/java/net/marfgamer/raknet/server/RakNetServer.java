@@ -470,7 +470,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @param sender
 	 *            The address of the sender
 	 */
-	protected void handleMessage(RakNetPacket packet, InetSocketAddress sender) {
+	protected void handlePacket(RakNetPacket packet, InetSocketAddress sender) {
 		short packetId = packet.getId();
 
 		if (packetId == ID_UNCONNECTED_PING || packetId == ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
@@ -559,7 +559,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 					this.sendRawMessage(errorPacket, sender);
 				}
 			}
-		} else if (packetId >= ID_RESERVED_3 && packetId <= ID_RESERVED_9) {
+		} else if (packetId >= CustomPacket.ID_CUSTOM_0 && packetId <= CustomPacket.ID_CUSTOM_F) {
 			if (sessions.containsKey(sender)) {
 				CustomPacket custom = new CustomPacket(packet);
 				custom.decode();

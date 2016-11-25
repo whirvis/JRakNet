@@ -114,7 +114,7 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 				this.unblockAddress(sender.getAddress());
 			}
 
-			server.handleMessage(packet, sender);
+			server.handlePacket(packet, sender);
 			datagram.content().release(); // No longer needed
 		}
 	}
