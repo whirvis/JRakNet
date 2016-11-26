@@ -17,7 +17,6 @@ net.marfgamer.raknet.protocol
 net.marfgamer.raknet.protocol.login
 net.marfgamer.raknet.protocol.message
 net.marfgamer.raknet.protocol.message.acknowledge
-net.marfgamer.raknet.protocol.session
 net.marfgamer.raknet.protocol.status
 net.marfgamer.raknet.server
 net.marfgamer.raknet.session
