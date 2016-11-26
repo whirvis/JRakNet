@@ -28,20 +28,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package net.marfgamer.raknet.protocol.session;
+package net.marfgamer.raknet.exception.client;
 
-import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
-import net.marfgamer.raknet.protocol.MessageIdentifier;
+import net.marfgamer.raknet.exception.RakNetException;
 
-public class DisconnectionNotification extends RakNetPacket {
+/**
+ * This exception is thrown whenever a critical packet fails to encode or decode
+ * correctly
+ *
+ * @author MarfGamer
+ */
+public class PacketBufferException extends RakNetException {
 
-	public DisconnectionNotification() {
-		super(MessageIdentifier.ID_DISCONNECTION_NOTIFICATION);
+	private static final long serialVersionUID = -3730545025991834599L;
+
+	private final RakNetPacket packet;
+
+	public PacketBufferException(RakNetPacket packet) {
+		super("Packet with ID 0x" + Integer.toHexString(packet.getId()).toUpperCase().substring(0, 2)
+				+ " failed to encode/decode!");
+		this.packet = packet;
 	}
 
-	public DisconnectionNotification(Packet packet) {
-		super(packet);
+	/**
+	 * Returns the packet that failed to encode/decode
+	 * 
+	 * @return The packet that failed to encode/decode
+	 */
+	public RakNetPacket getPacket() {
+		return this.packet;
+	}
+
+	@Override
+	public String getLocalizedMessage() {
+		return "Packet failed to encode/decode";
 	}
 
 }

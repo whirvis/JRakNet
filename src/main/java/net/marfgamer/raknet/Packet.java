@@ -732,4 +732,11 @@ public class Packet {
 		return buffer.readableBytes();
 	}
 
+	/**
+	 * Clears the packets buffer
+	 */
+	public void clear() {
+		buffer.clear();
+	}
+
 }

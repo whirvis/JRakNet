@@ -319,6 +319,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			if (session.getState() == RakNetState.CONNECTED) {
 				listener.onClientDisconnect(session, reason);
 			}
+			session.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
 			sessions.remove(address);
 		}
 	}
@@ -524,7 +525,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			OpenConnectionRequestTwo connectionRequestTwo = new OpenConnectionRequestTwo(packet);
 			connectionRequestTwo.decode();
 
-			if (connectionRequestTwo.magic == true) {
+			if (!connectionRequestTwo.failed() && connectionRequestTwo.magic == true) {
 				// Are there any problems?
 				RakNetPacket errorPacket = this.validateSender(sender);
 				if (errorPacket == null) {
@@ -542,17 +543,19 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 							connectionResponseTwo.encryptionEnabled = false;
 							connectionResponseTwo.encode();
 
-							// Call event
-							this.getListener().onClientPreConnect(sender);
+							if (!connectionResponseTwo.failed()) {
+								// Call event
+								this.getListener().onClientPreConnect(sender);
 
-							// Create session
-							RakNetClientSession clientSession = new RakNetClientSession(this,
-									System.currentTimeMillis(), connectionRequestTwo.clientGuid,
-									connectionRequestTwo.maximumTransferUnit, channel, sender);
-							sessions.put(sender, clientSession);
+								// Create session
+								RakNetClientSession clientSession = new RakNetClientSession(this,
+										System.currentTimeMillis(), connectionRequestTwo.clientGuid,
+										connectionRequestTwo.maximumTransferUnit, channel, sender);
+								sessions.put(sender, clientSession);
 
-							// Send response, we are ready for login!
-							this.sendRawMessage(connectionResponseTwo, sender);
+								// Send response, we are ready for login!
+								this.sendRawMessage(connectionResponseTwo, sender);
+							}
 						}
 					}
 				} else {

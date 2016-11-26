@@ -41,7 +41,6 @@ import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.protocol.login.ConnectionRequestAccepted;
 import net.marfgamer.raknet.protocol.login.NewIncomingConnection;
 import net.marfgamer.raknet.protocol.message.acknowledge.Record;
-import net.marfgamer.raknet.protocol.session.DisconnectionNotification;
 
 /**
  * This class represents a server connection and handles the login sequence
@@ -78,19 +77,24 @@ public class RakNetServerSession extends RakNetSession {
 			ConnectionRequestAccepted serverHandshake = new ConnectionRequestAccepted(packet);
 			serverHandshake.decode();
 
-			NewIncomingConnection clientHandshake = new NewIncomingConnection();
-			clientHandshake.serverAddress = client.getSession().getAddress();
-			clientHandshake.clientTimestamp = serverHandshake.clientTimestamp;
-			clientHandshake.serverTimestamp = serverHandshake.serverTimestamp;
-			clientHandshake.encode();
+			if (!serverHandshake.failed()) {
+				NewIncomingConnection clientHandshake = new NewIncomingConnection();
+				clientHandshake.serverAddress = client.getSession().getAddress();
+				clientHandshake.clientTimestamp = serverHandshake.clientTimestamp;
+				clientHandshake.serverTimestamp = serverHandshake.serverTimestamp;
+				clientHandshake.encode();
 
-			this.sendMessage(Reliability.RELIABLE, clientHandshake);
-			this.setState(RakNetState.CONNECTED);
-			client.getListener().onConnect(this);
+				if (!clientHandshake.failed()) {
+					this.sendMessage(Reliability.RELIABLE, clientHandshake);
+					this.setState(RakNetState.CONNECTED);
+					client.getListener().onConnect(this);
+				} else {
+					client.disconnect("Failed to connect, invalid handshake");
+				}
+			} else {
+				client.disconnect("Failed to connect, invalid connection request acception");
+			}
 		} else if (packetId == ID_DISCONNECTION_NOTIFICATION) {
-			DisconnectionNotification disconnectionNotification = new DisconnectionNotification(packet);
-			disconnectionNotification.decode();
-
 			this.setState(RakNetState.DISCONNECTED);
 			client.disconnect("Server disconnected");
 		} else if (packetId >= ID_USER_PACKET_ENUM) {
@@ -102,10 +106,7 @@ public class RakNetServerSession extends RakNetSession {
 	 * Called by the client when the connection is closed
 	 */
 	public void closeConnection() {
-		DisconnectionNotification disconnectionNotification = new DisconnectionNotification();
-		disconnectionNotification.encode();
-
-		this.sendMessage(Reliability.UNRELIABLE, disconnectionNotification);
+		this.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
 	}
 
 }
