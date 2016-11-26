@@ -102,7 +102,8 @@ public class SessionPreparation {
 			OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo(packet);
 			connectionResponseTwo.decode();
 
-			if (connectionResponseTwo.magic == true && connectionResponseTwo.serverGuid == this.guid
+			if (!connectionResponseTwo.failed() && connectionResponseTwo.magic == true
+					&& connectionResponseTwo.serverGuid == this.guid
 					&& connectionResponseTwo.maximumTransferUnit == this.maximumTransferUnit) {
 				this.loginPackets[1] = true;
 				if (connectionResponseTwo.encryptionEnabled == true) {

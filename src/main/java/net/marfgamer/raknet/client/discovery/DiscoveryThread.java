@@ -45,10 +45,19 @@ import net.marfgamer.raknet.client.RakNetClient;
 public class DiscoveryThread extends Thread {
 
 	private List<RakNetClient> clients;
-	private boolean running;
+	private volatile boolean running;
 
 	public DiscoveryThread() {
 		this.clients = Collections.synchronizedList(new ArrayList<RakNetClient>());
+	}
+
+	/**
+	 * Returns the clients that are currently using the discovery system
+	 * 
+	 * @return The clients that are currently using the discovery system
+	 */
+	public RakNetClient[] getClients() {
+		return clients.toArray(new RakNetClient[clients.size()]);
 	}
 
 	/**
@@ -85,10 +94,17 @@ public class DiscoveryThread extends Thread {
 		return this.running;
 	}
 
+	/**
+	 * Shuts down the discovery system
+	 */
+	public void shutdown() {
+		this.running = false;
+	}
+
 	@Override
 	public synchronized void run() {
 		this.running = true;
-		while (true) {
+		while (this.running) {
 			for (RakNetClient client : this.clients) {
 				if (client.getDiscoveryMode() != DiscoveryMode.NONE) {
 					client.updateDiscoveryData();

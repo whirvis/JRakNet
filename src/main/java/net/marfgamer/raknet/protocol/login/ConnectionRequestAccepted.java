@@ -35,13 +35,15 @@ import java.net.UnknownHostException;
 
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
+import net.marfgamer.raknet.protocol.Failable;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 
-public class ConnectionRequestAccepted extends RakNetPacket {
+public class ConnectionRequestAccepted extends RakNetPacket implements Failable {
 
 	public InetSocketAddress clientAddress;
 	public long clientTimestamp;
 	public long serverTimestamp;
+	private boolean failed;
 
 	public ConnectionRequestAccepted() {
 		super(MessageIdentifier.ID_CONNECTION_REQUEST_ACCEPTED);
@@ -62,7 +64,11 @@ public class ConnectionRequestAccepted extends RakNetPacket {
 			this.writeLong(clientTimestamp);
 			this.writeLong(serverTimestamp);
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			this.failed = true;
+			this.clientAddress = null;
+			this.clientTimestamp = 0;
+			this.serverTimestamp = 0;
+			this.clear();
 		}
 	}
 
@@ -77,8 +83,17 @@ public class ConnectionRequestAccepted extends RakNetPacket {
 			this.clientTimestamp = this.readLong();
 			this.serverTimestamp = this.readLong();
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			this.failed = true;
+			this.clientAddress = null;
+			this.clientTimestamp = 0;
+			this.serverTimestamp = 0;
+			this.clear();
 		}
+	}
+
+	@Override
+	public boolean failed() {
+		return this.failed;
 	}
 
 }

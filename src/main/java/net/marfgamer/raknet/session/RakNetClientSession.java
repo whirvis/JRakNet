@@ -41,7 +41,6 @@ import net.marfgamer.raknet.protocol.login.ConnectionRequest;
 import net.marfgamer.raknet.protocol.login.ConnectionRequestAccepted;
 import net.marfgamer.raknet.protocol.login.NewIncomingConnection;
 import net.marfgamer.raknet.protocol.message.acknowledge.Record;
-import net.marfgamer.raknet.protocol.session.DisconnectionNotification;
 import net.marfgamer.raknet.server.RakNetServer;
 
 /**
@@ -117,9 +116,13 @@ public class RakNetClientSession extends RakNetSession {
 				requestAccepted.serverTimestamp = server.getTimestamp();
 				requestAccepted.encode();
 
-				this.timestamp = (System.currentTimeMillis() - request.timestamp);
-				this.sendMessage(Reliability.RELIABLE_ORDERED, requestAccepted);
-				this.setState(RakNetState.HANDSHAKING);
+				if (!requestAccepted.failed()) {
+					this.timestamp = (System.currentTimeMillis() - request.timestamp);
+					this.sendMessage(Reliability.RELIABLE_ORDERED, requestAccepted);
+					this.setState(RakNetState.HANDSHAKING);
+				} else {
+					server.removeSession(this, "Connection failed, invalid connection request acception");
+				}
 			} else {
 				this.sendMessage(Reliability.RELIABLE_ORDERED, ID_CONNECTION_ATTEMPT_FAILED);
 				this.setState(RakNetState.DISCONNECTED);
@@ -129,13 +132,14 @@ public class RakNetClientSession extends RakNetSession {
 			NewIncomingConnection clientHandshake = new NewIncomingConnection(packet);
 			clientHandshake.decode();
 
-			this.timestamp = (System.currentTimeMillis() - clientHandshake.clientTimestamp);
-			this.setState(RakNetState.CONNECTED);
-			server.getListener().onClientConnect(this);
+			if (!clientHandshake.failed()) {
+				this.timestamp = (System.currentTimeMillis() - clientHandshake.clientTimestamp);
+				this.setState(RakNetState.CONNECTED);
+				server.getListener().onClientConnect(this);
+			} else {
+				server.removeSession(this, "Connection failed, invalid handshake");
+			}
 		} else if (packetId == ID_DISCONNECTION_NOTIFICATION) {
-			DisconnectionNotification disconnectionNotification = new DisconnectionNotification(packet);
-			disconnectionNotification.decode();
-
 			server.removeSession(this, "Client disconnected");
 		} else if (packetId >= ID_USER_PACKET_ENUM) {
 			server.getListener().handlePacket(this, packet, channel);
