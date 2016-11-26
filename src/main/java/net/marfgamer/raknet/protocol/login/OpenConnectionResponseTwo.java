@@ -35,15 +35,17 @@ import java.net.UnknownHostException;
 
 import net.marfgamer.raknet.Packet;
 import net.marfgamer.raknet.RakNetPacket;
+import net.marfgamer.raknet.protocol.Failable;
 import net.marfgamer.raknet.protocol.MessageIdentifier;
 
-public class OpenConnectionResponseTwo extends RakNetPacket {
+public class OpenConnectionResponseTwo extends RakNetPacket implements Failable {
 
 	public boolean magic;
 	public long serverGuid;
 	public InetSocketAddress clientAddress;
 	public int maximumTransferUnit;
 	public boolean encryptionEnabled;
+	private boolean failed;
 
 	public OpenConnectionResponseTwo(Packet packet) {
 		super(packet);
@@ -62,7 +64,13 @@ public class OpenConnectionResponseTwo extends RakNetPacket {
 			this.writeUShort(maximumTransferUnit);
 			this.writeBoolean(encryptionEnabled);
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			this.failed = true;
+			this.magic = false;
+			this.serverGuid = 0;
+			this.clientAddress = null;
+			this.maximumTransferUnit = 0;
+			this.encryptionEnabled = false;
+			this.clear();
 		}
 	}
 
@@ -75,8 +83,19 @@ public class OpenConnectionResponseTwo extends RakNetPacket {
 			this.maximumTransferUnit = this.readUShort();
 			this.encryptionEnabled = this.readBoolean();
 		} catch (UnknownHostException e) {
-			e.printStackTrace();
+			this.failed = true;
+			this.magic = false;
+			this.serverGuid = 0;
+			this.clientAddress = null;
+			this.maximumTransferUnit = 0;
+			this.encryptionEnabled = false;
+			this.clear();
 		}
+	}
+
+	@Override
+	public boolean failed() {
+		return this.failed;
 	}
 
 }

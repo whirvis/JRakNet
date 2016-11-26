@@ -54,6 +54,7 @@ import net.marfgamer.raknet.client.discovery.DiscoveryThread;
 import net.marfgamer.raknet.exception.NoListenerException;
 import net.marfgamer.raknet.exception.RakNetException;
 import net.marfgamer.raknet.exception.client.NettyHandlerException;
+import net.marfgamer.raknet.exception.client.PacketBufferException;
 import net.marfgamer.raknet.exception.client.ServerOfflineException;
 import net.marfgamer.raknet.protocol.Reliability;
 import net.marfgamer.raknet.protocol.login.ConnectionRequest;
@@ -82,7 +83,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			new MaximumTransferUnit(548, 5) };
 
 	// Used to discover systems without relying on the main thread
-	private static final DiscoveryThread discoverySystem = new DiscoveryThread();
+	private static DiscoveryThread discoverySystem = new DiscoveryThread();
 
 	// Client data
 	private final long guid;
@@ -473,9 +474,13 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			connectionRequestTwo.address = preparation.address;
 			connectionRequestTwo.maximumTransferUnit = preparation.maximumTransferUnit;
 			connectionRequestTwo.encode();
-			this.sendRawMessage(connectionRequestTwo, address);
 
-			RakNetUtils.threadLock(500);
+			if (!connectionRequestTwo.failed()) {
+				this.sendRawMessage(connectionRequestTwo, address);
+				RakNetUtils.threadLock(500);
+			} else {
+				preparation.cancelReason = new PacketBufferException(connectionRequestTwo);
+			}
 		}
 
 		// If the server didn't respond then it is offline
@@ -669,7 +674,16 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * longer connect to servers
 	 */
 	public void shutdown() {
-		throw new RuntimeException("This method is not yet implemented!");
+		// Close channel
+		channel.close();
+		group.shutdownGracefully();
+
+		// Shutdown discovery system if needed
+		discoverySystem.removeClient(this);
+		if (discoverySystem.getClients().length <= 0) {
+			discoverySystem.shutdown();
+			discoverySystem = new DiscoveryThread();
+		}
 	}
 
 	/**
