@@ -89,10 +89,10 @@ public class RakNetServerSession extends RakNetSession {
 					this.setState(RakNetState.CONNECTED);
 					client.getListener().onConnect(this);
 				} else {
-					client.disconnect("Failed to connect, invalid handshake");
+					client.disconnect("Failed to login");
 				}
 			} else {
-				client.disconnect("Failed to connect, invalid connection request acception");
+				client.disconnect("Failed to login");
 			}
 		} else if (packetId == ID_DISCONNECTION_NOTIFICATION) {
 			this.setState(RakNetState.DISCONNECTED);
