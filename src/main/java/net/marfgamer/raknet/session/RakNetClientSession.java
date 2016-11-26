@@ -121,12 +121,12 @@ public class RakNetClientSession extends RakNetSession {
 					this.sendMessage(Reliability.RELIABLE_ORDERED, requestAccepted);
 					this.setState(RakNetState.HANDSHAKING);
 				} else {
-					server.removeSession(this, "Connection failed, invalid connection request acception");
+					server.removeSession(this, "Login failed");
 				}
 			} else {
 				this.sendMessage(Reliability.RELIABLE_ORDERED, ID_CONNECTION_ATTEMPT_FAILED);
 				this.setState(RakNetState.DISCONNECTED);
-				server.removeSession(this, "Connection failed, invalid GUID");
+				server.removeSession(this, "Login failed");
 			}
 		} else if (packetId == ID_NEW_INCOMING_CONNECTION && this.getState() == RakNetState.HANDSHAKING) {
 			NewIncomingConnection clientHandshake = new NewIncomingConnection(packet);
@@ -137,10 +137,10 @@ public class RakNetClientSession extends RakNetSession {
 				this.setState(RakNetState.CONNECTED);
 				server.getListener().onClientConnect(this);
 			} else {
-				server.removeSession(this, "Connection failed, invalid handshake");
+				server.removeSession(this, "Login failed");
 			}
 		} else if (packetId == ID_DISCONNECTION_NOTIFICATION) {
-			server.removeSession(this, "Client disconnected");
+			server.removeSession(this, "Disconnected");
 		} else if (packetId >= ID_USER_PACKET_ENUM) {
 			server.getListener().handlePacket(this, packet, channel);
 		}
