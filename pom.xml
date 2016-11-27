@@ -4,12 +4,12 @@
 
   <groupId>net.marfgamer</groupId>
   <artifactId>jraknet</artifactId>
-  <version>2.2.3</version>
+  <version>2.2.4</version>
   <packaging>jar</packaging>
 
   <name>JRakNet</name>
-  <description>A RakNet port to Java</description>
-  <url>http://github.com/MarfGamer/JRakNet</url>
+  <description>A RakNet protocol implementation written in Java</description>
+  <url>http://marfgamer.net/JRakNet</url>
 
   <properties>
     <maven.compiler.source>1.8</maven.compiler.source>
