@@ -36,6 +36,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.netty.bootstrap.Bootstrap;
@@ -105,7 +106,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	public RakNetClient(DiscoveryMode discoveryMode, int discoveryPort) {
 		// Set client data
-		this.guid = RakNet.UNIQUE_ID_BITS.getLeastSignificantBits();
+		this.guid = new Random().nextLong();
 		this.timestamp = System.currentTimeMillis();
 
 		// Set discovery data

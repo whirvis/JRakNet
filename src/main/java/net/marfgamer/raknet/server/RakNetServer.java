@@ -34,6 +34,7 @@ import static net.marfgamer.raknet.protocol.MessageIdentifier.*;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.netty.bootstrap.Bootstrap;
@@ -94,7 +95,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 	public RakNetServer(int port, int maxConnections, int maximumTransferUnit, Identifier identifier) {
 		// Set server data
-		this.guid = RakNet.UNIQUE_ID_BITS.getMostSignificantBits();
+		this.guid = new Random().nextLong();
 		this.timestamp = System.currentTimeMillis();
 		this.port = port;
 		this.maxConnections = maxConnections;
