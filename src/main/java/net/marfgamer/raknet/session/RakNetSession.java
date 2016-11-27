@@ -71,7 +71,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	public static final long ACK_SEND_WAIT_TIME_MILLIS = 3000L;
 	public static final long PING_SEND_WAIT_TIME_MILLIS = 3000L;
 	public static final long DETECTION_SEND_WAIT_TIME_MILLIS = 5000L;
-	public static final long SESSION_TIMEOUT = PING_SEND_WAIT_TIME_MILLIS * 5L;
+	public static final long SESSION_TIMEOUT = DETECTION_SEND_WAIT_TIME_MILLIS * 5L;
 
 	// Session data
 	private final long guid;
