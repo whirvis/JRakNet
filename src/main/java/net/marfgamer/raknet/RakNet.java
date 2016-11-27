@@ -30,8 +30,6 @@
  */
 package net.marfgamer.raknet;
 
-import java.util.UUID;
-
 /**
  * Contains info for RakNet
  *
@@ -44,11 +42,6 @@ public class RakNet {
 	 * can for debugging data
 	 */
 	// TODO? public static boolean LOGGER_ENABLED = false;
-
-	/**
-	 * Server takes higher bits, client takes lower bits
-	 */
-	public static final UUID UNIQUE_ID_BITS = UUID.randomUUID();
 
 	// Network protocol data
 	public static final int SERVER_NETWORK_PROTOCOL = 8;
