@@ -82,6 +82,37 @@ public interface RakNetClientListener {
 	}
 
 	/**
+	 * Called when an external server is added to the client's external server
+	 * list
+	 * 
+	 * @param address
+	 *            The address of the server
+	 */
+	public default void onExternalServerAdded(InetSocketAddress address) {
+	}
+
+	/**
+	 * Called when the identifier of an external server changes
+	 * 
+	 * @param address
+	 *            The address of the server
+	 * @param identifier
+	 *            The new identifier
+	 */
+	public default void onExternalServerIdentifierUpdate(InetSocketAddress address, Identifier identifier) {
+	}
+
+	/**
+	 * Called when an external server is removed from the client's external
+	 * server list
+	 * 
+	 * @param address
+	 *            The address of the server
+	 */
+	public default void onExternalServerRemoved(InetSocketAddress address) {
+	}
+
+	/**
 	 * Called when the client successfully connects to a server
 	 * 
 	 * @param session

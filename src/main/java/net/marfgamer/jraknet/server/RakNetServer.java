@@ -80,6 +80,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	private final int port;
 	private final int maxConnections;
 	private final int maximumTransferUnit;
+	private boolean broadcastingEnabled;
 	private Identifier identifier;
 
 	// Networking data
@@ -100,6 +101,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		this.port = port;
 		this.maxConnections = maxConnections;
 		this.maximumTransferUnit = maximumTransferUnit;
+		this.broadcastingEnabled = true;
 		this.identifier = identifier;
 
 		// Initiate bootstrap data
@@ -131,6 +133,15 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	public RakNetServer(int port, int maxConnections, Identifier identifier) {
 		this(port, maxConnections);
 		this.identifier = identifier;
+	}
+
+	/**
+	 * Returns the server's networking protocol version
+	 * 
+	 * @return The server's networking protocol version
+	 */
+	public int getProtocolVersion() {
+		return RakNet.SERVER_NETWORK_PROTOCOL;
 	}
 
 	/**
@@ -179,6 +190,25 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
+	 * Enables/disables server broadcasting
+	 * 
+	 * @param enabled
+	 *            Whether or not the server will broadcast
+	 */
+	public void setBroadcastingEnabled(boolean enabled) {
+		this.broadcastingEnabled = enabled;
+	}
+
+	/**
+	 * Returns whether or not broadcasting is enabled
+	 * 
+	 * @return Whether or not broadcasting is enabled
+	 */
+	public boolean getBroadcastingEnabled() {
+		return this.broadcastingEnabled;
+	}
+
+	/**
 	 * Returns the identifier the server uses for discovery
 	 * 
 	 * @return The identifier the server uses for discovery
@@ -192,11 +222,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * 
 	 * @param identifier
 	 *            The new identifier
-	 * @return The server
 	 */
-	public RakNetServer setIdentifier(Identifier identifier) {
+	public void setIdentifier(Identifier identifier) {
 		this.identifier = identifier;
-		return this;
 	}
 
 	/**
@@ -479,7 +507,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			UnconnectedPing ping = new UnconnectedPing(packet);
 			ping.decode();
 
-			if ((packetId == ID_UNCONNECTED_PING || sessions.size() < this.maxConnections)) {
+			// Make sure parameters match and that broadcasting is enabled
+			if ((packetId == ID_UNCONNECTED_PING || sessions.size() < this.maxConnections)
+					&& this.broadcastingEnabled == true) {
 				ServerPing pingEvent = new ServerPing(sender, identifier);
 				listener.handlePing(pingEvent);
 
@@ -501,10 +531,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				// Are there any problems?
 				RakNetPacket errorPacket = this.validateSender(sender);
 				if (errorPacket == null) {
-					if (connectionRequestOne.protocolVersion != RakNet.SERVER_NETWORK_PROTOCOL) {
+					if (connectionRequestOne.protocolVersion != this.getProtocolVersion()) {
 						// Incompatible protocol!
 						IncompatibleProtocol incompatibleProtocol = new IncompatibleProtocol();
-						incompatibleProtocol.networkProtocol = RakNet.SERVER_NETWORK_PROTOCOL;
+						incompatibleProtocol.networkProtocol = this.getProtocolVersion();
 						incompatibleProtocol.serverGuid = this.guid;
 						incompatibleProtocol.encode();
 						this.sendRawMessage(incompatibleProtocol, sender);

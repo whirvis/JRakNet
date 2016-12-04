@@ -106,9 +106,7 @@ public class DiscoveryThread extends Thread {
 		this.running = true;
 		while (this.running) {
 			for (RakNetClient client : this.clients) {
-				if (client.getDiscoveryMode() != DiscoveryMode.NONE) {
-					client.updateDiscoveryData();
-				}
+				client.updateDiscoveryData();
 			}
 
 			// Exceptions caught here have to do with the thread

@@ -63,4 +63,13 @@ public class Identifier {
 		return this.build();
 	}
 
+	@Override
+	public boolean equals(Object object) {
+		if (object instanceof Identifier) {
+			Identifier identifier = (Identifier) object;
+			return this.build().equals(identifier.build());
+		}
+		return false;
+	}
+
 }
