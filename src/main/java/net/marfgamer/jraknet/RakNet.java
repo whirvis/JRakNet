@@ -46,7 +46,7 @@ public class RakNet {
 	// Version data
 	public static final int JRAKNET_RELEASE_VERSION = 2;
 	public static final int JRAKNET_MAJOR_VERSION = 3;
-	public static final int JRAKNET_MINOR_VERSION = 0;
+	public static final int JRAKNET_MINOR_VERSION = 1;
 
 	// Network protocol data
 	public static final int SERVER_NETWORK_PROTOCOL = 8;
