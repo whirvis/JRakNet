@@ -100,4 +100,15 @@ public class DiscoveredServer {
 		this.identifier = identifier;
 	}
 
+	@Override
+	public boolean equals(Object object) {
+		if (object instanceof DiscoveredServer) {
+			DiscoveredServer discoveredServer = (DiscoveredServer) object;
+			return (discoveredServer.getAddress().equals(this.getAddress())
+					&& discoveredServer.getDiscoveryTimestamp() == this.getDiscoveryTimestamp()
+					&& discoveredServer.getIdentifier().equals(this.getIdentifier()));
+		}
+		return false;
+	}
+
 }
