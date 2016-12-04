@@ -92,6 +92,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	private int discoveryPort;
 	private DiscoveryMode discoveryMode;
 	private final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> discovered;
+	private final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> externalServers;
 
 	// Networking data
 	private final Bootstrap bootstrap;
@@ -116,6 +117,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			this.discoveryMode = (discoveryPort > -1 ? DiscoveryMode.ALL_CONNECTIONS : DiscoveryMode.NONE);
 		}
 		this.discovered = new ConcurrentHashMap<InetSocketAddress, DiscoveredServer>();
+		this.externalServers = new ConcurrentHashMap<InetSocketAddress, DiscoveredServer>();
 
 		// Set networking data
 		this.bootstrap = new Bootstrap();
@@ -150,6 +152,15 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
+	 * Returns the client's networking protocol version
+	 * 
+	 * @return The client's networking protocol version
+	 */
+	public int getProtocolVersion() {
+		return RakNet.CLIENT_NETWORK_PROTOCOL;
+	}
+
+	/**
 	 * Returns the client's globally unique ID (GUID)
 	 * 
 	 * @return The client's globally unique ID
@@ -181,11 +192,9 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * 
 	 * @param discoveryPort
 	 *            The new discovery port
-	 * @return The client
 	 */
-	public RakNetClient setDiscoveryPort(int discoveryPort) {
+	public void setDiscoveryPort(int discoveryPort) {
 		this.discoveryPort = discoveryPort;
-		return this;
 	}
 
 	/**
@@ -202,9 +211,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * 
 	 * @param mode
 	 *            How the client will discover servers on the local network
-	 * @return The client
 	 */
-	public RakNetClient setDiscoveryMode(DiscoveryMode mode) {
+	public void setDiscoveryMode(DiscoveryMode mode) {
 		this.discoveryMode = (mode != null ? mode : DiscoveryMode.NONE);
 		if (this.discoveryMode == DiscoveryMode.NONE) {
 			if (listener != null) {
@@ -214,7 +222,102 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			}
 			discovered.clear(); // We are not discovering servers anymore!
 		}
-		return this;
+	}
+
+	/**
+	 * Adds a server to the client's external server discovery list, functions
+	 * like the normal discovery system but is not affect by the
+	 * <code>DiscoveryMode</code> or discovery port set for the client
+	 * 
+	 * @param address
+	 *            The server address
+	 */
+	public void addExternalServer(InetSocketAddress address) {
+		if (!externalServers.contains(address)) {
+			externalServers.put(address, new DiscoveredServer(address, -1, null));
+			listener.onExternalServerAdded(address);
+		}
+	}
+
+	/**
+	 * Adds a server to the client's external server discovery list, functions
+	 * like the normal discovery system but is not affect by the
+	 * <code>DiscoveryMode</code> or discovery port set for the client
+	 * 
+	 * @param address
+	 *            The server address
+	 * @param port
+	 *            The server port
+	 */
+	public void addExternalServer(InetAddress address, int port) {
+		this.addExternalServer(new InetSocketAddress(address, port));
+	}
+
+	/**
+	 * Adds a server to the client's external server discovery list, functions
+	 * like the normal discovery system but is not affect by the
+	 * <code>DiscoveryMode</code> or discovery port set for the client
+	 * 
+	 * @param address
+	 *            The server address
+	 * @param port
+	 *            The server port
+	 * @throws UnknownHostException
+	 *             Thrown if the specified address is an unknown host
+	 */
+	public void addExternalServer(String address, int port) throws UnknownHostException {
+		this.addExternalServer(InetAddress.getByName(address), port);
+	}
+
+	/**
+	 * Removes an external server from the client's external server discovery
+	 * list
+	 * 
+	 * @param address
+	 *            The server address
+	 */
+	public void removeExternalServer(InetSocketAddress address) {
+		if (externalServers.contains(address)) {
+			externalServers.remove(address);
+			listener.onExternalServerRemoved(address);
+		}
+	}
+
+	/**
+	 * Removes an external server from the client's external server discovery
+	 * list
+	 * 
+	 * @param address
+	 *            The server address
+	 * @param port
+	 *            The server port
+	 */
+	public void removeExternalServer(InetAddress address, int port) {
+		this.removeExternalServer(new InetSocketAddress(address, port));
+	}
+
+	/**
+	 * Removes an external server from the client's external server discovery
+	 * list
+	 * 
+	 * @param address
+	 *            The server address
+	 * @param port
+	 *            The server port
+	 * @throws UnknownHostException
+	 *             Thrown if the specified address is an unknown host
+	 */
+	public void removeExternalServer(String address, int port) throws UnknownHostException {
+		this.removeExternalServer(InetAddress.getByName(address), port);
+	}
+
+	/**
+	 * Returns the external servers as an array
+	 * 
+	 * @return The external servers as an array
+	 */
+	public DiscoveredServer[] getExternalServers() {
+		return externalServers.values().toArray(new DiscoveredServer[externalServers.size()]);
 	}
 
 	/**
@@ -361,12 +464,6 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * servers that have taken too long to respond to a ping
 	 */
 	public void updateDiscoveryData() {
-		// Make sure we have a listener
-		if (listener == null) {
-			return;// throw new NoListenerException("Unable to start client,
-					// there is no listener!");
-		}
-
 		// Remove all servers that have timed out
 		ArrayList<InetSocketAddress> forgottenServers = new ArrayList<InetSocketAddress>();
 		for (InetSocketAddress discoveredServerAddress : discovered.keySet()) {
@@ -379,17 +476,27 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		}
 		discovered.keySet().removeAll(forgottenServers);
 
-		// Broadcast ping
+		// Broadcast ping to local network
 		if (discoveryMode != DiscoveryMode.NONE && discoveryPort > -1) {
 			UnconnectedPing ping = new UnconnectedPing();
 			if (discoveryMode == DiscoveryMode.OPEN_CONNECTIONS) {
 				ping = new UnconnectedPingOpenConnections();
 			}
-
 			ping.timestamp = this.getTimestamp();
 			ping.encode();
 
 			this.sendRawMessage(ping, new InetSocketAddress("255.255.255.255", discoveryPort));
+		}
+
+		// Send ping to external servers
+		if (!externalServers.isEmpty()) {
+			UnconnectedPing ping = new UnconnectedPing();
+			ping.timestamp = this.getTimestamp();
+			ping.encode();
+
+			for (InetSocketAddress externalAddress : externalServers.keySet()) {
+				this.sendRawMessage(ping, externalAddress);
+			}
 		}
 	}
 
@@ -403,20 +510,35 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            The pong packet to handle
 	 */
 	public void updateDiscoveryData(InetSocketAddress sender, UnconnectedPong pong) {
-		if (!discovered.containsKey(sender)) {
-			// Server discovered
-			discovered.put(sender, new DiscoveredServer(sender, System.currentTimeMillis(), pong.identifier));
-			if (listener != null) {
-				listener.onServerDiscovered(sender, pong.identifier);
+
+		// Is this a local or an external server?
+		if (sender.getAddress().isSiteLocalAddress()) {
+			// This is a local server
+			if (!discovered.containsKey(sender)) {
+				// Server discovered
+				discovered.put(sender, new DiscoveredServer(sender, System.currentTimeMillis(), pong.identifier));
+				if (listener != null) {
+					listener.onServerDiscovered(sender, pong.identifier);
+				}
+			} else {
+				// Server already discovered, but data has changed
+				DiscoveredServer server = discovered.get(sender);
+				server.setDiscoveryTimestamp(System.currentTimeMillis());
+				if (!pong.identifier.equals(server.getIdentifier())) {
+					server.setIdentifier(pong.identifier);
+					if (listener != null) {
+						listener.onServerIdentifierUpdate(sender, pong.identifier);
+					}
+				}
 			}
 		} else {
-			// Server already discovered, but data has changed
-			DiscoveredServer server = discovered.get(sender);
-			server.setDiscoveryTimestamp(System.currentTimeMillis());
-			if (server.getIdentifier().equals(pong.identifier) == false) {
-				server.setIdentifier(pong.identifier);
-				if (listener != null) {
-					listener.onServerIdentifierUpdate(sender, pong.identifier);
+			// This is an external server
+			if (externalServers.containsKey(sender)) {
+				DiscoveredServer server = externalServers.get(sender);
+				server.setDiscoveryTimestamp(System.currentTimeMillis());
+				if (!pong.identifier.equals(server.getIdentifier())) {
+					server.setIdentifier(pong.identifier);
+					listener.onExternalServerIdentifierUpdate(sender, pong.identifier);
 				}
 			}
 		}
@@ -450,7 +572,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			while (unit.retry() > 0 && preparation.loginPackets[0] == false && preparation.cancelReason == null) {
 				OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne();
 				connectionRequestOne.maximumTransferUnit = unit.getMaximumTransferUnit();
-				connectionRequestOne.protocolVersion = RakNet.CLIENT_NETWORK_PROTOCOL;
+				connectionRequestOne.protocolVersion = this.getProtocolVersion();
 				connectionRequestOne.encode();
 				this.sendRawMessage(connectionRequestOne, address);
 

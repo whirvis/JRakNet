@@ -41,7 +41,12 @@ public class RakNet {
 	 * If this is set to true, the server and client will log as much as they
 	 * can for debugging data
 	 */
-	// TODO? public static boolean LOGGER_ENABLED = false;
+	/* TODO? public static boolean LOGGER_ENABLED = false; */
+
+	// Version data
+	public static final int JRAKNET_RELEASE_VERSION = 2;
+	public static final int JRAKNET_MAJOR_VERSION = 3;
+	public static final int JRAKNET_MINOR_VERSION = 0;
 
 	// Network protocol data
 	public static final int SERVER_NETWORK_PROTOCOL = 8;
