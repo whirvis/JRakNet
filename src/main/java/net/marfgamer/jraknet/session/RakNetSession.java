@@ -738,7 +738,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		}
 
 		// Resend lost packets
-		if (currentTime - this.lastRecoverySendTime >= RakNet.RECOVERY_SEND_INTERVAL && !recoveryQueue.isEmpty()) {
+		if (currentTime - this.lastRecoverySendTime >= RakNet.RECOVERY_SEND_INTERVAL
+				&& recoveryQueue.values().iterator().hasNext()) {
 			this.sendCustomPacket(recoveryQueue.values().iterator().next(), false);
 			this.lastRecoverySendTime = currentTime;
 		}
