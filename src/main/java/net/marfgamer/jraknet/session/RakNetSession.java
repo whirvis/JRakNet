@@ -537,6 +537,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		if (acknowledge.getType().equals(AcknowledgeType.ACKNOWLEDGED)) {
 			// Remove acknowledged packets from the recovery queue
 			for (Record record : acknowledge.records) {
+				// TODO: Implement onAcknowledge
 				recoveryQueue.remove(record.getIndex());
 			}
 		} else if (acknowledge.getType().equals(AcknowledgeType.NOT_ACKNOWLEDGED)) {
@@ -545,6 +546,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 			int[] newSequenceNumbers = new int[oldSequenceNumbers.length];
 
 			for (int i = 0; i < acknowledge.records.size(); i++) {
+				// TODO: Implement onNotAcknowledge
+
 				// Update records and resend lost packets
 				Record record = acknowledge.records.get(i);
 				if (recoveryQueue.containsKey(record.getIndex())) {
@@ -741,8 +744,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		}
 
 		// Send ping to detect latency if it is enabled
-		if (currentTime - this.lastPingSendTime >= RakNet.PING_SEND_INTERVAL
-				&& state.getOrder() >= this.keepAliveState) {
+		if (currentTime - this.lastPingSendTime >= RakNet.PING_SEND_INTERVAL && state.getOrder() >= this.keepAliveState
+				&& this.keepAliveState >= 0) {
 			ConnectedPing ping = new ConnectedPing();
 			ping.identifier = this.latencyIdentifier++;
 			ping.encode();
@@ -754,7 +757,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		// Make sure the client is still connected
 		if (currentTime - this.lastPacketReceiveTime >= RakNet.DETECTION_SEND_INTERVAL
 				&& currentTime - this.lastKeepAliveSendTime >= RakNet.DETECTION_SEND_INTERVAL
-				&& state.getOrder() >= this.keepAliveState) {
+				&& state.getOrder() >= this.keepAliveState && this.keepAliveState >= 0) {
 			this.sendMessage(Reliability.UNRELIABLE, ID_DETECT_LOST_CONNECTIONS);
 			this.lastKeepAliveSendTime = currentTime;
 		}
