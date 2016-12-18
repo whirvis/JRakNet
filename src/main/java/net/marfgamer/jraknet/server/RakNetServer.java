@@ -58,12 +58,10 @@ import net.marfgamer.jraknet.protocol.login.OpenConnectionResponseOne;
 import net.marfgamer.jraknet.protocol.login.OpenConnectionResponseTwo;
 import net.marfgamer.jraknet.protocol.message.CustomPacket;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Acknowledge;
-import net.marfgamer.jraknet.protocol.message.acknowledge.AcknowledgeReceipt;
 import net.marfgamer.jraknet.protocol.status.UnconnectedPing;
 import net.marfgamer.jraknet.protocol.status.UnconnectedPong;
 import net.marfgamer.jraknet.session.GeminusRakNetPeer;
 import net.marfgamer.jraknet.session.RakNetClientSession;
-import net.marfgamer.jraknet.session.RakNetSession;
 import net.marfgamer.jraknet.session.RakNetState;
 import net.marfgamer.jraknet.util.RakNetUtils;
 
@@ -91,7 +89,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	// Session data
 	private Channel channel;
 	private volatile RakNetServerListener listener;
-	private volatile boolean running; // Allow other threads to modify this
+	private volatile boolean running;
 	private final ConcurrentHashMap<InetSocketAddress, RakNetClientSession> sessions;
 
 	public RakNetServer(int port, int maxConnections, int maximumTransferUnit, Identifier identifier) {
@@ -347,6 +345,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			RakNetClientSession session = sessions.get(address);
 			if (session.getState() == RakNetState.CONNECTED) {
 				listener.onClientDisconnect(session, reason);
+			} else {
+				listener.onClientPreDisconnect(address, reason);
 			}
 			session.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
 			sessions.remove(address);
@@ -426,44 +426,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 */
 	public void unblockAddress(InetAddress address) {
 		handler.unblockAddress(address);
-	}
-
-	/**
-	 * Blocks the address and disconnects all the clients on the address with
-	 * the specified reason for the specified amount of time
-	 * 
-	 * @param address
-	 *            The address to block
-	 * @param reason
-	 *            The reason the address was blocked
-	 * @param time
-	 *            How long the address will blocked in milliseconds
-	 */
-	public void blockAddress(InetSocketAddress address, String reason, long time) {
-		this.blockAddress(address.getAddress(), reason, time);
-	}
-
-	/**
-	 * Blocks the address and disconnects all the clients on the address for the
-	 * specified amount of time
-	 * 
-	 * @param address
-	 *            The address to block
-	 * @param time
-	 *            How long the address will blocked in milliseconds
-	 */
-	public void blockAddress(InetSocketAddress address, long time) {
-		this.blockAddress(address, "Blocked", time);
-	}
-
-	/**
-	 * Unblocks the specified address
-	 * 
-	 * @param address
-	 *            The address to unblock
-	 */
-	public void unblockAddress(InetSocketAddress address) {
-		this.unblockAddress(address.getAddress());
 	}
 
 	/**
@@ -599,15 +561,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				custom.decode();
 
 				RakNetClientSession session = sessions.get(sender);
-				session.handleCustom0(custom);
-			}
-		} else if (packetId == ID_SND_RECEIPT_ACKED || packetId == ID_SND_RECEIPT_LOSS) {
-			if (sessions.containsKey(sender)) {
-				AcknowledgeReceipt acknowledgeReceipt = new AcknowledgeReceipt(packet);
-				acknowledgeReceipt.decode();
-
-				RakNetClientSession session = sessions.get(sender);
-				session.handleAcknowledgeReceipt(acknowledgeReceipt);
+				session.handleCustom(custom);
 			}
 		} else if (packetId == Acknowledge.ACKNOWLEDGED || packetId == Acknowledge.NOT_ACKNOWLEDGED) {
 			if (sessions.containsKey(sender)) {
@@ -703,8 +657,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 					// Update session and make sure it isn't DOSing us
 					session.update();
 					if (session.getPacketsReceivedThisSecond() >= RakNet.MAX_PACKETS_PER_SECOND) {
-						this.blockAddress(session.getAddress(), "Too many packets",
-								RakNetSession.MAX_PACKETS_PER_SECOND_BLOCK);
+						this.blockAddress(session.getInetAddress(), "Too many packets",
+								RakNet.MAX_PACKETS_PER_SECOND_BLOCK);
 					}
 				} catch (Exception e) {
 					// An error related to the session occurred, remove it!

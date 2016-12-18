@@ -71,10 +71,8 @@ public class LatencyTest {
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 		while (true) {
-			synchronized (server) {
-				frame.updatePaneText(server.getSessions());
-				RakNetUtils.threadLock(500);
-			}
+			frame.updatePaneText(server.getSessions());
+			RakNetUtils.threadLock(500);
 		}
 	}
 

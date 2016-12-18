@@ -34,14 +34,13 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
-import net.marfgamer.jraknet.RakNet;
-import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.client.RakNetClientListener;
 import net.marfgamer.jraknet.exception.RakNetException;
 import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.message.CustomPacket;
 import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
+import net.marfgamer.jraknet.server.BlockedClient;
 import net.marfgamer.jraknet.server.RakNetServer;
 import net.marfgamer.jraknet.server.RakNetServerListener;
 import net.marfgamer.jraknet.session.RakNetClientSession;
@@ -90,6 +89,17 @@ public class SplitPacketTest {
 
 			@Override
 			public void onClientConnect(RakNetClientSession session) {
+				// Only accept the packet if it's from the same device
+				try {
+					if (!InetAddress.getLocalHost().equals(session.getAddress().getAddress())) {
+						server.removeSession(session, "Session is not from local address");
+						server.blockAddress(session.getInetAddress(), BlockedClient.PERMANENT_BLOCK);
+						return; // The sender is not from our address!
+					}
+				} catch (UnknownHostException e) {
+					e.printStackTrace();
+				}
+
 				System.out.println("Server: Client connected from " + session.getAddress() + "!");
 			}
 
@@ -101,15 +111,6 @@ public class SplitPacketTest {
 
 			@Override
 			public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
-				// Only accept the packet if it's from the same device
-				try {
-					if (!InetAddress.getLocalHost().equals(session.getAddress().getAddress())) {
-						return; // The sender is not from our address!
-					}
-				} catch (UnknownHostException e) {
-					e.printStackTrace();
-				}
-
 				System.out.println("Server: Received packet of " + packet.size() + " bytes from " + session.getAddress()
 						+ ", checking data...");
 
@@ -131,7 +132,7 @@ public class SplitPacketTest {
 						System.exit(1);
 					} else {
 						lastInt = currentInt;
-						System.out.print(lastInt + (packet.remaining() >= 2 ? ", " : "\n"));
+						System.out.print(lastInt + (packet.remaining() >= 4 ? ", " : "\n"));
 					}
 				}
 
@@ -176,12 +177,14 @@ public class SplitPacketTest {
 		// Server connected
 		client.setListener(new RakNetClientListener() {
 
+			private Packet packet;
+
 			@Override
 			public void onConnect(RakNetServerSession session) {
 				System.out.println("Client: Connected to server with MTU " + session.getMaximumTransferUnit());
 
 				// Calculate maximum packet size
-				RakNetPacket packet = new RakNetPacket(SPLIT_START_ID);
+				this.packet = new RakNetPacket(SPLIT_START_ID);
 				int maximumPacketSize = (session.getMaximumTransferUnit() - CustomPacket.calculateDummy()
 						- EncapsulatedPacket.calculateDummy(Reliability.RELIABLE_ORDERED, false))
 						* RakNet.MAX_SPLIT_COUNT;

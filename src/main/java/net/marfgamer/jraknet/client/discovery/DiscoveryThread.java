@@ -31,8 +31,6 @@
 package net.marfgamer.jraknet.client.discovery;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import net.marfgamer.jraknet.client.RakNetClient;
 
@@ -44,11 +42,11 @@ import net.marfgamer.jraknet.client.RakNetClient;
  */
 public class DiscoveryThread extends Thread {
 
-	private List<RakNetClient> clients;
+	private ArrayList<RakNetClient> clients;
 	private volatile boolean running;
 
 	public DiscoveryThread() {
-		this.clients = Collections.synchronizedList(new ArrayList<RakNetClient>());
+		this.clients = new ArrayList<RakNetClient>();
 	}
 
 	/**
