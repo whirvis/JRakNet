@@ -104,8 +104,9 @@ public class SessionPreparation {
 
 			if (!connectionResponseTwo.failed() && connectionResponseTwo.magic == true
 					&& connectionResponseTwo.serverGuid == this.guid
-					&& connectionResponseTwo.maximumTransferUnit == this.maximumTransferUnit) {
+					&& connectionResponseTwo.maximumTransferUnit <= this.maximumTransferUnit) {
 				this.loginPackets[1] = true;
+				this.maximumTransferUnit = connectionResponseTwo.maximumTransferUnit;
 				if (connectionResponseTwo.encryptionEnabled == true) {
 					client.getListener().onWarning(Warning.ENCRYPTION_ENABLED);
 				}
