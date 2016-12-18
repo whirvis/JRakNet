@@ -63,12 +63,6 @@ import net.marfgamer.jraknet.util.map.IntMap;
  */
 public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer {
 
-	public static final long SEND_INTERVAL = 10L;
-	public static final long RECOVERY_SEND_INTERVAL = 1000L;
-	public static final long PING_SEND_INTERVAL = 2500L;
-	public static final long DETECTION_SEND_INTERVAL = 5000L;
-	public static final long SESSION_TIMEOUT = DETECTION_SEND_INTERVAL * 5L;
-
 	// Session data
 	private final long guid;
 	private final int maximumTransferUnit;
@@ -741,13 +735,14 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		}
 
 		// Resend lost packets
-		if (currentTime - this.lastRecoverySendTime >= RECOVERY_SEND_INTERVAL && !recoveryQueue.isEmpty()) {
+		if (currentTime - this.lastRecoverySendTime >= RakNet.RECOVERY_SEND_INTERVAL && !recoveryQueue.isEmpty()) {
 			this.sendCustomPacket(recoveryQueue.values().iterator().next(), false);
 			this.lastRecoverySendTime = currentTime;
 		}
 
 		// Send ping to detect latency if it is enabled
-		if (currentTime - this.lastPingSendTime >= PING_SEND_INTERVAL && state.getOrder() >= this.keepAliveState) {
+		if (currentTime - this.lastPingSendTime >= RakNet.PING_SEND_INTERVAL
+				&& state.getOrder() >= this.keepAliveState) {
 			ConnectedPing ping = new ConnectedPing();
 			ping.identifier = this.latencyIdentifier++;
 			ping.encode();
@@ -757,15 +752,15 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		}
 
 		// Make sure the client is still connected
-		if (currentTime - this.lastPacketReceiveTime >= DETECTION_SEND_INTERVAL
-				&& currentTime - this.lastKeepAliveSendTime >= DETECTION_SEND_INTERVAL
+		if (currentTime - this.lastPacketReceiveTime >= RakNet.DETECTION_SEND_INTERVAL
+				&& currentTime - this.lastKeepAliveSendTime >= RakNet.DETECTION_SEND_INTERVAL
 				&& state.getOrder() >= this.keepAliveState) {
 			this.sendMessage(Reliability.UNRELIABLE, ID_DETECT_LOST_CONNECTIONS);
 			this.lastKeepAliveSendTime = currentTime;
 		}
 
 		// Client timed out
-		if (currentTime - this.lastPacketReceiveTime >= RakNetSession.SESSION_TIMEOUT) {
+		if (currentTime - this.lastPacketReceiveTime >= RakNet.SESSION_TIMEOUT) {
 			throw new TimeoutException();
 		}
 
