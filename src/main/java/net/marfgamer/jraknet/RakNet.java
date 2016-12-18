@@ -61,5 +61,6 @@ public class RakNet {
 	public static final int MAX_SPLIT_COUNT = 128;
 	public static final int MAX_SPLITS_PER_QUEUE = 4;
 	public static final int MAX_PACKETS_PER_SECOND = 500;
+	public static final int MAX_PACKETS_PER_SECOND_BLOCK = (1000 * 300);
 
 }

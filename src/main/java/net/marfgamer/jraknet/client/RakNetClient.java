@@ -67,7 +67,6 @@ import net.marfgamer.jraknet.protocol.status.UnconnectedPing;
 import net.marfgamer.jraknet.protocol.status.UnconnectedPingOpenConnections;
 import net.marfgamer.jraknet.protocol.status.UnconnectedPong;
 import net.marfgamer.jraknet.session.RakNetServerSession;
-import net.marfgamer.jraknet.session.RakNetSession;
 import net.marfgamer.jraknet.session.RakNetState;
 import net.marfgamer.jraknet.session.UnumRakNetPeer;
 import net.marfgamer.jraknet.util.RakNetUtils;
@@ -80,8 +79,8 @@ import net.marfgamer.jraknet.util.RakNetUtils;
 public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	// JRakNet plans to use it's own dynamic MTU system later
-	protected static final MaximumTransferUnit[] units = new MaximumTransferUnit[] { new MaximumTransferUnit(1172, 4),
-			new MaximumTransferUnit(548, 5) };
+	protected static final MaximumTransferUnit[] units = new MaximumTransferUnit[] { new MaximumTransferUnit(1464, 3),
+			new MaximumTransferUnit(1172, 4), new MaximumTransferUnit(548, 5) };
 
 	// Used to discover systems without relying on the main thread
 	private static DiscoveryThread discoverySystem = new DiscoveryThread();
@@ -423,7 +422,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 					CustomPacket custom = new CustomPacket(packet);
 					custom.decode();
 
-					session.handleCustom0(custom);
+					session.handleCustom(custom);
 				} else if (packetId == Acknowledge.ACKNOWLEDGED || packetId == Acknowledge.NOT_ACKNOWLEDGED) {
 					Acknowledge acknowledge = new Acknowledge(packet);
 					acknowledge.decode();
@@ -684,7 +683,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            The address of the server to connect to
 	 * @return The Thread the client is running on
 	 */
-	public Thread connectThreaded(InetSocketAddress address) {
+	public synchronized Thread connectThreaded(InetSocketAddress address) {
 		// Give the thread a reference
 		RakNetClient client = this;
 
@@ -752,13 +751,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	private void initConnection() throws RakNetException {
 		while (session != null) {
-			long lastPacketReceiveTime = session.getLastPacketReceiveTime();
 			session.update();
-
-			if (System.currentTimeMillis() - lastPacketReceiveTime > RakNetSession.SESSION_TIMEOUT) {
-				this.disconnect("The session has timed out!");
-				break;
-			}
 		}
 	}
 

@@ -28,46 +28,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package net.marfgamer.jraknet.protocol.message.acknowledge;
+package net.marfgamer.jraknet.util.map;
 
-/**
- * Represents the type of an acknowledge receipt
- *
- * @author MarfGamer
- */
-public enum AcknowledgeReceiptType {
-
-	ACKNOWLEDGED(AcknowledgeReceipt.RECEIPT_ACKNOWLEDGED), LOSS(AcknowledgeReceipt.RECEIPT_LOSS);
-
-	public short id;
-
-	private AcknowledgeReceiptType(short id) {
-		this.id = id;
-	}
+public interface DynamicKey<T> {
 
 	/**
-	 * Returns the ID of the acknowledge receipt type
+	 * Renames the specified key and changes it to the specified one
 	 * 
-	 * @return The ID of the acknowledge receipt type
+	 * @param oldKey
+	 *            The old key
+	 * @param newKey
+	 *            The new key
+	 * @throws NullPointerException
+	 *             Thrown if the old key did not previously exist
 	 */
-	public short getId() {
-		return this.id;
-	}
-
-	/**
-	 * Returns an <code>AcknowledgeReceiptType</code> based on the specified ID
-	 * 
-	 * @param id
-	 *            The ID of the acknowledge receipt type to lookup
-	 * @return An <code>AcknowledgeReceiptType</code> based on the specified ID
-	 */
-	public static AcknowledgeReceiptType lookup(short id) {
-		for (AcknowledgeReceiptType type : AcknowledgeReceiptType.values()) {
-			if (type.getId() == id) {
-				return type;
-			}
-		}
-		return null;
-	}
+	public void renameKey(T oldKey, T newKey) throws NullPointerException;
 
 }

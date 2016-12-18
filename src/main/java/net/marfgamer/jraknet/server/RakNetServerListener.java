@@ -75,6 +75,17 @@ public interface RakNetServerListener {
 	}
 
 	/**
+	 * Called when a client that has connected to the server fails to log in
+	 * 
+	 * @param address
+	 *            The address of the client
+	 * @param reason
+	 *            The reason the client failed to login
+	 */
+	public default void onClientPreDisconnect(InetSocketAddress address, String reason) {
+	}
+
+	/**
 	 * Called when a client has connected and logged in to the server
 	 * 
 	 * @param session
