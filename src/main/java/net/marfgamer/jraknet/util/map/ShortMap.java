@@ -33,7 +33,7 @@ package net.marfgamer.jraknet.util.map;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ShortMap<T> extends HashMap<Short, T> implements Map<Short, T> {
+public class ShortMap<T> extends HashMap<Short, T> implements Map<Short, T>, DynamicKey<Short> {
 
 	private static final long serialVersionUID = 4324132003573381634L;
 
@@ -55,6 +55,15 @@ public class ShortMap<T> extends HashMap<Short, T> implements Map<Short, T> {
 
 	public T remove(short key) {
 		return super.remove(new Short(key));
+	}
+
+	@Override
+	public void renameKey(Short oldKey, Short newKey) throws NullPointerException {
+		T storedObject = this.remove(oldKey.shortValue());
+		if (storedObject == null) {
+			throw new NullPointerException();
+		}
+		this.put(newKey.shortValue(), storedObject);
 	}
 
 }

@@ -33,7 +33,7 @@ package net.marfgamer.jraknet.util.map;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ByteMap<T> extends HashMap<Byte, T> implements Map<Byte, T> {
+public class ByteMap<T> extends HashMap<Byte, T> implements Map<Byte, T>, DynamicKey<Byte> {
 
 	private static final long serialVersionUID = 4324132003573381634L;
 
@@ -55,6 +55,15 @@ public class ByteMap<T> extends HashMap<Byte, T> implements Map<Byte, T> {
 
 	public T remove(byte key) {
 		return super.remove(new Byte(key));
+	}
+
+	@Override
+	public void renameKey(Byte oldKey, Byte newKey) throws NullPointerException {
+		T storedObject = this.remove(oldKey.byteValue());
+		if (storedObject == null) {
+			throw new NullPointerException();
+		}
+		this.put(newKey.byteValue(), storedObject);
 	}
 
 }

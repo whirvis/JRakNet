@@ -42,8 +42,8 @@ import java.util.Arrays;
  */
 public class Record {
 
-	private final int index;
-	private final int endIndex;
+	private int index;
+	private int endIndex;
 
 	public Record(int index, int endIndex) {
 		this.index = index;
@@ -64,6 +64,16 @@ public class Record {
 	}
 
 	/**
+	 * Sets the starting index of the record
+	 * 
+	 * @param index
+	 *            The new starting index
+	 */
+	public void setIndex(int index) {
+		this.index = index;
+	}
+
+	/**
 	 * Returns the ending index of the record <br>
 	 * <br>
 	 * <b>Note:</b> It is very possible for this method to return -1, to make
@@ -74,6 +84,23 @@ public class Record {
 	 */
 	public int getEndIndex() {
 		return this.endIndex;
+	}
+
+	/**
+	 * Sets the ending index of the record <br>
+	 * <br>
+	 * <b>Note:</b> If the ending index is set to -1 or lower (It will be set to
+	 * -1 automatically if the new end index is lower than the starting index),
+	 * it is assumed that the record is a single record and not a ranged one
+	 * 
+	 * @param endIndex
+	 *            The new ending index
+	 */
+	public void setEndIndex(int endIndex) {
+		if (endIndex < this.index) {
+			endIndex = -1;
+		}
+		this.endIndex = endIndex;
 	}
 
 	/**

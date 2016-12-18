@@ -32,16 +32,16 @@ package net.marfgamer.jraknet.session;
 
 import static net.marfgamer.jraknet.protocol.MessageIdentifier.*;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Iterator;
 
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramPacket;
 import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNet;
 import net.marfgamer.jraknet.RakNetPacket;
-import net.marfgamer.jraknet.exception.RakNetException;
 import net.marfgamer.jraknet.exception.session.InvalidChannelException;
 import net.marfgamer.jraknet.exception.session.SplitQueueOverloadException;
 import net.marfgamer.jraknet.exception.session.TimeoutException;
@@ -50,13 +50,10 @@ import net.marfgamer.jraknet.protocol.SplitPacket;
 import net.marfgamer.jraknet.protocol.message.CustomPacket;
 import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Acknowledge;
-import net.marfgamer.jraknet.protocol.message.acknowledge.AcknowledgeReceipt;
-import net.marfgamer.jraknet.protocol.message.acknowledge.AcknowledgeReceiptType;
 import net.marfgamer.jraknet.protocol.message.acknowledge.AcknowledgeType;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 import net.marfgamer.jraknet.protocol.status.ConnectedPing;
 import net.marfgamer.jraknet.protocol.status.ConnectedPong;
-import net.marfgamer.jraknet.util.ArrayUtils;
 import net.marfgamer.jraknet.util.map.IntMap;
 
 /**
@@ -66,99 +63,84 @@ import net.marfgamer.jraknet.util.map.IntMap;
  */
 public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer {
 
-	public static final long MAX_PACKETS_PER_SECOND_BLOCK = 1000L * 300L;
-	public static final long RECOVERY_SEND_WAIT_TIME_MILLIS = 50L;
-	public static final long ACK_SEND_WAIT_TIME_MILLIS = 3000L;
-	public static final long PING_SEND_WAIT_TIME_MILLIS = 3000L;
-	public static final long DETECTION_SEND_WAIT_TIME_MILLIS = 5000L;
-	public static final long SESSION_TIMEOUT = DETECTION_SEND_WAIT_TIME_MILLIS * 5L;
+	public static final long SEND_INTERVAL = 10L;
+	public static final long RECOVERY_SEND_INTERVAL = 1000L;
+	public static final long PING_SEND_INTERVAL = 2500L;
+	public static final long DETECTION_SEND_INTERVAL = 5000L;
+	public static final long SESSION_TIMEOUT = DETECTION_SEND_INTERVAL * 5L;
 
 	// Session data
 	private final long guid;
 	private final int maximumTransferUnit;
+	private final Channel channel;
+	private final InetSocketAddress address;
 	private RakNetState state;
+	private int keepAliveState;
+
+	// Timing
 	private int packetsSentThisSecond;
 	private int packetsReceivedThisSecond;
-	private long packetSentReceiveCounter;
+	private long lastPacketCounterResetTime;
+	private long lastPacketSendTime;
 	private long lastPacketReceiveTime;
+	private long lastRecoverySendTime;
+	private long lastKeepAliveSendTime;
+	private long lastPingSendTime;
+
+	// Packet data
+	private int messageIndex;
+	private int splitId;
+	private final ArrayList<Integer> reliables;
+	private final IntMap<SplitPacket> splitQueue;
+	private final ArrayList<EncapsulatedPacket> sendQueue;
+	private final IntMap<EncapsulatedPacket[]> recoveryQueue;
+
+	// Ordering and sequencing
+	private int sendSequenceNumber;
+	private int receiveSequenceNumber;
+	private final int[] orderSendIndex;
+	private final int[] orderReceiveIndex;
+	private final int[] sequenceSendIndex;
+	private final int[] sequenceReceiveIndex;
+	private final IntMap<IntMap<EncapsulatedPacket>> handleQueue;
+
+	// Latency detection
+	private boolean latencyEnabled;
+	private int pongsReceived;
+	private long latencyIdentifier;
+	private long totalLatency;
 	private long latency;
 	private long lastLatency;
 	private long lowestLatency;
 	private long highestLatency;
 
-	// Networking data
-	private final Channel channel;
-	private final InetSocketAddress address;
-
-	// Ordering data
-	private int splitId;
-	private int messageIndex;
-	private int nextSequenceNumber;
-	private int lastSequenceNumber;
-	private final int[] sendOrderIndex;
-	private final int[] receiveOrderIndex;
-	private final int[] sendSequenceIndex;
-	private final int[] receiveSequenceIndex;
-
-	// Handling data
-	private final ArrayList<Integer> customIndexQueue;
-	private final ArrayList<Integer> messageIndexQueue;
-	private final IntMap<IntMap<EncapsulatedPacket>> orderedHandleQueue;
-
-	// Network queuing
-	private final IntMap<CustomPacket> recoveryQueue;
-	private final ArrayList<Record> acknowledgeQueue;
-	private final ArrayList<Record> nacknowledgeQueue;
-	private final IntMap<EncapsulatedPacket[]> requireAcknowledgeQueue;
-	private final IntMap<SplitPacket> splitQueue;
-	private final ArrayList<EncapsulatedPacket> sendQueue;
-	private long lastRecoverySend;
-	private long lastAckSend;
-
-	// Latency detection
-	private boolean latencyEnabled;
-	private long lastPingSend;
-	private long pongsReceived;
-	private long pongsTotalLatency;
-	private long pingIdentifier;
-
-	// Connection loss prevention
-	private long lastDetectionSend;
-
 	public RakNetSession(long guid, int maximumTransferUnit, Channel channel, InetSocketAddress address) {
 		// Session data
 		this.guid = guid;
 		this.maximumTransferUnit = maximumTransferUnit;
-		this.state = RakNetState.DISCONNECTED;
-		this.packetSentReceiveCounter = System.currentTimeMillis();
-		this.lastPacketReceiveTime = System.currentTimeMillis();
-
-		// Networking data
 		this.channel = channel;
 		this.address = address;
+		this.state = RakNetState.DISCONNECTED;
+		this.keepAliveState = RakNetState.CONNECTED.getOrder();
 
-		// Ordering data
-		this.sendOrderIndex = new int[RakNet.MAX_CHANNELS];
-		this.receiveOrderIndex = new int[RakNet.MAX_CHANNELS];
-		this.sendSequenceIndex = new int[RakNet.MAX_CHANNELS];
-		this.receiveSequenceIndex = new int[RakNet.MAX_CHANNELS];
+		// Timing
+		this.lastPacketReceiveTime = System.currentTimeMillis();
 
-		// Handling data
-		this.customIndexQueue = new ArrayList<Integer>();
-		this.messageIndexQueue = new ArrayList<Integer>();
-		this.orderedHandleQueue = new IntMap<IntMap<EncapsulatedPacket>>();
-		for (int i = 0; i < receiveOrderIndex.length; i++) {
-			orderedHandleQueue.put(i, new IntMap<EncapsulatedPacket>());
-		}
-
-		// Network queuing
-		this.recoveryQueue = new IntMap<CustomPacket>();
-		this.acknowledgeQueue = new ArrayList<Record>();
-		this.nacknowledgeQueue = new ArrayList<Record>();
-		this.requireAcknowledgeQueue = new IntMap<EncapsulatedPacket[]>();
+		// Packet data
+		this.reliables = new ArrayList<Integer>();
 		this.splitQueue = new IntMap<SplitPacket>();
 		this.sendQueue = new ArrayList<EncapsulatedPacket>();
-		this.lastAckSend = System.currentTimeMillis();
+		this.recoveryQueue = new IntMap<EncapsulatedPacket[]>();
+
+		// Ordering and sequencing
+		this.orderSendIndex = new int[RakNet.MAX_CHANNELS];
+		this.orderReceiveIndex = new int[RakNet.MAX_CHANNELS];
+		this.sequenceSendIndex = new int[RakNet.MAX_CHANNELS];
+		this.sequenceReceiveIndex = new int[RakNet.MAX_CHANNELS];
+		this.handleQueue = new IntMap<IntMap<EncapsulatedPacket>>();
+		for (int i = 0; i < RakNet.MAX_CHANNELS; i++) {
+			handleQueue.put(i, new IntMap<EncapsulatedPacket>());
+		}
 
 		// Latency detection
 		this.latencyEnabled = true;
@@ -166,9 +148,6 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		this.lastLatency = -1;
 		this.lowestLatency = -1;
 		this.highestLatency = -1;
-
-		// Connection loss prevention
-		this.lastDetectionSend = System.currentTimeMillis();
 	}
 
 	/**
@@ -187,6 +166,24 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 */
 	public final InetSocketAddress getAddress() {
 		return this.address;
+	}
+
+	/**
+	 * Returns the session's <code>InetAddress</code>
+	 * 
+	 * @return The session's <code>InetAddress</code>
+	 */
+	public final InetAddress getInetAddress() {
+		return address.getAddress();
+	}
+
+	/**
+	 * Returns the session's port
+	 * 
+	 * @return The session's port
+	 */
+	public final int getInetPort() {
+		return address.getPort();
 	}
 
 	/**
@@ -218,6 +215,35 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	}
 
 	/**
+	 * Returns the session's keep alive state
+	 * 
+	 * @return The session's keep alive state
+	 */
+	public int getKeepAliveState() {
+		return this.keepAliveState;
+	}
+
+	/**
+	 * Sets the session's keep alive state
+	 * 
+	 * @param keepAliveState
+	 *            The new keep alive state
+	 */
+	public void setKeepAliveState(int keepAliveState) {
+		this.keepAliveState = keepAliveState;
+	}
+
+	/**
+	 * Sets the session's keep alive state
+	 * 
+	 * @param keepAliveState
+	 *            The new keep alive state
+	 */
+	public void setKeepAliveState(RakNetState keepAliveState) {
+		this.setKeepAliveState(keepAliveState.getOrder());
+	}
+
+	/**
 	 * Returns the amount of packets sent this second
 	 * 
 	 * @return The amount of packets sent this second
@@ -236,10 +262,20 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	}
 
 	/**
-	 * Returns the last time a packet(CustomPacket, Acknowledgement, or
-	 * AcknowledgementReceipt) was received by the session
+	 * Returns the last time a packet (<code>CustomPacket</code> or
+	 * <code>Acknowledgement</code>) was sent by the session
 	 * 
-	 * @return The last time a packet was received by the session
+	 * @return The last time a packet was sent by the session
+	 */
+	public long getLastPacketSendTime() {
+		return this.lastPacketSendTime;
+	}
+
+	/**
+	 * Returns the last time a packet (<code>CustomPacket</code> or
+	 * <code>Acknowledgement</code>) was received from the session
+	 * 
+	 * @return The last time a packet was received from the session
 	 */
 	public long getLastPacketReceiveTime() {
 		return this.lastPacketReceiveTime;
@@ -247,7 +283,10 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 	/**
 	 * Enables/disables latency detection, when disabled the latency will always
-	 * return -1
+	 * return -1<br>
+	 * <br>
+	 * Note: If the session is not yet in the keep alive state then the packets
+	 * needed to detect the latency will not be sent until then
 	 * 
 	 * @param enabled
 	 *            Whether or not latency detection is enabled
@@ -255,6 +294,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	public void enableLatencyDetection(boolean enabled) {
 		this.latencyEnabled = enabled;
 		this.latency = (enabled ? this.latency : -1);
+		this.pongsReceived = (enabled ? this.pongsReceived : 0);
 	}
 
 	/**
@@ -302,67 +342,246 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		return this.highestLatency;
 	}
 
-	/**
-	 * Handles a CustomPacket and updates the session's data accordingly
-	 * 
-	 * @param custom
-	 *            The CustomPacket to handle
-	 */
-	public final void handleCustom0(CustomPacket custom) {
-		this.lastPacketReceiveTime = System.currentTimeMillis();
-
-		// Only handle if we haven't handled it before
-		if (customIndexQueue.contains(custom.sequenceNumber)) {
-			return; // We have handle it before!
+	@Override
+	public final void sendMessage(Reliability reliability, int channel, Packet packet) throws InvalidChannelException {
+		// Make sure channel doesn't exceed RakNet limit
+		if (channel >= RakNet.MAX_CHANNELS) {
+			throw new InvalidChannelException();
 		}
-		customIndexQueue.add(custom.sequenceNumber);
 
-		// Generate NACK queue if needed
-		int difference = custom.sequenceNumber - this.lastSequenceNumber;
-		synchronized (this.nacknowledgeQueue) {
-			Record record = new Record(custom.sequenceNumber);
-			if (nacknowledgeQueue.contains(record)) {
-				nacknowledgeQueue.remove(record);
+		// Set packet properties
+		EncapsulatedPacket encapsulated = new EncapsulatedPacket();
+		encapsulated.reliability = reliability;
+		encapsulated.orderChannel = (byte) channel;
+		encapsulated.payload = packet;
+		if (reliability.isReliable()) {
+			encapsulated.messageIndex = this.messageIndex++;
+		}
+		if (reliability.isOrdered() || reliability.isSequenced()) {
+			encapsulated.orderIndex = (reliability.isOrdered() ? this.orderSendIndex[channel]++
+					: this.sequenceSendIndex[channel]++);
+		}
+
+		// Do we need to split the packet?
+		if (SplitPacket.needsSplit(reliability, packet, this.maximumTransferUnit)) {
+			encapsulated.splitId = this.splitId++;
+			for (EncapsulatedPacket split : SplitPacket.splitPacket(encapsulated, this.maximumTransferUnit)) {
+				sendQueue.add(split);
 			}
-
-			if (difference > 0) {
-				if (difference > 1) {
-					nacknowledgeQueue.add(new Record(this.lastSequenceNumber, custom.sequenceNumber - 1));
-				} else {
-					nacknowledgeQueue.add(new Record(custom.sequenceNumber - 1));
-				}
-			}
+		} else {
+			sendQueue.add(encapsulated);
 		}
+	}
 
-		// Make sure we don't set an old packet to the new one
-		if (difference >= 0) {
-			this.lastSequenceNumber = (custom.sequenceNumber + 1);
-		}
-
-		// Update acknowledgement queues
-		acknowledgeQueue.add(new Record(custom.sequenceNumber));
-		this.updateAcknowledge(true);
-
-		// Handle the messages accordingly
-		this.packetsReceivedThisSecond++;
-		for (EncapsulatedPacket encapsulated : custom.messages) {
-			this.handleEncapsulated0(encapsulated);
+	@Override
+	public final void sendMessage(long guid, Reliability reliability, int channel, Packet packet)
+			throws InvalidChannelException {
+		if (this.guid == guid) {
+			this.sendMessage(reliability, channel, packet);
+		} else {
+			throw new IllegalArgumentException("Invalid GUID! Did you mean to send this packet to another session?");
 		}
 	}
 
 	/**
-	 * Handles an EncapsulatedPacket retrieved from a CustomPacket and updates
-	 * the session's data accordingly
+	 * Sends a raw message
+	 * 
+	 * @param packet
+	 *            The packet to send
+	 */
+	public final void sendRawMessage(Packet packet) {
+		channel.writeAndFlush(new DatagramPacket(packet.buffer(), this.address));
+	}
+
+	/**
+	 * Sends a <code>CustomPacket</code> with the specified
+	 * <code>EncapsulatedPacket</code>'s
 	 * 
 	 * @param encapsulated
-	 *            The EncapsulatedPacket to handle
-	 * @throws SplitQueueOverloadException
-	 *             Thrown if the split queue has been overloaded
-	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
+	 *            The encapsulated packets to send
+	 * @param updateRecoveryQueue
+	 *            Whether or not to store the encapsulated packets in the
+	 *            recovery queue for later, only set this to <code>true</code>
+	 *            if you are sending new data and not resending old data
+	 * @return The sequence number of the <code>CustomPacket</code>
 	 */
-	private final void handleEncapsulated0(EncapsulatedPacket encapsulated)
-			throws SplitQueueOverloadException, InvalidChannelException {
+	private final int sendCustomPacket(ArrayList<EncapsulatedPacket> encapsulated, boolean updateRecoveryQueue) {
+		// Create CustomPacket
+		CustomPacket custom = new CustomPacket();
+		custom.sequenceNumber = this.sendSequenceNumber++;
+		custom.messages = encapsulated;
+		custom.encode();
+
+		// Send packet
+		this.sendRawMessage(custom);
+
+		// Do we need to store it for recovery?
+		if (updateRecoveryQueue == true) {
+			// Make sure unreliable data is discarded
+			custom.removeUnreliables();
+			if (custom.messages.size() > 0) {
+				recoveryQueue.put(custom.sequenceNumber,
+						custom.messages.toArray(new EncapsulatedPacket[custom.messages.size()]));
+			}
+		}
+
+		// Update packet data
+		this.packetsSentThisSecond++;
+		this.lastPacketSendTime = System.currentTimeMillis();
+		return custom.sequenceNumber;
+	}
+
+	/**
+	 * Sends a <code>CustomPacket</code> with the specified
+	 * <code>EncapsulatedPacket</code>'s
+	 * 
+	 * @param encapsulated
+	 *            The encapsulated packets to send
+	 * @param updateRecoveryQueue
+	 *            Whether or not to store the encapsulated packets in the
+	 *            recovery queue for later, only set this to <code>true</code>
+	 *            if you are sending new data and not resending old data
+	 * @return The sequence number of the <code>CustomPacket</code>
+	 */
+	private final int sendCustomPacket(EncapsulatedPacket[] encapsulated, boolean updateRecoveryQueue) {
+		ArrayList<EncapsulatedPacket> encapsulatedArray = new ArrayList<EncapsulatedPacket>();
+		for (EncapsulatedPacket message : encapsulated) {
+			encapsulatedArray.add(message);
+		}
+		return this.sendCustomPacket(encapsulatedArray, updateRecoveryQueue);
+	}
+
+	/**
+	 * Sends an <code>Acknowledge</code> packet with the specified type and
+	 * records
+	 * 
+	 * @param type
+	 *            The type of the <code>Acknowledge</code> packet
+	 * @param records
+	 *            The records to send
+	 */
+	private final void sendAcknowledge(AcknowledgeType type, Record... records) {
+		// Create Acknowledge packet
+		Acknowledge acknowledge = new Acknowledge(type);
+		for (Record record : records) {
+			acknowledge.records.add(record);
+		}
+		acknowledge.encode();
+		this.sendRawMessage(acknowledge);
+
+		// Update packet data
+		this.lastPacketSendTime = System.currentTimeMillis();
+	}
+
+	/**
+	 * Handles a <code>CustomPacket</code>
+	 * 
+	 * @param custom
+	 *            The <code>CustomPacket</code> to handle
+	 */
+	public final void handleCustom(CustomPacket custom) {
+		// Update packet data
+		this.packetsReceivedThisSecond++;
+
+		/*
+		 * There are three important things to note here:
+		 */
+
+		/*
+		 * 1. The reason we subtract one from the difference is because the last
+		 * sequence number we received should always be one less than the next
+		 * one
+		 */
+
+		/*
+		 * 2. The reason we add one to the last sequence number to the record
+		 * when the difference is bigger than one is because we have already
+		 * received that record, this is also the same reason we subtract one
+		 * from the CustomPacket's sequence number even when the difference is
+		 * not greater than one
+		 */
+
+		/*
+		 * 3. We always generate the NACK response first because the previous
+		 * sequence number data would be destroyed, making it impossible to
+		 * generate it
+		 */
+
+		// Generate NACK queue if needed
+		int difference = custom.sequenceNumber - this.receiveSequenceNumber - 1;
+		if (difference > 0) {
+			if (difference > 1) {
+				this.sendAcknowledge(AcknowledgeType.NOT_ACKNOWLEDGED,
+						new Record(this.receiveSequenceNumber + 1, custom.sequenceNumber - 1));
+			} else {
+				this.sendAcknowledge(AcknowledgeType.NOT_ACKNOWLEDGED, new Record(custom.sequenceNumber - 1));
+			}
+		}
+
+		// Only handle if it is a newer packet
+		if (custom.sequenceNumber > this.receiveSequenceNumber - 1) {
+			this.receiveSequenceNumber = custom.sequenceNumber;
+			for (EncapsulatedPacket encapsulated : custom.messages) {
+				this.handleEncapsulated(encapsulated);
+			}
+
+			// Update packet data
+			this.lastPacketReceiveTime = System.currentTimeMillis();
+		}
+
+		// Send ACK
+		this.sendAcknowledge(AcknowledgeType.ACKNOWLEDGED, new Record(custom.sequenceNumber));
+	}
+
+	/**
+	 * Handles an <code>Acknowledge</code> packet and responds accordingly
+	 * 
+	 * @param acknowledge
+	 *            The <code>Acknowledge</code> packet to handle
+	 */
+	public final void handleAcknowledge(Acknowledge acknowledge) {
+		if (acknowledge.getType().equals(AcknowledgeType.ACKNOWLEDGED)) {
+			// Remove acknowledged packets from the recovery queue
+			for (Record record : acknowledge.records) {
+				recoveryQueue.remove(record.getIndex());
+			}
+		} else if (acknowledge.getType().equals(AcknowledgeType.NOT_ACKNOWLEDGED)) {
+			// Track old sequence numbers so they can be properly renamed
+			int[] oldSequenceNumbers = new int[acknowledge.records.size()];
+			int[] newSequenceNumbers = new int[oldSequenceNumbers.length];
+
+			for (int i = 0; i < acknowledge.records.size(); i++) {
+				// Update records and resend lost packets
+				Record record = acknowledge.records.get(i);
+				if (recoveryQueue.containsKey(record.getIndex())) {
+					oldSequenceNumbers[i] = record.getIndex();
+					newSequenceNumbers[i] = this.sendCustomPacket(recoveryQueue.get(oldSequenceNumbers[i]), false);
+				} else {
+					oldSequenceNumbers[i] = -1;
+					newSequenceNumbers[i] = -1;
+				}
+			}
+
+			// Rename lost packets
+			for (int i = 0; i < oldSequenceNumbers.length; i++) {
+				if (oldSequenceNumbers[i] != -1) {
+					recoveryQueue.renameKey(oldSequenceNumbers[i], newSequenceNumbers[i]);
+				}
+			}
+		}
+
+		// Update packet data
+		this.lastPacketReceiveTime = System.currentTimeMillis();
+	}
+
+	/**
+	 * Handles an <code>EncapsulatedPacket</code> and makes sure all the data is
+	 * handled correctly
+	 * 
+	 * @param encapsulated
+	 *            The <code>EncapsualtedPacket</code> to handle
+	 */
+	private final void handleEncapsulated(EncapsulatedPacket encapsulated) {
 		Reliability reliability = encapsulated.reliability;
 
 		// Put together split packet
@@ -371,12 +590,22 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 				splitQueue.put(encapsulated.splitId,
 						new SplitPacket(encapsulated.splitId, encapsulated.splitCount, encapsulated.reliability));
 				if (splitQueue.size() > RakNet.MAX_SPLITS_PER_QUEUE) {
+					// Remove unreliable packets from the queue
+					Iterator<SplitPacket> splitPackets = splitQueue.values().iterator();
+					while (splitPackets.hasNext()) {
+						SplitPacket splitPacket = splitPackets.next();
+						if (!splitPacket.getReliability().isReliable()) {
+							splitPackets.remove();
+						}
+					}
+
+					// The queue is filled with reliable packets
 					throw new SplitQueueOverloadException();
 				}
 			}
 
-			SplitPacket split = splitQueue.get(encapsulated.splitId);
-			Packet finalPayload = split.update(encapsulated);
+			SplitPacket splitPacket = splitQueue.get(encapsulated.splitId);
+			Packet finalPayload = splitPacket.update(encapsulated);
 			if (finalPayload == null) {
 				return; // Do not handle, the split packet is not complete!
 			}
@@ -392,10 +621,10 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 		// Make sure we are not handling a duplicate
 		if (reliability.isReliable()) {
-			if (messageIndexQueue.contains(encapsulated.messageIndex)) {
+			if (reliables.contains(encapsulated.messageIndex)) {
 				return; // Do not handle, it is a duplicate!
 			}
-			messageIndexQueue.add(encapsulated.messageIndex);
+			reliables.add(encapsulated.messageIndex);
 		}
 
 		// Make sure we are handling everything in an ordered/sequenced fashion
@@ -406,35 +635,34 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		} else {
 			// Channel is valid, it is safe to handle
 			if (reliability.isOrdered()) {
-				orderedHandleQueue.get(orderChannel).put(orderIndex, encapsulated);
-				while (orderedHandleQueue.get(orderChannel).containsKey(receiveOrderIndex[orderChannel])) {
-					EncapsulatedPacket orderedEncapsulated = orderedHandleQueue.get(orderChannel)
-							.get(receiveOrderIndex[orderChannel]++);
-					this.handlePacket0(new RakNetPacket(orderedEncapsulated.payload), orderedEncapsulated.orderChannel);
+				handleQueue.get(orderChannel).put(orderIndex, encapsulated);
+				while (handleQueue.get(orderChannel).containsKey(orderReceiveIndex[orderChannel])) {
+					EncapsulatedPacket orderedEncapsulated = handleQueue.get(orderChannel)
+							.get(orderReceiveIndex[orderChannel]++);
+					this.handlePacket0(encapsulated.orderChannel, new RakNetPacket(orderedEncapsulated.payload));
 				}
 			} else if (reliability.isSequenced()) {
-				if (orderIndex > receiveSequenceIndex[orderChannel]) {
-					receiveSequenceIndex[orderChannel] = orderIndex + 1;
-					this.handlePacket0(new RakNetPacket(encapsulated.payload), encapsulated.orderChannel);
+				if (orderIndex > sequenceReceiveIndex[orderChannel]) {
+					sequenceReceiveIndex[orderChannel] = orderIndex + 1;
+					this.handlePacket0(encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
 				}
 			} else {
-				this.handlePacket0(new RakNetPacket(encapsulated.payload), encapsulated.orderChannel);
+				this.handlePacket0(encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
 			}
 		}
 	}
 
 	/**
-	 * This method is method is called before
-	 * <code>handlePacket(RakNetPacket, int)</code> so we can handle packets
-	 * that are sent by the server and the client
+	 * Handles an internal packet related to RakNet, if the ID is unrecognized
+	 * it is passed on to the underlying session class
 	 * 
-	 * @param packet
-	 *            The packet to handle
 	 * @param channel
 	 *            The channel the packet was sent on
+	 * @param packet
+	 *            The packet
 	 */
-	private final void handlePacket0(RakNetPacket packet, int channel) {
-		int packetId = packet.getId();
+	private final void handlePacket0(int channel, RakNetPacket packet) {
+		short packetId = packet.getId();
 
 		if (packetId == ID_CONNECTED_PING) {
 			ConnectedPing ping = new ConnectedPing(packet);
@@ -449,8 +677,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 			pong.decode();
 
 			if (latencyEnabled == true) {
-				if (this.pingIdentifier - pong.identifier == 1) {
-					long latencyRaw = (this.lastPacketReceiveTime - this.lastPingSend);
+				if (latencyIdentifier - pong.identifier == 1) {
+					long latencyRaw = (this.lastPacketReceiveTime - this.lastPingSendTime);
 
 					// Get last latency result
 					this.lastLatency = latencyRaw;
@@ -468,271 +696,84 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 					}
 
 					// Get average latency
-					pongsReceived++;
-					pongsTotalLatency += latencyRaw;
-					this.latency = (pongsTotalLatency / pongsReceived);
+					this.pongsReceived++;
+					this.totalLatency += latencyRaw;
+					this.latency = (totalLatency / pongsReceived);
 				}
 			}
 
-			this.pingIdentifier = pong.identifier + 1;
+			this.latencyIdentifier = (pong.identifier + 1);
 		} else {
 			this.handlePacket(packet, channel);
 		}
 	}
 
 	/**
-	 * Handles an Acknowledge packet and updates the session's data accordingly
-	 * 
-	 * @param acknowledge
-	 *            The acknowledge packet to handle
-	 */
-	public final void handleAcknowledge(Acknowledge acknowledge) {
-		this.lastPacketReceiveTime = System.currentTimeMillis();
-
-		// Make sure the ranged records were converted to single records
-		acknowledge.simplifyRecords();
-
-		// Handle Acknowledged based on it's type
-		if (acknowledge.getType() == AcknowledgeType.ACKNOWLEDGED) {
-			for (Record record : acknowledge.records) {
-				// The packet successfully sent, no need to store it anymore
-				recoveryQueue.remove(record.getIndex());
-			}
-		} else if (acknowledge.getType() == AcknowledgeType.NOT_ACKNOWLEDGED) {
-			for (Record record : acknowledge.records) {
-				// Resend the lost packets
-				CustomPacket custom = recoveryQueue.get(record.getIndex());
-				this.sendRawMessage(custom);
-			}
-		}
-	}
-
-	/**
-	 * Handles an acknowledge receipt and notifies the API accordingly
-	 * 
-	 * @param acknowledgeReceipt
-	 *            The acknowledge receipt to handle
-	 */
-	public final void handleAcknowledgeReceipt(AcknowledgeReceipt acknowledgeReceipt) {
-		this.lastPacketReceiveTime = System.currentTimeMillis();
-		for (EncapsulatedPacket encapsulated : requireAcknowledgeQueue.get(acknowledgeReceipt.record)) {
-			// Do we have this packet registered?
-			if (encapsulated == null) {
-				continue; // We never sent a packet requiring an acknowledge
-							// receipt with this ID!
-			}
-
-			// Was the packet received or was it lost?
-			if (acknowledgeReceipt.getType() == AcknowledgeReceiptType.ACKNOWLEDGED) {
-				this.onAcknowledge(new Record(acknowledgeReceipt.record), encapsulated.reliability,
-						encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
-			} else if (acknowledgeReceipt.getType() == AcknowledgeReceiptType.LOSS) {
-				this.onNotAcknowledge(new Record(acknowledgeReceipt.record), encapsulated.reliability,
-						encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
-			}
-		}
-	}
-
-	@Override
-	public final synchronized void sendMessage(Reliability reliability, int channel, Packet packet)
-			throws InvalidChannelException {
-		// Make sure channel doesn't exceed RakNet limit
-		if (channel >= RakNet.MAX_CHANNELS) {
-			throw new InvalidChannelException();
-		}
-
-		// Make sure the EncapsulatedPacket fits inside a CustomPacket
-		if (EncapsulatedPacket.calculateDummy(reliability, false, packet)
-				+ CustomPacket.calculateDummy() <= this.maximumTransferUnit) {
-			// Set the parameters
-			EncapsulatedPacket encapsulated = new EncapsulatedPacket();
-			encapsulated.reliability = reliability;
-			encapsulated.orderChannel = (byte) channel;
-			encapsulated.payload = packet;
-
-			// Set reliability specific parameters
-			if (reliability.isReliable()) {
-				encapsulated.messageIndex = this.messageIndex++;
-			}
-			if (reliability.isOrdered() || reliability.isSequenced()) {
-				encapsulated.orderIndex = (reliability.isOrdered() ? this.sendOrderIndex[channel]++
-						: this.sendSequenceIndex[channel]++);
-			}
-
-			// Add to buffer, CustomPacket encodes it
-			sendQueue.add(encapsulated);
-		} else {
-			// Get split packet data
-			byte[][] split = ArrayUtils.splitArray(packet.array(), this.maximumTransferUnit
-					- CustomPacket.calculateDummy() - EncapsulatedPacket.calculateDummy(reliability, true));
-			int splitMessageIndex = this.messageIndex;
-			int splitOrderIndex = (reliability.isOrdered() ? this.sendOrderIndex[channel]++
-					: this.sendSequenceIndex[channel]++);
-
-			// Encode encapsulated packets
-			for (int i = 0; i < split.length; i++) {
-				// Set the normal parameters
-				EncapsulatedPacket encapsulatedSplit = new EncapsulatedPacket();
-				encapsulatedSplit.reliability = reliability;
-				encapsulatedSplit.orderChannel = (byte) channel;
-				encapsulatedSplit.payload = new Packet(Unpooled.copiedBuffer(split[i]));
-
-				// Set reliability specific parameters
-				if (reliability.isReliable()) {
-					encapsulatedSplit.messageIndex = splitMessageIndex;
-				}
-				if (reliability.isOrdered() || reliability.isSequenced()) {
-					encapsulatedSplit.orderIndex = splitOrderIndex;
-				}
-
-				// Set the split related parameters
-				encapsulatedSplit.split = true;
-				encapsulatedSplit.splitCount = split.length;
-				encapsulatedSplit.splitId = this.splitId;
-				encapsulatedSplit.splitIndex = i;
-
-				// Add to buffer, CustomPacket encodes it
-				sendQueue.add(encapsulatedSplit);
-			}
-
-			// Bump split ID for next split packet
-			this.splitId++;
-		}
-	}
-
-	@Override
-	public void sendMessage(long guid, Reliability reliability, int channel, Packet packet) {
-		if (this.guid == guid) {
-			this.sendMessage(reliability, channel, packet);
-		}
-	}
-
-	/**
-	 * Sends a raw message
-	 * 
-	 * @param packet
-	 *            The packet to send
-	 */
-	public final void sendRawMessage(Packet packet) {
-		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
-	}
-
-	/**
-	 * Updates acknowledgement data by resending unacknowledged packets along
-	 * with sending ACK and NACK packets
-	 * 
-	 * @param forceSend
-	 *            Determines whether or not the functions will be done
-	 *            immediately or be handled based on the timer system
-	 */
-	private final void updateAcknowledge(boolean forceSend) {
-		long currentTime = System.currentTimeMillis();
-
-		// Resend unacknowledged packets
-		if (currentTime - this.lastRecoverySend >= RECOVERY_SEND_WAIT_TIME_MILLIS && !recoveryQueue.isEmpty()) {
-			for (CustomPacket custom : recoveryQueue.values()) {
-				this.sendRawMessage(custom);
-				break; // Only send one at a time
-			}
-			this.lastRecoverySend = currentTime;
-		}
-
-		// Check for missing packets
-		if (currentTime - lastAckSend >= ACK_SEND_WAIT_TIME_MILLIS || forceSend == true) {
-			// Have we not acknowledge some packets?
-			if (acknowledgeQueue.isEmpty() == false) {
-				Acknowledge ack = new Acknowledge(AcknowledgeType.ACKNOWLEDGED);
-				ack.records = this.acknowledgeQueue;
-				ack.encode();
-				this.sendRawMessage(ack);
-
-				acknowledgeQueue.clear(); // No longer needed
-			}
-
-			// Are we missing any packets?
-			if (nacknowledgeQueue.isEmpty() == false) {
-				Acknowledge nack = new Acknowledge(AcknowledgeType.NOT_ACKNOWLEDGED);
-				nack.records = this.nacknowledgeQueue;
-				nack.encode();
-				this.sendRawMessage(nack);
-			}
-
-			// Update timing
-			this.lastAckSend = currentTime;
-		}
-	}
-
-	/**
 	 * Updates the session
-	 * 
-	 * @throws RakNetException
-	 *             Thrown if an error occurs during the updating process
 	 */
-	public final synchronized void update() throws RakNetException {
+	public final synchronized void update() {
 		long currentTime = System.currentTimeMillis();
 
-		// Are we missing any packets?
-		this.updateAcknowledge(false);
+		// Send packets in the send queue
+		if (!sendQueue.isEmpty() && this.packetsSentThisSecond < RakNet.MAX_PACKETS_PER_SECOND) {
+			ArrayList<EncapsulatedPacket> send = new ArrayList<EncapsulatedPacket>();
+			int sendLength = CustomPacket.calculateDummy();
 
-		// Are there any packets to send?
-		if (sendQueue.isEmpty() == false) {
-			CustomPacket custom = new CustomPacket();
-
-			// Add packets to the CustomPacket until it's full or there's none
-			ArrayList<EncapsulatedPacket> sent = new ArrayList<EncapsulatedPacket>();
-			for (EncapsulatedPacket encapsulated : this.sendQueue) {
-				if (custom.calculateSize() + encapsulated.calculateSize() > this.maximumTransferUnit) {
-					if (sent.isEmpty()) {
-						throw new RakNetException(
-								"Payload is too big to fit in a single packet! Was it split correctly?");
-					}
-					break; // If we add this next packet we'll exceed the MTU!
+			// Add packets
+			Iterator<EncapsulatedPacket> queue = sendQueue.iterator();
+			while (queue.hasNext()) {
+				// Make sure the packet will not cause an overflow
+				EncapsulatedPacket encapsulated = queue.next();
+				sendLength += encapsulated.calculateSize();
+				if (sendLength > this.maximumTransferUnit) {
+					break;
 				}
-				sent.add(encapsulated);
-				custom.messages.add(encapsulated);
+
+				// Add the packet and remove it from the queue
+				send.add(encapsulated);
+				queue.remove();
 			}
-			sendQueue.removeAll(sent); // We no longer need these, remove them
 
-			// Only send if we have something to send
-			if (custom.messages.size() > 0) {
-				custom.sequenceNumber = this.nextSequenceNumber++;
-				custom.encode();
-
-				// Let all unacknowledged packets be handled first and don't DOS
-				if (recoveryQueue.isEmpty() == true && this.packetsSentThisSecond < RakNet.MAX_PACKETS_PER_SECOND) {
-					this.sendRawMessage(custom);
-				}
-				custom.removeUnreliables();
-				recoveryQueue.put(custom.sequenceNumber, custom);
+			// Send packet
+			if (send.size() > 0) {
+				this.sendCustomPacket(send, true);
 			}
 		}
 
-		// Reset the amount of packets sent and received in this second
-		if (currentTime - packetSentReceiveCounter >= RakNet.MAX_PACKETS_PER_SECOND) {
+		// Resend lost packets
+		if (currentTime - this.lastRecoverySendTime >= RECOVERY_SEND_INTERVAL && !recoveryQueue.isEmpty()) {
+			this.sendCustomPacket(recoveryQueue.values().iterator().next(), false);
+			this.lastRecoverySendTime = currentTime;
+		}
+
+		// Send ping to detect latency if it is enabled
+		if (currentTime - this.lastPingSendTime >= PING_SEND_INTERVAL && state.getOrder() >= this.keepAliveState) {
+			ConnectedPing ping = new ConnectedPing();
+			ping.identifier = this.latencyIdentifier++;
+			ping.encode();
+
+			this.sendMessage(Reliability.UNRELIABLE, ping);
+			this.lastPingSendTime = currentTime;
+		}
+
+		// Make sure the client is still connected
+		if (currentTime - this.lastPacketReceiveTime >= DETECTION_SEND_INTERVAL
+				&& currentTime - this.lastKeepAliveSendTime >= DETECTION_SEND_INTERVAL
+				&& state.getOrder() >= this.keepAliveState) {
+			this.sendMessage(Reliability.UNRELIABLE, ID_DETECT_LOST_CONNECTIONS);
+			this.lastKeepAliveSendTime = currentTime;
+		}
+
+		// Client timed out
+		if (currentTime - this.lastPacketReceiveTime >= RakNetSession.SESSION_TIMEOUT) {
+			throw new TimeoutException();
+		}
+
+		// Reset packet data
+		if (currentTime - this.lastPacketCounterResetTime >= 1000L) {
 			this.packetsSentThisSecond = 0;
 			this.packetsReceivedThisSecond = 0;
-			this.packetSentReceiveCounter = currentTime;
-		}
-
-		// Send a CONNECTED_PING to get the latency
-		if (currentTime - lastPingSend >= PING_SEND_WAIT_TIME_MILLIS && latencyEnabled == true) {
-			ConnectedPing ping = new ConnectedPing();
-			ping.identifier = this.pingIdentifier++;
-			ping.encode();
-			this.sendMessage(Reliability.UNRELIABLE, ping);
-			this.lastPingSend = currentTime;
-		}
-
-		// Send a DETECT_LOST_CONNECTIONS to make sure the client is still there
-		if (currentTime - lastDetectionSend >= DETECTION_SEND_WAIT_TIME_MILLIS
-				&& currentTime - this.lastPacketReceiveTime >= DETECTION_SEND_WAIT_TIME_MILLIS) {
-			this.sendMessage(Reliability.RELIABLE, ID_DETECT_LOST_CONNECTIONS);
-			this.lastDetectionSend = currentTime;
-		}
-
-		// The client timed out
-		if (currentTime - lastPacketReceiveTime >= SESSION_TIMEOUT) {
-			throw new TimeoutException();
+			this.lastPacketCounterResetTime = currentTime;
 		}
 	}
 

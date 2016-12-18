@@ -61,6 +61,11 @@ public class RakNetServerTest {
 			}
 
 			@Override
+			public void onClientPreDisconnect(InetSocketAddress address, String reason) {
+				System.out.println("Client from " + address + " has failed to login for \"" + reason + "\"");
+			}
+
+			@Override
 			public void onClientConnect(RakNetClientSession session) {
 				System.out.println("Client from address " + session.getAddress() + " has connected to the server");
 			}

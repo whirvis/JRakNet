@@ -33,7 +33,7 @@ package net.marfgamer.jraknet.util.map;
 import java.util.HashMap;
 import java.util.Map;
 
-public class IntMap<T> extends HashMap<Integer, T> implements Map<Integer, T> {
+public class IntMap<T> extends HashMap<Integer, T> implements Map<Integer, T>, DynamicKey<Integer> {
 
 	private static final long serialVersionUID = 4324132003573381634L;
 
@@ -55,6 +55,15 @@ public class IntMap<T> extends HashMap<Integer, T> implements Map<Integer, T> {
 
 	public T remove(int key) {
 		return super.remove(new Integer(key));
+	}
+
+	@Override
+	public void renameKey(Integer oldKey, Integer newKey) throws NullPointerException {
+		T storedObject = this.remove(oldKey.intValue());
+		if (storedObject == null) {
+			throw new NullPointerException();
+		}
+		this.put(newKey.intValue(), storedObject);
 	}
 
 }
