@@ -399,7 +399,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 *            if you are sending new data and not resending old data
 	 * @return The sequence number of the <code>CustomPacket</code>
 	 */
-	private final int sendCustomPacket(ArrayList<EncapsulatedPacket> encapsulated, boolean updateRecoveryQueue) {
+	private final synchronized int sendCustomPacket(ArrayList<EncapsulatedPacket> encapsulated,
+			boolean updateRecoveryQueue) {
 		// Create CustomPacket
 		CustomPacket custom = new CustomPacket();
 		custom.sequenceNumber = this.sendSequenceNumber++;
@@ -437,7 +438,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 *            if you are sending new data and not resending old data
 	 * @return The sequence number of the <code>CustomPacket</code>
 	 */
-	private final int sendCustomPacket(EncapsulatedPacket[] encapsulated, boolean updateRecoveryQueue) {
+	private final synchronized int sendCustomPacket(EncapsulatedPacket[] encapsulated, boolean updateRecoveryQueue) {
 		ArrayList<EncapsulatedPacket> encapsulatedArray = new ArrayList<EncapsulatedPacket>();
 		for (EncapsulatedPacket message : encapsulated) {
 			encapsulatedArray.add(message);
@@ -533,7 +534,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 * @param acknowledge
 	 *            The <code>Acknowledge</code> packet to handle
 	 */
-	public final void handleAcknowledge(Acknowledge acknowledge) {
+	public final synchronized void handleAcknowledge(Acknowledge acknowledge) {
 		if (acknowledge.getType().equals(AcknowledgeType.ACKNOWLEDGED)) {
 			// Remove acknowledged packets from the recovery queue
 			for (Record record : acknowledge.records) {
@@ -738,9 +739,9 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		}
 
 		// Resend lost packets
-		if (currentTime - this.lastRecoverySendTime >= RakNet.RECOVERY_SEND_INTERVAL
-				&& recoveryQueue.values().iterator().hasNext()) {
-			this.sendCustomPacket(recoveryQueue.values().iterator().next(), false);
+		Iterator<EncapsulatedPacket[]> recovering = recoveryQueue.values().iterator();
+		if (currentTime - this.lastRecoverySendTime >= RakNet.RECOVERY_SEND_INTERVAL && recovering.hasNext()) {
+			this.sendCustomPacket(recovering.next(), false);
 			this.lastRecoverySendTime = currentTime;
 		}
 
