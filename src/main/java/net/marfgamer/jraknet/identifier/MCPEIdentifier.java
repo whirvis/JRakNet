@@ -108,7 +108,7 @@ public class MCPEIdentifier extends Identifier {
 
 		if (this.versionTag != null) {
 			if (verifyVersionTag(this.versionTag) == false) {
-				throw new IllegalArgumentException("Invalid version tag!");
+				throw new IllegalArgumentException("Invalid version tag");
 			}
 		}
 	}
@@ -117,7 +117,7 @@ public class MCPEIdentifier extends Identifier {
 		String[] data = identifier.build().split(SEPERATOR);
 		if (data.length >= DATA_COUNT_LEGACY) {
 			if (data[0].equals(HEADER) == false) {
-				throw new IllegalArgumentException("Invalid header!");
+				throw new IllegalArgumentException("Invalid header");
 			}
 
 			this.serverName = data[1];
@@ -135,7 +135,7 @@ public class MCPEIdentifier extends Identifier {
 			}
 
 			if (verifyVersionTag(this.versionTag) == false) {
-				throw new IllegalArgumentException("Invalid version tag!");
+				throw new IllegalArgumentException("Invalid version tag");
 			}
 		}
 	}

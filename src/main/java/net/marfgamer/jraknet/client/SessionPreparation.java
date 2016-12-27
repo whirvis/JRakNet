@@ -36,13 +36,8 @@ import java.net.InetSocketAddress;
 
 import io.netty.channel.Channel;
 import net.marfgamer.jraknet.RakNet;
+import net.marfgamer.jraknet.RakNetException;
 import net.marfgamer.jraknet.RakNetPacket;
-import net.marfgamer.jraknet.exception.RakNetException;
-import net.marfgamer.jraknet.exception.client.AlreadyConnectedException;
-import net.marfgamer.jraknet.exception.client.ConnectionBannedException;
-import net.marfgamer.jraknet.exception.client.IncompatibleProtocolException;
-import net.marfgamer.jraknet.exception.client.InvalidProtocolException;
-import net.marfgamer.jraknet.exception.client.NoFreeIncomingConnectionsException;
 import net.marfgamer.jraknet.protocol.login.ConnectionBanned;
 import net.marfgamer.jraknet.protocol.login.IncompatibleProtocol;
 import net.marfgamer.jraknet.protocol.login.OpenConnectionResponseOne;
@@ -160,7 +155,7 @@ public class SessionPreparation {
 			}
 		}
 
-		// Nothing returned false, everything is ready!
+		// Nothing returned false, everything is ready
 		return true;
 	}
 

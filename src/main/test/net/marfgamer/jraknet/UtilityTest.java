@@ -34,7 +34,6 @@ import static net.marfgamer.jraknet.util.RakNetUtils.*;
 
 import java.net.InetSocketAddress;
 
-import net.marfgamer.jraknet.exception.RakNetException;
 import net.marfgamer.jraknet.identifier.MCPEIdentifier;
 import net.marfgamer.jraknet.util.RakNetUtils;
 

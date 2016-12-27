@@ -47,7 +47,7 @@ public class RakNetPacket extends Packet {
 	public RakNetPacket(int id) {
 		super();
 		if (id < 0) {
-			throw new IllegalArgumentException("The packet ID is unsigned, it must be at least 0!");
+			throw new IllegalArgumentException("The packet ID is unsigned, it must be at least 0");
 		}
 		this.writeUByte(this.id = (short) id);
 	}
@@ -55,7 +55,7 @@ public class RakNetPacket extends Packet {
 	public RakNetPacket(ByteBuf buffer) {
 		super(buffer);
 		if (this.remaining() < 1) {
-			throw new IllegalArgumentException("The packet contains no data, it has no ID to be read!");
+			throw new IllegalArgumentException("The packet contains no data, it has no ID to be read");
 		}
 		this.id = this.readUByte();
 	}

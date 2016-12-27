@@ -30,7 +30,7 @@
  */
 package net.marfgamer.jraknet.example.chat.client;
 
-import net.marfgamer.jraknet.exception.RakNetException;
+import net.marfgamer.jraknet.RakNetException;
 
 /**
  * A generic exception used by the client to warn the user of a problem that has

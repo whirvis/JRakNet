@@ -337,10 +337,10 @@ public class RakNetUtils {
 			if (port >= 0 && port <= 65535) {
 				return new InetSocketAddress(inetAddress, port);
 			} else {
-				throw new UnknownHostException("Invalid port! Must be between 0-65535");
+				throw new UnknownHostException("Port number must be between 0-65535");
 			}
 		} else {
-			throw new UnknownHostException("Invalid address! Format must follow address:port");
+			throw new UnknownHostException("Format must follow address:port");
 		}
 	}
 

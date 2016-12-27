@@ -41,8 +41,8 @@ import net.marfgamer.jraknet.example.chat.protocol.Kick;
 import net.marfgamer.jraknet.example.chat.protocol.LoginAccepted;
 import net.marfgamer.jraknet.example.chat.protocol.RemoveChannel;
 import net.marfgamer.jraknet.example.chat.protocol.RenameChannel;
-import net.marfgamer.jraknet.exception.session.InvalidChannelException;
 import net.marfgamer.jraknet.protocol.Reliability;
+import net.marfgamer.jraknet.session.InvalidChannelException;
 import net.marfgamer.jraknet.session.RakNetSession;
 
 /**
