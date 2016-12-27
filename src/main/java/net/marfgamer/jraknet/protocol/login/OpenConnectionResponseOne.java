@@ -44,7 +44,7 @@ public class OpenConnectionResponseOne extends RakNetPacket {
 
 	/*
 	 * JRakNet does not support RakNet's built in security function, it is
-	 * poorly documented!
+	 * poorly documented
 	 */
 	public boolean useSecurity = false;
 

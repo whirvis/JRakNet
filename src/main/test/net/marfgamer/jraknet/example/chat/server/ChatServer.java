@@ -48,10 +48,10 @@ import net.marfgamer.jraknet.example.chat.server.command.ChannelCommand;
 import net.marfgamer.jraknet.example.chat.server.command.CommandHandler;
 import net.marfgamer.jraknet.example.chat.server.command.KickCommand;
 import net.marfgamer.jraknet.example.chat.server.command.StopCommand;
-import net.marfgamer.jraknet.exception.session.InvalidChannelException;
 import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.server.RakNetServer;
 import net.marfgamer.jraknet.server.RakNetServerListener;
+import net.marfgamer.jraknet.session.InvalidChannelException;
 import net.marfgamer.jraknet.session.RakNetClientSession;
 
 /**

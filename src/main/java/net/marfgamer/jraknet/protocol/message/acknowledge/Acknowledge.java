@@ -46,7 +46,7 @@ public class Acknowledge extends RakNetPacket {
 	public Acknowledge(short type) {
 		super(type);
 		if (type != ACKNOWLEDGED && type != NOT_ACKNOWLEDGED) {
-			throw new IllegalArgumentException("Must be ACKNOWLEDGED or NOT_ACKNOWLEDGED!");
+			throw new IllegalArgumentException("Must be ACKNOWLEDGED or NOT_ACKNOWLEDGED");
 		}
 		this.records = new ArrayList<Record>();
 	}

@@ -31,7 +31,7 @@
 package net.marfgamer.jraknet.example.chat;
 
 import net.marfgamer.jraknet.RakNet;
-import net.marfgamer.jraknet.exception.session.InvalidChannelException;
+import net.marfgamer.jraknet.session.InvalidChannelException;
 
 /**
  * Represents a channel on a <code>ChatServer</code>, used by both the

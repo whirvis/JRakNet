@@ -332,7 +332,7 @@ public class Packet {
 			int port = this.readUShort();
 			return new InetSocketAddress(InetAddress.getByAddress(Arrays.copyOfRange(addressBytes, 0, 16)), port);
 		} else {
-			throw new UnknownHostException("Unknown protocol IPv" + version + "!");
+			throw new UnknownHostException("Unknown protocol IPv" + version);
 		}
 	}
 
@@ -645,7 +645,7 @@ public class Packet {
 			this.pad(ADDRESS_VERSION_IPV6_MYSTERY_LENGTH); // Mystery bytes
 			this.writeUShort(address.getPort());
 		} else {
-			throw new UnknownHostException("Unknown protocol IPv" + addressBytes.length + "!");
+			throw new UnknownHostException("Unknown protocol IPv" + addressBytes.length);
 		}
 		return this;
 	}

@@ -8,9 +8,6 @@ net.marfgamer.jraknet.example.chat.client.frame
 net.marfgamer.jraknet.example.chat.protocol
 net.marfgamer.jraknet.example.chat.server
 net.marfgamer.jraknet.example.chat.server.command
-net.marfgamer.jraknet.exception
-net.marfgamer.jraknet.exception.client
-net.marfgamer.jraknet.exception.session
 net.marfgamer.jraknet.identifier
 net.marfgamer.jraknet.interactive
 net.marfgamer.jraknet.protocol

@@ -44,10 +44,10 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import net.marfgamer.jraknet.NoListenerException;
 import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNet;
 import net.marfgamer.jraknet.RakNetPacket;
-import net.marfgamer.jraknet.exception.NoListenerException;
 import net.marfgamer.jraknet.identifier.Identifier;
 import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.login.ConnectionBanned;
@@ -116,7 +116,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		// Check maximum transfer unit
 		if (this.maximumTransferUnit < RakNet.MINIMUM_TRANSFER_UNIT) {
 			throw new IllegalArgumentException(
-					"Maximum transfer unit can be no smaller than " + RakNet.MINIMUM_TRANSFER_UNIT + "!");
+					"Maximum transfer unit can be no smaller than " + RakNet.MINIMUM_TRANSFER_UNIT);
 		}
 	}
 
@@ -243,7 +243,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 */
 	public RakNetServer setListener(RakNetServerListener listener) {
 		if (listener == null) {
-			throw new NullPointerException("Listener must not be null!");
+			throw new NullPointerException();
 		}
 		this.listener = listener;
 		return this;
@@ -494,14 +494,14 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				RakNetPacket errorPacket = this.validateSender(sender);
 				if (errorPacket == null) {
 					if (connectionRequestOne.protocolVersion != this.getProtocolVersion()) {
-						// Incompatible protocol!
+						// Incompatible protocol
 						IncompatibleProtocol incompatibleProtocol = new IncompatibleProtocol();
 						incompatibleProtocol.networkProtocol = this.getProtocolVersion();
 						incompatibleProtocol.serverGuid = this.guid;
 						incompatibleProtocol.encode();
 						this.sendRawMessage(incompatibleProtocol, sender);
 					} else {
-						// Everything passed! One last check...
+						// Everything passed, one last check...
 						if (connectionRequestOne.maximumTransferUnit <= this.maximumTransferUnit) {
 							OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne();
 							connectionResponseOne.serverGuid = this.guid;
@@ -523,10 +523,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				RakNetPacket errorPacket = this.validateSender(sender);
 				if (errorPacket == null) {
 					if (this.hasSession(connectionRequestTwo.clientGuid)) {
-						// This client is already connected!
+						// This client is already connected
 						this.sendRawMessage(ID_ALREADY_CONNECTED, sender);
 					} else {
-						// Everything passed! One last check...
+						// Everything passed, one last check...
 						if (connectionRequestTwo.maximumTransferUnit <= this.maximumTransferUnit) {
 							// Create response
 							OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo();
@@ -546,7 +546,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 										connectionRequestTwo.maximumTransferUnit, channel, sender);
 								sessions.put(sender, clientSession);
 
-								// Send response, we are ready for login!
+								// Send response, we are ready for login
 								this.sendRawMessage(connectionResponseTwo, sender);
 							}
 						}
@@ -586,10 +586,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		if (this.hasSession(sender)) {
 			return new RakNetPacket(ID_ALREADY_CONNECTED);
 		} else if (this.getSessionCount() >= this.maxConnections) {
-			// We have no free connections!
+			// We have no free connections
 			return new RakNetPacket(ID_NO_FREE_INCOMING_CONNECTIONS);
 		} else if (this.addressBlocked(sender.getAddress())) {
-			// Address is blocked!
+			// Address is blocked
 			ConnectionBanned connectionBanned = new ConnectionBanned();
 			connectionBanned.serverGuid = this.guid;
 			connectionBanned.encode();
@@ -633,7 +633,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	public void start() throws NoListenerException {
 		// Make sure we have an adapter
 		if (listener == null) {
-			throw new NoListenerException("Unable to start server, there is no listener!");
+			throw new NoListenerException();
 		}
 
 		// Create bootstrap and bind the channel
@@ -661,7 +661,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 								RakNet.MAX_PACKETS_PER_SECOND_BLOCK);
 					}
 				} catch (Exception e) {
-					// An error related to the session occurred, remove it!
+					// An error related to the session occurred, remove it
 					this.removeSession(session, e.getMessage());
 				}
 			}

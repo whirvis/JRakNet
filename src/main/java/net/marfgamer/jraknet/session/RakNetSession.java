@@ -42,9 +42,6 @@ import io.netty.channel.socket.DatagramPacket;
 import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNet;
 import net.marfgamer.jraknet.RakNetPacket;
-import net.marfgamer.jraknet.exception.session.InvalidChannelException;
-import net.marfgamer.jraknet.exception.session.SplitQueueOverloadException;
-import net.marfgamer.jraknet.exception.session.TimeoutException;
 import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.SplitPacket;
 import net.marfgamer.jraknet.protocol.message.CustomPacket;
@@ -373,7 +370,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		if (this.guid == guid) {
 			this.sendMessage(reliability, channel, packet);
 		} else {
-			throw new IllegalArgumentException("Invalid GUID! Did you mean to send this packet to another session?");
+			throw new IllegalArgumentException("Invalid GUID");
 		}
 	}
 
@@ -605,7 +602,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 			SplitPacket splitPacket = splitQueue.get(encapsulated.splitId);
 			Packet finalPayload = splitPacket.update(encapsulated);
 			if (finalPayload == null) {
-				return; // Do not handle, the split packet is not complete!
+				return; // Do not handle, the split packet is not complete
 			}
 
 			/*
@@ -620,7 +617,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		// Make sure we are not handling a duplicate
 		if (reliability.isReliable()) {
 			if (reliables.contains(encapsulated.messageIndex)) {
-				return; // Do not handle, it is a duplicate!
+				return; // Do not handle, it is a duplicate
 			}
 			reliables.add(encapsulated.messageIndex);
 		}

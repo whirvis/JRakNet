@@ -30,8 +30,8 @@
  */
 package net.marfgamer.jraknet.example;
 
+import net.marfgamer.jraknet.RakNetException;
 import net.marfgamer.jraknet.RakNetPacket;
-import net.marfgamer.jraknet.exception.RakNetException;
 import net.marfgamer.jraknet.identifier.MCPEIdentifier;
 import net.marfgamer.jraknet.server.RakNetServer;
 import net.marfgamer.jraknet.server.RakNetServerListener;

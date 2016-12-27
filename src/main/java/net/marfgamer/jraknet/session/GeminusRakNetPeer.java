@@ -33,7 +33,6 @@ package net.marfgamer.jraknet.session;
 import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNet;
 import net.marfgamer.jraknet.RakNetPacket;
-import net.marfgamer.jraknet.exception.session.InvalidChannelException;
 import net.marfgamer.jraknet.protocol.Reliability;
 
 /**

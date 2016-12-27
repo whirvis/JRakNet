@@ -46,17 +46,14 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import net.marfgamer.jraknet.NoListenerException;
 import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNet;
+import net.marfgamer.jraknet.RakNetException;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.client.discovery.DiscoveredServer;
 import net.marfgamer.jraknet.client.discovery.DiscoveryMode;
 import net.marfgamer.jraknet.client.discovery.DiscoveryThread;
-import net.marfgamer.jraknet.exception.NoListenerException;
-import net.marfgamer.jraknet.exception.RakNetException;
-import net.marfgamer.jraknet.exception.client.NettyHandlerException;
-import net.marfgamer.jraknet.exception.client.PacketBufferException;
-import net.marfgamer.jraknet.exception.client.ServerOfflineException;
 import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.login.ConnectionRequest;
 import net.marfgamer.jraknet.protocol.login.OpenConnectionRequestOne;
@@ -553,7 +550,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	public void connect(InetSocketAddress address) throws RakNetException {
 		// Make sure we have a listener
 		if (this.listener == null) {
-			throw new NoListenerException("Unable to start client, there is no listener!");
+			throw new NoListenerException();
 		}
 
 		// Reset client data
