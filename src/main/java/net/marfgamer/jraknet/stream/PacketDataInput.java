@@ -136,7 +136,7 @@ public class PacketDataInput extends InputStream implements DataInput {
 
 	@Override
 	public String readLine() throws IOException {
-		throw new RuntimeException("This method is not supported by " + this.getClass().getSimpleName() + "!");
+		throw new RuntimeException("This method is not supported by " + this.getClass().getSimpleName());
 	}
 
 	@Override

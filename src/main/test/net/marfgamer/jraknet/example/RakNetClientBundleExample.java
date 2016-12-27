@@ -32,8 +32,8 @@ package net.marfgamer.jraknet.example;
 
 import java.net.UnknownHostException;
 
+import net.marfgamer.jraknet.RakNetException;
 import net.marfgamer.jraknet.client.RakNetClient;
-import net.marfgamer.jraknet.exception.RakNetException;
 import net.marfgamer.jraknet.session.RakNetServerSession;
 
 /**

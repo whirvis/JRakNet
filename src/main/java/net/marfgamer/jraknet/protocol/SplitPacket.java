@@ -58,7 +58,7 @@ public class SplitPacket {
 		this.payloads = new IntMap<Packet>();
 
 		if (this.splitCount > RakNet.MAX_SPLIT_COUNT) {
-			throw new IllegalArgumentException("Split count can be no greater than " + RakNet.MAX_SPLIT_COUNT + "!");
+			throw new IllegalArgumentException("Split count can be no greater than " + RakNet.MAX_SPLIT_COUNT);
 		}
 	}
 
@@ -102,7 +102,7 @@ public class SplitPacket {
 		// Update payload data
 		if (encapsulated.split != true || encapsulated.splitId != this.splitId
 				|| encapsulated.splitCount != this.splitCount || encapsulated.reliability != this.reliability) {
-			throw new IllegalArgumentException("This split packet does not belong to this one!");
+			throw new IllegalArgumentException("This split packet does not belong to this one");
 		}
 		payloads.put(encapsulated.splitIndex, encapsulated.payload);
 

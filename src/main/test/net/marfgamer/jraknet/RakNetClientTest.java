@@ -35,7 +35,6 @@ import java.net.InetSocketAddress;
 import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.client.RakNetClientListener;
 import net.marfgamer.jraknet.client.Warning;
-import net.marfgamer.jraknet.exception.RakNetException;
 import net.marfgamer.jraknet.session.RakNetServerSession;
 
 /**

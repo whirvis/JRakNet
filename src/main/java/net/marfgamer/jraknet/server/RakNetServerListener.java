@@ -43,7 +43,7 @@ import net.marfgamer.jraknet.session.RakNetClientSession;
  * events are triggered<br>
  * <br>
  * Note: Do <b>NOT</b> use <code>Thread.sleep(long)</code> in any of these
- * methods, as it will cause the server to timeout!
+ * methods, as it will cause the server to timeout
  *
  * @author MarfGamer
  */
