@@ -582,9 +582,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		// Put together split packet
 		if (encapsulated.split == true) {
 			if (!splitQueue.containsKey(encapsulated.splitId)) {
-				splitQueue.put(encapsulated.splitId,
-						new SplitPacket(encapsulated.splitId, encapsulated.splitCount, encapsulated.reliability));
-				if (splitQueue.size() > RakNet.MAX_SPLITS_PER_QUEUE) {
+				// We remove unreliables here incase the new split packet is unreliable
+				if (splitQueue.size() + 1 > RakNet.MAX_SPLITS_PER_QUEUE) {
 					// Remove unreliable packets from the queue
 					Iterator<SplitPacket> splitPackets = splitQueue.values().iterator();
 					while (splitPackets.hasNext()) {
@@ -595,8 +594,12 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 					}
 
 					// The queue is filled with reliable packets
-					throw new SplitQueueOverloadException();
+					if(splitQueue.size() + 1 > RakNet.MAX_SPLITS_PER_QUEUE) {
+						throw new SplitQueueOverloadException();
+					}
 				}
+				splitQueue.put(encapsulated.splitId,
+						new SplitPacket(encapsulated.splitId, encapsulated.splitCount, encapsulated.reliability));
 			}
 
 			SplitPacket splitPacket = splitQueue.get(encapsulated.splitId);
