@@ -37,18 +37,13 @@ package net.marfgamer.jraknet.protocol;
  */
 public enum Reliability {
 
-	/* For the love of god, do not CTRL+SHIFT+F this */
-	UNRELIABLE(0, false, false, false, false),
-	UNRELIABLE_SEQUENCED(1, false, false, true, false),
-	RELIABLE(2, true, false, false, false),
-	RELIABLE_ORDERED(3, true, true, false, false),
-	RELIABLE_SEQUENCED(4, true, false, true, false),
-	UNRELIABLE_WITH_ACK_RECEIPT(5, false, false, false, true),
+	UNRELIABLE(0, false, false, false, false), UNRELIABLE_SEQUENCED(1, false, false, true, false),
+	RELIABLE(2, true, false, false, false), RELIABLE_ORDERED(3, true, true, false, false),
+	RELIABLE_SEQUENCED(4, true, false, true, false), UNRELIABLE_WITH_ACK_RECEIPT(5, false, false, false, true),
 	UNRELIABLE_SEQUENCED_WITH_ACK_RECEIPT(6, false, false, true, true),
 	RELIABLE_WITH_ACK_RECEIPT(7, true, false, false, true),
 	RELIABLE_ORDERED_WITH_ACK_RECEIPT(8, true, true, false, true),
 	RELIABLE_SEQUENCED_WITH_ACK_RECEIPT(9, true, false, true, true);
-	/* You can CTRL+SHIFT+F, but make sure these each stay on their own line */
 
 	private final byte reliability;
 	private final boolean reliable;
