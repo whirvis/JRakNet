@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,62 +42,62 @@ import io.netty.channel.socket.DatagramPacket;
  */
 public class RakNetPacket extends Packet {
 
-	private final short id;
+    private final short id;
 
-	public RakNetPacket(int id) {
-		super();
-		if (id < 0) {
-			throw new IllegalArgumentException("The packet ID is unsigned, it must be at least 0");
-		}
-		this.writeUByte(this.id = (short) id);
+    public RakNetPacket(int id) {
+	super();
+	if (id < 0) {
+	    throw new IllegalArgumentException("The packet ID is unsigned, it must be at least 0");
 	}
+	this.writeUByte(this.id = (short) id);
+    }
 
-	public RakNetPacket(ByteBuf buffer) {
-		super(buffer);
-		if (this.remaining() < 1) {
-			throw new IllegalArgumentException("The packet contains no data, it has no ID to be read");
-		}
-		this.id = this.readUByte();
+    public RakNetPacket(ByteBuf buffer) {
+	super(buffer);
+	if (this.remaining() < 1) {
+	    throw new IllegalArgumentException("The packet contains no data, it has no ID to be read");
 	}
+	this.id = this.readUByte();
+    }
 
-	public RakNetPacket(DatagramPacket datagram) {
-		this(datagram.content());
+    public RakNetPacket(DatagramPacket datagram) {
+	this(datagram.content());
+    }
+
+    public RakNetPacket(byte[] data) {
+	this(Unpooled.copiedBuffer(data));
+    }
+
+    public RakNetPacket(Packet packet) {
+	super(packet);
+
+	// Make sure this isn't an existing RakNetPacket!
+	if (packet instanceof RakNetPacket) {
+	    this.id = ((RakNetPacket) packet).id;
+	} else {
+	    this.id = this.readUByte();
 	}
+    }
 
-	public RakNetPacket(byte[] data) {
-		this(Unpooled.copiedBuffer(data));
-	}
+    /**
+     * Returns the ID of the packet
+     * 
+     * @return The ID of the packet
+     */
+    public final short getId() {
+	return this.id;
+    }
 
-	public RakNetPacket(Packet packet) {
-		super(packet);
+    /**
+     * Encodes the packet
+     */
+    public void encode() {
+    }
 
-		// Make sure this isn't an existing RakNetPacket!
-		if (packet instanceof RakNetPacket) {
-			this.id = ((RakNetPacket) packet).id;
-		} else {
-			this.id = this.readUByte();
-		}
-	}
-
-	/**
-	 * Returns the ID of the packet
-	 * 
-	 * @return The ID of the packet
-	 */
-	public final short getId() {
-		return this.id;
-	}
-
-	/**
-	 * Encodes the packet
-	 */
-	public void encode() {
-	}
-
-	/**
-	 * Decodes the packet
-	 */
-	public void decode() {
-	}
+    /**
+     * Decodes the packet
+     */
+    public void decode() {
+    }
 
 }

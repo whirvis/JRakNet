@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,7 +41,7 @@ import java.io.DataOutput;
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -75,84 +75,84 @@ import net.marfgamer.jraknet.Packet;
  */
 public class PacketDataOutput extends OutputStream implements DataOutput {
 
-	private final Packet packet;
+    private final Packet packet;
 
-	public PacketDataOutput(Packet packet) {
-		this.packet = packet;
-	}
+    public PacketDataOutput(Packet packet) {
+	this.packet = packet;
+    }
 
-	@Override
-	public void write(int b) throws IOException {
-		packet.writeByte(b);
-	}
+    @Override
+    public void write(int b) throws IOException {
+	packet.writeByte(b);
+    }
 
-	@Override
-	public void write(byte[] b) throws IOException {
-		packet.write(b);
-	}
+    @Override
+    public void write(byte[] b) throws IOException {
+	packet.write(b);
+    }
 
-	@Override
-	public void write(byte[] b, int off, int len) throws IOException {
-		for (int i = off; i < len; i++) {
-			packet.writeByte(b[i]);
-		}
+    @Override
+    public void write(byte[] b, int off, int len) throws IOException {
+	for (int i = off; i < len; i++) {
+	    packet.writeByte(b[i]);
 	}
+    }
 
-	@Override
-	public void writeBoolean(boolean v) throws IOException {
-		packet.writeBoolean(v);
-	}
+    @Override
+    public void writeBoolean(boolean v) throws IOException {
+	packet.writeBoolean(v);
+    }
 
-	@Override
-	public void writeByte(int v) throws IOException {
-		packet.writeByte(v);
-	}
+    @Override
+    public void writeByte(int v) throws IOException {
+	packet.writeByte(v);
+    }
 
-	@Override
-	public void writeShort(int v) throws IOException {
-		packet.writeShort(v);
-	}
+    @Override
+    public void writeShort(int v) throws IOException {
+	packet.writeShort(v);
+    }
 
-	@Override
-	public void writeChar(int v) throws IOException {
-		packet.writeUShort(v);
-	}
+    @Override
+    public void writeChar(int v) throws IOException {
+	packet.writeUShort(v);
+    }
 
-	@Override
-	public void writeInt(int v) throws IOException {
-		packet.writeInt(v);
-	}
+    @Override
+    public void writeInt(int v) throws IOException {
+	packet.writeInt(v);
+    }
 
-	@Override
-	public void writeLong(long v) throws IOException {
-		packet.writeLong(v);
-	}
+    @Override
+    public void writeLong(long v) throws IOException {
+	packet.writeLong(v);
+    }
 
-	@Override
-	public void writeFloat(float v) throws IOException {
-		packet.writeFloat(v);
-	}
+    @Override
+    public void writeFloat(float v) throws IOException {
+	packet.writeFloat(v);
+    }
 
-	@Override
-	public void writeDouble(double v) throws IOException {
-		packet.writeDouble(v);
-	}
+    @Override
+    public void writeDouble(double v) throws IOException {
+	packet.writeDouble(v);
+    }
 
-	@Override
-	public void writeBytes(String s) throws IOException {
-		packet.write(s.getBytes());
-	}
+    @Override
+    public void writeBytes(String s) throws IOException {
+	packet.write(s.getBytes());
+    }
 
-	@Override
-	public void writeChars(String s) throws IOException {
-		for (char c : s.toCharArray()) {
-			packet.writeUShort(c);
-		}
+    @Override
+    public void writeChars(String s) throws IOException {
+	for (char c : s.toCharArray()) {
+	    packet.writeUShort(c);
 	}
+    }
 
-	@Override
-	public void writeUTF(String s) throws IOException {
-		packet.writeString(s);
-	}
+    @Override
+    public void writeUTF(String s) throws IOException {
+	packet.writeString(s);
+    }
 
 }

@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,10 +40,10 @@ import net.marfgamer.jraknet.RakNetClientException;
  */
 public class ConnectionBannedException extends RakNetClientException {
 
-	private static final long serialVersionUID = 8440218445920818619L;
+    private static final long serialVersionUID = 8440218445920818619L;
 
-	public ConnectionBannedException(RakNetClient client) {
-		super(client, "Banned from server");
-	}
+    public ConnectionBannedException(RakNetClient client) {
+	super(client, "Banned from server");
+    }
 
 }

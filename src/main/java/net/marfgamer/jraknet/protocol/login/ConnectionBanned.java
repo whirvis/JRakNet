@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,24 +36,24 @@ import net.marfgamer.jraknet.protocol.MessageIdentifier;
 
 public class ConnectionBanned extends RakNetPacket {
 
-	public long serverGuid;
+    public long serverGuid;
 
-	public ConnectionBanned() {
-		super(MessageIdentifier.ID_CONNECTION_BANNED);
-	}
+    public ConnectionBanned() {
+	super(MessageIdentifier.ID_CONNECTION_BANNED);
+    }
 
-	public ConnectionBanned(Packet packet) {
-		super(packet);
-	}
+    public ConnectionBanned(Packet packet) {
+	super(packet);
+    }
 
-	@Override
-	public void encode() {
-		this.writeLong(serverGuid);
-	}
+    @Override
+    public void encode() {
+	this.writeLong(serverGuid);
+    }
 
-	@Override
-	public void decode() {
-		this.serverGuid = this.readLong();
-	}
+    @Override
+    public void decode() {
+	this.serverGuid = this.readLong();
+    }
 
 }

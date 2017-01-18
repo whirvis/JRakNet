@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,27 +40,27 @@ import net.marfgamer.jraknet.RakNetException;
  */
 public class ChatException extends Exception {
 
-	private static final long serialVersionUID = 4497482433048975592L;
+    private static final long serialVersionUID = 4497482433048975592L;
 
-	private final String exception;
+    private final String exception;
 
-	public ChatException(String exception) {
-		super(exception);
-		this.exception = exception;
-	}
+    public ChatException(String exception) {
+	super(exception);
+	this.exception = exception;
+    }
 
-	public ChatException(RakNetException exception) {
-		this(exception.getMessage());
-	}
+    public ChatException(RakNetException exception) {
+	this(exception.getMessage());
+    }
 
-	@Override
-	public String getMessage() {
-		return this.exception;
-	}
+    @Override
+    public String getMessage() {
+	return this.exception;
+    }
 
-	@Override
-	public String getLocalizedMessage() {
-		return this.exception;
-	}
+    @Override
+    public String getLocalizedMessage() {
+	return this.exception;
+    }
 
 }

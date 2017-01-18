@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,21 +38,21 @@ package net.marfgamer.jraknet.client;
  */
 public enum Warning {
 
-	SECURITY_ENABLED("The server has security enabled"), ENCRYPTION_ENABLED("The server has encryption enabled");
+    SECURITY_ENABLED("The server has security enabled"), ENCRYPTION_ENABLED("The server has encryption enabled");
 
-	private String message;
+    private String message;
 
-	private Warning(String message) {
-		this.message = message;
-	}
+    private Warning(String message) {
+	this.message = message;
+    }
 
-	/**
-	 * Returns the warning message
-	 * 
-	 * @return The warning message
-	 */
-	public String getMessage() {
-		return this.message;
-	}
+    /**
+     * Returns the warning message
+     * 
+     * @return The warning message
+     */
+    public String getMessage() {
+	return this.message;
+    }
 
 }

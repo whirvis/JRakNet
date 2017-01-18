@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,37 +45,37 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
  */
 public class RakNetClientTest {
 
-	public static void main(String[] args) throws RakNetException {
-		RakNetClient client = new RakNetClient();
-		client.setListener(new RakNetClientListener() {
+    public static void main(String[] args) throws RakNetException {
+	RakNetClient client = new RakNetClient();
+	client.setListener(new RakNetClientListener() {
 
-			@Override
-			public void onConnect(RakNetServerSession session) {
-				System.out.println("Connected to server with address " + session.getAddress() + "!");
-				client.disconnectAndShutdown();
-			}
+	    @Override
+	    public void onConnect(RakNetServerSession session) {
+		System.out.println("Connected to server with address " + session.getAddress() + "!");
+		client.disconnectAndShutdown();
+	    }
 
-			@Override
-			public void onDisconnect(RakNetServerSession session, String reason) {
-				System.out.println("Disconnected from server with address " + session.getAddress() + " for reason \""
-						+ reason + "\"");
-			}
+	    @Override
+	    public void onDisconnect(RakNetServerSession session, String reason) {
+		System.out.println("Disconnected from server with address " + session.getAddress() + " for reason \""
+			+ reason + "\"");
+	    }
 
-			@Override
-			public void onWarning(Warning warning) {
-				System.err.println("Warning: " + warning.getMessage());
-			}
+	    @Override
+	    public void onWarning(Warning warning) {
+		System.err.println("Warning: " + warning.getMessage());
+	    }
 
-			@Override
-			public void onHandlerException(InetSocketAddress address, Throwable cause) {
-				System.err.println("Exception caused by " + address);
-				cause.printStackTrace();
-			}
+	    @Override
+	    public void onHandlerException(InetSocketAddress address, Throwable cause) {
+		System.err.println("Exception caused by " + address);
+		cause.printStackTrace();
+	    }
 
-		});
-		System.out.println("Created client, connecting to " + UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
+	});
+	System.out.println("Created client, connecting to " + UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
 
-		client.connect(UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
-	}
+	client.connect(UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
+    }
 
 }

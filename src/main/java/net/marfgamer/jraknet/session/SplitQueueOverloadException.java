@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,10 +38,10 @@ package net.marfgamer.jraknet.session;
  */
 public class SplitQueueOverloadException extends RuntimeException {
 
-	private static final long serialVersionUID = 969985052588965615L;
+    private static final long serialVersionUID = 969985052588965615L;
 
-	public SplitQueueOverloadException() {
-		super("Too many split packets in a single queue");
-	}
+    public SplitQueueOverloadException() {
+	super("Too many split packets in a single queue");
+    }
 
 }

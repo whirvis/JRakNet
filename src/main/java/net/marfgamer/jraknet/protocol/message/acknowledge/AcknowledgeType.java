@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,38 +31,38 @@
 package net.marfgamer.jraknet.protocol.message.acknowledge;
 
 public enum AcknowledgeType {
+    
+    ACKNOWLEDGED(Acknowledge.ACKNOWLEDGED), NOT_ACKNOWLEDGED(Acknowledge.NOT_ACKNOWLEDGED);
 
-	ACKNOWLEDGED(Acknowledge.ACKNOWLEDGED), NOT_ACKNOWLEDGED(Acknowledge.NOT_ACKNOWLEDGED);
+    public short id;
 
-	public short id;
+    private AcknowledgeType(short id) {
+	this.id = id;
+    }
 
-	private AcknowledgeType(short id) {
-		this.id = id;
+    /**
+     * Returns the ID of the acknowledge type
+     * 
+     * @return The ID of the acknowledge type
+     */
+    public short getId() {
+	return this.id;
+    }
+
+    /**
+     * Returns an <code>AcknowledgeType</code> based on the specified ID
+     * 
+     * @param id
+     *            The ID of the acknowledge receipt type to lookup
+     * @return An <code>AcknowledgeType</code> based on the specified ID
+     */
+    public static AcknowledgeType lookup(short id) {
+	for (AcknowledgeType type : AcknowledgeType.values()) {
+	    if (type.getId() == id) {
+		return type;
+	    }
 	}
-
-	/**
-	 * Returns the ID of the acknowledge type
-	 * 
-	 * @return The ID of the acknowledge type
-	 */
-	public short getId() {
-		return this.id;
-	}
-
-	/**
-	 * Returns an <code>AcknowledgeType</code> based on the specified ID
-	 * 
-	 * @param id
-	 *            The ID of the acknowledge receipt type to lookup
-	 * @return An <code>AcknowledgeType</code> based on the specified ID
-	 */
-	public static AcknowledgeType lookup(short id) {
-		for (AcknowledgeType type : AcknowledgeType.values()) {
-			if (type.getId() == id) {
-				return type;
-			}
-		}
-		return null;
-	}
+	return null;
+    }
 
 }

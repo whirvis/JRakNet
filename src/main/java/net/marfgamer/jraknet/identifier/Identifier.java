@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,37 +39,37 @@ package net.marfgamer.jraknet.identifier;
  */
 public class Identifier {
 
-	private final String identifier;
+    private final String identifier;
 
-	public Identifier(String identifier) {
-		this.identifier = identifier;
-	}
+    public Identifier(String identifier) {
+	this.identifier = identifier;
+    }
 
-	public Identifier() {
-		this(null);
-	}
+    public Identifier() {
+	this(null);
+    }
 
-	/**
-	 * Converts the identifier to a String
-	 * 
-	 * @return The identifier as a String
-	 */
-	public String build() {
-		return this.identifier;
-	}
+    /**
+     * Converts the identifier to a String
+     * 
+     * @return The identifier as a String
+     */
+    public String build() {
+	return this.identifier;
+    }
 
-	@Override
-	public final String toString() {
-		return this.build();
-	}
+    @Override
+    public final String toString() {
+	return this.build();
+    }
 
-	@Override
-	public boolean equals(Object object) {
-		if (object instanceof Identifier) {
-			Identifier identifier = (Identifier) object;
-			return this.build().equals(identifier.build());
-		}
-		return false;
+    @Override
+    public boolean equals(Object object) {
+	if (object instanceof Identifier) {
+	    Identifier identifier = (Identifier) object;
+	    return this.build().equals(identifier.build());
 	}
+	return false;
+    }
 
 }

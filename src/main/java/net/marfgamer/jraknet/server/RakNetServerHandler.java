@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,81 +47,81 @@ import net.marfgamer.jraknet.RakNetPacket;
  */
 public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 
-	private final RakNetServer server;
-	private final HashMap<InetAddress, BlockedClient> blocked;
-	private InetSocketAddress causeAddress;
+    private final RakNetServer server;
+    private final HashMap<InetAddress, BlockedClient> blocked;
+    private InetSocketAddress causeAddress;
 
-	public RakNetServerHandler(RakNetServer server) {
-		this.server = server;
-		this.blocked = new HashMap<InetAddress, BlockedClient>();
-	}
+    public RakNetServerHandler(RakNetServer server) {
+	this.server = server;
+	this.blocked = new HashMap<InetAddress, BlockedClient>();
+    }
 
-	/**
-	 * Blocks the specified address for the specified amount of time
-	 * 
-	 * @param address
-	 *            The address to block
-	 * @param time
-	 *            How long the address will be blocked in milliseconds
-	 */
-	public void blockAddress(InetAddress address, long time) {
-		blocked.put(address, new BlockedClient(System.currentTimeMillis(), time));
-		server.getListener().onAddressBlocked(address, time);
-	}
+    /**
+     * Blocks the specified address for the specified amount of time
+     * 
+     * @param address
+     *            The address to block
+     * @param time
+     *            How long the address will be blocked in milliseconds
+     */
+    public void blockAddress(InetAddress address, long time) {
+	blocked.put(address, new BlockedClient(System.currentTimeMillis(), time));
+	server.getListener().onAddressBlocked(address, time);
+    }
 
-	/**
-	 * Unblocks the specified address
-	 * 
-	 * @param address
-	 *            The address to unblock
-	 */
-	public void unblockAddress(InetAddress address) {
-		blocked.remove(address);
-		server.getListener().onAddressUnblocked(address);
-	}
+    /**
+     * Unblocks the specified address
+     * 
+     * @param address
+     *            The address to unblock
+     */
+    public void unblockAddress(InetAddress address) {
+	blocked.remove(address);
+	server.getListener().onAddressUnblocked(address);
+    }
 
-	/**
-	 * Returns whether or not the specified address is blocked
-	 * 
-	 * @param address
-	 *            The address to check
-	 * @return Whether or not the specified address is blocked
-	 */
-	public boolean addressBlocked(InetAddress address) {
-		return blocked.containsKey(address);
-	}
+    /**
+     * Returns whether or not the specified address is blocked
+     * 
+     * @param address
+     *            The address to check
+     * @return Whether or not the specified address is blocked
+     */
+    public boolean addressBlocked(InetAddress address) {
+	return blocked.containsKey(address);
+    }
 
-	@Override
-	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		if (msg instanceof DatagramPacket) {
-			// Get packet and sender data
-			DatagramPacket datagram = (DatagramPacket) msg;
-			InetSocketAddress sender = datagram.sender();
-			RakNetPacket packet = new RakNetPacket(datagram);
+    @Override
+    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+	if (msg instanceof DatagramPacket) {
+	    // Get packet and sender data
+	    DatagramPacket datagram = (DatagramPacket) msg;
+	    InetSocketAddress sender = datagram.sender();
+	    RakNetPacket packet = new RakNetPacket(datagram);
 
-			// If an exception happens it's because of this address
-			this.causeAddress = sender;
+	    // If an exception happens it's because of this address
+	    this.causeAddress = sender;
 
-			// Is the sender blocked?
-			if (this.addressBlocked(sender.getAddress())) {
-				BlockedClient status = blocked.get(sender.getAddress());
-				if (status.getTime() <= BlockedClient.PERMANENT_BLOCK) {
-					return; // Permanently blocked
-				}
-				if (System.currentTimeMillis() - status.getStartTime() < status.getTime()) {
-					return; // Time hasn't expired
-				}
-				this.unblockAddress(sender.getAddress());
-			}
-
-			server.handlePacket(packet, sender);
-			datagram.content().release(); // No longer needed
+	    // Is the sender blocked?
+	    if (this.addressBlocked(sender.getAddress())) {
+		BlockedClient status = blocked.get(sender.getAddress());
+		if (status.getTime() <= BlockedClient.PERMANENT_BLOCK) {
+		    return; // Permanently blocked
 		}
-	}
+		if (System.currentTimeMillis() - status.getStartTime() < status.getTime()) {
+		    return; // Time hasn't expired
+		}
+		this.unblockAddress(sender.getAddress());
+	    }
 
-	@Override
-	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-		server.handleHandlerException(this.causeAddress, cause);
+	    server.handlePacket(packet, sender);
+	    datagram.content().release(); // No longer needed
 	}
+    }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
+	server.handleHandlerException(this.causeAddress, cause);
+    }
 
 }

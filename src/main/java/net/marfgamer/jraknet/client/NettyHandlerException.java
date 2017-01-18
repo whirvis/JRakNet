@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,33 +41,33 @@ import net.marfgamer.jraknet.RakNetClientException;
  */
 public class NettyHandlerException extends RakNetClientException {
 
-	private static final long serialVersionUID = -7405227886962804185L;
+    private static final long serialVersionUID = -7405227886962804185L;
 
-	private final RakNetClientHandler handler;
-	private final Throwable cause;
+    private final RakNetClientHandler handler;
+    private final Throwable cause;
 
-	public NettyHandlerException(RakNetClient client, RakNetClientHandler handler, Throwable cause) {
-		super(client, "Exception in handler \"" + cause.getMessage() + "\"");
-		this.handler = handler;
-		this.cause = cause;
-	}
+    public NettyHandlerException(RakNetClient client, RakNetClientHandler handler, Throwable cause) {
+	super(client, "Exception in handler \"" + cause.getMessage() + "\"");
+	this.handler = handler;
+	this.cause = cause;
+    }
 
-	/**
-	 * Returns the handler the client is using
-	 * 
-	 * @return The handler the client is using
-	 */
-	public RakNetClientHandler getHandler() {
-		return this.handler;
-	}
+    /**
+     * Returns the handler the client is using
+     * 
+     * @return The handler the client is using
+     */
+    public RakNetClientHandler getHandler() {
+	return this.handler;
+    }
 
-	/**
-	 * Returns the exception that was caught by the handler
-	 *
-	 * @return The exception that was caught by the handler
-	 */
-	public Throwable getCause() {
-		return this.cause;
-	}
+    /**
+     * Returns the exception that was caught by the handler
+     *
+     * @return The exception that was caught by the handler
+     */
+    public Throwable getCause() {
+	return this.cause;
+    }
 
 }

@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,37 +37,37 @@ package net.marfgamer.jraknet;
  */
 public class RakNet {
 
-	/**
-	 * If this is set to true, the server and client will log as much as they
-	 * can for debugging data
-	 */
-	/* TODO? public static boolean LOGGER_ENABLED = false; */
+    /**
+     * If this is set to true, the server and client will log as much as they
+     * can for debugging data
+     */
+    /* TODO? public static boolean LOGGER_ENABLED = false; */
 
-	// Version data
-	public static final int JRAKNET_RELEASE_VERSION = 2;
-	public static final int JRAKNET_MAJOR_VERSION = 3;
-	public static final int JRAKNET_MINOR_VERSION = 1;
+    // Version data
+    public static final int JRAKNET_RELEASE_VERSION = 2;
+    public static final int JRAKNET_MAJOR_VERSION = 3;
+    public static final int JRAKNET_MINOR_VERSION = 1;
 
-	// Network protocol data
-	public static final int SERVER_NETWORK_PROTOCOL = 8;
-	public static final int CLIENT_NETWORK_PROTOCOL = 8;
+    // Network protocol data
+    public static final int SERVER_NETWORK_PROTOCOL = 8;
+    public static final int CLIENT_NETWORK_PROTOCOL = 8;
 
-	// Maximum Transfer Unit data
-	public static final int MINIMUM_TRANSFER_UNIT = 530;
+    // Maximum Transfer Unit data
+    public static final int MINIMUM_TRANSFER_UNIT = 530;
 
-	// Session limiting
-	public static final int MAX_CHANNELS = 32;
-	public static final byte DEFAULT_CHANNEL = 0x00;
-	public static final int MAX_SPLIT_COUNT = 128;
-	public static final int MAX_SPLITS_PER_QUEUE = 4;
-	public static final int MAX_PACKETS_PER_SECOND = 500;
+    // Session limiting
+    public static final int MAX_CHANNELS = 32;
+    public static final byte DEFAULT_CHANNEL = 0x00;
+    public static final int MAX_SPLIT_COUNT = 128;
+    public static final int MAX_SPLITS_PER_QUEUE = 4;
+    public static final int MAX_PACKETS_PER_SECOND = 500;
 
-	// Session timing
-	public static final long SEND_INTERVAL = 50L;
-	public static final long RECOVERY_SEND_INTERVAL = SEND_INTERVAL;
-	public static final long PING_SEND_INTERVAL = 2500L;
-	public static final long DETECTION_SEND_INTERVAL = PING_SEND_INTERVAL * 2;
-	public static final long SESSION_TIMEOUT = DETECTION_SEND_INTERVAL * 5;
-	public static final long MAX_PACKETS_PER_SECOND_BLOCK = (1000L * 300);
+    // Session timing
+    public static final long SEND_INTERVAL = 50L;
+    public static final long RECOVERY_SEND_INTERVAL = SEND_INTERVAL;
+    public static final long PING_SEND_INTERVAL = 2500L;
+    public static final long DETECTION_SEND_INTERVAL = PING_SEND_INTERVAL * 2;
+    public static final long SESSION_TIMEOUT = DETECTION_SEND_INTERVAL * 5;
+    public static final long MAX_PACKETS_PER_SECOND_BLOCK = (1000L * 300);
 
 }

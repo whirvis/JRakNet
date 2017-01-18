@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,74 +41,74 @@ import net.marfgamer.jraknet.identifier.Identifier;
  */
 public class DiscoveredServer {
 
-	public static final long SERVER_TIMEOUT_MILLI = 5000L;
+    public static final long SERVER_TIMEOUT_MILLI = 5000L;
 
-	private final InetSocketAddress address;
-	private long discoveryTimestamp;
-	private Identifier identifier;
+    private final InetSocketAddress address;
+    private long discoveryTimestamp;
+    private Identifier identifier;
 
-	public DiscoveredServer(InetSocketAddress address, long discoveryTimestamp, Identifier identifier) {
-		this.address = address;
-		this.discoveryTimestamp = discoveryTimestamp;
-		this.identifier = identifier;
+    public DiscoveredServer(InetSocketAddress address, long discoveryTimestamp, Identifier identifier) {
+	this.address = address;
+	this.discoveryTimestamp = discoveryTimestamp;
+	this.identifier = identifier;
+    }
+
+    /**
+     * Returns the address of the discovered server
+     * 
+     * @return The address of the discovered server
+     */
+    public InetSocketAddress getAddress() {
+	return this.address;
+    }
+
+    /**
+     * Returns the last time the server sent a response back
+     * 
+     * @return The last time the server sent a response back
+     */
+    public long getDiscoveryTimestamp() {
+	return this.discoveryTimestamp;
+    }
+
+    /**
+     * Updates the last time the server sent a response back
+     * 
+     * @param discoveryTimestamp
+     *            The new discovery timestamp
+     */
+    public void setDiscoveryTimestamp(long discoveryTimestamp) {
+	this.discoveryTimestamp = discoveryTimestamp;
+    }
+
+    /**
+     * Returns the identifier sent in the response
+     * 
+     * @return The identifier sent in the response
+     */
+    public Identifier getIdentifier() {
+	return this.identifier;
+    }
+
+    /**
+     * Updates the identifier sent in the response
+     * 
+     * @param identifier
+     *            The new identifier sent in the response
+     */
+    public void setIdentifier(Identifier identifier) {
+	this.identifier = identifier;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+	if (object instanceof DiscoveredServer) {
+	    DiscoveredServer discoveredServer = (DiscoveredServer) object;
+	    return (discoveredServer.getAddress().equals(this.getAddress())
+		    && discoveredServer.getDiscoveryTimestamp() == this.getDiscoveryTimestamp()
+		    && discoveredServer.getIdentifier().equals(this.getIdentifier()));
 	}
-
-	/**
-	 * Returns the address of the discovered server
-	 * 
-	 * @return The address of the discovered server
-	 */
-	public InetSocketAddress getAddress() {
-		return this.address;
-	}
-
-	/**
-	 * Returns the last time the server sent a response back
-	 * 
-	 * @return The last time the server sent a response back
-	 */
-	public long getDiscoveryTimestamp() {
-		return this.discoveryTimestamp;
-	}
-
-	/**
-	 * Updates the last time the server sent a response back
-	 * 
-	 * @param discoveryTimestamp
-	 *            The new discovery timestamp
-	 */
-	public void setDiscoveryTimestamp(long discoveryTimestamp) {
-		this.discoveryTimestamp = discoveryTimestamp;
-	}
-
-	/**
-	 * Returns the identifier sent in the response
-	 * 
-	 * @return The identifier sent in the response
-	 */
-	public Identifier getIdentifier() {
-		return this.identifier;
-	}
-
-	/**
-	 * Updates the identifier sent in the response
-	 * 
-	 * @param identifier
-	 *            The new identifier sent in the response
-	 */
-	public void setIdentifier(Identifier identifier) {
-		this.identifier = identifier;
-	}
-
-	@Override
-	public boolean equals(Object object) {
-		if (object instanceof DiscoveredServer) {
-			DiscoveredServer discoveredServer = (DiscoveredServer) object;
-			return (discoveredServer.getAddress().equals(this.getAddress())
-					&& discoveredServer.getDiscoveryTimestamp() == this.getDiscoveryTimestamp()
-					&& discoveredServer.getIdentifier().equals(this.getIdentifier()));
-		}
-		return false;
-	}
+	return false;
+    }
 
 }

@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,23 +45,23 @@ import net.marfgamer.jraknet.example.chat.client.ChatException;
  */
 public class ComboBoxServerChannelListener implements ActionListener {
 
-	private final ChatFrame frame;
-	private final ChatClient client;
+    private final ChatFrame frame;
+    private final ChatClient client;
 
-	public ComboBoxServerChannelListener(ChatFrame frame, ChatClient client) {
-		this.frame = frame;
-		this.client = client;
+    public ComboBoxServerChannelListener(ChatFrame frame, ChatClient client) {
+	this.frame = frame;
+	this.client = client;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+	ServerChannel serverChannel = (ServerChannel) frame.cmbServerChannels.getSelectedItem();
+
+	try {
+	    client.setChannel(serverChannel.getChannel());
+	} catch (ChatException e1) {
+	    frame.displayError(e1);
 	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		ServerChannel serverChannel = (ServerChannel) frame.cmbServerChannels.getSelectedItem();
-
-		try {
-			client.setChannel(serverChannel.getChannel());
-		} catch (ChatException e1) {
-			frame.displayError(e1);
-		}
-	}
+    }
 
 }

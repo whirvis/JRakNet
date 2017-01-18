@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,37 +37,37 @@ package net.marfgamer.jraknet.session;
  */
 public enum RakNetState {
 
-	DISCONNECTED(0), HANDSHAKING(1), CONNECTED(2);
+    DISCONNECTED(0), HANDSHAKING(1), CONNECTED(2);
 
-	private final int order;
+    private final int order;
 
-	private RakNetState(int order) {
-		this.order = order;
+    private RakNetState(int order) {
+	this.order = order;
+    }
+
+    /**
+     * Returns the order the state is in as an int value
+     * 
+     * @return The order the state is in as an int value
+     */
+    public int getOrder() {
+	return this.order;
+    }
+
+    /**
+     * Returns the state by it's numerical order
+     * 
+     * @param order
+     *            The order of the state
+     * @return The state by it's numerical order
+     */
+    public static RakNetState getState(int order) {
+	for (RakNetState state : RakNetState.values()) {
+	    if (state.getOrder() == order) {
+		return state;
+	    }
 	}
-
-	/**
-	 * Returns the order the state is in as an int value
-	 * 
-	 * @return The order the state is in as an int value
-	 */
-	public int getOrder() {
-		return this.order;
-	}
-
-	/**
-	 * Returns the state by it's numerical order
-	 * 
-	 * @param order
-	 *            The order of the state
-	 * @return The state by it's numerical order
-	 */
-	public static RakNetState getState(int order) {
-		for (RakNetState state : RakNetState.values()) {
-			if (state.getOrder() == order) {
-				return state;
-			}
-		}
-		return null;
-	}
+	return null;
+    }
 
 }

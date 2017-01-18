@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,33 +40,33 @@ import net.marfgamer.jraknet.RakNetClientException;
  */
 public class IncompatibleProtocolException extends RakNetClientException {
 
-	private static final long serialVersionUID = -3390229698349252537L;
+    private static final long serialVersionUID = -3390229698349252537L;
 
-	private final int clientProtocol;
-	private final int serverProtocol;
+    private final int clientProtocol;
+    private final int serverProtocol;
 
-	public IncompatibleProtocolException(RakNetClient client, int clientProtocol, int serverProtocol) {
-		super(client, (clientProtocol < serverProtocol ? "Outdated client" : "Outdated server"));
-		this.clientProtocol = clientProtocol;
-		this.serverProtocol = serverProtocol;
-	}
+    public IncompatibleProtocolException(RakNetClient client, int clientProtocol, int serverProtocol) {
+	super(client, (clientProtocol < serverProtocol ? "Outdated client" : "Outdated server"));
+	this.clientProtocol = clientProtocol;
+	this.serverProtocol = serverProtocol;
+    }
 
-	/**
-	 * Returns the protocol the client is on
-	 * 
-	 * @return The protocol the client is on
-	 */
-	public int getClientProtocol() {
-		return this.clientProtocol;
-	}
+    /**
+     * Returns the protocol the client is on
+     * 
+     * @return The protocol the client is on
+     */
+    public int getClientProtocol() {
+	return this.clientProtocol;
+    }
 
-	/**
-	 * Returns the protocol the server is on
-	 * 
-	 * @return The protocol the server is on
-	 */
-	public int getServerProtocol() {
-		return this.serverProtocol;
-	}
+    /**
+     * Returns the protocol the server is on
+     * 
+     * @return The protocol the server is on
+     */
+    public int getServerProtocol() {
+	return this.serverProtocol;
+    }
 
 }
