@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,31 +44,31 @@ import net.marfgamer.jraknet.example.chat.client.ChatClient;
  */
 public class ChatBoxKeyListener implements KeyListener {
 
-	private final ChatFrame frame;
-	private final ChatClient client;
+    private final ChatFrame frame;
+    private final ChatClient client;
 
-	public ChatBoxKeyListener(ChatFrame frame, ChatClient client) {
-		this.frame = frame;
-		this.client = client;
-	}
+    public ChatBoxKeyListener(ChatFrame frame, ChatClient client) {
+	this.frame = frame;
+	this.client = client;
+    }
 
-	@Override
-	public void keyPressed(KeyEvent e) {
-		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-			ServerChannel channel = (ServerChannel) frame.cmbServerChannels.getSelectedItem();
-			client.sendChatMessage(frame.txtChatBox.getText(), channel.getChannel());
-			frame.txtChatBox.setText("");
-		}
+    @Override
+    public void keyPressed(KeyEvent e) {
+	if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+	    ServerChannel channel = (ServerChannel) frame.cmbServerChannels.getSelectedItem();
+	    client.sendChatMessage(frame.txtChatBox.getText(), channel.getChannel());
+	    frame.txtChatBox.setText("");
 	}
+    }
 
-	@Override
-	public void keyReleased(KeyEvent e) {
-		// not used
-	}
+    @Override
+    public void keyReleased(KeyEvent e) {
+	// not used
+    }
 
-	@Override
-	public void keyTyped(KeyEvent e) {
-		// Not used
-	}
+    @Override
+    public void keyTyped(KeyEvent e) {
+	// Not used
+    }
 
 }

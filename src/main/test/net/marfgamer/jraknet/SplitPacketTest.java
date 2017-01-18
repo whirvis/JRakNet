@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -55,171 +55,171 @@ import net.marfgamer.jraknet.util.RakNetUtils;
  */
 public class SplitPacketTest {
 
-	private static final short SPLIT_START_ID = 0xFE;
-	private static final short SPLIT_END_ID = 0xFF;
+    private static final short SPLIT_START_ID = 0xFE;
+    private static final short SPLIT_END_ID = 0xFF;
 
-	private static long startSend = -1;
+    private static long startSend = -1;
 
-	public static void main(String[] args) throws RakNetException, UnknownHostException {
-		System.out.println("Creating server...");
-		createServer();
+    public static void main(String[] args) throws RakNetException, UnknownHostException {
+	System.out.println("Creating server...");
+	createServer();
 
-		System.out.println("Sleeping 5000MS...");
-		RakNetUtils.threadLock(5000);
+	System.out.println("Sleeping 5000MS...");
+	RakNetUtils.threadLock(5000);
 
-		System.out.println("Creating client...");
-		createClient();
-	}
+	System.out.println("Creating client...");
+	createClient();
+    }
 
-	/**
-	 * Creates the server that will receive the giant packet from the client
-	 * 
-	 * @return The server that will receive the giant packet
-	 * @throws RakNetException
-	 *             Thrown if any problems occur during the stress test
-	 * @throws UnknownHostException
-	 *             Thrown if the localhost address cannot be found
-	 */
-	private static RakNetServer createServer() throws RakNetException {
-		RakNetServer server = new RakNetServer(UtilityTest.MARFGAMER_DEVELOPMENT_PORT, 1);
+    /**
+     * Creates the server that will receive the giant packet from the client
+     * 
+     * @return The server that will receive the giant packet
+     * @throws RakNetException
+     *             Thrown if any problems occur during the stress test
+     * @throws UnknownHostException
+     *             Thrown if the localhost address cannot be found
+     */
+    private static RakNetServer createServer() throws RakNetException {
+	RakNetServer server = new RakNetServer(UtilityTest.MARFGAMER_DEVELOPMENT_PORT, 1);
 
-		// Client connected
-		server.setListener(new RakNetServerListener() {
+	// Client connected
+	server.setListener(new RakNetServerListener() {
 
-			@Override
-			public void onClientConnect(RakNetClientSession session) {
-				// Only accept the packet if it's from the same device
-				try {
-					if (!InetAddress.getLocalHost().equals(session.getAddress().getAddress())) {
-						server.removeSession(session, "Session is not from local address");
-						server.blockAddress(session.getInetAddress(), BlockedClient.PERMANENT_BLOCK);
-						return; // The sender is not from our address!
-					}
-				} catch (UnknownHostException e) {
-					e.printStackTrace();
-				}
+	    @Override
+	    public void onClientConnect(RakNetClientSession session) {
+		// Only accept the packet if it's from the same device
+		try {
+		    if (!InetAddress.getLocalHost().equals(session.getAddress().getAddress())) {
+			server.removeSession(session, "Session is not from local address");
+			server.blockAddress(session.getInetAddress(), BlockedClient.PERMANENT_BLOCK);
+			return; // The sender is not from our address!
+		    }
+		} catch (UnknownHostException e) {
+		    e.printStackTrace();
+		}
 
-				System.out.println("Server: Client connected from " + session.getAddress() + "!");
-			}
+		System.out.println("Server: Client connected from " + session.getAddress() + "!");
+	    }
 
-			@Override
-			public void onClientDisconnect(RakNetClientSession session, String reason) {
-				System.out.println("Server: Client from " + session.getAddress() + " disconnected! (" + reason + ")");
-				System.exit(1);
-			}
+	    @Override
+	    public void onClientDisconnect(RakNetClientSession session, String reason) {
+		System.out.println("Server: Client from " + session.getAddress() + " disconnected! (" + reason + ")");
+		System.exit(1);
+	    }
 
-			@Override
-			public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
-				System.out.println("Server: Received packet of " + packet.size() + " bytes from " + session.getAddress()
-						+ ", checking data...");
+	    @Override
+	    public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
+		System.out.println("Server: Received packet of " + packet.size() + " bytes from " + session.getAddress()
+			+ ", checking data...");
 
-				// Check packet ID
-				System.out.println("Server: Checking header byte...");
-				if (packet.getId() != SPLIT_START_ID) {
-					System.err.println("Server: Packet header is " + packet.getId() + " when it should be "
-							+ SPLIT_START_ID + "!");
-					System.exit(1);
-				}
+		// Check packet ID
+		System.out.println("Server: Checking header byte...");
+		if (packet.getId() != SPLIT_START_ID) {
+		    System.err.println("Server: Packet header is " + packet.getId() + " when it should be "
+			    + SPLIT_START_ID + "!");
+		    System.exit(1);
+		}
 
-				// Check shorts
-				System.out.println("Server: Checking if data is sequenced correctly...");
-				long lastInt = -1;
-				while (packet.remaining() >= 4) {
-					long currentInt = packet.readUInt();
-					if (currentInt - lastInt != 1) {
-						System.err.println("Server: Short data was not split correctly!");
-						System.exit(1);
-					} else {
-						lastInt = currentInt;
-						System.out.print(lastInt + (packet.remaining() >= 4 ? ", " : "\n"));
-					}
-				}
+		// Check shorts
+		System.out.println("Server: Checking if data is sequenced correctly...");
+		long lastInt = -1;
+		while (packet.remaining() >= 4) {
+		    long currentInt = packet.readUInt();
+		    if (currentInt - lastInt != 1) {
+			System.err.println("Server: Short data was not split correctly!");
+			System.exit(1);
+		    } else {
+			lastInt = currentInt;
+			System.out.print(lastInt + (packet.remaining() >= 4 ? ", " : "\n"));
+		    }
+		}
 
-				// Check packet footer
-				System.out.println("Server: Checking footer byte...");
-				if (packet.readUByte() != SPLIT_END_ID) {
-					System.err.println("Server: Packet footer is " + packet.getId() + " when it should be "
-							+ SPLIT_START_ID + "!");
-					System.exit(1);
-				}
+		// Check packet footer
+		System.out.println("Server: Checking footer byte...");
+		if (packet.readUByte() != SPLIT_END_ID) {
+		    System.err.println("Server: Packet footer is " + packet.getId() + " when it should be "
+			    + SPLIT_START_ID + "!");
+		    System.exit(1);
+		}
 
-				System.out.println(
-						"Server: Split packet test passed! (Took " + (System.currentTimeMillis() - startSend) + "MS)");
-				System.exit(0);
-			}
+		System.out.println(
+			"Server: Split packet test passed! (Took " + (System.currentTimeMillis() - startSend) + "MS)");
+		System.exit(0);
+	    }
 
-			@Override
-			public void onHandlerException(InetSocketAddress address, Throwable cause) {
-				cause.printStackTrace();
-				System.exit(1);
-			}
+	    @Override
+	    public void onHandlerException(InetSocketAddress address, Throwable cause) {
+		cause.printStackTrace();
+		System.exit(1);
+	    }
 
-		});
+	});
 
-		server.startThreaded();
-		return server;
-	}
+	server.startThreaded();
+	return server;
+    }
 
-	/**
-	 * Creates the client that will be sending the giant packet to the server
-	 * 
-	 * @return The client that will be sending the giant packet
-	 * @throws RakNetException
-	 *             Thrown if any problems occur during the stress test
-	 * @throws UnknownHostException
-	 *             Thrown if the localhost address cannot be found
-	 */
-	private static RakNetClient createClient() throws RakNetException, UnknownHostException {
-		// Create client and add hooks
-		RakNetClient client = new RakNetClient();
+    /**
+     * Creates the client that will be sending the giant packet to the server
+     * 
+     * @return The client that will be sending the giant packet
+     * @throws RakNetException
+     *             Thrown if any problems occur during the stress test
+     * @throws UnknownHostException
+     *             Thrown if the localhost address cannot be found
+     */
+    private static RakNetClient createClient() throws RakNetException, UnknownHostException {
+	// Create client and add hooks
+	RakNetClient client = new RakNetClient();
 
-		// Server connected
-		client.setListener(new RakNetClientListener() {
+	// Server connected
+	client.setListener(new RakNetClientListener() {
 
-			private Packet packet;
+	    private Packet packet;
 
-			@Override
-			public void onConnect(RakNetServerSession session) {
-				System.out.println("Client: Connected to server with MTU " + session.getMaximumTransferUnit());
+	    @Override
+	    public void onConnect(RakNetServerSession session) {
+		System.out.println("Client: Connected to server with MTU " + session.getMaximumTransferUnit());
 
-				// Calculate maximum packet size
-				this.packet = new RakNetPacket(SPLIT_START_ID);
-				int maximumPacketSize = (session.getMaximumTransferUnit() - CustomPacket.calculateDummy()
-						- EncapsulatedPacket.calculateDummy(Reliability.RELIABLE_ORDERED, false))
-						* RakNet.MAX_SPLIT_COUNT;
+		// Calculate maximum packet size
+		this.packet = new RakNetPacket(SPLIT_START_ID);
+		int maximumPacketSize = (session.getMaximumTransferUnit() - CustomPacket.calculateDummy()
+			- EncapsulatedPacket.calculateDummy(Reliability.RELIABLE_ORDERED, false))
+			* RakNet.MAX_SPLIT_COUNT;
 
-				// Fill up packet
-				int integersWritten = 0;
-				for (int i = 0; i < (maximumPacketSize - 2) / 4; i++) {
-					packet.writeUInt(i);
-					integersWritten++;
-				}
-				packet.writeUByte(SPLIT_END_ID);
+		// Fill up packet
+		int integersWritten = 0;
+		for (int i = 0; i < (maximumPacketSize - 2) / 4; i++) {
+		    packet.writeUInt(i);
+		    integersWritten++;
+		}
+		packet.writeUByte(SPLIT_END_ID);
 
-				// Send packet
-				System.out.println(
-						"Client: Sending giant packet... (" + packet.size() + " bytes, " + integersWritten + " ints)");
-				session.sendMessage(Reliability.RELIABLE_ORDERED, packet);
-				startSend = System.currentTimeMillis();
-			}
+		// Send packet
+		System.out.println(
+			"Client: Sending giant packet... (" + packet.size() + " bytes, " + integersWritten + " ints)");
+		session.sendMessage(Reliability.RELIABLE_ORDERED, packet);
+		startSend = System.currentTimeMillis();
+	    }
 
-			@Override
-			public void onDisconnect(RakNetServerSession session, String reason) {
-				System.err.println("Client: Lost connection to server! (" + reason + ")");
-				System.exit(1);
-			}
+	    @Override
+	    public void onDisconnect(RakNetServerSession session, String reason) {
+		System.err.println("Client: Lost connection to server! (" + reason + ")");
+		System.exit(1);
+	    }
 
-			@Override
-			public void onHandlerException(InetSocketAddress address, Throwable cause) {
-				cause.printStackTrace();
-				System.exit(1);
-			}
+	    @Override
+	    public void onHandlerException(InetSocketAddress address, Throwable cause) {
+		cause.printStackTrace();
+		System.exit(1);
+	    }
 
-		});
+	});
 
-		// Connect to server
-		client.connectThreaded(InetAddress.getLocalHost(), UtilityTest.MARFGAMER_DEVELOPMENT_PORT);
-		return client;
-	}
+	// Connect to server
+	client.connectThreaded(InetAddress.getLocalHost(), UtilityTest.MARFGAMER_DEVELOPMENT_PORT);
+	return client;
+    }
 
 }

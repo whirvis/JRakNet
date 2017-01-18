@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,10 +40,10 @@ import net.marfgamer.jraknet.RakNet;
  */
 public class InvalidChannelException extends IllegalArgumentException {
 
-	private static final long serialVersionUID = -8690545139286694469L;
+    private static final long serialVersionUID = -8690545139286694469L;
 
-	public InvalidChannelException() {
-		super("Channel must be lower than " + RakNet.MAX_CHANNELS);
-	}
+    public InvalidChannelException() {
+	super("Channel must be lower than " + RakNet.MAX_CHANNELS);
+    }
 
 }

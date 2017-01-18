@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,49 +36,49 @@ import net.marfgamer.jraknet.protocol.MessageIdentifier;
 
 public class OpenConnectionResponseOne extends RakNetPacket {
 
-	public static final byte USE_SECURITY_BIT = 0x01;
+    public static final byte USE_SECURITY_BIT = 0x01;
 
-	public boolean magic;
-	public long serverGuid;
-	public int maximumTransferUnit;
+    public boolean magic;
+    public long serverGuid;
+    public int maximumTransferUnit;
 
-	/*
-	 * JRakNet does not support RakNet's built in security function, it is
-	 * poorly documented
-	 */
-	public boolean useSecurity = false;
+    /*
+     * JRakNet does not support RakNet's built in security function, it is
+     * poorly documented
+     */
+    public boolean useSecurity = false;
 
-	public OpenConnectionResponseOne(Packet packet) {
-		super(packet);
+    public OpenConnectionResponseOne(Packet packet) {
+	super(packet);
+    }
+
+    public OpenConnectionResponseOne() {
+	super(MessageIdentifier.ID_OPEN_CONNECTION_REPLY_1);
+    }
+
+    @Override
+    public void encode() {
+	this.writeMagic();
+	this.writeLong(serverGuid);
+
+	// Set security flags
+	byte securityFlags = 0x00;
+	securityFlags |= (useSecurity ? USE_SECURITY_BIT : 0x00);
+	this.writeUByte(securityFlags);
+	this.writeUShort(maximumTransferUnit);
+    }
+
+    @Override
+    public void decode() {
+	this.magic = this.checkMagic();
+	this.serverGuid = this.readLong();
+
+	byte securityFlags = 0x00;
+	securityFlags |= this.readUByte(); // Use security
+	if ((securityFlags & USE_SECURITY_BIT) == USE_SECURITY_BIT) {
+	    this.useSecurity = true;
 	}
-
-	public OpenConnectionResponseOne() {
-		super(MessageIdentifier.ID_OPEN_CONNECTION_REPLY_1);
-	}
-
-	@Override
-	public void encode() {
-		this.writeMagic();
-		this.writeLong(serverGuid);
-
-		// Set security flags
-		byte securityFlags = 0x00;
-		securityFlags |= (useSecurity ? USE_SECURITY_BIT : 0x00);
-		this.writeUByte(securityFlags);
-		this.writeUShort(maximumTransferUnit);
-	}
-
-	@Override
-	public void decode() {
-		this.magic = this.checkMagic();
-		this.serverGuid = this.readLong();
-
-		byte securityFlags = 0x00;
-		securityFlags |= this.readUByte(); // Use security
-		if ((securityFlags & USE_SECURITY_BIT) == USE_SECURITY_BIT) {
-			this.useSecurity = true;
-		}
-		this.maximumTransferUnit = this.readUShort();
-	}
+	this.maximumTransferUnit = this.readUShort();
+    }
 
 }

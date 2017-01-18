@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,10 +37,10 @@ package net.marfgamer.jraknet.session;
  */
 public class TimeoutException extends RuntimeException {
 
-	private static final long serialVersionUID = 4216977972114486611L;
+    private static final long serialVersionUID = 4216977972114486611L;
 
-	public TimeoutException() {
-		super("Session timeout");
-	}
+    public TimeoutException() {
+	super("Session timeout");
+    }
 
 }

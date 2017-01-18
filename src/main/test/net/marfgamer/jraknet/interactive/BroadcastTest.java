@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,65 +51,65 @@ import net.marfgamer.jraknet.identifier.MCPEIdentifier;
  */
 public class BroadcastTest {
 
-	private final RakNetClient client;
-	private final HashMap<InetSocketAddress, MCPEIdentifier> discovered;
-	private final BroadcastFrame frame;
+    private final RakNetClient client;
+    private final HashMap<InetSocketAddress, MCPEIdentifier> discovered;
+    private final BroadcastFrame frame;
 
-	public BroadcastTest() {
-		this.client = new RakNetClient(DiscoveryMode.ALL_CONNECTIONS,
-				UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT);
-		this.discovered = new HashMap<InetSocketAddress, MCPEIdentifier>();
-		this.frame = new BroadcastFrame(client);
+    public BroadcastTest() {
+	this.client = new RakNetClient(DiscoveryMode.ALL_CONNECTIONS,
+		UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT);
+	this.discovered = new HashMap<InetSocketAddress, MCPEIdentifier>();
+	this.frame = new BroadcastFrame(client);
+    }
+
+    /**
+     * The class used to listen for server discovery updates
+     *
+     * @author MarfGamer
+     */
+    private class ServerDiscoveryListener implements RakNetClientListener {
+
+	@Override
+	public void onServerDiscovered(InetSocketAddress address, Identifier identifier) {
+	    if (MCPEIdentifier.isMCPEIdentifier(identifier)) {
+		discovered.put(address, new MCPEIdentifier(identifier));
+	    }
+	    frame.updatePaneText(discovered.values().toArray(new MCPEIdentifier[discovered.size()]));
 	}
 
-	/**
-	 * The class used to listen for server discovery updates
-	 *
-	 * @author MarfGamer
-	 */
-	private class ServerDiscoveryListener implements RakNetClientListener {
-
-		@Override
-		public void onServerDiscovered(InetSocketAddress address, Identifier identifier) {
-			if (MCPEIdentifier.isMCPEIdentifier(identifier)) {
-				discovered.put(address, new MCPEIdentifier(identifier));
-			}
-			frame.updatePaneText(discovered.values().toArray(new MCPEIdentifier[discovered.size()]));
-		}
-
-		@Override
-		public void onServerIdentifierUpdate(InetSocketAddress address, Identifier identifier) {
-			if (MCPEIdentifier.isMCPEIdentifier(identifier)) {
-				discovered.put(address, new MCPEIdentifier(identifier));
-			}
-			frame.updatePaneText(discovered.values().toArray(new MCPEIdentifier[discovered.size()]));
-		}
-
-		@Override
-		public void onServerForgotten(InetSocketAddress address) {
-			discovered.remove(address);
-			frame.updatePaneText(discovered.values().toArray(new MCPEIdentifier[discovered.size()]));
-		}
-
+	@Override
+	public void onServerIdentifierUpdate(InetSocketAddress address, Identifier identifier) {
+	    if (MCPEIdentifier.isMCPEIdentifier(identifier)) {
+		discovered.put(address, new MCPEIdentifier(identifier));
+	    }
+	    frame.updatePaneText(discovered.values().toArray(new MCPEIdentifier[discovered.size()]));
 	}
 
-	/**
-	 * Starts the test
-	 */
-	public void start() {
-		// Set client options
-		client.setListener(new ServerDiscoveryListener());
-
-		// Create window
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setVisible(true);
+	@Override
+	public void onServerForgotten(InetSocketAddress address) {
+	    discovered.remove(address);
+	    frame.updatePaneText(discovered.values().toArray(new MCPEIdentifier[discovered.size()]));
 	}
 
-	public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
-			IllegalAccessException, UnsupportedLookAndFeelException {
-		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		BroadcastTest test = new BroadcastTest();
-		test.start();
-	}
+    }
+
+    /**
+     * Starts the test
+     */
+    public void start() {
+	// Set client options
+	client.setListener(new ServerDiscoveryListener());
+
+	// Create window
+	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	frame.setVisible(true);
+    }
+
+    public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
+	    IllegalAccessException, UnsupportedLookAndFeelException {
+	UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+	BroadcastTest test = new BroadcastTest();
+	test.start();
+    }
 
 }

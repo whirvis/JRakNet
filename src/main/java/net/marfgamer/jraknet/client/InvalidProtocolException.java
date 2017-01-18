@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,10 +44,10 @@ import net.marfgamer.jraknet.RakNetClientException;
  */
 public class InvalidProtocolException extends RakNetClientException {
 
-	private static final long serialVersionUID = -5025319984358819345L;
+    private static final long serialVersionUID = -5025319984358819345L;
 
-	public InvalidProtocolException(RakNetClient client) {
-		super(client, "Received invalid packet from server during login");
-	}
+    public InvalidProtocolException(RakNetClient client) {
+	super(client, "Received invalid packet from server during login");
+    }
 
 }

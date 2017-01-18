@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,58 +40,58 @@ import net.marfgamer.jraknet.protocol.MessageIdentifier;
 
 public class NewIncomingConnection extends RakNetPacket implements Failable {
 
-	public InetSocketAddress serverAddress;
-	public long serverTimestamp;
-	public long clientTimestamp;
-	private boolean failed;
+    public InetSocketAddress serverAddress;
+    public long serverTimestamp;
+    public long clientTimestamp;
+    private boolean failed;
 
-	public NewIncomingConnection(Packet packet) {
-		super(packet);
-	}
+    public NewIncomingConnection(Packet packet) {
+	super(packet);
+    }
 
-	public NewIncomingConnection() {
-		super(MessageIdentifier.ID_NEW_INCOMING_CONNECTION);
-	}
+    public NewIncomingConnection() {
+	super(MessageIdentifier.ID_NEW_INCOMING_CONNECTION);
+    }
 
-	@Override
-	public void encode() {
-		try {
-			this.writeAddress(serverAddress);
-			for (int i = 0; i < 10; i++) {
-				this.writeAddress("0.0.0.0", 0);
-			}
-			this.writeLong(serverTimestamp);
-			this.writeLong(clientTimestamp);
-		} catch (UnknownHostException e) {
-			this.failed = true;
-			this.serverAddress = null;
-			this.serverTimestamp = 0;
-			this.clientTimestamp = 0;
-			this.clear();
-		}
+    @Override
+    public void encode() {
+	try {
+	    this.writeAddress(serverAddress);
+	    for (int i = 0; i < 10; i++) {
+		this.writeAddress("0.0.0.0", 0);
+	    }
+	    this.writeLong(serverTimestamp);
+	    this.writeLong(clientTimestamp);
+	} catch (UnknownHostException e) {
+	    this.failed = true;
+	    this.serverAddress = null;
+	    this.serverTimestamp = 0;
+	    this.clientTimestamp = 0;
+	    this.clear();
 	}
+    }
 
-	@Override
-	public void decode() {
-		try {
-			this.serverAddress = this.readAddress();
-			for (int i = 0; i < 10; i++) {
-				this.readAddress(); // Ignore, unknown use
-			}
-			this.serverTimestamp = this.readLong();
-			this.clientTimestamp = this.readLong();
-		} catch (UnknownHostException e) {
-			this.failed = true;
-			this.serverAddress = null;
-			this.serverTimestamp = 0;
-			this.clientTimestamp = 0;
-			this.clear();
-		}
+    @Override
+    public void decode() {
+	try {
+	    this.serverAddress = this.readAddress();
+	    for (int i = 0; i < 10; i++) {
+		this.readAddress(); // Ignore, unknown use
+	    }
+	    this.serverTimestamp = this.readLong();
+	    this.clientTimestamp = this.readLong();
+	} catch (UnknownHostException e) {
+	    this.failed = true;
+	    this.serverAddress = null;
+	    this.serverTimestamp = 0;
+	    this.clientTimestamp = 0;
+	    this.clear();
 	}
+    }
 
-	@Override
-	public boolean failed() {
-		return this.failed;
-	}
+    @Override
+    public boolean failed() {
+	return this.failed;
+    }
 
 }

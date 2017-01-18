@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,53 +43,53 @@ import net.marfgamer.jraknet.session.RakNetClientSession;
  */
 public class LatencyFrame extends JFrame {
 
-	private static final long serialVersionUID = 9127496840159114268L;
-	private static final int FRAME_WIDTH = 375;
-	private static final int FRAME_HEIGHT = 235;
+    private static final long serialVersionUID = 9127496840159114268L;
+    private static final int FRAME_WIDTH = 375;
+    private static final int FRAME_HEIGHT = 235;
 
-	private final JTextPane txtPnClientLatencies;
+    private final JTextPane txtPnClientLatencies;
 
-	public LatencyFrame() {
-		// Frame settings
-		setResizable(false);
-		setSize(FRAME_WIDTH, FRAME_HEIGHT);
-		setTitle("JRakNet Latency Test");
-		setIconImage(FrameResources.RAKNET_ICON.getImage());
+    public LatencyFrame() {
+	// Frame settings
+	setResizable(false);
+	setSize(FRAME_WIDTH, FRAME_HEIGHT);
+	setTitle("JRakNet Latency Test");
+	setIconImage(FrameResources.RAKNET_ICON.getImage());
 
-		// Content settings
-		getContentPane().setLayout(null);
+	// Content settings
+	getContentPane().setLayout(null);
 
-		// Client latencies
-		JTextPane txtpnClientLatencies = new JTextPane();
-		txtpnClientLatencies.setEditable(false);
-		txtpnClientLatencies.setText("Client latencies");
-		txtpnClientLatencies.setBackground(UIManager.getColor("Button.background"));
-		txtpnClientLatencies.setBounds(10, 10, 350, 20);
-		getContentPane().add(txtpnClientLatencies);
+	// Client latencies
+	JTextPane txtpnClientLatencies = new JTextPane();
+	txtpnClientLatencies.setEditable(false);
+	txtpnClientLatencies.setText("Client latencies");
+	txtpnClientLatencies.setBackground(UIManager.getColor("Button.background"));
+	txtpnClientLatencies.setBounds(10, 10, 350, 20);
+	getContentPane().add(txtpnClientLatencies);
 
-		// The list of the connected clients
-		txtPnClientLatencies = new JTextPane();
-		txtPnClientLatencies.setToolTipText("This is the list of the connected clients and their latencies");
-		txtPnClientLatencies.setEditable(false);
-		txtPnClientLatencies.setBackground(UIManager.getColor("Button.background"));
-		txtPnClientLatencies.setBounds(10, 30, 350, 165);
-		getContentPane().add(txtPnClientLatencies);
+	// The list of the connected clients
+	txtPnClientLatencies = new JTextPane();
+	txtPnClientLatencies.setToolTipText("This is the list of the connected clients and their latencies");
+	txtPnClientLatencies.setEditable(false);
+	txtPnClientLatencies.setBackground(UIManager.getColor("Button.background"));
+	txtPnClientLatencies.setBounds(10, 30, 350, 165);
+	getContentPane().add(txtPnClientLatencies);
+    }
+
+    /**
+     * Updates the text in the JFrame according to the connecting clients
+     * 
+     * @param sessions
+     *            The sessions of the clients connected to the server
+     */
+    public void updatePaneText(RakNetClientSession[] sessions) {
+	StringBuilder discoverString = new StringBuilder();
+	for (int i = 0; i < sessions.length; i++) {
+	    RakNetClientSession session = sessions[i];
+	    discoverString.append((session.getAddress() + ": " + session.getLatency() + "MS")
+		    + (i + 1 < sessions.length ? "\n" : ""));
 	}
-
-	/**
-	 * Updates the text in the JFrame according to the connecting clients
-	 * 
-	 * @param sessions
-	 *            The sessions of the clients connected to the server
-	 */
-	public void updatePaneText(RakNetClientSession[] sessions) {
-		StringBuilder discoverString = new StringBuilder();
-		for (int i = 0; i < sessions.length; i++) {
-			RakNetClientSession session = sessions[i];
-			discoverString.append((session.getAddress() + ": " + session.getLatency() + "MS")
-					+ (i + 1 < sessions.length ? "\n" : ""));
-		}
-		txtPnClientLatencies.setText(discoverString.toString());
-	}
+	txtPnClientLatencies.setText(discoverString.toString());
+    }
 
 }

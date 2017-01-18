@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,27 +36,27 @@ import net.marfgamer.jraknet.protocol.MessageIdentifier;
 
 public class IncompatibleProtocol extends RakNetPacket {
 
-	public int networkProtocol;
-	public long serverGuid;
+    public int networkProtocol;
+    public long serverGuid;
 
-	public IncompatibleProtocol(Packet packet) {
-		super(packet);
-	}
+    public IncompatibleProtocol(Packet packet) {
+	super(packet);
+    }
 
-	public IncompatibleProtocol() {
-		super(MessageIdentifier.ID_INCOMPATIBLE_PROTOCOL_VERSION);
-	}
+    public IncompatibleProtocol() {
+	super(MessageIdentifier.ID_INCOMPATIBLE_PROTOCOL_VERSION);
+    }
 
-	@Override
-	public void encode() {
-		this.writeUByte(networkProtocol);
-		this.writeMagic();
-		this.writeLong(serverGuid);
-	}
+    @Override
+    public void encode() {
+	this.writeUByte(networkProtocol);
+	this.writeMagic();
+	this.writeLong(serverGuid);
+    }
 
-	@Override
-	public void decode() {
+    @Override
+    public void decode() {
 
-	}
+    }
 
 }

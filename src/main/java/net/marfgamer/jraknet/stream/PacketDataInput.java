@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,103 +45,103 @@ import net.marfgamer.jraknet.Packet;
  */
 public class PacketDataInput extends InputStream implements DataInput {
 
-	private final Packet packet;
+    private final Packet packet;
 
-	public PacketDataInput(Packet packet) {
-		this.packet = packet;
-	}
+    public PacketDataInput(Packet packet) {
+	this.packet = packet;
+    }
 
-	@Override
-	public int read() throws IOException {
-		if (packet.remaining() <= 0) {
-			return -1;
-		} else {
-			return packet.readUByte();
-		}
+    @Override
+    public int read() throws IOException {
+	if (packet.remaining() <= 0) {
+	    return -1;
+	} else {
+	    return packet.readUByte();
 	}
+    }
 
-	@Override
-	public void readFully(byte[] b) throws IOException {
-		for (int i = 0; i < b.length; i++) {
-			b[i] = packet.readByte();
-		}
+    @Override
+    public void readFully(byte[] b) throws IOException {
+	for (int i = 0; i < b.length; i++) {
+	    b[i] = packet.readByte();
 	}
+    }
 
-	@Override
-	public void readFully(byte[] b, int off, int len) throws IOException {
-		for (int i = off; i < len; i++) {
-			b[i] = packet.readByte();
-		}
+    @Override
+    public void readFully(byte[] b, int off, int len) throws IOException {
+	for (int i = off; i < len; i++) {
+	    b[i] = packet.readByte();
 	}
+    }
 
-	@Override
-	public int skipBytes(int n) throws IOException {
-		int skipped = 0;
-		while (skipped < n && packet.remaining() > 0) {
-			packet.readByte();
-			skipped++;
-		}
-		return skipped;
+    @Override
+    public int skipBytes(int n) throws IOException {
+	int skipped = 0;
+	while (skipped < n && packet.remaining() > 0) {
+	    packet.readByte();
+	    skipped++;
 	}
+	return skipped;
+    }
 
-	@Override
-	public boolean readBoolean() throws IOException {
-		return packet.readBoolean();
-	}
+    @Override
+    public boolean readBoolean() throws IOException {
+	return packet.readBoolean();
+    }
 
-	@Override
-	public byte readByte() throws IOException {
-		return packet.readByte();
-	}
+    @Override
+    public byte readByte() throws IOException {
+	return packet.readByte();
+    }
 
-	@Override
-	public int readUnsignedByte() throws IOException {
-		return packet.readUByte();
-	}
+    @Override
+    public int readUnsignedByte() throws IOException {
+	return packet.readUByte();
+    }
 
-	@Override
-	public short readShort() throws IOException {
-		return packet.readShort();
-	}
+    @Override
+    public short readShort() throws IOException {
+	return packet.readShort();
+    }
 
-	@Override
-	public int readUnsignedShort() throws IOException {
-		return packet.readUShort();
-	}
+    @Override
+    public int readUnsignedShort() throws IOException {
+	return packet.readUShort();
+    }
 
-	@Override
-	public char readChar() throws IOException {
-		return (char) packet.readUShort();
-	}
+    @Override
+    public char readChar() throws IOException {
+	return (char) packet.readUShort();
+    }
 
-	@Override
-	public int readInt() throws IOException {
-		return packet.readInt();
-	}
+    @Override
+    public int readInt() throws IOException {
+	return packet.readInt();
+    }
 
-	@Override
-	public long readLong() throws IOException {
-		return packet.readLong();
-	}
+    @Override
+    public long readLong() throws IOException {
+	return packet.readLong();
+    }
 
-	@Override
-	public float readFloat() throws IOException {
-		return packet.readFloat();
-	}
+    @Override
+    public float readFloat() throws IOException {
+	return packet.readFloat();
+    }
 
-	@Override
-	public double readDouble() throws IOException {
-		return packet.readDouble();
-	}
+    @Override
+    public double readDouble() throws IOException {
+	return packet.readDouble();
+    }
 
-	@Override
-	public String readLine() throws IOException {
-		throw new RuntimeException("This method is not supported by " + this.getClass().getSimpleName());
-	}
+    @Override
+    public String readLine() throws IOException {
+	throw new RuntimeException("This method is not supported by " + this.getClass().getSimpleName());
+    }
 
-	@Override
-	public String readUTF() throws IOException {
-		return packet.readString();
-	}
+    @Override
+    public String readUTF() throws IOException {
+	return packet.readString();
+    }
 
 }

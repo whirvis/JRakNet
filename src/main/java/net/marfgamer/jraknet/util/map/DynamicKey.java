@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,16 +32,16 @@ package net.marfgamer.jraknet.util.map;
 
 public interface DynamicKey<T> {
 
-	/**
-	 * Renames the specified key and changes it to the specified one
-	 * 
-	 * @param oldKey
-	 *            The old key
-	 * @param newKey
-	 *            The new key
-	 * @throws NullPointerException
-	 *             Thrown if the old key did not previously exist
-	 */
-	public void renameKey(T oldKey, T newKey) throws NullPointerException;
+    /**
+     * Renames the specified key and changes it to the specified one
+     * 
+     * @param oldKey
+     *            The old key
+     * @param newKey
+     *            The new key
+     * @throws NullPointerException
+     *             Thrown if the old key did not previously exist
+     */
+    public void renameKey(T oldKey, T newKey) throws NullPointerException;
 
 }

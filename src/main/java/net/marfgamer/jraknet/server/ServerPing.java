@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,40 +43,40 @@ import net.marfgamer.jraknet.identifier.Identifier;
  */
 public class ServerPing {
 
-	private final InetSocketAddress sender;
-	private Identifier identifier;
+    private final InetSocketAddress sender;
+    private Identifier identifier;
 
-	public ServerPing(InetSocketAddress sender, Identifier identifier) {
-		this.sender = sender;
-		this.identifier = identifier;
-	}
+    public ServerPing(InetSocketAddress sender, Identifier identifier) {
+	this.sender = sender;
+	this.identifier = identifier;
+    }
 
-	/**
-	 * Returns the sender's address of the ping
-	 * 
-	 * @return The sender's address of the ping
-	 */
-	public InetSocketAddress getSender() {
-		return this.sender;
-	}
+    /**
+     * Returns the sender's address of the ping
+     * 
+     * @return The sender's address of the ping
+     */
+    public InetSocketAddress getSender() {
+	return this.sender;
+    }
 
-	/**
-	 * Returns the identifier being sent back to the sender
-	 * 
-	 * @return The identifier being sent back to the sender
-	 */
-	public Identifier getIdentifier() {
-		return this.identifier;
-	}
+    /**
+     * Returns the identifier being sent back to the sender
+     * 
+     * @return The identifier being sent back to the sender
+     */
+    public Identifier getIdentifier() {
+	return this.identifier;
+    }
 
-	/**
-	 * Sets the identifier being sent back to the sender
-	 * 
-	 * @param identifier
-	 *            The new identifier
-	 */
-	public void setIdentifier(Identifier identifier) {
-		this.identifier = identifier;
-	}
+    /**
+     * Sets the identifier being sent back to the sender
+     * 
+     * @param identifier
+     *            The new identifier
+     */
+    public void setIdentifier(Identifier identifier) {
+	this.identifier = identifier;
+    }
 
 }

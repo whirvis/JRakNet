@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,22 +37,22 @@ package net.marfgamer.jraknet;
  */
 public class RakNetException extends Exception {
 
-	private static final long serialVersionUID = -685945306592443928L;
+    private static final long serialVersionUID = -685945306592443928L;
 
-	private final String error;
+    private final String error;
 
-	public RakNetException(String error) {
-		super(error);
-		this.error = error;
-	}
+    public RakNetException(String error) {
+	super(error);
+	this.error = error;
+    }
 
-	public RakNetException(Throwable cause) {
-		this(cause.getMessage());
-	}
+    public RakNetException(Throwable cause) {
+	this(cause.getMessage());
+    }
 
-	@Override
-	public String getLocalizedMessage() {
-		return this.error;
-	}
+    @Override
+    public String getLocalizedMessage() {
+	return this.error;
+    }
 
 }

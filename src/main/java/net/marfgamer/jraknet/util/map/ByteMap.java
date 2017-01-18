@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,35 +35,35 @@ import java.util.Map;
 
 public class ByteMap<T> extends HashMap<Byte, T> implements Map<Byte, T>, DynamicKey<Byte> {
 
-	private static final long serialVersionUID = 4324132003573381634L;
+    private static final long serialVersionUID = 4324132003573381634L;
 
-	public boolean containsKey(byte key) {
-		return super.containsKey(new Byte(key));
-	}
+    public boolean containsKey(byte key) {
+	return super.containsKey(new Byte(key));
+    }
 
-	public boolean containsValue(Object value) {
-		return super.containsValue(value);
-	}
+    public boolean containsValue(Object value) {
+	return super.containsValue(value);
+    }
 
-	public T get(byte key) {
-		return super.get(new Byte(key));
-	}
+    public T get(byte key) {
+	return super.get(new Byte(key));
+    }
 
-	public T put(byte key, T value) {
-		return super.put(new Byte(key), value);
-	}
+    public T put(byte key, T value) {
+	return super.put(new Byte(key), value);
+    }
 
-	public T remove(byte key) {
-		return super.remove(new Byte(key));
-	}
+    public T remove(byte key) {
+	return super.remove(new Byte(key));
+    }
 
-	@Override
-	public void renameKey(Byte oldKey, Byte newKey) throws NullPointerException {
-		T storedObject = this.remove(oldKey.byteValue());
-		if (storedObject == null) {
-			throw new NullPointerException();
-		}
-		this.put(newKey.byteValue(), storedObject);
+    @Override
+    public void renameKey(Byte oldKey, Byte newKey) throws NullPointerException {
+	T storedObject = this.remove(oldKey.byteValue());
+	if (storedObject == null) {
+	    throw new NullPointerException();
 	}
+	this.put(newKey.byteValue(), storedObject);
+    }
 
 }
