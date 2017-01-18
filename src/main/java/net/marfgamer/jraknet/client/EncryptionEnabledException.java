@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,10 +41,10 @@ import net.marfgamer.jraknet.RakNetClientException;
 @Deprecated // It seems as if complying with encryption is optional
 public class EncryptionEnabledException extends RakNetClientException {
 
-	private static final long serialVersionUID = -2790036366485341646L;
+    private static final long serialVersionUID = -2790036366485341646L;
 
-	public EncryptionEnabledException(RakNetClient client) {
-		super(client, "Server has encryption enabled");
-	}
+    public EncryptionEnabledException(RakNetClient client) {
+	super(client, "Server has encryption enabled");
+    }
 
 }

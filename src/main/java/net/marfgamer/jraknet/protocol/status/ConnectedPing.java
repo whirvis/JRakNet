@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,24 +36,24 @@ import net.marfgamer.jraknet.protocol.MessageIdentifier;
 
 public class ConnectedPing extends RakNetPacket {
 
-	public long identifier;
+    public long identifier;
 
-	public ConnectedPing() {
-		super(MessageIdentifier.ID_CONNECTED_PING);
-	}
+    public ConnectedPing() {
+	super(MessageIdentifier.ID_CONNECTED_PING);
+    }
 
-	public ConnectedPing(Packet packet) {
-		super(packet);
-	}
+    public ConnectedPing(Packet packet) {
+	super(packet);
+    }
 
-	@Override
-	public void encode() {
-		this.writeLong(identifier);
-	}
+    @Override
+    public void encode() {
+	this.writeLong(identifier);
+    }
 
-	@Override
-	public void decode() {
-		this.identifier = this.readLong();
-	}
+    @Override
+    public void decode() {
+	this.identifier = this.readLong();
+    }
 
 }

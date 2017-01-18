@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,58 +40,58 @@ import java.util.HashMap;
  */
 public class CommandHandler {
 
-	private HashMap<String, Command> commands;
+    private HashMap<String, Command> commands;
 
-	public CommandHandler() {
-		this.commands = new HashMap<String, Command>();
+    public CommandHandler() {
+	this.commands = new HashMap<String, Command>();
+    }
+
+    /**
+     * Registers a command
+     * 
+     * @param command
+     *            - The command to register
+     */
+    public void registerCommand(Command command) {
+	if (commands.containsKey(command.getLabel())) {
+	    if (commands.get(command.getLabel()).isOverridable() == false) {
+		throw new RuntimeException("The label \"" + command.getLabel() + "\" is not overridable!");
+	    }
 	}
+	commands.put(command.getLabel().toLowerCase(), command);
+    }
 
-	/**
-	 * Registers a command
-	 * 
-	 * @param command
-	 *            - The command to register
-	 */
-	public void registerCommand(Command command) {
-		if (commands.containsKey(command.getLabel())) {
-			if (commands.get(command.getLabel()).isOverridable() == false) {
-				throw new RuntimeException("The label \"" + command.getLabel() + "\" is not overridable!");
-			}
-		}
-		commands.put(command.getLabel().toLowerCase(), command);
+    /**
+     * Unregisters a command
+     * 
+     * @param label
+     *            - The label of the command to unregister
+     */
+    public void unregisterCommand(String label) {
+	commands.remove(label);
+    }
+
+    /**
+     * Handles raw input as a command
+     * 
+     * @param input
+     *            - The input to process and handle
+     */
+    public void handleInput(String input) {
+	// Get command
+	String[] arguments = input.split(" ");
+	String label = arguments[0].toLowerCase();
+	arguments = Arrays.copyOfRange(arguments, 1, arguments.length);
+
+	// Handle command and print usage if needed
+	if (commands.containsKey(label)) {
+	    Command command = commands.get(label);
+	    if (command.handleCommand(arguments) == false) {
+		System.err.println("Usage: " + command.getUsage());
+	    }
+	} else {
+	    System.err.println("Unknown command!");
 	}
-
-	/**
-	 * Unregisters a command
-	 * 
-	 * @param label
-	 *            - The label of the command to unregister
-	 */
-	public void unregisterCommand(String label) {
-		commands.remove(label);
-	}
-
-	/**
-	 * Handles raw input as a command
-	 * 
-	 * @param input
-	 *            - The input to process and handle
-	 */
-	public void handleInput(String input) {
-		// Get command
-		String[] arguments = input.split(" ");
-		String label = arguments[0].toLowerCase();
-		arguments = Arrays.copyOfRange(arguments, 1, arguments.length);
-
-		// Handle command and print usage if needed
-		if (commands.containsKey(label)) {
-			Command command = commands.get(label);
-			if (command.handleCommand(arguments) == false) {
-				System.err.println("Usage: " + command.getUsage());
-			}
-		} else {
-			System.err.println("Unknown command!");
-		}
-	}
+    }
 
 }

@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,57 +40,57 @@ import net.marfgamer.jraknet.protocol.MessageIdentifier;
 
 public class OpenConnectionRequestTwo extends RakNetPacket implements Failable {
 
-	public boolean magic;
-	public InetSocketAddress address;
-	public int maximumTransferUnit;
-	public long clientGuid;
-	private boolean failed;
+    public boolean magic;
+    public InetSocketAddress address;
+    public int maximumTransferUnit;
+    public long clientGuid;
+    private boolean failed;
 
-	public OpenConnectionRequestTwo(Packet packet) {
-		super(packet);
-	}
+    public OpenConnectionRequestTwo(Packet packet) {
+	super(packet);
+    }
 
-	public OpenConnectionRequestTwo() {
-		super(MessageIdentifier.ID_OPEN_CONNECTION_REQUEST_2);
-	}
+    public OpenConnectionRequestTwo() {
+	super(MessageIdentifier.ID_OPEN_CONNECTION_REQUEST_2);
+    }
 
-	@Override
-	public void encode() {
-		try {
-			this.writeMagic();
-			this.writeAddress(address);
-			this.writeShort(maximumTransferUnit);
-			this.writeLong(clientGuid);
-		} catch (UnknownHostException e) {
-			this.failed = true;
-			this.magic = false;
-			this.address = null;
-			this.maximumTransferUnit = 0;
-			this.clientGuid = 0;
-			this.clear();
-		}
+    @Override
+    public void encode() {
+	try {
+	    this.writeMagic();
+	    this.writeAddress(address);
+	    this.writeShort(maximumTransferUnit);
+	    this.writeLong(clientGuid);
+	} catch (UnknownHostException e) {
+	    this.failed = true;
+	    this.magic = false;
+	    this.address = null;
+	    this.maximumTransferUnit = 0;
+	    this.clientGuid = 0;
+	    this.clear();
 	}
+    }
 
-	@Override
-	public void decode() {
-		try {
-			this.magic = this.checkMagic();
-			this.address = this.readAddress();
-			this.maximumTransferUnit = this.readUShort();
-			this.clientGuid = this.readLong();
-		} catch (UnknownHostException e) {
-			this.failed = true;
-			this.magic = false;
-			this.address = null;
-			this.maximumTransferUnit = 0;
-			this.clientGuid = 0;
-			this.clear();
-		}
+    @Override
+    public void decode() {
+	try {
+	    this.magic = this.checkMagic();
+	    this.address = this.readAddress();
+	    this.maximumTransferUnit = this.readUShort();
+	    this.clientGuid = this.readLong();
+	} catch (UnknownHostException e) {
+	    this.failed = true;
+	    this.magic = false;
+	    this.address = null;
+	    this.maximumTransferUnit = 0;
+	    this.clientGuid = 0;
+	    this.clear();
 	}
+    }
 
-	@Override
-	public boolean failed() {
-		return this.failed;
-	}
+    @Override
+    public boolean failed() {
+	return this.failed;
+    }
 
 }

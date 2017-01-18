@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,35 +35,35 @@ import java.util.Map;
 
 public class ShortMap<T> extends HashMap<Short, T> implements Map<Short, T>, DynamicKey<Short> {
 
-	private static final long serialVersionUID = 4324132003573381634L;
+    private static final long serialVersionUID = 4324132003573381634L;
 
-	public boolean containsKey(short key) {
-		return super.containsKey(new Short(key));
-	}
+    public boolean containsKey(short key) {
+	return super.containsKey(new Short(key));
+    }
 
-	public boolean containsValue(Object value) {
-		return super.containsValue(value);
-	}
+    public boolean containsValue(Object value) {
+	return super.containsValue(value);
+    }
 
-	public T get(short key) {
-		return super.get(new Short(key));
-	}
+    public T get(short key) {
+	return super.get(new Short(key));
+    }
 
-	public T put(short key, T value) {
-		return super.put(new Short(key), value);
-	}
+    public T put(short key, T value) {
+	return super.put(new Short(key), value);
+    }
 
-	public T remove(short key) {
-		return super.remove(new Short(key));
-	}
+    public T remove(short key) {
+	return super.remove(new Short(key));
+    }
 
-	@Override
-	public void renameKey(Short oldKey, Short newKey) throws NullPointerException {
-		T storedObject = this.remove(oldKey.shortValue());
-		if (storedObject == null) {
-			throw new NullPointerException();
-		}
-		this.put(newKey.shortValue(), storedObject);
+    @Override
+    public void renameKey(Short oldKey, Short newKey) throws NullPointerException {
+	T storedObject = this.remove(oldKey.shortValue());
+	if (storedObject == null) {
+	    throw new NullPointerException();
 	}
+	this.put(newKey.shortValue(), storedObject);
+    }
 
 }

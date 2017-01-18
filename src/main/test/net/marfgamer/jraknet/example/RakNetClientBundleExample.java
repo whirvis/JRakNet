@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,31 +45,31 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
  */
 public class RakNetClientBundleExample extends RakNetClient {
 
-	// Server address and port
-	private static final String SERVER_ADDRESS = "sg.lbsg.net";
-	private static final int SERVER_PORT = 19132;
+    // Server address and port
+    private static final String SERVER_ADDRESS = "sg.lbsg.net";
+    private static final int SERVER_PORT = 19132;
 
-	// Server connected
-	@Override
-	public void onConnect(RakNetServerSession session) {
-		System.out.println("Successfully connected to server with address " + session.getAddress());
-		this.disconnect();
-	}
+    // Server connected
+    @Override
+    public void onConnect(RakNetServerSession session) {
+	System.out.println("Successfully connected to server with address " + session.getAddress());
+	this.disconnect();
+    }
 
-	// Server disconnected
-	@Override
-	public void onDisconnect(RakNetServerSession session, String reason) {
-		System.out.println("Sucessfully disconnected from server with address " + session.getAddress()
-				+ " for the reason \"" + reason + "\"");
-		System.exit(0);
-	}
+    // Server disconnected
+    @Override
+    public void onDisconnect(RakNetServerSession session, String reason) {
+	System.out.println("Sucessfully disconnected from server with address " + session.getAddress()
+		+ " for the reason \"" + reason + "\"");
+	System.exit(0);
+    }
 
-	public static void main(String[] args) throws RakNetException, UnknownHostException {
-		// Create client
-		RakNetClientBundleExample bundle = new RakNetClientBundleExample();
+    public static void main(String[] args) throws RakNetException, UnknownHostException {
+	// Create client
+	RakNetClientBundleExample bundle = new RakNetClientBundleExample();
 
-		// Connect to server
-		bundle.connect(SERVER_ADDRESS, SERVER_PORT);
-	}
+	// Connect to server
+	bundle.connect(SERVER_ADDRESS, SERVER_PORT);
+    }
 
 }

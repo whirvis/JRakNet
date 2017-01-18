@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,12 +34,12 @@ import net.marfgamer.jraknet.Packet;
 
 public class UnconnectedPingOpenConnections extends UnconnectedPing {
 
-	public UnconnectedPingOpenConnections() {
-		super(true);
-	}
+    public UnconnectedPingOpenConnections() {
+	super(true);
+    }
 
-	public UnconnectedPingOpenConnections(Packet packet) {
-		super(packet);
-	}
+    public UnconnectedPingOpenConnections(Packet packet) {
+	super(packet);
+    }
 
 }

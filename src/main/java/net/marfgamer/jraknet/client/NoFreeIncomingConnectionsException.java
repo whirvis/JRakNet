@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,10 +40,10 @@ import net.marfgamer.jraknet.RakNetClientException;
  */
 public class NoFreeIncomingConnectionsException extends RakNetClientException {
 
-	private static final long serialVersionUID = 5863972657532782029L;
+    private static final long serialVersionUID = 5863972657532782029L;
 
-	public NoFreeIncomingConnectionsException(RakNetClient client) {
-		super(client, "Server has no free incoming connections");
-	}
+    public NoFreeIncomingConnectionsException(RakNetClient client) {
+	super(client, "Server has no free incoming connections");
+    }
 
 }

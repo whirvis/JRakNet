@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,63 +50,63 @@ import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
  */
 public class RakNetServerSession extends RakNetSession {
 
-	private final RakNetClient client;
+    private final RakNetClient client;
 
-	public RakNetServerSession(RakNetClient client, long guid, int maximumTransferUnit, Channel channel,
-			InetSocketAddress address) {
-		super(guid, maximumTransferUnit, channel, address);
-		this.client = client;
-		this.setState(RakNetState.HANDSHAKING); // We start at the handshake
-	}
+    public RakNetServerSession(RakNetClient client, long guid, int maximumTransferUnit, Channel channel,
+	    InetSocketAddress address) {
+	super(guid, maximumTransferUnit, channel, address);
+	this.client = client;
+	this.setState(RakNetState.HANDSHAKING); // We start at the handshake
+    }
 
-	@Override
-	public void onAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet) {
-		client.getListener().onAcknowledge(this, record, reliability, channel, packet);
-	}
+    @Override
+    public void onAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet) {
+	client.getListener().onAcknowledge(this, record, reliability, channel, packet);
+    }
 
-	@Override
-	public void onNotAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet) {
-		client.getListener().onNotAcknowledge(this, record, reliability, channel, packet);
-	}
+    @Override
+    public void onNotAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet) {
+	client.getListener().onNotAcknowledge(this, record, reliability, channel, packet);
+    }
 
-	@Override
-	public void handlePacket(RakNetPacket packet, int channel) {
-		short packetId = packet.getId();
+    @Override
+    public void handlePacket(RakNetPacket packet, int channel) {
+	short packetId = packet.getId();
 
-		if (packetId == ID_CONNECTION_REQUEST_ACCEPTED) {
-			ConnectionRequestAccepted serverHandshake = new ConnectionRequestAccepted(packet);
-			serverHandshake.decode();
+	if (packetId == ID_CONNECTION_REQUEST_ACCEPTED) {
+	    ConnectionRequestAccepted serverHandshake = new ConnectionRequestAccepted(packet);
+	    serverHandshake.decode();
 
-			if (!serverHandshake.failed()) {
-				NewIncomingConnection clientHandshake = new NewIncomingConnection();
-				clientHandshake.serverAddress = client.getSession().getAddress();
-				clientHandshake.clientTimestamp = serverHandshake.clientTimestamp;
-				clientHandshake.serverTimestamp = serverHandshake.serverTimestamp;
-				clientHandshake.encode();
+	    if (!serverHandshake.failed()) {
+		NewIncomingConnection clientHandshake = new NewIncomingConnection();
+		clientHandshake.serverAddress = client.getSession().getAddress();
+		clientHandshake.clientTimestamp = serverHandshake.clientTimestamp;
+		clientHandshake.serverTimestamp = serverHandshake.serverTimestamp;
+		clientHandshake.encode();
 
-				if (!clientHandshake.failed()) {
-					this.sendMessage(Reliability.RELIABLE, clientHandshake);
-					this.setState(RakNetState.CONNECTED);
-					client.getListener().onConnect(this);
-				} else {
-					client.disconnect("Failed to login");
-				}
-			} else {
-				client.disconnect("Failed to login");
-			}
-		} else if (packetId == ID_DISCONNECTION_NOTIFICATION) {
-			this.setState(RakNetState.DISCONNECTED);
-			client.disconnect("Server disconnected");
-		} else if (packetId >= ID_USER_PACKET_ENUM) {
-			client.getListener().handlePacket(this, packet, channel);
+		if (!clientHandshake.failed()) {
+		    this.sendMessage(Reliability.RELIABLE, clientHandshake);
+		    this.setState(RakNetState.CONNECTED);
+		    client.getListener().onConnect(this);
+		} else {
+		    client.disconnect("Failed to login");
 		}
+	    } else {
+		client.disconnect("Failed to login");
+	    }
+	} else if (packetId == ID_DISCONNECTION_NOTIFICATION) {
+	    this.setState(RakNetState.DISCONNECTED);
+	    client.disconnect("Server disconnected");
+	} else if (packetId >= ID_USER_PACKET_ENUM) {
+	    client.getListener().handlePacket(this, packet, channel);
 	}
+    }
 
-	/**
-	 * Called by the client when the connection is closed
-	 */
-	public void closeConnection() {
-		this.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
-	}
+    /**
+     * Called by the client when the connection is closed
+     */
+    public void closeConnection() {
+	this.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
+    }
 
 }

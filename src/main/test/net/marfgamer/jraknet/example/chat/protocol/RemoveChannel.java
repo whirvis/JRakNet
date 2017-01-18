@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,24 +35,24 @@ import net.marfgamer.jraknet.example.chat.ChatMessageIdentifier;
 
 public class RemoveChannel extends ChatPacket {
 
-	public int channel;
+    public int channel;
 
-	public RemoveChannel(Packet packet) {
-		super(packet);
-	}
+    public RemoveChannel(Packet packet) {
+	super(packet);
+    }
 
-	public RemoveChannel() {
-		super(ChatMessageIdentifier.ID_RENAME_CHANNEL);
-	}
+    public RemoveChannel() {
+	super(ChatMessageIdentifier.ID_RENAME_CHANNEL);
+    }
 
-	@Override
-	public void encode() {
-		this.writeUByte(channel);
-	}
+    @Override
+    public void encode() {
+	this.writeUByte(channel);
+    }
 
-	@Override
-	public void decode() {
-		this.channel = this.readUByte();
-	}
+    @Override
+    public void decode() {
+	this.channel = this.readUByte();
+    }
 
 }

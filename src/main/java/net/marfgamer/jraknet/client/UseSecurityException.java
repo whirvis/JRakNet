@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,10 +41,10 @@ import net.marfgamer.jraknet.RakNetClientException;
 @Deprecated // It seems as if complying with security is optional
 public class UseSecurityException extends RakNetClientException {
 
-	private static final long serialVersionUID = 5287717235922196735L;
+    private static final long serialVersionUID = 5287717235922196735L;
 
-	public UseSecurityException(RakNetClient client) {
-		super(client, "Server has security enabled");
-	}
+    public UseSecurityException(RakNetClient client) {
+	super(client, "Server has security enabled");
+    }
 
 }

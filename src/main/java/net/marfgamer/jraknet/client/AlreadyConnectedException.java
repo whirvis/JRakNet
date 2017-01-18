@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016 MarfGamer
+ * Copyright (c) 2016, 2017 MarfGamer
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,10 +40,10 @@ import net.marfgamer.jraknet.RakNetClientException;
  */
 public class AlreadyConnectedException extends RakNetClientException {
 
-	private static final long serialVersionUID = -482118372058339060L;
+    private static final long serialVersionUID = -482118372058339060L;
 
-	public AlreadyConnectedException(RakNetClient client) {
-		super(client, "Already connected to server");
-	}
+    public AlreadyConnectedException(RakNetClient client) {
+	super(client, "Already connected to server");
+    }
 
 }
