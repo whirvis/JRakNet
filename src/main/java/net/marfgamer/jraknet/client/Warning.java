@@ -38,21 +38,21 @@ package net.marfgamer.jraknet.client;
  */
 public enum Warning {
 
-    SECURITY_ENABLED("The server has security enabled"), ENCRYPTION_ENABLED("The server has encryption enabled");
+	SECURITY_ENABLED("The server has security enabled"), ENCRYPTION_ENABLED("The server has encryption enabled");
 
-    private String message;
+	private String message;
 
-    private Warning(String message) {
-	this.message = message;
-    }
+	private Warning(String message) {
+		this.message = message;
+	}
 
-    /**
-     * Returns the warning message
-     * 
-     * @return The warning message
-     */
-    public String getMessage() {
-	return this.message;
-    }
+	/**
+	 * Returns the warning message
+	 * 
+	 * @return The warning message
+	 */
+	public String getMessage() {
+		return this.message;
+	}
 
 }

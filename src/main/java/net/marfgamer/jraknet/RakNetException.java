@@ -37,22 +37,22 @@ package net.marfgamer.jraknet;
  */
 public class RakNetException extends Exception {
 
-    private static final long serialVersionUID = -685945306592443928L;
+	private static final long serialVersionUID = -685945306592443928L;
 
-    private final String error;
+	private final String error;
 
-    public RakNetException(String error) {
-	super(error);
-	this.error = error;
-    }
+	public RakNetException(String error) {
+		super(error);
+		this.error = error;
+	}
 
-    public RakNetException(Throwable cause) {
-	this(cause.getMessage());
-    }
+	public RakNetException(Throwable cause) {
+		this(cause.getMessage());
+	}
 
-    @Override
-    public String getLocalizedMessage() {
-	return this.error;
-    }
+	@Override
+	public String getLocalizedMessage() {
+		return this.error;
+	}
 
 }

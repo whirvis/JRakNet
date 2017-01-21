@@ -34,12 +34,12 @@ import net.marfgamer.jraknet.Packet;
 
 public class UnconnectedPingOpenConnections extends UnconnectedPing {
 
-    public UnconnectedPingOpenConnections() {
-	super(true);
-    }
+	public UnconnectedPingOpenConnections() {
+		super(true);
+	}
 
-    public UnconnectedPingOpenConnections(Packet packet) {
-	super(packet);
-    }
+	public UnconnectedPingOpenConnections(Packet packet) {
+		super(packet);
+	}
 
 }

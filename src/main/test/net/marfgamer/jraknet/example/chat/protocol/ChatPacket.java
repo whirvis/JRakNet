@@ -44,39 +44,39 @@ import net.marfgamer.jraknet.protocol.MessageIdentifier;
  */
 public class ChatPacket extends RakNetPacket {
 
-    public ChatPacket(int id) {
-	super(id);
-	if (id < MessageIdentifier.ID_USER_PACKET_ENUM) {
-	    throw new IllegalArgumentException("Packet ID too low!");
+	public ChatPacket(int id) {
+		super(id);
+		if (id < MessageIdentifier.ID_USER_PACKET_ENUM) {
+			throw new IllegalArgumentException("Packet ID too low!");
+		}
 	}
-    }
 
-    public ChatPacket(Packet packet) {
-	super(packet);
-    }
+	public ChatPacket(Packet packet) {
+		super(packet);
+	}
 
-    /**
-     * Reads a UUID
-     * 
-     * @return A single UUID
-     */
-    public UUID readUUID() {
-	long mostSigBits = this.readLong();
-	long leastSigBits = this.readLong();
-	return new UUID(mostSigBits, leastSigBits);
-    }
+	/**
+	 * Reads a UUID
+	 * 
+	 * @return A single UUID
+	 */
+	public UUID readUUID() {
+		long mostSigBits = this.readLong();
+		long leastSigBits = this.readLong();
+		return new UUID(mostSigBits, leastSigBits);
+	}
 
-    /**
-     * Writes a UUID
-     * 
-     * @param uuid
-     *            - The UUID
-     * @return The packet
-     */
-    public ChatPacket writeUUID(UUID uuid) {
-	this.writeLong(uuid.getMostSignificantBits());
-	this.writeLong(uuid.getLeastSignificantBits());
-	return this;
-    }
+	/**
+	 * Writes a UUID
+	 * 
+	 * @param uuid
+	 *            - The UUID
+	 * @return The packet
+	 */
+	public ChatPacket writeUUID(UUID uuid) {
+		this.writeLong(uuid.getMostSignificantBits());
+		this.writeLong(uuid.getLeastSignificantBits());
+		return this;
+	}
 
 }

@@ -44,21 +44,21 @@ import net.marfgamer.jraknet.example.chat.client.ChatException;
  */
 public class UpdateUsernameBoxListener implements ActionListener {
 
-    private final ChatFrame frame;
-    private final ChatClient client;
+	private final ChatFrame frame;
+	private final ChatClient client;
 
-    public UpdateUsernameBoxListener(ChatFrame frame, ChatClient client) {
-	this.frame = frame;
-	this.client = client;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-	try {
-	    client.setUsernameRequest(frame.txtClientUsername.getText());
-	} catch (ChatException e1) {
-	    frame.displayError(e1);
+	public UpdateUsernameBoxListener(ChatFrame frame, ChatClient client) {
+		this.frame = frame;
+		this.client = client;
 	}
-    }
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		try {
+			client.setUsernameRequest(frame.txtClientUsername.getText());
+		} catch (ChatException e1) {
+			frame.displayError(e1);
+		}
+	}
 
 }

@@ -38,10 +38,10 @@ package net.marfgamer.jraknet.session;
  */
 public class SplitQueueOverloadException extends RuntimeException {
 
-    private static final long serialVersionUID = 969985052588965615L;
+	private static final long serialVersionUID = 969985052588965615L;
 
-    public SplitQueueOverloadException() {
-	super("Too many split packets in a single queue");
-    }
+	public SplitQueueOverloadException() {
+		super("Too many split packets in a single queue");
+	}
 
 }

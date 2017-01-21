@@ -31,38 +31,38 @@
 package net.marfgamer.jraknet.protocol.message.acknowledge;
 
 public enum AcknowledgeType {
-    
-    ACKNOWLEDGED(Acknowledge.ACKNOWLEDGED), NOT_ACKNOWLEDGED(Acknowledge.NOT_ACKNOWLEDGED);
 
-    public short id;
+	ACKNOWLEDGED(Acknowledge.ACKNOWLEDGED), NOT_ACKNOWLEDGED(Acknowledge.NOT_ACKNOWLEDGED);
 
-    private AcknowledgeType(short id) {
-	this.id = id;
-    }
+	public short id;
 
-    /**
-     * Returns the ID of the acknowledge type
-     * 
-     * @return The ID of the acknowledge type
-     */
-    public short getId() {
-	return this.id;
-    }
-
-    /**
-     * Returns an <code>AcknowledgeType</code> based on the specified ID
-     * 
-     * @param id
-     *            The ID of the acknowledge receipt type to lookup
-     * @return An <code>AcknowledgeType</code> based on the specified ID
-     */
-    public static AcknowledgeType lookup(short id) {
-	for (AcknowledgeType type : AcknowledgeType.values()) {
-	    if (type.getId() == id) {
-		return type;
-	    }
+	private AcknowledgeType(short id) {
+		this.id = id;
 	}
-	return null;
-    }
+
+	/**
+	 * Returns the ID of the acknowledge type
+	 * 
+	 * @return The ID of the acknowledge type
+	 */
+	public short getId() {
+		return this.id;
+	}
+
+	/**
+	 * Returns an <code>AcknowledgeType</code> based on the specified ID
+	 * 
+	 * @param id
+	 *            The ID of the acknowledge receipt type to lookup
+	 * @return An <code>AcknowledgeType</code> based on the specified ID
+	 */
+	public static AcknowledgeType lookup(short id) {
+		for (AcknowledgeType type : AcknowledgeType.values()) {
+			if (type.getId() == id) {
+				return type;
+			}
+		}
+		return null;
+	}
 
 }

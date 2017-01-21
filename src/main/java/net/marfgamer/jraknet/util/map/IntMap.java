@@ -35,35 +35,35 @@ import java.util.Map;
 
 public class IntMap<T> extends HashMap<Integer, T> implements Map<Integer, T>, DynamicKey<Integer> {
 
-    private static final long serialVersionUID = 4324132003573381634L;
+	private static final long serialVersionUID = 4324132003573381634L;
 
-    public boolean containsKey(int key) {
-	return super.containsKey(new Integer(key));
-    }
-
-    public boolean containsValue(Object value) {
-	return super.containsValue(value);
-    }
-
-    public T get(int key) {
-	return super.get(new Integer(key));
-    }
-
-    public T put(int key, T value) {
-	return super.put(new Integer(key), value);
-    }
-
-    public T remove(int key) {
-	return super.remove(new Integer(key));
-    }
-
-    @Override
-    public void renameKey(Integer oldKey, Integer newKey) throws NullPointerException {
-	T storedObject = this.remove(oldKey.intValue());
-	if (storedObject == null) {
-	    throw new NullPointerException();
+	public boolean containsKey(int key) {
+		return super.containsKey(new Integer(key));
 	}
-	this.put(newKey.intValue(), storedObject);
-    }
+
+	public boolean containsValue(Object value) {
+		return super.containsValue(value);
+	}
+
+	public T get(int key) {
+		return super.get(new Integer(key));
+	}
+
+	public T put(int key, T value) {
+		return super.put(new Integer(key), value);
+	}
+
+	public T remove(int key) {
+		return super.remove(new Integer(key));
+	}
+
+	@Override
+	public void renameKey(Integer oldKey, Integer newKey) throws NullPointerException {
+		T storedObject = this.remove(oldKey.intValue());
+		if (storedObject == null) {
+			throw new NullPointerException();
+		}
+		this.put(newKey.intValue(), storedObject);
+	}
 
 }

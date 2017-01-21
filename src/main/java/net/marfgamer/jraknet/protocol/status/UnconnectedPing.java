@@ -36,32 +36,32 @@ import net.marfgamer.jraknet.protocol.MessageIdentifier;
 
 public class UnconnectedPing extends RakNetPacket {
 
-    public long timestamp;
-    public boolean magic;
+	public long timestamp;
+	public boolean magic;
 
-    protected UnconnectedPing(boolean requiresOpenConnections) {
-	super((requiresOpenConnections ? MessageIdentifier.ID_UNCONNECTED_PING_OPEN_CONNECTIONS
-		: MessageIdentifier.ID_UNCONNECTED_PING));
-    }
+	protected UnconnectedPing(boolean requiresOpenConnections) {
+		super((requiresOpenConnections ? MessageIdentifier.ID_UNCONNECTED_PING_OPEN_CONNECTIONS
+				: MessageIdentifier.ID_UNCONNECTED_PING));
+	}
 
-    public UnconnectedPing(Packet packet) {
-	super(packet);
-    }
+	public UnconnectedPing(Packet packet) {
+		super(packet);
+	}
 
-    public UnconnectedPing() {
-	this(false);
-    }
+	public UnconnectedPing() {
+		this(false);
+	}
 
-    @Override
-    public void encode() {
-	this.writeLong(timestamp);
-	this.writeMagic();
-    }
+	@Override
+	public void encode() {
+		this.writeLong(timestamp);
+		this.writeMagic();
+	}
 
-    @Override
-    public void decode() {
-	this.timestamp = this.readLong();
-	this.magic = this.checkMagic();
-    }
+	@Override
+	public void decode() {
+		this.timestamp = this.readLong();
+		this.magic = this.checkMagic();
+	}
 
 }

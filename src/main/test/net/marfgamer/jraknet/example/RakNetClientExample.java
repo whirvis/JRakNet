@@ -45,36 +45,36 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
  */
 public class RakNetClientExample {
 
-    // Server address and port
-    private static final String SERVER_ADDRESS = "sg.lbsg.net";
-    private static final int SERVER_PORT = 19132;
+	// Server address and port
+	private static final String SERVER_ADDRESS = "sg.lbsg.net";
+	private static final int SERVER_PORT = 19132;
 
-    public static void main(String[] args) throws RakNetException, UnknownHostException {
-	// Create client
-	RakNetClient client = new RakNetClient();
+	public static void main(String[] args) throws RakNetException, UnknownHostException {
+		// Create client
+		RakNetClient client = new RakNetClient();
 
-	// Set listener
-	client.setListener(new RakNetClientListener() {
+		// Set listener
+		client.setListener(new RakNetClientListener() {
 
-	    // Server connected
-	    @Override
-	    public void onConnect(RakNetServerSession session) {
-		System.out.println("Successfully connected to server with address " + session.getAddress());
-		client.disconnect();
-	    }
+			// Server connected
+			@Override
+			public void onConnect(RakNetServerSession session) {
+				System.out.println("Successfully connected to server with address " + session.getAddress());
+				client.disconnect();
+			}
 
-	    // Server disconnected
-	    @Override
-	    public void onDisconnect(RakNetServerSession session, String reason) {
-		System.out.println("Sucessfully disconnected from server with address " + session.getAddress()
-			+ " for the reason \"" + reason + "\"");
-		System.exit(0);
-	    }
+			// Server disconnected
+			@Override
+			public void onDisconnect(RakNetServerSession session, String reason) {
+				System.out.println("Sucessfully disconnected from server with address " + session.getAddress()
+						+ " for the reason \"" + reason + "\"");
+				System.exit(0);
+			}
 
-	});
+		});
 
-	// Connect to server
-	client.connect(SERVER_ADDRESS, SERVER_PORT);
-    }
+		// Connect to server
+		client.connect(SERVER_ADDRESS, SERVER_PORT);
+	}
 
 }

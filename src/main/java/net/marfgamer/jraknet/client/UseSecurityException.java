@@ -41,10 +41,10 @@ import net.marfgamer.jraknet.RakNetClientException;
 @Deprecated // It seems as if complying with security is optional
 public class UseSecurityException extends RakNetClientException {
 
-    private static final long serialVersionUID = 5287717235922196735L;
+	private static final long serialVersionUID = 5287717235922196735L;
 
-    public UseSecurityException(RakNetClient client) {
-	super(client, "Server has security enabled");
-    }
+	public UseSecurityException(RakNetClient client) {
+		super(client, "Server has security enabled");
+	}
 
 }

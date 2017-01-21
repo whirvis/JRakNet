@@ -38,6 +38,6 @@ package net.marfgamer.jraknet.client.discovery;
  */
 public enum DiscoveryMode {
 
-    NONE, ALL_CONNECTIONS, OPEN_CONNECTIONS;
+	NONE, ALL_CONNECTIONS, OPEN_CONNECTIONS;
 
 }
