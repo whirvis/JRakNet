@@ -37,61 +37,61 @@ package net.marfgamer.jraknet.client;
  */
 public class MaximumTransferUnit {
 
-    private final int maximumTransferUnit;
-    private final int retries;
-    private int retriesLeft;
+	private final int maximumTransferUnit;
+	private final int retries;
+	private int retriesLeft;
 
-    public MaximumTransferUnit(int maximumTransferUnit, int retries) {
-	this.maximumTransferUnit = maximumTransferUnit;
-	this.retries = retries;
-	this.retriesLeft = retries;
-    }
+	public MaximumTransferUnit(int maximumTransferUnit, int retries) {
+		this.maximumTransferUnit = maximumTransferUnit;
+		this.retries = retries;
+		this.retriesLeft = retries;
+	}
 
-    /**
-     * Returns the size of the maximum transfer unit
-     * 
-     * @return The size of the maximum transfer unit
-     */
-    public int getMaximumTransferUnit() {
-	return this.maximumTransferUnit;
-    }
+	/**
+	 * Returns the size of the maximum transfer unit
+	 * 
+	 * @return The size of the maximum transfer unit
+	 */
+	public int getMaximumTransferUnit() {
+		return this.maximumTransferUnit;
+	}
 
-    /**
-     * Returns the default amount of retries before the client stops using this
-     * maximum transfer unit and lowers it
-     * 
-     * @return The default amount of retries before the client stops using this
-     *         maximum transfer unit and lowers it
-     */
-    public int getRetries() {
-	return this.retries;
-    }
+	/**
+	 * Returns the default amount of retries before the client stops using this
+	 * maximum transfer unit and lowers it
+	 * 
+	 * @return The default amount of retries before the client stops using this
+	 *         maximum transfer unit and lowers it
+	 */
+	public int getRetries() {
+		return this.retries;
+	}
 
-    /**
-     * Returns how many times <code>retry()</code> can be called before yielding
-     * 0 or lower
-     * 
-     * @return How many times <code>retry()</code> can be called before yielding
-     *         0 or lower without calling <code>reset()</code>
-     */
-    public int getRetriesLeft() {
-	return this.retriesLeft;
-    }
+	/**
+	 * Returns how many times <code>retry()</code> can be called before yielding
+	 * 0 or lower
+	 * 
+	 * @return How many times <code>retry()</code> can be called before yielding
+	 *         0 or lower without calling <code>reset()</code>
+	 */
+	public int getRetriesLeft() {
+		return this.retriesLeft;
+	}
 
-    /**
-     * Returns how many retries there are left and then lowers it by one
-     * 
-     * @return How many retries are left
-     */
-    public int retry() {
-	return this.retriesLeft--;
-    }
+	/**
+	 * Returns how many retries there are left and then lowers it by one
+	 * 
+	 * @return How many retries are left
+	 */
+	public int retry() {
+		return this.retriesLeft--;
+	}
 
-    /**
-     * Sets the amount of retries left back to it's default
-     */
-    public void reset() {
-	this.retriesLeft = this.retries;
-    }
+	/**
+	 * Sets the amount of retries left back to it's default
+	 */
+	public void reset() {
+		this.retriesLeft = this.retries;
+	}
 
 }

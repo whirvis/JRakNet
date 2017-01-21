@@ -40,10 +40,10 @@ import net.marfgamer.jraknet.RakNet;
  */
 public class InvalidChannelException extends IllegalArgumentException {
 
-    private static final long serialVersionUID = -8690545139286694469L;
+	private static final long serialVersionUID = -8690545139286694469L;
 
-    public InvalidChannelException() {
-	super("Channel must be lower than " + RakNet.MAX_CHANNELS);
-    }
+	public InvalidChannelException() {
+		super("Channel must be lower than " + RakNet.MAX_CHANNELS);
+	}
 
 }

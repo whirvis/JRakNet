@@ -35,24 +35,24 @@ import net.marfgamer.jraknet.example.chat.ChatMessageIdentifier;
 
 public class Kick extends ChatPacket {
 
-    public String reason;
+	public String reason;
 
-    public Kick(Packet packet) {
-	super(packet);
-    }
+	public Kick(Packet packet) {
+		super(packet);
+	}
 
-    public Kick() {
-	super(ChatMessageIdentifier.ID_KICK);
-    }
+	public Kick() {
+		super(ChatMessageIdentifier.ID_KICK);
+	}
 
-    @Override
-    public void encode() {
-	this.writeString(reason);
-    }
+	@Override
+	public void encode() {
+		this.writeString(reason);
+	}
 
-    @Override
-    public void decode() {
-	this.reason = this.readString();
-    }
+	@Override
+	public void decode() {
+		this.reason = this.readString();
+	}
 
 }

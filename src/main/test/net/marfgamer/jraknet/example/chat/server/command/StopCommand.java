@@ -39,18 +39,18 @@ import net.marfgamer.jraknet.example.chat.server.ChatServer;
  */
 public class StopCommand extends Command {
 
-    private final ChatServer server;
+	private final ChatServer server;
 
-    public StopCommand(ChatServer server) {
-	super(false, "stop", "");
-	this.server = server;
-    }
+	public StopCommand(ChatServer server) {
+		super(false, "stop", "");
+		this.server = server;
+	}
 
-    @Override
-    public boolean handleCommand(String[] args) {
-	System.out.println("Stopping the server...");
-	server.stop();
-	return true;
-    }
+	@Override
+	public boolean handleCommand(String[] args) {
+		System.out.println("Stopping the server...");
+		server.stop();
+		return true;
+	}
 
 }

@@ -40,10 +40,10 @@ import javax.swing.ImageIcon;
  */
 public class FrameResources {
 
-    public static ImageIcon RAKNET_ICON = null;
+	public static ImageIcon RAKNET_ICON = null;
 
-    static {
-	RAKNET_ICON = new ImageIcon(BroadcastFrame.class.getResource("/net/marfgamer/jraknet/RAKNET_LOGO.png"));
-    }
+	static {
+		RAKNET_ICON = new ImageIcon(BroadcastFrame.class.getResource("/net/marfgamer/jraknet/RAKNET_LOGO.png"));
+	}
 
 }

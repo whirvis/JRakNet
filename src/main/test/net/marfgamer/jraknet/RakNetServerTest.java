@@ -48,68 +48,68 @@ import net.marfgamer.jraknet.session.RakNetClientSession;
  */
 public class RakNetServerTest {
 
-    public static void main(String[] args) throws RakNetException {
-	RakNetServer server = new RakNetServer(UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT, 10);
+	public static void main(String[] args) throws RakNetException {
+		RakNetServer server = new RakNetServer(UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT, 10);
 
-	server.setListener(new RakNetServerListener() {
+		server.setListener(new RakNetServerListener() {
 
-	    @Override
-	    public void onClientPreConnect(InetSocketAddress address) {
-		System.out.println("Client from " + address + " has instantiated the connection, waiting for "
-			+ NewIncomingConnection.class.getSimpleName() + " packet");
-	    }
+			@Override
+			public void onClientPreConnect(InetSocketAddress address) {
+				System.out.println("Client from " + address + " has instantiated the connection, waiting for "
+						+ NewIncomingConnection.class.getSimpleName() + " packet");
+			}
 
-	    @Override
-	    public void onClientPreDisconnect(InetSocketAddress address, String reason) {
-		System.out.println("Client from " + address + " has failed to login for \"" + reason + "\"");
-	    }
+			@Override
+			public void onClientPreDisconnect(InetSocketAddress address, String reason) {
+				System.out.println("Client from " + address + " has failed to login for \"" + reason + "\"");
+			}
 
-	    @Override
-	    public void onClientConnect(RakNetClientSession session) {
-		System.out.println("Client from address " + session.getAddress() + " has connected to the server");
-	    }
+			@Override
+			public void onClientConnect(RakNetClientSession session) {
+				System.out.println("Client from address " + session.getAddress() + " has connected to the server");
+			}
 
-	    @Override
-	    public void onClientDisconnect(RakNetClientSession session, String reason) {
-		System.out.println("Client from address " + session.getAddress() + " has been disconnected for \""
-			+ reason + "\"");
-	    }
+			@Override
+			public void onClientDisconnect(RakNetClientSession session, String reason) {
+				System.out.println("Client from address " + session.getAddress() + " has been disconnected for \""
+						+ reason + "\"");
+			}
 
-	    @Override
-	    public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
-		System.out.println(
-			"Received packet from client with address " + session.getAddress() + " with packet ID 0x"
-				+ Integer.toHexString(packet.getId()).toUpperCase() + " on channel " + channel);
-	    }
+			@Override
+			public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
+				System.out.println(
+						"Received packet from client with address " + session.getAddress() + " with packet ID 0x"
+								+ Integer.toHexString(packet.getId()).toUpperCase() + " on channel " + channel);
+			}
 
-	    @Override
-	    public void handlePing(ServerPing ping) {
-		MCPEIdentifier identifier = new MCPEIdentifier("A JRakNet server test", 91, "0.16.2",
-			server.getSessionCount(), server.getMaxConnections(), server.getGloballyUniqueId(), "New World",
-			"Survival");
-		ping.setIdentifier(identifier);
-	    }
+			@Override
+			public void handlePing(ServerPing ping) {
+				MCPEIdentifier identifier = new MCPEIdentifier("A JRakNet server test", 91, "0.16.2",
+						server.getSessionCount(), server.getMaxConnections(), server.getGloballyUniqueId(), "New World",
+						"Survival");
+				ping.setIdentifier(identifier);
+			}
 
-	    @Override
-	    public void onHandlerException(InetSocketAddress address, Throwable cause) {
-		System.err.println("Exception caused by " + address);
-		cause.printStackTrace();
-	    }
+			@Override
+			public void onHandlerException(InetSocketAddress address, Throwable cause) {
+				System.err.println("Exception caused by " + address);
+				cause.printStackTrace();
+			}
 
-	    @Override
-	    public void onAddressBlocked(InetAddress address, long time) {
-		System.out.println("Blocked address " + address + " for " + (time / 1000L) + " seconds");
-	    }
+			@Override
+			public void onAddressBlocked(InetAddress address, long time) {
+				System.out.println("Blocked address " + address + " for " + (time / 1000L) + " seconds");
+			}
 
-	    @Override
-	    public void onAddressUnblocked(InetAddress address) {
-		System.out.println("Unblocked address " + address);
-	    }
+			@Override
+			public void onAddressUnblocked(InetAddress address) {
+				System.out.println("Unblocked address " + address);
+			}
 
-	});
+		});
 
-	server.startThreaded();
-	System.out.println("Started server!");
-    }
+		server.startThreaded();
+		System.out.println("Started server!");
+	}
 
 }

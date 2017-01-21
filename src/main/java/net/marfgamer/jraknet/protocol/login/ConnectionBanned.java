@@ -36,24 +36,24 @@ import net.marfgamer.jraknet.protocol.MessageIdentifier;
 
 public class ConnectionBanned extends RakNetPacket {
 
-    public long serverGuid;
+	public long serverGuid;
 
-    public ConnectionBanned() {
-	super(MessageIdentifier.ID_CONNECTION_BANNED);
-    }
+	public ConnectionBanned() {
+		super(MessageIdentifier.ID_CONNECTION_BANNED);
+	}
 
-    public ConnectionBanned(Packet packet) {
-	super(packet);
-    }
+	public ConnectionBanned(Packet packet) {
+		super(packet);
+	}
 
-    @Override
-    public void encode() {
-	this.writeLong(serverGuid);
-    }
+	@Override
+	public void encode() {
+		this.writeLong(serverGuid);
+	}
 
-    @Override
-    public void decode() {
-	this.serverGuid = this.readLong();
-    }
+	@Override
+	public void decode() {
+		this.serverGuid = this.readLong();
+	}
 
 }

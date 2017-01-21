@@ -35,24 +35,24 @@ import net.marfgamer.jraknet.example.chat.ChatMessageIdentifier;
 
 public class UpdateUsername extends ChatPacket {
 
-    public String newUsername;
+	public String newUsername;
 
-    public UpdateUsername() {
-	super(ChatMessageIdentifier.ID_UPDATE_USERNAME_REQUEST);
-    }
+	public UpdateUsername() {
+		super(ChatMessageIdentifier.ID_UPDATE_USERNAME_REQUEST);
+	}
 
-    public UpdateUsername(Packet packet) {
-	super(packet);
-    }
+	public UpdateUsername(Packet packet) {
+		super(packet);
+	}
 
-    @Override
-    public void encode() {
-	this.writeString(newUsername);
-    }
+	@Override
+	public void encode() {
+		this.writeString(newUsername);
+	}
 
-    @Override
-    public void decode() {
-	this.newUsername = this.readString();
-    }
+	@Override
+	public void decode() {
+		this.newUsername = this.readString();
+	}
 
 }

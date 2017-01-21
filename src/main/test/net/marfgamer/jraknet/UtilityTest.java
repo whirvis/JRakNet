@@ -44,56 +44,56 @@ import net.marfgamer.jraknet.util.RakNetUtils;
  */
 public class UtilityTest {
 
-    private static final String ADDRESS_TEST_VALID = "255.255.255.255:65535";
-    private static final String ADDRESS_TEST_INVALID = "275.3.6.28:83245";
-    private static final char UNICODE_MINECRAFT_COLOR_SYMBOL = '\u00A7';
-    public static final int MARFGAMER_DEVELOPMENT_PORT = 30851;
-    public static final int MINECRAFT_POCKET_EDITION_DEFAULT_PORT = 19132;
-    public static final InetSocketAddress LIFEBOAT_SURVIVAL_GAMES_ADDRESS = new InetSocketAddress("sg.lbsg.net",
-	    MINECRAFT_POCKET_EDITION_DEFAULT_PORT);
+	private static final String ADDRESS_TEST_VALID = "255.255.255.255:65535";
+	private static final String ADDRESS_TEST_INVALID = "275.3.6.28:83245";
+	private static final char UNICODE_MINECRAFT_COLOR_SYMBOL = '\u00A7';
+	public static final int MARFGAMER_DEVELOPMENT_PORT = 30851;
+	public static final int MINECRAFT_POCKET_EDITION_DEFAULT_PORT = 19132;
+	public static final InetSocketAddress LIFEBOAT_SURVIVAL_GAMES_ADDRESS = new InetSocketAddress("sg.lbsg.net",
+			MINECRAFT_POCKET_EDITION_DEFAULT_PORT);
 
-    public static void main(String[] args) throws RakNetException {
-	System.out.println("Parsing valid address " + ADDRESS_TEST_VALID + " ?= "
-		+ RakNetUtils.parseAddressPassive(ADDRESS_TEST_VALID));
-	System.out.println("Parsing invalid address " + ADDRESS_TEST_INVALID + " ?= "
-		+ RakNetUtils.parseAddressPassive(ADDRESS_TEST_INVALID));
+	public static void main(String[] args) throws RakNetException {
+		System.out.println("Parsing valid address " + ADDRESS_TEST_VALID + " ?= "
+				+ RakNetUtils.parseAddressPassive(ADDRESS_TEST_VALID));
+		System.out.println("Parsing invalid address " + ADDRESS_TEST_INVALID + " ?= "
+				+ RakNetUtils.parseAddressPassive(ADDRESS_TEST_INVALID));
 
-	// Tell the user the sever we are pinging
-	System.out.println("Server address: " + LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
-	System.out.println("Maximum Transfer Unit: " + RakNetUtils.getMaximumTransferUnit());
+		// Tell the user the sever we are pinging
+		System.out.println("Server address: " + LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
+		System.out.println("Maximum Transfer Unit: " + RakNetUtils.getMaximumTransferUnit());
 
-	// Check if the server is online
-	System.out.print("Pinging server... ");
-	if (isServerOnline(LIFEBOAT_SURVIVAL_GAMES_ADDRESS)) {
-	    System.out.println("Success!");
-	} else {
-	    throw new RakNetException("Failed to connect to server, unable to proceed with testing!");
+		// Check if the server is online
+		System.out.print("Pinging server... ");
+		if (isServerOnline(LIFEBOAT_SURVIVAL_GAMES_ADDRESS)) {
+			System.out.println("Success!");
+		} else {
+			throw new RakNetException("Failed to connect to server, unable to proceed with testing!");
+		}
+
+		System.out.print("Checking compatibility... ");
+		if (isServerCompatible(LIFEBOAT_SURVIVAL_GAMES_ADDRESS)) {
+			System.out.println("Success!");
+		} else {
+			throw new RakNetException("Invalid protocol, we are unable to continue with testing!");
+		}
+
+		// Get the server identifier
+		System.out.print("Server identifier: ");
+		MCPEIdentifier identifier = new MCPEIdentifier(getServerIdentifier(LIFEBOAT_SURVIVAL_GAMES_ADDRESS));
+		System.out.println(formatMCPEIdentifier(identifier));
 	}
 
-	System.out.print("Checking compatibility... ");
-	if (isServerCompatible(LIFEBOAT_SURVIVAL_GAMES_ADDRESS)) {
-	    System.out.println("Success!");
-	} else {
-	    throw new RakNetException("Invalid protocol, we are unable to continue with testing!");
+	/**
+	 * Converts an MCPE identifier to a formatted String
+	 * 
+	 * @param identifier
+	 *            The identifier to format
+	 * @return A formated MCPE identifier
+	 */
+	public static String formatMCPEIdentifier(MCPEIdentifier identifier) {
+		return ("[Name: " + identifier.getServerName().replaceAll(UNICODE_MINECRAFT_COLOR_SYMBOL + ".", "")
+				+ "] [Version: " + identifier.getVersionTag() + "] [Player count: " + identifier.getOnlinePlayerCount()
+				+ "/" + identifier.getMaxPlayerCount() + "]");
 	}
-
-	// Get the server identifier
-	System.out.print("Server identifier: ");
-	MCPEIdentifier identifier = new MCPEIdentifier(getServerIdentifier(LIFEBOAT_SURVIVAL_GAMES_ADDRESS));
-	System.out.println(formatMCPEIdentifier(identifier));
-    }
-
-    /**
-     * Converts an MCPE identifier to a formatted String
-     * 
-     * @param identifier
-     *            The identifier to format
-     * @return A formated MCPE identifier
-     */
-    public static String formatMCPEIdentifier(MCPEIdentifier identifier) {
-	return ("[Name: " + identifier.getServerName().replaceAll(UNICODE_MINECRAFT_COLOR_SYMBOL + ".", "")
-		+ "] [Version: " + identifier.getVersionTag() + "] [Player count: " + identifier.getOnlinePlayerCount()
-		+ "/" + identifier.getMaxPlayerCount() + "]");
-    }
 
 }

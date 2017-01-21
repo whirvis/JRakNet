@@ -35,27 +35,27 @@ import net.marfgamer.jraknet.example.chat.ChatMessageIdentifier;
 
 public class AddChannel extends ChatPacket {
 
-    public int channel;
-    public String channelName;
+	public int channel;
+	public String channelName;
 
-    public AddChannel(Packet packet) {
-	super(packet);
-    }
+	public AddChannel(Packet packet) {
+		super(packet);
+	}
 
-    public AddChannel() {
-	super(ChatMessageIdentifier.ID_ADD_CHANNEL);
-    }
+	public AddChannel() {
+		super(ChatMessageIdentifier.ID_ADD_CHANNEL);
+	}
 
-    @Override
-    public void encode() {
-	this.writeUByte(channel);
-	this.writeString(channelName);
-    }
+	@Override
+	public void encode() {
+		this.writeUByte(channel);
+		this.writeString(channelName);
+	}
 
-    @Override
-    public void decode() {
-	this.channel = this.readUByte();
-	this.channelName = this.readString();
-    }
+	@Override
+	public void decode() {
+		this.channel = this.readUByte();
+		this.channelName = this.readString();
+	}
 
 }

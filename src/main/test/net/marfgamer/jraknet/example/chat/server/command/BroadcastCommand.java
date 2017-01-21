@@ -39,21 +39,21 @@ import net.marfgamer.jraknet.example.chat.server.ChatServer;
  */
 public class BroadcastCommand extends Command {
 
-    private final ChatServer server;
+	private final ChatServer server;
 
-    public BroadcastCommand(ChatServer server) {
-	super("broadcast", "<message>");
-	this.server = server;
-    }
-
-    @Override
-    public boolean handleCommand(String[] args) {
-	if (args.length >= 1) {
-	    String message = remainingArguments(0, args);
-	    server.broadcastMessage("<Server> " + message);
-	    return true;
+	public BroadcastCommand(ChatServer server) {
+		super("broadcast", "<message>");
+		this.server = server;
 	}
-	return false;
-    }
+
+	@Override
+	public boolean handleCommand(String[] args) {
+		if (args.length >= 1) {
+			String message = remainingArguments(0, args);
+			server.broadcastMessage("<Server> " + message);
+			return true;
+		}
+		return false;
+	}
 
 }

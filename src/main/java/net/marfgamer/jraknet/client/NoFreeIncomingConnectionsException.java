@@ -40,10 +40,10 @@ import net.marfgamer.jraknet.RakNetClientException;
  */
 public class NoFreeIncomingConnectionsException extends RakNetClientException {
 
-    private static final long serialVersionUID = 5863972657532782029L;
+	private static final long serialVersionUID = 5863972657532782029L;
 
-    public NoFreeIncomingConnectionsException(RakNetClient client) {
-	super(client, "Server has no free incoming connections");
-    }
+	public NoFreeIncomingConnectionsException(RakNetClient client) {
+		super(client, "Server has no free incoming connections");
+	}
 
 }

@@ -45,23 +45,23 @@ import net.marfgamer.jraknet.example.chat.client.ChatException;
  */
 public class ComboBoxServerChannelListener implements ActionListener {
 
-    private final ChatFrame frame;
-    private final ChatClient client;
+	private final ChatFrame frame;
+	private final ChatClient client;
 
-    public ComboBoxServerChannelListener(ChatFrame frame, ChatClient client) {
-	this.frame = frame;
-	this.client = client;
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent e) {
-	ServerChannel serverChannel = (ServerChannel) frame.cmbServerChannels.getSelectedItem();
-
-	try {
-	    client.setChannel(serverChannel.getChannel());
-	} catch (ChatException e1) {
-	    frame.displayError(e1);
+	public ComboBoxServerChannelListener(ChatFrame frame, ChatClient client) {
+		this.frame = frame;
+		this.client = client;
 	}
-    }
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		ServerChannel serverChannel = (ServerChannel) frame.cmbServerChannels.getSelectedItem();
+
+		try {
+			client.setChannel(serverChannel.getChannel());
+		} catch (ChatException e1) {
+			frame.displayError(e1);
+		}
+	}
 
 }

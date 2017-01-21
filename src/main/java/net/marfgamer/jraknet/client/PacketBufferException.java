@@ -41,28 +41,28 @@ import net.marfgamer.jraknet.RakNetPacket;
  */
 public class PacketBufferException extends RakNetException {
 
-    private static final long serialVersionUID = -3730545025991834599L;
+	private static final long serialVersionUID = -3730545025991834599L;
 
-    private final RakNetPacket packet;
+	private final RakNetPacket packet;
 
-    public PacketBufferException(RakNetPacket packet) {
-	super("Packet with ID 0x" + Integer.toHexString(packet.getId()).toUpperCase().substring(0, 2)
-		+ " failed to encode/decode");
-	this.packet = packet;
-    }
+	public PacketBufferException(RakNetPacket packet) {
+		super("Packet with ID 0x" + Integer.toHexString(packet.getId()).toUpperCase().substring(0, 2)
+				+ " failed to encode/decode");
+		this.packet = packet;
+	}
 
-    /**
-     * Returns the packet that failed to encode/decode
-     * 
-     * @return The packet that failed to encode/decode
-     */
-    public RakNetPacket getPacket() {
-	return this.packet;
-    }
+	/**
+	 * Returns the packet that failed to encode/decode
+	 * 
+	 * @return The packet that failed to encode/decode
+	 */
+	public RakNetPacket getPacket() {
+		return this.packet;
+	}
 
-    @Override
-    public String getLocalizedMessage() {
-	return "Packet failed to encode/decode";
-    }
+	@Override
+	public String getLocalizedMessage() {
+		return "Packet failed to encode/decode";
+	}
 
 }

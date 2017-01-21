@@ -37,10 +37,10 @@ package net.marfgamer.jraknet.session;
  */
 public class TimeoutException extends RuntimeException {
 
-    private static final long serialVersionUID = 4216977972114486611L;
+	private static final long serialVersionUID = 4216977972114486611L;
 
-    public TimeoutException() {
-	super("Session timeout");
-    }
+	public TimeoutException() {
+		super("Session timeout");
+	}
 
 }
