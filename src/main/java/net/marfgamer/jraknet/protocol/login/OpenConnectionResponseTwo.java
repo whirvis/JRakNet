@@ -40,62 +40,62 @@ import net.marfgamer.jraknet.protocol.MessageIdentifier;
 
 public class OpenConnectionResponseTwo extends RakNetPacket implements Failable {
 
-    public boolean magic;
-    public long serverGuid;
-    public InetSocketAddress clientAddress;
-    public int maximumTransferUnit;
-    public boolean encryptionEnabled;
-    private boolean failed;
+	public boolean magic;
+	public long serverGuid;
+	public InetSocketAddress clientAddress;
+	public int maximumTransferUnit;
+	public boolean encryptionEnabled;
+	private boolean failed;
 
-    public OpenConnectionResponseTwo(Packet packet) {
-	super(packet);
-    }
-
-    public OpenConnectionResponseTwo() {
-	super(MessageIdentifier.ID_OPEN_CONNECTION_REPLY_2);
-    }
-
-    @Override
-    public void encode() {
-	try {
-	    this.writeMagic();
-	    this.writeLong(serverGuid);
-	    this.writeAddress(clientAddress);
-	    this.writeUShort(maximumTransferUnit);
-	    this.writeBoolean(encryptionEnabled);
-	} catch (UnknownHostException e) {
-	    this.failed = true;
-	    this.magic = false;
-	    this.serverGuid = 0;
-	    this.clientAddress = null;
-	    this.maximumTransferUnit = 0;
-	    this.encryptionEnabled = false;
-	    this.clear();
+	public OpenConnectionResponseTwo(Packet packet) {
+		super(packet);
 	}
-    }
 
-    @Override
-    public void decode() {
-	try {
-	    this.magic = this.checkMagic();
-	    this.serverGuid = this.readLong();
-	    this.clientAddress = this.readAddress();
-	    this.maximumTransferUnit = this.readUShort();
-	    this.encryptionEnabled = this.readBoolean();
-	} catch (UnknownHostException e) {
-	    this.failed = true;
-	    this.magic = false;
-	    this.serverGuid = 0;
-	    this.clientAddress = null;
-	    this.maximumTransferUnit = 0;
-	    this.encryptionEnabled = false;
-	    this.clear();
+	public OpenConnectionResponseTwo() {
+		super(MessageIdentifier.ID_OPEN_CONNECTION_REPLY_2);
 	}
-    }
 
-    @Override
-    public boolean failed() {
-	return this.failed;
-    }
+	@Override
+	public void encode() {
+		try {
+			this.writeMagic();
+			this.writeLong(serverGuid);
+			this.writeAddress(clientAddress);
+			this.writeUShort(maximumTransferUnit);
+			this.writeBoolean(encryptionEnabled);
+		} catch (UnknownHostException e) {
+			this.failed = true;
+			this.magic = false;
+			this.serverGuid = 0;
+			this.clientAddress = null;
+			this.maximumTransferUnit = 0;
+			this.encryptionEnabled = false;
+			this.clear();
+		}
+	}
+
+	@Override
+	public void decode() {
+		try {
+			this.magic = this.checkMagic();
+			this.serverGuid = this.readLong();
+			this.clientAddress = this.readAddress();
+			this.maximumTransferUnit = this.readUShort();
+			this.encryptionEnabled = this.readBoolean();
+		} catch (UnknownHostException e) {
+			this.failed = true;
+			this.magic = false;
+			this.serverGuid = 0;
+			this.clientAddress = null;
+			this.maximumTransferUnit = 0;
+			this.encryptionEnabled = false;
+			this.clear();
+		}
+	}
+
+	@Override
+	public boolean failed() {
+		return this.failed;
+	}
 
 }

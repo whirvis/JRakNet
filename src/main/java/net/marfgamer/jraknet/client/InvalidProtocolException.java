@@ -44,10 +44,10 @@ import net.marfgamer.jraknet.RakNetClientException;
  */
 public class InvalidProtocolException extends RakNetClientException {
 
-    private static final long serialVersionUID = -5025319984358819345L;
+	private static final long serialVersionUID = -5025319984358819345L;
 
-    public InvalidProtocolException(RakNetClient client) {
-	super(client, "Received invalid packet from server during login");
-    }
+	public InvalidProtocolException(RakNetClient client) {
+		super(client, "Received invalid packet from server during login");
+	}
 
 }

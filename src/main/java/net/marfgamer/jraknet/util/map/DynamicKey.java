@@ -32,16 +32,16 @@ package net.marfgamer.jraknet.util.map;
 
 public interface DynamicKey<T> {
 
-    /**
-     * Renames the specified key and changes it to the specified one
-     * 
-     * @param oldKey
-     *            The old key
-     * @param newKey
-     *            The new key
-     * @throws NullPointerException
-     *             Thrown if the old key did not previously exist
-     */
-    public void renameKey(T oldKey, T newKey) throws NullPointerException;
+	/**
+	 * Renames the specified key and changes it to the specified one
+	 * 
+	 * @param oldKey
+	 *            The old key
+	 * @param newKey
+	 *            The new key
+	 * @throws NullPointerException
+	 *             Thrown if the old key did not previously exist
+	 */
+	public void renameKey(T oldKey, T newKey) throws NullPointerException;
 
 }

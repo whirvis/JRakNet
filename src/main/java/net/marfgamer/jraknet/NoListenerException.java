@@ -38,10 +38,10 @@ package net.marfgamer.jraknet;
  */
 public class NoListenerException extends RuntimeException {
 
-    private static final long serialVersionUID = 1841007286123953067L;
+	private static final long serialVersionUID = 1841007286123953067L;
 
-    public NoListenerException() {
-	super("Listener cannot be null");
-    }
+	public NoListenerException() {
+		super("Listener cannot be null");
+	}
 
 }

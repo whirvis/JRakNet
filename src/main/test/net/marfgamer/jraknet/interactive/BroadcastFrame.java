@@ -54,134 +54,134 @@ import net.marfgamer.jraknet.util.RakNetUtils;
  */
 public class BroadcastFrame extends JFrame {
 
-    private static final long serialVersionUID = -313407802523891773L;
-    private static final int FRAME_WIDTH = 500;
-    private static final int FRAME_HEIGHT = 235;
-    private static final String[] discoveryModeOptions = new String[] { "All Connections", "Open Connections",
-	    "No discovery" };
+	private static final long serialVersionUID = -313407802523891773L;
+	private static final int FRAME_WIDTH = 500;
+	private static final int FRAME_HEIGHT = 235;
+	private static final String[] discoveryModeOptions = new String[] { "All Connections", "Open Connections",
+			"No discovery" };
 
-    private final JTextPane txtPnDiscoveredMcpeServerList;
+	private final JTextPane txtPnDiscoveredMcpeServerList;
 
-    public BroadcastFrame(RakNetClient client) {
-	// Frame settings
-	setResizable(false);
-	setSize(FRAME_WIDTH, FRAME_HEIGHT);
-	setTitle("JRakNet Broadcast Test");
-	setIconImage(FrameResources.RAKNET_ICON.getImage());
+	public BroadcastFrame(RakNetClient client) {
+		// Frame settings
+		setResizable(false);
+		setSize(FRAME_WIDTH, FRAME_HEIGHT);
+		setTitle("JRakNet Broadcast Test");
+		setIconImage(FrameResources.RAKNET_ICON.getImage());
 
-	// Content settings
-	getContentPane().setLayout(null);
+		// Content settings
+		getContentPane().setLayout(null);
 
-	// Discovered MCPE Servers
-	JTextPane txtpnDiscoveredMcpeServers = new JTextPane();
-	txtpnDiscoveredMcpeServers.setEditable(false);
-	txtpnDiscoveredMcpeServers.setBackground(UIManager.getColor("Button.background"));
-	txtpnDiscoveredMcpeServers.setText("Discovered servers");
-	txtpnDiscoveredMcpeServers.setBounds(10, 10, 350, 20);
-	getContentPane().add(txtpnDiscoveredMcpeServers);
+		// Discovered MCPE Servers
+		JTextPane txtpnDiscoveredMcpeServers = new JTextPane();
+		txtpnDiscoveredMcpeServers.setEditable(false);
+		txtpnDiscoveredMcpeServers.setBackground(UIManager.getColor("Button.background"));
+		txtpnDiscoveredMcpeServers.setText("Discovered servers");
+		txtpnDiscoveredMcpeServers.setBounds(10, 10, 350, 20);
+		getContentPane().add(txtpnDiscoveredMcpeServers);
 
-	// How the client will discover servers on the local network
-	JComboBox<String> comboBoxDiscoveryType = new JComboBox<String>();
-	comboBoxDiscoveryType.setToolTipText(
-		"Changing this will update how the client will discover servers, by default it will look for any possible connection on the network");
-	comboBoxDiscoveryType.setModel(new DefaultComboBoxModel<String>(discoveryModeOptions));
-	comboBoxDiscoveryType.setBounds(370, 10, 115, 20);
-	comboBoxDiscoveryType.addActionListener(new RakNetBroadcastDiscoveryTypeListener(client));
-	getContentPane().add(comboBoxDiscoveryType);
+		// How the client will discover servers on the local network
+		JComboBox<String> comboBoxDiscoveryType = new JComboBox<String>();
+		comboBoxDiscoveryType.setToolTipText(
+				"Changing this will update how the client will discover servers, by default it will look for any possible connection on the network");
+		comboBoxDiscoveryType.setModel(new DefaultComboBoxModel<String>(discoveryModeOptions));
+		comboBoxDiscoveryType.setBounds(370, 10, 115, 20);
+		comboBoxDiscoveryType.addActionListener(new RakNetBroadcastDiscoveryTypeListener(client));
+		getContentPane().add(comboBoxDiscoveryType);
 
-	// Used to update the discovery port
-	JTextField textFieldDiscoveryPort = new JTextField();
-	textFieldDiscoveryPort.setBounds(370, 45, 115, 20);
-	textFieldDiscoveryPort.setText(Integer.toString(client.getDiscoveryPort()));
-	getContentPane().add(textFieldDiscoveryPort);
-	textFieldDiscoveryPort.setColumns(10);
-	JButton btnUpdatePort = new JButton("Update Port");
-	btnUpdatePort.setBounds(370, 76, 114, 23);
-	btnUpdatePort.addActionListener(new RakNetBroadcastUpdatePortListener(client, textFieldDiscoveryPort));
-	getContentPane().add(btnUpdatePort);
-
-	// The text containing the discovered MCPE servers
-	txtPnDiscoveredMcpeServerList = new JTextPane();
-	txtPnDiscoveredMcpeServerList.setToolTipText("This is the list of the discovered servers on the local network");
-	txtPnDiscoveredMcpeServerList.setEditable(false);
-	txtPnDiscoveredMcpeServerList.setBackground(UIManager.getColor("Button.background"));
-	txtPnDiscoveredMcpeServerList.setBounds(10, 30, 350, 165);
-	getContentPane().add(txtPnDiscoveredMcpeServerList);
-    }
-
-    /**
-     * Used to listen for discovery mode changes and then update the client
-     * accordingly
-     *
-     * @author MarfGamer
-     */
-    private class RakNetBroadcastDiscoveryTypeListener implements ActionListener {
-
-	private final RakNetClient client;
-
-	public RakNetBroadcastDiscoveryTypeListener(RakNetClient client) {
-	    this.client = client;
-	}
-
-	@SuppressWarnings("unchecked")
-	@Override
-	public void actionPerformed(ActionEvent e) {
-	    // 0 is all connections, 1 is open connections, anything else is
-	    // none
-	    int index = ((JComboBox<String>) e.getSource()).getSelectedIndex();
-	    if (index == 0) {
-		client.setDiscoveryMode(DiscoveryMode.ALL_CONNECTIONS);
-	    } else if (index == 1) {
-		client.setDiscoveryMode(DiscoveryMode.OPEN_CONNECTIONS);
-	    } else {
-		client.setDiscoveryMode(DiscoveryMode.NONE);
-	    }
-	}
-
-    }
-
-    /**
-     * Used to listen for discovery port changes and then update the client
-     * accordingly
-     *
-     * @author MarfGamer
-     */
-    private class RakNetBroadcastUpdatePortListener implements ActionListener {
-
-	private final RakNetClient client;
-	private final JTextField textFieldDiscoveryPort;
-
-	public RakNetBroadcastUpdatePortListener(RakNetClient client, JTextField textFieldDiscoveryPort) {
-	    this.client = client;
-	    this.textFieldDiscoveryPort = textFieldDiscoveryPort;
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-	    int newDiscoveryPort = RakNetUtils.parseIntPassive(textFieldDiscoveryPort.getText());
-	    if (newDiscoveryPort > -1) {
-		client.setDiscoveryPort(newDiscoveryPort);
-	    } else {
+		// Used to update the discovery port
+		JTextField textFieldDiscoveryPort = new JTextField();
+		textFieldDiscoveryPort.setBounds(370, 45, 115, 20);
 		textFieldDiscoveryPort.setText(Integer.toString(client.getDiscoveryPort()));
-	    }
+		getContentPane().add(textFieldDiscoveryPort);
+		textFieldDiscoveryPort.setColumns(10);
+		JButton btnUpdatePort = new JButton("Update Port");
+		btnUpdatePort.setBounds(370, 76, 114, 23);
+		btnUpdatePort.addActionListener(new RakNetBroadcastUpdatePortListener(client, textFieldDiscoveryPort));
+		getContentPane().add(btnUpdatePort);
+
+		// The text containing the discovered MCPE servers
+		txtPnDiscoveredMcpeServerList = new JTextPane();
+		txtPnDiscoveredMcpeServerList.setToolTipText("This is the list of the discovered servers on the local network");
+		txtPnDiscoveredMcpeServerList.setEditable(false);
+		txtPnDiscoveredMcpeServerList.setBackground(UIManager.getColor("Button.background"));
+		txtPnDiscoveredMcpeServerList.setBounds(10, 30, 350, 165);
+		getContentPane().add(txtPnDiscoveredMcpeServerList);
 	}
 
-    }
+	/**
+	 * Used to listen for discovery mode changes and then update the client
+	 * accordingly
+	 *
+	 * @author MarfGamer
+	 */
+	private class RakNetBroadcastDiscoveryTypeListener implements ActionListener {
 
-    /**
-     * Updates the text in the JFrame according to the discovered servers
-     * 
-     * @param identifiers
-     *            The identifiers of the discovered servers
-     */
-    public void updatePaneText(MCPEIdentifier[] identifiers) {
-	StringBuilder discoverString = new StringBuilder();
-	for (int i = 0; i < identifiers.length; i++) {
-	    MCPEIdentifier identifier = identifiers[i];
-	    discoverString
-		    .append(UtilityTest.formatMCPEIdentifier(identifier) + (i + 1 < identifiers.length ? "\n" : ""));
+		private final RakNetClient client;
+
+		public RakNetBroadcastDiscoveryTypeListener(RakNetClient client) {
+			this.client = client;
+		}
+
+		@SuppressWarnings("unchecked")
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			// 0 is all connections, 1 is open connections, anything else is
+			// none
+			int index = ((JComboBox<String>) e.getSource()).getSelectedIndex();
+			if (index == 0) {
+				client.setDiscoveryMode(DiscoveryMode.ALL_CONNECTIONS);
+			} else if (index == 1) {
+				client.setDiscoveryMode(DiscoveryMode.OPEN_CONNECTIONS);
+			} else {
+				client.setDiscoveryMode(DiscoveryMode.NONE);
+			}
+		}
 
 	}
-	txtPnDiscoveredMcpeServerList.setText(discoverString.toString());
-    }
+
+	/**
+	 * Used to listen for discovery port changes and then update the client
+	 * accordingly
+	 *
+	 * @author MarfGamer
+	 */
+	private class RakNetBroadcastUpdatePortListener implements ActionListener {
+
+		private final RakNetClient client;
+		private final JTextField textFieldDiscoveryPort;
+
+		public RakNetBroadcastUpdatePortListener(RakNetClient client, JTextField textFieldDiscoveryPort) {
+			this.client = client;
+			this.textFieldDiscoveryPort = textFieldDiscoveryPort;
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			int newDiscoveryPort = RakNetUtils.parseIntPassive(textFieldDiscoveryPort.getText());
+			if (newDiscoveryPort > -1) {
+				client.setDiscoveryPort(newDiscoveryPort);
+			} else {
+				textFieldDiscoveryPort.setText(Integer.toString(client.getDiscoveryPort()));
+			}
+		}
+
+	}
+
+	/**
+	 * Updates the text in the JFrame according to the discovered servers
+	 * 
+	 * @param identifiers
+	 *            The identifiers of the discovered servers
+	 */
+	public void updatePaneText(MCPEIdentifier[] identifiers) {
+		StringBuilder discoverString = new StringBuilder();
+		for (int i = 0; i < identifiers.length; i++) {
+			MCPEIdentifier identifier = identifiers[i];
+			discoverString
+					.append(UtilityTest.formatMCPEIdentifier(identifier) + (i + 1 < identifiers.length ? "\n" : ""));
+
+		}
+		txtPnDiscoveredMcpeServerList.setText(discoverString.toString());
+	}
 }

@@ -40,10 +40,10 @@ import net.marfgamer.jraknet.RakNetClientException;
  */
 public class AlreadyConnectedException extends RakNetClientException {
 
-    private static final long serialVersionUID = -482118372058339060L;
+	private static final long serialVersionUID = -482118372058339060L;
 
-    public AlreadyConnectedException(RakNetClient client) {
-	super(client, "Already connected to server");
-    }
+	public AlreadyConnectedException(RakNetClient client) {
+		super(client, "Already connected to server");
+	}
 
 }

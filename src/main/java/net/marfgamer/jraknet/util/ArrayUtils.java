@@ -40,54 +40,54 @@ import java.util.Arrays;
  */
 public abstract class ArrayUtils {
 
-    /**
-     * Splits an array into more chunks with the specified maximum size for each
-     * array chunk
-     * 
-     * @param src
-     *            The original array
-     * @param size
-     *            The max size for each array that has been split
-     * @return The split byte array's no bigger than the maximum size
-     */
-    public static final byte[][] splitArray(byte[] src, int size) {
-	if (size > 0) {
-	    int index = 0;
-	    ArrayList<byte[]> split = new ArrayList<byte[]>();
-	    while (index < src.length) {
-		if (index + size <= src.length) {
-		    split.add(Arrays.copyOfRange(src, index, index + size));
-		    index += size;
+	/**
+	 * Splits an array into more chunks with the specified maximum size for each
+	 * array chunk
+	 * 
+	 * @param src
+	 *            The original array
+	 * @param size
+	 *            The max size for each array that has been split
+	 * @return The split byte array's no bigger than the maximum size
+	 */
+	public static final byte[][] splitArray(byte[] src, int size) {
+		if (size > 0) {
+			int index = 0;
+			ArrayList<byte[]> split = new ArrayList<byte[]>();
+			while (index < src.length) {
+				if (index + size <= src.length) {
+					split.add(Arrays.copyOfRange(src, index, index + size));
+					index += size;
+				} else {
+					split.add(Arrays.copyOfRange(src, index, src.length));
+					index = src.length;
+				}
+			}
+			return split.toArray(new byte[split.size()][]);
 		} else {
-		    split.add(Arrays.copyOfRange(src, index, src.length));
-		    index = src.length;
+			return new byte[0][0];
 		}
-	    }
-	    return split.toArray(new byte[split.size()][]);
-	} else {
-	    return new byte[0][0];
-	}
-    }
-
-    /**
-     * Returns all the integers in between each other as a normal subtraction
-     * 
-     * @param low
-     *            The starting point
-     * @param high
-     *            The ending point
-     * @return The numbers in between high and low
-     */
-    public static final int[] subtractionArray(int low, int high) {
-	if (low > high) {
-	    return new int[0];
 	}
 
-	int[] arr = new int[high - low - 1];
-	for (int i = 0; i < arr.length; i++) {
-	    arr[i] = i + low + 1;
+	/**
+	 * Returns all the integers in between each other as a normal subtraction
+	 * 
+	 * @param low
+	 *            The starting point
+	 * @param high
+	 *            The ending point
+	 * @return The numbers in between high and low
+	 */
+	public static final int[] subtractionArray(int low, int high) {
+		if (low > high) {
+			return new int[0];
+		}
+
+		int[] arr = new int[high - low - 1];
+		for (int i = 0; i < arr.length; i++) {
+			arr[i] = i + low + 1;
+		}
+		return arr;
 	}
-	return arr;
-    }
 
 }

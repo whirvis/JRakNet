@@ -46,41 +46,41 @@ import net.marfgamer.jraknet.util.RakNetUtils;
  */
 public class LatencyTest {
 
-    private static final MCPEIdentifier LATENCY_TEST_IDENTIFIER = new MCPEIdentifier("JRakNet Latency Test", 91,
-	    "0.16.2", 0, 10, -1 /* We don't know the GUID yet */, "New World", "Developer");
+	private static final MCPEIdentifier LATENCY_TEST_IDENTIFIER = new MCPEIdentifier("JRakNet Latency Test", 91,
+			"0.16.2", 0, 10, -1 /* We don't know the GUID yet */, "New World", "Developer");
 
-    private final RakNetServer server;
-    private final LatencyFrame frame;
+	private final RakNetServer server;
+	private final LatencyFrame frame;
 
-    public LatencyTest() {
-	this.server = new RakNetServer(UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT,
-		LATENCY_TEST_IDENTIFIER.getMaxPlayerCount());
-	this.frame = new LatencyFrame();
-    }
-
-    /**
-     * Starts the test
-     */
-    public void start() {
-	// Set server options and start it
-	LATENCY_TEST_IDENTIFIER.setServerGloballyUniqueId(server.getGloballyUniqueId());
-	server.setIdentifier(LATENCY_TEST_IDENTIFIER);
-	server.startThreaded();
-
-	// Create window
-	frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	frame.setVisible(true);
-	while (true) {
-	    frame.updatePaneText(server.getSessions());
-	    RakNetUtils.threadLock(500);
+	public LatencyTest() {
+		this.server = new RakNetServer(UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT,
+				LATENCY_TEST_IDENTIFIER.getMaxPlayerCount());
+		this.frame = new LatencyFrame();
 	}
-    }
 
-    public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
-	    IllegalAccessException, UnsupportedLookAndFeelException {
-	UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-	LatencyTest test = new LatencyTest();
-	test.start();
-    }
+	/**
+	 * Starts the test
+	 */
+	public void start() {
+		// Set server options and start it
+		LATENCY_TEST_IDENTIFIER.setServerGloballyUniqueId(server.getGloballyUniqueId());
+		server.setIdentifier(LATENCY_TEST_IDENTIFIER);
+		server.startThreaded();
+
+		// Create window
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setVisible(true);
+		while (true) {
+			frame.updatePaneText(server.getSessions());
+			RakNetUtils.threadLock(500);
+		}
+	}
+
+	public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
+			IllegalAccessException, UnsupportedLookAndFeelException {
+		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		LatencyTest test = new LatencyTest();
+		test.start();
+	}
 
 }

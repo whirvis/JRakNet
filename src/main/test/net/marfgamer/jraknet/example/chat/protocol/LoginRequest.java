@@ -35,24 +35,24 @@ import net.marfgamer.jraknet.example.chat.ChatMessageIdentifier;
 
 public class LoginRequest extends ChatPacket {
 
-    public String username;
+	public String username;
 
-    public LoginRequest() {
-	super(ChatMessageIdentifier.ID_LOGIN_REQUEST);
-    }
+	public LoginRequest() {
+		super(ChatMessageIdentifier.ID_LOGIN_REQUEST);
+	}
 
-    public LoginRequest(Packet packet) {
-	super(packet);
-    }
+	public LoginRequest(Packet packet) {
+		super(packet);
+	}
 
-    @Override
-    public void encode() {
-	this.writeString(username);
-    }
+	@Override
+	public void encode() {
+		this.writeString(username);
+	}
 
-    @Override
-    public void decode() {
-	this.username = this.readString();
-    }
+	@Override
+	public void decode() {
+		this.username = this.readString();
+	}
 
 }

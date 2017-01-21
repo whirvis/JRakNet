@@ -39,37 +39,37 @@ package net.marfgamer.jraknet.identifier;
  */
 public class Identifier {
 
-    private final String identifier;
+	private final String identifier;
 
-    public Identifier(String identifier) {
-	this.identifier = identifier;
-    }
-
-    public Identifier() {
-	this(null);
-    }
-
-    /**
-     * Converts the identifier to a String
-     * 
-     * @return The identifier as a String
-     */
-    public String build() {
-	return this.identifier;
-    }
-
-    @Override
-    public final String toString() {
-	return this.build();
-    }
-
-    @Override
-    public boolean equals(Object object) {
-	if (object instanceof Identifier) {
-	    Identifier identifier = (Identifier) object;
-	    return this.build().equals(identifier.build());
+	public Identifier(String identifier) {
+		this.identifier = identifier;
 	}
-	return false;
-    }
+
+	public Identifier() {
+		this(null);
+	}
+
+	/**
+	 * Converts the identifier to a String
+	 * 
+	 * @return The identifier as a String
+	 */
+	public String build() {
+		return this.identifier;
+	}
+
+	@Override
+	public final String toString() {
+		return this.build();
+	}
+
+	@Override
+	public boolean equals(Object object) {
+		if (object instanceof Identifier) {
+			Identifier identifier = (Identifier) object;
+			return this.build().equals(identifier.build());
+		}
+		return false;
+	}
 
 }

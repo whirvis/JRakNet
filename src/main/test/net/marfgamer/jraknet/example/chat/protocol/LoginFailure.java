@@ -35,24 +35,24 @@ import net.marfgamer.jraknet.example.chat.ChatMessageIdentifier;
 
 public class LoginFailure extends ChatPacket {
 
-    public String reason;
+	public String reason;
 
-    public LoginFailure() {
-	super(ChatMessageIdentifier.ID_LOGIN_FAILURE);
-    }
+	public LoginFailure() {
+		super(ChatMessageIdentifier.ID_LOGIN_FAILURE);
+	}
 
-    public LoginFailure(Packet packet) {
-	super(packet);
-    }
+	public LoginFailure(Packet packet) {
+		super(packet);
+	}
 
-    @Override
-    public void encode() {
-	this.writeString(this.reason);
-    }
+	@Override
+	public void encode() {
+		this.writeString(this.reason);
+	}
 
-    @Override
-    public void decode() {
-	this.reason = this.readString();
-    }
+	@Override
+	public void decode() {
+		this.reason = this.readString();
+	}
 
 }

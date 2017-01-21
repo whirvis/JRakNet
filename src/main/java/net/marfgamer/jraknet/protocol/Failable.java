@@ -38,11 +38,11 @@ package net.marfgamer.jraknet.protocol;
  */
 public interface Failable {
 
-    /**
-     * Returns whether or not the packet failed to encode or decode
-     * 
-     * @return Whether or not the packet failed to encode or decode
-     */
-    public boolean failed();
+	/**
+	 * Returns whether or not the packet failed to encode or decode
+	 * 
+	 * @return Whether or not the packet failed to encode or decode
+	 */
+	public boolean failed();
 
 }

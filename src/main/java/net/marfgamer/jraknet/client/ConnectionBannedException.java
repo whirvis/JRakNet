@@ -40,10 +40,10 @@ import net.marfgamer.jraknet.RakNetClientException;
  */
 public class ConnectionBannedException extends RakNetClientException {
 
-    private static final long serialVersionUID = 8440218445920818619L;
+	private static final long serialVersionUID = 8440218445920818619L;
 
-    public ConnectionBannedException(RakNetClient client) {
-	super(client, "Banned from server");
-    }
+	public ConnectionBannedException(RakNetClient client) {
+		super(client, "Banned from server");
+	}
 
 }

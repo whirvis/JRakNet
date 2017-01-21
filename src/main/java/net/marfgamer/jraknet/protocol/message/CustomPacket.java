@@ -38,109 +38,109 @@ import net.marfgamer.jraknet.protocol.MessageIdentifier;
 
 public class CustomPacket extends RakNetPacket {
 
-    public static final int SEQUENCE_NUMBER_LENGTH = 0x03;
+	public static final int SEQUENCE_NUMBER_LENGTH = 0x03;
 
-    public int sequenceNumber;
-    public ArrayList<EncapsulatedPacket> messages;
+	public int sequenceNumber;
+	public ArrayList<EncapsulatedPacket> messages;
 
-    public CustomPacket() {
-	super(MessageIdentifier.ID_CUSTOM_4);
-	this.messages = new ArrayList<EncapsulatedPacket>();
-    }
-
-    public CustomPacket(Packet packet) {
-	super(packet);
-	this.messages = new ArrayList<EncapsulatedPacket>();
-    }
-
-    @Override
-    public void encode() {
-	this.writeTriadLE(sequenceNumber);
-	for (EncapsulatedPacket packet : messages) {
-	    // Encode packet and write to buffer
-	    packet.buffer = this;
-	    packet.encode();
-
-	    // Buffer is no longer needed, proceed
-	    packet.buffer = null;
-	}
-    }
-
-    @Override
-    public void decode() {
-	this.sequenceNumber = this.readTriadLE();
-	while (this.remaining() >= EncapsulatedPacket.MINIMUM_BUFFER_LENGTH) {
-	    // Decode packet
-	    EncapsulatedPacket packet = new EncapsulatedPacket();
-	    packet.buffer = new Packet(this.buffer());
-	    packet.decode();
-
-	    // Buffer is no longer needed, add the packet to the list
-	    packet.buffer = null;
-	    messages.add(packet);
-	}
-    }
-
-    /**
-     * Calculates what the size of the packet would be if it had been encoded
-     * 
-     * @return What the size of the packet would be if it had been encoded
-     */
-    public int calculateSize() {
-	int packetSize = 1; // Packet ID
-	packetSize += SEQUENCE_NUMBER_LENGTH;
-	for (EncapsulatedPacket message : this.messages) {
-	    packetSize += message.calculateSize();
-	}
-	return packetSize;
-    }
-
-    /**
-     * Returns whether or not the packet contains any unreliable messages
-     * 
-     * @return Whether or not the packet contains any unreliable messages
-     */
-    public boolean containsUnreliables() {
-	if (messages.size() <= 0) {
-	    return false; // Nothing to check
+	public CustomPacket() {
+		super(MessageIdentifier.ID_CUSTOM_4);
+		this.messages = new ArrayList<EncapsulatedPacket>();
 	}
 
-	for (EncapsulatedPacket encapsulated : this.messages) {
-	    if (!encapsulated.reliability.isReliable()) {
-		return true;
-	    }
-	}
-	return false;
-    }
-
-    /**
-     * Removes all the unreliable messages from the packet
-     */
-    public void removeUnreliables() {
-	if (messages.size() <= 0) {
-	    return; // Nothing to remove
+	public CustomPacket(Packet packet) {
+		super(packet);
+		this.messages = new ArrayList<EncapsulatedPacket>();
 	}
 
-	ArrayList<EncapsulatedPacket> unreliables = new ArrayList<EncapsulatedPacket>();
-	for (EncapsulatedPacket encapsulated : this.messages) {
-	    if (!encapsulated.reliability.isReliable()) {
-		unreliables.add(encapsulated);
-	    }
-	}
-	messages.removeAll(unreliables);
-    }
+	@Override
+	public void encode() {
+		this.writeTriadLE(sequenceNumber);
+		for (EncapsulatedPacket packet : messages) {
+			// Encode packet and write to buffer
+			packet.buffer = this;
+			packet.encode();
 
-    /**
-     * Calculates the size of a <code>CustomPacket</code> without any extra data
-     * written to it
-     * 
-     * @return The size of a <code>CustomPacket</code> without any extra data
-     *         written to it
-     */
-    public static int calculateDummy() {
-	CustomPacket custom = new CustomPacket();
-	custom.encode();
-	return custom.size();
-    }
+			// Buffer is no longer needed, proceed
+			packet.buffer = null;
+		}
+	}
+
+	@Override
+	public void decode() {
+		this.sequenceNumber = this.readTriadLE();
+		while (this.remaining() >= EncapsulatedPacket.MINIMUM_BUFFER_LENGTH) {
+			// Decode packet
+			EncapsulatedPacket packet = new EncapsulatedPacket();
+			packet.buffer = new Packet(this.buffer());
+			packet.decode();
+
+			// Buffer is no longer needed, add the packet to the list
+			packet.buffer = null;
+			messages.add(packet);
+		}
+	}
+
+	/**
+	 * Calculates what the size of the packet would be if it had been encoded
+	 * 
+	 * @return What the size of the packet would be if it had been encoded
+	 */
+	public int calculateSize() {
+		int packetSize = 1; // Packet ID
+		packetSize += SEQUENCE_NUMBER_LENGTH;
+		for (EncapsulatedPacket message : this.messages) {
+			packetSize += message.calculateSize();
+		}
+		return packetSize;
+	}
+
+	/**
+	 * Returns whether or not the packet contains any unreliable messages
+	 * 
+	 * @return Whether or not the packet contains any unreliable messages
+	 */
+	public boolean containsUnreliables() {
+		if (messages.size() <= 0) {
+			return false; // Nothing to check
+		}
+
+		for (EncapsulatedPacket encapsulated : this.messages) {
+			if (!encapsulated.reliability.isReliable()) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Removes all the unreliable messages from the packet
+	 */
+	public void removeUnreliables() {
+		if (messages.size() <= 0) {
+			return; // Nothing to remove
+		}
+
+		ArrayList<EncapsulatedPacket> unreliables = new ArrayList<EncapsulatedPacket>();
+		for (EncapsulatedPacket encapsulated : this.messages) {
+			if (!encapsulated.reliability.isReliable()) {
+				unreliables.add(encapsulated);
+			}
+		}
+		messages.removeAll(unreliables);
+	}
+
+	/**
+	 * Calculates the size of a <code>CustomPacket</code> without any extra data
+	 * written to it
+	 * 
+	 * @return The size of a <code>CustomPacket</code> without any extra data
+	 *         written to it
+	 */
+	public static int calculateDummy() {
+		CustomPacket custom = new CustomPacket();
+		custom.encode();
+		return custom.size();
+	}
 
 }

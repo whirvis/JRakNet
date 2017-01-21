@@ -41,70 +41,70 @@ import net.marfgamer.jraknet.session.InvalidChannelException;
  */
 public class ServerChannel {
 
-    private final int channel;
-    private String name;
-    private final StringBuilder channelText;
+	private final int channel;
+	private String name;
+	private final StringBuilder channelText;
 
-    public ServerChannel(int channel, String name) throws InvalidChannelException {
-	this.channel = channel;
-	this.name = name;
-	this.channelText = new StringBuilder();
+	public ServerChannel(int channel, String name) throws InvalidChannelException {
+		this.channel = channel;
+		this.name = name;
+		this.channelText = new StringBuilder();
 
-	if (channel >= RakNet.MAX_CHANNELS) {
-	    throw new InvalidChannelException();
+		if (channel >= RakNet.MAX_CHANNELS) {
+			throw new InvalidChannelException();
+		}
 	}
-    }
 
-    /**
-     * Returns the ID of the channel
-     * 
-     * @return The ID of the channel
-     */
-    public int getChannel() {
-	return this.channel;
-    }
+	/**
+	 * Returns the ID of the channel
+	 * 
+	 * @return The ID of the channel
+	 */
+	public int getChannel() {
+		return this.channel;
+	}
 
-    /**
-     * Returns the name of the channel
-     * 
-     * @return The name of the channel
-     */
-    public String getName() {
-	return this.name;
-    }
+	/**
+	 * Returns the name of the channel
+	 * 
+	 * @return The name of the channel
+	 */
+	public String getName() {
+		return this.name;
+	}
 
-    /**
-     * Sets the name of the channel
-     * 
-     * @param name
-     *            The new channel name
-     */
-    public void setName(String name) {
-	this.name = name;
-    }
+	/**
+	 * Sets the name of the channel
+	 * 
+	 * @param name
+	 *            The new channel name
+	 */
+	public void setName(String name) {
+		this.name = name;
+	}
 
-    /**
-     * Adds a chat message to the server channel
-     * 
-     * @param message
-     *            The message to add
-     */
-    public void addChatMessage(String message) {
-	channelText.append(message + "\n");
-    }
+	/**
+	 * Adds a chat message to the server channel
+	 * 
+	 * @param message
+	 *            The message to add
+	 */
+	public void addChatMessage(String message) {
+		channelText.append(message + "\n");
+	}
 
-    /**
-     * Returns the text displayed on the channel
-     * 
-     * @return The text displayed on the channel
-     */
-    public String getChannelText() {
-	return channelText.toString();
-    }
+	/**
+	 * Returns the text displayed on the channel
+	 * 
+	 * @return The text displayed on the channel
+	 */
+	public String getChannelText() {
+		return channelText.toString();
+	}
 
-    @Override
-    public String toString() {
-	return this.name;
-    }
+	@Override
+	public String toString() {
+		return this.name;
+	}
 
 }

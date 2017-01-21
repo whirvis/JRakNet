@@ -46,38 +46,38 @@ import net.marfgamer.jraknet.session.RakNetClientSession;
  */
 public class RakNetServerExample {
 
-    public static void main(String[] args) throws RakNetException {
-	// Create server
-	RakNetServer server = new RakNetServer(19132, 10, new MCPEIdentifier("JRakNet Example Server", 91, "0.16.2", 0,
-		10, System.currentTimeMillis(), "New World", "Survival"));
+	public static void main(String[] args) throws RakNetException {
+		// Create server
+		RakNetServer server = new RakNetServer(19132, 10, new MCPEIdentifier("JRakNet Example Server", 91, "0.16.2", 0,
+				10, System.currentTimeMillis(), "New World", "Survival"));
 
-	// Set listener
-	server.setListener(new RakNetServerListener() {
+		// Set listener
+		server.setListener(new RakNetServerListener() {
 
-	    // Client connected
-	    @Override
-	    public void onClientConnect(RakNetClientSession session) {
-		System.out.println("Client from address " + session.getAddress() + " has connected to the server");
-	    }
+			// Client connected
+			@Override
+			public void onClientConnect(RakNetClientSession session) {
+				System.out.println("Client from address " + session.getAddress() + " has connected to the server");
+			}
 
-	    // Client disconnected
-	    @Override
-	    public void onClientDisconnect(RakNetClientSession session, String reason) {
-		System.out.println("Client from address " + session.getAddress()
-			+ " has disconnected from the server for the reason \"" + reason + "\"");
-	    }
+			// Client disconnected
+			@Override
+			public void onClientDisconnect(RakNetClientSession session, String reason) {
+				System.out.println("Client from address " + session.getAddress()
+						+ " has disconnected from the server for the reason \"" + reason + "\"");
+			}
 
-	    // Packet received
-	    @Override
-	    public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
-		System.out.println("Client from address " + session.getAddress() + " sent packet with ID 0x"
-			+ Integer.toHexString(packet.getId()).toUpperCase() + " on channel " + channel);
-	    }
+			// Packet received
+			@Override
+			public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
+				System.out.println("Client from address " + session.getAddress() + " sent packet with ID 0x"
+						+ Integer.toHexString(packet.getId()).toUpperCase() + " on channel " + channel);
+			}
 
-	});
+		});
 
-	// Start server
-	server.start();
-    }
+		// Start server
+		server.start();
+	}
 
 }

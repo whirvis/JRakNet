@@ -36,24 +36,24 @@ import net.marfgamer.jraknet.protocol.MessageIdentifier;
 
 public class ConnectedPong extends RakNetPacket {
 
-    public long identifier;
+	public long identifier;
 
-    public ConnectedPong() {
-	super(MessageIdentifier.ID_CONNECTED_PONG);
-    }
+	public ConnectedPong() {
+		super(MessageIdentifier.ID_CONNECTED_PONG);
+	}
 
-    public ConnectedPong(Packet packet) {
-	super(packet);
-    }
+	public ConnectedPong(Packet packet) {
+		super(packet);
+	}
 
-    @Override
-    public void encode() {
-	this.writeLong(identifier);
-    }
+	@Override
+	public void encode() {
+		this.writeLong(identifier);
+	}
 
-    @Override
-    public void decode() {
-	this.identifier = this.readLong();
-    }
+	@Override
+	public void decode() {
+		this.identifier = this.readLong();
+	}
 
 }
