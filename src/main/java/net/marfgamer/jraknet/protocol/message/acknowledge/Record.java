@@ -30,9 +30,9 @@
  */
 package net.marfgamer.jraknet.protocol.message.acknowledge;
 
-import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * Represents a record in RakNet, used mainly for easy record manipulation for

@@ -81,32 +81,42 @@ public class SessionPreparation {
 			OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne(packet);
 			connectionResponseOne.decode();
 
-			if (connectionResponseOne.magic == true
-					&& connectionResponseOne.maximumTransferUnit >= RakNet.MINIMUM_TRANSFER_UNIT
-					&& connectionResponseOne.maximumTransferUnit <= this.initialMaximumTransferUnit) {
+			if (connectionResponseOne.magic != true) {
+				this.cancelReason = new InvalidProtocolException(client, "MAGIC failed to validate");
+			} else if (connectionResponseOne.maximumTransferUnit < RakNet.MINIMUM_TRANSFER_UNIT) {
+				this.cancelReason = new InvalidProtocolException(client,
+						"Maximum transfer unit is is lower than the minimum");
+			} else if (connectionResponseOne.maximumTransferUnit > this.initialMaximumTransferUnit) {
+				this.cancelReason = new InvalidProtocolException(client,
+						"Server maximum transfer unit is higher than the client can handle");
+			} else {
 				this.maximumTransferUnit = connectionResponseOne.maximumTransferUnit;
 				this.guid = connectionResponseOne.serverGuid;
 				this.loginPackets[0] = true;
 				if (connectionResponseOne.useSecurity == true) {
 					client.getListener().onWarning(Warning.SECURITY_ENABLED);
 				}
-			} else {
-				this.cancelReason = new InvalidProtocolException(client);
 			}
 		} else if (packetId == ID_OPEN_CONNECTION_REPLY_2) {
 			OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo(packet);
 			connectionResponseTwo.decode();
 
-			if (!connectionResponseTwo.failed() && connectionResponseTwo.magic == true
-					&& connectionResponseTwo.serverGuid == this.guid
-					&& connectionResponseTwo.maximumTransferUnit <= this.maximumTransferUnit) {
+			if (connectionResponseTwo.failed()) {
+				this.cancelReason = new InvalidProtocolException(client,
+						connectionResponseTwo.getClass().getSimpleName() + " packet failed to decode");
+			} else if (connectionResponseTwo.magic != true) {
+				this.cancelReason = new InvalidProtocolException(client, "MAGIC failed to validate");
+			} else if (connectionResponseTwo.serverGuid != this.guid) {
+				this.cancelReason = new InvalidProtocolException(client, "Server responded with invalid GUID");
+			} else if (connectionResponseTwo.maximumTransferUnit > this.maximumTransferUnit) {
+				this.cancelReason = new InvalidProtocolException(client,
+						"Server maximum transfer unit is higher than the client can handle");
+			} else {
 				this.loginPackets[1] = true;
 				this.maximumTransferUnit = connectionResponseTwo.maximumTransferUnit;
 				if (connectionResponseTwo.encryptionEnabled == true) {
 					client.getListener().onWarning(Warning.ENCRYPTION_ENABLED);
 				}
-			} else {
-				this.cancelReason = new InvalidProtocolException(client);
 			}
 		} else if (packetId == ID_ALREADY_CONNECTED) {
 			this.cancelReason = new AlreadyConnectedException(client);
