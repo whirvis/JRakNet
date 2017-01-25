@@ -276,7 +276,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @return Whether or not the server has a session with the specified
 	 *         address
 	 */
-	public boolean hasSession(InetSocketAddress address) {
+	public synchronized boolean hasSession(InetSocketAddress address) {
 		return sessions.containsKey(address);
 	}
 
@@ -305,7 +305,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            The address of the session
 	 * @return A session connected to the server by their address
 	 */
-	public RakNetClientSession getSession(InetSocketAddress address) {
+	public synchronized RakNetClientSession getSession(InetSocketAddress address) {
 		return sessions.get(address);
 	}
 
@@ -340,7 +340,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @param reason
 	 *            The reason the session was removed
 	 */
-	public void removeSession(InetSocketAddress address, String reason) {
+	public synchronized void removeSession(InetSocketAddress address, String reason) {
 		if (sessions.containsKey(address)) {
 			RakNetClientSession session = sessions.get(address);
 			if (session.getState() == RakNetState.CONNECTED) {
@@ -488,6 +488,11 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		} else if (packetId == ID_OPEN_CONNECTION_REQUEST_1) {
 			OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne(packet);
 			connectionRequestOne.decode();
+
+			if (sessions.containsKey(sender)) {
+				// The session is already connected
+				this.removeSession(sender, "Client reinstantiated connection");
+			}
 
 			if (connectionRequestOne.magic == true) {
 				// Are there any problems?
