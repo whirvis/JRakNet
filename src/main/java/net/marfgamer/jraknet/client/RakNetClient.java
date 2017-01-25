@@ -228,7 +228,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param address
 	 *            The server address
 	 */
-	public void addExternalServer(InetSocketAddress address) {
+	public synchronized void addExternalServer(InetSocketAddress address) {
 		if (!externalServers.contains(address)) {
 			externalServers.put(address, new DiscoveredServer(address, -1, null));
 			listener.onExternalServerAdded(address);
@@ -272,7 +272,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param address
 	 *            The server address
 	 */
-	public void removeExternalServer(InetSocketAddress address) {
+	public synchronized void removeExternalServer(InetSocketAddress address) {
 		if (externalServers.contains(address)) {
 			externalServers.remove(address);
 			listener.onExternalServerRemoved(address);
@@ -459,7 +459,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * Updates the discovery data in the client by sending pings and removing
 	 * servers that have taken too long to respond to a ping
 	 */
-	public void updateDiscoveryData() {
+	public synchronized void updateDiscoveryData() {
 		// Remove all servers that have timed out
 		ArrayList<InetSocketAddress> forgottenServers = new ArrayList<InetSocketAddress>();
 		for (InetSocketAddress discoveredServerAddress : discovered.keySet()) {
@@ -505,7 +505,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param pong
 	 *            The pong packet to handle
 	 */
-	public void updateDiscoveryData(InetSocketAddress sender, UnconnectedPong pong) {
+	public synchronized void updateDiscoveryData(InetSocketAddress sender, UnconnectedPong pong) {
 		// Is this a local or an external server?
 		if (sender.getAddress().isSiteLocalAddress() && !externalServers.containsKey(sender)) {
 			// This is a local server

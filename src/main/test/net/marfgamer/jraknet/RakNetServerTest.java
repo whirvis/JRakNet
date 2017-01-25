@@ -33,7 +33,6 @@ package net.marfgamer.jraknet;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
-import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.identifier.MCPEIdentifier;
 import net.marfgamer.jraknet.protocol.login.NewIncomingConnection;
 import net.marfgamer.jraknet.server.RakNetServer;
