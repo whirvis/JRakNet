@@ -255,7 +255,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @return The sessions connected to the server
 	 */
 	public RakNetClientSession[] getSessions() {
-		return sessions.values().toArray(new RakNetClientSession[sessions.size()]);
+		synchronized (sessions) {
+			return sessions.values().toArray(new RakNetClientSession[sessions.size()]);
+		}
 	}
 
 	/**
@@ -264,7 +266,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @return The amount of sessions connected to the server
 	 */
 	public int getSessionCount() {
-		return sessions.size();
+		synchronized (sessions) {
+			return sessions.size();
+		}
 	}
 
 	/**
@@ -276,8 +280,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @return Whether or not the server has a session with the specified
 	 *         address
 	 */
-	public synchronized boolean hasSession(InetSocketAddress address) {
-		return sessions.containsKey(address);
+	public boolean hasSession(InetSocketAddress address) {
+		synchronized (sessions) {
+			return sessions.containsKey(address);
+		}
 	}
 
 	/**
@@ -290,9 +296,11 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *         Globally Unique ID
 	 */
 	public boolean hasSession(long guid) {
-		for (RakNetClientSession session : sessions.values()) {
-			if (session.getGloballyUniqueId() == guid) {
-				return true;
+		synchronized (sessions) {
+			for (RakNetClientSession session : sessions.values()) {
+				if (session.getGloballyUniqueId() == guid) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -305,8 +313,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            The address of the session
 	 * @return A session connected to the server by their address
 	 */
-	public synchronized RakNetClientSession getSession(InetSocketAddress address) {
-		return sessions.get(address);
+	public RakNetClientSession getSession(InetSocketAddress address) {
+		synchronized (sessions) {
+			return sessions.get(address);
+		}
 	}
 
 	/**
@@ -317,9 +327,11 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @return A session connected to the server by their address
 	 */
 	public RakNetClientSession getSession(long guid) {
-		for (RakNetClientSession session : sessions.values()) {
-			if (session.getGloballyUniqueId() == guid) {
-				return session;
+		synchronized (sessions) {
+			for (RakNetClientSession session : sessions.values()) {
+				if (session.getGloballyUniqueId() == guid) {
+					return session;
+				}
 			}
 		}
 		return null;
@@ -340,16 +352,18 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @param reason
 	 *            The reason the session was removed
 	 */
-	public synchronized void removeSession(InetSocketAddress address, String reason) {
-		if (sessions.containsKey(address)) {
-			RakNetClientSession session = sessions.get(address);
-			if (session.getState() == RakNetState.CONNECTED) {
-				listener.onClientDisconnect(session, reason);
-			} else {
-				listener.onClientPreDisconnect(address, reason);
+	public void removeSession(InetSocketAddress address, String reason) {
+		synchronized (sessions) {
+			if (sessions.containsKey(address)) {
+				RakNetClientSession session = sessions.get(address);
+				if (session.getState() == RakNetState.CONNECTED) {
+					listener.onClientDisconnect(session, reason);
+				} else {
+					listener.onClientPreDisconnect(address, reason);
+				}
+				session.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
+				sessions.remove(address);
 			}
-			session.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
-			sessions.remove(address);
 		}
 	}
 
@@ -397,9 +411,11 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            How long the address will blocked in milliseconds
 	 */
 	public void blockAddress(InetAddress address, String reason, long time) {
-		for (InetSocketAddress clientAddress : sessions.keySet()) {
-			if (clientAddress.getAddress().getAddress().equals(address)) {
-				this.removeSession(clientAddress, reason);
+		synchronized (sessions) {
+			for (InetSocketAddress clientAddress : sessions.keySet()) {
+				if (clientAddress.getAddress().getAddress().equals(address)) {
+					this.removeSession(clientAddress, reason);
+				}
 			}
 		}
 		handler.blockAddress(address, time);
@@ -470,28 +486,32 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			ping.decode();
 
 			// Make sure parameters match and that broadcasting is enabled
-			if ((packetId == ID_UNCONNECTED_PING || sessions.size() < this.maxConnections)
-					&& this.broadcastingEnabled == true) {
-				ServerPing pingEvent = new ServerPing(sender, identifier);
-				listener.handlePing(pingEvent);
+			synchronized (sessions) {
+				if ((packetId == ID_UNCONNECTED_PING || sessions.size() < this.maxConnections)
+						&& this.broadcastingEnabled == true) {
+					ServerPing pingEvent = new ServerPing(sender, identifier);
+					listener.handlePing(pingEvent);
 
-				if (ping.magic == true && pingEvent.getIdentifier() != null) {
-					UnconnectedPong pong = new UnconnectedPong();
-					pong.pingId = ping.timestamp;
-					pong.pongId = this.getTimestamp();
-					pong.identifier = pingEvent.getIdentifier();
+					if (ping.magic == true && pingEvent.getIdentifier() != null) {
+						UnconnectedPong pong = new UnconnectedPong();
+						pong.pingId = ping.timestamp;
+						pong.pongId = this.getTimestamp();
+						pong.identifier = pingEvent.getIdentifier();
 
-					pong.encode();
-					this.sendRawMessage(pong, sender);
+						pong.encode();
+						this.sendRawMessage(pong, sender);
+					}
 				}
 			}
 		} else if (packetId == ID_OPEN_CONNECTION_REQUEST_1) {
 			OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne(packet);
 			connectionRequestOne.decode();
 
-			if (sessions.containsKey(sender)) {
-				// The session is already connected
-				this.removeSession(sender, "Client reinstantiated connection");
+			synchronized (sessions) {
+				if (sessions.containsKey(sender)) {
+					// The session is already connected
+					this.removeSession(sender, "Client reinstantiated connection");
+				}
 			}
 
 			if (connectionRequestOne.magic == true) {
@@ -546,10 +566,12 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 								this.getListener().onClientPreConnect(sender);
 
 								// Create session
-								RakNetClientSession clientSession = new RakNetClientSession(this,
-										System.currentTimeMillis(), connectionRequestTwo.clientGuid,
-										connectionRequestTwo.maximumTransferUnit, channel, sender);
-								sessions.put(sender, clientSession);
+								synchronized (sessions) {
+									RakNetClientSession clientSession = new RakNetClientSession(this,
+											System.currentTimeMillis(), connectionRequestTwo.clientGuid,
+											connectionRequestTwo.maximumTransferUnit, channel, sender);
+									sessions.put(sender, clientSession);
+								}
 
 								// Send response, we are ready for login
 								this.sendRawMessage(connectionResponseTwo, sender);
@@ -561,20 +583,24 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				}
 			}
 		} else if (packetId >= ID_CUSTOM_0 && packetId <= ID_CUSTOM_F) {
-			if (sessions.containsKey(sender)) {
-				CustomPacket custom = new CustomPacket(packet);
-				custom.decode();
+			synchronized (sessions) {
+				if (sessions.containsKey(sender)) {
+					CustomPacket custom = new CustomPacket(packet);
+					custom.decode();
 
-				RakNetClientSession session = sessions.get(sender);
-				session.handleCustom(custom);
+					RakNetClientSession session = sessions.get(sender);
+					session.handleCustom(custom);
+				}
 			}
 		} else if (packetId == Acknowledge.ACKNOWLEDGED || packetId == Acknowledge.NOT_ACKNOWLEDGED) {
-			if (sessions.containsKey(sender)) {
-				Acknowledge acknowledge = new Acknowledge(packet);
-				acknowledge.decode();
+			synchronized (sessions) {
+				if (sessions.containsKey(sender)) {
+					Acknowledge acknowledge = new Acknowledge(packet);
+					acknowledge.decode();
 
-				RakNetClientSession session = sessions.get(sender);
-				session.handleAcknowledge(acknowledge);
+					RakNetClientSession session = sessions.get(sender);
+					session.handleAcknowledge(acknowledge);
+				}
 			}
 		}
 	}
@@ -657,17 +683,19 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 		// Update system
 		while (this.running == true) {
-			for (RakNetClientSession session : sessions.values()) {
-				try {
-					// Update session and make sure it isn't DOSing us
-					session.update();
-					if (session.getPacketsReceivedThisSecond() >= RakNet.MAX_PACKETS_PER_SECOND) {
-						this.blockAddress(session.getInetAddress(), "Too many packets",
-								RakNet.MAX_PACKETS_PER_SECOND_BLOCK);
+			synchronized (sessions) {
+				for (RakNetClientSession session : sessions.values()) {
+					try {
+						// Update session and make sure it isn't DOSing us
+						session.update();
+						if (session.getPacketsReceivedThisSecond() >= RakNet.MAX_PACKETS_PER_SECOND) {
+							this.blockAddress(session.getInetAddress(), "Too many packets",
+									RakNet.MAX_PACKETS_PER_SECOND_BLOCK);
+						}
+					} catch (Exception e) {
+						// An error related to the session occurred, remove it
+						this.removeSession(session, e.getMessage());
 					}
-				} catch (Exception e) {
-					// An error related to the session occurred, remove it
-					this.removeSession(session, e.getMessage());
 				}
 			}
 		}
@@ -704,10 +732,12 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 */
 	public void stop() {
 		this.running = false;
-		for (RakNetClientSession session : sessions.values()) {
-			this.removeSession(session, "Server shutdown");
+		synchronized (sessions) {
+			for (RakNetClientSession session : sessions.values()) {
+				this.removeSession(session, "Server shutdown");
+			}
+			sessions.clear();
 		}
-		sessions.clear();
 		this.getListener().onServerShutdown();
 	}
 

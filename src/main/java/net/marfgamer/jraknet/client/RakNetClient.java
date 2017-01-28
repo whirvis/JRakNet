@@ -87,7 +87,9 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	private final long timestamp;
 	private int discoveryPort;
 	private DiscoveryMode discoveryMode;
+	/** This must be synchronized <b><u>FIRST</b></u>!!! */
 	private final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> discovered;
+	/** This must be synchronized <b><u>SECOND</b></u>!!! */
 	private final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> externalServers;
 
 	// Networking data
@@ -210,13 +212,15 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	public void setDiscoveryMode(DiscoveryMode mode) {
 		this.discoveryMode = (mode != null ? mode : DiscoveryMode.NONE);
-		if (this.discoveryMode == DiscoveryMode.NONE) {
-			if (listener != null) {
-				for (InetSocketAddress address : discovered.keySet()) {
-					listener.onServerForgotten(address);
+		synchronized (discovered) {
+			if (this.discoveryMode == DiscoveryMode.NONE) {
+				if (listener != null) {
+					for (InetSocketAddress address : discovered.keySet()) {
+						listener.onServerForgotten(address);
+					}
 				}
+				discovered.clear(); // We are not discovering servers anymore!
 			}
-			discovered.clear(); // We are not discovering servers anymore!
 		}
 	}
 
@@ -228,10 +232,12 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param address
 	 *            The server address
 	 */
-	public synchronized void addExternalServer(InetSocketAddress address) {
-		if (!externalServers.contains(address)) {
-			externalServers.put(address, new DiscoveredServer(address, -1, null));
-			listener.onExternalServerAdded(address);
+	public void addExternalServer(InetSocketAddress address) {
+		synchronized (externalServers) {
+			if (!externalServers.contains(address)) {
+				externalServers.put(address, new DiscoveredServer(address, -1, null));
+				listener.onExternalServerAdded(address);
+			}
 		}
 	}
 
@@ -272,10 +278,12 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param address
 	 *            The server address
 	 */
-	public synchronized void removeExternalServer(InetSocketAddress address) {
-		if (externalServers.contains(address)) {
-			externalServers.remove(address);
-			listener.onExternalServerRemoved(address);
+	public void removeExternalServer(InetSocketAddress address) {
+		synchronized (externalServers) {
+			if (externalServers.contains(address)) {
+				externalServers.remove(address);
+				listener.onExternalServerRemoved(address);
+			}
 		}
 	}
 
@@ -313,7 +321,9 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @return The external servers as an array
 	 */
 	public DiscoveredServer[] getExternalServers() {
-		return externalServers.values().toArray(new DiscoveredServer[externalServers.size()]);
+		synchronized (externalServers) {
+			return externalServers.values().toArray(new DiscoveredServer[externalServers.size()]);
+		}
 	}
 
 	/**
@@ -459,39 +469,45 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * Updates the discovery data in the client by sending pings and removing
 	 * servers that have taken too long to respond to a ping
 	 */
-	public synchronized void updateDiscoveryData() {
+	public void updateDiscoveryData() {
 		// Remove all servers that have timed out
-		ArrayList<InetSocketAddress> forgottenServers = new ArrayList<InetSocketAddress>();
-		for (InetSocketAddress discoveredServerAddress : discovered.keySet()) {
-			DiscoveredServer discoveredServer = discovered.get(discoveredServerAddress);
-			if (System.currentTimeMillis()
-					- discoveredServer.getDiscoveryTimestamp() >= DiscoveredServer.SERVER_TIMEOUT_MILLI) {
-				forgottenServers.add(discoveredServerAddress);
-				listener.onServerForgotten(discoveredServerAddress);
-			}
-		}
-		discovered.keySet().removeAll(forgottenServers);
+		synchronized (discovered) {
+			synchronized (externalServers) {
+				ArrayList<InetSocketAddress> forgottenServers = new ArrayList<InetSocketAddress>();
+				for (InetSocketAddress discoveredServerAddress : discovered.keySet()) {
+					DiscoveredServer discoveredServer = discovered.get(discoveredServerAddress);
+					if (System.currentTimeMillis()
+							- discoveredServer.getDiscoveryTimestamp() >= DiscoveredServer.SERVER_TIMEOUT_MILLI) {
+						forgottenServers.add(discoveredServerAddress);
+						listener.onServerForgotten(discoveredServerAddress);
+					}
+				}
+				discovered.keySet().removeAll(forgottenServers);
 
-		// Broadcast ping to local network
-		if (discoveryMode != DiscoveryMode.NONE && discoveryPort > -1) {
-			UnconnectedPing ping = new UnconnectedPing();
-			if (discoveryMode == DiscoveryMode.OPEN_CONNECTIONS) {
-				ping = new UnconnectedPingOpenConnections();
-			}
-			ping.timestamp = this.getTimestamp();
-			ping.encode();
+				// Broadcast ping to local network
+				if (discoveryMode != DiscoveryMode.NONE && discoveryPort > -1) {
+					UnconnectedPing ping = new UnconnectedPing();
+					if (discoveryMode == DiscoveryMode.OPEN_CONNECTIONS) {
+						ping = new UnconnectedPingOpenConnections();
+					}
+					ping.timestamp = this.getTimestamp();
+					ping.encode();
 
-			this.sendRawMessage(ping, new InetSocketAddress("255.255.255.255", discoveryPort));
-		}
+					this.sendRawMessage(ping, new InetSocketAddress("255.255.255.255", discoveryPort));
+				}
 
-		// Send ping to external servers
-		if (!externalServers.isEmpty()) {
-			UnconnectedPing ping = new UnconnectedPing();
-			ping.timestamp = this.getTimestamp();
-			ping.encode();
+				// Send ping to external servers
+				synchronized (externalServers) {
+					if (!externalServers.isEmpty()) {
+						UnconnectedPing ping = new UnconnectedPing();
+						ping.timestamp = this.getTimestamp();
+						ping.encode();
 
-			for (InetSocketAddress externalAddress : externalServers.keySet()) {
-				this.sendRawMessage(ping, externalAddress);
+						for (InetSocketAddress externalAddress : externalServers.keySet()) {
+							this.sendRawMessage(ping, externalAddress);
+						}
+					}
+				}
 			}
 		}
 	}
@@ -505,35 +521,40 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param pong
 	 *            The pong packet to handle
 	 */
-	public synchronized void updateDiscoveryData(InetSocketAddress sender, UnconnectedPong pong) {
+	public void updateDiscoveryData(InetSocketAddress sender, UnconnectedPong pong) {
 		// Is this a local or an external server?
-		if (sender.getAddress().isSiteLocalAddress() && !externalServers.containsKey(sender)) {
-			// This is a local server
-			if (!discovered.containsKey(sender)) {
-				// Server discovered
-				discovered.put(sender, new DiscoveredServer(sender, System.currentTimeMillis(), pong.identifier));
-				if (listener != null) {
-					listener.onServerDiscovered(sender, pong.identifier);
-				}
-			} else {
-				// Server already discovered, but data has changed
-				DiscoveredServer server = discovered.get(sender);
-				server.setDiscoveryTimestamp(System.currentTimeMillis());
-				if (!pong.identifier.equals(server.getIdentifier())) {
-					server.setIdentifier(pong.identifier);
-					if (listener != null) {
-						listener.onServerIdentifierUpdate(sender, pong.identifier);
+		synchronized (discovered) {
+			synchronized (externalServers) {
+				if (sender.getAddress().isSiteLocalAddress() && !externalServers.containsKey(sender)) {
+					// This is a local server
+					if (!discovered.containsKey(sender)) {
+						// Server discovered
+						discovered.put(sender,
+								new DiscoveredServer(sender, System.currentTimeMillis(), pong.identifier));
+						if (listener != null) {
+							listener.onServerDiscovered(sender, pong.identifier);
+						}
+					} else {
+						// Server already discovered, but data has changed
+						DiscoveredServer server = discovered.get(sender);
+						server.setDiscoveryTimestamp(System.currentTimeMillis());
+						if (!pong.identifier.equals(server.getIdentifier())) {
+							server.setIdentifier(pong.identifier);
+							if (listener != null) {
+								listener.onServerIdentifierUpdate(sender, pong.identifier);
+							}
+						}
 					}
-				}
-			}
-		} else {
-			// This is an external server
-			if (externalServers.containsKey(sender)) {
-				DiscoveredServer server = externalServers.get(sender);
-				server.setDiscoveryTimestamp(System.currentTimeMillis());
-				if (!pong.identifier.equals(server.getIdentifier())) {
-					server.setIdentifier(pong.identifier);
-					listener.onExternalServerIdentifierUpdate(sender, pong.identifier);
+				} else {
+					// This is an external server
+					if (externalServers.containsKey(sender)) {
+						DiscoveredServer server = externalServers.get(sender);
+						server.setDiscoveryTimestamp(System.currentTimeMillis());
+						if (!pong.identifier.equals(server.getIdentifier())) {
+							server.setIdentifier(pong.identifier);
+							listener.onExternalServerIdentifierUpdate(sender, pong.identifier);
+						}
+					}
 				}
 			}
 		}
@@ -561,9 +582,9 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		preparation.address = address;
 
 		// Send OPEN_CONNECTION_REQUEST_ONE with a decreasing MTU
-		int retries = 0;
+		int retriesLeft = 0;
 		for (MaximumTransferUnit unit : units) {
-			retries += unit.getRetries();
+			retriesLeft += unit.getRetries();
 			while (unit.retry() > 0 && preparation.loginPackets[0] == false && preparation.cancelReason == null) {
 				OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne();
 				connectionRequestOne.maximumTransferUnit = unit.getMaximumTransferUnit();
@@ -586,7 +607,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		}
 
 		// Send OPEN_CONNECTION_REQUEST_TWO until a response is received
-		while (retries > 0 && preparation.loginPackets[1] == false && preparation.cancelReason == null) {
+		while (retriesLeft > 0 && preparation.loginPackets[1] == false && preparation.cancelReason == null) {
 			OpenConnectionRequestTwo connectionRequestTwo = new OpenConnectionRequestTwo();
 			connectionRequestTwo.clientGuid = this.guid;
 			connectionRequestTwo.address = preparation.address;
