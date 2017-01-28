@@ -109,7 +109,7 @@ public class RakNetClientSession extends RakNetSession {
 			ConnectionRequest request = new ConnectionRequest(packet);
 			request.decode();
 
-			if (request.clientGuid == this.getGloballyUniqueId()) {
+			if (request.clientGuid == this.getGloballyUniqueId() && request.useSecurity != true) {
 				ConnectionRequestAccepted requestAccepted = new ConnectionRequestAccepted();
 				requestAccepted.clientAddress = this.getAddress();
 				requestAccepted.clientTimestamp = request.timestamp;
@@ -121,12 +121,19 @@ public class RakNetClientSession extends RakNetSession {
 					this.sendMessage(Reliability.RELIABLE_ORDERED, requestAccepted);
 					this.setState(RakNetState.HANDSHAKING);
 				} else {
-					server.removeSession(this, "Login failed");
+					server.removeSession(this, "Login failed, " + ConnectionRequestAccepted.class.getSimpleName()
+							+ " packet failed to encode");
 				}
 			} else {
+				String reason = "unknown error";
+				if (request.clientGuid != this.getGloballyUniqueId()) {
+					reason = "client GUID did not match";
+				} else if (request.useSecurity == true) {
+					reason = "client has security enabled";
+				}
 				this.sendMessage(Reliability.RELIABLE_ORDERED, ID_CONNECTION_ATTEMPT_FAILED);
 				this.setState(RakNetState.DISCONNECTED);
-				server.removeSession(this, "Login failed");
+				server.removeSession(this, "Login failed, " + reason);
 			}
 		} else if (packetId == ID_NEW_INCOMING_CONNECTION && this.getState() == RakNetState.HANDSHAKING) {
 			NewIncomingConnection clientHandshake = new NewIncomingConnection(packet);
@@ -137,7 +144,8 @@ public class RakNetClientSession extends RakNetSession {
 				this.setState(RakNetState.CONNECTED);
 				server.getListener().onClientConnect(this);
 			} else {
-				server.removeSession(this, "Login failed");
+				server.removeSession(this,
+						"Login failed, " + NewIncomingConnection.class.getSimpleName() + " packet failed to decode");
 			}
 		} else if (packetId == ID_DISCONNECTION_NOTIFICATION) {
 			server.removeSession(this, "Disconnected");
