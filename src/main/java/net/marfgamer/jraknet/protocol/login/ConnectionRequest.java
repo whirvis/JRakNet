@@ -39,6 +39,12 @@ public class ConnectionRequest extends RakNetPacket {
 	public long clientGuid;
 	public long timestamp;
 
+	/*
+	 * JRakNet does not support RakNet's built in security function, it is
+	 * poorly documented
+	 */
+	public boolean useSecurity = false;
+
 	public ConnectionRequest() {
 		super(MessageIdentifier.ID_CONNECTION_REQUEST);
 	}
@@ -51,12 +57,14 @@ public class ConnectionRequest extends RakNetPacket {
 	public void encode() {
 		this.writeLong(clientGuid);
 		this.writeLong(timestamp);
+		this.writeBoolean(this.useSecurity);
 	}
 
 	@Override
 	public void decode() {
 		this.clientGuid = this.readLong();
 		this.timestamp = this.readLong();
+		this.useSecurity = this.readBoolean();
 	}
 
 }
