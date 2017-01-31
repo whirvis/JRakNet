@@ -1,2 +1,0 @@
-This is the package where the JNI implementation of RakNet will be, in the future I hope to replace the manual implementation
-with this JNI implementation. But who knows, it may never hapen
