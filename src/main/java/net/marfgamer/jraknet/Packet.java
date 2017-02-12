@@ -56,9 +56,9 @@ public class Packet {
 	public static final int ADDRESS_VERSION_IPV6_LENGTH = 0x10;
 	public static final int ADDRESS_VERSION_IPV6_MYSTERY_LENGTH = 0x0A;
 
-	private final ByteBuf buffer;
-	private final PacketDataInput input;
-	private final PacketDataOutput output;
+	private ByteBuf buffer;
+	private PacketDataInput input;
+	private PacketDataOutput output;
 
 	public Packet(ByteBuf buffer) {
 		this.buffer = buffer;
@@ -730,6 +730,18 @@ public class Packet {
 	 */
 	public int remaining() {
 		return buffer.readableBytes();
+	}
+
+	public void setBuffer(byte[] buffer) {
+		this.buffer = Unpooled.copiedBuffer(buffer);
+	}
+
+	/**
+	 * Flips the packet
+	 */
+	public void flip() {
+		byte[] data = buffer.array();
+		this.buffer = Unpooled.copiedBuffer(data);
 	}
 
 	/**

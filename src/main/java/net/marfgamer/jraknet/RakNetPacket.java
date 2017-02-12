@@ -42,7 +42,7 @@ import io.netty.channel.socket.DatagramPacket;
  */
 public class RakNetPacket extends Packet {
 
-	private final short id;
+	private short id;
 
 	public RakNetPacket(int id) {
 		super();
@@ -98,6 +98,12 @@ public class RakNetPacket extends Packet {
 	 * Decodes the packet
 	 */
 	public void decode() {
+	}
+
+	@Override
+	public void flip() {
+		super.flip();
+		this.id = this.readUByte();
 	}
 
 }
