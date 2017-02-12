@@ -154,7 +154,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * 
 	 * @return The client's networking protocol version
 	 */
-	public int getProtocolVersion() {
+	public final int getProtocolVersion() {
 		return RakNet.CLIENT_NETWORK_PROTOCOL;
 	}
 
@@ -163,7 +163,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * 
 	 * @return The client's globally unique ID
 	 */
-	public long getGloballyUniqueId() {
+	public final long getGloballyUniqueId() {
 		return this.guid;
 	}
 
@@ -172,7 +172,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * 
 	 * @return The client's timestamp
 	 */
-	public long getTimestamp() {
+	public final long getTimestamp() {
 		return (System.currentTimeMillis() - this.timestamp);
 	}
 
@@ -181,7 +181,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * 
 	 * @return The client's discovery port
 	 */
-	public int getDiscoveryPort() {
+	public final int getDiscoveryPort() {
 		return this.discoveryPort;
 	}
 
@@ -191,7 +191,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param discoveryPort
 	 *            The new discovery port
 	 */
-	public void setDiscoveryPort(int discoveryPort) {
+	public final void setDiscoveryPort(int discoveryPort) {
 		this.discoveryPort = discoveryPort;
 	}
 
@@ -200,7 +200,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * 
 	 * @return The client's discovery mode
 	 */
-	public DiscoveryMode getDiscoveryMode() {
+	public final DiscoveryMode getDiscoveryMode() {
 		return this.discoveryMode;
 	}
 
@@ -210,7 +210,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param mode
 	 *            How the client will discover servers on the local network
 	 */
-	public void setDiscoveryMode(DiscoveryMode mode) {
+	public final void setDiscoveryMode(DiscoveryMode mode) {
 		this.discoveryMode = (mode != null ? mode : DiscoveryMode.NONE);
 		synchronized (discovered) {
 			if (this.discoveryMode == DiscoveryMode.NONE) {
@@ -232,7 +232,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param address
 	 *            The server address
 	 */
-	public void addExternalServer(InetSocketAddress address) {
+	public final void addExternalServer(InetSocketAddress address) {
 		synchronized (externalServers) {
 			if (!externalServers.contains(address)) {
 				externalServers.put(address, new DiscoveredServer(address, -1, null));
@@ -251,7 +251,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param port
 	 *            The server port
 	 */
-	public void addExternalServer(InetAddress address, int port) {
+	public final void addExternalServer(InetAddress address, int port) {
 		this.addExternalServer(new InetSocketAddress(address, port));
 	}
 
@@ -267,7 +267,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @throws UnknownHostException
 	 *             Thrown if the specified address is an unknown host
 	 */
-	public void addExternalServer(String address, int port) throws UnknownHostException {
+	public final void addExternalServer(String address, int port) throws UnknownHostException {
 		this.addExternalServer(InetAddress.getByName(address), port);
 	}
 
@@ -278,7 +278,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param address
 	 *            The server address
 	 */
-	public void removeExternalServer(InetSocketAddress address) {
+	public final void removeExternalServer(InetSocketAddress address) {
 		synchronized (externalServers) {
 			if (externalServers.contains(address)) {
 				externalServers.remove(address);
@@ -296,7 +296,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param port
 	 *            The server port
 	 */
-	public void removeExternalServer(InetAddress address, int port) {
+	public final void removeExternalServer(InetAddress address, int port) {
 		this.removeExternalServer(new InetSocketAddress(address, port));
 	}
 
@@ -311,7 +311,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @throws UnknownHostException
 	 *             Thrown if the specified address is an unknown host
 	 */
-	public void removeExternalServer(String address, int port) throws UnknownHostException {
+	public final void removeExternalServer(String address, int port) throws UnknownHostException {
 		this.removeExternalServer(InetAddress.getByName(address), port);
 	}
 
@@ -320,7 +320,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * 
 	 * @return The external servers as an array
 	 */
-	public DiscoveredServer[] getExternalServers() {
+	public final DiscoveredServer[] getExternalServers() {
 		synchronized (externalServers) {
 			return externalServers.values().toArray(new DiscoveredServer[externalServers.size()]);
 		}
@@ -331,7 +331,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * 
 	 * @return The session the client is connected to
 	 */
-	public RakNetServerSession getSession() {
+	public final RakNetServerSession getSession() {
 		return this.session;
 	}
 
@@ -340,7 +340,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * 
 	 * @return The client's listener
 	 */
-	public RakNetClientListener getListener() {
+	public final RakNetClientListener getListener() {
 		return this.listener;
 	}
 
@@ -351,7 +351,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            The client's new listener
 	 * @return The client
 	 */
-	public RakNetClient setListener(RakNetClientListener listener) {
+	public final RakNetClient setListener(RakNetClientListener listener) {
 		if (listener == null) {
 			throw new NullPointerException("Listener must not be null!");
 		}
@@ -364,7 +364,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * 
 	 * @return Whether or not the client is connected
 	 */
-	public boolean isConnected() {
+	public final boolean isConnected() {
 		if (session != null) {
 			return (session.getState() == RakNetState.CONNECTED);
 		}
@@ -379,7 +379,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param cause
 	 *            The exception caught by the handler
 	 */
-	protected void handleHandlerException(InetSocketAddress address, Throwable cause) {
+	protected final void handleHandlerException(InetSocketAddress address, Throwable cause) {
 		listener.onHandlerException(address, cause);
 		if (preparation != null) {
 			if (address.equals(preparation.address)) {
@@ -402,7 +402,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param sender
 	 *            The address of the sender
 	 */
-	public void handleMessage(RakNetPacket packet, InetSocketAddress sender) {
+	public final void handleMessage(RakNetPacket packet, InetSocketAddress sender) {
 		short packetId = packet.getId();
 
 		// This packet has to do with server discovery so it isn't handled here
@@ -448,7 +448,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param address
 	 *            The address to send the packet to
 	 */
-	private void sendRawMessage(RakNetPacket packet, InetSocketAddress address) {
+	private final void sendRawMessage(RakNetPacket packet, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
 	}
 
@@ -461,7 +461,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            The address to send the packet to
 	 */
 	@SuppressWarnings("unused") // Currently not needed by the client
-	private void sendRawMessage(int packetId, InetSocketAddress address) {
+	private final void sendRawMessage(int packetId, InetSocketAddress address) {
 		this.sendRawMessage(new RakNetPacket(packetId), address);
 	}
 
@@ -469,7 +469,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * Updates the discovery data in the client by sending pings and removing
 	 * servers that have taken too long to respond to a ping
 	 */
-	public void updateDiscoveryData() {
+	public final void updateDiscoveryData() {
 		// Remove all servers that have timed out
 		synchronized (discovered) {
 			synchronized (externalServers) {
@@ -521,7 +521,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param pong
 	 *            The pong packet to handle
 	 */
-	public void updateDiscoveryData(InetSocketAddress sender, UnconnectedPong pong) {
+	public final void updateDiscoveryData(InetSocketAddress sender, UnconnectedPong pong) {
 		// Is this a local or an external server?
 		synchronized (discovered) {
 			synchronized (externalServers) {
@@ -568,7 +568,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @throws RakNetException
 	 *             Thrown if an error occurs during connection or login
 	 */
-	public void connect(InetSocketAddress address) throws RakNetException {
+	public final void connect(InetSocketAddress address) throws RakNetException {
 		// Make sure we have a listener
 		if (this.listener == null) {
 			throw new NoListenerException();
@@ -661,7 +661,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @throws RakNetException
 	 *             Thrown if an error occurs during connection or login
 	 */
-	public void connect(InetAddress address, int port) throws RakNetException {
+	public final void connect(InetAddress address, int port) throws RakNetException {
 		this.connect(new InetSocketAddress(address, port));
 	}
 
@@ -677,7 +677,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @throws UnknownHostException
 	 *             Thrown if the specified address is an unknown host
 	 */
-	public void connect(String address, int port) throws RakNetException, UnknownHostException {
+	public final void connect(String address, int port) throws RakNetException, UnknownHostException {
 		this.connect(InetAddress.getByName(address), port);
 	}
 
@@ -689,7 +689,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @throws RakNetException
 	 *             Thrown if an error occurs during connection or login
 	 */
-	public void connect(DiscoveredServer server) throws RakNetException {
+	public final void connect(DiscoveredServer server) throws RakNetException {
 		this.connect(server.getAddress());
 	}
 
@@ -701,7 +701,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            The address of the server to connect to
 	 * @return The Thread the client is running on
 	 */
-	public synchronized Thread connectThreaded(InetSocketAddress address) {
+	public final synchronized Thread connectThreaded(InetSocketAddress address) {
 		// Give the thread a reference
 		RakNetClient client = this;
 
@@ -732,7 +732,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            The port of the server to connect to
 	 * @return The Thread the client is running on
 	 */
-	public Thread connectThreaded(InetAddress address, int port) {
+	public final Thread connectThreaded(InetAddress address, int port) {
 		return this.connectThreaded(new InetSocketAddress(address, port));
 	}
 
@@ -748,7 +748,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *             Thrown if the specified address is an unknown host
 	 * @return The Thread the client is running on
 	 */
-	public Thread connectThreaded(String address, int port) throws UnknownHostException {
+	public final Thread connectThreaded(String address, int port) throws UnknownHostException {
 		return this.connectThreaded(InetAddress.getByName(address), port);
 	}
 
@@ -760,21 +760,21 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            The discovered server to connect to
 	 * @return The Thread the client is running on
 	 */
-	public Thread connectThreaded(DiscoveredServer server) {
+	public final Thread connectThreaded(DiscoveredServer server) {
 		return this.connectThreaded(server.getAddress());
 	}
 
 	/**
 	 * Starts the loop needed for the client to stay connected to the server
 	 */
-	private void initConnection() throws RakNetException {
+	private final void initConnection() throws RakNetException {
 		while (session != null) {
 			session.update();
 		}
 	}
 
 	@Override
-	public void sendMessage(Reliability reliability, int channel, Packet packet) {
+	public final void sendMessage(Reliability reliability, int channel, Packet packet) {
 		if (this.isConnected()) {
 			session.sendMessage(reliability, channel, packet);
 		}
@@ -786,7 +786,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param reason
 	 *            The reason the client disconnected from the server
 	 */
-	public void disconnect(String reason) {
+	public final void disconnect(String reason) {
 		if (session != null) {
 			session.closeConnection();
 			this.getListener().onDisconnect(session, reason);
@@ -798,7 +798,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	/**
 	 * Disconnects the client from the server if it is connected to one
 	 */
-	public void disconnect() {
+	public final void disconnect() {
 		this.disconnect("Disconnected");
 	}
 
@@ -806,7 +806,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * Shuts down the client for good, once this is called the client can no
 	 * longer connect to servers
 	 */
-	public void shutdown() {
+	public final void shutdown() {
 		// Close channel
 		channel.close();
 		group.shutdownGracefully();
@@ -826,7 +826,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param reason
 	 *            The reason the client shutdown
 	 */
-	public void disconnectAndShutdown(String reason) {
+	public final void disconnectAndShutdown(String reason) {
 		this.disconnect(reason);
 		this.shutdown();
 	}
@@ -835,14 +835,13 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * Disconnects from the server and shuts down the client for good, once this
 	 * is called the client can no longer connect to servers
 	 */
-	public void disconnectAndShutdown() {
+	public final void disconnectAndShutdown() {
 		this.disconnectAndShutdown("Shutdown");
 	}
 
 	@Override
-	public void finalize() {
+	public final void finalize() {
 		this.shutdown();
-		discoverySystem.removeClient(this);
 	}
 
 }
