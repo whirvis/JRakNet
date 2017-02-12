@@ -100,6 +100,21 @@ public class RakNetPacket extends Packet {
 	public void decode() {
 	}
 
+	/**
+	 * Sets the buffer and updates the ID if specified
+	 * 
+	 * @param buffer
+	 *            The new buffer
+	 * @param updateId
+	 *            Whether or not to update the ID
+	 */
+	public void setBuffer(byte[] buffer, boolean updateId) {
+		super.setBuffer(buffer);
+		if (updateId == true) {
+			this.id = this.readUByte();
+		}
+	}
+
 	@Override
 	public void flip() {
 		super.flip();
