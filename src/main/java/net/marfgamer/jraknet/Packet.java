@@ -301,7 +301,7 @@ public class Packet {
 	}
 
 	/**
-	 * Reads a UTF-8 String with ti's length prefixed by a unsigned little
+	 * Reads a UTF-8 String with it's length prefixed by a unsigned little
 	 * endian short
 	 * 
 	 * @return A String
@@ -732,7 +732,13 @@ public class Packet {
 		return buffer.readableBytes();
 	}
 
-	public void setBuffer(byte[] buffer) {
+	/**
+	 * Sets the buffer of the packet
+	 * 
+	 * @param buffer
+	 *            The new buffer
+	 */
+	public final void setBuffer(byte[] buffer) {
 		this.buffer = Unpooled.copiedBuffer(buffer);
 	}
 
