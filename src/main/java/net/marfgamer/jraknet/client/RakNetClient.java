@@ -711,8 +711,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			public synchronized void run() {
 				try {
 					client.connect(address);
-				} catch (Exception e) {
-					client.getListener().onThreadException(e);
+				} catch (Throwable throwable) {
+					client.getListener().onThreadException(throwable);
 				}
 			}
 		};

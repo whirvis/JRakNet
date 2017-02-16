@@ -66,6 +66,9 @@ public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 			// Handle the packet and release the buffer
 			client.handleMessage(packet, sender);
 			datagram.content().release();
+
+			// No exceptions occurred, release the suspect
+			this.causeAddress = null;
 		}
 	}
 
