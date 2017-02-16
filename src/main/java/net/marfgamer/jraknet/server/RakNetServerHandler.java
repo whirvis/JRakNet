@@ -116,6 +116,9 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 
 			server.handlePacket(packet, sender);
 			datagram.content().release(); // No longer needed
+
+			// No exceptions occurred, release the suspect
+			this.causeAddress = null;
 		}
 	}
 
