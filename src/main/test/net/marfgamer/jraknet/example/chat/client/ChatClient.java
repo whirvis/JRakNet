@@ -88,7 +88,6 @@ public class ChatClient implements RakNetClientListener {
 		frame.setInstructions(CHAT_INSTRUCTIONS_DISCONNECTED);
 
 		this.client = new RakNetClient().setListener(this);
-		;
 		this.channels = new ServerChannel[RakNet.MAX_CHANNELS];
 	}
 
