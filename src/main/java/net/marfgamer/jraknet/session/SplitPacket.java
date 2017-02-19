@@ -28,10 +28,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package net.marfgamer.jraknet.protocol;
+package net.marfgamer.jraknet.session;
 
 import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNet;
+import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.message.CustomPacket;
 import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.jraknet.util.ArrayUtils;
@@ -139,34 +140,31 @@ public class SplitPacket {
 	 * Splits the specified <code>EncapsulatedPacket</code> using the specified
 	 * maximumTransferUnit
 	 * 
+	 * @param session
+	 *            The session
 	 * @param encapsulated
 	 *            The <code>EncapsulatedPacket</code> to split
-	 * @param maximumTransferUnit
-	 *            The maximum transfer unit of the session
 	 * @return The split <code>EncapsulatedPacket</code>'s
 	 */
-	public static final EncapsulatedPacket[] splitPacket(EncapsulatedPacket encapsulated, int maximumTransferUnit) {
+	public static final EncapsulatedPacket[] splitPacket(RakNetSession session, EncapsulatedPacket encapsulated) {
 		// Get split packet data
-		byte[][] split = ArrayUtils.splitArray(encapsulated.payload.array(), maximumTransferUnit
+		byte[][] split = ArrayUtils.splitArray(encapsulated.payload.array(), session.getMaximumTransferUnit()
 				- CustomPacket.calculateDummy() - EncapsulatedPacket.calculateDummy(encapsulated.reliability, true));
-		int splitMessageIndex = encapsulated.messageIndex;
-		int splitOrderIndex = encapsulated.orderIndex;
 		EncapsulatedPacket[] splitPackets = new EncapsulatedPacket[split.length];
 
 		// Encode encapsulated packets
 		for (int i = 0; i < split.length; i++) {
-			// Set the normal parameters
+			// Set the base parameters
 			EncapsulatedPacket encapsulatedSplit = new EncapsulatedPacket();
 			encapsulatedSplit.reliability = encapsulated.reliability;
-			encapsulatedSplit.orderChannel = encapsulated.orderChannel;
 			encapsulatedSplit.payload = new Packet(split[i]);
 
 			// Set reliability specific parameters
-			if (encapsulated.reliability.isReliable()) {
-				encapsulatedSplit.messageIndex = splitMessageIndex;
-			}
+			encapsulatedSplit.messageIndex = (encapsulated.reliability.isReliable() ? session.bumpMessageIndex()
+					: encapsulated.messageIndex);
 			if (encapsulated.reliability.isOrdered() || encapsulated.reliability.isSequenced()) {
-				encapsulatedSplit.orderIndex = splitOrderIndex;
+				encapsulatedSplit.orderChannel = encapsulated.orderChannel;
+				encapsulatedSplit.orderIndex = encapsulated.orderIndex;
 			}
 
 			// Set the split related parameters

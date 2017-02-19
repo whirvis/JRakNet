@@ -51,22 +51,18 @@ public abstract class ArrayUtils {
 	 * @return The split byte array's no bigger than the maximum size
 	 */
 	public static final byte[][] splitArray(byte[] src, int size) {
-		if (size > 0) {
-			int index = 0;
-			ArrayList<byte[]> split = new ArrayList<byte[]>();
-			while (index < src.length) {
-				if (index + size <= src.length) {
-					split.add(Arrays.copyOfRange(src, index, index + size));
-					index += size;
-				} else {
-					split.add(Arrays.copyOfRange(src, index, src.length));
-					index = src.length;
-				}
+		int index = 0;
+		ArrayList<byte[]> split = new ArrayList<byte[]>();
+		while (index < src.length) {
+			if (index + size <= src.length) {
+				split.add(Arrays.copyOfRange(src, index, index + size));
+				index += size;
+			} else {
+				split.add(Arrays.copyOfRange(src, index, src.length));
+				index = src.length;
 			}
-			return split.toArray(new byte[split.size()][]);
-		} else {
-			return new byte[0][0];
 		}
+		return split.toArray(new byte[split.size()][size]);
 	}
 
 	/**
