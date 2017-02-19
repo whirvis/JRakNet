@@ -34,7 +34,6 @@ import java.net.InetSocketAddress;
 
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.identifier.Identifier;
-import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 import net.marfgamer.jraknet.session.RakNetServerSession;
 
@@ -133,41 +132,25 @@ public interface RakNetClientListener {
 	}
 
 	/**
-	 * Called when a message sent with _REQUIRES_ACK_RECEIPT is received by the
-	 * server
+	 * Called when a message is received by the server
 	 * 
 	 * @param session
 	 *            The server that received the packet
 	 * @param record
-	 *            The record of the packet
-	 * @param reliability
-	 *            The reliability of the packet
-	 * @param channel
-	 *            The channel of the packet
-	 * @param packet
-	 *            The received packet
+	 *            The received record
 	 */
-	public default void onAcknowledge(RakNetServerSession session, Record record, Reliability reliability, int channel,
-			RakNetPacket packet) {
+	public default void onAcknowledge(RakNetServerSession session, Record record) {
 	}
 
 	/**
-	 * Called when a message sent with _REQUIRES_ACK_RECEIPT is not received by
-	 * the server
+	 * Called when a message is not received by the server
 	 * 
 	 * @param session
 	 *            The server that lost the packet
 	 * @param record
-	 *            The record of the packet
-	 * @param reliability
-	 *            The reliability of the packet
-	 * @param channel
-	 *            The channel of the packet
-	 * @param packet
-	 *            The lost packet
+	 *            The lost record
 	 */
-	public default void onNotAcknowledge(RakNetServerSession session, Record record, Reliability reliability,
-			int channel, RakNetPacket packet) {
+	public default void onNotAcknowledge(RakNetServerSession session, Record record) {
 	}
 
 	/**

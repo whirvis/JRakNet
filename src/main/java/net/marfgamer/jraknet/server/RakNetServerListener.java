@@ -34,7 +34,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 import net.marfgamer.jraknet.RakNetPacket;
-import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 import net.marfgamer.jraknet.session.RakNetClientSession;
 
@@ -106,41 +105,25 @@ public interface RakNetServerListener {
 	}
 
 	/**
-	 * Called when a message sent with _REQUIRES_ACK_RECEIPT is received by a
-	 * client
+	 * Called when a message is received by a client
 	 * 
 	 * @param session
 	 *            The client that received the packet
 	 * @param record
-	 *            The record of the packet
-	 * @param reliability
-	 *            The reliability of the packet
-	 * @param channel
-	 *            The channel of the packet
-	 * @param packet
-	 *            The received packet
+	 *            The received record
 	 */
-	public default void onAcknowledge(RakNetClientSession session, Record record, Reliability reliability, int channel,
-			RakNetPacket packet) {
+	public default void onAcknowledge(RakNetClientSession session, Record record) {
 	}
 
 	/**
-	 * Called when a message sent with _REQUIRES_ACK_RECEIPT is not received by
-	 * a client
+	 * Called when a message is not received by a client
 	 * 
 	 * @param session
 	 *            The client that lost the packet
 	 * @param record
-	 *            The record of the packet
-	 * @param reliability
-	 *            The reliability of the packet
-	 * @param channel
-	 *            The channel of the packet
-	 * @param packet
-	 *            The lost packet
+	 *            The lost record
 	 */
-	public default void onNotAcknowledge(RakNetClientSession session, Record record, Reliability reliability,
-			int channel, RakNetPacket packet) {
+	public default void onNotAcknowledge(RakNetClientSession session, Record record) {
 	}
 
 	/**
@@ -168,6 +151,18 @@ public interface RakNetServerListener {
 	 */
 	public default void onHandlerException(InetSocketAddress address, Throwable throwable) {
 		throwable.printStackTrace();
+	}
+
+	/**
+	 * Called when a session exception has occurred, these normally do not
+	 * matter as the server will kick the client
+	 * 
+	 * @param session
+	 *            The session that caused the exception
+	 * @param throwable
+	 *            The throwable exception that was caught
+	 */
+	public default void onSessionException(RakNetClientSession session, Throwable throwable) {
 	}
 
 	/**

@@ -478,7 +478,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @param sender
 	 *            The address of the sender
 	 */
-	protected final void handlePacket(RakNetPacket packet, InetSocketAddress sender) {
+	protected final void handleMessage(RakNetPacket packet, InetSocketAddress sender) {
 		short packetId = packet.getId();
 
 		if (packetId == ID_UNCONNECTED_PING || packetId == ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
@@ -692,9 +692,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 							this.blockAddress(session.getInetAddress(), "Too many packets",
 									RakNet.MAX_PACKETS_PER_SECOND_BLOCK);
 						}
-					} catch (Exception e) {
+					} catch (Throwable throwable) {
 						// An error related to the session occurred, remove it
-						this.removeSession(session, e.getMessage());
+						listener.onSessionException(session, throwable);
+						this.removeSession(session, throwable.getMessage());
 					}
 				}
 			}

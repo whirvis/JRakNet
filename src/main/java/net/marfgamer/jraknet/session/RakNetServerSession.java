@@ -60,20 +60,20 @@ public class RakNetServerSession extends RakNetSession {
 	}
 
 	@Override
-	public void onAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet) {
-		client.getListener().onAcknowledge(this, record, reliability, channel, packet);
+	public void onAcknowledge(Record record) {
+		client.getListener().onAcknowledge(this, record);
 	}
 
 	@Override
-	public void onNotAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet) {
-		client.getListener().onNotAcknowledge(this, record, reliability, channel, packet);
+	public void onNotAcknowledge(Record record) {
+		client.getListener().onNotAcknowledge(this, record);
 	}
 
 	@Override
 	public void handlePacket(RakNetPacket packet, int channel) {
 		short packetId = packet.getId();
 
-		if (packetId == ID_CONNECTION_REQUEST_ACCEPTED) {
+		if (packetId == ID_CONNECTION_REQUEST_ACCEPTED && this.getState() == RakNetState.HANDSHAKING) {
 			ConnectionRequestAccepted serverHandshake = new ConnectionRequestAccepted(packet);
 			serverHandshake.decode();
 

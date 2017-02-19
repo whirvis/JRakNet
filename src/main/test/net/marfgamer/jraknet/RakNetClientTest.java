@@ -31,34 +31,50 @@
 package net.marfgamer.jraknet;
 
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 
 import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.client.RakNetClientListener;
 import net.marfgamer.jraknet.client.Warning;
+import net.marfgamer.jraknet.protocol.Reliability;
+import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 import net.marfgamer.jraknet.session.RakNetServerSession;
 
 /**
- * Used to test <code>RakNetClient</code> by connecting to the Lifeboat Survival
- * Games server and then disconnecting afterwards
+ * Used to test <code>RakNetClient</code> by connecting to the LifeBoat Survival
+ * Games server, sending a dummy packet to make sure the ACK/NACK functions
+ * work, and then disconnecting afterwards
  *
  * @author MarfGamer
  */
 public class RakNetClientTest {
 
-	public static void main(String[] args) throws RakNetException {
+	public static void main(String[] args) throws RakNetException, UnknownHostException {
 		RakNetClient client = new RakNetClient();
 		client.setListener(new RakNetClientListener() {
 
 			@Override
 			public void onConnect(RakNetServerSession session) {
 				System.out.println("Connected to server with address " + session.getAddress() + "!");
-				client.disconnectAndShutdown();
+				session.sendMessage(Reliability.UNRELIABLE, new RakNetPacket(0xFF));
 			}
 
 			@Override
 			public void onDisconnect(RakNetServerSession session, String reason) {
 				System.out.println("Disconnected from server with address " + session.getAddress() + " for reason \""
 						+ reason + "\"");
+			}
+
+			@Override
+			public void onAcknowledge(RakNetServerSession session, Record record) {
+				System.out.println("Received ACK for record(s) " + record.toString());
+				client.disconnectAndShutdown();
+			}
+
+			@Override
+			public void onNotAcknowledge(RakNetServerSession session, Record record) {
+				System.out.println("Received NACK for record(s) " + record.toString());
+				client.disconnectAndShutdown();
 			}
 
 			@Override
@@ -75,7 +91,7 @@ public class RakNetClientTest {
 		});
 		System.out.println("Created client, connecting to " + UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
 
-		client.connect(UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
+		client.connect("192.168.1.21", 19132);
 	}
 
 }

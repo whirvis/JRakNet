@@ -535,7 +535,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		if (acknowledge.getType().equals(AcknowledgeType.ACKNOWLEDGED)) {
 			// Remove acknowledged packets from the recovery queue
 			for (Record record : acknowledge.records) {
-				// TODO: Implement onAcknowledge
+				this.onAcknowledge(record);
 				recoveryQueue.remove(record.getIndex());
 			}
 		} else if (acknowledge.getType().equals(AcknowledgeType.NOT_ACKNOWLEDGED)) {
@@ -544,7 +544,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 			int[] newSequenceNumbers = new int[oldSequenceNumbers.length];
 
 			for (int i = 0; i < acknowledge.records.size(); i++) {
-				// TODO: Implement onNotAcknowledge
+				this.onNotAcknowledge(acknowledge.records.get(i));
 
 				// Update records and resend lost packets
 				Record record = acknowledge.records.get(i);
@@ -582,8 +582,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		// Put together split packet
 		if (encapsulated.split == true) {
 			if (!splitQueue.containsKey(encapsulated.splitId)) {
-				// We remove unreliables here incase the new split packet is
-				// unreliable
+				// Prevent queue from overflowing
 				if (splitQueue.size() + 1 > RakNet.MAX_SPLITS_PER_QUEUE) {
 					// Remove unreliable packets from the queue
 					Iterator<SplitPacket> splitPackets = splitQueue.values().iterator();
@@ -723,6 +722,11 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 			while (queue.hasNext()) {
 				// Make sure the packet will not cause an overflow
 				EncapsulatedPacket encapsulated = queue.next();
+				if (encapsulated == null) {
+					queue.remove();
+					continue; // This will happen from time to time, especially
+								// when packets are sent rapidly
+				}
 				sendLength += encapsulated.calculateSize();
 				if (sendLength > this.maximumTransferUnit) {
 					break;
@@ -783,30 +787,18 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 * packet
 	 * 
 	 * @param record
-	 *            The record of the packet
-	 * @param reliability
-	 *            The reliability of the packet
-	 * @param channel
-	 *            The channel of the packet
-	 * @param packet
-	 *            The acknowledged packet
+	 *            The received record
 	 */
-	public abstract void onAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet);
+	public abstract void onAcknowledge(Record record);
 
 	/**
 	 * This function is called when a not acknowledged receipt is received for
 	 * the packet
 	 * 
 	 * @param record
-	 *            The record of the packet
-	 * @param reliability
-	 *            The reliability of the packet
-	 * @param channel
-	 *            The channel of the packet
-	 * @param packet
-	 *            The not acknowledged packet
+	 *            The lost record
 	 */
-	public abstract void onNotAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet);
+	public abstract void onNotAcknowledge(Record record);
 
 	/**
 	 * This function is called when a packet is received by the session

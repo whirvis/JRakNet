@@ -92,13 +92,13 @@ public class RakNetClientSession extends RakNetSession {
 	}
 
 	@Override
-	public void onAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet) {
-		server.getListener().onAcknowledge(this, record, reliability, channel, packet);
+	public void onAcknowledge(Record record) {
+		server.getListener().onAcknowledge(this, record);
 	}
 
 	@Override
-	public void onNotAcknowledge(Record record, Reliability reliability, int channel, RakNetPacket packet) {
-		server.getListener().onNotAcknowledge(this, record, reliability, channel, packet);
+	public void onNotAcknowledge(Record record) {
+		server.getListener().onNotAcknowledge(this, record);
 	}
 
 	@Override
