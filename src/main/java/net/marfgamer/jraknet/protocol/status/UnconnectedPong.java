@@ -64,11 +64,7 @@ public class UnconnectedPong extends RakNetPacket {
 		this.pongId = this.readLong();
 		this.magic = this.checkMagic();
 
-		try {
-			this.identifier = new Identifier(this.readString());
-		} catch (IndexOutOfBoundsException e) {
-			this.identifier = null;
-		}
+		this.identifier = new Identifier(this.readString());
 	}
 
 }

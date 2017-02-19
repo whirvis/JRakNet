@@ -211,7 +211,7 @@ public class MessageIdentifier {
 					if (packetId == id) {
 						return field.getName();
 					}
-				} catch (Exception e) {
+				} catch (ReflectiveOperationException e) {
 					e.printStackTrace();
 				}
 			}

@@ -67,6 +67,7 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
 import net.marfgamer.jraknet.session.RakNetState;
 import net.marfgamer.jraknet.session.UnumRakNetPeer;
 import net.marfgamer.jraknet.util.RakNetUtils;
+import net.marfgamer.jraknet.util.map.IntMap;
 
 /**
  * This class is used to connection to servers using the RakNet protocol
@@ -74,10 +75,6 @@ import net.marfgamer.jraknet.util.RakNetUtils;
  * @author MarfGamer
  */
 public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
-
-	// JRakNet plans to use it's own dynamic MTU system later
-	protected static final MaximumTransferUnit[] units = new MaximumTransferUnit[] { new MaximumTransferUnit(1464, 3),
-			new MaximumTransferUnit(1172, 4), new MaximumTransferUnit(548, 5) };
 
 	// Used to discover systems without relying on the main thread
 	private static DiscoveryThread discoverySystem = new DiscoveryThread();
@@ -96,6 +93,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	private final Bootstrap bootstrap;
 	private final EventLoopGroup group;
 	private final RakNetClientHandler handler;
+	private final IntMap<MaximumTransferUnit> maximumTransferUnits;
 
 	// Session management
 	private Channel channel;
@@ -121,6 +119,13 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		this.bootstrap = new Bootstrap();
 		this.group = new NioEventLoopGroup();
 		this.handler = new RakNetClientHandler(this);
+
+		// Add maximum transfer units
+		this.maximumTransferUnits = new IntMap<MaximumTransferUnit>();
+		this.addMaximumTransferUnit(new MaximumTransferUnit(RakNetUtils.getMaximumTransferUnit(), 2));
+		this.addMaximumTransferUnit(new MaximumTransferUnit(1464, 3));
+		this.addMaximumTransferUnit(new MaximumTransferUnit(1172, 4));
+		this.addMaximumTransferUnit(new MaximumTransferUnit(548, 5));
 
 		// Initiate bootstrap data
 		try {
@@ -324,6 +329,64 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		synchronized (externalServers) {
 			return externalServers.values().toArray(new DiscoveredServer[externalServers.size()]);
 		}
+	}
+
+	/**
+	 * Adds a <code>MaximumTransferUnit</code> that can be used by the client
+	 * during connection
+	 * 
+	 * @param maximumTransferUnit
+	 *            The maximum transfer unit
+	 */
+	public final void addMaximumTransferUnit(MaximumTransferUnit maximumTransferUnit) {
+		maximumTransferUnits.put(maximumTransferUnit.getMaximumTransferUnit(), maximumTransferUnit);
+	}
+
+	/**
+	 * Adds a <code>MaximumTransferUnit</code> that can be used by the client
+	 * during connection
+	 * 
+	 * @param maximumTransferUnit
+	 *            The maximum transfer unit
+	 * @param retries
+	 *            The amount of retries before the client moves on to the lower
+	 *            maximum transfer unit
+	 */
+	public final void addMaximumTransferUnit(int maximumTransferUnit, int retries) {
+		this.addMaximumTransferUnit(new MaximumTransferUnit(maximumTransferUnit, retries));
+	}
+
+	/**
+	 * Removes a <code>MaximumTransferUnit</code> that was being used by the
+	 * client based on it's maximum transfer unit
+	 * 
+	 * @param maximumTransferUnit
+	 *            The maximum transfer unit to remove
+	 */
+	public final void removeMaximumTransferUnit(int maximumTransferUnit) {
+		maximumTransferUnits.remove(maximumTransferUnit);
+	}
+
+	/**
+	 * Removes a <code>MaximumTransferUnit</code> that was being used by the
+	 * client
+	 * 
+	 * @param maximumTransferUnit
+	 *            The maximum transfer unit to remove
+	 */
+	public final void removeMaximumTransferUnit(MaximumTransferUnit maximumTransferUnit) {
+		this.removeMaximumTransferUnit(maximumTransferUnit);
+	}
+
+	/**
+	 * Returns the <code>MaximumTransferUnit</code>'s the client uses during
+	 * login
+	 * 
+	 * @return The <code>MaximumTransferUnit</code>'s the client uses during
+	 *         login
+	 */
+	public final MaximumTransferUnit[] getMaximumTransferUnits() {
+		return maximumTransferUnits.values().toArray(new MaximumTransferUnit[maximumTransferUnits.size()]);
 	}
 
 	/**
@@ -578,6 +641,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		if (this.isConnected()) {
 			this.disconnect("Disconnected");
 		}
+		MaximumTransferUnit[] units = MaximumTransferUnit.sort(this.getMaximumTransferUnits());
 		this.preparation = new SessionPreparation(this, units[0].getMaximumTransferUnit());
 		preparation.address = address;
 
@@ -597,7 +661,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		}
 
 		// Reset MaximumTransferUnit's so they can be used again
-		for (MaximumTransferUnit unit : units) {
+		for (MaximumTransferUnit unit : maximumTransferUnits.values()) {
 			unit.reset();
 		}
 
