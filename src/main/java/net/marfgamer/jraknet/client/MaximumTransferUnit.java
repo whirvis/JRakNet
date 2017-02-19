@@ -30,6 +30,16 @@
  */
 package net.marfgamer.jraknet.client;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Map.Entry;
+import java.util.NavigableMap;
+import java.util.Set;
+import java.util.TreeMap;
+
+import net.marfgamer.jraknet.util.map.IntMap;
+
 /**
  * This class represents one of the maximum transfer units used during login
  *
@@ -45,6 +55,40 @@ public class MaximumTransferUnit {
 		this.maximumTransferUnit = maximumTransferUnit;
 		this.retries = retries;
 		this.retriesLeft = retries;
+	}
+
+	/**
+	 * Sorts an array of <code>MaximumTransferUnit</code>'s from highest to
+	 * lowest maximum transfer units
+	 * 
+	 * @param units
+	 *            The maximum transfer units to sort
+	 * @return The sorted <code>MaximumTransferUnit</code>'s
+	 */
+	public static MaximumTransferUnit[] sort(MaximumTransferUnit[] units) {
+		// Convert array to IntMap
+		IntMap<MaximumTransferUnit> unitMap = new IntMap<MaximumTransferUnit>();
+		for (MaximumTransferUnit unit : units) {
+			unitMap.put(unit.getMaximumTransferUnit(), unit);
+		}
+
+		// Sort IntMap
+		ArrayList<MaximumTransferUnit> unitList = new ArrayList<MaximumTransferUnit>();
+		NavigableMap<Integer, MaximumTransferUnit> unitTreeMap = new TreeMap<Integer, MaximumTransferUnit>(unitMap)
+				.descendingMap();
+		Set<Entry<Integer, MaximumTransferUnit>> unitSet = unitTreeMap.entrySet();
+		Iterator<Entry<Integer, MaximumTransferUnit>> unitI = unitSet.iterator();
+		while (unitI.hasNext()) {
+			Entry<Integer, MaximumTransferUnit> unitEntry = unitI.next();
+			unitList.add(unitEntry.getValue());
+		}
+		return unitList.toArray(new MaximumTransferUnit[unitList.size()]);
+	}
+
+	public static void main(String[] args) {
+		MaximumTransferUnit[] t = new MaximumTransferUnit[] { new MaximumTransferUnit(0, 0),
+				new MaximumTransferUnit(4894, 0), new MaximumTransferUnit(9990, 0), new MaximumTransferUnit(300, 0) };
+		System.out.println(Arrays.toString(sort(t)));
 	}
 
 	/**
@@ -92,6 +136,11 @@ public class MaximumTransferUnit {
 	 */
 	public void reset() {
 		this.retriesLeft = this.retries;
+	}
+
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName() + "(" + this.getMaximumTransferUnit() + ":" + this.getRetries() + ")";
 	}
 
 }
