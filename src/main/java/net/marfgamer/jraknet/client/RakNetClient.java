@@ -856,7 +856,6 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			this.getListener().onDisconnect(session, reason);
 		}
 		this.session = null;
-		this.preparation = null;
 	}
 
 	/**

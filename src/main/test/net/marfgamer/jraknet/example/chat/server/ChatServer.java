@@ -88,7 +88,7 @@ public class ChatServer implements RakNetServerListener {
 	 * Stops the server
 	 */
 	public void stop() {
-		server.stop();
+		server.shutdown();
 	}
 
 	/**
