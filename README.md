@@ -10,6 +10,25 @@ This library was meant to be used for Minecraft: Pocket Edition servers and clie
 
 **Note:** Always use the newest version of JRakNet, including bug fix updates as they almost always fix major bugs, add new features, or have optimizations to make the API run faster.
 
+# How to use with Maven
+In order to add this project to your maven project, you will need to add the maven repository and then the actual dependency.
+Repository:
+```xml
+<repository>
+  <id>maven-repo</id>
+  <url>https://raw.githubusercontent.com/JRakNet/MavenRepository/master</url>
+</repository>
+```
+
+Dependency:
+```xml
+<dependency>
+  <groupId>net.marfgamer</groupId>
+  <artifactId>jraknet</artifactId>
+  <version>2.5.1</version>
+</dependency>
+```
+
 # How to create a server
 Creating a server in JRakNet is extremely easy, all it takes to create one can be seen right here
 
