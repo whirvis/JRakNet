@@ -64,8 +64,12 @@ public class SplitPacketTest {
 		System.out.println("Creating server...");
 		createServer();
 
-		System.out.println("Sleeping 5000MS...");
-		RakNetUtils.threadLock(5000);
+		System.out.print("Sleeping 3000MS");
+		for (int i = 0; i < 3; i++) {
+			RakNetUtils.threadLock(1000);
+			System.out.print(".");
+		}
+		System.out.println();
 
 		System.out.println("Creating client...");
 		createClient();

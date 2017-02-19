@@ -731,7 +731,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	/**
 	 * Stops the server
 	 */
-	public final void stop() {
+	public final void shutdown() {
 		this.running = false;
 		synchronized (sessions) {
 			for (RakNetClientSession session : sessions.values()) {
