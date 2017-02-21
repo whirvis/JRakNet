@@ -639,7 +639,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @param address
 	 *            The address to send the packet to
 	 */
-	private final void sendRawMessage(Packet packet, InetSocketAddress address) {
+	public final void sendRawMessage(Packet packet, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
 	}
 
@@ -651,7 +651,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @param address
 	 *            The address to send the packet to
 	 */
-	private final void sendRawMessage(int packetId, InetSocketAddress address) {
+	public final void sendRawMessage(int packetId, InetSocketAddress address) {
 		this.sendRawMessage(new RakNetPacket(packetId), address);
 	}
 
