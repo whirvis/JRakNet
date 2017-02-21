@@ -64,7 +64,7 @@ public class RakNetServerBundleExample extends RakNetServer {
 
 	// Packet received
 	@Override
-	public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
+	public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
 		System.out.println("Client from address " + session.getAddress() + " sent packet with ID 0x"
 				+ Integer.toHexString(packet.getId()).toUpperCase() + " on channel " + channel);
 	}

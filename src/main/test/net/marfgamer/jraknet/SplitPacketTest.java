@@ -113,7 +113,7 @@ public class SplitPacketTest {
 			}
 
 			@Override
-			public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
+			public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
 				System.out.println("Server: Received packet of " + packet.size() + " bytes from " + session.getAddress()
 						+ ", checking data...");
 

@@ -40,6 +40,7 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -126,6 +127,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		this.addMaximumTransferUnit(new MaximumTransferUnit(1464, 3));
 		this.addMaximumTransferUnit(new MaximumTransferUnit(1172, 4));
 		this.addMaximumTransferUnit(new MaximumTransferUnit(548, 5));
+		this.addMaximumTransferUnit(new MaximumTransferUnit(RakNet.MINIMUM_TRANSFER_UNIT, 6));
 
 		// Initiate bootstrap data
 		try {
@@ -480,7 +482,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		// Are we still logging in?
 		if (preparation != null) {
 			if (sender.equals(preparation.address)) {
-				preparation.handlePacket(packet);
+				preparation.handleMessage(packet);
 				return;
 			}
 		}
@@ -504,28 +506,54 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Sends a raw packet to the specified address
+	 * Sends a raw message to the specified address, be careful when using this
+	 * method! As if it is used incorrectly it could break server sessions
+	 * entirely. If you are wanting to send a message to a session, you are
+	 * probably looking for the
+	 * {@link net.marfgamer.jraknet.session.RakNetSession#sendMessage(net.marfgamer.jraknet.protocol.Reliability, net.marfgamer.jraknet.Packet)
+	 * sendMessage} method
+	 * 
+	 * @param buf
+	 *            The buffer to send
+	 * @param address
+	 *            The address to send the buffer to
+	 */
+	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) {
+		channel.writeAndFlush(new DatagramPacket(buf, address));
+	}
+
+	/**
+	 * Sends a raw message to the specified address, be careful when using this
+	 * method! As if it is used incorrectly it could break server sessions
+	 * entirely. If you are wanting to send a message to a session, you are
+	 * probably looking for the
+	 * {@link net.marfgamer.jraknet.session.RakNetSession#sendMessage(net.marfgamer.jraknet.protocol.Reliability, net.marfgamer.jraknet.Packet)
+	 * sendMessage} method
 	 * 
 	 * @param packet
 	 *            The packet to send
 	 * @param address
 	 *            The address to send the packet to
 	 */
-	private final void sendRawMessage(RakNetPacket packet, InetSocketAddress address) {
-		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
+	public final void sendNettyMessage(Packet packet, InetSocketAddress address) {
+		this.sendNettyMessage(packet.buffer(), address);
 	}
 
 	/**
-	 * Sends a single ID to the specified address
+	 * Sends a raw message to the specified address, be careful when using this
+	 * method! As if it is used incorrectly it could break server sessions
+	 * entirely. If you are wanting to send a message to a session, you are
+	 * probably looking for the
+	 * {@link net.marfgamer.jraknet.session.RakNetSession#sendMessage(net.marfgamer.jraknet.protocol.Reliability, int)
+	 * sendMessage} method
 	 * 
 	 * @param packetId
 	 *            The ID of the packet to send
 	 * @param address
 	 *            The address to send the packet to
 	 */
-	@SuppressWarnings("unused")
-	private final void sendRawMessage(int packetId, InetSocketAddress address) {
-		this.sendRawMessage(new RakNetPacket(packetId), address);
+	public final void sendNettyMessage(int packetId, InetSocketAddress address) {
+		this.sendNettyMessage(new RakNetPacket(packetId), address);
 	}
 
 	/**
@@ -556,7 +584,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 					ping.timestamp = this.getTimestamp();
 					ping.encode();
 
-					this.sendRawMessage(ping, new InetSocketAddress("255.255.255.255", discoveryPort));
+					this.sendNettyMessage(ping, new InetSocketAddress("255.255.255.255", discoveryPort));
 				}
 
 				// Send ping to external servers
@@ -567,7 +595,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 						ping.encode();
 
 						for (InetSocketAddress externalAddress : externalServers.keySet()) {
-							this.sendRawMessage(ping, externalAddress);
+							this.sendNettyMessage(ping, externalAddress);
 						}
 					}
 				}
@@ -654,7 +682,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 				connectionRequestOne.maximumTransferUnit = unit.getMaximumTransferUnit();
 				connectionRequestOne.protocolVersion = this.getProtocolVersion();
 				connectionRequestOne.encode();
-				this.sendRawMessage(connectionRequestOne, address);
+				this.sendNettyMessage(connectionRequestOne, address);
 
 				RakNetUtils.threadLock(500);
 			}
@@ -679,7 +707,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			connectionRequestTwo.encode();
 
 			if (!connectionRequestTwo.failed()) {
-				this.sendRawMessage(connectionRequestTwo, address);
+				this.sendNettyMessage(connectionRequestTwo, address);
 				RakNetUtils.threadLock(500);
 			} else {
 				preparation.cancelReason = new PacketBufferException(connectionRequestTwo);

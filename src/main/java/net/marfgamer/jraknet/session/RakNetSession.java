@@ -651,15 +651,15 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 				while (handleQueue.get(orderChannel).containsKey(orderReceiveIndex[orderChannel])) {
 					EncapsulatedPacket orderedEncapsulated = handleQueue.get(orderChannel)
 							.get(orderReceiveIndex[orderChannel]++);
-					this.handlePacket0(encapsulated.orderChannel, new RakNetPacket(orderedEncapsulated.payload));
+					this.handleMessage0(encapsulated.orderChannel, new RakNetPacket(orderedEncapsulated.payload));
 				}
 			} else if (reliability.isSequenced()) {
 				if (orderIndex > sequenceReceiveIndex[orderChannel]) {
 					sequenceReceiveIndex[orderChannel] = orderIndex + 1;
-					this.handlePacket0(encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
+					this.handleMessage0(encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
 				}
 			} else {
-				this.handlePacket0(encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
+				this.handleMessage0(encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
 			}
 		}
 	}
@@ -673,7 +673,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 * @param packet
 	 *            The packet
 	 */
-	private final void handlePacket0(int channel, RakNetPacket packet) {
+	private final void handleMessage0(int channel, RakNetPacket packet) {
 		short packetId = packet.getId();
 
 		if (packetId == ID_CONNECTED_PING) {
@@ -716,7 +716,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 			this.latencyIdentifier = (pong.identifier + 1);
 		} else {
-			this.handlePacket(packet, channel);
+			this.handleMessage(packet, channel);
 		}
 	}
 
@@ -825,6 +825,6 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 * @param channel
 	 *            The packet the channel was sent on
 	 */
-	public abstract void handlePacket(RakNetPacket packet, int channel);
+	public abstract void handleMessage(RakNetPacket packet, int channel);
 
 }

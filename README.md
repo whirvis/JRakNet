@@ -33,10 +33,13 @@ In order to add this project to your maven project, you will need to add the mav
 Creating a server in JRakNet is extremely easy, all it takes to create one can be seen right here
 
 ```java
-// Create server and set listener
+// Create server
 RakNetServer server = new RakNetServer(19132, 10, new MCPEIdentifier("JRakNet Example Server", 91, "0.16.2", 0,
 		10, new Random().nextLong() /* Server ID */, "New World", "Survival"));
+
+// Set listener
 server.setListener(new RakNetServerListener() {
+
 	// Client connected
 	@Override
 	public void onClientConnect(RakNetClientSession session) {
@@ -52,10 +55,11 @@ server.setListener(new RakNetServerListener() {
 
 	// Packet received
 	@Override
-	public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
+	public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
 		System.out.println("Client from address " + session.getAddress() + " sent packet with ID 0x"
 				+ Integer.toHexString(packet.getId()).toUpperCase() + " on channel " + channel);
 	}
+
 });
 
 // Start server
@@ -72,10 +76,14 @@ Creating a client in JRakNet is also very easy. The code required to create a cl
 private static final String SERVER_ADDRESS = "sg.lbsg.net";
 private static final int SERVER_PORT = 19132;
 
-// Create client and set listener
+// Create client
 RakNetClient client = new RakNetClient();
+
+// Set listener
 client.setListener(new RakNetClientListener() {
+
 	// Server connected
+	@Override
 	public void onConnect(RakNetServerSession session) {
 		System.out.println("Successfully connected to server with address " + session.getAddress());
 		client.disconnect();
@@ -86,8 +94,9 @@ client.setListener(new RakNetClientListener() {
 	public void onDisconnect(RakNetServerSession session, String reason) {
 		System.out.println("Sucessfully disconnected from server with address " + session.getAddress()
 			+ " for the reason \"" + reason + "\"");
-		client.shutdown();
+		System.exit(0);
 	}
+
 });
 
 // Connect to server
@@ -95,9 +104,6 @@ client.connect(SERVER_ADDRESS, SERVER_PORT);
 ```
 
 A simple RakNet client, this example attempts to connect to the main [LBSG](http://lbsg.net/) server. When it is connected, it closes the connection and shuts down.
-
-# How to contact
-This project has a twitter page, [@JRakNet](https://twitter.com/JRakNet). There all github commits and releases are tweeted. There is also a G-Mail account, [jraknet@gmail.com](https://gmail.com) for anything related specifically to JRakNet :)
 
 # Notes
 Some DataPacket ID's are reserved by RakNet. Because of this, it is recommended that all game packets not relating to RakNet begin with their own special ID, Minecraft: Pocket Edition does this (It's header byte is currently 0xFE). It is also recommended that game servers and game clients do not use raw packets at all.
