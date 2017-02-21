@@ -511,7 +511,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param address
 	 *            The address to send the packet to
 	 */
-	public final void sendRawMessage(RakNetPacket packet, InetSocketAddress address) {
+	private final void sendRawMessage(RakNetPacket packet, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
 	}
 
@@ -523,7 +523,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param address
 	 *            The address to send the packet to
 	 */
-	public final void sendRawMessage(int packetId, InetSocketAddress address) {
+	@SuppressWarnings("unused")
+	private final void sendRawMessage(int packetId, InetSocketAddress address) {
 		this.sendRawMessage(new RakNetPacket(packetId), address);
 	}
 
