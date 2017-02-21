@@ -33,6 +33,7 @@ package net.marfgamer.jraknet.server;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
+import io.netty.buffer.ByteBuf;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 import net.marfgamer.jraknet.session.RakNetClientSession;
@@ -52,6 +53,12 @@ public interface RakNetServerListener {
 	 * Called when the server has been successfully started
 	 */
 	public default void onServerStart() {
+	}
+
+	/**
+	 * Called when the server has been shutdown
+	 */
+	public default void onServerShutdown() {
 	}
 
 	/**
@@ -105,55 +112,6 @@ public interface RakNetServerListener {
 	}
 
 	/**
-	 * Called when a message is received by a client
-	 * 
-	 * @param session
-	 *            The client that received the packet
-	 * @param record
-	 *            The received record
-	 */
-	public default void onAcknowledge(RakNetClientSession session, Record record) {
-	}
-
-	/**
-	 * Called when a message is not received by a client
-	 * 
-	 * @param session
-	 *            The client that lost the packet
-	 * @param record
-	 *            The lost record
-	 */
-	public default void onNotAcknowledge(RakNetClientSession session, Record record) {
-	}
-
-	/**
-	 * Called when a packet has been received from a client and is ready to be
-	 * handled
-	 * 
-	 * @param session
-	 *            The client that sent the packet
-	 * @param packet
-	 *            The packet received from the client
-	 * @param channel
-	 *            The channel the packet was sent on
-	 */
-	public default void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
-	}
-
-	/**
-	 * Called when a handler exception has occurred, these normally do not
-	 * matter as long as the server handles them on it's own
-	 * 
-	 * @param address
-	 *            The address that caused the exception
-	 * @param throwable
-	 *            The throwable exception that was caught
-	 */
-	public default void onHandlerException(InetSocketAddress address, Throwable throwable) {
-		throwable.printStackTrace();
-	}
-
-	/**
 	 * Called when a session exception has occurred, these normally do not
 	 * matter as the server will kick the client
 	 * 
@@ -186,9 +144,71 @@ public interface RakNetServerListener {
 	}
 
 	/**
-	 * Called when the server has been shutdown
+	 * Called when a message is received by a client
+	 * 
+	 * @param session
+	 *            The client that received the packet
+	 * @param record
+	 *            The received record
 	 */
-	public default void onServerShutdown() {
+	@Deprecated
+	public default void onAcknowledge(RakNetClientSession session, Record record) {
+	}
+
+	/**
+	 * Called when a message is not received by a client
+	 * 
+	 * @param session
+	 *            The client that lost the packet
+	 * @param record
+	 *            The lost record
+	 */
+	@Deprecated
+	public default void onNotAcknowledge(RakNetClientSession session, Record record) {
+	}
+
+	/**
+	 * Called when a packet has been received from a client and is ready to be
+	 * handled
+	 * 
+	 * @param session
+	 *            The client that sent the packet
+	 * @param packet
+	 *            The packet received from the client
+	 * @param channel
+	 *            The channel the packet was sent on
+	 */
+	public default void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
+	}
+
+	/**
+	 * Called when the handler receives a packet after the server has already
+	 * handled it, this method is useful for handling packets outside of the
+	 * RakNet protocol <b>*cough*</b> UT3 Query Protocol that MCPE uses for some
+	 * stupid reason <b>*cough*</b>. However, be weary when using this as
+	 * packets meant for the server will have already been handled by the
+	 * server; and it is not a good idea to try to manipulate JRakNet's RakNet
+	 * protocol using this method
+	 * 
+	 * @param buf
+	 *            The packet buffer
+	 * @param address
+	 *            The address of the sender
+	 */
+	public default void handleNettyMessage(ByteBuf buf, InetSocketAddress address) {
+	}
+
+	/**
+	 * Called when a handler exception has occurred, these normally do not
+	 * matter as long as the server handles them on it's own
+	 * 
+	 * @param address
+	 *            The address that caused the exception
+	 * @param throwable
+	 *            The throwable exception that was caught
+	 */
+	public default void onHandlerException(InetSocketAddress address, Throwable throwable) {
+		throwable.printStackTrace();
 	}
 
 	/**

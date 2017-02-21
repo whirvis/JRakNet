@@ -30,6 +30,8 @@
  */
 package net.marfgamer.jraknet.example;
 
+import java.util.Random;
+
 import net.marfgamer.jraknet.RakNetException;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.identifier.MCPEIdentifier;
@@ -49,7 +51,7 @@ public class RakNetServerExample {
 	public static void main(String[] args) throws RakNetException {
 		// Create server
 		RakNetServer server = new RakNetServer(19132, 10, new MCPEIdentifier("JRakNet Example Server", 91, "0.16.2", 0,
-				10, System.currentTimeMillis(), "New World", "Survival"));
+				10, new Random().nextLong() /* Server ID */, "New World", "Survival"));
 
 		// Set listener
 		server.setListener(new RakNetServerListener() {
@@ -69,7 +71,7 @@ public class RakNetServerExample {
 
 			// Packet received
 			@Override
-			public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
+			public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
 				System.out.println("Client from address " + session.getAddress() + " sent packet with ID 0x"
 						+ Integer.toHexString(packet.getId()).toUpperCase() + " on channel " + channel);
 			}

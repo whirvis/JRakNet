@@ -270,7 +270,7 @@ public class ChatClient implements RakNetClientListener {
 	}
 
 	@Override
-	public void handlePacket(RakNetServerSession session, RakNetPacket packet, int channel) {
+	public void handleMessage(RakNetServerSession session, RakNetPacket packet, int channel) {
 		short packetId = packet.getId();
 
 		if (packetId == ChatMessageIdentifier.ID_LOGIN_ACCEPTED) {

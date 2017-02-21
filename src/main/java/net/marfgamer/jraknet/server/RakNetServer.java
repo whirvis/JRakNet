@@ -38,6 +38,7 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.netty.bootstrap.Bootstrap;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
@@ -499,7 +500,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 						pong.identifier = pingEvent.getIdentifier();
 
 						pong.encode();
-						this.sendRawMessage(pong, sender);
+						this.sendNettyMessage(pong, sender);
 					}
 				}
 			}
@@ -524,7 +525,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 						incompatibleProtocol.networkProtocol = this.getProtocolVersion();
 						incompatibleProtocol.serverGuid = this.guid;
 						incompatibleProtocol.encode();
-						this.sendRawMessage(incompatibleProtocol, sender);
+						this.sendNettyMessage(incompatibleProtocol, sender);
 					} else {
 						// Everything passed, one last check...
 						if (connectionRequestOne.maximumTransferUnit <= this.maximumTransferUnit) {
@@ -532,11 +533,11 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 							connectionResponseOne.serverGuid = this.guid;
 							connectionResponseOne.maximumTransferUnit = connectionRequestOne.maximumTransferUnit;
 							connectionResponseOne.encode();
-							this.sendRawMessage(connectionResponseOne, sender);
+							this.sendNettyMessage(connectionResponseOne, sender);
 						}
 					}
 				} else {
-					this.sendRawMessage(errorPacket, sender);
+					this.sendNettyMessage(errorPacket, sender);
 				}
 			}
 		} else if (packetId == ID_OPEN_CONNECTION_REQUEST_2) {
@@ -549,7 +550,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				if (errorPacket == null) {
 					if (this.hasSession(connectionRequestTwo.clientGuid)) {
 						// This client is already connected
-						this.sendRawMessage(ID_ALREADY_CONNECTED, sender);
+						this.sendNettyMessage(ID_ALREADY_CONNECTED, sender);
 					} else {
 						// Everything passed, one last check...
 						if (connectionRequestTwo.maximumTransferUnit <= this.maximumTransferUnit) {
@@ -574,12 +575,12 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 								}
 
 								// Send response, we are ready for login
-								this.sendRawMessage(connectionResponseTwo, sender);
+								this.sendNettyMessage(connectionResponseTwo, sender);
 							}
 						}
 					}
 				} else {
-					this.sendRawMessage(errorPacket, sender);
+					this.sendNettyMessage(errorPacket, sender);
 				}
 			}
 		} else if (packetId >= ID_CUSTOM_0 && packetId <= ID_CUSTOM_F) {
@@ -632,27 +633,54 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Sends a raw message to the specified address
+	 * Sends a raw message to the specified address, be careful when using this
+	 * method! As if it is used incorrectly it could break client sessions
+	 * entirely. If you are wanting to send a message to a session, you are
+	 * probably looking for the
+	 * {@link net.marfgamer.jraknet.session.RakNetSession#sendMessage(net.marfgamer.jraknet.protocol.Reliability, net.marfgamer.jraknet.Packet)
+	 * sendMessage} method
+	 * 
+	 * @param buf
+	 *            The buffer to send
+	 * @param address
+	 *            The address to send the buffer to
+	 */
+	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) {
+		channel.writeAndFlush(new DatagramPacket(buf, address));
+	}
+
+	/**
+	 * Sends a raw message to the specified address, be careful when using this
+	 * method! As if it is used incorrectly it could break client sessions
+	 * entirely. If you are wanting to send a message to a session, you are
+	 * probably looking for the
+	 * {@link net.marfgamer.jraknet.session.RakNetSession#sendMessage(net.marfgamer.jraknet.protocol.Reliability, net.marfgamer.jraknet.Packet)
+	 * sendMessage} method
 	 * 
 	 * @param packet
 	 *            The packet to send
 	 * @param address
 	 *            The address to send the packet to
 	 */
-	private final void sendRawMessage(Packet packet, InetSocketAddress address) {
-		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
+	public final void sendNettyMessage(Packet packet, InetSocketAddress address) {
+		this.sendNettyMessage(packet.buffer(), address);
 	}
 
 	/**
-	 * Sends a single ID to the specified address
+	 * Sends a raw message to the specified address, be careful when using this
+	 * method! As if it is used incorrectly it could break client sessions
+	 * entirely. If you are wanting to send a message to a session, you are
+	 * probably looking for the
+	 * {@link net.marfgamer.jraknet.session.RakNetSession#sendMessage(net.marfgamer.jraknet.protocol.Reliability, int)
+	 * sendMessage} method
 	 * 
 	 * @param packetId
 	 *            The ID of the packet to send
 	 * @param address
 	 *            The address to send the packet to
 	 */
-	private final void sendRawMessage(int packetId, InetSocketAddress address) {
-		this.sendRawMessage(new RakNetPacket(packetId), address);
+	public final void sendNettyMessage(int packetId, InetSocketAddress address) {
+		this.sendNettyMessage(new RakNetPacket(packetId), address);
 	}
 
 	/**
@@ -739,7 +767,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			}
 			sessions.clear();
 		}
-		this.getListener().onServerShutdown();
+		listener.onServerShutdown();
 	}
 
 }
