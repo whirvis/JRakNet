@@ -37,13 +37,6 @@ package net.marfgamer.jraknet;
  */
 public class RakNet {
 
-	/**
-	 * If this is set to true, the server and client will log as much as they
-	 * can for debugging data
-	 */
-	/* TODO? public static boolean LOGGER_ENABLED = false; */
-	// TODO: UDT Congestion Control Algorithm
-
 	// Network protocol data
 	public static final int SERVER_NETWORK_PROTOCOL = 8;
 	public static final int CLIENT_NETWORK_PROTOCOL = 8;
