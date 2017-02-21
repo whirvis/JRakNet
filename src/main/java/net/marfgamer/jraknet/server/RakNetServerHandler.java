@@ -115,6 +115,7 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			}
 
 			server.handleMessage(packet, sender);
+			server.handleNettyMessage(datagram.content(), sender);
 			datagram.content().release(); // No longer needed
 
 			// No exceptions occurred, release the suspect

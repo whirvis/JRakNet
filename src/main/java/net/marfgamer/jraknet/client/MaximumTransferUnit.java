@@ -31,7 +31,6 @@
 package net.marfgamer.jraknet.client;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
@@ -83,12 +82,6 @@ public class MaximumTransferUnit {
 			unitList.add(unitEntry.getValue());
 		}
 		return unitList.toArray(new MaximumTransferUnit[unitList.size()]);
-	}
-
-	public static void main(String[] args) {
-		MaximumTransferUnit[] t = new MaximumTransferUnit[] { new MaximumTransferUnit(0, 0),
-				new MaximumTransferUnit(4894, 0), new MaximumTransferUnit(9990, 0), new MaximumTransferUnit(300, 0) };
-		System.out.println(Arrays.toString(sort(t)));
 	}
 
 	/**

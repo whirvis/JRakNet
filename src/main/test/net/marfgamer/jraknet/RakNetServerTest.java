@@ -75,7 +75,7 @@ public class RakNetServerTest {
 			}
 
 			@Override
-			public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
+			public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
 				System.out.println(
 						"Received packet from client with address " + session.getAddress() + " with packet ID 0x"
 								+ Integer.toHexString(packet.getId()).toUpperCase() + " on channel " + channel);

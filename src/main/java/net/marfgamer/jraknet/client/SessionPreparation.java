@@ -75,7 +75,7 @@ public class SessionPreparation {
 	 * @param packet
 	 *            The packet to handle
 	 */
-	public void handlePacket(RakNetPacket packet) {
+	public void handleMessage(RakNetPacket packet) {
 		short packetId = packet.getId();
 		if (packetId == ID_OPEN_CONNECTION_REPLY_1) {
 			OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne(packet);
@@ -153,14 +153,12 @@ public class SessionPreparation {
 
 		// Not all of the data has been set
 		if (this.guid == -1 || this.maximumTransferUnit == -1 || this.address == null) {
-			System.out.println("NOt enough data");
 			return false;
 		}
 
 		// Not all of the packets needed to connect have been handled
 		for (boolean handled : loginPackets) {
 			if (handled == false) {
-				System.out.println("Unhandled packets");
 				return false;
 			}
 		}

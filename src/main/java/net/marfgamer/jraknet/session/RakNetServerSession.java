@@ -59,18 +59,20 @@ public class RakNetServerSession extends RakNetSession {
 		this.setState(RakNetState.HANDSHAKING); // We start at the handshake
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onAcknowledge(Record record) {
 		client.getListener().onAcknowledge(this, record);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onNotAcknowledge(Record record) {
 		client.getListener().onNotAcknowledge(this, record);
 	}
 
 	@Override
-	public void handlePacket(RakNetPacket packet, int channel) {
+	public void handleMessage(RakNetPacket packet, int channel) {
 		short packetId = packet.getId();
 
 		if (packetId == ID_CONNECTION_REQUEST_ACCEPTED && this.getState() == RakNetState.HANDSHAKING) {
@@ -98,7 +100,7 @@ public class RakNetServerSession extends RakNetSession {
 			this.setState(RakNetState.DISCONNECTED);
 			client.disconnect("Server disconnected");
 		} else if (packetId >= ID_USER_PACKET_ENUM) {
-			client.getListener().handlePacket(this, packet, channel);
+			client.getListener().handleMessage(this, packet, channel);
 		}
 	}
 

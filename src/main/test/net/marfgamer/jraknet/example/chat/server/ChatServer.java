@@ -323,7 +323,7 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	@Override
-	public void handlePacket(RakNetClientSession session, RakNetPacket packet, int channel) {
+	public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
 		InetSocketAddress sender = session.getAddress();
 		short packetId = packet.getId();
 

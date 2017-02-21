@@ -91,18 +91,20 @@ public class RakNetClientSession extends RakNetSession {
 		return (System.currentTimeMillis() - this.timestamp);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onAcknowledge(Record record) {
 		server.getListener().onAcknowledge(this, record);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onNotAcknowledge(Record record) {
 		server.getListener().onNotAcknowledge(this, record);
 	}
 
 	@Override
-	public void handlePacket(RakNetPacket packet, int channel) {
+	public void handleMessage(RakNetPacket packet, int channel) {
 		short packetId = packet.getId();
 
 		if (packetId == ID_CONNECTION_REQUEST && this.getState() == RakNetState.DISCONNECTED) {
@@ -150,7 +152,7 @@ public class RakNetClientSession extends RakNetSession {
 		} else if (packetId == ID_DISCONNECTION_NOTIFICATION) {
 			server.removeSession(this, "Disconnected");
 		} else if (packetId >= ID_USER_PACKET_ENUM) {
-			server.getListener().handlePacket(this, packet, channel);
+			server.getListener().handleMessage(this, packet, channel);
 		}
 	}
 

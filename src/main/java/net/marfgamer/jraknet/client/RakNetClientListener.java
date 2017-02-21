@@ -32,6 +32,7 @@ package net.marfgamer.jraknet.client;
 
 import java.net.InetSocketAddress;
 
+import io.netty.buffer.ByteBuf;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.identifier.Identifier;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
@@ -47,6 +48,36 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
  * @author MarfGamer
  */
 public interface RakNetClientListener {
+
+	/**
+	 * Called when the client successfully connects to a server
+	 * 
+	 * @param session
+	 *            The session assigned to the server
+	 */
+	public default void onConnect(RakNetServerSession session) {
+	}
+
+	/**
+	 * Called when the client disconnects from the server
+	 * 
+	 * @param session
+	 *            The server the client disconnected from
+	 * @param reason
+	 *            The reason for disconnection
+	 */
+	public default void onDisconnect(RakNetServerSession session, String reason) {
+	}
+
+	/**
+	 * Called whenever the client is afraid an error will occur but is not
+	 * absolutely positive one will occur
+	 * 
+	 * @param warning
+	 *            The warning
+	 */
+	public default void onWarning(Warning warning) {
+	}
 
 	/**
 	 * Called when a server is discovered on the local network
@@ -112,26 +143,6 @@ public interface RakNetClientListener {
 	}
 
 	/**
-	 * Called when the client successfully connects to a server
-	 * 
-	 * @param session
-	 *            The session assigned to the server
-	 */
-	public default void onConnect(RakNetServerSession session) {
-	}
-
-	/**
-	 * Called when the client disconnects from the server
-	 * 
-	 * @param session
-	 *            The server the client disconnected from
-	 * @param reason
-	 *            The reason for disconnection
-	 */
-	public default void onDisconnect(RakNetServerSession session, String reason) {
-	}
-
-	/**
 	 * Called when a message is received by the server
 	 * 
 	 * @param session
@@ -139,6 +150,7 @@ public interface RakNetClientListener {
 	 * @param record
 	 *            The received record
 	 */
+	@Deprecated
 	public default void onAcknowledge(RakNetServerSession session, Record record) {
 	}
 
@@ -150,17 +162,39 @@ public interface RakNetClientListener {
 	 * @param record
 	 *            The lost record
 	 */
+	@Deprecated
 	public default void onNotAcknowledge(RakNetServerSession session, Record record) {
 	}
 
 	/**
-	 * Called whenever the client is afraid an error will occur but is not
-	 * absolutely positive one will occur
+	 * Called when a packet has been received from the server and is ready to be
+	 * handled
 	 * 
-	 * @param warning
-	 *            The warning
+	 * @param session
+	 *            The server that sent the packet
+	 * @param packet
+	 *            The packet received from the server
+	 * @param channel
+	 *            The channel the packet was sent on
 	 */
-	public default void onWarning(Warning warning) {
+	public default void handleMessage(RakNetServerSession session, RakNetPacket packet, int channel) {
+	}
+
+	/**
+	 * Called when the handler receives a packet after the server has already
+	 * handled it, this method is useful for handling packets outside of the
+	 * RakNet protocol <b>*cough*</b> UT3 Query Protocol that MCPE uses for some
+	 * stupid reason <b>*cough*</b>. However, be weary when using this as
+	 * packets meant for the server will have already been handled by the
+	 * client; and it is not a good idea to try to manipulate JRakNet's RakNet
+	 * protocol using this method
+	 * 
+	 * @param buf
+	 *            The packet buffer
+	 * @param address
+	 *            The address of the sender
+	 */
+	public default void handleNettyMessage(ByteBuf buf, InetSocketAddress address) {
 	}
 
 	/**
@@ -175,20 +209,6 @@ public interface RakNetClientListener {
 	 */
 	public default void onHandlerException(InetSocketAddress address, Throwable throwable) {
 		throwable.printStackTrace();
-	}
-
-	/**
-	 * Called when a packet has been received from the server and is ready to be
-	 * handled
-	 * 
-	 * @param session
-	 *            The server that sent the packet
-	 * @param packet
-	 *            The packet received from the server
-	 * @param channel
-	 *            The channel the packet was sent on
-	 */
-	public default void handlePacket(RakNetServerSession session, RakNetPacket packet, int channel) {
 	}
 
 	/**
