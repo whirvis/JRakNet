@@ -94,7 +94,7 @@ client.setListener(new RakNetClientListener() {
 	public void onDisconnect(RakNetServerSession session, String reason) {
 		System.out.println("Sucessfully disconnected from server with address " + session.getAddress()
 			+ " for the reason \"" + reason + "\"");
-		System.exit(0);
+		client.shutdown();
 	}
 
 });
