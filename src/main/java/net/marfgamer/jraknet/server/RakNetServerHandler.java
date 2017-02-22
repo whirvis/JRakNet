@@ -34,8 +34,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.DatagramPacket;
@@ -99,7 +97,6 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			// Get packet and sender data
 			DatagramPacket datagram = (DatagramPacket) msg;
 			InetSocketAddress sender = datagram.sender();
-			ByteBuf copiedBuf = Unpooled.copiedBuffer(datagram.content().array());
 			RakNetPacket packet = new RakNetPacket(datagram);
 
 			// If an exception happens it's because of this address
@@ -119,9 +116,8 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 
 			// Handle the packet and release the buffer
 			server.handleMessage(packet, sender);
-			server.handleNettyMessage(copiedBuf, sender);
+			server.handleNettyMessage(datagram.content(), sender);
 			datagram.content().release();
-			copiedBuf.release();
 
 			// No exceptions occurred, release the suspect
 			this.causeAddress = null;
