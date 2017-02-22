@@ -32,8 +32,6 @@ package net.marfgamer.jraknet.client;
 
 import java.net.InetSocketAddress;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.DatagramPacket;
@@ -60,7 +58,6 @@ public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 			// Get packet and sender data
 			DatagramPacket datagram = (DatagramPacket) msg;
 			InetSocketAddress sender = datagram.sender();
-			ByteBuf copiedBuf = Unpooled.copiedBuffer(datagram.content().array());
 			RakNetPacket packet = new RakNetPacket(datagram);
 
 			// If an exception happens it's because of this address
@@ -68,9 +65,8 @@ public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 
 			// Handle the packet and release the buffer
 			client.handleMessage(packet, sender);
-			client.handleNettyMessage(copiedBuf, sender);
+			client.handleNettyMessage(datagram.content(), sender);
 			datagram.content().release();
-			copiedBuf.release();
 
 			// No exceptions occurred, release the suspect
 			this.causeAddress = null;
