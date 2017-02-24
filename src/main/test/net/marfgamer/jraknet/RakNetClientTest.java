@@ -35,7 +35,6 @@ import java.net.UnknownHostException;
 
 import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.client.RakNetClientListener;
-import net.marfgamer.jraknet.client.Warning;
 import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 import net.marfgamer.jraknet.session.RakNetServerSession;
@@ -43,7 +42,7 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
 /**
  * Used to test <code>RakNetClient</code> by connecting to the LifeBoat Survival
  * Games server, sending a dummy packet to make sure the ACK/NACK functions
- * work, and then disconnecting afterwards
+ * work, and then disconnecting afterwards.
  *
  * @author MarfGamer
  */
@@ -75,11 +74,6 @@ public class RakNetClientTest {
 			public void onNotAcknowledge(RakNetServerSession session, Record record) {
 				System.out.println("Received NACK for record(s) " + record.toString());
 				client.disconnectAndShutdown();
-			}
-
-			@Override
-			public void onWarning(Warning warning) {
-				System.err.println("Warning: " + warning.getMessage());
 			}
 
 			@Override

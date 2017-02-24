@@ -48,7 +48,7 @@ import net.marfgamer.jraknet.identifier.MCPEIdentifier;
 import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
- * The frame used to visualize the broadcast test
+ * The frame used to visualize the broadcast test.
  *
  * @author MarfGamer
  */
@@ -67,7 +67,6 @@ public class BroadcastFrame extends JFrame {
 		setResizable(false);
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		setTitle("JRakNet Broadcast Test");
-		setIconImage(FrameResources.RAKNET_ICON.getImage());
 
 		// Content settings
 		getContentPane().setLayout(null);
@@ -111,7 +110,7 @@ public class BroadcastFrame extends JFrame {
 
 	/**
 	 * Used to listen for discovery mode changes and then update the client
-	 * accordingly
+	 * accordingly.
 	 *
 	 * @author MarfGamer
 	 */
@@ -142,7 +141,7 @@ public class BroadcastFrame extends JFrame {
 
 	/**
 	 * Used to listen for discovery port changes and then update the client
-	 * accordingly
+	 * accordingly.
 	 *
 	 * @author MarfGamer
 	 */
@@ -169,10 +168,10 @@ public class BroadcastFrame extends JFrame {
 	}
 
 	/**
-	 * Updates the text in the JFrame according to the discovered servers
+	 * Updates the text in the JFrame according to the discovered servers.
 	 * 
 	 * @param identifiers
-	 *            The identifiers of the discovered servers
+	 *            the identifiers of the discovered servers.
 	 */
 	public void updatePaneText(MCPEIdentifier[] identifiers) {
 		StringBuilder discoverString = new StringBuilder();

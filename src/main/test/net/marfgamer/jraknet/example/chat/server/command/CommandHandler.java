@@ -34,7 +34,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 /**
- * Used by the server to register and handle commands easily
+ * Used by the server to register and handle commands easily.
  *
  * @author MarfGamer
  */
@@ -47,10 +47,10 @@ public class CommandHandler {
 	}
 
 	/**
-	 * Registers a command
+	 * Registers a command.
 	 * 
 	 * @param command
-	 *            - The command to register
+	 *            the command to register.
 	 */
 	public void registerCommand(Command command) {
 		if (commands.containsKey(command.getLabel())) {
@@ -62,20 +62,20 @@ public class CommandHandler {
 	}
 
 	/**
-	 * Unregisters a command
+	 * Unregisters a command.
 	 * 
 	 * @param label
-	 *            - The label of the command to unregister
+	 *            the label of the command to unregister.
 	 */
 	public void unregisterCommand(String label) {
 		commands.remove(label);
 	}
 
 	/**
-	 * Handles raw input as a command
+	 * Handles raw input as a command.
 	 * 
 	 * @param input
-	 *            - The input to process and handle
+	 *            the input to process and handle.
 	 */
 	public void handleInput(String input) {
 		// Get command

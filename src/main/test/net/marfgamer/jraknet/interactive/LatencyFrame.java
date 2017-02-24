@@ -37,7 +37,7 @@ import javax.swing.UIManager;
 import net.marfgamer.jraknet.session.RakNetClientSession;
 
 /**
- * The frame used to visualize the latency test
+ * The frame used to visualize the latency test.
  *
  * @author MarfGamer
  */
@@ -54,7 +54,6 @@ public class LatencyFrame extends JFrame {
 		setResizable(false);
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		setTitle("JRakNet Latency Test");
-		setIconImage(FrameResources.RAKNET_ICON.getImage());
 
 		// Content settings
 		getContentPane().setLayout(null);
@@ -77,10 +76,10 @@ public class LatencyFrame extends JFrame {
 	}
 
 	/**
-	 * Updates the text in the JFrame according to the connecting clients
+	 * Updates the text in the JFrame according to the connecting clients.
 	 * 
 	 * @param sessions
-	 *            The sessions of the clients connected to the server
+	 *            the sessions of the clients connected to the server.
 	 */
 	public void updatePaneText(RakNetClientSession[] sessions) {
 		StringBuilder discoverString = new StringBuilder();

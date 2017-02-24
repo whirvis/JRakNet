@@ -33,9 +33,12 @@ package net.marfgamer.jraknet.client.discovery;
 import java.net.InetSocketAddress;
 
 import net.marfgamer.jraknet.identifier.Identifier;
+import net.marfgamer.jraknet.util.ArrayUtils;
 
 /**
- * This class represents a discovered RakNet server
+ * This class represents a server that has been discovered by the
+ * <code>RakNetClient</code> and also stores the discovered server's address and
+ * <code>Identifier</code> which are both crucial to making use of this class.
  *
  * @author MarfGamer
  */
@@ -47,6 +50,17 @@ public class DiscoveredServer {
 	private long discoveryTimestamp;
 	private Identifier identifier;
 
+	/**
+	 * Constructs a <code>DiscoveredServer</code> with the specified address,
+	 * discovery timestamp, and identifier.
+	 * 
+	 * @param address
+	 *            the discovered server's address.
+	 * @param discoveryTimestamp
+	 *            the time the server was initially discovered.
+	 * @param identifier
+	 *            the server's identifier.
+	 */
 	public DiscoveredServer(InetSocketAddress address, long discoveryTimestamp, Identifier identifier) {
 		this.address = address;
 		this.discoveryTimestamp = discoveryTimestamp;
@@ -54,47 +68,41 @@ public class DiscoveredServer {
 	}
 
 	/**
-	 * Returns the address of the discovered server
-	 * 
-	 * @return The address of the discovered server
+	 * @return the address of the discovered server.
 	 */
 	public InetSocketAddress getAddress() {
 		return this.address;
 	}
 
 	/**
-	 * Returns the last time the server sent a response back
-	 * 
-	 * @return The last time the server sent a response back
+	 * @return the last time the server sent a response back.
 	 */
 	public long getDiscoveryTimestamp() {
 		return this.discoveryTimestamp;
 	}
 
 	/**
-	 * Updates the last time the server sent a response back
+	 * Updates the last time the server sent a response back.
 	 * 
 	 * @param discoveryTimestamp
-	 *            The new discovery timestamp
+	 *            the new discovery timestamp.
 	 */
 	public void setDiscoveryTimestamp(long discoveryTimestamp) {
 		this.discoveryTimestamp = discoveryTimestamp;
 	}
 
 	/**
-	 * Returns the identifier sent in the response
-	 * 
-	 * @return The identifier sent in the response
+	 * @return the last identifier received by the server.
 	 */
 	public Identifier getIdentifier() {
 		return this.identifier;
 	}
 
 	/**
-	 * Updates the identifier sent in the response
+	 * Updates the identifier.
 	 * 
 	 * @param identifier
-	 *            The new identifier sent in the response
+	 *            the new identifier.
 	 */
 	public void setIdentifier(Identifier identifier) {
 		this.identifier = identifier;
@@ -109,6 +117,11 @@ public class DiscoveredServer {
 					&& discoveredServer.getIdentifier().equals(this.getIdentifier()));
 		}
 		return false;
+	}
+
+	@Override
+	public String toString() {
+		return ArrayUtils.toJRakNetString(this.address, this.discoveryTimestamp, this.identifier);
 	}
 
 }

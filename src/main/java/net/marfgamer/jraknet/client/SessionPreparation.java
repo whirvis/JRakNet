@@ -6,7 +6,7 @@
  * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
  *                                                  
- * The MIT License (MIT)
+ * the MIT License (MIT)
  *
  * Copyright (c) 2016, 2017 MarfGamer
  *
@@ -17,7 +17,7 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
+ * the above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -45,8 +45,8 @@ import net.marfgamer.jraknet.protocol.login.OpenConnectionResponseTwo;
 import net.marfgamer.jraknet.session.RakNetServerSession;
 
 /**
- * This class is used to easily store data during login and create the session
- * when the client is connected
+ * Used by the <code>RakNetClient</code> to easily store data during login and
+ * create the session when the client is connected.
  *
  * @author MarfGamer
  */
@@ -63,6 +63,15 @@ public class SessionPreparation {
 	public InetSocketAddress address = null;
 	public boolean loginPackets[] = new boolean[2];
 
+	/**
+	 * Constructs a <code>SessionPreperation</code> with the specified
+	 * <code>RakNetClient</code> and initial maximum transfer unit.
+	 * 
+	 * @param client
+	 *            the <code>RakNetClient</code> that is logging into the server.
+	 * @param initialMaximumTransferUnit
+	 *            the initial maximum transfer unit.
+	 */
 	public SessionPreparation(RakNetClient client, int initialMaximumTransferUnit) {
 		this.client = client;
 		this.initialMaximumTransferUnit = initialMaximumTransferUnit;
@@ -70,10 +79,10 @@ public class SessionPreparation {
 
 	/**
 	 * Handles the specified packet and automatically updates the preparation
-	 * data
+	 * data.
 	 * 
 	 * @param packet
-	 *            The packet to handle
+	 *            the packet to handle.
 	 */
 	public void handleMessage(RakNetPacket packet) {
 		short packetId = packet.getId();
@@ -82,41 +91,35 @@ public class SessionPreparation {
 			connectionResponseOne.decode();
 
 			if (connectionResponseOne.magic != true) {
-				this.cancelReason = new InvalidProtocolException(client, "MAGIC failed to validate");
+				this.cancelReason = new LoginFailureException(client, "MAGIC failed to validate");
 			} else if (connectionResponseOne.maximumTransferUnit < RakNet.MINIMUM_TRANSFER_UNIT) {
-				this.cancelReason = new InvalidProtocolException(client,
+				this.cancelReason = new LoginFailureException(client,
 						"Maximum transfer unit is is lower than the minimum");
 			} else if (connectionResponseOne.maximumTransferUnit > this.initialMaximumTransferUnit) {
-				this.cancelReason = new InvalidProtocolException(client,
+				this.cancelReason = new LoginFailureException(client,
 						"Server maximum transfer unit is higher than the client can handle");
 			} else {
 				this.maximumTransferUnit = connectionResponseOne.maximumTransferUnit;
 				this.guid = connectionResponseOne.serverGuid;
 				this.loginPackets[0] = true;
-				if (connectionResponseOne.useSecurity == true) {
-					client.getListener().onWarning(Warning.SECURITY_ENABLED);
-				}
 			}
 		} else if (packetId == ID_OPEN_CONNECTION_REPLY_2) {
 			OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo(packet);
 			connectionResponseTwo.decode();
 
 			if (connectionResponseTwo.failed()) {
-				this.cancelReason = new InvalidProtocolException(client,
+				this.cancelReason = new LoginFailureException(client,
 						connectionResponseTwo.getClass().getSimpleName() + " packet failed to decode");
 			} else if (connectionResponseTwo.magic != true) {
-				this.cancelReason = new InvalidProtocolException(client, "MAGIC failed to validate");
+				this.cancelReason = new LoginFailureException(client, "MAGIC failed to validate");
 			} else if (connectionResponseTwo.serverGuid != this.guid) {
-				this.cancelReason = new InvalidProtocolException(client, "Server responded with invalid GUID");
+				this.cancelReason = new LoginFailureException(client, "Server responded with invalid GUID");
 			} else if (connectionResponseTwo.maximumTransferUnit > this.maximumTransferUnit) {
-				this.cancelReason = new InvalidProtocolException(client,
+				this.cancelReason = new LoginFailureException(client,
 						"Server maximum transfer unit is higher than the client can handle");
 			} else {
 				this.loginPackets[1] = true;
 				this.maximumTransferUnit = connectionResponseTwo.maximumTransferUnit;
-				if (connectionResponseTwo.encryptionEnabled == true) {
-					client.getListener().onWarning(Warning.ENCRYPTION_ENABLED);
-				}
 			}
 		} else if (packetId == ID_ALREADY_CONNECTED) {
 			this.cancelReason = new AlreadyConnectedException(client);
@@ -140,10 +143,7 @@ public class SessionPreparation {
 	}
 
 	/**
-	 * Returns whether or not the session has enough data to be created to be
-	 * used by the client
-	 * 
-	 * @return Whether or not the session has enough data to be created
+	 * @return true if the session has enough data to be created
 	 */
 	public boolean readyForSession() {
 		// It was cancelled, why are we finishing?
@@ -168,13 +168,16 @@ public class SessionPreparation {
 	}
 
 	/**
-	 * Creates the session with the data set during login
+	 * Creates the session with the data set during login.
 	 * 
 	 * @param channel
-	 *            The channel the session will send data through
-	 * @return RakNetServerSession
+	 *            the channel the session will send data through.
+	 * @return the newly created session.
 	 */
 	public RakNetServerSession createSession(Channel channel) {
+		if (!this.readyForSession()) {
+			return null;
+		}
 		return new RakNetServerSession(client, guid, maximumTransferUnit, channel, address);
 	}
 

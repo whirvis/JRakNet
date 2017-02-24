@@ -31,17 +31,14 @@
 package net.marfgamer.jraknet.protocol;
 
 /**
- * This class represents a packet that has a risk of failing to encode or decode
- * data
+ * Represents a packet that has a risk of failing to encode or decode data.
  *
  * @author MarfGamer
  */
 public interface Failable {
 
 	/**
-	 * Returns whether or not the packet failed to encode or decode
-	 * 
-	 * @return Whether or not the packet failed to encode or decode
+	 * @return true if the packet failed to encode.
 	 */
 	public boolean failed();
 

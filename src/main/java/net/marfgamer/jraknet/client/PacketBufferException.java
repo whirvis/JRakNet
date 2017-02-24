@@ -30,31 +30,37 @@
  */
 package net.marfgamer.jraknet.client;
 
-import net.marfgamer.jraknet.RakNetException;
 import net.marfgamer.jraknet.RakNetPacket;
 
 /**
- * This exception is thrown whenever a critical packet fails to encode or decode
- * correctly
+ * Signals that a packet critical to the <code>RakNetClient</code> failed to
+ * encode or decode correctly.
  *
  * @author MarfGamer
  */
-public class PacketBufferException extends RakNetException {
+public class PacketBufferException extends RakNetClientException {
 
 	private static final long serialVersionUID = -3730545025991834599L;
 
 	private final RakNetPacket packet;
 
-	public PacketBufferException(RakNetPacket packet) {
-		super("Packet with ID 0x" + Integer.toHexString(packet.getId()).toUpperCase().substring(0, 2)
-				+ " failed to encode/decode");
+	/**
+	 * Constructs a <code>PacketBufferException</code> with the specified
+	 * <code>RakNetClient</code> and <code>RakNetPacket</code>.
+	 * 
+	 * @param client
+	 *            the <code>RakNetClient</code> that threw the exception.
+	 * @param packet
+	 *            the <code>RakNetPacket</code> that failed to encode/decode.
+	 */
+	public PacketBufferException(RakNetClient client, RakNetPacket packet) {
+		super(client,
+				"Packet with ID 0x" + Integer.toHexString(((byte) packet.getId()) & 0xFF) + " failed to encode/decode");
 		this.packet = packet;
 	}
 
 	/**
-	 * Returns the packet that failed to encode/decode
-	 * 
-	 * @return The packet that failed to encode/decode
+	 * @return the packet that failed to encode/decode.
 	 */
 	public RakNetPacket getPacket() {
 		return this.packet;

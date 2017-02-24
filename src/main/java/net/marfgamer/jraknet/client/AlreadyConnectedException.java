@@ -30,11 +30,9 @@
  */
 package net.marfgamer.jraknet.client;
 
-import net.marfgamer.jraknet.RakNetClientException;
-
 /**
- * This exception is thrown whenever the client is attempting to connect to a
- * server it is already connected to
+ * Signals that a <code>RakNetClient</code> is attempting to connect to a server
+ * that it is already connected to.
  *
  * @author MarfGamer
  */
@@ -42,6 +40,13 @@ public class AlreadyConnectedException extends RakNetClientException {
 
 	private static final long serialVersionUID = -482118372058339060L;
 
+	/**
+	 * Constructs an <code>AlreadyConnectedException</code> with the specified
+	 * <code>RakNetClient</code>.
+	 * 
+	 * @param client
+	 *            the <code>RakNetClient</code> that threw the exception.
+	 */
 	public AlreadyConnectedException(RakNetClient client) {
 		super(client, "Already connected to server");
 	}

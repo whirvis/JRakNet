@@ -34,6 +34,12 @@ import io.netty.buffer.Unpooled;
 import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.protocol.Reliability;
 
+/**
+ * Used by <code>RakNetSession</code> to properly send data to connected clients
+ * and servers.
+ *
+ * @author MarfGamer
+ */
 public class EncapsulatedPacket {
 
 	// Length constants
@@ -49,8 +55,8 @@ public class EncapsulatedPacket {
 	public static final byte FLAG_RELIABILITY = (byte) 0b11100000;
 	public static final byte FLAG_SPLIT = (byte) 0b00010000;
 
-	// Used to encode and decode, modified ONLY by CustomPacket
-	public Packet buffer = new Packet();
+	// Used to encode and decode, modified by CustomPacket only
+	protected Packet buffer = new Packet();
 
 	// Encapsulation data
 	public Reliability reliability;
@@ -64,7 +70,7 @@ public class EncapsulatedPacket {
 	public Packet payload;
 
 	/**
-	 * Encodes the packet
+	 * Encodes the packet.
 	 */
 	public void encode() {
 		buffer.writeByte((byte) ((reliability.asByte() << RELIABILITY_POSITION) | (split ? FLAG_SPLIT : 0)));
@@ -89,7 +95,7 @@ public class EncapsulatedPacket {
 	}
 
 	/**
-	 * Decodes the packet
+	 * Decodes the packet.
 	 */
 	public void decode() {
 		byte flags = buffer.readByte();
@@ -116,9 +122,7 @@ public class EncapsulatedPacket {
 	}
 
 	/**
-	 * Calculates what the size of the packet would be if it had been encoded
-	 * 
-	 * @return What the size of the packet would be if it had been encoded
+	 * @return what the size of the packet would be if it had been encoded.
 	 */
 	public int calculateSize() {
 		int packetSize = 0; // Unlike CustomPacket EncapsulatedPacket has no ID,
@@ -143,19 +147,15 @@ public class EncapsulatedPacket {
 	}
 
 	/**
-	 * Calculates the size of an <code>EncapsulatedPacket</code> based on the
-	 * specified reliability, whether or not it is split, and the size of the
-	 * specified payload without any extra data written to it
-	 * 
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param split
-	 *            Whether or not the packet is split
+	 *            whether or not the packet is split.
 	 * @param payload
-	 *            The payload of the packet
-	 * @return The size of an <code>EncapsulatedPacket</code> based on the
+	 *            the payload of the packet
+	 * @return the size of an <code>EncapsulatedPacket</code> based on the
 	 *         specified reliability, whether or not it is split, and the size
-	 *         of the specified payload without any extra data written to it
+	 *         of the specified payload without any extra data written to it.
 	 */
 	public static int calculateDummy(Reliability reliability, boolean split, Packet payload) {
 		EncapsulatedPacket dummy = new EncapsulatedPacket();
@@ -167,17 +167,13 @@ public class EncapsulatedPacket {
 	}
 
 	/**
-	 * Calculates the size of an <code>EncapsulatedPacket</code> based on the
-	 * specified reliability and whether or not it is split without any extra
-	 * data written to it
-	 * 
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param split
-	 *            Whether or not the packet is split
-	 * @return The size of an <code>EncapsulatedPacket</code> based on the
+	 *            whether or not the packet is split.
+	 * @return the size of an <code>EncapsulatedPacket</code> based on the
 	 *         specified reliability and whether or not it is split without any
-	 *         extra data written to it
+	 *         extra data written to it.
 	 */
 	public static int calculateDummy(Reliability reliability, boolean split) {
 		return EncapsulatedPacket.calculateDummy(reliability, split, new Packet());

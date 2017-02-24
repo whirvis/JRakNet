@@ -30,11 +30,9 @@
  */
 package net.marfgamer.jraknet.client;
 
-import net.marfgamer.jraknet.RakNetClientException;
-
 /**
- * This exception is thrown when the client is banned from the server it is
- * attempting to connect to
+ * Signals that a <code>RakNetClient</code>'s connection is banned from the
+ * server.
  *
  * @author MarfGamer
  */
@@ -42,6 +40,13 @@ public class ConnectionBannedException extends RakNetClientException {
 
 	private static final long serialVersionUID = 8440218445920818619L;
 
+	/**
+	 * Constructs a <code>ConnectedionBannedException</code> with the specified
+	 * <code>RakNetClient</code>.
+	 * 
+	 * @param client
+	 *            the <code>RakNetClient</code> that threw the exception.
+	 */
 	public ConnectionBannedException(RakNetClient client) {
 		super(client, "Banned from server");
 	}

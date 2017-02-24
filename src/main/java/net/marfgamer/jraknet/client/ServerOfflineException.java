@@ -32,11 +32,9 @@ package net.marfgamer.jraknet.client;
 
 import java.net.InetSocketAddress;
 
-import net.marfgamer.jraknet.RakNetClientException;
-
 /**
- * This exception is thrown whenever the server the client is attempting to is
- * offline
+ * Signals that a <code>RakNetClient</code> is attempting to connect to an
+ * offline server.
  *
  * @author MarfGamer
  */
@@ -46,15 +44,22 @@ public class ServerOfflineException extends RakNetClientException {
 
 	private final InetSocketAddress address;
 
+	/**
+	 * Constructs a <code>ServerOfflineException</code> with the specified
+	 * <code>RakNetClient</code> and address.
+	 * 
+	 * @param client
+	 *            the <code>RakNetClient</code> that threw the exception.
+	 * @param address
+	 *            the address of the offline server.
+	 */
 	public ServerOfflineException(RakNetClient client, InetSocketAddress address) {
 		super(client, "Server at address " + address.toString() + " is offline");
 		this.address = address;
 	}
 
 	/**
-	 * Returns the address of the server that is offline
-	 * 
-	 * @return The address of the server that is offline
+	 * @return the address of the offline server.
 	 */
 	public InetSocketAddress getAddress() {
 		return this.address;

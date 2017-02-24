@@ -37,7 +37,7 @@ import net.marfgamer.jraknet.example.chat.client.ChatClient;
 
 /**
  * Used to listen for presses to the connect/disconnect button in the frame,
- * used to signal the client to connect/disconnect
+ * used to signal the client to connect/disconnect.
  *
  * @author MarfGamer
  */

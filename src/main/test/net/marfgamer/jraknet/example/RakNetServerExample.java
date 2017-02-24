@@ -42,7 +42,7 @@ import net.marfgamer.jraknet.session.RakNetClientSession;
 /**
  * A simple <code>RakNetServer</code> that can be tested through a Minecraft:
  * Pocket Edition client using the local multiplayer features built into the
- * game
+ * game.
  *
  * @author MarfGamer
  */

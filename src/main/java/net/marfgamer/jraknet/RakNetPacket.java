@@ -36,7 +36,7 @@ import io.netty.channel.socket.DatagramPacket;
 
 /**
  * A generic RakNet packet that has the ability to get the ID of the packet
- * along with encoding and decoding
+ * along with encoding and decoding.
  *
  * @author MarfGamer
  */
@@ -44,6 +44,13 @@ public class RakNetPacket extends Packet {
 
 	private short id;
 
+	/**
+	 * Constructs a <code>RakNetPacket</code> with the specified ID that will be
+	 * written to it.
+	 * 
+	 * @param id
+	 *            the ID of the <code>RakNetPacket</code>.
+	 */
 	public RakNetPacket(int id) {
 		super();
 		if (id < 0) {
@@ -52,6 +59,14 @@ public class RakNetPacket extends Packet {
 		this.writeUByte(this.id = (short) id);
 	}
 
+	/**
+	 * Constructs a <code>RakNetPacket</code> that reads from and writes to the
+	 * specified <code>ByteBuf</code>. On instantiation, the first byte of the
+	 * buffer will be read and set as the ID.
+	 * 
+	 * @param buffer
+	 *            the <code>ByteBuf</code> to read from and write to.
+	 */
 	public RakNetPacket(ByteBuf buffer) {
 		super(buffer);
 		if (this.remaining() < 1) {
@@ -60,14 +75,39 @@ public class RakNetPacket extends Packet {
 		this.id = this.readUByte();
 	}
 
+	/**
+	 * Constructs a <code>RakNetPacket</code> that reads from and writes to the
+	 * specified <code>DatagramPacket</code>. On instantiation, the first byte
+	 * of the datagram will be read and set as the ID.
+	 * 
+	 * @param datagram
+	 *            the <code>DatagramPacket</code> to read from and write to.
+	 */
 	public RakNetPacket(DatagramPacket datagram) {
 		this(datagram.content());
 	}
 
+	/**
+	 * Constructs a <code>RakNetPacket</code> that reads from and writes to the
+	 * specified byte array. On instantiation, the first byte of the byte array
+	 * will be read and set as the ID.
+	 * 
+	 * @param data
+	 *            the byte array to read from and write to.
+	 */
 	public RakNetPacket(byte[] data) {
 		this(Unpooled.copiedBuffer(data));
 	}
 
+	/**
+	 * Constructs a <code>RakNetPacket</code> that reads from and writes to the
+	 * specified <code>Packet</code>. On instantiation, the first byte of the
+	 * buffer will be read and set as the ID <b>unless</b> the specified packet
+	 * is a subclass of <code>RakNetPacket</code>.
+	 * 
+	 * @param packet
+	 *            the <code>Packet</code> to read from and write to.
+	 */
 	public RakNetPacket(Packet packet) {
 		super(packet);
 
@@ -80,33 +120,31 @@ public class RakNetPacket extends Packet {
 	}
 
 	/**
-	 * Returns the ID of the packet
-	 * 
-	 * @return The ID of the packet
+	 * @return the ID of the packet.
 	 */
 	public final short getId() {
 		return this.id;
 	}
 
 	/**
-	 * Encodes the packet
+	 * Encodes the packet.
 	 */
 	public void encode() {
 	}
 
 	/**
-	 * Decodes the packet
+	 * Decodes the packet.
 	 */
 	public void decode() {
 	}
 
 	/**
-	 * Sets the buffer and updates the ID if specified
+	 * Sets the buffer and updates the ID if specified.
 	 * 
 	 * @param buffer
-	 *            The new buffer
+	 *            the new buffer.
 	 * @param updateId
-	 *            Whether or not to update the ID
+	 *            whether or not to update the ID.
 	 */
 	public void setBuffer(byte[] buffer, boolean updateId) {
 		super.setBuffer(buffer);

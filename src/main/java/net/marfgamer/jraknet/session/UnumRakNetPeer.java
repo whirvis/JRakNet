@@ -6,7 +6,7 @@
  * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
  *                                                  
- * The MIT License (MIT)
+ * the MIT License (MIT)
  *
  * Copyright (c) 2016, 2017 MarfGamer
  *
@@ -17,7 +17,7 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
+ * the above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -38,38 +38,38 @@ import net.marfgamer.jraknet.protocol.Reliability;
 /**
  * This interface represents a client connection to a server, this is used
  * mainly to keep message sending easier and consistent between the lower and
- * higher level implementation
+ * higher level implementation.
  *
  * @author MarfGamer
  */
 public interface UnumRakNetPeer {
 
 	/**
-	 * Sends a message with the specified reliability on the specified channel
+	 * Sends a message with the specified reliability on the specified channel.
 	 * 
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param channel
-	 *            The channel to send the packet on
+	 *            the channel to send the packet on.
 	 * @param packet
-	 *            The packet to send
+	 *            the packet to send.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
+	 *             if the channel is higher than the maximum.
 	 */
 	public void sendMessage(Reliability reliability, int channel, Packet packet);
 
 	/**
 	 * Sends the specified messages with the specified reliability on the
-	 * specified channel
+	 * specified channel.
 	 * 
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param channel
-	 *            The channel to send the packet on
+	 *            the channel to send the packet on.
 	 * @param packets
-	 *            The packets to send
+	 *            the packets to send.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
+	 *             if the channel is higher than the maximum.
 	 */
 	public default void sendMessage(Reliability reliability, int channel, Packet... packets)
 			throws InvalidChannelException {
@@ -79,14 +79,14 @@ public interface UnumRakNetPeer {
 	}
 
 	/**
-	 * Sends a message with the specified reliability on the default channel
+	 * Sends a message with the specified reliability on the default channel.
 	 * 
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param packet
-	 *            The packet to send
+	 *            the packet to send.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
+	 *             if the channel is higher than the maximum.
 	 */
 	public default void sendMessage(Reliability reliability, Packet packet) throws InvalidChannelException {
 		this.sendMessage(reliability, RakNet.DEFAULT_CHANNEL, packet);
@@ -94,14 +94,14 @@ public interface UnumRakNetPeer {
 
 	/**
 	 * Sends the specified messages with the specified reliability on the
-	 * default channel
+	 * default channel.
 	 * 
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param packets
-	 *            The packets to send
+	 *            the packets to send.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
+	 *             if the channel is higher than the maximum.
 	 */
 	public default void sendMessage(Reliability reliability, Packet... packets) throws InvalidChannelException {
 		for (Packet packet : packets) {
@@ -111,16 +111,16 @@ public interface UnumRakNetPeer {
 
 	/**
 	 * Sends a message identifier with the specified reliability on the
-	 * specified channel
+	 * specified channel.
 	 * 
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param channel
-	 *            The channel to send the packet on
+	 *            the channel to send the packet on.
 	 * @param packetId
-	 *            The packet ID to send
+	 *            the packet ID to send.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
+	 *             if the channel is higher than the maximum.
 	 */
 	public default void sendMessage(Reliability reliability, int channel, int packetId) {
 		this.sendMessage(reliability, channel, new RakNetPacket(packetId));
@@ -128,16 +128,16 @@ public interface UnumRakNetPeer {
 
 	/**
 	 * Sends the specified message identifiers with the specified reliability on
-	 * the specified channel
+	 * the specified channel.
 	 * 
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param channel
-	 *            The channel to send the packet on
+	 *            the channel to send the packet on.
 	 * @param packetIds
-	 *            The packet IDs to send
+	 *            the packet IDs to send.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
+	 *             if the channel is higher than the maximum.
 	 */
 	public default void sendMessage(Reliability reliability, int channel, int... packetIds) {
 		for (int packetId : packetIds) {
@@ -147,14 +147,14 @@ public interface UnumRakNetPeer {
 
 	/**
 	 * Sends a message identifier with the specified reliability on the default
-	 * channel
+	 * channel.
 	 * 
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param packetId
-	 *            The packet ID to send
+	 *            the packet ID to send.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
+	 *             if the channel is higher than the maximum.
 	 */
 	public default void sendMessage(Reliability reliability, int packetId) {
 		this.sendMessage(reliability, new RakNetPacket(packetId));
@@ -162,14 +162,14 @@ public interface UnumRakNetPeer {
 
 	/**
 	 * Sends the specified message identifiers with the specified reliability on
-	 * the default channel
+	 * the default channel.
 	 * 
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param packetIds
-	 *            The packet IDs to send
+	 *            the packet IDs to send.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
+	 *             if the channel is higher than the maximum.
 	 */
 	public default void sendMessage(Reliability reliability, int... packetIds) {
 		for (int packetId : packetIds) {

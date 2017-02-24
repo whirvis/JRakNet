@@ -59,7 +59,7 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
 import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
- * A simple chat client built using JRakNet and a <code>JFrame</code>
+ * A simple chat client built using JRakNet and a <code>JFrame</code>.
  *
  * @author MarfGamer
  */
@@ -92,32 +92,28 @@ public class ChatClient implements RakNetClientListener {
 	}
 
 	/**
-	 * Returns the current user ID
-	 * 
-	 * @return The current user ID
+	 * @return the current user ID.
 	 */
 	public UUID getUserId() {
 		return this.userId;
 	}
 
 	/**
-	 * Returns the user's current username
-	 * 
-	 * @return The user's current username
+	 * @return the user's current username.
 	 */
 	public String getUsername() {
 		return this.username;
 	}
 
 	/**
-	 * Sends a chat message to the specified channel
+	 * Sends a chat message to the specified channel.
 	 * 
 	 * @param message
-	 *            The message to send
+	 *            the message to send.
 	 * @param channel
-	 *            The channel to send it to
+	 *            the channel to send it to.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel exceeds the limit
+	 *             if the channel exceeds the limit.
 	 */
 	public void sendChatMessage(String message, int channel) throws InvalidChannelException {
 		if (channel >= RakNet.MAX_CHANNELS) {
@@ -131,12 +127,12 @@ public class ChatClient implements RakNetClientListener {
 	}
 
 	/**
-	 * Requests to change the username mid-session
+	 * Requests to change the username mid-session.
 	 * 
 	 * @param newUsername
-	 *            The new username
+	 *            the new username.
 	 * @throws ChatException
-	 *             Thrown if an error occurs during the request
+	 *             if an error occurs during the request.
 	 */
 	public void setUsernameRequest(String newUsername) throws ChatException {
 		// Make sure we can change the username
@@ -157,14 +153,14 @@ public class ChatClient implements RakNetClientListener {
 	}
 
 	/**
-	 * Sets the current displayed channel
+	 * Sets the current displayed channel.
 	 * 
 	 * @param channel
-	 *            The new channel to display
+	 *            the new channel to display.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel exceeds the limit
+	 *             if the channel exceeds the limit.
 	 * @throws ChatException
-	 *             Thrown if an error occurs when setting the channel
+	 *             if an error occurs when setting the channel.
 	 */
 	public void setChannel(int channel) throws InvalidChannelException, ChatException {
 		// Make sure the channel is valid
@@ -181,17 +177,17 @@ public class ChatClient implements RakNetClientListener {
 	}
 
 	/**
-	 * Updates the channel text for the frame
+	 * Updates the channel text for the frame.
 	 */
 	public void updateChannelText() {
 		frame.setCurrentChannel(channels[channel]);
 	}
 
 	/**
-	 * Adds a channel to the client
+	 * Adds a channel to the client.
 	 * 
 	 * @param channel
-	 *            The new channel
+	 *            the new channel.
 	 */
 	public void addChannel(ServerChannel channel) {
 		this.channels[channel.getChannel()] = channel;
@@ -199,12 +195,12 @@ public class ChatClient implements RakNetClientListener {
 	}
 
 	/**
-	 * Removes a channel from the client
+	 * Removes a channel from the client.
 	 * 
 	 * @param channel
-	 *            The ID of the channel to remove
+	 *            the ID of the channel to remove.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel exceeds the limit
+	 *             if the channel exceeds the limit.
 	 */
 	public void removeChannel(int channel) throws InvalidChannelException {
 		if (channel >= RakNet.MAX_CHANNELS) {
@@ -215,7 +211,7 @@ public class ChatClient implements RakNetClientListener {
 	}
 
 	/**
-	 * Removes every channel from the client and resets the frame data
+	 * Removes every channel from the client and resets the frame data.
 	 */
 	public void resetChannels() {
 		for (int i = 0; i < channels.length; i++) {
@@ -225,10 +221,10 @@ public class ChatClient implements RakNetClientListener {
 	}
 
 	/**
-	 * Connects to a chat server at the specified address
+	 * Connects to a chat server at the specified address.
 	 * 
 	 * @param address
-	 *            The address of the server
+	 *            the address of the server.
 	 */
 	public void connect(String address) {
 		try {
@@ -244,10 +240,10 @@ public class ChatClient implements RakNetClientListener {
 	}
 
 	/**
-	 * Disconnects from the server with the specified reason
+	 * Disconnects from the server with the specified reason.
 	 * 
 	 * @param reason
-	 *            The reason the client disconnected from the server
+	 *            the reason the client disconnected from the server.
 	 */
 	public void disconnect(String reason) {
 		client.disconnect(reason);

@@ -31,8 +31,7 @@
 package net.marfgamer.jraknet;
 
 /**
- * This exception is thrown whenever there is no listener set for the client or
- * server
+ * Signals that there is no set listener for the server/client.
  *
  * @author MarfGamer
  */
@@ -40,6 +39,9 @@ public class NoListenerException extends RuntimeException {
 
 	private static final long serialVersionUID = 1841007286123953067L;
 
+	/**
+	 * Constructs a <code>NoListenerException</code>.
+	 */
 	public NoListenerException() {
 		super("Listener cannot be null");
 	}

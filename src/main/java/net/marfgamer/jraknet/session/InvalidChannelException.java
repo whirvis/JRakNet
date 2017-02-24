@@ -33,8 +33,8 @@ package net.marfgamer.jraknet.session;
 import net.marfgamer.jraknet.RakNet;
 
 /**
- * This exception is thrown whenever the channel in a sent packet or received
- * packet is higher than the limit
+ * Signals that a packet channel in a sent or received packet is higher than the
+ * limit.
  *
  * @author MarfGamer
  */
@@ -42,6 +42,9 @@ public class InvalidChannelException extends IllegalArgumentException {
 
 	private static final long serialVersionUID = -8690545139286694469L;
 
+	/**
+	 * Constructs an <code>InvalidChannelException</code>.
+	 */
 	public InvalidChannelException() {
 		super("Channel must be lower than " + RakNet.MAX_CHANNELS);
 	}
