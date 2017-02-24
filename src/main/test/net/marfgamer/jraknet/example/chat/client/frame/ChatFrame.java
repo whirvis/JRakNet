@@ -44,10 +44,9 @@ import javax.swing.UIManager;
 
 import net.marfgamer.jraknet.example.chat.ServerChannel;
 import net.marfgamer.jraknet.example.chat.client.ChatClient;
-import net.marfgamer.jraknet.interactive.FrameResources;
 
 /**
- * The frame used by the <code>ChatClient</code> to visualize it's data
+ * The frame used by the <code>ChatClient</code> to visualize it's data.
  *
  * @author MarfGamer
  */
@@ -88,7 +87,6 @@ public class ChatFrame extends JFrame {
 		setResizable(false);
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
 		setTitle("JRakNet Client Example");
-		setIconImage(FrameResources.RAKNET_ICON.getImage());
 
 		// Content settings
 		getContentPane().setLayout(null);
@@ -170,39 +168,37 @@ public class ChatFrame extends JFrame {
 	}
 
 	/**
-	 * Returns the text in the username box
-	 * 
-	 * @return The text in the username box
+	 * @return the text in the username box.
 	 */
 	public String getUsername() {
 		return txtClientUsername.getText();
 	}
 
 	/**
-	 * Sets the displayed server name
+	 * Sets the displayed server name.
 	 * 
 	 * @param serverName
-	 *            The name to display
+	 *            the name to display.
 	 */
 	public void setServerName(String serverName) {
 		txtServerName.setText(serverName);
 	}
 
 	/**
-	 * Sets the displayed server message of the day
+	 * Sets the displayed server message of the day.
 	 * 
 	 * @param serverMotd
-	 *            The message of the day to display
+	 *            the message of the day to display.
 	 */
 	public void setServerMotd(String serverMotd) {
 		txtServerMotd.setText(serverMotd);
 	}
 
 	/**
-	 * Sets the current displayed channels
+	 * Sets the current displayed channels.
 	 * 
 	 * @param channels
-	 *            The channels to display
+	 *            the channels to display.
 	 */
 	public void setChannels(ServerChannel[] channels) {
 		ArrayList<ServerChannel> cleaned = new ArrayList<ServerChannel>();
@@ -216,20 +212,20 @@ public class ChatFrame extends JFrame {
 	}
 
 	/**
-	 * Sets the current channel
+	 * Sets the current channel.
 	 * 
 	 * @param channel
-	 *            The channel to display
+	 *            the channel to display.
 	 */
 	public void setCurrentChannel(ServerChannel channel) {
 		txtPaneServerChannel.setText(channel.getChannelText());
 	}
 
 	/**
-	 * Sets the displayed instructions
+	 * Sets the displayed instructions.
 	 * 
 	 * @param instructions
-	 *            The instructions to display
+	 *            the instructions to display.
 	 */
 	public void setInstructions(String instructions) {
 		txtpnInstructions.setText(instructions);
@@ -237,10 +233,10 @@ public class ChatFrame extends JFrame {
 
 	/**
 	 * Enables or disables server interaction, and is used to easily reset the
-	 * displayed client data
+	 * displayed client data.
 	 * 
 	 * @param connected
-	 *            Whether or not the client is connected
+	 *            whether or not the client is connected.
 	 */
 	public void toggleServerInteraction(boolean connected) {
 		this.connected = connected;
@@ -266,10 +262,10 @@ public class ChatFrame extends JFrame {
 
 	/**
 	 * Updates the listeners required for the frame to function properly based
-	 * on the client
+	 * on the client.
 	 * 
 	 * @param client
-	 *            The client to assign the listeners to
+	 *            the client to assign the listeners to.
 	 */
 	public void updateListeners(ChatClient client) {
 		btnConnectServer.addActionListener(new ConnectServerListener(this, client));
@@ -279,32 +275,32 @@ public class ChatFrame extends JFrame {
 	}
 
 	/**
-	 * Displays a message
+	 * Displays a message.
 	 * 
 	 * @param message
-	 *            The message to display
+	 *            the message to display.
 	 */
 	public void displayMessage(String message) {
 		JOptionPane.showMessageDialog(this, message);
 	}
 
 	/**
-	 * Displays an error with the specified title and message
+	 * Displays an error with the specified title and message.
 	 * 
 	 * @param title
-	 *            The title of the error
+	 *            the title of the error.
 	 * @param error
-	 *            The error message
+	 *            the error message.
 	 */
 	public void displayError(String title, String error) {
 		JOptionPane.showMessageDialog(this, error, title, JOptionPane.ERROR_MESSAGE);
 	}
 
 	/**
-	 * Displays an error using the specified exception
+	 * Displays an error using the specified exception.
 	 * 
 	 * @param throwable
-	 *            The caught exception
+	 *            the caught exception.
 	 */
 	public void displayError(Throwable throwable) {
 		this.displayError("Error: " + throwable.getClass().getName(), throwable.getMessage());

@@ -42,6 +42,7 @@ import net.marfgamer.jraknet.session.RakNetClientSession;
 
 /**
  * Used to test <code>RakNetServer</code> by starting a server on the default
+ * Minecraft: Pocket Edition port.
  *
  * @author MarfGamer
  */

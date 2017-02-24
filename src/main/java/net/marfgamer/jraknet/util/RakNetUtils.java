@@ -6,7 +6,7 @@
  * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
  *                                                  
- * The MIT License (MIT)
+ * the MIT License (MIT)
  *
  * Copyright (c) 2016, 2017 MarfGamer
  *
@@ -17,7 +17,7 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
+ * the above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -58,7 +58,7 @@ import net.marfgamer.jraknet.protocol.status.UnconnectedPong;
 
 /**
  * This class is used to accomplish tasks related to the RakNet protocol without
- * needing a dedicated client or server
+ * needing a dedicated client or server.
  *
  * @author MarfGamer
  */
@@ -71,17 +71,17 @@ public class RakNetUtils {
 	/**
 	 * Sends a raw message to the specified address for the specified amount of
 	 * times in the specified interval until the packet is received or there is
-	 * a timeout
+	 * a timeout.
 	 * 
 	 * @param address
-	 *            The address to send the packet to
+	 *            the address to send the packet to.
 	 * @param packet
-	 *            The packet to send
+	 *            the packet to send.
 	 * @param timeout
-	 *            The interval of which the packet is sent
+	 *            the interval of which the packet is sent.
 	 * @param retries
-	 *            How many times the packet will be sent
-	 * @return The received packet if it was received
+	 *            how many times the packet will be sent.
+	 * @return the received packet if it was received.
 	 */
 	private static RakNetPacket createBootstrapAndSend(InetSocketAddress address, Packet packet, long timeout,
 			int retries) {
@@ -111,7 +111,7 @@ public class RakNetUtils {
 					}
 				}
 				if (packetReceived != null) {
-					break; // The master loop is no longer needed
+					break; // the master loop is no longer needed
 				}
 				retries--;
 			}
@@ -124,11 +124,9 @@ public class RakNetUtils {
 	}
 
 	/**
-	 * Returns whether or not the server is online
-	 * 
 	 * @param address
-	 *            The address of the server
-	 * @return Whether or not the server is online
+	 *            the address of the server.
+	 * @return true if the server is online.
 	 */
 	public static boolean isServerOnline(InetSocketAddress address) {
 		// Create connection packet
@@ -152,41 +150,33 @@ public class RakNetUtils {
 	}
 
 	/**
-	 * Returns whether or not the server is online
-	 * 
 	 * @param address
-	 *            The address of the server
+	 *            the address of the server.
 	 * @param port
-	 *            The port of the server
-	 * @return Whether or not the server is online
+	 *            the port of the server.
+	 * @return true if the server is online.
 	 */
 	public static boolean isServerOnline(InetAddress address, int port) {
 		return isServerOnline(new InetSocketAddress(address, port));
 	}
 
 	/**
-	 * Returns whether or not the server is online
-	 * 
 	 * @param address
-	 *            The address of the server
+	 *            the address of the server.
 	 * @param port
-	 *            The port of the server
-	 * @return Whether or not the server is online
+	 *            the port of the server.
+	 * @return true if the server is online.
 	 * @throws UnknownHostException
-	 *             Thrown if the specified address is an unknown host
+	 *             if the specified address is an unknown host.
 	 */
 	public static boolean isServerOnline(String address, int port) throws UnknownHostException {
 		return isServerOnline(InetAddress.getByName(address), port);
 	}
 
 	/**
-	 * Returns whether or not the server is compatible to the current client
-	 * protocol
-	 * 
 	 * @param address
-	 *            The address of the server
-	 * @return Whether or not the server is compatible to the current client
-	 *         protocol
+	 *            the address of the server.
+	 * @return true if the server is compatible to the current client protocol.
 	 */
 	public static boolean isServerCompatible(InetSocketAddress address) {
 		// Create connection packet
@@ -215,43 +205,33 @@ public class RakNetUtils {
 	}
 
 	/**
-	 * Returns whether or not the server is compatible to the current client
-	 * protocol
-	 * 
 	 * @param address
-	 *            The address of the server
+	 *            the address of the server.
 	 * @param port
-	 *            The port of the server
-	 * @return Whether or not the server is compatible to the current client
-	 *         protocol
+	 *            the port of the server.
+	 * @return true if the server is compatible to the current client protocol.
 	 */
 	public static boolean isServerCompatible(InetAddress address, int port) {
 		return isServerCompatible(new InetSocketAddress(address, port));
 	}
 
 	/**
-	 * Returns whether or not the server is compatible to the current client
-	 * protocol
-	 * 
 	 * @param address
-	 *            The address of the server
+	 *            the address of the server.
 	 * @param port
-	 *            The port of the server
-	 * @return Whether or not the server is compatible to the current client
-	 *         protocol
+	 *            the port of the server.
+	 * @return true if the server is compatible to the current client protocol.
 	 * @throws UnknownHostException
-	 *             Thrown if the specified address is an unknown host
+	 *             if the specified address is an unknown host.
 	 */
 	public static boolean isServerCompatible(String address, int port) throws UnknownHostException {
 		return isServerCompatible(InetAddress.getByName(address), port);
 	}
 
 	/**
-	 * Returns the specified server's identifier
-	 * 
 	 * @param address
-	 *            The address of the server
-	 * @return The specified server's identifier
+	 *            the address of the server.
+	 * @return the specified server's <code>Identifier</code>.
 	 */
 	public static Identifier getServerIdentifier(InetSocketAddress address) {
 		// Create ping packet
@@ -274,39 +254,32 @@ public class RakNetUtils {
 	}
 
 	/**
-	 * Returns the specified server's identifier
-	 * 
 	 * @param address
-	 *            The address of the server
+	 *            the address of the server.
 	 * @param port
-	 *            The port of the server
-	 * @return The specified server's identifier
+	 *            the port of the server.
+	 * @return the specified server's <code>Identifier</code>.
 	 */
 	public static Identifier getServerIdentifier(InetAddress address, int port) {
 		return getServerIdentifier(new InetSocketAddress(address, port));
 	}
 
 	/**
-	 * Returns the specified server's identifier
-	 * 
 	 * @param address
-	 *            The address of the server
+	 *            the address of the server.
 	 * @param port
-	 *            The port of the server
-	 * @return The specified server's identifier
+	 *            the port of the server.
+	 * @return the specified server's <code>Identifier</code>.
 	 * @throws UnknownHostException
-	 *             Thrown if the specified address is an unknown host
+	 *             if the specified address is an unknown host.
 	 */
 	public static Identifier getServerIdentifier(String address, int port) throws UnknownHostException {
 		return getServerIdentifier(InetAddress.getByName(address), port);
 	}
 
 	/**
-	 * Returns the maximum transfer unit of the network interface binded to the
-	 * localhost
-	 * 
-	 * @return The maximum transfer unit of the network interface binded to the
-	 *         localhost
+	 * @return the maximum transfer unit of the network interface binded to the
+	 *         localhost.
 	 */
 	public static int getMaximumTransferUnit() {
 		try {
@@ -317,17 +290,17 @@ public class RakNetUtils {
 	}
 
 	/**
-	 * Parses a single <code>String</code> as an address and port and converts
-	 * it to an <code>InetSocketAddress</code>
+	 * Parses a single String as an address and port and converts it to an
+	 * <code>InetSocketAddress</code>.
 	 * 
 	 * @param address
-	 *            The address to convert
+	 *            the address to convert.
 	 * @param defaultPort
-	 *            The default port to use if one is not specified
-	 * @return A parsed InetSocketAddress
+	 *            the default port to use if one is not specified.
+	 * @return the parsed <code>InetSocketAddress</code>.
 	 * @throws UnknownHostException
-	 *             Thrown if the address is in an invalid format or if the host
-	 *             cannot be found
+	 *             if the address is in an invalid format or if the host cannot
+	 *             be found.
 	 */
 	public static InetSocketAddress parseAddress(String address, int defaultPort) throws UnknownHostException {
 		String[] addressSplit = address.split(":");
@@ -345,29 +318,29 @@ public class RakNetUtils {
 	}
 
 	/**
-	 * Parses a single <code>String</code> as an address and port and converts
-	 * it to an <code>InetSocketAddress</code>
+	 * Parses a single String as an address and port and converts it to an
+	 * <code>InetSocketAddress</code>.
 	 * 
 	 * @param address
-	 *            The address to convert
-	 * @return A parsed InetSocketAddress
+	 *            the address to convert.
+	 * @return the parsed <code>InetSocketAddress</code>.
 	 * @throws UnknownHostException
-	 *             Thrown if the address is in an invalid format or if the host
-	 *             cannot be found
+	 *             if the address is in an invalid format or if the host cannot
+	 *             be found.
 	 */
 	public static InetSocketAddress parseAddress(String address) throws UnknownHostException {
 		return parseAddress(address, -1);
 	}
 
 	/**
-	 * Parses a single <code>String</code> as an address and port and converts
-	 * it to an <code>InetSocketAddress</code>
+	 * Parses a single String as an address and port and converts it to an
+	 * <code>InetSocketAddress</code>.
 	 * 
 	 * @param address
-	 *            The address to convert
+	 *            the address to convert.
 	 * @param defaultPort
-	 *            The default port to use if one is not specified
-	 * @return A parsed InetSocketAddress
+	 *            the default port to use if one is not specified.
+	 * @return the parsed <code>InetSocketAddress</code>.
 	 */
 	public static InetSocketAddress parseAddressPassive(String address, int defaultPort) {
 		try {
@@ -378,12 +351,12 @@ public class RakNetUtils {
 	}
 
 	/**
-	 * Parses a single <code>String</code> as an address and port and converts
-	 * it to an <code>InetSocketAddress</code>
+	 * Parses a single String as an address and port and converts it to an
+	 * <code>InetSocketAddress</code>.
 	 * 
 	 * @param address
-	 *            The address to convert
-	 * @return A parsed InetSocketAddress
+	 *            the address to convert.
+	 * @return the parsed <code>InetSocketAddress</code>.
 	 */
 	public static InetSocketAddress parseAddressPassive(String address) {
 		return parseAddressPassive(address, -1);
@@ -391,11 +364,11 @@ public class RakNetUtils {
 
 	/**
 	 * Parses a String as a long and returns -1 in the case of a
-	 * NumberFormatException
+	 * <code>NumberFormatException</code>.
 	 * 
 	 * @param longStr
-	 *            The String to parse
-	 * @return The String as a long
+	 *            the String to parse.
+	 * @return the String as a long.
 	 */
 	public static long parseLongPassive(String longStr) {
 		try {
@@ -407,11 +380,11 @@ public class RakNetUtils {
 
 	/**
 	 * Parses a String as an int and returns -1 in the case of a
-	 * NumberFormatException
+	 * <code>NumberFormatException</code>.
 	 * 
 	 * @param intStr
-	 *            The String to parse
-	 * @return The String as an int
+	 *            the String to parse.
+	 * @return the String as an int.
 	 */
 	public static int parseIntPassive(String intStr) {
 		return (int) RakNetUtils.parseLongPassive(intStr);
@@ -419,11 +392,11 @@ public class RakNetUtils {
 
 	/**
 	 * Parses a String as a short and returns -1 in the case of a
-	 * NumberFormatException
+	 * <code>NumberFormatException</code>.
 	 * 
 	 * @param shortStr
-	 *            The String to parse
-	 * @return The String as a short
+	 *            the String to parse.
+	 * @return the String as a short.
 	 */
 	public static short parseShortPassive(String shortStr) {
 		return (short) RakNetUtils.parseLongPassive(shortStr);
@@ -431,21 +404,21 @@ public class RakNetUtils {
 
 	/**
 	 * Parses a String as a byte and returns -1 in the case of a
-	 * NumberFormatException
+	 * <code>NumberFormatException</code>.
 	 * 
 	 * @param byteStr
-	 *            The String to parse
-	 * @return The String as a byte
+	 *            the String to parse.
+	 * @return the String as a byte.
 	 */
 	public static byte parseBytePassive(String byteStr) {
 		return (byte) RakNetUtils.parseLongPassive(byteStr);
 	}
 
 	/**
-	 * Causes a sleep on the main thread using a simple while loop
+	 * Causes a sleep on the main thread using a simple while loop.
 	 * 
 	 * @param time
-	 *            How long the thread will sleep in milliseconds
+	 *            How long the thread will sleep in milliseconds.
 	 */
 	public static void threadLock(long time) {
 		long sleepStart = System.currentTimeMillis();
@@ -454,9 +427,8 @@ public class RakNetUtils {
 	}
 
 	/**
-	 * Used by
-	 * <code>createBootstrapAndSend(InetSocketAddress, Packet, long, int)</code>
-	 * to wait for the packet and return it
+	 * Used by <code>createBootstrapAndSend()</code> to wait for the packet and
+	 * return it.
 	 *
 	 * @author MarfGamer
 	 */

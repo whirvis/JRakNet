@@ -32,7 +32,7 @@ package net.marfgamer.jraknet.example.chat.server.command;
 
 /**
  * Used to easily implements instructions given from the console to be handled
- * by the server
+ * by the server.
  *
  * @author MarfGamer
  */
@@ -42,55 +42,74 @@ public abstract class Command {
 	private final String label;
 	private final String usage;
 
+	/**
+	 * Constructs a <code>Command</code> with whether or not it is overridable
+	 * along the specified label and usage.
+	 * 
+	 * @param overridable
+	 *            whether or not the command is overridable.
+	 * @param label
+	 *            the command label.
+	 * @param usage
+	 *            the command usage.
+	 */
 	protected Command(boolean overridable, String label, String usage) {
 		this.overridable = overridable;
 		this.label = label;
 		this.usage = usage;
 	}
 
-	public Command(String name, String usage) {
-		this(true, name, usage);
-	}
-
-	public Command(String name) {
-		this(name, "");
+	/**
+	 * Constructs a <code>Command</code> with the specified label and usage.
+	 * 
+	 * @param label
+	 *            the command label.
+	 * @param usage
+	 *            the command usage.
+	 */
+	public Command(String label, String usage) {
+		this(true, label, usage);
 	}
 
 	/**
-	 * Returns whether or not this command be overridden by another command
+	 * Constructs a <code>Command</code> with the specified label.
 	 * 
-	 * @return Whether or not this command by overridden by another command
+	 * @param label
+	 *            the command label.
+	 */
+	public Command(String label) {
+		this(label, label);
+	}
+
+	/**
+	 * @return true if this command by overridden by another command.
 	 */
 	protected boolean isOverridable() {
 		return this.overridable;
 	}
 
 	/**
-	 * Returns the label of the command
-	 * 
-	 * @return The label of the command
+	 * @return the label of the command.
 	 */
 	public String getLabel() {
 		return this.label;
 	}
 
 	/**
-	 * Returns the usage of the command
-	 * 
-	 * @return The usage of the command
+	 * @return the usage of the command.
 	 */
 	public String getUsage() {
 		return (this.label + " " + this.usage);
 	}
 
 	/**
-	 * Converts the remaining arguments to a single String from a single index
+	 * Converts the remaining arguments to a single String from a single index.
 	 * 
 	 * @param startIndex
-	 *            - The index to start from
+	 *            the index to start from.
 	 * @param stringArray
-	 *            - The array to convert to a single String
-	 * @return The converted String
+	 *            the array to convert to a single String.
+	 * @return the converted String
 	 */
 	protected String remainingArguments(int startIndex, String[] stringArray) {
 		StringBuilder builder = new StringBuilder();
@@ -101,11 +120,11 @@ public abstract class Command {
 	}
 
 	/**
-	 * Handles the command with the specified arguments
+	 * Handles the command with the specified arguments.
 	 * 
 	 * @param args
-	 *            - The command arguments
-	 * @return Whether or not the command was handled successfully
+	 *            the command arguments.
+	 * @return true if the command was handled successfully.
 	 */
 	public abstract boolean handleCommand(String[] args);
 

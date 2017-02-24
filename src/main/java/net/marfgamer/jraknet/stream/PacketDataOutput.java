@@ -69,7 +69,7 @@ import net.marfgamer.jraknet.Packet;
 /**
  * Used to write data to a <code>Packet</code> with ease, to retrieve a
  * <code>Packet</code>'s <code>DataOutput</code> simply use
- * <code>getDataOutput()</code>
+ * <code>getDataOutput()</code>.
  *
  * @author MarfGamer
  */
@@ -77,6 +77,13 @@ public class PacketDataOutput extends OutputStream implements DataOutput {
 
 	private final Packet packet;
 
+	/**
+	 * Constructs a <code>PacketDataOutput</code> with the specified
+	 * <code>Packet</code>.
+	 * 
+	 * @param packet
+	 *            The <code>Packet</code> to write data to.
+	 */
 	public PacketDataOutput(Packet packet) {
 		this.packet = packet;
 	}

@@ -6,7 +6,7 @@
  * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
  *                                                  
- * The MIT License (MIT)
+ * the MIT License (MIT)
  *
  * Copyright (c) 2016, 2017 MarfGamer
  *
@@ -17,7 +17,7 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
+ * the above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -30,11 +30,9 @@
  */
 package net.marfgamer.jraknet.client;
 
-import net.marfgamer.jraknet.RakNetClientException;
-
 /**
- * This exception is thrown when the client does not share the same protocol as
- * the server it is attempting to connect to
+ * Signals that a <code>RakNetClient</code> does not share the same protocol as
+ * the server it is attempting to connect to.
  *
  * @author MarfGamer
  */
@@ -45,6 +43,18 @@ public class IncompatibleProtocolException extends RakNetClientException {
 	private final int clientProtocol;
 	private final int serverProtocol;
 
+	/**
+	 * Constructs an <code>IncompatibleProtocolException</code> with the
+	 * specified <code>RakNetClient</code>, client protocol, and server
+	 * protocol.
+	 * 
+	 * @param client
+	 *            the <code>RakNetClient</code> that threw the exception.
+	 * @param clientProtocol
+	 *            the client's protocol
+	 * @param serverProtocol
+	 *            the server's protocol
+	 */
 	public IncompatibleProtocolException(RakNetClient client, int clientProtocol, int serverProtocol) {
 		super(client, (clientProtocol < serverProtocol ? "Outdated client" : "Outdated server"));
 		this.clientProtocol = clientProtocol;
@@ -52,18 +62,14 @@ public class IncompatibleProtocolException extends RakNetClientException {
 	}
 
 	/**
-	 * Returns the protocol the client is on
-	 * 
-	 * @return The protocol the client is on
+	 * @return the protocol the client is on.
 	 */
 	public int getClientProtocol() {
 		return this.clientProtocol;
 	}
 
 	/**
-	 * Returns the protocol the server is on
-	 * 
-	 * @return The protocol the server is on
+	 * @return the protocol the server is on.
 	 */
 	public int getServerProtocol() {
 		return this.serverProtocol;

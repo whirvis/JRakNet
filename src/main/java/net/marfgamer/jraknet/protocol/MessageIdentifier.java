@@ -33,7 +33,7 @@ package net.marfgamer.jraknet.protocol;
 import java.lang.reflect.Field;
 
 /**
- * Contains all the IDs for RakNet
+ * Contains all the IDs for RakNet.
  *
  * @author MarfGamer
  */
@@ -197,11 +197,9 @@ public class MessageIdentifier {
 	public static final short ID_CUSTOM_F = 0x8F;
 
 	/**
-	 * Returns the packet's name based on it's ID
-	 * 
 	 * @param id
-	 *            The ID of the packet
-	 * @return The packet's name based on it's ID
+	 *            the ID of the packet.
+	 * @return the packet's name based on it's ID.
 	 */
 	public static String getName(int id) {
 		for (Field field : MessageIdentifier.class.getDeclaredFields()) {
@@ -220,11 +218,9 @@ public class MessageIdentifier {
 	}
 
 	/**
-	 * Returns the packet's ID based on it's name
-	 * 
 	 * @param name
-	 *            The name of the packet
-	 * @return The packet's ID based on it's name
+	 *            the name of the packet.
+	 * @return the packet's ID based on it's name.
 	 */
 	public static int getId(String name) {
 		try {

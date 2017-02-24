@@ -6,7 +6,7 @@
  * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
  *                                                  
- * The MIT License (MIT)
+ * the MIT License (MIT)
  *
  * Copyright (c) 2016, 2017 MarfGamer
  *
@@ -17,7 +17,7 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
+ * the above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -40,7 +40,8 @@ import java.util.TreeMap;
 import net.marfgamer.jraknet.util.map.IntMap;
 
 /**
- * This class represents one of the maximum transfer units used during login
+ * Used by the <code>RakNetClient</code> during login to track how and when it
+ * should modify it's maximum transfer unit in the login process.
  *
  * @author MarfGamer
  */
@@ -50,6 +51,15 @@ public class MaximumTransferUnit {
 	private final int retries;
 	private int retriesLeft;
 
+	/**
+	 * Constructs a <code>MaximumTransferUnit</code> with the specified maximum
+	 * transfer unit and amount of retries before it should stop being used.
+	 * 
+	 * @param maximumTransferUnit
+	 *            the maximum transfer unit.
+	 * @param retries
+	 *            the amount of retries before it should stop being used.
+	 */
 	public MaximumTransferUnit(int maximumTransferUnit, int retries) {
 		this.maximumTransferUnit = maximumTransferUnit;
 		this.retries = retries;
@@ -58,11 +68,11 @@ public class MaximumTransferUnit {
 
 	/**
 	 * Sorts an array of <code>MaximumTransferUnit</code>'s from highest to
-	 * lowest maximum transfer units
+	 * lowest maximum transfer units.
 	 * 
 	 * @param units
-	 *            The maximum transfer units to sort
-	 * @return The sorted <code>MaximumTransferUnit</code>'s
+	 *            the <code>MaximumTransferUnit</code>s to sort.
+	 * @return the sorted <code>MaximumTransferUnit</code>s.
 	 */
 	public static MaximumTransferUnit[] sort(MaximumTransferUnit[] units) {
 		// Convert array to IntMap
@@ -85,55 +95,42 @@ public class MaximumTransferUnit {
 	}
 
 	/**
-	 * Returns the size of the maximum transfer unit
-	 * 
-	 * @return The size of the maximum transfer unit
+	 * @return the size of the maximum transfer unit.
 	 */
 	public int getMaximumTransferUnit() {
 		return this.maximumTransferUnit;
 	}
 
 	/**
-	 * Returns the default amount of retries before the client stops using this
-	 * maximum transfer unit and lowers it
-	 * 
-	 * @return The default amount of retries before the client stops using this
-	 *         maximum transfer unit and lowers it
+	 * @return the default amount of retries before the client stops using this
+	 *         <code>MaximumTransferUnit</code> and lowers it.
 	 */
 	public int getRetries() {
 		return this.retries;
 	}
 
 	/**
-	 * Returns how many times <code>retry()</code> can be called before yielding
-	 * 0 or lower
-	 * 
-	 * @return How many times <code>retry()</code> can be called before yielding
-	 *         0 or lower without calling <code>reset()</code>
+	 * @return how many times <code>retry()</code> can be called before yielding
+	 *         0 or lower without calling <code>reset()</code>.
 	 */
 	public int getRetriesLeft() {
 		return this.retriesLeft;
 	}
 
 	/**
-	 * Returns how many retries there are left and then lowers it by one
+	 * Lowers the amount of retries left.
 	 * 
-	 * @return How many retries are left
+	 * @return the amount of retries left.
 	 */
 	public int retry() {
 		return this.retriesLeft--;
 	}
 
 	/**
-	 * Sets the amount of retries left back to it's default
+	 * Sets the amount of retries left back to the default.
 	 */
 	public void reset() {
 		this.retriesLeft = this.retries;
-	}
-
-	@Override
-	public String toString() {
-		return this.getClass().getSimpleName() + "(" + this.getMaximumTransferUnit() + ":" + this.getRetries() + ")";
 	}
 
 }

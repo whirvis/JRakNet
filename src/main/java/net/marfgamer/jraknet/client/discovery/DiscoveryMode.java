@@ -31,13 +31,27 @@
 package net.marfgamer.jraknet.client.discovery;
 
 /**
- * This enum represents how the client will discover servers on the local
- * network
+ * Used by the <code>RakNetClient</code> to determine how it will discover
+ * servers.
  *
  * @author MarfGamer
  */
 public enum DiscoveryMode {
 
-	NONE, ALL_CONNECTIONS, OPEN_CONNECTIONS;
+	/**
+	 * the client will not attempt to discover servers on the local network.
+	 */
+	NONE,
+
+	/**
+	 * any servers found on the local network will appear.
+	 */
+	ALL_CONNECTIONS,
+
+	/**
+	 * any servers found on the local network will appear as long as they have
+	 * open connections.
+	 */
+	OPEN_CONNECTIONS;
 
 }

@@ -53,7 +53,7 @@ import net.marfgamer.jraknet.protocol.status.ConnectedPong;
 import net.marfgamer.jraknet.util.map.IntMap;
 
 /**
- * This class is used to easily manage connections in RakNet
+ * This class is used to easily manage connections in RakNet.
  *
  * @author MarfGamer
  */
@@ -104,6 +104,19 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	private long lowestLatency;
 	private long highestLatency;
 
+	/**
+	 * Constructs a <code>RakNetSession</code> with the specified globally
+	 * unique ID, maximum transfer unit, <code>Channel</code>, and address.
+	 * 
+	 * @param guid
+	 *            the globally unique ID.
+	 * @param maximumTransferUnit
+	 *            the maximum transfer unit.
+	 * @param channel
+	 *            the <code>Channel</code>.
+	 * @param address
+	 *            the address.
+	 */
 	public RakNetSession(long guid, int maximumTransferUnit, Channel channel, InetSocketAddress address) {
 		// Session data
 		this.guid = guid;
@@ -141,131 +154,107 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	}
 
 	/**
-	 * Returns the session's globally unique ID (GUID)
-	 * 
-	 * @return The session's globally unique ID
+	 * @return the session's globally unique ID.
 	 */
 	public final long getGloballyUniqueId() {
 		return this.guid;
 	}
 
 	/**
-	 * Returns the session's address
-	 * 
-	 * @return The session's address
+	 * @return the session's address.
 	 */
 	public final InetSocketAddress getAddress() {
 		return this.address;
 	}
 
 	/**
-	 * Returns the session's <code>InetAddress</code>
-	 * 
-	 * @return The session's <code>InetAddress</code>
+	 * @return the session's <code>InetAddress</code>.
 	 */
 	public final InetAddress getInetAddress() {
 		return address.getAddress();
 	}
 
 	/**
-	 * Returns the session's port
-	 * 
-	 * @return The session's port
+	 * @return the session's port.
 	 */
 	public final int getInetPort() {
 		return address.getPort();
 	}
 
 	/**
-	 * Returns the session's maximum transfer unit
-	 * 
-	 * @return The session's maximum transfer unit
+	 * @return the session's maximum transfer unit.
 	 */
 	public int getMaximumTransferUnit() {
 		return this.maximumTransferUnit;
 	}
 
 	/**
-	 * Returns the session's current state
-	 * 
-	 * @return The session's current state
+	 * @return the session's current state.
 	 */
 	public RakNetState getState() {
 		return this.state;
 	}
 
 	/**
-	 * Sets the session's current state
+	 * Sets the session's current state.
 	 * 
 	 * @param state
-	 *            The new state
+	 *            the new state.
 	 */
 	public void setState(RakNetState state) {
 		this.state = state;
 	}
 
 	/**
-	 * Returns the session's keep alive state
-	 * 
-	 * @return The session's keep alive state
+	 * @return the session's keep alive state.
 	 */
 	public int getKeepAliveState() {
 		return this.keepAliveState;
 	}
 
 	/**
-	 * Sets the session's keep alive state
+	 * Sets the session's keep alive state.
 	 * 
 	 * @param keepAliveState
-	 *            The new keep alive state
+	 *            the new keep alive state.
 	 */
 	public void setKeepAliveState(int keepAliveState) {
 		this.keepAliveState = keepAliveState;
 	}
 
 	/**
-	 * Sets the session's keep alive state
+	 * Sets the session's keep alive state.
 	 * 
 	 * @param keepAliveState
-	 *            The new keep alive state
+	 *            the new keep alive state.
 	 */
 	public void setKeepAliveState(RakNetState keepAliveState) {
 		this.setKeepAliveState(keepAliveState.getOrder());
 	}
 
 	/**
-	 * Returns the amount of packets sent this second
-	 * 
-	 * @return The amount of packets sent this second
+	 * @return the amount of packets sent this second.
 	 */
 	public int getPacketsSentThisSecond() {
 		return this.packetsSentThisSecond;
 	}
 
 	/**
-	 * Returns the amount of packet received this second
-	 * 
-	 * @return The amount of packets received this second
+	 * @return the amount of packets received this second.
 	 */
 	public int getPacketsReceivedThisSecond() {
 		return this.packetsReceivedThisSecond;
 	}
 
 	/**
-	 * Returns the last time a packet (<code>CustomPacket</code> or
-	 * <code>Acknowledgement</code>) was sent by the session
-	 * 
-	 * @return The last time a packet was sent by the session
+	 * @return the last time a packet was sent by the session.
 	 */
 	public long getLastPacketSendTime() {
 		return this.lastPacketSendTime;
 	}
 
 	/**
-	 * Returns the last time a packet (<code>CustomPacket</code> or
-	 * <code>Acknowledgement</code>) was received from the session
-	 * 
-	 * @return The last time a packet was received from the session
+	 * @return yhe last time a packet was received from the session.
 	 */
 	public long getLastPacketReceiveTime() {
 		return this.lastPacketReceiveTime;
@@ -273,9 +262,9 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 	/**
 	 * Bumps the message index and returns the new one, this should only be
-	 * called by the <code>SplitPacket</code> class
+	 * called by the <code>SplitPacket</code> class.
 	 * 
-	 * @return The new message index
+	 * @return the new message index.
 	 */
 	protected int bumpMessageIndex() {
 		return this.messageIndex++;
@@ -283,13 +272,11 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 	/**
 	 * Enables/disables latency detection, when disabled the latency will always
-	 * return -1<br>
-	 * <br>
-	 * Note: If the session is not yet in the keep alive state then the packets
-	 * needed to detect the latency will not be sent until then
+	 * return -1. If the session is not yet in the keep alive state then the
+	 * packets needed to detect the latency will not be sent until then.
 	 * 
 	 * @param enabled
-	 *            Whether or not latency detection is enabled
+	 *            whether or not latency detection is enabled
 	 */
 	public void enableLatencyDetection(boolean enabled) {
 		this.latencyEnabled = enabled;
@@ -298,45 +285,35 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	}
 
 	/**
-	 * Returns whether or not latency detection is enabled
-	 * 
-	 * @return Whether or not latency detection is enabled
+	 * @return whether or not latency detection is enabled.
 	 */
 	public boolean latencyDetectionEnabled() {
 		return this.latencyEnabled;
 	}
 
 	/**
-	 * Returns the average latency for the session
-	 * 
-	 * @return The average latency for the session
+	 * @return the average latency for the session.
 	 */
 	public long getLatency() {
 		return this.latency;
 	}
 
 	/**
-	 * Returns the last latency for the session
-	 * 
-	 * @return The last latency for the session
+	 * @return the last latency for the session.
 	 */
 	public long getLastLatency() {
 		return this.lastLatency;
 	}
 
 	/**
-	 * Returns the lowest recorded latency for the session
-	 * 
-	 * @return The lowest recorded latency for the session
+	 * @return the lowest recorded latency for the session.
 	 */
 	public long getLowestLatency() {
 		return this.lowestLatency;
 	}
 
 	/**
-	 * Returns the highest recorded latency for the session
-	 * 
-	 * @return The highest recorded latency for the session
+	 * @return the highest recorded latency for the session.
 	 */
 	public long getHighestLatency() {
 		return this.highestLatency;
@@ -386,10 +363,10 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	}
 
 	/**
-	 * Sends a raw message
+	 * Sends a raw message.
 	 * 
 	 * @param packet
-	 *            The packet to send
+	 *            The packet to send.
 	 */
 	public final void sendRawMessage(Packet packet) {
 		channel.writeAndFlush(new DatagramPacket(packet.buffer(), this.address));
@@ -397,15 +374,15 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 	/**
 	 * Sends a <code>CustomPacket</code> with the specified
-	 * <code>EncapsulatedPacket</code>'s
+	 * <code>EncapsulatedPacket</code>'s.
 	 * 
 	 * @param encapsulated
-	 *            The encapsulated packets to send
+	 *            the encapsulated packets to send.
 	 * @param updateRecoveryQueue
-	 *            Whether or not to store the encapsulated packets in the
+	 *            whether or not to store the encapsulated packets in the
 	 *            recovery queue for later, only set this to <code>true</code>
-	 *            if you are sending new data and not resending old data
-	 * @return The sequence number of the <code>CustomPacket</code>
+	 *            if you are sending new data and not resending old data.
+	 * @return the sequence number of the <code>CustomPacket</code>.
 	 */
 	private final int sendCustomPacket(ArrayList<EncapsulatedPacket> encapsulated, boolean updateRecoveryQueue) {
 		// Create CustomPacket
@@ -457,12 +434,12 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 	/**
 	 * Sends an <code>Acknowledge</code> packet with the specified type and
-	 * records
+	 * <code>Record</code>s.
 	 * 
 	 * @param type
-	 *            The type of the <code>Acknowledge</code> packet
+	 *            the type of the <code>Acknowledge</code> packet.
 	 * @param records
-	 *            The records to send
+	 *            the <code>Record</code>s to send.
 	 */
 	private final void sendAcknowledge(AcknowledgeType type, Record... records) {
 		// Create Acknowledge packet
@@ -478,10 +455,10 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	}
 
 	/**
-	 * Handles a <code>CustomPacket</code>
+	 * Handles a <code>CustomPacket</code>.
 	 * 
 	 * @param custom
-	 *            The <code>CustomPacket</code> to handle
+	 *            the <code>CustomPacket</code> to handle.
 	 */
 	public final void handleCustom(CustomPacket custom) {
 		// Update packet data
@@ -538,10 +515,10 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	}
 
 	/**
-	 * Handles an <code>Acknowledge</code> packet and responds accordingly
+	 * Handles an <code>Acknowledge</code> packet and responds accordingly.
 	 * 
 	 * @param acknowledge
-	 *            The <code>Acknowledge</code> packet to handle
+	 *            the <code>Acknowledge</code> packet to handle.
 	 */
 	public final void handleAcknowledge(Acknowledge acknowledge) {
 		synchronized (recoveryQueue) {
@@ -585,10 +562,10 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 	/**
 	 * Handles an <code>EncapsulatedPacket</code> and makes sure all the data is
-	 * handled correctly
+	 * handled correctly.
 	 * 
 	 * @param encapsulated
-	 *            The <code>EncapsualtedPacket</code> to handle
+	 *            the <code>EncapsualtedPacket</code> to handle.
 	 */
 	private final void handleEncapsulated(EncapsulatedPacket encapsulated) {
 		Reliability reliability = encapsulated.reliability;
@@ -666,12 +643,12 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 	/**
 	 * Handles an internal packet related to RakNet, if the ID is unrecognized
-	 * it is passed on to the underlying session class
+	 * it is passed on to the underlying session class.
 	 * 
 	 * @param channel
-	 *            The channel the packet was sent on
+	 *            the channel the packet was sent on.
 	 * @param packet
-	 *            The packet
+	 *            the packet.
 	 */
 	private final void handleMessage0(int channel, RakNetPacket packet) {
 		short packetId = packet.getId();
@@ -721,7 +698,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	}
 
 	/**
-	 * Updates the session
+	 * Updates the session.
 	 */
 	public final void update() {
 		long currentTime = System.currentTimeMillis();
@@ -801,29 +778,29 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 	/**
 	 * This function is called when a acknowledge receipt is received for the
-	 * packet
+	 * packet.
 	 * 
 	 * @param record
-	 *            The received record
+	 *            the received record.
 	 */
 	public abstract void onAcknowledge(Record record);
 
 	/**
 	 * This function is called when a not acknowledged receipt is received for
-	 * the packet
+	 * the packet.
 	 * 
 	 * @param record
-	 *            The lost record
+	 *            the lost record.
 	 */
 	public abstract void onNotAcknowledge(Record record);
 
 	/**
-	 * This function is called when a packet is received by the session
+	 * This function is called when a packet is received by the session.
 	 * 
 	 * @param packet
-	 *            The packet to handle
+	 *            the packet to handle.
 	 * @param channel
-	 *            The packet the channel was sent on
+	 *            the packet the channel was sent on.
 	 */
 	public abstract void handleMessage(RakNetPacket packet, int channel);
 

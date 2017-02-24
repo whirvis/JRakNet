@@ -31,9 +31,9 @@
 package net.marfgamer.jraknet.identifier;
 
 /**
- * This class represents an identifier sent from a server on the local network,
- * any class extending this only has to override the <code>build()</code> method
- * in order to have their identifier be dynamic
+ * Represents an identifier sent from a server on the local network, any class
+ * extending this only has to override the <code>build()</code> method in order
+ * to have their identifier be dynamic.
  *
  * @author MarfGamer
  */
@@ -50,9 +50,7 @@ public class Identifier {
 	}
 
 	/**
-	 * Converts the identifier to a String
-	 * 
-	 * @return The identifier as a String
+	 * @return the identifier as a String.
 	 */
 	public String build() {
 		return this.identifier;

@@ -71,7 +71,7 @@ import net.marfgamer.jraknet.util.RakNetUtils;
 import net.marfgamer.jraknet.util.map.IntMap;
 
 /**
- * This class is used to connection to servers using the RakNet protocol
+ * Used to connect to servers using the RakNet protocol.
  *
  * @author MarfGamer
  */
@@ -85,9 +85,9 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	private final long timestamp;
 	private int discoveryPort;
 	private DiscoveryMode discoveryMode;
-	/** This must be synchronized <b><u>FIRST</b></u>!!! */
+	/** synchronize this first! (<code>externalServers</code> goes second!) */
 	private final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> discovered;
-	/** This must be synchronized <b><u>SECOND</b></u>!!! */
+	/** synchronize this second! (<code>discovered</code> goes first!) */
 	private final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> externalServers;
 
 	// Networking data
@@ -102,6 +102,18 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	private volatile RakNetServerSession session;
 	private volatile RakNetClientListener listener;
 
+	/**
+	 * Constructs a <code>RakNetClient</code> with the specified
+	 * <code>DiscoveryMode</code> and server discovery port.
+	 * 
+	 * @param discoveryMode
+	 *            how the client will discover servers. If this is set to
+	 *            <code>null</code>, the client will enable set it to
+	 *            <code>DiscoveryMode.ALL_CONNECTIONS</code> as long as the port
+	 *            is greater than -1.
+	 * @param discoveryPort
+	 *            the port the client will attempt to discover servers on.
+	 */
 	public RakNetClient(DiscoveryMode discoveryMode, int discoveryPort) {
 		// Set client data
 		this.guid = new Random().nextLong();
@@ -148,74 +160,77 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		discoverySystem.addClient(this);
 	}
 
+	/**
+	 * Constructs a <code>RakNetClient</code> with the specified server
+	 * discovery port with the <code>DiscoveryMode</code> set to
+	 * <code>DiscoveryMode.ALL_CONNECTIONS</code>.
+	 * 
+	 * @param discoveryPort
+	 *            the port the client will attempt to discover servers on.
+	 */
 	public RakNetClient(int discoveryPort) {
 		this(null, discoveryPort);
 	}
 
+	/**
+	 * Constructs a <code>RakNetClient</code> with the
+	 * <code>DiscoveryMode</code> set to <code>DiscoveryMode.NONE</code> and the
+	 * discovery port set to -1.
+	 */
 	public RakNetClient() {
 		this(-1);
 	}
 
 	/**
-	 * Returns the client's networking protocol version
-	 * 
-	 * @return The client's networking protocol version
+	 * @return the client's networking protocol version.
 	 */
 	public final int getProtocolVersion() {
 		return RakNet.CLIENT_NETWORK_PROTOCOL;
 	}
 
 	/**
-	 * Returns the client's globally unique ID (GUID)
-	 * 
-	 * @return The client's globally unique ID
+	 * @return the client's globally unique ID.
 	 */
 	public final long getGloballyUniqueId() {
 		return this.guid;
 	}
 
 	/**
-	 * Returns the client's timestamp (how long ago it started in milliseconds)
-	 * 
-	 * @return The client's timestamp
+	 * @return the client's timestamp.
 	 */
 	public final long getTimestamp() {
 		return (System.currentTimeMillis() - this.timestamp);
 	}
 
 	/**
-	 * Returns the client's discovery port
-	 * 
-	 * @return The client's discovery port
+	 * @return the client's discovery port.
 	 */
 	public final int getDiscoveryPort() {
 		return this.discoveryPort;
 	}
 
 	/**
-	 * Sets the client's discovery port
+	 * Sets the client's discovery port.
 	 * 
 	 * @param discoveryPort
-	 *            The new discovery port
+	 *            the new discovery port.
 	 */
 	public final void setDiscoveryPort(int discoveryPort) {
 		this.discoveryPort = discoveryPort;
 	}
 
 	/**
-	 * Returns the client's discovery mode
-	 * 
-	 * @return The client's discovery mode
+	 * @return the client's discovery mode.
 	 */
 	public final DiscoveryMode getDiscoveryMode() {
 		return this.discoveryMode;
 	}
 
 	/**
-	 * Sets the client's discovery mode
+	 * Sets the client's discovery mode.
 	 * 
 	 * @param mode
-	 *            How the client will discover servers on the local network
+	 *            how the client will discover servers on the local network.
 	 */
 	public final void setDiscoveryMode(DiscoveryMode mode) {
 		this.discoveryMode = (mode != null ? mode : DiscoveryMode.NONE);
@@ -232,12 +247,12 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Adds a server to the client's external server discovery list, functions
-	 * like the normal discovery system but is not affect by the
-	 * <code>DiscoveryMode</code> or discovery port set for the client
+	 * Adds a server to the client's external server discovery list. This
+	 * functions like the normal discovery system but is not affected by the
+	 * <code>DiscoveryMode</code> or discovery port set for the client.
 	 * 
 	 * @param address
-	 *            The server address
+	 *            yhe server address.
 	 */
 	public final void addExternalServer(InetSocketAddress address) {
 		synchronized (externalServers) {
@@ -249,30 +264,30 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Adds a server to the client's external server discovery list, functions
-	 * like the normal discovery system but is not affect by the
-	 * <code>DiscoveryMode</code> or discovery port set for the client
+	 * Adds a server to the client's external server discovery list. This
+	 * functions like the normal discovery system but is not affected by the
+	 * <code>DiscoveryMode</code> or discovery port set for the client.
 	 * 
 	 * @param address
-	 *            The server address
+	 *            the server address.
 	 * @param port
-	 *            The server port
+	 *            the server port.
 	 */
 	public final void addExternalServer(InetAddress address, int port) {
 		this.addExternalServer(new InetSocketAddress(address, port));
 	}
 
 	/**
-	 * Adds a server to the client's external server discovery list, functions
-	 * like the normal discovery system but is not affect by the
-	 * <code>DiscoveryMode</code> or discovery port set for the client
+	 * Adds a server to the client's external server discovery list. This
+	 * functions like the normal discovery system but is not affected by the
+	 * <code>DiscoveryMode</code> or discovery port set for the client.
 	 * 
 	 * @param address
-	 *            The server address
+	 *            the server address.
 	 * @param port
-	 *            The server port
+	 *            the server port.
 	 * @throws UnknownHostException
-	 *             Thrown if the specified address is an unknown host
+	 *             if the specified address is an unknown host.
 	 */
 	public final void addExternalServer(String address, int port) throws UnknownHostException {
 		this.addExternalServer(InetAddress.getByName(address), port);
@@ -280,10 +295,10 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	/**
 	 * Removes an external server from the client's external server discovery
-	 * list
+	 * list.
 	 * 
 	 * @param address
-	 *            The server address
+	 *            the server address.
 	 */
 	public final void removeExternalServer(InetSocketAddress address) {
 		synchronized (externalServers) {
@@ -296,12 +311,12 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	/**
 	 * Removes an external server from the client's external server discovery
-	 * list
+	 * list.
 	 * 
 	 * @param address
-	 *            The server address
+	 *            the server address.
 	 * @param port
-	 *            The server port
+	 *            the server port.
 	 */
 	public final void removeExternalServer(InetAddress address, int port) {
 		this.removeExternalServer(new InetSocketAddress(address, port));
@@ -309,23 +324,21 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	/**
 	 * Removes an external server from the client's external server discovery
-	 * list
+	 * list.
 	 * 
 	 * @param address
-	 *            The server address
+	 *            the server address.
 	 * @param port
-	 *            The server port
+	 *            the server port.
 	 * @throws UnknownHostException
-	 *             Thrown if the specified address is an unknown host
+	 *             if the specified address is an unknown host.
 	 */
 	public final void removeExternalServer(String address, int port) throws UnknownHostException {
 		this.removeExternalServer(InetAddress.getByName(address), port);
 	}
 
 	/**
-	 * Returns the external servers as an array
-	 * 
-	 * @return The external servers as an array
+	 * @return the external servers as an array.
 	 */
 	public final DiscoveredServer[] getExternalServers() {
 		synchronized (externalServers) {
@@ -335,10 +348,10 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	/**
 	 * Adds a <code>MaximumTransferUnit</code> that can be used by the client
-	 * during connection
+	 * during connection.
 	 * 
 	 * @param maximumTransferUnit
-	 *            The maximum transfer unit
+	 *            the maximum transfer unit.
 	 */
 	public final void addMaximumTransferUnit(MaximumTransferUnit maximumTransferUnit) {
 		maximumTransferUnits.put(maximumTransferUnit.getMaximumTransferUnit(), maximumTransferUnit);
@@ -346,13 +359,13 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	/**
 	 * Adds a <code>MaximumTransferUnit</code> that can be used by the client
-	 * during connection
+	 * during connection.
 	 * 
 	 * @param maximumTransferUnit
-	 *            The maximum transfer unit
+	 *            the maximum transfer unit.
 	 * @param retries
-	 *            The amount of retries before the client moves on to the lower
-	 *            maximum transfer unit
+	 *            the amount of retries before the client moves on to the lower
+	 *            maximum transfer unit.
 	 */
 	public final void addMaximumTransferUnit(int maximumTransferUnit, int retries) {
 		this.addMaximumTransferUnit(new MaximumTransferUnit(maximumTransferUnit, retries));
@@ -360,10 +373,10 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	/**
 	 * Removes a <code>MaximumTransferUnit</code> that was being used by the
-	 * client based on it's maximum transfer unit
+	 * client based on it's maximum transfer unit.
 	 * 
 	 * @param maximumTransferUnit
-	 *            The maximum transfer unit to remove
+	 *            the maximum transfer unit to remove.
 	 */
 	public final void removeMaximumTransferUnit(int maximumTransferUnit) {
 		maximumTransferUnits.remove(maximumTransferUnit);
@@ -371,50 +384,43 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	/**
 	 * Removes a <code>MaximumTransferUnit</code> that was being used by the
-	 * client
+	 * client.
 	 * 
 	 * @param maximumTransferUnit
-	 *            The maximum transfer unit to remove
+	 *            the maximum transfer unit to remove.
 	 */
 	public final void removeMaximumTransferUnit(MaximumTransferUnit maximumTransferUnit) {
 		this.removeMaximumTransferUnit(maximumTransferUnit);
 	}
 
 	/**
-	 * Returns the <code>MaximumTransferUnit</code>'s the client uses during
-	 * login
-	 * 
-	 * @return The <code>MaximumTransferUnit</code>'s the client uses during
-	 *         login
+	 * @return the <code>MaximumTransferUnit</code>'s the client uses during
+	 *         login.
 	 */
 	public final MaximumTransferUnit[] getMaximumTransferUnits() {
 		return maximumTransferUnits.values().toArray(new MaximumTransferUnit[maximumTransferUnits.size()]);
 	}
 
 	/**
-	 * Returns the session the client is connected to
-	 * 
-	 * @return The session the client is connected to
+	 * @return the session the client is connected to.
 	 */
 	public final RakNetServerSession getSession() {
 		return this.session;
 	}
 
 	/**
-	 * Returns the client's listener
-	 * 
-	 * @return The client's listener
+	 * @return the client's listener.
 	 */
 	public final RakNetClientListener getListener() {
 		return this.listener;
 	}
 
 	/**
-	 * Sets the client's listener
+	 * Sets the client's listener.
 	 * 
 	 * @param listener
-	 *            The client's new listener
-	 * @return The client
+	 *            the client's new listener.
+	 * @return the client.
 	 */
 	public final RakNetClient setListener(RakNetClientListener listener) {
 		if (listener == null) {
@@ -425,9 +431,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Returns whether or not the client is connected
-	 * 
-	 * @return Whether or not the client is connected
+	 * @return true if the client is connected.
 	 */
 	public final boolean isConnected() {
 		if (session != null) {
@@ -437,12 +441,12 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Called whenever the handler catches an exception in Netty
+	 * Called whenever the handler catches an exception in Netty.
 	 * 
 	 * @param address
-	 *            The address that caused the exception
+	 *            the address that caused the exception.
 	 * @param cause
-	 *            The exception caught by the handler
+	 *            the exception caught by the handler.
 	 */
 	protected final void handleHandlerException(InetSocketAddress address, Throwable cause) {
 		listener.onHandlerException(address, cause);
@@ -460,12 +464,12 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Handles a packet received by the handler
+	 * Handles a packet received by the handler.
 	 * 
 	 * @param packet
-	 *            The packet to handle
+	 *            the packet to handle.
 	 * @param sender
-	 *            The address of the sender
+	 *            the address of the sender.
 	 */
 	public final void handleMessage(RakNetPacket packet, InetSocketAddress sender) {
 		short packetId = packet.getId();
@@ -506,51 +510,51 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Sends a raw message to the specified address, be careful when using this
-	 * method! As if it is used incorrectly it could break server sessions
-	 * entirely. If you are wanting to send a message to a session, you are
+	 * Sends a raw message to the specified address. Be careful when using this
+	 * method, because if it is used incorrectly it could break server sessions
+	 * entirely! If you are wanting to send a message to a session, you are
 	 * probably looking for the
 	 * {@link net.marfgamer.jraknet.session.RakNetSession#sendMessage(net.marfgamer.jraknet.protocol.Reliability, net.marfgamer.jraknet.Packet)
-	 * sendMessage} method
+	 * sendMessage} method.
 	 * 
 	 * @param buf
-	 *            The buffer to send
+	 *            the buffer to send.
 	 * @param address
-	 *            The address to send the buffer to
+	 *            the address to send the buffer to.
 	 */
 	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(buf, address));
 	}
 
 	/**
-	 * Sends a raw message to the specified address, be careful when using this
-	 * method! As if it is used incorrectly it could break server sessions
-	 * entirely. If you are wanting to send a message to a session, you are
+	 * Sends a raw message to the specified address. Be careful when using this
+	 * method, because if it is used incorrectly it could break server sessions
+	 * entirely! If you are wanting to send a message to a session, you are
 	 * probably looking for the
 	 * {@link net.marfgamer.jraknet.session.RakNetSession#sendMessage(net.marfgamer.jraknet.protocol.Reliability, net.marfgamer.jraknet.Packet)
-	 * sendMessage} method
+	 * sendMessage} method.
 	 * 
 	 * @param packet
-	 *            The packet to send
+	 *            the packet to send.
 	 * @param address
-	 *            The address to send the packet to
+	 *            the address to send the packet to.
 	 */
 	public final void sendNettyMessage(Packet packet, InetSocketAddress address) {
 		this.sendNettyMessage(packet.buffer(), address);
 	}
 
 	/**
-	 * Sends a raw message to the specified address, be careful when using this
-	 * method! As if it is used incorrectly it could break server sessions
-	 * entirely. If you are wanting to send a message to a session, you are
+	 * Sends a raw message to the specified address. Be careful when using this
+	 * method, because if it is used incorrectly it could break server sessions
+	 * entirely! If you are wanting to send a message to a session, you are
 	 * probably looking for the
 	 * {@link net.marfgamer.jraknet.session.RakNetSession#sendMessage(net.marfgamer.jraknet.protocol.Reliability, int)
-	 * sendMessage} method
+	 * sendMessage} method.
 	 * 
 	 * @param packetId
-	 *            The ID of the packet to send
+	 *            the ID of the packet to send.
 	 * @param address
-	 *            The address to send the packet to
+	 *            the address to send the packet to.
 	 */
 	public final void sendNettyMessage(int packetId, InetSocketAddress address) {
 		this.sendNettyMessage(new RakNetPacket(packetId), address);
@@ -558,7 +562,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	/**
 	 * Updates the discovery data in the client by sending pings and removing
-	 * servers that have taken too long to respond to a ping
+	 * servers that have taken too long to respond to a ping.
 	 */
 	public final void updateDiscoveryData() {
 		// Remove all servers that have timed out
@@ -604,13 +608,13 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * This method handles the specified pong packet and updates the discovery
-	 * data accordingly
+	 * This method handles the specified <code>UnconnectedPong</code> packet and
+	 * updates the discovery data accordingly.
 	 * 
 	 * @param sender
-	 *            The sender of the pong packet
+	 *            the sender of the <code>UnconnectedPong</code> packet.
 	 * @param pong
-	 *            The pong packet to handle
+	 *            the <code>UnconnectedPong</code> packet to handle.
 	 */
 	public final void updateDiscoveryData(InetSocketAddress sender, UnconnectedPong pong) {
 		// Is this a local or an external server?
@@ -652,12 +656,12 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Connects the client to a server with the specified address
+	 * Connects the client to a server with the specified address.
 	 * 
 	 * @param address
-	 *            The address of the server to connect to
+	 *            the address of the server to connect to.
 	 * @throws RakNetException
-	 *             Thrown if an error occurs during connection or login
+	 *             if an error occurs during connection or login.
 	 */
 	public final void connect(InetSocketAddress address) throws RakNetException {
 		// Make sure we have a listener
@@ -710,7 +714,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 				this.sendNettyMessage(connectionRequestTwo, address);
 				RakNetUtils.threadLock(500);
 			} else {
-				preparation.cancelReason = new PacketBufferException(connectionRequestTwo);
+				preparation.cancelReason = new PacketBufferException(this, connectionRequestTwo);
 			}
 		}
 
@@ -744,42 +748,42 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Connects the client to a server with the specified address
+	 * Connects the client to a server with the specified address.
 	 * 
 	 * @param address
-	 *            The address of the server to connect to
+	 *            the address of the server to connect to.
 	 * @param port
-	 *            The port of the server to connect to
+	 *            the port of the server to connect to.
 	 * @throws RakNetException
-	 *             Thrown if an error occurs during connection or login
+	 *             if an error occurs during connection or login.
 	 */
 	public final void connect(InetAddress address, int port) throws RakNetException {
 		this.connect(new InetSocketAddress(address, port));
 	}
 
 	/**
-	 * Connects the client to a server with the specified address
+	 * Connects the client to a server with the specified address.
 	 * 
 	 * @param address
-	 *            The address of the server to connect to
+	 *            the address of the server to connect to.
 	 * @param port
-	 *            The port of the server to connect to
+	 *            the port of the server to connect to.
 	 * @throws RakNetException
-	 *             Thrown if an error occurs during connection or login
+	 *             if an error occurs during connection or login.
 	 * @throws UnknownHostException
-	 *             Thrown if the specified address is an unknown host
+	 *             if the specified address is an unknown host.
 	 */
 	public final void connect(String address, int port) throws RakNetException, UnknownHostException {
 		this.connect(InetAddress.getByName(address), port);
 	}
 
 	/**
-	 * Connects the the client to the specified discovered server
+	 * Connects the the client to the specified discovered server.
 	 * 
 	 * @param server
-	 *            The discovered server to connect to
+	 *            the discovered server to connect to.
 	 * @throws RakNetException
-	 *             Thrown if an error occurs during connection or login
+	 *             if an error occurs during connection or login.
 	 */
 	public final void connect(DiscoveredServer server) throws RakNetException {
 		this.connect(server.getAddress());
@@ -787,11 +791,11 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	/**
 	 * Connects the client to a server with the specified address on it's own
-	 * Thread
+	 * <code>Thread</code>.
 	 * 
 	 * @param address
-	 *            The address of the server to connect to
-	 * @return The Thread the client is running on
+	 *            the address of the server to connect to.
+	 * @return the Thread the client is running on.
 	 */
 	public final synchronized Thread connectThreaded(InetSocketAddress address) {
 		// Give the thread a reference
@@ -816,13 +820,13 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	/**
 	 * Connects the client to a server with the specified address on it's own
-	 * Thread
+	 * <code>Thread</code>.
 	 * 
 	 * @param address
-	 *            The address of the server to connect to
+	 *            the address of the server to connect to.
 	 * @param port
-	 *            The port of the server to connect to
-	 * @return The Thread the client is running on
+	 *            the port of the server to connect to.
+	 * @return the Thread the client is running on.
 	 */
 	public final Thread connectThreaded(InetAddress address, int port) {
 		return this.connectThreaded(new InetSocketAddress(address, port));
@@ -830,15 +834,15 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	/**
 	 * Connects the client to a server with the specified address on it's own
-	 * Thread
+	 * <code>Thread</code>.
 	 * 
 	 * @param address
-	 *            The address of the server to connect to
+	 *            the address of the server to connect to.
 	 * @param port
-	 *            The port of the server to connect to
+	 *            the port of the server to connect to.
 	 * @throws UnknownHostException
-	 *             Thrown if the specified address is an unknown host
-	 * @return The Thread the client is running on
+	 *             if the specified address is an unknown host.
+	 * @return the Thread the client is running on.
 	 */
 	public final Thread connectThreaded(String address, int port) throws UnknownHostException {
 		return this.connectThreaded(InetAddress.getByName(address), port);
@@ -846,18 +850,18 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	/**
 	 * Connects the the client to the specified discovered server on it's own
-	 * Thread
+	 * <code>Thread</code>.
 	 * 
 	 * @param server
-	 *            The discovered server to connect to
-	 * @return The Thread the client is running on
+	 *            the discovered server to connect to.
+	 * @return the Thread the client is running on.
 	 */
 	public final Thread connectThreaded(DiscoveredServer server) {
 		return this.connectThreaded(server.getAddress());
 	}
 
 	/**
-	 * Starts the loop needed for the client to stay connected to the server
+	 * Starts the loop needed for the client to stay connected to the server.
 	 */
 	private final void initConnection() throws RakNetException {
 		while (session != null) {
@@ -873,10 +877,10 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Disconnects the client from the server if it is connected to one
+	 * Disconnects the client from the server if it is connected to one.
 	 * 
 	 * @param reason
-	 *            The reason the client disconnected from the server
+	 *            the reason the client disconnected from the server.
 	 */
 	public final void disconnect(String reason) {
 		if (session != null) {
@@ -887,7 +891,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Disconnects the client from the server if it is connected to one
+	 * Disconnects the client from the server if it is connected to one.
 	 */
 	public final void disconnect() {
 		this.disconnect("Disconnected");
@@ -895,7 +899,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	/**
 	 * Shuts down the client for good, once this is called the client can no
-	 * longer connect to servers
+	 * longer connect to servers.
 	 */
 	public final void shutdown() {
 		// Close channel
@@ -912,10 +916,10 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	/**
 	 * Disconnects from the server and shuts down the client for good, once this
-	 * is called the client can no longer connect to servers
+	 * is called the client can no longer connect to servers.
 	 * 
 	 * @param reason
-	 *            The reason the client shutdown
+	 *            the reason the client shutdown.
 	 */
 	public final void disconnectAndShutdown(String reason) {
 		this.disconnect(reason);
@@ -924,7 +928,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	/**
 	 * Disconnects from the server and shuts down the client for good, once this
-	 * is called the client can no longer connect to servers
+	 * is called the client can no longer connect to servers.
 	 */
 	public final void disconnectAndShutdown() {
 		this.disconnectAndShutdown("Shutdown");

@@ -6,7 +6,7 @@
  * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
  *                                                  
- * The MIT License (MIT)
+ * the MIT License (MIT)
  *
  * Copyright (c) 2016, 2017 MarfGamer
  *
@@ -17,7 +17,7 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
+ * the above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -33,7 +33,7 @@ package net.marfgamer.jraknet.identifier;
 import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
- * This class represents an identifier from Minecraft: Pocket Edition servers
+ * Represents an identifier from a Minecraft: Pocket Edition server.
  *
  * @author MarfGamer
  */
@@ -47,11 +47,9 @@ public class MCPEIdentifier extends Identifier {
 	private static final int DATA_COUNT = 9;
 
 	/**
-	 * Returns whether or not the specified version tag is valid
-	 * 
 	 * @param versionTag
-	 *            The version tag to validate
-	 * @return Whether or not the version tag is valid
+	 *            the version tag to validate.
+	 * @return true if the version tag is valid.
 	 */
 	private static boolean verifyVersionTag(String versionTag) {
 		for (char vtc : versionTag.toCharArray()) {
@@ -72,13 +70,10 @@ public class MCPEIdentifier extends Identifier {
 	}
 
 	/**
-	 * Returns whether or not the specified identifier is a Minecraft: Pocket
-	 * Edition identifier
-	 * 
 	 * @param identifier
-	 *            The identifier to check
-	 * @return Whether or not the specified identifier is a Miencraft: Pocket
-	 *         Edition identifier
+	 *            the identifier to check.
+	 * @return true if the specified identifier is a Minecraft: Pocket Edition
+	 *         identifier.
 	 */
 	public static boolean isMCPEIdentifier(Identifier identifier) {
 		return identifier.build().startsWith(HEADER);
@@ -94,6 +89,28 @@ public class MCPEIdentifier extends Identifier {
 	private String gamemode;
 	private boolean legacy;
 
+	/**
+	 * Constructs an <code>MCPEIdentifier</code> with the specified server name,
+	 * server protocol, version tag, online player count, max player count,
+	 * globally unique ID, world name, and gamemode.
+	 * 
+	 * @param serverName
+	 *            the server name.
+	 * @param serverProtocol
+	 *            the server protocol.
+	 * @param versionTag
+	 *            the version tag.
+	 * @param onlinePlayerCount
+	 *            the online player count.
+	 * @param maxPlayerCount
+	 *            the max player count.
+	 * @param guid
+	 *            the globally unique ID.
+	 * @param worldName
+	 *            the world name.
+	 * @param gamemode
+	 *            the gamemode.
+	 */
 	public MCPEIdentifier(String serverName, int serverProtocol, String versionTag, int onlinePlayerCount,
 			int maxPlayerCount, long guid, String worldName, String gamemode) {
 		this.serverName = serverName;
@@ -113,6 +130,13 @@ public class MCPEIdentifier extends Identifier {
 		}
 	}
 
+	/**
+	 * Constructs a <code>MCPEIdentifer</code> by parsing the specified
+	 * <code>Identifier</code>.
+	 * 
+	 * @param identifier
+	 *            the <code>Identifier</code> to parse.
+	 */
 	public MCPEIdentifier(Identifier identifier) {
 		String[] data = identifier.build().split(SEPERATOR);
 		if (data.length >= DATA_COUNT_LEGACY) {
@@ -140,112 +164,106 @@ public class MCPEIdentifier extends Identifier {
 		}
 	}
 
+	/**
+	 * Constructs a <code>MCPEIdentifer</code> by parsing the specified String
+	 * identifier.
+	 * 
+	 * @param identifier
+	 *            the identifier to parse.
+	 */
 	public MCPEIdentifier(String identifier) {
 		this(new Identifier(identifier));
 	}
 
+	/**
+	 * Constructs a blank <code>MCPEIdentifier</code>.
+	 */
 	public MCPEIdentifier() {
 		this("", -1, "", -1, -1, -1, "", "");
 	}
 
 	/**
-	 * Returns the server name
-	 * 
-	 * @return The server name
+	 * @return the server name.
 	 */
 	public String getServerName() {
 		return this.serverName;
 	}
 
 	/**
-	 * Returns the server protocol
-	 * 
-	 * @return The server protocol
+	 * @return the server protocol.
 	 */
 	public int getServerProtocol() {
 		return this.serverProtocol;
 	}
 
 	/**
-	 * Returns the version tag
-	 * 
-	 * @return The version tag
+	 * @return the version tag.
 	 */
 	public String getVersionTag() {
 		return this.versionTag;
 	}
 
 	/**
-	 * Returns the online player count
-	 * 
-	 * @return The online player count
+	 * @return the online player count.
 	 */
 	public int getOnlinePlayerCount() {
 		return this.onlinePlayerCount;
 	}
 
 	/**
-	 * Returns the max player count
-	 * 
-	 * @return The max player count
+	 * @return the max player count.
 	 */
 	public int getMaxPlayerCount() {
 		return this.maxPlayerCount;
 	}
 
 	/**
-	 * Returns the globally unique ID (GUID)
-	 * 
-	 * @return The globally unique ID
+	 * @return the globally unique ID.
 	 */
 	public long getGloballyUniqueId() {
 		return this.guid;
 	}
 
 	/**
-	 * Returns the world name
-	 * 
-	 * @return The world name
+	 * @return the world name.
 	 */
 	public String getWorldName() {
 		return this.worldName;
 	}
 
 	/**
-	 * Returns the gamemode
-	 * 
-	 * @return The gamemode
+	 * @return the gamemode.
 	 */
 	public String getGamemode() {
 		return this.gamemode;
 	}
 
 	/**
-	 * Sets the server name
+	 * Sets the server name.
 	 * 
 	 * @param serverName
-	 *            The new server name
+	 *            the new server name.
 	 */
 	public void setServerName(String serverName) {
 		this.serverName = serverName;
 	}
 
 	/**
-	 * Sets the server protocol
+	 * Sets the server protocol.
 	 * 
 	 * @param serverProtocol
-	 *            The new server protocol
+	 *            the new server protocol.
 	 */
 	public void setServerProtocol(int serverProtocol) {
 		this.serverProtocol = serverProtocol;
 	}
 
 	/**
-	 * Sets the version tag
+	 * Sets the version tag.
 	 * 
 	 * @param versionTag
-	 *            The new version tag
-	 * @return Whether or not the version tag was set
+	 *            the new version tag.
+	 * @return true if the version tag was set
 	 */
 	public boolean setVersionTag(String versionTag) {
 		if (verifyVersionTag(versionTag)) {
@@ -256,71 +274,69 @@ public class MCPEIdentifier extends Identifier {
 	}
 
 	/**
-	 * Sets the online player count
+	 * Sets the online player count.
 	 * 
 	 * @param onlinePlayerCount
-	 *            The new online player count
+	 *            the new online player count.
 	 */
 	public void setOnlinePlayerCount(int onlinePlayerCount) {
 		this.onlinePlayerCount = onlinePlayerCount;
 	}
 
 	/**
-	 * Sets the max player count
+	 * Sets the max player count.
 	 * 
 	 * @param maxPlayerCount
-	 *            The new max player count
+	 *            the new max player count.
 	 */
 	public void setMaxPlayerCount(int maxPlayerCount) {
 		this.maxPlayerCount = maxPlayerCount;
 	}
 
 	/**
-	 * Sets the globally unique ID (GUID)
+	 * Sets the globally unique ID.
 	 * 
 	 * @param guid
-	 *            The new globally unique ID
+	 *            the new globally unique ID.
 	 */
 	public void setServerGloballyUniqueId(long guid) {
 		this.guid = guid;
 	}
 
 	/**
-	 * Sets the world name
+	 * Sets the world name.
 	 * 
 	 * @param worldName
-	 *            The new world name
+	 *            the new world name.
 	 */
 	public void setWorldName(String worldName) {
 		this.worldName = worldName;
 	}
 
 	/**
-	 * Sets the gamemode
+	 * Sets the gamemode.
 	 * 
 	 * @param gamemode
-	 *            The new gamemode
+	 *            the new gamemode.
 	 */
 	public void setGamemode(String gamemode) {
 		this.gamemode = gamemode;
 	}
 
 	/**
-	 * Enables/Disables the legacy builder
+	 * Enables/Disables the legacy builder.
 	 * 
 	 * @param legacy
-	 *            The legacy toggle
+	 *            the legacy toggle.
 	 */
-	public void setLegacy(boolean legacy) {
+	public void setLegacyMode(boolean legacy) {
 		this.legacy = legacy;
 	}
 
 	/**
-	 * Returns whether or not the identifier is legacy
-	 * 
-	 * @return Whether or not the identifier is legacy
+	 * @return true if the identifier is in legacy mode.
 	 */
-	public boolean isLegacy() {
+	public boolean isLegacyMode() {
 		return this.legacy;
 	}
 

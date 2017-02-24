@@ -31,7 +31,7 @@
 package net.marfgamer.jraknet.protocol;
 
 /**
- * Contains all the reliability types for RakNet
+ * Contains all the reliability types for RakNet.
  * 
  * @author MarfGamer
  */
@@ -51,6 +51,22 @@ public enum Reliability {
 	private final boolean sequenced;
 	private final boolean requiresAck;
 
+	/**
+	 * Constructs a <code>Reliability</code> with the specified reliability and
+	 * whether or not it is reliable, ordered, sequenced, or requires an
+	 * acknowledge receipt.
+	 * 
+	 * @param reliability
+	 *            the reliability.
+	 * @param reliable
+	 *            whether or not it is reliable.
+	 * @param ordered
+	 *            whether or not it is ordered.
+	 * @param sequenced
+	 *            whether or not it is sequenced.
+	 * @param requiresAck
+	 *            whether or not it requires an acknowledge receipt.
+	 */
 	private Reliability(int reliability, boolean reliable, boolean ordered, boolean sequenced, boolean requiresAck) {
 		this.reliability = (byte) reliability;
 		this.reliable = reliable;
@@ -60,56 +76,44 @@ public enum Reliability {
 	}
 
 	/**
-	 * Returns the reliability as a byte
-	 * 
-	 * @return The reliability as a byte
+	 * @return the reliability as a byte.
 	 */
 	public byte asByte() {
 		return this.reliability;
 	}
 
 	/**
-	 * Returns whether or not the reliability is reliable
-	 * 
-	 * @return Whether or not the reliability is reliable
+	 * @return true if the reliability is reliable.
 	 */
 	public boolean isReliable() {
 		return this.reliable;
 	}
 
 	/**
-	 * Returns whether or not the reliability is ordered
-	 * 
-	 * @return Whether or not the reliability is ordered
+	 * @return true if the reliability is ordered.
 	 */
 	public boolean isOrdered() {
 		return this.ordered;
 	}
 
 	/**
-	 * Returns whether or not the reliability is sequenced
-	 * 
-	 * @return Whether or not the reliability is sequenced
+	 * @return true if the reliability is sequenced.
 	 */
 	public boolean isSequenced() {
 		return this.sequenced;
 	}
 
 	/**
-	 * Returns whether or not the reliability requires Acknowledgement
-	 * 
-	 * @return Whether or not the reliability requires Acknowledgement
+	 * @return true if the reliability requires acknowledgement.
 	 */
 	public boolean requiresAck() {
 		return this.requiresAck;
 	}
 
 	/**
-	 * Returns the reliability based on it's ID
-	 * 
 	 * @param reliability
-	 *            The ID of the reliability to lookup
-	 * @return The reliability based on it's ID
+	 *            the ID of the reliability to lookup.
+	 * @return the reliability based on it's ID.
 	 */
 	public static Reliability lookup(int reliability) {
 		Reliability[] reliabilities = Reliability.values();

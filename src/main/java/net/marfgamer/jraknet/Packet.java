@@ -6,7 +6,7 @@
  * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
  *                                                  
- * The MIT License (MIT)
+ * the MIT License (MIT)
  *
  * Copyright (c) 2016, 2017 MarfGamer
  *
@@ -17,7 +17,7 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
+ * the above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -44,7 +44,7 @@ import net.marfgamer.jraknet.stream.PacketDataInput;
 import net.marfgamer.jraknet.stream.PacketDataOutput;
 
 /**
- * Used to read and write data with ease
+ * Used to read and write data with ease.
  *
  * @author MarfGamer
  */
@@ -60,33 +60,65 @@ public class Packet {
 	private PacketDataInput input;
 	private PacketDataOutput output;
 
+	/**
+	 * Constructs a <code>Packet</code> that reads from and writes to the
+	 * specified <code>ByteBuf</code>.
+	 * 
+	 * @param buffer
+	 *            the <code>ByteBuf</code> to read from and write to.
+	 */
 	public Packet(ByteBuf buffer) {
 		this.buffer = buffer;
 		this.input = new PacketDataInput(this);
 		this.output = new PacketDataOutput(this);
 	}
 
+	/**
+	 * Constructs a <code>Packet</code> that reads from and writes to the
+	 * specified <code>DatagramPacket</code>
+	 * 
+	 * @param datagram
+	 *            the <code>DatagramPacket</code> to read from and write to.
+	 */
 	public Packet(DatagramPacket datagram) {
 		this(Unpooled.copiedBuffer(datagram.content()));
 	}
 
+	/**
+	 * Constructs a <code>Packet</code> that reads from and writes to the
+	 * specified byte array.
+	 * 
+	 * @param data
+	 *            the byte[] to read from and write to.
+	 */
 	public Packet(byte[] data) {
 		this(Unpooled.copiedBuffer(data));
 	}
 
+	/**
+	 * Constructs a <code>Packet</code> that reads from and writes to the
+	 * specified <code>Packet</code>.
+	 * 
+	 * @param packet
+	 *            the <code>Packet</code> to read from and write to.
+	 */
 	public Packet(Packet packet) {
 		this(Unpooled.copiedBuffer(packet.buffer));
 	}
 
+	/**
+	 * Constructs a blank <code>Packet</code> using an empty
+	 * <code>ByteBuf</code>.
+	 */
 	public Packet() {
 		this(Unpooled.buffer());
 	}
 
 	/**
-	 * Reads data into the specified byte array
+	 * Reads data into the specified byte array.
 	 * 
 	 * @param dest
-	 *            The bytes to read the data into
+	 *            the bytes to read the data into.
 	 */
 	public void read(byte[] dest) {
 		for (int i = 0; i < dest.length; i++) {
@@ -95,11 +127,11 @@ public class Packet {
 	}
 
 	/**
-	 * Returns a byte array of the read data with the specified size
+	 * Returns a byte array of the read data with the specified size.
 	 * 
 	 * @param length
-	 *            The amount of bytes to read
-	 * @return A byte array of the read data with the specified size
+	 *            the amount of bytes to read.
+	 * @return a byte array of the read data with the specified size.
 	 */
 	public byte[] read(int length) {
 		byte[] data = new byte[length];
@@ -110,27 +142,27 @@ public class Packet {
 	}
 
 	/**
-	 * Reads a byte
+	 * Reads a byte.
 	 * 
-	 * @return A single byte
+	 * @return a byte.
 	 */
 	public byte readByte() {
 		return buffer.readByte();
 	}
 
 	/**
-	 * Reads a unsigned byte
+	 * Reads an unsigned byte.
 	 * 
-	 * @return A single unsigned byte
+	 * @return an unsigned byte.
 	 */
 	public short readUByte() {
 		return (short) (buffer.readByte() & 0xFF);
 	}
 
 	/**
-	 * Reads a flipped unsigned byte casted back to a byte
+	 * Reads a flipped unsigned byte casted back to a byte.
 	 * 
-	 * @return A flipped unsigned byte casted back to a byte
+	 * @return a flipped unsigned byte casted back to a byte.
 	 */
 	private byte readCFUByte() {
 		return (byte) (~buffer.readByte() & 0xFF);
@@ -138,12 +170,12 @@ public class Packet {
 
 	/**
 	 * Returns a byte array of the read flipped unsigned byte's casted back to a
-	 * byte
+	 * byte.
 	 * 
 	 * @param length
-	 *            The amount of bytes to read
-	 * @return A byte array of the read flipped unsigned byte's casted back to a
-	 *         byte with the specified size
+	 *            the amount of bytes to read.
+	 * @return a byte array of the read flipped unsigned byte's casted back to a
+	 *         byte with the specified size.
 	 */
 	private byte[] readCFU(int length) {
 		byte[] data = new byte[length];
@@ -154,135 +186,135 @@ public class Packet {
 	}
 
 	/**
-	 * Reads a boolean (Anything larger than 0 is considered true)
+	 * Reads a boolean (Anything larger than 0 is considered true).
 	 * 
-	 * @return A boolean
+	 * @return a boolean.
 	 */
 	public boolean readBoolean() {
 		return (this.readUByte() > 0x00);
 	}
 
 	/**
-	 * Reads a short
+	 * Reads a short.
 	 * 
-	 * @return A short
+	 * @return a short.
 	 */
 	public short readShort() {
 		return buffer.readShort();
 	}
 
 	/**
-	 * Reads a little endian short
+	 * Reads a little endian short.
 	 * 
-	 * @return A little endian short
+	 * @return a little endian short.
 	 */
 	public short readShortLE() {
 		return buffer.readShortLE();
 	}
 
 	/**
-	 * Reads an unsigned short
+	 * Reads an unsigned short.
 	 * 
-	 * @return An unsigned short
+	 * @return an unsigned short.
 	 */
 	public int readUShort() {
 		return (buffer.readShort() & 0xFFFF);
 	}
 
 	/**
-	 * Reads an unsigned little endian short
+	 * Reads an unsigned little endian short.
 	 * 
-	 * @return An unsigned little endian short
+	 * @return an unsigned little endian short.
 	 */
 	public int readUShortLE() {
 		return (buffer.readShortLE() & 0xFFFF);
 	}
 
 	/**
-	 * Reads a little endian triad
+	 * Reads a little endian triad.
 	 * 
-	 * @return A little endian triad
+	 * @return a little endian triad.
 	 */
 	public int readTriadLE() {
 		return (buffer.readByte() & 0xFF) | ((buffer.readByte() & 0xFF) << 8) | ((buffer.readByte() & 0x0F) << 16);
 	}
 
 	/**
-	 * Reads an integer
+	 * Reads an integer.
 	 * 
-	 * @return An integer
+	 * @return an integer.
 	 */
 	public int readInt() {
 		return buffer.readInt();
 	}
 
 	/**
-	 * Reads a little endian integer
+	 * Reads a little endian integer.
 	 * 
-	 * @return A little endian integer
+	 * @return a little endian integer.
 	 */
 	public int readIntLE() {
 		return buffer.readIntLE();
 	}
 
 	/**
-	 * Reads an unsigned integer
+	 * Reads an unsigned integer.
 	 * 
-	 * @return An unsigned integer
+	 * @return an unsigned integer.
 	 */
 	public long readUInt() {
 		return (buffer.readInt() & 0x00000000FFFFFFFFL);
 	}
 
 	/**
-	 * Reads an unsigned little endian integer
+	 * Reads an unsigned little endian integer.
 	 * 
-	 * @return An unsigned little endian integer
+	 * @return an unsigned little endian integer.
 	 */
 	public long readUIntLE() {
 		return (buffer.readIntLE() & 0x00000000FFFFFFFFL);
 	}
 
 	/**
-	 * Reads a long
+	 * Reads a long.
 	 * 
-	 * @return A long
+	 * @return a long.
 	 */
 	public long readLong() {
 		return buffer.readLong();
 	}
 
 	/**
-	 * Reads a little endian long
+	 * Reads a little endian long.
 	 * 
-	 * @return A little endian long
+	 * @return a little endian long.
 	 */
 	public long readLongLE() {
 		return buffer.readLongLE();
 	}
 
 	/**
-	 * Reads a float
+	 * Reads a float.
 	 * 
-	 * @return A float
+	 * @return a float.
 	 */
 	public float readFloat() {
 		return buffer.readFloat();
 	}
 
 	/**
-	 * Reads a double
+	 * Reads a double.
 	 * 
-	 * @return A double
+	 * @return a double.
 	 */
 	public double readDouble() {
 		return buffer.readDouble();
 	}
 
 	/**
-	 * Reads a magic array and returns whether or not it is valid
+	 * Reads a magic array and returns whether or not it is valid.
 	 * 
-	 * @return Whether or not the magic array was valid
+	 * @return whether or not the magic array was valid.
 	 */
 	public boolean checkMagic() {
 		byte[] magicCheck = this.read(MAGIC.length);
@@ -290,9 +322,9 @@ public class Packet {
 	}
 
 	/**
-	 * Reads a UTF-8 String with it's length prefixed by a unsigned short
+	 * Reads a UTF-8 String with it's length prefixed by a unsigned short.
 	 * 
-	 * @return A String
+	 * @return a String.
 	 */
 	public String readString() {
 		int len = this.readUShort();
@@ -302,9 +334,9 @@ public class Packet {
 
 	/**
 	 * Reads a UTF-8 String with it's length prefixed by a unsigned little
-	 * endian short
+	 * endian short.
 	 * 
-	 * @return A String
+	 * @return a String.
 	 */
 	public String readStringLE() {
 		int len = this.readUShortLE();
@@ -313,11 +345,11 @@ public class Packet {
 	}
 
 	/**
-	 * Reads an IPv4/IPv6 address
+	 * Reads an IPv4/IPv6 address.
 	 * 
-	 * @return An IPv4/IPv6 address
+	 * @return an IPv4/IPv6 address.
 	 * @throws UnknownHostException
-	 *             Thrown if an error occurs when reading the address
+	 *             if an error occurs when reading the address.
 	 */
 	public InetSocketAddress readAddress() throws UnknownHostException {
 		short version = this.readUByte();
@@ -337,11 +369,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes the specified byte array to the packet
+	 * Writes the specified byte array to the packet.
 	 * 
 	 * @param data
-	 *            The data to write
-	 * @return The packet
+	 *            the data to write.
+	 * @return the packet.
 	 */
 	public Packet write(byte[] data) {
 		for (int i = 0; i < data.length; i++) {
@@ -351,11 +383,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes the specified amount of null (0x00) bytes to the packet
+	 * Writes the specified amount of null (0x00) bytes to the packet.
 	 * 
 	 * @param length
-	 *            The amount of bytes to write
-	 * @return The packet
+	 *            the amount of bytes to write.
+	 * @return the packet.
 	 */
 	public Packet pad(int length) {
 		for (int i = 0; i < length; i++) {
@@ -365,11 +397,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a byte to the packet
+	 * Writes a byte to the packet.
 	 * 
 	 * @param b
-	 *            The byte
-	 * @return The packet
+	 *            the byte.
+	 * @return the packet.
 	 */
 	public Packet writeByte(int b) {
 		buffer.writeByte((byte) b);
@@ -377,11 +409,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes an unsigned by to the packet
+	 * Writes an unsigned by to the packet.
 	 * 
 	 * @param b
-	 *            The unsigned byte
-	 * @return The packet
+	 *            the unsigned byte.
+	 * @return the packet.
 	 */
 	public Packet writeUByte(int b) {
 		buffer.writeByte(((byte) b) & 0xFF);
@@ -389,11 +421,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a flipped unsigned byte casted back into a byte to the packet
+	 * Writes a flipped unsigned byte casted back into a byte to the packet.
 	 * 
 	 * @param b
-	 *            The byte
-	 * @return The packet
+	 *            the byte
+	 * @return the packet.
 	 */
 	private Packet writeCFUByte(byte b) {
 		buffer.writeByte(~b & 0xFF);
@@ -402,11 +434,11 @@ public class Packet {
 
 	/**
 	 * Writes a byte array of the specified flipped unsigned byte's casted back
-	 * to a byte to the packet
+	 * to a byte to the packet.
 	 * 
 	 * @param data
-	 *            The data to write
-	 * @return The packet
+	 *            the data to write.
+	 * @return the packet.
 	 */
 	private Packet writeCFU(byte[] data) {
 		for (int i = 0; i < data.length; i++) {
@@ -416,11 +448,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a boolean value to the packet
+	 * Writes a boolean value to the packet.
 	 * 
 	 * @param b
-	 *            The boolean
-	 * @return The packet
+	 *            the boolean.
+	 * @return the packet.
 	 */
 	public Packet writeBoolean(boolean b) {
 		buffer.writeByte(b ? 0x01 : 0x00);
@@ -428,11 +460,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a short to the packet
+	 * Writes a short to the packet.
 	 * 
 	 * @param s
-	 *            The short
-	 * @return The packet
+	 *            the short.
+	 * @return the packet.
 	 */
 	public Packet writeShort(int s) {
 		buffer.writeShort(s);
@@ -440,11 +472,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a little endian short to the packet
+	 * Writes a little endian short to the packet.
 	 * 
 	 * @param s
-	 *            The short
-	 * @return The packet
+	 *            the short.
+	 * @return the packet.
 	 */
 	public Packet writeShortLE(int s) {
 		buffer.writeShortLE(s);
@@ -452,11 +484,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a unsigned short to the packet
+	 * Writes a unsigned short to the packet.
 	 * 
 	 * @param s
-	 *            The short
-	 * @return The packet
+	 *            the short.
+	 * @return the packet.
 	 */
 	public Packet writeUShort(int s) {
 		buffer.writeShort(((short) s) & 0xFFFF);
@@ -464,11 +496,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes an unsigned little endian short to the packet
+	 * Writes an unsigned little endian short to the packet.
 	 * 
 	 * @param s
-	 *            The short
-	 * @return The packet
+	 *            the short.
+	 * @return the packet.
 	 */
 	public Packet writeUShortLE(int s) {
 		buffer.writeShortLE(((short) s) & 0xFFFF);
@@ -476,11 +508,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a little endian triad to the packet
+	 * Writes a little endian triad to the packet.
 	 * 
 	 * @param t
-	 *            The triad
-	 * @return The packet
+	 *            the triad.
+	 * @return the packet.
 	 */
 	public Packet writeTriadLE(int t) {
 		buffer.writeByte((byte) (t & 0xFF));
@@ -490,11 +522,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes an integer to the packet
+	 * Writes an integer to the packet.
 	 * 
 	 * @param i
-	 *            The integer
-	 * @return The packet
+	 *            the integer.
+	 * @return the packet.
 	 */
 	public Packet writeInt(int i) {
 		buffer.writeInt(i);
@@ -502,11 +534,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes an unsigned integer to the packet
+	 * Writes an unsigned integer to the packet.
 	 * 
 	 * @param i
-	 *            The integer
-	 * @return The packet
+	 *            the integer.
+	 * @return the packet.
 	 */
 	public Packet writeUInt(long i) {
 		buffer.writeInt(((int) i) & 0xFFFFFFFF);
@@ -514,11 +546,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a little endian integer to the packet
+	 * Writes a little endian integer to the packet.
 	 * 
 	 * @param i
-	 *            The integer
-	 * @return The packet
+	 *            the integer.
+	 * @return the packet.
 	 */
 	public Packet writeIntLE(int i) {
 		buffer.writeIntLE(i);
@@ -526,11 +558,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes an unsigned little endian integer to the packet
+	 * Writes an unsigned little endian integer to the packet.
 	 * 
 	 * @param i
-	 *            The integer
-	 * @return The packet
+	 *            the integer.
+	 * @return the packet.
 	 */
 	public Packet writeUIntLE(long i) {
 		buffer.writeIntLE(((int) i) & 0xFFFFFFFF);
@@ -538,11 +570,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a long to the packet
+	 * Writes a long to the packet.
 	 * 
 	 * @param l
-	 *            The long
-	 * @return The packet
+	 *            the long.
+	 * @return the packet.
 	 */
 	public Packet writeLong(long l) {
 		buffer.writeLong(l);
@@ -550,11 +582,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a little endian long to the packet
+	 * Writes a little endian long to the packet.
 	 * 
 	 * @param l
-	 *            The long
-	 * @return The packet
+	 *            the long.
+	 * @return the packet.
 	 */
 	public Packet writeLongLE(long l) {
 		buffer.writeLongLE(l);
@@ -562,11 +594,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a float to the packet
+	 * Writes a float to the packet.
 	 * 
 	 * @param f
-	 *            The float
-	 * @return The packet
+	 *            the float.
+	 * @return the packet.
 	 */
 	public Packet writeFloat(double f) {
 		buffer.writeFloat((float) f);
@@ -574,11 +606,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a double to the packet
+	 * Writes a double to the packet.
 	 * 
 	 * @param d
-	 *            The double
-	 * @return The packet
+	 *            the double.
+	 * @return the packet.
 	 */
 	public Packet writeDouble(double d) {
 		buffer.writeDouble(d);
@@ -586,9 +618,9 @@ public class Packet {
 	}
 
 	/**
-	 * Writes the magic sequence to the packet
+	 * Writes the magic sequence to the packet.
 	 * 
-	 * @return The packet
+	 * @return the packet.
 	 */
 	public Packet writeMagic() {
 		this.write(MAGIC);
@@ -596,11 +628,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a UTF-8 String prefixed by an unsigned short to the packet
+	 * Writes a UTF-8 String prefixed by an unsigned short to the packet.
 	 * 
 	 * @param s
-	 *            The String
-	 * @return The packet
+	 *            the String.
+	 * @return the packet.
 	 */
 	public Packet writeString(String s) {
 		byte[] data = s.getBytes();
@@ -611,11 +643,11 @@ public class Packet {
 
 	/**
 	 * Writes a UTF-8 String prefixed by a little endian unsigned short to the
-	 * packet
+	 * packet.
 	 * 
 	 * @param s
-	 *            The String
-	 * @return The packet
+	 *            the String.
+	 * @return the packet.
 	 */
 	public Packet writeStringLE(String s) {
 		byte[] data = s.getBytes();
@@ -625,13 +657,13 @@ public class Packet {
 	}
 
 	/**
-	 * Writes an IPv4 address to the packet (Writing IPv6 is not yet supported)
+	 * Writes an IPv4 address to the packet (Writing IPv6 is not yet supported).
 	 * 
 	 * @param address
-	 *            The address
-	 * @return The packet
+	 *            the address.
+	 * @return the packet.
 	 * @throws UnknownHostException
-	 *             Thrown if an error occurs when reading the address
+	 *             if an error occurs when reading the address.
 	 */
 	public Packet writeAddress(InetSocketAddress address) throws UnknownHostException {
 		byte[] addressBytes = address.getAddress().getAddress();
@@ -651,82 +683,70 @@ public class Packet {
 	}
 
 	/**
-	 * Writes an IPv4 address to the packet (IPv6 is not yet supported)
+	 * Writes an IPv4 address to the packet (IPv6 is not yet supported).
 	 * 
 	 * @param address
-	 *            The address
+	 *            the address.
 	 * @param port
-	 *            The port
+	 *            the port.
 	 * @throws UnknownHostException
-	 *             Thrown if an error occurs when reading the address
+	 *             if an error occurs when reading the address.
 	 */
 	public void writeAddress(InetAddress address, int port) throws UnknownHostException {
 		this.writeAddress(new InetSocketAddress(address, port));
 	}
 
 	/**
-	 * Writes an IPv4 address to the packet (IPv6 is not yet supported)
+	 * Writes an IPv4 address to the packet (IPv6 is not yet supported).
 	 * 
 	 * @param address
-	 *            The address
+	 *            the address.
 	 * @param port
-	 *            The port
+	 *            the port.
 	 * @throws UnknownHostException
-	 *             Thrown if an error occurs when reading the address
+	 *             if an error occurs when reading the address.
 	 */
 	public void writeAddress(String address, int port) throws UnknownHostException {
 		this.writeAddress(new InetSocketAddress(address, port));
 	}
 
 	/**
-	 * Converts the packet to a byte array
-	 * 
-	 * @return The packet as a byte array
+	 * @return the packet as a byte array.
 	 */
 	public byte[] array() {
 		return Arrays.copyOfRange(buffer.array(), 0, buffer.writerIndex());
 	}
 
 	/**
-	 * Returns the size of the packet in bytes
-	 * 
-	 * @return The size of the packet in bytes
+	 * @return the size of the packet in bytes.
 	 */
 	public int size() {
 		return array().length;
 	}
 
 	/**
-	 * Returns the packet's buffer
-	 * 
-	 * @return The packet's buffer
+	 * @return the packet's buffer.
 	 */
 	public ByteBuf buffer() {
 		return this.buffer.retain();
 	}
 
 	/**
-	 * Returns the packet's input
-	 * 
-	 * @return The packet's input
+	 * @return the packet's input.
 	 */
 	public PacketDataInput getDataInput() {
 		return this.input;
 	}
 
 	/**
-	 * Returns the packet's output
-	 * 
-	 * @return The packet's output
+	 * @return the packet's output.
 	 */
 	public PacketDataOutput getDataOutput() {
 		return this.output;
 	}
 
 	/**
-	 * Returns how many bytes are left in the packet's buffer
-	 * 
-	 * @return How many bytes are left in the packet's buffer
+	 * @return How many bytes are left in the packet's buffer.
 	 */
 	public int remaining() {
 		return buffer.readableBytes();
@@ -736,14 +756,14 @@ public class Packet {
 	 * Sets the buffer of the packet
 	 * 
 	 * @param buffer
-	 *            The new buffer
+	 *            the new buffer.
 	 */
 	public final void setBuffer(byte[] buffer) {
 		this.buffer = Unpooled.copiedBuffer(buffer);
 	}
 
 	/**
-	 * Flips the packet
+	 * Flips the packet.
 	 */
 	public void flip() {
 		byte[] data = buffer.array();
@@ -751,7 +771,7 @@ public class Packet {
 	}
 
 	/**
-	 * Clears the packets buffer
+	 * Clears the packets buffer.
 	 */
 	public void clear() {
 		buffer.clear();

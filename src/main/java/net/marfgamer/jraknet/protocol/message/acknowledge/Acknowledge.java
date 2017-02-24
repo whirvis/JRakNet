@@ -6,7 +6,7 @@
  * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
  *                                                  
- * The MIT License (MIT)
+ * the MIT License (MIT)
  *
  * Copyright (c) 2016, 2017 MarfGamer
  *
@@ -17,7 +17,7 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
+ * the above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -61,9 +61,7 @@ public class Acknowledge extends RakNetPacket {
 	}
 
 	/**
-	 * Returns the type of the acknowledge packet
-	 * 
-	 * @return The type of the acknowledge packet
+	 * @return the type of the acknowledge packet.
 	 */
 	public AcknowledgeType getType() {
 		return AcknowledgeType.lookup(this.getId());
@@ -104,10 +102,9 @@ public class Acknowledge extends RakNetPacket {
 	 * records are converted back to single records through the
 	 * <code>toArray</code> method in <code>Record</code>) back to as many
 	 * ranged records as possible and then storing the single records that could
-	 * not be converted to ranged records.
-	 * 
-	 * Example: Let's say we have records <code>[1, 2, 3, 4, 5, 66, 77]</code>
-	 * and the ranged records <code>[4:7, 12:17]</code>. The output will now be
+	 * not be converted to ranged records. For example, let's say we have
+	 * records <code>[1, 2, 3, 4, 5, 66, 77]</code> and the ranged records
+	 * <code>[4:7, 12:17]</code>. The output will now be
 	 * <code> [1:3, 4:7, 12:17, 66, 77]</code>.
 	 */
 	public void condenseRecords() {
@@ -145,10 +142,9 @@ public class Acknowledge extends RakNetPacket {
 
 	/**
 	 * This method simplifies the records, converting the single records and the
-	 * ranged records to an ordered array of single records. <br>
-	 * <br>
-	 * Example: Let's say we have records <code>[1, 2, 3]</code> and the ranged
-	 * records <code>[4:7,
+	 * ranged records to an ordered array of single records. For example, let's
+	 * say we have records <code>[1, 2, 3]</code> and the ranged records
+	 * <code>[4:7,
 	 * 12:17]</code>. The output will now be
 	 * <code>[1, 2, 3, 4, 5, 6, 7, 12, 13, 14, 15, 16,
 	 * 17]</code>.

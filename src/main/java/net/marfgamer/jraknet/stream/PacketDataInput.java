@@ -6,7 +6,7 @@
  * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
  *                                                  
- * The MIT License (MIT)
+ * the MIT License (MIT)
  *
  * Copyright (c) 2016, 2017 MarfGamer
  *
@@ -17,7 +17,7 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
+ * the above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -39,7 +39,7 @@ import net.marfgamer.jraknet.Packet;
 /**
  * Used to read data from a <code>Packet</code> with ease, to retrieve a
  * <code>Packet</code>'s <code>DataInput</code> simply use
- * <code>getDataInput()</code>
+ * <code>getDataInput()</code>.
  *
  * @author MarfGamer
  */
@@ -47,6 +47,13 @@ public class PacketDataInput extends InputStream implements DataInput {
 
 	private final Packet packet;
 
+	/**
+	 * Constructs a <code>PacketDataInput</code> with the specified
+	 * <code>Packet</code>.
+	 * 
+	 * @param packet
+	 *            the <code>Packet</code> to read data from.
+	 */
 	public PacketDataInput(Packet packet) {
 		this.packet = packet;
 	}

@@ -34,7 +34,7 @@ import net.marfgamer.jraknet.RakNetException;
 
 /**
  * A generic exception used by the client to warn the user of a problem that has
- * occured
+ * occurred.
  *
  * @author MarfGamer
  */
@@ -42,25 +42,26 @@ public class ChatException extends Exception {
 
 	private static final long serialVersionUID = 4497482433048975592L;
 
-	private final String exception;
-
+	/**
+	 * Constructs a <code>ChatException</code> with the specified exception
+	 * message.
+	 * 
+	 * @param exception
+	 *            the exception message.
+	 */
 	public ChatException(String exception) {
 		super(exception);
-		this.exception = exception;
 	}
 
+	/**
+	 * Constructs a <code>ChatException</code> with the specified
+	 * <code>RakNetExcetion</code>.
+	 * 
+	 * @param exception
+	 *            the <code>RakNetException</code>.
+	 */
 	public ChatException(RakNetException exception) {
 		this(exception.getMessage());
-	}
-
-	@Override
-	public String getMessage() {
-		return this.exception;
-	}
-
-	@Override
-	public String getLocalizedMessage() {
-		return this.exception;
 	}
 
 }

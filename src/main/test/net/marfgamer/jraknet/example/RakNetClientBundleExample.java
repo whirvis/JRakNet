@@ -39,7 +39,7 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
 /**
  * A simple <code>RakNetClient</code> that is extending
  * <code>RakNetClient</code> in order to connect to the LifeBoat Survival Games
- * server, when it is connected the client disconnects and shuts down
+ * server, when it is connected the client disconnects and shuts down.
  * 
  * @author MarfGamer
  */

@@ -38,7 +38,7 @@ import net.marfgamer.jraknet.example.chat.client.ChatException;
 
 /**
  * Used to listen for presses to the update username button in the frame, used
- * to signal the client to update the username
+ * to signal the client to update the username.
  *
  * @author MarfGamer
  */

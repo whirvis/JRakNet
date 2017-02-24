@@ -31,35 +31,51 @@
 package net.marfgamer.jraknet.session;
 
 /**
- * Represents the current status of a connection in a RakNetSession
+ * Represents the current status of a connection in a
+ * <code>RakNetSession</code>.
  *
  * @author MarfGamer
  */
 public enum RakNetState {
 
-	DISCONNECTED(0), HANDSHAKING(1), CONNECTED(2);
+	/**
+	 * the session is disconnected.
+	 */
+	DISCONNECTED(0),
+
+	/**
+	 * the session is handshaking.
+	 */
+	HANDSHAKING(1),
+
+	/**
+	 * the session is connected
+	 */
+	CONNECTED(2);
 
 	private final int order;
 
+	/**
+	 * Constructs a <code>RakNetState</code> with the specified order.
+	 * 
+	 * @param order
+	 *            the order of the <code>RakNetState</code>.
+	 */
 	private RakNetState(int order) {
 		this.order = order;
 	}
 
 	/**
-	 * Returns the order the state is in as an int value
-	 * 
-	 * @return The order the state is in as an int value
+	 * @return the order the state is in as an int value.
 	 */
 	public int getOrder() {
 		return this.order;
 	}
 
 	/**
-	 * Returns the state by it's numerical order
-	 * 
 	 * @param order
-	 *            The order of the state
-	 * @return The state by it's numerical order
+	 *            the order of the state.
+	 * @return the state by it's numerical order.
 	 */
 	public static RakNetState getState(int order) {
 		for (RakNetState state : RakNetState.values()) {

@@ -6,7 +6,7 @@
  * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
  *                                                  
- * The MIT License (MIT)
+ * the MIT License (MIT)
  *
  * Copyright (c) 2016, 2017 MarfGamer
  *
@@ -17,7 +17,7 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
+ * the above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -38,7 +38,7 @@ import net.marfgamer.jraknet.protocol.Reliability;
 /**
  * This interface represents a server connection to a client, this is used
  * mainly to keep message sending easier and consistent between the lower and
- * higher level implementation using the session's globally unique ID
+ * higher level implementation using the session's globally unique ID.
  *
  * @author MarfGamer
  */
@@ -46,35 +46,35 @@ public interface GeminusRakNetPeer {
 
 	/**
 	 * Sends a message with the specified reliability on the specified channel
-	 * to the session with the specified globally unique ID
+	 * to the session with the specified globally unique ID.
 	 * 
 	 * @param guid
-	 *            The globally unique ID of the session
+	 *            the globally unique ID of the session.
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param channel
-	 *            The channel to send the packet on
+	 *            the channel to send the packet on.
 	 * @param packet
-	 *            The packet to send
+	 *            the packet to send.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
+	 *             if the channel is higher than the maximum.
 	 */
 	public void sendMessage(long guid, Reliability reliability, int channel, Packet packet);
 
 	/**
 	 * Sends the specified messages with the specified reliability on the
-	 * specified channel to the session with the specified globally unique ID
+	 * specified channel to the session with the specified globally unique ID.
 	 * 
 	 * @param guid
-	 *            The globally unique ID of the session
+	 *            the globally unique ID of the session.
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param channel
-	 *            The channel to send the packet on
+	 *            the channel to send the packet on.
 	 * @param packets
-	 *            The packets to send
+	 *            the packets to send.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
+	 *             if the channel is higher than the maximum.
 	 */
 	public default void sendMessage(long guid, Reliability reliability, int channel, Packet... packets)
 			throws InvalidChannelException {
@@ -85,16 +85,16 @@ public interface GeminusRakNetPeer {
 
 	/**
 	 * Sends a message with the specified reliability on the default channel to
-	 * the session with the specified globally unique ID
+	 * the session with the specified globally unique ID.
 	 * 
 	 * @param guid
-	 *            The globally unique ID of the session
+	 *            the globally unique ID of the session.
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param packet
-	 *            The packet to send
+	 *            the packet to send.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
+	 *             if the channel is higher than the maximum.
 	 */
 	public default void sendMessage(long guid, Reliability reliability, Packet packet) throws InvalidChannelException {
 		this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, packet);
@@ -102,16 +102,16 @@ public interface GeminusRakNetPeer {
 
 	/**
 	 * Sends the specified messages with the specified reliability on the
-	 * default channel to the session with the specified globally unique ID
+	 * default channel to the session with the specified globally unique ID.
 	 * 
 	 * @param guid
-	 *            The globally unique ID of the session
+	 *            the globally unique ID of the session.
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param packets
-	 *            The packets to send
+	 *            the packets to send.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
+	 *             if the channel is higher than the maximum.
 	 */
 	public default void sendMessage(long guid, Reliability reliability, Packet... packets)
 			throws InvalidChannelException {
@@ -122,18 +122,18 @@ public interface GeminusRakNetPeer {
 
 	/**
 	 * Sends a message identifier with the specified reliability on the
-	 * specified channel to the session with the specified globally unique ID
+	 * specified channel to the session with the specified globally unique ID.
 	 * 
 	 * @param guid
-	 *            The globally unique ID of the session
+	 *            the globally unique ID of the session.
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param channel
-	 *            The channel to send the packet on
+	 *            the channel to send the packet on.
 	 * @param packetId
-	 *            The packet ID to send
+	 *            the packet ID to send.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
+	 *             if the channel is higher than the maximum.
 	 */
 	public default void sendMessage(long guid, Reliability reliability, int channel, int packetId) {
 		this.sendMessage(guid, reliability, channel, new RakNetPacket(packetId));
@@ -145,15 +145,15 @@ public interface GeminusRakNetPeer {
 	 * ID
 	 * 
 	 * @param guid
-	 *            The globally unique ID of the session
+	 *            the globally unique ID of the session.
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param channel
-	 *            The channel to send the packet on
+	 *            the channel to send the packet on.
 	 * @param packetIds
-	 *            The packet IDs to send
+	 *            the packet IDs to send.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
+	 *             if the channel is higher than the maximum.
 	 */
 	public default void sendMessage(long guid, Reliability reliability, int channel, int... packetIds) {
 		for (int packetId : packetIds) {
@@ -163,16 +163,16 @@ public interface GeminusRakNetPeer {
 
 	/**
 	 * Sends a message identifier with the specified reliability on the default
-	 * channel to the session with the specified globally unique ID
+	 * channel to the session with the specified globally unique ID.
 	 * 
 	 * @param guid
-	 *            The globally unique ID of the session
+	 *            the globally unique ID of the session.
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param packetId
-	 *            The packet ID to send
+	 *            the packet ID to send.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
+	 *             if the channel is higher than the maximum.
 	 */
 	public default void sendMessage(long guid, Reliability reliability, int packetId) {
 		this.sendMessage(guid, reliability, new RakNetPacket(packetId));
@@ -180,16 +180,16 @@ public interface GeminusRakNetPeer {
 
 	/**
 	 * Sends the specified message identifiers with the specified reliability on
-	 * the default channel to the session with the specified globally unique ID
+	 * the default channel to the session with the specified globally unique ID.
 	 * 
 	 * @param guid
-	 *            The globally unique ID of the session
+	 *            the globally unique ID of the session.
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param packetIds
-	 *            The packet IDs to send
+	 *            the packet IDs to send.
 	 * @throws InvalidChannelException
-	 *             Thrown if the channel is higher than the maximum
+	 *             if the channel is higher than the maximum.
 	 */
 	public default void sendMessage(long guid, Reliability reliability, int... packetIds) {
 		for (int packetId : packetIds) {

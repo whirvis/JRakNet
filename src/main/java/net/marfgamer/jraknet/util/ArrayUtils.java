@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
- * Used for easily manipulation of arrays
+ * Used for easily manipulation of arrays.
  *
  * @author MarfGamer
  */
@@ -42,13 +42,13 @@ public abstract class ArrayUtils {
 
 	/**
 	 * Splits an array into more chunks with the specified maximum size for each
-	 * array chunk
+	 * array chunk.
 	 * 
 	 * @param src
-	 *            The original array
+	 *            the original array.
 	 * @param size
-	 *            The max size for each array that has been split
-	 * @return The split byte array's no bigger than the maximum size
+	 *            the max size for each array that has been split.
+	 * @return the split byte array's no bigger than the maximum size.
 	 */
 	public static final byte[][] splitArray(byte[] src, int size) {
 		int index = 0;
@@ -66,13 +66,13 @@ public abstract class ArrayUtils {
 	}
 
 	/**
-	 * Returns all the integers in between each other as a normal subtraction
+	 * Returns all the integers in between each other as a normal subtraction.
 	 * 
 	 * @param low
-	 *            The starting point
+	 *            the starting point.
 	 * @param high
-	 *            The ending point
-	 * @return The numbers in between high and low
+	 *            the ending point.
+	 * @return the numbers in between high and low.
 	 */
 	public static final int[] subtractionArray(int low, int high) {
 		if (low > high) {
@@ -84,6 +84,23 @@ public abstract class ArrayUtils {
 			arr[i] = i + low + 1;
 		}
 		return arr;
+	}
+
+	/**
+	 * Convert the specified list of objects to a String. Used primarily by
+	 * JRakNet objects to easily convert their data to a readable String.
+	 * 
+	 * @param obj
+	 *            the objects to convert.
+	 * @return a converted string.
+	 */
+	public static final String toJRakNetString(Object... obj) {
+		StringBuilder str = new StringBuilder();
+		str.append("[");
+		for (int i = 0; i < obj.length; i++) {
+			str.append(obj.toString() + (i + 1 < obj.length ? ", " : "]"));
+		}
+		return str.toString();
 	}
 
 }
