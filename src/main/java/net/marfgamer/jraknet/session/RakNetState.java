@@ -49,7 +49,7 @@ public enum RakNetState {
 	HANDSHAKING(1),
 
 	/**
-	 * the session is connected
+	 * the session is connected.
 	 */
 	CONNECTED(2);
 

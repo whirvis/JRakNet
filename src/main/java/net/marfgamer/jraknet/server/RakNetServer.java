@@ -519,8 +519,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 			synchronized (sessions) {
 				if (sessions.containsKey(sender)) {
-					// the session is already connected
-					this.removeSession(sender, "Client reinstantiated connection");
+					sessions.get(sender).getState().equals(RakNetState.CONNECTED);
+					this.removeSession(sender, "Client re-instantiated connection");
 				}
 			}
 
