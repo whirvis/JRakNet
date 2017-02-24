@@ -39,7 +39,7 @@ import net.marfgamer.jraknet.example.chat.client.ChatException;
 
 /**
  * Listens for changes in the current selected channel, used to set the client
- * channel
+ * channel.
  *
  * @author MarfGamer
  */

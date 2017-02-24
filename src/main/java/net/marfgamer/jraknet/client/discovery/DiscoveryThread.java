@@ -33,10 +33,12 @@ package net.marfgamer.jraknet.client.discovery;
 import java.util.ArrayList;
 
 import net.marfgamer.jraknet.client.RakNetClient;
+import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
- * This class is a Thread that allows clients to discover servers on the local
- * network without having to actually be started
+ * This <code>Thread</code> is used by the <code>RakNetClient</code> to discover
+ * servers, allowing the client to discover servers without being started and
+ * without having to take up multiple threads.
  *
  * @author MarfGamer
  */
@@ -45,24 +47,26 @@ public class DiscoveryThread extends Thread {
 	private ArrayList<RakNetClient> clients;
 	private volatile boolean running;
 
+	/**
+	 * Constructs a <code>DiscoveryThread</code>.
+	 */
 	public DiscoveryThread() {
 		this.clients = new ArrayList<RakNetClient>();
 	}
 
 	/**
-	 * Returns the clients that are currently using the discovery system
-	 * 
-	 * @return The clients that are currently using the discovery system
+	 * @return the clients that are currently using the discovery system.
 	 */
 	public RakNetClient[] getClients() {
 		return clients.toArray(new RakNetClient[clients.size()]);
 	}
 
 	/**
-	 * Adds a client to the discovery system so it can discover servers
+	 * Adds a <code>RakNetClient</code> to the discovery system so it can
+	 * discover servers.
 	 * 
 	 * @param client
-	 *            The client enabling its discovery system
+	 *            the <code>RakNetClient</code> enabling its discovery system.
 	 */
 	public void addClient(RakNetClient client) {
 		if (clients.contains(client)) {
@@ -72,28 +76,26 @@ public class DiscoveryThread extends Thread {
 	}
 
 	/**
-	 * Removes a client from the discovery system so it will no longer discover
-	 * servers <br>
-	 * Note: This method is normally called when a client is garbage collected
+	 * Removes a <code>RakNetClient</code> from the discovery system, this
+	 * method is also called automatically by the client when it is garbage
+	 * collected.
 	 * 
 	 * @param client
-	 *            The client disabling its discovery system
+	 *            the <code>RakNetClient</code> disabling its discovery system.
 	 */
 	public void removeClient(RakNetClient client) {
 		clients.remove(client);
 	}
 
 	/**
-	 * Returns whether or not the thread has already been started
-	 * 
-	 * @return Whether or not the thread has already been started
+	 * @return true if the thread has been started.
 	 */
 	public boolean isRunning() {
 		return this.running;
 	}
 
 	/**
-	 * Shuts down the discovery system
+	 * shuts down the discovery system.
 	 */
 	public void shutdown() {
 		this.running = false;
@@ -106,13 +108,7 @@ public class DiscoveryThread extends Thread {
 			for (RakNetClient client : this.clients) {
 				client.updateDiscoveryData();
 			}
-
-			// Exceptions caught here have to do with the thread
-			try {
-				Thread.sleep(1000L);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			RakNetUtils.threadLock(1000L);
 		}
 	}
 

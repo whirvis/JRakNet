@@ -6,7 +6,7 @@
  * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
  *                                                  
- * The MIT License (MIT)
+ * the MIT License (MIT)
  *
  * Copyright (c) 2016, 2017 MarfGamer
  *
@@ -17,7 +17,7 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
+ * the above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -30,11 +30,9 @@
  */
 package net.marfgamer.jraknet.client;
 
-import net.marfgamer.jraknet.RakNetClientException;
-
 /**
- * This exception is thrown whenever the server the client is attempting to
- * connect to is full
+ * Signals that the server the <code>RakNetClient</code> is attempting to
+ * connect to is full.
  *
  * @author MarfGamer
  */
@@ -42,6 +40,13 @@ public class NoFreeIncomingConnectionsException extends RakNetClientException {
 
 	private static final long serialVersionUID = 5863972657532782029L;
 
+	/**
+	 * Constructs a <code>NoFreeIncomingConnectionsException</code> with the
+	 * specified <code>RakNetClient</code>.
+	 * 
+	 * @param client
+	 *            the <code>RakNetClient</code> that threw the exception.
+	 */
 	public NoFreeIncomingConnectionsException(RakNetClient client) {
 		super(client, "Server has no free incoming connections");
 	}

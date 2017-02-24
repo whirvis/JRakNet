@@ -45,7 +45,7 @@ import net.marfgamer.jraknet.server.RakNetServer;
 
 /**
  * This class represents a client connection and handles the login sequence
- * packets
+ * packets.
  *
  * @author MarfGamer
  */
@@ -55,6 +55,24 @@ public class RakNetClientSession extends RakNetSession {
 	private final long timeCreated;
 	private long timestamp;
 
+	/**
+	 * Constructs a <code>RakNetClientSession</code> with the specified
+	 * <code>RakNetServer</code>, the time the server was created, globally
+	 * unique ID, maximum transfer unit, <code>Channel</code>, and address.
+	 * 
+	 * @param server
+	 *            the <code>RakNetServer</code>.
+	 * @param timeCreated
+	 *            the time the server was created.
+	 * @param guid
+	 *            the globally unique ID.
+	 * @param maximumTransferUnit
+	 *            the maximum transfer unit
+	 * @param channel
+	 *            the <code>Channel</code>.
+	 * @param address
+	 *            the address.
+	 */
 	public RakNetClientSession(RakNetServer server, long timeCreated, long guid, int maximumTransferUnit,
 			Channel channel, InetSocketAddress address) {
 		super(guid, maximumTransferUnit, channel, address);
@@ -64,28 +82,21 @@ public class RakNetClientSession extends RakNetSession {
 	}
 
 	/**
-	 * Returns the server this session is connected to
-	 * 
-	 * @return The server this session is connected to
+	 * @return the server this session is connected to.
 	 */
 	public RakNetServer getServer() {
 		return this.server;
 	}
 
 	/**
-	 * Returns the time this session was created
-	 * 
-	 * @return The time this session was created
+	 * @return the time this session was created.
 	 */
 	public long getTimeCreated() {
 		return this.timeCreated;
 	}
 
 	/**
-	 * Returns the client's timestamp<br>
-	 * Note: This is not determined during creation but rather during login
-	 * 
-	 * @return The client's timestamp
+	 * @return the client's timestamp.
 	 */
 	public long getTimestamp() {
 		return (System.currentTimeMillis() - this.timestamp);

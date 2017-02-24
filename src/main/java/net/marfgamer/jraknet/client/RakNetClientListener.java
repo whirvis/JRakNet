@@ -6,7 +6,7 @@
  * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
  *                                                  
- * The MIT License (MIT)
+ * the MIT License (MIT)
  *
  * Copyright (c) 2016, 2017 MarfGamer
  *
@@ -17,7 +17,7 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
+ * the above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -39,128 +39,117 @@ import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 import net.marfgamer.jraknet.session.RakNetServerSession;
 
 /**
- * This interface is used by the client to let the user know when specific
- * events are triggered <br>
- * <br>
- * Note: Do <b>NOT</b> use <code>Thread.sleep(long)</code> in any of these
- * methods, as it will cause the client to timeout
+ * This interface is used by the <code>RakNetClient</code> to let the user know
+ * when specific events are triggered. Do <b>not</b> use in any sleeps methods
+ * any of these methods, as it will cause the client to timeout.
  *
  * @author MarfGamer
  */
 public interface RakNetClientListener {
 
 	/**
-	 * Called when the client successfully connects to a server
+	 * Called when the client successfully connects to a server.
 	 * 
 	 * @param session
-	 *            The session assigned to the server
+	 *            the session assigned to the server.
 	 */
 	public default void onConnect(RakNetServerSession session) {
 	}
 
 	/**
-	 * Called when the client disconnects from the server
+	 * Called when the client disconnects from the server.
 	 * 
 	 * @param session
-	 *            The server the client disconnected from
+	 *            the server the client disconnected from.
 	 * @param reason
-	 *            The reason for disconnection
+	 *            the reason for disconnection.
 	 */
 	public default void onDisconnect(RakNetServerSession session, String reason) {
 	}
 
 	/**
-	 * Called whenever the client is afraid an error will occur but is not
-	 * absolutely positive one will occur
-	 * 
-	 * @param warning
-	 *            The warning
-	 */
-	public default void onWarning(Warning warning) {
-	}
-
-	/**
-	 * Called when a server is discovered on the local network
+	 * Called when a server is discovered on the local network.
 	 * 
 	 * @param address
-	 *            The address of the server
+	 *            the address of the server.
 	 * @param identifier
-	 *            The identifier of the server
+	 *            the <code>Identifier</code> of the server.
 	 */
 	public default void onServerDiscovered(InetSocketAddress address, Identifier identifier) {
 	}
 
 	/**
-	 * Called when the identifier of an already discovered server changes
+	 * Called when the <code>Identifier</code> of an already discovered server
+	 * changes.
 	 * 
 	 * @param address
-	 *            The address of the server
+	 *            the address of the server.
 	 * @param identifier
-	 *            The new identifier
+	 *            the new <code>Identifier</code>.
 	 */
 	public default void onServerIdentifierUpdate(InetSocketAddress address, Identifier identifier) {
 	}
 
 	/**
 	 * Called when a previously discovered server has been forgotten by the
-	 * client
+	 * client.
 	 * 
 	 * @param address
-	 *            The address of the server
+	 *            the address of the server.
 	 */
 	public default void onServerForgotten(InetSocketAddress address) {
 	}
 
 	/**
 	 * Called when an external server is added to the client's external server
-	 * list
+	 * list.
 	 * 
 	 * @param address
-	 *            The address of the server
+	 *            the address of the server.
 	 */
 	public default void onExternalServerAdded(InetSocketAddress address) {
 	}
 
 	/**
-	 * Called when the identifier of an external server changes
+	 * Called when the identifier of an external server changes.
 	 * 
 	 * @param address
-	 *            The address of the server
+	 *            the address of the server.
 	 * @param identifier
-	 *            The new identifier
+	 *            the new identifier.
 	 */
 	public default void onExternalServerIdentifierUpdate(InetSocketAddress address, Identifier identifier) {
 	}
 
 	/**
 	 * Called when an external server is removed from the client's external
-	 * server list
+	 * server list.
 	 * 
 	 * @param address
-	 *            The address of the server
+	 *            the address of the server.
 	 */
 	public default void onExternalServerRemoved(InetSocketAddress address) {
 	}
 
 	/**
-	 * Called when a message is received by the server
+	 * Called when a message is received by the server.
 	 * 
 	 * @param session
-	 *            The server that received the packet
+	 *            the server that received the packet.
 	 * @param record
-	 *            The received record
+	 *            the received record.
 	 */
 	@Deprecated
 	public default void onAcknowledge(RakNetServerSession session, Record record) {
 	}
 
 	/**
-	 * Called when a message is not received by the server
+	 * Called when a message is not received by the server.
 	 * 
 	 * @param session
-	 *            The server that lost the packet
+	 *            the server that lost the packet.
 	 * @param record
-	 *            The lost record
+	 *            the lost record.
 	 */
 	@Deprecated
 	public default void onNotAcknowledge(RakNetServerSession session, Record record) {
@@ -168,14 +157,14 @@ public interface RakNetClientListener {
 
 	/**
 	 * Called when a packet has been received from the server and is ready to be
-	 * handled
+	 * handled.
 	 * 
 	 * @param session
-	 *            The server that sent the packet
+	 *            the server that sent the packet.
 	 * @param packet
-	 *            The packet received from the server
+	 *            the packet received from the server.
 	 * @param channel
-	 *            The channel the packet was sent on
+	 *            the channel the packet was sent on.
 	 */
 	public default void handleMessage(RakNetServerSession session, RakNetPacket packet, int channel) {
 	}
@@ -183,16 +172,15 @@ public interface RakNetClientListener {
 	/**
 	 * Called when the handler receives a packet after the server has already
 	 * handled it, this method is useful for handling packets outside of the
-	 * RakNet protocol <b>*cough*</b> UT3 Query Protocol that MCPE uses for some
-	 * stupid reason <b>*cough*</b>. However, be weary when using this as
-	 * packets meant for the server will have already been handled by the
-	 * client; and it is not a good idea to try to manipulate JRakNet's RakNet
-	 * protocol using this method
+	 * RakNet protocol. However, be weary when using this as packets meant for
+	 * the server will have already been handled by the client; and it is not a
+	 * good idea to try to manipulate JRakNet's RakNet protocol implementation
+	 * using this method.
 	 * 
 	 * @param buf
-	 *            The packet buffer
+	 *            the packet buffer.
 	 * @param address
-	 *            The address of the sender
+	 *            the address of the sender.
 	 */
 	public default void handleNettyMessage(ByteBuf buf, InetSocketAddress address) {
 	}
@@ -200,12 +188,12 @@ public interface RakNetClientListener {
 	/**
 	 * Called when a handler exception has occurred, these normally do not
 	 * matter as long as it does not come the address of the server the client
-	 * is connecting or is connected to
+	 * is connecting or is connected to.
 	 * 
 	 * @param address
-	 *            The address that caused the exception
+	 *            the address that caused the exception.
 	 * @param throwable
-	 *            The throwable exception that was caught
+	 *            the <code>Throwable</code> that was caught.
 	 */
 	public default void onHandlerException(InetSocketAddress address, Throwable throwable) {
 		throwable.printStackTrace();
@@ -214,10 +202,10 @@ public interface RakNetClientListener {
 	/**
 	 * Called when an exception is caught in the external thread the client is
 	 * running on, this method is only called when the client is started through
-	 * <code>connectThreaded()</code>
+	 * <code>connectThreaded()</code>.
 	 * 
 	 * @param throwable
-	 *            The throwable exception that was caught
+	 *            the <code>Throwable</code> that was caught.
 	 */
 	public default void onThreadException(Throwable throwable) {
 		throwable.printStackTrace();

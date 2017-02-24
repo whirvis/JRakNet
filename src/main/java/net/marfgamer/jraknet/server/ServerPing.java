@@ -36,8 +36,7 @@ import net.marfgamer.jraknet.identifier.Identifier;
 
 /**
  * Used primarily to box an identifier sent in the response of a server to a
- * ping sent by a client (Or maybe another server? :O) so it can be modified by
- * the user
+ * ping sent by a client so it can be modified by the user.
  *
  * @author MarfGamer
  */
@@ -46,34 +45,39 @@ public class ServerPing {
 	private final InetSocketAddress sender;
 	private Identifier identifier;
 
+	/**
+	 * Constructs a <code>ServerPing</code> with the specified address and
+	 * <code>Identifier</code>.
+	 * 
+	 * @param sender
+	 *            the address of the ping sender.
+	 * @param identifier
+	 *            the <code>Identifier</code> to respond with.
+	 */
 	public ServerPing(InetSocketAddress sender, Identifier identifier) {
 		this.sender = sender;
 		this.identifier = identifier;
 	}
 
 	/**
-	 * Returns the sender's address of the ping
-	 * 
-	 * @return The sender's address of the ping
+	 * @return the address of the ping sender.
 	 */
 	public InetSocketAddress getSender() {
 		return this.sender;
 	}
 
 	/**
-	 * Returns the identifier being sent back to the sender
-	 * 
-	 * @return The identifier being sent back to the sender
+	 * @return the <code>Identifier</code> being sent back to the sender.
 	 */
 	public Identifier getIdentifier() {
 		return this.identifier;
 	}
 
 	/**
-	 * Sets the identifier being sent back to the sender
+	 * Sets the <code>Identifier</code> being sent back to the sender.
 	 * 
 	 * @param identifier
-	 *            The new identifier
+	 *            the new <code>Identifier</code>.
 	 */
 	public void setIdentifier(Identifier identifier) {
 		this.identifier = identifier;

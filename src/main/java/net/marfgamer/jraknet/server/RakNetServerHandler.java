@@ -6,7 +6,7 @@
  * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
  *                                                  
- * The MIT License (MIT)
+ * the MIT License (MIT)
  *
  * Copyright (c) 2016, 2017 MarfGamer
  *
@@ -17,7 +17,7 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
+ * the above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -40,40 +40,47 @@ import io.netty.channel.socket.DatagramPacket;
 import net.marfgamer.jraknet.RakNetPacket;
 
 /**
- * This class is instantiated by the server with the sole purpose of sending
- * received packets to the server so they can be properly handled
+ * Used by the <code>RakNetServer</code> with the sole purpose of sending
+ * received packets to the server so they can be handled.
  *
  * @author MarfGamer
  */
 public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 
 	private final RakNetServer server;
-	private final HashMap<InetAddress, BlockedClient> blocked;
+	private final HashMap<InetAddress, BlockedAddress> blocked;
 	private InetSocketAddress causeAddress;
 
+	/**
+	 * Constructs a <code>RakNetClientServer</code> with the specified
+	 * <code>RakNetClient</code>.
+	 * 
+	 * @param server
+	 *            the <code>RakNetServer</code> to send received packets to.
+	 */
 	public RakNetServerHandler(RakNetServer server) {
 		this.server = server;
-		this.blocked = new HashMap<InetAddress, BlockedClient>();
+		this.blocked = new HashMap<InetAddress, BlockedAddress>();
 	}
 
 	/**
-	 * Blocks the specified address for the specified amount of time
+	 * Blocks the specified address for the specified amount of time.
 	 * 
 	 * @param address
-	 *            The address to block
+	 *            the address to block.
 	 * @param time
-	 *            How long the address will be blocked in milliseconds
+	 *            how long the address will be blocked in milliseconds.
 	 */
 	public void blockAddress(InetAddress address, long time) {
-		blocked.put(address, new BlockedClient(System.currentTimeMillis(), time));
+		blocked.put(address, new BlockedAddress(System.currentTimeMillis(), time));
 		server.getListener().onAddressBlocked(address, time);
 	}
 
 	/**
-	 * Unblocks the specified address
+	 * Unblocks the specified address.
 	 * 
 	 * @param address
-	 *            The address to unblock
+	 *            the address to unblock.
 	 */
 	public void unblockAddress(InetAddress address) {
 		blocked.remove(address);
@@ -81,11 +88,11 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	}
 
 	/**
-	 * Returns whether or not the specified address is blocked
+	 * Returns whether or not the specified address is blocked.
 	 * 
 	 * @param address
-	 *            The address to check
-	 * @return Whether or not the specified address is blocked
+	 *            the address to check.
+	 * @return whether or not the specified address is blocked.
 	 */
 	public boolean addressBlocked(InetAddress address) {
 		return blocked.containsKey(address);
@@ -104,8 +111,8 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 
 			// Is the sender blocked?
 			if (this.addressBlocked(sender.getAddress())) {
-				BlockedClient status = blocked.get(sender.getAddress());
-				if (status.getTime() <= BlockedClient.PERMANENT_BLOCK) {
+				BlockedAddress status = blocked.get(sender.getAddress());
+				if (status.getTime() <= BlockedAddress.PERMANENT_BLOCK) {
 					return; // Permanently blocked
 				}
 				if (System.currentTimeMillis() - status.getStartTime() < status.getTime()) {

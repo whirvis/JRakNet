@@ -40,7 +40,7 @@ import net.marfgamer.jraknet.server.RakNetServer;
 import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
- * Used to test the latency feature in <code>RakNetSession</code>
+ * Used to test the latency feature in <code>RakNetSession</code>.
  *
  * @author MarfGamer
  */
@@ -59,7 +59,7 @@ public class LatencyTest {
 	}
 
 	/**
-	 * Starts the test
+	 * Starts the test.
 	 */
 	public void start() {
 		// Set server options and start it

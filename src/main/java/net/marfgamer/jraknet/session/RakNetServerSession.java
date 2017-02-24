@@ -44,7 +44,7 @@ import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 
 /**
  * This class represents a server connection and handles the login sequence
- * packets
+ * packets.
  *
  * @author MarfGamer
  */
@@ -52,6 +52,22 @@ public class RakNetServerSession extends RakNetSession {
 
 	private final RakNetClient client;
 
+	/**
+	 * Constructs a <code>RakNetClientSession</code> with the specified
+	 * <code>RakNetClient</code>, globally unique ID, maximum transfer unit,
+	 * <code>Channel</code>, and address.
+	 * 
+	 * @param client
+	 *            the <code>RakNetClient</code>.
+	 * @param guid
+	 *            the globally unique ID.
+	 * @param maximumTransferUnit
+	 *            the maximum transfer unit
+	 * @param channel
+	 *            the <code>Channel</code>.
+	 * @param address
+	 *            the address.
+	 */
 	public RakNetServerSession(RakNetClient client, long guid, int maximumTransferUnit, Channel channel,
 			InetSocketAddress address) {
 		super(guid, maximumTransferUnit, channel, address);
@@ -105,7 +121,7 @@ public class RakNetServerSession extends RakNetSession {
 	}
 
 	/**
-	 * Called by the client when the connection is closed
+	 * Called by the client when the connection is closed.
 	 */
 	public void closeConnection() {
 		this.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);

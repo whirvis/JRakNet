@@ -6,7 +6,7 @@
  * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
  *                                                  
- * The MIT License (MIT)
+ * the MIT License (MIT)
  *
  * Copyright (c) 2016, 2017 MarfGamer
  *
@@ -17,7 +17,7 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
+ * the above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -30,12 +30,9 @@
  */
 package net.marfgamer.jraknet.client;
 
-import net.marfgamer.jraknet.RakNetClientException;
-
 /**
- * This exception is thrown whenever the <code>RakNetClientHandler</code>
- * catches an exception caused by the server the client is attempting to connect
- * to
+ * Signals that a <code>Throwable</code> was caught by the
+ * <code>RakNetClientHandler</code>.
  *
  * @author MarfGamer
  */
@@ -46,6 +43,19 @@ public class NettyHandlerException extends RakNetClientException {
 	private final RakNetClientHandler handler;
 	private final Throwable cause;
 
+	/**
+	 * Constructs a <code>NettyHandlerException</code> with the specified
+	 * <code>RakNetClient</code>, <code>RakNetClientHandler</code>, and
+	 * <code>Throwable</code> that caused this exception to be thrown.
+	 * 
+	 * @param client
+	 *            the <code>RakNetClient</code> that threw the exception.
+	 * @param handler
+	 *            the <code>RakNetClientHandler</code> that caught the
+	 *            exception.
+	 * @param cause
+	 *            the <code>Throwable</code> that was caught by the handler.
+	 */
 	public NettyHandlerException(RakNetClient client, RakNetClientHandler handler, Throwable cause) {
 		super(client, "Exception in handler \"" + cause.getMessage() + "\"");
 		this.handler = handler;
@@ -53,20 +63,16 @@ public class NettyHandlerException extends RakNetClientException {
 	}
 
 	/**
-	 * Returns the handler the client is using
-	 * 
-	 * @return The handler the client is using
+	 * @return the <code>RakNetHandler</code> the client is using.
 	 */
 	public RakNetClientHandler getHandler() {
 		return this.handler;
 	}
 
 	/**
-	 * Returns the exception that was caught by the handler
-	 *
-	 * @return The exception that was caught by the handler
+	 * @return the <code>Throwable</code> that was caught by the handler.
 	 */
-	public Throwable getCause() {
+	public Throwable getThrowableCause() {
 		return this.cause;
 	}
 

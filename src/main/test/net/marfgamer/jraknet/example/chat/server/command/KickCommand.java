@@ -33,7 +33,7 @@ package net.marfgamer.jraknet.example.chat.server.command;
 import net.marfgamer.jraknet.example.chat.server.ChatServer;
 
 /**
- * Allows the server to kick players from the server
+ * Allows the server to kick players.
  *
  * @author MarfGamer
  */

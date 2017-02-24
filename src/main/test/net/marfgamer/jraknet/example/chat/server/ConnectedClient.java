@@ -43,7 +43,7 @@ import net.marfgamer.jraknet.example.chat.protocol.RemoveChannel;
 import net.marfgamer.jraknet.example.chat.protocol.RenameChannel;
 import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.session.InvalidChannelException;
-import net.marfgamer.jraknet.session.RakNetSession;
+import net.marfgamer.jraknet.session.RakNetClientSession;
 
 /**
  * Represents a client connect to a <code>ChatServer</code> and is used to easy
@@ -56,53 +56,58 @@ public class ConnectedClient {
 	public static final int USER_STATUS_CLIENT_CONNECTED = 0x00;
 	public static final int USER_STATUS_CLIENT_DISCONNECTED = 0x01;
 
-	private final RakNetSession session;
+	private final RakNetClientSession session;
 	private final UUID uuid;
 	private String username;
 
-	public ConnectedClient(RakNetSession session, UUID uuid, String username) {
+	/**
+	 * Constructs a <code>ConnectedClient</code> with the specified
+	 * <code>RakNetClientSession</code>, <code>UUID</code> and username.
+	 * 
+	 * @param session
+	 *            the <code>RakNetSession</code>.
+	 * @param uuid
+	 *            the <code>UUID</code>.
+	 * @param username
+	 *            the username.
+	 */
+	public ConnectedClient(RakNetClientSession session, UUID uuid, String username) {
 		this.session = session;
 		this.uuid = uuid;
 		this.username = username;
 	}
 
 	/**
-	 * Returns the client's assigned UUID
-	 * 
-	 * @return The client's assigned UUID
+	 * @return the client's assigned UUID.
 	 */
 	public UUID getUUID() {
 		return this.uuid;
 	}
 
 	/**
-	 * Returns the client's username
-	 * 
-	 * @return The client's username
+	 * @return the client's username.
 	 */
 	public String getUsername() {
 		return this.username;
 	}
 
 	/**
-	 * Returns the client's session
-	 * 
-	 * @return The client's session
+	 * @return the client's session.
 	 */
-	public RakNetSession getSession() {
+	public RakNetClientSession getSession() {
 		return this.session;
 	}
 
 	/**
 	 * Accepts the client's requested login and sends the data required for the
-	 * client to display the server data properly
+	 * client to display the server data properly.
 	 * 
 	 * @param name
-	 *            The name of the server
+	 *            the name of the server.
 	 * @param motd
-	 *            The server message of the day
+	 *            the server message of the day.
 	 * @param channels
-	 *            The channels the client can use
+	 *            the channels the client can use.
 	 */
 	public void acceptLogin(String name, String motd, ServerChannel[] channels) {
 		LoginAccepted accepted = new LoginAccepted();
@@ -115,10 +120,10 @@ public class ConnectedClient {
 	}
 
 	/**
-	 * Tells the client its new username has been accepted
+	 * Tells the client its new username has been accepted.
 	 * 
 	 * @param username
-	 *            The client's new username
+	 *            the client's new username.
 	 */
 	public void acceptUsernameUpdate(String username) {
 		this.username = username;
@@ -126,19 +131,19 @@ public class ConnectedClient {
 	}
 
 	/**
-	 * Tells the client its new username has been denied
+	 * Tells the client its new username has been denied.
 	 */
 	public void denyUsernameUpdate() {
 		session.sendMessage(Reliability.RELIABLE_ORDERED, ChatMessageIdentifier.ID_UPDATE_USERNAME_FAILURE);
 	}
 
 	/**
-	 * Sends a chat message to the client on the specified channel
+	 * Sends a chat message to the client on the specified channel.
 	 * 
 	 * @param message
-	 *            The message to send
+	 *            the message to send.
 	 * @param channel
-	 *            The channel to send the message on
+	 *            the channel to send the message on.
 	 */
 	public void sendChatMessage(String message, int channel) {
 		if (channel >= RakNet.MAX_CHANNELS) {
@@ -152,12 +157,12 @@ public class ConnectedClient {
 	}
 
 	/**
-	 * Notifies the client of a new channel
+	 * Notifies the client of a new channel.
 	 * 
 	 * @param channel
-	 *            The ID of the channel
+	 *            the ID of the channel.
 	 * @param name
-	 *            The name of the channel
+	 *            the name of the channel.
 	 */
 	public void addChannel(int channel, String name) {
 		AddChannel addChannel = new AddChannel();
@@ -168,12 +173,12 @@ public class ConnectedClient {
 	}
 
 	/**
-	 * Notifies the client of a channel rename
+	 * Notifies the client of a channel rename.
 	 * 
 	 * @param channel
-	 *            The ID of the channel
+	 *            the ID of the channel.
 	 * @param name
-	 *            The new name of the channel
+	 *            the new name of the channel.
 	 */
 	public void renameChannel(int channel, String name) {
 		RenameChannel renameChannel = new RenameChannel();
@@ -184,10 +189,10 @@ public class ConnectedClient {
 	}
 
 	/**
-	 * Notifies the client of a removed channel
+	 * Notifies the client of a removed channel.
 	 * 
 	 * @param channel
-	 *            The ID of the channel
+	 *            the ID of the channel.
 	 */
 	public void removeChannel(int channel) {
 		RemoveChannel removeChannel = new RemoveChannel();
@@ -197,10 +202,10 @@ public class ConnectedClient {
 	}
 
 	/**
-	 * Kicks the client
+	 * Kicks the client.
 	 * 
 	 * @param reason
-	 *            The reason the client was kicked
+	 *            the reason the client was kicked.
 	 */
 	public void kick(String reason) {
 		Kick kick = new Kick();

@@ -30,6 +30,12 @@
  */
 package net.marfgamer.jraknet.protocol.message.acknowledge;
 
+/**
+ * Used by <code>Acknowledge</code> to show what type a set of
+ * <code>Record</code>s is.
+ *
+ * @author MarfGamer
+ */
 public enum AcknowledgeType {
 
 	ACKNOWLEDGED(Acknowledge.ACKNOWLEDGED), NOT_ACKNOWLEDGED(Acknowledge.NOT_ACKNOWLEDGED);
@@ -41,20 +47,16 @@ public enum AcknowledgeType {
 	}
 
 	/**
-	 * Returns the ID of the acknowledge type
-	 * 
-	 * @return The ID of the acknowledge type
+	 * @return the ID of the acknowledge type.
 	 */
 	public short getId() {
 		return this.id;
 	}
 
 	/**
-	 * Returns an <code>AcknowledgeType</code> based on the specified ID
-	 * 
 	 * @param id
-	 *            The ID of the acknowledge receipt type to lookup
-	 * @return An <code>AcknowledgeType</code> based on the specified ID
+	 *            the ID of the acknowledge receipt type to lookup.
+	 * @return an <code>AcknowledgeType</code> based on the specified ID.
 	 */
 	public static AcknowledgeType lookup(short id) {
 		for (AcknowledgeType type : AcknowledgeType.values()) {

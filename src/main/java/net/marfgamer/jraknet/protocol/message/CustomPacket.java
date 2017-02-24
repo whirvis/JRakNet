@@ -82,9 +82,7 @@ public class CustomPacket extends RakNetPacket {
 	}
 
 	/**
-	 * Calculates what the size of the packet would be if it had been encoded
-	 * 
-	 * @return What the size of the packet would be if it had been encoded
+	 * @return the size of the packet would be if it had been encoded.
 	 */
 	public int calculateSize() {
 		int packetSize = 1; // Packet ID
@@ -96,9 +94,7 @@ public class CustomPacket extends RakNetPacket {
 	}
 
 	/**
-	 * Returns whether or not the packet contains any unreliable messages
-	 * 
-	 * @return Whether or not the packet contains any unreliable messages
+	 * @return true if the packet contains any unreliable messages.
 	 */
 	public boolean containsUnreliables() {
 		if (messages.size() <= 0) {
@@ -114,7 +110,7 @@ public class CustomPacket extends RakNetPacket {
 	}
 
 	/**
-	 * Removes all the unreliable messages from the packet
+	 * Removes all the unreliable messages from the packet.
 	 */
 	public void removeUnreliables() {
 		if (messages.size() <= 0) {
@@ -131,11 +127,8 @@ public class CustomPacket extends RakNetPacket {
 	}
 
 	/**
-	 * Calculates the size of a <code>CustomPacket</code> without any extra data
-	 * written to it
-	 * 
-	 * @return The size of a <code>CustomPacket</code> without any extra data
-	 *         written to it
+	 * @return the size of a <code>CustomPacket</code> without any extra data
+	 *         written to it.
 	 */
 	public static int calculateDummy() {
 		CustomPacket custom = new CustomPacket();

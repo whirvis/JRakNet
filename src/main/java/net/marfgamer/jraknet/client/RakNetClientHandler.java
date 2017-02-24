@@ -38,8 +38,8 @@ import io.netty.channel.socket.DatagramPacket;
 import net.marfgamer.jraknet.RakNetPacket;
 
 /**
- * This class is instantiated by the client with the sole purpose of sending
- * received packets to the client so they can be properly handled
+ * Used by the <code>RakNetClient</code> with the sole purpose of sending
+ * received packets to the client so they can be handled.
  *
  * @author MarfGamer
  */
@@ -48,6 +48,13 @@ public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 	private final RakNetClient client;
 	private InetSocketAddress causeAddress;
 
+	/**
+	 * Constructs a <code>RakNetClientHandler</code> with the specified
+	 * <code>RakNetClient</code>.
+	 * 
+	 * @param client
+	 *            the <code>RakNetClient</code> to send received packets to.
+	 */
 	public RakNetClientHandler(RakNetClient client) {
 		this.client = client;
 	}

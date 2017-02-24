@@ -6,7 +6,7 @@
  * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
  *                                                  
- * The MIT License (MIT)
+ * the MIT License (MIT)
  *
  * Copyright (c) 2016, 2017 MarfGamer
  *
@@ -17,7 +17,7 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
+ * the above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -67,7 +67,7 @@ import net.marfgamer.jraknet.session.RakNetState;
 import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
- * This class is used to easily create servers using the RakNet protocol
+ * Used to easily create servers using the RakNet protocol.
  *
  * @author MarfGamer
  */
@@ -93,6 +93,19 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	private volatile boolean running;
 	private final ConcurrentHashMap<InetSocketAddress, RakNetClientSession> sessions;
 
+	/**
+	 * Constructs a <code>RakNetServer</code> with the specified port, maximum
+	 * amount connections, maximum transfer unit, and <code>Identifier</code>.
+	 *
+	 * @param port
+	 *            the server port.
+	 * @param maxConnections
+	 *            the maximum amount of connections.
+	 * @param maximumTransferUnit
+	 *            the maximum transfer unit.
+	 * @param identifier
+	 *            the <code>Identifier</code>.
+	 */
 	public RakNetServer(int port, int maxConnections, int maximumTransferUnit, Identifier identifier) {
 		// Set server data
 		this.guid = new Random().nextLong();
@@ -121,126 +134,139 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		}
 	}
 
+	/**
+	 * Constructs a <code>RakNetServer</code> with the specified port, maximum
+	 * amount connections, and maximum transfer unit.
+	 *
+	 * @param port
+	 *            the server port.
+	 * @param maxConnections
+	 *            the maximum amount of connections.
+	 * @param maximumTransferUnit
+	 *            the maximum transfer unit.
+	 */
 	public RakNetServer(int port, int maxConnections, int maximumTransferUnit) {
 		this(port, maxConnections, maximumTransferUnit, null);
 	}
 
+	/**
+	 * Constructs a <code>RakNetServer</code> with the specified port and
+	 * maximum amount of connections.
+	 *
+	 * @param port
+	 *            the server port.
+	 * @param maxConnections
+	 *            the maximum amount of connections.
+	 */
 	public RakNetServer(int port, int maxConnections) {
 		this(port, maxConnections, RakNetUtils.getMaximumTransferUnit());
 	}
 
+	/**
+	 * Constructs a <code>RakNetServer</code> with the specified port, maximum
+	 * amount connections, and <code>Identifier</code>.
+	 *
+	 * @param port
+	 *            the server port.
+	 * @param maxConnections
+	 *            the maximum amount of connections.
+	 * @param identifier
+	 *            the <code>Identifier</code>.
+	 */
 	public RakNetServer(int port, int maxConnections, Identifier identifier) {
 		this(port, maxConnections);
 		this.identifier = identifier;
 	}
 
 	/**
-	 * Returns the server's networking protocol version
-	 * 
-	 * @return The server's networking protocol version
+	 * @return the server's networking protocol version.
 	 */
 	public final int getProtocolVersion() {
 		return RakNet.SERVER_NETWORK_PROTOCOL;
 	}
 
 	/**
-	 * Returns the server's globally unique ID (GUID)
-	 * 
-	 * @return The server's globally unique ID
+	 * @return the server's globally unique ID.
 	 */
 	public final long getGloballyUniqueId() {
 		return this.guid;
 	}
 
 	/**
-	 * Returns the server's timestamp (how long ago it started in milliseconds)
-	 * 
-	 * @return The server's timestamp
+	 * @return the server's timestamp.
 	 */
 	public final long getTimestamp() {
 		return (System.currentTimeMillis() - this.timestamp);
 	}
 
 	/**
-	 * Returns the port the server is bound to
-	 * 
-	 * @return The port the server is bound to
+	 * @return the port the server is bound to.
 	 */
 	public final int getPort() {
 		return this.port;
 	}
 
 	/**
-	 * Returns the maximum amount of connections the server can handle at once
-	 * 
-	 * @return The maximum amount of connections the server can handle at once
+	 * @return the maximum amount of connections the server can handle at once.
 	 */
 	public final int getMaxConnections() {
 		return this.maxConnections;
 	}
 
 	/**
-	 * Returns the maximum transfer unit
-	 * 
-	 * @return The maximum transfer unit
+	 * @return the maximum transfer unit.
 	 */
 	public final int getMaximumTransferUnit() {
 		return this.maximumTransferUnit;
 	}
 
 	/**
-	 * Enables/disables server broadcasting
+	 * Enables/disables server broadcasting.
 	 * 
 	 * @param enabled
-	 *            Whether or not the server will broadcast
+	 *            whether or not the server will broadcast.
 	 */
 	public final void setBroadcastingEnabled(boolean enabled) {
 		this.broadcastingEnabled = enabled;
 	}
 
 	/**
-	 * Returns whether or not broadcasting is enabled
-	 * 
-	 * @return Whether or not broadcasting is enabled
+	 * @return true if broadcasting is enabled.
 	 */
-	public final boolean getBroadcastingEnabled() {
+	public final boolean isBroadcastingEnabled() {
 		return this.broadcastingEnabled;
 	}
 
 	/**
-	 * Returns the identifier the server uses for discovery
-	 * 
-	 * @return The identifier the server uses for discovery
+	 * @return the identifier the server uses for discovery.
 	 */
 	public final Identifier getIdentifier() {
 		return this.identifier;
 	}
 
 	/**
-	 * Sets the server's identifier used for discovery
+	 * Sets the server's identifier used for discovery.
 	 * 
 	 * @param identifier
-	 *            The new identifier
+	 *            the new identifier.
 	 */
 	public final void setIdentifier(Identifier identifier) {
 		this.identifier = identifier;
 	}
 
 	/**
-	 * Returns the server's listener
-	 * 
-	 * @return The server's listener
+	 * @return the server's listener.
 	 */
 	public final RakNetServerListener getListener() {
 		return this.listener;
 	}
 
 	/**
-	 * Sets the server's listener
+	 * Sets the server's listener.
 	 * 
 	 * @param listener
-	 *            The new listener
-	 * @return The server
+	 *            the new listener.
+	 * @return the server.
 	 */
 	public final RakNetServer setListener(RakNetServerListener listener) {
 		if (listener == null) {
@@ -251,9 +277,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns the sessions connected to the server
-	 * 
-	 * @return The sessions connected to the server
+	 * @return the sessions connected to the server.
 	 */
 	public final RakNetClientSession[] getSessions() {
 		synchronized (sessions) {
@@ -262,9 +286,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns the amount of sessions connected to the server
-	 * 
-	 * @return The amount of sessions connected to the server
+	 * @return the amount of sessions connected to the server.
 	 */
 	public final int getSessionCount() {
 		synchronized (sessions) {
@@ -273,13 +295,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns whether or not the server has a session with the specified
-	 * address
-	 * 
 	 * @param address
-	 *            The address to check
-	 * @return Whether or not the server has a session with the specified
-	 *         address
+	 *            the address to check.
+	 * @return true server has a session with the specified address.
 	 */
 	public final boolean hasSession(InetSocketAddress address) {
 		synchronized (sessions) {
@@ -288,13 +306,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns whether or not the server has a session with the specified
-	 * globally unique ID
-	 * 
 	 * @param guid
-	 *            The globally unique ID to check
-	 * @return Whether or not the server has a session with the specified
-	 *         Globally Unique ID
+	 *            the globally unique ID to check.
+	 * @return true if the server has a session with the specified globally
+	 *         unique ID.
 	 */
 	public final boolean hasSession(long guid) {
 		synchronized (sessions) {
@@ -308,11 +323,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns a session connected to the server by their address
-	 * 
 	 * @param address
-	 *            The address of the session
-	 * @return A session connected to the server by their address
+	 *            the address of the session.
+	 * @return a session connected to the server by their address.
 	 */
 	public final RakNetClientSession getSession(InetSocketAddress address) {
 		synchronized (sessions) {
@@ -321,11 +334,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns a session connected to the server by their Globally Unique ID
-	 * 
 	 * @param guid
-	 *            The Globally Unique ID of the session
-	 * @return A session connected to the server by their address
+	 *            the globally unique ID of the session.
+	 * @return a session connected to the server by their address.
 	 */
 	public final RakNetClientSession getSession(long guid) {
 		synchronized (sessions) {
@@ -346,12 +357,12 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Removes a session from the server with the specified reason
+	 * Removes a session from the server with the specified reason.
 	 * 
 	 * @param address
-	 *            The address of the session
+	 *            the address of the session.
 	 * @param reason
-	 *            The reason the session was removed
+	 *            the reason the session was removed.
 	 */
 	public final void removeSession(InetSocketAddress address, String reason) {
 		synchronized (sessions) {
@@ -369,32 +380,32 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Removes a session from the server
+	 * Removes a session from the server.
 	 * 
 	 * @param address
-	 *            The address of the session
+	 *            the address of the session.
 	 */
 	public final void removeSession(InetSocketAddress address) {
 		this.removeSession(address, "Disconnected from server");
 	}
 
 	/**
-	 * Removes a session from the server with the specified reason
+	 * Removes a session from the server with the specified reason.
 	 * 
 	 * @param session
-	 *            The session to remove
+	 *            the session to remove.
 	 * @param reason
-	 *            The reason the session was removed
+	 *            the reason the session was removed.
 	 */
 	public final void removeSession(RakNetClientSession session, String reason) {
 		this.removeSession(session.getAddress(), reason);
 	}
 
 	/**
-	 * Removes a session from the server
+	 * Removes a session from the server.
 	 * 
 	 * @param session
-	 *            The session to remove
+	 *            the session to remove.
 	 */
 	public final void removeSession(RakNetClientSession session) {
 		this.removeSession(session, "Disconnected from server");
@@ -402,14 +413,14 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 	/**
 	 * Blocks the address and disconnects all the clients on the address with
-	 * the specified reason for the specified amount of time
+	 * the specified reason for the specified amount of time.
 	 * 
 	 * @param address
-	 *            The address to block
+	 *            the address to block.
 	 * @param reason
-	 *            The reason the address was blocked
+	 *            the reason the address was blocked.
 	 * @param time
-	 *            How long the address will blocked in milliseconds
+	 *            how long the address will blocked in milliseconds.
 	 */
 	public final void blockAddress(InetAddress address, String reason, long time) {
 		synchronized (sessions) {
@@ -424,45 +435,43 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 	/**
 	 * Blocks the address and disconnects all the clients on the address for the
-	 * specified amount of time
+	 * specified amount of time.
 	 * 
 	 * @param address
-	 *            The address to block
+	 *            the address to block.
 	 * @param time
-	 *            How long the address will blocked in milliseconds
+	 *            how long the address will blocked in milliseconds.
 	 */
 	public final void blockAddress(InetAddress address, long time) {
 		this.blockAddress(address, "Blocked", time);
 	}
 
 	/**
-	 * Unblocks the specified address
+	 * Unblocks the specified address.
 	 * 
 	 * @param address
-	 *            The address to unblock
+	 *            the address to unblock.
 	 */
 	public final void unblockAddress(InetAddress address) {
 		handler.unblockAddress(address);
 	}
 
 	/**
-	 * Returns whether or not the specified address is blocked
-	 * 
 	 * @param address
-	 *            The address to check
-	 * @return Whether or not the specified address is blocked
+	 *            the address to check.
+	 * @return true if the specified address is blocked.
 	 */
 	public final boolean addressBlocked(InetAddress address) {
 		return handler.addressBlocked(address);
 	}
 
 	/**
-	 * Called whenever the handler catches an exception in Netty
+	 * Called whenever the handler catches an exception in Netty.
 	 * 
 	 * @param address
-	 *            The address that caused the exception
+	 *            the address that caused the exception.
 	 * @param cause
-	 *            The exception caught by the handler
+	 *            the exception caught by the handler.
 	 */
 	protected final void handleHandlerException(InetSocketAddress address, Throwable cause) {
 		if (this.hasSession(address)) {
@@ -472,12 +481,12 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Handles a packet received by the handler
+	 * Handles a packet received by the handler.
 	 * 
 	 * @param packet
-	 *            The packet to handle
+	 *            the packet to handle.
 	 * @param sender
-	 *            The address of the sender
+	 *            the address of the sender.
 	 */
 	protected final void handleMessage(RakNetPacket packet, InetSocketAddress sender) {
 		short packetId = packet.getId();
@@ -510,7 +519,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 			synchronized (sessions) {
 				if (sessions.containsKey(sender)) {
-					// The session is already connected
+					// the session is already connected
 					this.removeSession(sender, "Client reinstantiated connection");
 				}
 			}
@@ -607,11 +616,11 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Validates the sender during login to make sure there are no problems
+	 * Validates the sender during login to make sure there are no problems.
 	 * 
 	 * @param sender
-	 *            The address of the packet sender
-	 * @return The packet to respond with if there was an error
+	 *            the address of the packet sender.
+	 * @return the packet to respond with if there was an error.
 	 */
 	private final RakNetPacket validateSender(InetSocketAddress sender) {
 		// Checked throughout all login
@@ -628,66 +637,66 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			return connectionBanned;
 		}
 
-		// There were no errors
+		// there were no errors
 		return null;
 	}
 
 	/**
-	 * Sends a raw message to the specified address, be careful when using this
-	 * method! As if it is used incorrectly it could break client sessions
-	 * entirely. If you are wanting to send a message to a session, you are
+	 * Sends a raw message to the specified address. Be careful when using this
+	 * method, because if it is used incorrectly it could break server sessions
+	 * entirely! If you are wanting to send a message to a session, you are
 	 * probably looking for the
 	 * {@link net.marfgamer.jraknet.session.RakNetSession#sendMessage(net.marfgamer.jraknet.protocol.Reliability, net.marfgamer.jraknet.Packet)
-	 * sendMessage} method
+	 * sendMessage} method.
 	 * 
 	 * @param buf
-	 *            The buffer to send
+	 *            the buffer to send.
 	 * @param address
-	 *            The address to send the buffer to
+	 *            the address to send the buffer to.
 	 */
 	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(buf, address));
 	}
 
 	/**
-	 * Sends a raw message to the specified address, be careful when using this
-	 * method! As if it is used incorrectly it could break client sessions
-	 * entirely. If you are wanting to send a message to a session, you are
+	 * Sends a raw message to the specified address. Be careful when using this
+	 * method, because if it is used incorrectly it could break server sessions
+	 * entirely! If you are wanting to send a message to a session, you are
 	 * probably looking for the
 	 * {@link net.marfgamer.jraknet.session.RakNetSession#sendMessage(net.marfgamer.jraknet.protocol.Reliability, net.marfgamer.jraknet.Packet)
-	 * sendMessage} method
+	 * sendMessage} method.
 	 * 
 	 * @param packet
-	 *            The packet to send
+	 *            the buffer to send.
 	 * @param address
-	 *            The address to send the packet to
+	 *            the address to send the buffer to.
 	 */
 	public final void sendNettyMessage(Packet packet, InetSocketAddress address) {
 		this.sendNettyMessage(packet.buffer(), address);
 	}
 
 	/**
-	 * Sends a raw message to the specified address, be careful when using this
-	 * method! As if it is used incorrectly it could break client sessions
-	 * entirely. If you are wanting to send a message to a session, you are
+	 * Sends a raw message to the specified address. Be careful when using this
+	 * method, because if it is used incorrectly it could break server sessions
+	 * entirely! If you are wanting to send a message to a session, you are
 	 * probably looking for the
 	 * {@link net.marfgamer.jraknet.session.RakNetSession#sendMessage(net.marfgamer.jraknet.protocol.Reliability, int)
-	 * sendMessage} method
+	 * sendMessage} method.
 	 * 
 	 * @param packetId
-	 *            The ID of the packet to send
+	 *            the ID of the packet to send.
 	 * @param address
-	 *            The address to send the packet to
+	 *            the address to send the packet to.
 	 */
 	public final void sendNettyMessage(int packetId, InetSocketAddress address) {
 		this.sendNettyMessage(new RakNetPacket(packetId), address);
 	}
 
 	/**
-	 * Starts the server
+	 * Starts the server.
 	 * 
 	 * @throws NoListenerException
-	 *             Thrown if the listener has not yet been set
+	 *             if the listener has not yet been set.
 	 */
 	public final void start() throws NoListenerException {
 		// Make sure we have an adapter
@@ -731,9 +740,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Starts the server on it's own Thread
+	 * Starts the server on it's own <code>Thread</code>.
 	 * 
-	 * @return The Thread the server is running on
+	 * @return the <code>Thread</code> the server is running on.
 	 */
 	public final synchronized Thread startThreaded() {
 		// Give the thread a reference
@@ -757,7 +766,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Stops the server
+	 * Stops the server.
 	 */
 	public final void shutdown() {
 		this.running = false;

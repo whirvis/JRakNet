@@ -35,7 +35,7 @@ import net.marfgamer.jraknet.example.chat.server.ChatServer;
 import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
- * Allows the server to add, remove, and rename channels
+ * Allows the server to add, remove, and rename channels.
  *
  * @author MarfGamer
  */

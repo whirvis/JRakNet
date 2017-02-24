@@ -38,7 +38,7 @@ import net.marfgamer.jraknet.identifier.MCPEIdentifier;
 import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
- * Used to test the various functions in <code>RakNetUtils</code>
+ * Used to test the various functions in <code>RakNetUtils</code>.
  *
  * @author MarfGamer
  */
@@ -84,11 +84,9 @@ public class UtilityTest {
 	}
 
 	/**
-	 * Converts an MCPE identifier to a formatted String
-	 * 
 	 * @param identifier
-	 *            The identifier to format
-	 * @return A formated MCPE identifier
+	 *            the <code>Identifier</code> to format.
+	 * @return a formated Minecraft: Pocket Edition identifier.
 	 */
 	public static String formatMCPEIdentifier(MCPEIdentifier identifier) {
 		return ("[Name: " + identifier.getServerName().replaceAll(UNICODE_MINECRAFT_COLOR_SYMBOL + ".", "")

@@ -45,7 +45,7 @@ import net.marfgamer.jraknet.identifier.Identifier;
 import net.marfgamer.jraknet.identifier.MCPEIdentifier;
 
 /**
- * Used to test the broadcast feature in <code>RakNetClient</code>
+ * Used to test the broadcast feature in <code>RakNetClient</code>.
  *
  * @author MarfGamer
  */
@@ -63,7 +63,7 @@ public class BroadcastTest {
 	}
 
 	/**
-	 * The class used to listen for server discovery updates
+	 * The class used to listen for server discovery updates.
 	 *
 	 * @author MarfGamer
 	 */
@@ -94,7 +94,7 @@ public class BroadcastTest {
 	}
 
 	/**
-	 * Starts the test
+	 * Starts the test.
 	 */
 	public void start() {
 		// Set client options

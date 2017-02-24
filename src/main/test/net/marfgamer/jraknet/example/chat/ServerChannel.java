@@ -35,7 +35,7 @@ import net.marfgamer.jraknet.session.InvalidChannelException;
 
 /**
  * Represents a channel on a <code>ChatServer</code>, used by both the
- * <code>ChatServer</code> and <code>ChatClient</code> to manage the chat rooms
+ * <code>ChatServer</code> and <code>ChatClient</code> to manage the chat rooms.
  *
  * @author MarfGamer
  */
@@ -45,6 +45,17 @@ public class ServerChannel {
 	private String name;
 	private final StringBuilder channelText;
 
+	/**
+	 * Constructs a <code>ServerChannel</code> with the specified channel and
+	 * name.
+	 * 
+	 * @param channel
+	 *            the channel.
+	 * @param name
+	 *            the name.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than the maximum.
+	 */
 	public ServerChannel(int channel, String name) throws InvalidChannelException {
 		this.channel = channel;
 		this.name = name;
@@ -56,47 +67,41 @@ public class ServerChannel {
 	}
 
 	/**
-	 * Returns the ID of the channel
-	 * 
-	 * @return The ID of the channel
+	 * @return the ID of the channel.
 	 */
 	public int getChannel() {
 		return this.channel;
 	}
 
 	/**
-	 * Returns the name of the channel
-	 * 
-	 * @return The name of the channel
+	 * @return the name of the channel.
 	 */
 	public String getName() {
 		return this.name;
 	}
 
 	/**
-	 * Sets the name of the channel
+	 * Sets the name of the channel.
 	 * 
 	 * @param name
-	 *            The new channel name
+	 *            the new channel name.
 	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
 	/**
-	 * Adds a chat message to the server channel
+	 * Adds a chat message to the server channel.
 	 * 
 	 * @param message
-	 *            The message to add
+	 *            the message to add.
 	 */
 	public void addChatMessage(String message) {
 		channelText.append(message + "\n");
 	}
 
 	/**
-	 * Returns the text displayed on the channel
-	 * 
-	 * @return The text displayed on the channel
+	 * @return the text displayed on the channel.
 	 */
 	public String getChannelText() {
 		return channelText.toString();

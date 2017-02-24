@@ -33,7 +33,7 @@ package net.marfgamer.jraknet.example.chat.server.command;
 import net.marfgamer.jraknet.example.chat.server.ChatServer;
 
 /**
- * Stops the server
+ * Stops the server.
  *
  * @author MarfGamer
  */

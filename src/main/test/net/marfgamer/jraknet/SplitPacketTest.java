@@ -39,7 +39,7 @@ import net.marfgamer.jraknet.client.RakNetClientListener;
 import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.message.CustomPacket;
 import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
-import net.marfgamer.jraknet.server.BlockedClient;
+import net.marfgamer.jraknet.server.BlockedAddress;
 import net.marfgamer.jraknet.server.RakNetServer;
 import net.marfgamer.jraknet.server.RakNetServerListener;
 import net.marfgamer.jraknet.session.RakNetClientSession;
@@ -49,7 +49,7 @@ import net.marfgamer.jraknet.util.RakNetUtils;
 /**
  * Used to test the split packet feature of <code>RakNetSession</code> through a
  * stress test by sending a packet as big as possible (Average packet size is
- * over 146,000 bytes!)
+ * over 146,000 bytes!).
  *
  * @author MarfGamer
  */
@@ -76,13 +76,11 @@ public class SplitPacketTest {
 	}
 
 	/**
-	 * Creates the server that will receive the giant packet from the client
-	 * 
-	 * @return The server that will receive the giant packet
+	 * @return the server that will receive the giant packet.
 	 * @throws RakNetException
-	 *             Thrown if any problems occur during the stress test
+	 *             if any problems occur during the stress test.
 	 * @throws UnknownHostException
-	 *             Thrown if the localhost address cannot be found
+	 *             if the localhost address cannot be found.
 	 */
 	private static RakNetServer createServer() throws RakNetException {
 		RakNetServer server = new RakNetServer(UtilityTest.MARFGAMER_DEVELOPMENT_PORT, 1);
@@ -96,7 +94,7 @@ public class SplitPacketTest {
 				try {
 					if (!InetAddress.getLocalHost().equals(session.getAddress().getAddress())) {
 						server.removeSession(session, "Session is not from local address");
-						server.blockAddress(session.getInetAddress(), BlockedClient.PERMANENT_BLOCK);
+						server.blockAddress(session.getInetAddress(), BlockedAddress.PERMANENT_BLOCK);
 						return; // The sender is not from our address!
 					}
 				} catch (UnknownHostException e) {
@@ -165,13 +163,11 @@ public class SplitPacketTest {
 	}
 
 	/**
-	 * Creates the client that will be sending the giant packet to the server
-	 * 
-	 * @return The client that will be sending the giant packet
+	 * @return the client that will be sending the giant packet.
 	 * @throws RakNetException
-	 *             Thrown if any problems occur during the stress test
+	 *             if any problems occur during the stress test.
 	 * @throws UnknownHostException
-	 *             Thrown if the localhost address cannot be found
+	 *             if the localhost address cannot be found.
 	 */
 	private static RakNetClient createClient() throws RakNetException, UnknownHostException {
 		// Create client and add hooks

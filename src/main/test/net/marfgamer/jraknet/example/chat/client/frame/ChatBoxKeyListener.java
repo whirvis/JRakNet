@@ -38,7 +38,7 @@ import net.marfgamer.jraknet.example.chat.client.ChatClient;
 
 /**
  * Listens for presses to the enter button in the chat box, used to signal the
- * client to send a chat message
+ * client to send a chat message.
  *
  * @author MarfGamer
  */
@@ -63,7 +63,7 @@ public class ChatBoxKeyListener implements KeyListener {
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		// not used
+		// Not used
 	}
 
 	@Override
