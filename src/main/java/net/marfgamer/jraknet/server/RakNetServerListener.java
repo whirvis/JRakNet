@@ -126,10 +126,12 @@ public interface RakNetServerListener {
 	 * 
 	 * @param address
 	 *            the address that was blocked.
+	 * @param reason
+	 *            the reason the address was blocked.
 	 * @param time
 	 *            how long the address is blocked for (Note: -1 is permanent).
 	 */
-	public default void onAddressBlocked(InetAddress address, long time) {
+	public default void onAddressBlocked(InetAddress address, String reason, long time) {
 	}
 
 	/**

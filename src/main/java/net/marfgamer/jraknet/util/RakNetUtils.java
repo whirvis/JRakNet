@@ -30,7 +30,6 @@
  */
 package net.marfgamer.jraknet.util;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -284,7 +283,7 @@ public class RakNetUtils {
 	public static int getMaximumTransferUnit() {
 		try {
 			return NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getMTU();
-		} catch (IOException e) {
+		} catch (Throwable throwable) {
 			return -1;
 		}
 	}

@@ -31,7 +31,7 @@
 package net.marfgamer.jraknet.session;
 
 /**
- * This exception is thrown whenever a session has timed out
+ * Signals that a <code>RakNetSession</code> has timed out.
  *
  * @author MarfGamer
  */
@@ -39,6 +39,9 @@ public class TimeoutException extends RuntimeException {
 
 	private static final long serialVersionUID = 4216977972114486611L;
 
+	/**
+	 * Constructs a <code>TimeoutException</code>.
+	 */
 	public TimeoutException() {
 		super("Session timeout");
 	}
