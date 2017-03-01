@@ -138,8 +138,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		this.addMaximumTransferUnit(new MaximumTransferUnit(RakNetUtils.getMaximumTransferUnit(), 2));
 		this.addMaximumTransferUnit(new MaximumTransferUnit(1464, 3));
 		this.addMaximumTransferUnit(new MaximumTransferUnit(1172, 4));
-		this.addMaximumTransferUnit(new MaximumTransferUnit(548, 5));
-		this.addMaximumTransferUnit(new MaximumTransferUnit(RakNet.MINIMUM_TRANSFER_UNIT, 6));
+		this.addMaximumTransferUnit(new MaximumTransferUnit(RakNet.MINIMUM_TRANSFER_UNIT, 5));
 
 		// Initiate bootstrap data
 		try {

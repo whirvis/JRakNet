@@ -40,7 +40,7 @@ import net.marfgamer.jraknet.util.map.IntMap;
 
 /**
  * Used to easily assemble split packets received from a
- * <code>RakNetSession</code>
+ * <code>RakNetSession</code>.
  *
  * @author MarfGamer
  */
@@ -52,6 +52,17 @@ public class SplitPacket {
 
 	private final IntMap<Packet> payloads;
 
+	/**
+	 * Constructs a <code>SplitPacket</code> with the specified split ID, split
+	 * count, and <code>Reliability</code>.
+	 * 
+	 * @param splitId
+	 *            the split ID.
+	 * @param splitCount
+	 *            the split count.
+	 * @param reliability
+	 *            the <code>Reliability</code>
+	 */
 	public SplitPacket(int splitId, int splitCount, Reliability reliability) {
 		this.splitId = splitId;
 		this.splitCount = splitCount;
@@ -64,27 +75,21 @@ public class SplitPacket {
 	}
 
 	/**
-	 * Returns the split ID of the split packet
-	 * 
-	 * @return The split ID of the split packet
+	 * @return the split ID of the split packet.
 	 */
 	public int getSplitId() {
 		return this.splitId;
 	}
 
 	/**
-	 * Returns the amount of packets needed to complete the split packet
-	 * 
-	 * @return The amount of packets needed to complete the split packet
+	 * @return the amount of packets needed to complete the split packet.
 	 */
 	public int getSplitCount() {
 		return this.splitCount;
 	}
 
 	/**
-	 * Returns the reliability of the split packet
-	 * 
-	 * @return The reliability of the split packet
+	 * @return the reliability of the split packet.
 	 */
 	public Reliability getReliability() {
 		return this.reliability;
@@ -92,12 +97,12 @@ public class SplitPacket {
 
 	/**
 	 * Updates the data for the split packet while also verifying that the
-	 * specified <code>EncapsulatedPacket</code> belongs to this split packet
+	 * specified <code>EncapsulatedPacket</code> belongs to this split packet.
 	 * 
 	 * @param encapsulated
-	 *            The <code>EncapsulatedPacket</code> being used to update the
-	 *            data
-	 * @return The packet if finished, null if data is still missing
+	 *            the <code>EncapsulatedPacket</code> being used to update the
+	 *            data.
+	 * @return the packet if finished, null if data is still missing.
 	 */
 	public Packet update(EncapsulatedPacket encapsulated) {
 		// Update payload data
@@ -121,15 +126,13 @@ public class SplitPacket {
 	}
 
 	/**
-	 * Returns whether or not the packet needs to be split
-	 * 
 	 * @param reliability
-	 *            The reliability of the packet
+	 *            the reliability of the packet.
 	 * @param packet
-	 *            The packet
+	 *            the packet.
 	 * @param maximumTransferUnit
-	 *            The maximum transfer unit of the session
-	 * @return Whether or not the packet needs to be split
+	 *            the maximum transfer unit of the session.
+	 * @return true the packet needs to be split.
 	 */
 	public static boolean needsSplit(Reliability reliability, Packet packet, int maximumTransferUnit) {
 		return (CustomPacket.calculateDummy()
@@ -141,10 +144,10 @@ public class SplitPacket {
 	 * maximumTransferUnit
 	 * 
 	 * @param session
-	 *            The session
+	 *            the session.
 	 * @param encapsulated
-	 *            The <code>EncapsulatedPacket</code> to split
-	 * @return The split <code>EncapsulatedPacket</code>'s
+	 *            the <code>EncapsulatedPacket</code> to split.
+	 * @return the split <code>EncapsulatedPacket</code>s.
 	 */
 	public static final EncapsulatedPacket[] splitPacket(RakNetSession session, EncapsulatedPacket encapsulated) {
 		// Get split packet data

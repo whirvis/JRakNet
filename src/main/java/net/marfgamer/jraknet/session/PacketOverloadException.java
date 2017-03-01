@@ -28,35 +28,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package net.marfgamer.jraknet;
+package net.marfgamer.jraknet.session;
+
+import net.marfgamer.jraknet.RakNet;
 
 /**
- * Contains info for RakNet
+ * Signals that a <code>RakNetSession</code> has attempted to send too many
+ * packets at once.
  *
  * @author MarfGamer
  */
-public class RakNet {
+public class PacketOverloadException extends RuntimeException {
 
-	// Network protocol data
-	public static final int SERVER_NETWORK_PROTOCOL = 8;
-	public static final int CLIENT_NETWORK_PROTOCOL = 8;
+	private static final long serialVersionUID = 8544922469731039197L;
 
-	// Maximum Transfer Unit data
-	public static final int MINIMUM_TRANSFER_UNIT = 548;
-
-	// Session limiting
-	public static final int MAX_CHANNELS = 32;
-	public static final byte DEFAULT_CHANNEL = 0x00;
-	public static final int MAX_SPLIT_COUNT = 128;
-	public static final int MAX_SPLITS_PER_QUEUE = 4;
-	public static final int MAX_PACKETS_PER_SECOND = 500;
-
-	// Session timing
-	public static final long SEND_INTERVAL = 50L;
-	public static final long RECOVERY_SEND_INTERVAL = SEND_INTERVAL;
-	public static final long PING_SEND_INTERVAL = 2500L;
-	public static final long DETECTION_SEND_INTERVAL = PING_SEND_INTERVAL * 2;
-	public static final long SESSION_TIMEOUT = DETECTION_SEND_INTERVAL * 5;
-	public static final long MAX_PACKETS_PER_SECOND_BLOCK = (1000L * 300);
+	/**
+	 * Constructs a <code>PacketOverloadException</code>.
+	 */
+	public PacketOverloadException() {
+		super("Too many packets (More than " + RakNet.MAX_PACKETS_PER_SECOND + ") were sent within a second");
+	}
 
 }
