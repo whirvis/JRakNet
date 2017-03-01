@@ -64,16 +64,19 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	}
 
 	/**
-	 * Blocks the specified address for the specified amount of time.
+	 * Blocks the specified address with the specified reason for the specified
+	 * amount time.
 	 * 
 	 * @param address
 	 *            the address to block.
+	 * @param reason
+	 *            the reason the address was blocked.
 	 * @param time
 	 *            how long the address will be blocked in milliseconds.
 	 */
-	public void blockAddress(InetAddress address, long time) {
+	public void blockAddress(InetAddress address, String reason, long time) {
 		blocked.put(address, new BlockedAddress(System.currentTimeMillis(), time));
-		server.getListener().onAddressBlocked(address, time);
+		server.getListener().onAddressBlocked(address, reason, time);
 	}
 
 	/**

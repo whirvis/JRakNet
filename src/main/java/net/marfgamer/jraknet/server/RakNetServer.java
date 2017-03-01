@@ -425,12 +425,12 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	public final void blockAddress(InetAddress address, String reason, long time) {
 		synchronized (sessions) {
 			for (InetSocketAddress clientAddress : sessions.keySet()) {
-				if (clientAddress.getAddress().getAddress().equals(address)) {
+				if (clientAddress.getAddress().equals(address)) {
 					this.removeSession(clientAddress, reason);
 				}
 			}
 		}
-		handler.blockAddress(address, time);
+		handler.blockAddress(address, reason, time);
 	}
 
 	/**
@@ -519,8 +519,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 			synchronized (sessions) {
 				if (sessions.containsKey(sender)) {
-					sessions.get(sender).getState().equals(RakNetState.CONNECTED);
-					this.removeSession(sender, "Client re-instantiated connection");
+					if (sessions.get(sender).getState().equals(RakNetState.CONNECTED)) {
+						this.removeSession(sender, "Client re-instantiated connection");
+					}
 				}
 			}
 

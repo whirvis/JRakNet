@@ -97,8 +97,9 @@ public class RakNetServerTest {
 			}
 
 			@Override
-			public void onAddressBlocked(InetAddress address, long time) {
-				System.out.println("Blocked address " + address + " for " + (time / 1000L) + " seconds");
+			public void onAddressBlocked(InetAddress address, String reason, long time) {
+				System.out.println(
+						"Blocked address " + address + " due to \"" + reason + "\" for " + (time / 1000L) + " seconds");
 			}
 
 			@Override
