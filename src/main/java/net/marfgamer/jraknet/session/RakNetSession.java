@@ -624,7 +624,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		} else {
 			// Channel is valid, it is safe to handle
 			if (reliability.isOrdered()) {
-				System.out.println("Received ordered packet on channel " + orderChannel + " with index " + orderIndex);
+				// System.out.println("Received ordered packet on channel " +
+				// orderChannel + " with index " + orderIndex);
 				handleQueue.get(orderChannel).put(orderIndex, encapsulated);
 				while (handleQueue.get(orderChannel).containsKey(orderReceiveIndex[orderChannel])) {
 					EncapsulatedPacket orderedEncapsulated = handleQueue.get(orderChannel)
@@ -632,9 +633,12 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 					handleQueue.get(orderChannel).remove(orderReceiveIndex[orderChannel] - 1);
 					this.handleMessage0(encapsulated.orderChannel, new RakNetPacket(orderedEncapsulated.payload));
 				}
-				System.out.println("Current order index for channel " + orderChannel + ": "
-						+ (orderReceiveIndex[orderChannel] - 1) + " (Leftover: " + handleQueue.get(orderChannel).size()
-						+ ") (Last index on channel: " + orderIndex + ")");
+				/*
+				 * System.out.println("Current order index for channel " +
+				 * orderChannel + ": " + (orderReceiveIndex[orderChannel] - 1) +
+				 * " (Leftover: " + handleQueue.get(orderChannel).size() +
+				 * ") (Last index on channel: " + orderIndex + ")");
+				 */
 			} else if (reliability.isSequenced()) {
 				if (orderIndex > sequenceReceiveIndex[orderChannel]) {
 					sequenceReceiveIndex[orderChannel] = orderIndex + 1;
@@ -772,7 +776,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		if (currentTime - this.lastPacketReceiveTime >= RakNet.SESSION_TIMEOUT) {
 			throw new TimeoutException();
 		}
-		
+
 		// Reset packet data
 		if (currentTime - this.lastPacketCounterResetTime >= 1000L) {
 			this.packetsSentThisSecond = 0;
