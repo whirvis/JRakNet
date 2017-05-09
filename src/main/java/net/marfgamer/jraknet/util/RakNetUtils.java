@@ -284,7 +284,24 @@ public class RakNetUtils {
 		try {
 			return NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getMTU();
 		} catch (Throwable throwable) {
-			return -1;
+			/* 
+			 * We failed to get the NetworkInterface, we're gonna have to cycle through 
+			 * them manually and choose the lowest one to make sure we never exceed any hardware 
+			 * limitations 
+			 */
+			try {
+				int lowestMaximumTransferUnit = Integer.MAX_VALUE;
+				for(NetworkInterface networkInterface : NetworkInterface.getNetworkInterfaces()) {
+					int maximumTransferUnit = networkInterface.getMTU();
+					if(maximumTransferUnit < lowestMaximumTransferUnit && maximumTransferUnit >= RakNet.MINIMUM_TRANSFER_UNIT) {
+						lowestMaximumTransferUnit = maximumTransferUnit;
+					}
+				}
+				return lowestMaximumTransferUnit;
+			} catch(Throwable throwable) {
+				throwable.printStackTrace();
+				return -1;
+			}
 		}
 	}
 
