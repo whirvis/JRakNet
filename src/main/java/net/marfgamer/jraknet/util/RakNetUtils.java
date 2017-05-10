@@ -30,10 +30,12 @@
  */
 package net.marfgamer.jraknet.util;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -284,25 +286,40 @@ public class RakNetUtils {
 		try {
 			return NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getMTU();
 		} catch (Throwable throwable) {
-			/* 
-			 * We failed to get the NetworkInterface, we're gonna have to cycle through 
-			 * them manually and choose the lowest one to make sure we never exceed any hardware 
-			 * limitations 
-			 */
 			try {
+				/*
+				 * We failed to get the NetworkInterface, we're gonna have to
+				 * cycle through them manually and choose the lowest one to make
+				 * sure we never exceed any hardware limitations
+				 */
+				boolean foundDevice = false;
 				int lowestMaximumTransferUnit = Integer.MAX_VALUE;
-				for(NetworkInterface networkInterface : NetworkInterface.getNetworkInterfaces()) {
+				for (Enumeration<NetworkInterface> networkInterfaces = NetworkInterface
+						.getNetworkInterfaces(); networkInterfaces.hasMoreElements();) {
+					NetworkInterface networkInterface = networkInterfaces.nextElement();
 					int maximumTransferUnit = networkInterface.getMTU();
-					if(maximumTransferUnit < lowestMaximumTransferUnit && maximumTransferUnit >= RakNet.MINIMUM_TRANSFER_UNIT) {
+					if (maximumTransferUnit < lowestMaximumTransferUnit
+							&& maximumTransferUnit >= RakNet.MINIMUM_TRANSFER_UNIT) {
 						lowestMaximumTransferUnit = maximumTransferUnit;
+						foundDevice = true;
 					}
 				}
+
+				// This is a serious error and will cause startup to fail
+				if (foundDevice == false) {
+					throw new IOException("Failed to locate Network Interface with an MTU higher than the minimum ("
+							+ RakNet.MINIMUM_TRANSFER_UNIT + ")");
+				}
 				return lowestMaximumTransferUnit;
-			} catch(Throwable throwable) {
-				throwable.printStackTrace();
+			} catch (Throwable throwable2) {
+				throwable2.printStackTrace();
 				return -1;
 			}
 		}
+	}
+
+	public static void main(String[] args) throws IOException {
+		System.out.println(getMaximumTransferUnit());
 	}
 
 	/**
