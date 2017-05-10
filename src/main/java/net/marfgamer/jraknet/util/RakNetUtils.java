@@ -307,7 +307,7 @@ public class RakNetUtils {
 
 				// This is a serious error and will cause startup to fail
 				if (foundDevice == false) {
-					throw new IOException("Failed to locate Network Interface with an MTU higher than the minimum ("
+					throw new IOException("Failed to locate a network interface with an MTU higher than the minimum ("
 							+ RakNet.MINIMUM_TRANSFER_UNIT + ")");
 				}
 				return lowestMaximumTransferUnit;
