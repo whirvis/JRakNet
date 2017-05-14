@@ -30,6 +30,11 @@
  */
 package net.marfgamer.jraknet.util.map;
 
+/**
+ * Used in supporting <code>Map</code> classes to rename keys of values.
+ *
+ * @author MarfGamer
+ */
 public interface DynamicKey<T> {
 
 	/**
