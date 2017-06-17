@@ -142,6 +142,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		this.sequenceReceiveIndex = new int[RakNet.MAX_CHANNELS];
 		this.handleQueue = new IntMap<IntMap<EncapsulatedPacket>>();
 		for (int i = 0; i < RakNet.MAX_CHANNELS; i++) {
+			sequenceReceiveIndex[i] = -1;
 			handleQueue.put(i, new IntMap<EncapsulatedPacket>());
 		}
 
@@ -641,7 +642,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 				 */
 			} else if (reliability.isSequenced()) {
 				if (orderIndex > sequenceReceiveIndex[orderChannel]) {
-					sequenceReceiveIndex[orderChannel] = orderIndex + 1;
+					sequenceReceiveIndex[orderChannel] = orderIndex;
 					this.handleMessage0(encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
 				}
 			} else {
