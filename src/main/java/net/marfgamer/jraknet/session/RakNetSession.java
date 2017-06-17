@@ -148,7 +148,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 		// Latency detection
 		this.latencyEnabled = true;
-		this.latency = -1; // We can't predict them
+		this.latency = -1; // We can't predict a player's latency
 		this.lastLatency = -1;
 		this.lowestLatency = -1;
 		this.highestLatency = -1;
@@ -715,7 +715,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 		// Send packets in the send queue
 		synchronized (sendQueue) {
-			if (!sendQueue.isEmpty() && this.packetsSentThisSecond < RakNet.MAX_PACKETS_PER_SECOND) {
+			if (!sendQueue.isEmpty() && this.packetsSentThisSecond < RakNet.getMaxPacketsPerSecond()) {
 				ArrayList<EncapsulatedPacket> send = new ArrayList<EncapsulatedPacket>();
 				int sendLength = CustomPacket.calculateDummy();
 
