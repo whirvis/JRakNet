@@ -49,7 +49,41 @@ public class RakNet {
 	public static final byte DEFAULT_CHANNEL = 0x00;
 	public static final int MAX_SPLIT_COUNT = 128;
 	public static final int MAX_SPLITS_PER_QUEUE = 4;
-	public static final int MAX_PACKETS_PER_SECOND = 500;
+
+	// Max packet count
+	private static long MAX_PACKETS_PER_SECOND = 500;
+
+	/**
+	 * Returns how many packets can be received in the span of a single second
+	 * (1000 milliseconds) before a session is blocked.
+	 * 
+	 * @return how many packets can be received in the span of a single second
+	 *         before a session is blocked.
+	 */
+	public static long getMaxPacketsPerSecond() {
+		return MAX_PACKETS_PER_SECOND;
+	}
+
+	/**
+	 * Sets how many packets can be received in the span of a single second
+	 * (1000 milliseconds) before a session is blocked.
+	 * 
+	 * @param maxPacketsPerSecond
+	 *            how many packets can be received in the span of a single
+	 *            second before a session is blocked.
+	 */
+	public static void setMaxPacketsPerSecond(long maxPacketsPerSecond) {
+		MAX_PACKETS_PER_SECOND = maxPacketsPerSecond;
+	}
+
+	/**
+	 * Removes the max packets per second limit so that no matter how many
+	 * packets a session sends it will never be blocked. This is unrecommended,
+	 * as it can open your server to DOS/DDOS attacks.
+	 */
+	public static void setMaxPacketsPerSecondUnlimited() {
+		MAX_PACKETS_PER_SECOND = Long.MAX_VALUE;
+	}
 
 	// Session timing
 	public static final long SEND_INTERVAL = 50L;

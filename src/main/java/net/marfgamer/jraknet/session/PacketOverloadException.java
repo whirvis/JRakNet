@@ -46,7 +46,7 @@ public class PacketOverloadException extends RuntimeException {
 	 * Constructs a <code>PacketOverloadException</code>.
 	 */
 	public PacketOverloadException() {
-		super("Too many packets (More than " + RakNet.MAX_PACKETS_PER_SECOND + ") were sent within a second");
+		super("Too many packets (More than " + RakNet.getMaxPacketsPerSecond() + ") were sent within a second");
 	}
 
 }
