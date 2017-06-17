@@ -33,12 +33,11 @@ package net.marfgamer.jraknet;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 
 import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.client.RakNetClientListener;
 import net.marfgamer.jraknet.protocol.Reliability;
-import net.marfgamer.jraknet.protocol.message.CustomPacket;
-import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.jraknet.server.BlockedAddress;
 import net.marfgamer.jraknet.server.RakNetServer;
 import net.marfgamer.jraknet.server.RakNetServerListener;
@@ -47,18 +46,29 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
 import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
- * Used to test the split packet feature of <code>RakNetSession</code> through a
- * stress test by sending a packet as big as possible (Average packet size is
- * over 146,000 bytes!).
+ * Used to test the sequenced packet feature of <code>RakNetSession</code>
+ * through a stress test by sending 1000 packets and seeing if any were lost
+ * (Completely lost or received before the earlier one could be handled, as the
+ * reliability used in this test is <code>UNRELIABLE_SEQUENCED</code>).
+ * 
+ * <br>
+ * <br>
+ * 
+ * This test was created in a response to GitHub issue #35 after it was
+ * discovered during beta testing of MarfGamer's port of Five Night's at
+ * Freddy's 3 to Java in it's spectator mode inside multiplayer mode.
  *
  * @author MarfGamer
+ * @see https://github.com/JRakNet/JRakNet/issues/35
  */
-public class SplitPacketTest {
+public class SequencedPacketTest {
 
-	private static final short SPLIT_START_ID = 0xFE;
-	private static final short SPLIT_END_ID = 0xFF;
+	private static final short SEQUENCE_START_ID = 0xFE;
+	private static final int PACKET_SEND_COUNT = 1000;
 
 	private static long startSend = -1;
+	private static int packetReceiveCount = 0;
+	private static boolean[] packetsReceived = new boolean[PACKET_SEND_COUNT];
 
 	public static void main(String[] args) throws RakNetException, UnknownHostException {
 		System.out.println("Creating server...");
@@ -73,10 +83,52 @@ public class SplitPacketTest {
 
 		System.out.println("Creating client...");
 		createClient();
+
+		// In case of timeout
+		long currentTime = System.currentTimeMillis();
+		while (true) {
+			if (currentTime - startSend >= 5000 && startSend > -1) {
+				System.err
+						.println("Failed to complete test due to timeout (Took over 30 seconds!), printing results...");
+				printResults();
+				System.exit(1);
+			} else {
+				currentTime = System.currentTimeMillis();
+			}
+		}
 	}
 
 	/**
-	 * @return the server that will receive the giant packet.
+	 * Prints the results of the test
+	 */
+	private static void printResults() {
+		System.out.print("Server: Sequenced packet test finished, lost " + (packetReceiveCount >= PACKET_SEND_COUNT
+				? "no"
+				: Float.toString(((float) PACKET_SEND_COUNT - packetReceiveCount / (float) PACKET_SEND_COUNT) * 100)
+						.substring(0, 3).replace(".", "") + "% of")
+				+ " packets");
+		if (packetReceiveCount < PACKET_SEND_COUNT) {
+			// Create list of lost packets
+			ArrayList<Integer> packetsLost = new ArrayList<Integer>();
+			for (int i = 0; i < packetsReceived.length; i++) {
+				if (packetsReceived[i] == false) {
+					packetsLost.add(i);
+				}
+			}
+
+			// Print out said list
+			System.out.print(" [");
+			for (int i = 0; i < packetsLost.size(); i++) {
+				Integer wi = packetsLost.get(i);
+				System.out.print(wi.intValue() + (i + 1 < packetsLost.size() ? ", " : ""));
+			}
+			System.out.print("]");
+		}
+		System.out.println(" (Took " + (System.currentTimeMillis() - startSend) + "MS)");
+	}
+
+	/**
+	 * @return the server that will receive the sequenced packets.
 	 * @throws RakNetException
 	 *             if any problems occur during the stress test.
 	 * @throws UnknownHostException
@@ -112,42 +164,16 @@ public class SplitPacketTest {
 
 			@Override
 			public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
-				System.out.println("Server: Received packet of " + packet.size() + " bytes from " + session.getAddress()
-						+ ", checking data...");
+				// Get packet index
+				int packetIndex = packet.readInt();
+				packetReceiveCount++;
+				packetsReceived[packetIndex] = true;
 
-				// Check packet ID
-				System.out.println("Server: Checking header byte...");
-				if (packet.getId() != SPLIT_START_ID) {
-					System.err.println("Server: Packet header is " + packet.getId() + " when it should be "
-							+ SPLIT_START_ID + "!");
-					System.exit(1);
+				// Tell user how many packets were dropped
+				if (packetIndex >= PACKET_SEND_COUNT - 1) {
+					printResults();
+					System.exit(0);
 				}
-
-				// Check shorts
-				System.out.println("Server: Checking if data is sequenced correctly...");
-				long lastInt = -1;
-				while (packet.remaining() >= 4) {
-					long currentInt = packet.readUInt();
-					if (currentInt - lastInt != 1) {
-						System.err.println("Server: Short data was not split correctly!");
-						System.exit(1);
-					} else {
-						lastInt = currentInt;
-						System.out.print(lastInt + (packet.remaining() >= 4 ? ", " : "\n"));
-					}
-				}
-
-				// Check packet footer
-				System.out.println("Server: Checking footer byte...");
-				if (packet.readUByte() != SPLIT_END_ID) {
-					System.err.println("Server: Packet footer is " + packet.getId() + " when it should be "
-							+ SPLIT_START_ID + "!");
-					System.exit(1);
-				}
-
-				System.out.println(
-						"Server: Split packet test passed! (Took " + (System.currentTimeMillis() - startSend) + "MS)");
-				System.exit(0);
 			}
 
 			@Override
@@ -163,7 +189,7 @@ public class SplitPacketTest {
 	}
 
 	/**
-	 * @return the client that will be sending the giant packet.
+	 * @return the client that will be sending the sequenced packets.
 	 * @throws RakNetException
 	 *             if any problems occur during the stress test.
 	 * @throws UnknownHostException
@@ -176,31 +202,25 @@ public class SplitPacketTest {
 		// Server connected
 		client.setListener(new RakNetClientListener() {
 
-			private Packet packet;
+			int packetSize;
 
 			@Override
 			public void onConnect(RakNetServerSession session) {
 				System.out.println("Client: Connected to server with MTU " + session.getMaximumTransferUnit());
 
-				// Calculate maximum packet size
-				this.packet = new RakNetPacket(SPLIT_START_ID);
-				int maximumPacketSize = (session.getMaximumTransferUnit() - CustomPacket.calculateDummy()
-						- EncapsulatedPacket.calculateDummy(Reliability.RELIABLE_ORDERED, false))
-						* RakNet.MAX_SPLIT_COUNT;
-
-				// Fill up packet
-				int integersWritten = 0;
-				for (int i = 0; i < (maximumPacketSize - 2) / 4; i++) {
-					packet.writeUInt(i);
-					integersWritten++;
-				}
-				packet.writeUByte(SPLIT_END_ID);
-
-				// Send packet
-				System.out.println(
-						"Client: Sending giant packet... (" + packet.size() + " bytes, " + integersWritten + " ints)");
+				// Send 100 sequenced packets
+				System.out.println("Client: Sending " + PACKET_SEND_COUNT + " packets...");
 				startSend = System.currentTimeMillis();
-				session.sendMessage(Reliability.RELIABLE_ORDERED, packet);
+				for (int i = 0; i < PACKET_SEND_COUNT; i++) {
+					RakNetPacket sequencedPacket = new RakNetPacket(SEQUENCE_START_ID);
+					sequencedPacket.writeInt(i);
+					packetSize += sequencedPacket.size();
+					session.sendMessage(Reliability.RELIABLE_SEQUENCED, sequencedPacket);
+				}
+
+				// Notify user
+				System.out.println("Client: Sent " + PACKET_SEND_COUNT + " packets (" + packetSize + " bytes, "
+						+ (packetSize / 4) + " ints)");
 			}
 
 			@Override
