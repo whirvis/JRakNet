@@ -148,15 +148,6 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-
-		// Set listener
-		this.listener = this;
-
-		// Initiate discovery system if it is not yet started
-		if (discoverySystem.isRunning() == false) {
-			discoverySystem.start();
-		}
-		discoverySystem.addClient(this);
 	}
 
 	/**
@@ -232,13 +223,14 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            how the client will discover servers on the local network.
 	 */
 	public final void setDiscoveryMode(DiscoveryMode mode) {
+		if (listener == null) {
+			throw new NoListenerException();
+		}
 		this.discoveryMode = (mode != null ? mode : DiscoveryMode.NONE);
 		synchronized (discovered) {
 			if (this.discoveryMode == DiscoveryMode.NONE) {
-				if (listener != null) {
-					for (InetSocketAddress address : discovered.keySet()) {
-						listener.onServerForgotten(address);
-					}
+				for (InetSocketAddress address : discovered.keySet()) {
+					listener.onServerForgotten(address);
 				}
 				discovered.clear(); // We are not discovering servers anymore!
 			}
@@ -422,11 +414,29 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @return the client.
 	 */
 	public final RakNetClient setListener(RakNetClientListener listener) {
+		// Set listener
 		if (listener == null) {
 			throw new NullPointerException("Listener must not be null!");
 		}
 		this.listener = listener;
+
+		// Initiate discovery system if it is not yet started
+		if (discoverySystem.isRunning() == false) {
+			discoverySystem.start();
+		}
+		discoverySystem.addClient(this);
+
 		return this;
+	}
+
+	/**
+	 * Sets the client's listener to itself, normally used for when a client is
+	 * an all-in-one class
+	 * 
+	 * @return the client.
+	 */
+	public final RakNetClient setListenerSelf() {
+		return this.setListener(this);
 	}
 
 	/**
@@ -625,18 +635,14 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 						// Server discovered
 						discovered.put(sender,
 								new DiscoveredServer(sender, System.currentTimeMillis(), pong.identifier));
-						if (listener != null) {
-							listener.onServerDiscovered(sender, pong.identifier);
-						}
+						listener.onServerDiscovered(sender, pong.identifier);
 					} else {
 						// Server already discovered, but data has changed
 						DiscoveredServer server = discovered.get(sender);
 						server.setDiscoveryTimestamp(System.currentTimeMillis());
 						if (!pong.identifier.equals(server.getIdentifier())) {
 							server.setIdentifier(pong.identifier);
-							if (listener != null) {
-								listener.onServerIdentifierUpdate(sender, pong.identifier);
-							}
+							listener.onServerIdentifierUpdate(sender, pong.identifier);
 						}
 					}
 				} else {
@@ -884,7 +890,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	public final void disconnect(String reason) {
 		if (session != null) {
 			session.closeConnection();
-			this.getListener().onDisconnect(session, reason);
+			listener.onDisconnect(session, reason);
 		}
 		this.session = null;
 	}

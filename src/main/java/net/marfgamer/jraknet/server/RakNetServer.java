@@ -121,9 +121,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		this.group = new NioEventLoopGroup();
 		this.handler = new RakNetServerHandler(this);
 
-		// Set listener
-		this.listener = this;
-
 		// Create session map
 		this.sessions = new ConcurrentHashMap<InetSocketAddress, RakNetClientSession>();
 
@@ -274,6 +271,16 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		}
 		this.listener = listener;
 		return this;
+	}
+
+	/**
+	 * Sets the server's listener to itself, normally used for when a server is
+	 * a bundled server
+	 * 
+	 * @return the server.
+	 */
+	public final RakNetServer setListenerSelf() {
+		return this.setListener(this);
 	}
 
 	/**

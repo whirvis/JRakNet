@@ -47,6 +47,7 @@ public class RakNetServerBundleExample extends RakNetServer {
 	public RakNetServerBundleExample() {
 		super(19132, 10, new MCPEIdentifier("JRakNet Example Server", 91, "0.16.2", 0, 10, System.currentTimeMillis(),
 				"New World", "Survival"));
+		this.setListenerSelf();
 	}
 
 	// Client connected
