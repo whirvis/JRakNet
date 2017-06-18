@@ -49,6 +49,11 @@ public class RakNetClientBundleExample extends RakNetClient {
 	private static final String SERVER_ADDRESS = "sg.lbsg.net";
 	private static final int SERVER_PORT = 19132;
 
+	public RakNetClientBundleExample() {
+		super();
+		this.setListenerSelf();
+	}
+
 	// Server connected
 	@Override
 	public void onConnect(RakNetServerSession session) {
