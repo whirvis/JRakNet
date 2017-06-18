@@ -59,7 +59,6 @@ import net.marfgamer.jraknet.util.RakNetUtils;
  * Freddy's 3 to Java in it's spectator mode inside multiplayer mode.
  *
  * @author MarfGamer
- * @see https://github.com/JRakNet/JRakNet/issues/35
  */
 public class SequencedPacketTest {
 
