@@ -255,7 +255,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	}
 
 	/**
-	 * @return yhe last time a packet was received from the session.
+	 * @return the last time a packet was received from the session.
 	 */
 	public long getLastPacketReceiveTime() {
 		return this.lastPacketReceiveTime;
