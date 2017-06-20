@@ -243,7 +243,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * <code>DiscoveryMode</code> or discovery port set for the client.
 	 * 
 	 * @param address
-	 *            yhe server address.
+	 *            the server address.
 	 */
 	public final void addExternalServer(InetSocketAddress address) {
 		synchronized (externalServers) {
