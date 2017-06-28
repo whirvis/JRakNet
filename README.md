@@ -4,9 +4,9 @@ This library was meant to be used for Minecraft: Pocket Edition servers and clie
 
 | Protocol Info             | Version |
 | --------------------------|:-------:|
-| Current Protocol          | 8       |
-| Supported Server Protocol | 8       |
-| Supported Client Protocol | 8       |
+| Current protocol          | 8       |
+| Supported server protocol | 8       |
+| Supported client protocol | 8       |
 
 **Note:** Always use the newest version of JRakNet, including bug fix updates as they almost always fix major bugs, add new features, or have optimizations to make the API run faster.
 
