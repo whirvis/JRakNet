@@ -8,7 +8,7 @@
  *                                                  
  * the MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Whirvis "MarfGamer" Ardenaur
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -61,7 +61,7 @@ import net.marfgamer.jraknet.protocol.status.UnconnectedPong;
  * This class is used to accomplish tasks related to the RakNet protocol without
  * needing a dedicated client or server.
  *
- * @author MarfGamer
+ * @author Whirvis "MarfGamer" Ardenaur
  */
 public class RakNetUtils {
 
@@ -463,7 +463,7 @@ public class RakNetUtils {
 	 * Used by <code>createBootstrapAndSend()</code> to wait for the packet and
 	 * return it.
 	 *
-	 * @author MarfGamer
+	 * @author Whirvis "MarfGamer" Ardenaur
 	 */
 	private static class BootstrapHandler extends ChannelInboundHandlerAdapter {
 		public volatile RakNetPacket packet;

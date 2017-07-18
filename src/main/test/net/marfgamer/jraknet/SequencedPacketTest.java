@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Whirvis "MarfGamer" Ardenaur
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,7 +58,7 @@ import net.marfgamer.jraknet.util.RakNetUtils;
  * discovered during beta testing of MarfGamer's port of Five Night's at
  * Freddy's 3 to Java in it's spectator mode inside multiplayer mode.
  *
- * @author MarfGamer
+ * @author Whirvis "MarfGamer" Ardenaur
  */
 public class SequencedPacketTest {
 
