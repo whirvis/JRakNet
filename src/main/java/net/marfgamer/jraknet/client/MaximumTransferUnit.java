@@ -8,7 +8,7 @@
  *                                                  
  * the MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Whirvis "MarfGamer" Ardenaur
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,7 @@ import net.marfgamer.jraknet.util.map.IntMap;
  * Used by the <code>RakNetClient</code> during login to track how and when it
  * should modify it's maximum transfer unit in the login process.
  *
- * @author MarfGamer
+ * @author Whirvis "MarfGamer" Ardenaur
  */
 public class MaximumTransferUnit {
 

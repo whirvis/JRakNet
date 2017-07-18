@@ -8,7 +8,7 @@
  *                                                  
  * the MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Whirvis "MarfGamer" Ardenaur
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,7 @@ import net.marfgamer.jraknet.protocol.Reliability;
  * mainly to keep message sending easier and consistent between the lower and
  * higher level implementation using the session's globally unique ID.
  *
- * @author MarfGamer
+ * @author Whirvis "MarfGamer" Ardenaur
  */
 public interface GeminusRakNetPeer {
 
