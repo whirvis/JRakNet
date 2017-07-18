@@ -867,6 +867,9 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	/**
 	 * Starts the loop needed for the client to stay connected to the server.
+	 * 
+	 * @throws RakNetException
+	 *             if any problems occur during connection.
 	 */
 	private final void initConnection() throws RakNetException {
 		while (session != null) {
