@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Trent "MarfGamer" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,7 @@ import net.marfgamer.jraknet.protocol.MessageIdentifier;
  * Used to read and write data related to the chat protocol used for the
  * example.
  *
- * @author MarfGamer
+ * @author Trent "MarfGamer" Summerlin
  */
 public class ChatPacket extends RakNetPacket {
 

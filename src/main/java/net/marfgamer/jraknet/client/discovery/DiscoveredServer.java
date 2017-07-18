@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Trent "MarfGamer" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,7 @@ import net.marfgamer.jraknet.util.ArrayUtils;
  * <code>RakNetClient</code> and also stores the discovered server's address and
  * <code>Identifier</code> which are both crucial to making use of this class.
  *
- * @author MarfGamer
+ * @author Trent "MarfGamer" Summerlin
  */
 public class DiscoveredServer {
 

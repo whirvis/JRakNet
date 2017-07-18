@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Trent "MarfGamer" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,7 @@ import net.marfgamer.jraknet.example.chat.client.ChatClient;
 /**
  * The frame used by the <code>ChatClient</code> to visualize it's data.
  *
- * @author MarfGamer
+ * @author Trent "MarfGamer" Summerlin
  */
 public class ChatFrame extends JFrame {
 

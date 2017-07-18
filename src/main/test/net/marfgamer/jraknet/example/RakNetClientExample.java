@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Trent "MarfGamer" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,7 +41,7 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
  * A simple <code>RakNetClient</code> that connects to the LifeBoat Survival
  * Games server, when it is connected the client disconnects and shuts down.
  * 
- * @author MarfGamer
+ * @author Trent "MarfGamer" Summerlin
  */
 public class RakNetClientExample {
 

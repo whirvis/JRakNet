@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Trent "MarfGamer" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,7 @@ import net.marfgamer.jraknet.session.RakNetClientSession;
  * <code>RakNetServer</code> and can be tested through a Minecraft: Pocket
  * Edition client using the local multiplayer features built into the game.
  *
- * @author MarfGamer
+ * @author Trent "MarfGamer" Summerlin
  */
 public class RakNetServerBundleExample extends RakNetServer {
 

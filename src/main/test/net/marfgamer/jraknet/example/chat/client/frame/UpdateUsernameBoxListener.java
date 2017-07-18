@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Trent "MarfGamer" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,7 +40,7 @@ import net.marfgamer.jraknet.example.chat.client.ChatException;
  * Used to listen for presses to the update username button in the frame, used
  * to signal the client to update the username.
  *
- * @author MarfGamer
+ * @author Trent "MarfGamer" Summerlin
  */
 public class UpdateUsernameBoxListener implements ActionListener {
 

@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Trent "MarfGamer" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@ import io.netty.channel.socket.DatagramPacket;
  * A generic RakNet packet that has the ability to get the ID of the packet
  * along with encoding and decoding.
  *
- * @author MarfGamer
+ * @author Trent "MarfGamer" Summerlin
  */
 public class RakNetPacket extends Packet {
 

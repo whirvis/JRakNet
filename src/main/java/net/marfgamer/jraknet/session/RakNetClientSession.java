@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Trent "MarfGamer" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +47,7 @@ import net.marfgamer.jraknet.server.RakNetServer;
  * This class represents a client connection and handles the login sequence
  * packets.
  *
- * @author MarfGamer
+ * @author Trent "MarfGamer" Summerlin
  */
 public class RakNetClientSession extends RakNetSession {
 

@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Trent "MarfGamer" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,7 @@ import net.marfgamer.jraknet.session.RakNetClientSession;
  * Represents a client connect to a <code>ChatServer</code> and is used to easy
  * set status, send chat messages, etc.
  *
- * @author MarfGamer
+ * @author Trent "MarfGamer" Summerlin
  */
 public class ConnectedClient {
 

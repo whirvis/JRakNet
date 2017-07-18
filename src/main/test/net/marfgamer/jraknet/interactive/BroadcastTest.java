@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Trent "MarfGamer" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +47,7 @@ import net.marfgamer.jraknet.identifier.MCPEIdentifier;
 /**
  * Used to test the broadcast feature in <code>RakNetClient</code>.
  *
- * @author MarfGamer
+ * @author Trent "MarfGamer" Summerlin
  */
 public class BroadcastTest {
 
@@ -65,7 +65,7 @@ public class BroadcastTest {
 	/**
 	 * The class used to listen for server discovery updates.
 	 *
-	 * @author MarfGamer
+	 * @author Trent "MarfGamer" Summerlin
 	 */
 	private class ServerDiscoveryListener implements RakNetClientListener {
 

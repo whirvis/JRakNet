@@ -8,7 +8,7 @@
  *                                                  
  * the MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Trent "MarfGamer" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,7 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
  * when specific events are triggered. Do <b>not</b> use in any sleeps methods
  * any of these methods, as it will cause the client to timeout.
  *
- * @author MarfGamer
+ * @author Trent "MarfGamer" Summerlin
  */
 public interface RakNetClientListener {
 

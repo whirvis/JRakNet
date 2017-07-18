@@ -8,7 +8,7 @@
  *                                                  
  * the MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Trent "MarfGamer" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@ import net.marfgamer.jraknet.util.RakNetUtils;
 /**
  * Represents an identifier from a Minecraft: Pocket Edition server.
  *
- * @author MarfGamer
+ * @author Trent "MarfGamer" Summerlin
  */
 public class MCPEIdentifier extends Identifier {
 

@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Trent "MarfGamer" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,7 +50,7 @@ import net.marfgamer.jraknet.util.RakNetUtils;
 /**
  * The frame used to visualize the broadcast test.
  *
- * @author MarfGamer
+ * @author Trent "MarfGamer" Summerlin
  */
 public class BroadcastFrame extends JFrame {
 
@@ -112,7 +112,7 @@ public class BroadcastFrame extends JFrame {
 	 * Used to listen for discovery mode changes and then update the client
 	 * accordingly.
 	 *
-	 * @author MarfGamer
+	 * @author Trent "MarfGamer" Summerlin
 	 */
 	private class RakNetBroadcastDiscoveryTypeListener implements ActionListener {
 
@@ -143,7 +143,7 @@ public class BroadcastFrame extends JFrame {
 	 * Used to listen for discovery port changes and then update the client
 	 * accordingly.
 	 *
-	 * @author MarfGamer
+	 * @author Trent "MarfGamer" Summerlin
 	 */
 	private class RakNetBroadcastUpdatePortListener implements ActionListener {
 

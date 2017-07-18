@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Trent "MarfGamer" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@ import net.marfgamer.jraknet.identifier.Identifier;
  * Used primarily to box an identifier sent in the response of a server to a
  * ping sent by a client so it can be modified by the user.
  *
- * @author MarfGamer
+ * @author Trent "MarfGamer" Summerlin
  */
 public class ServerPing {
 

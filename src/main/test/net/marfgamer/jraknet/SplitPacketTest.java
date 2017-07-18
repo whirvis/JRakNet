@@ -8,7 +8,7 @@
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016, 2017 MarfGamer
+ * Copyright (c) 2016, 2017 Trent "MarfGamer" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,7 +51,7 @@ import net.marfgamer.jraknet.util.RakNetUtils;
  * stress test by sending a packet as big as possible (Average packet size is
  * over 146,000 bytes!).
  *
- * @author MarfGamer
+ * @author Trent "MarfGamer" Summerlin
  */
 public class SplitPacketTest {
 
