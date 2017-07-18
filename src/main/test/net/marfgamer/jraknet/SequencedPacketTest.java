@@ -130,8 +130,6 @@ public class SequencedPacketTest {
 	 * @return the server that will receive the sequenced packets.
 	 * @throws RakNetException
 	 *             if any problems occur during the stress test.
-	 * @throws UnknownHostException
-	 *             if the localhost address cannot be found.
 	 */
 	private static RakNetServer createServer() throws RakNetException {
 		RakNetServer server = new RakNetServer(UtilityTest.MARFGAMER_DEVELOPMENT_PORT, 1);
