@@ -18,7 +18,7 @@ In order to add this project to your maven project, you will need to add the mav
     <id>maven-repo</id>
     <url>https://raw.githubusercontent.com/JRakNet/MavenRepository/master</url>
   </repository>
-<repositories>
+</repositories>
 
 <dependencies>
   <dependency>
