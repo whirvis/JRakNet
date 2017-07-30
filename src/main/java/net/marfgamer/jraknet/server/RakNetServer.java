@@ -763,7 +763,11 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				try {
 					server.start();
 				} catch (Throwable throwable) {
-					server.getListener().onThreadException(throwable);
+					if (server.getListener() != null) {
+						server.getListener().onThreadException(throwable);
+					} else {
+						throwable.printStackTrace();
+					}
 				}
 			}
 		};

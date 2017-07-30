@@ -813,7 +813,11 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 				try {
 					client.connect(address);
 				} catch (Throwable throwable) {
-					client.getListener().onThreadException(throwable);
+					if (client.getListener() != null) {
+						client.getListener().onThreadException(throwable);
+					} else {
+						throwable.printStackTrace();
+					}
 				}
 			}
 		};
