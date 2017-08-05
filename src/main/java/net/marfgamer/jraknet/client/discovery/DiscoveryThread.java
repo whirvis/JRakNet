@@ -80,7 +80,7 @@ public class DiscoveryThread extends Thread {
 			return;
 		}
 		clients.add(client);
-		RakNetLogger.info(LOGGER_NAME, "Added client #" + client.getGloballyUniqueId() + " to the discovery thread");
+		RakNetLogger.debug(LOGGER_NAME, "Added client #" + client.getGloballyUniqueId() + " to the discovery thread");
 	}
 
 	/**
@@ -97,7 +97,7 @@ public class DiscoveryThread extends Thread {
 			return;
 		}
 		clients.remove(client);
-		RakNetLogger.info(LOGGER_NAME,
+		RakNetLogger.debug(LOGGER_NAME,
 				"Removed client #" + client.getGloballyUniqueId() + " from the discovery thread");
 	}
 
@@ -125,7 +125,7 @@ public class DiscoveryThread extends Thread {
 				client.updateDiscoveryData();
 			}
 			if (clients.size() > 0) {
-				RakNetLogger.info(LOGGER_NAME,
+				RakNetLogger.debug(LOGGER_NAME,
 						"Sent discovery info out for " + clients.size() + " client" + (clients.size() == 1 ? "" : "s"));
 			} else {
 				RakNetLogger.warn(LOGGER_NAME, "Sent discovery info out for no clients");

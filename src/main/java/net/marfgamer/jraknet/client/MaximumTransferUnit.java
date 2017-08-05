@@ -82,8 +82,6 @@ public class MaximumTransferUnit {
 			unitList.add(unitEntry.getValue());
 		}
 
-		RakNetLogger.info(LOGGER_NAME,
-				"Sorted array of " + units.length + " MaximumTransferUnits by their size in bytes");
 		return unitList.toArray(new MaximumTransferUnit[unitList.size()]);
 	}
 
@@ -131,7 +129,7 @@ public class MaximumTransferUnit {
 	 * @return the amount of retries left.
 	 */
 	public int retry() {
-		RakNetLogger.info(LOGGER_NAME, "Retried MaximumTransferUnit with size of " + maximumTransferUnit + " bytes ("
+		RakNetLogger.debug(LOGGER_NAME, "Retried transfer unit with size of " + maximumTransferUnit + " bytes ("
 				+ (maximumTransferUnit * 8) + " bits)");
 		return this.retriesLeft--;
 	}
@@ -140,7 +138,7 @@ public class MaximumTransferUnit {
 	 * Sets the amount of retries left back to the default.
 	 */
 	public void reset() {
-		RakNetLogger.info(LOGGER_NAME, "Reset MaximumTransferUnit with size of " + maximumTransferUnit + " bytes ("
+		RakNetLogger.debug(LOGGER_NAME, "Reset transfer unit with size of " + maximumTransferUnit + " bytes ("
 				+ (maximumTransferUnit * 8) + " bits)");
 		this.retriesLeft = this.retries;
 	}

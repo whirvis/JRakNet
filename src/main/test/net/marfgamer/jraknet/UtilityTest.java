@@ -59,7 +59,7 @@ public class UtilityTest {
 	public static void main(String[] args) throws RakNetException {
 		// Enable logging
 		RakNet.enableLogging();
-		
+
 		RakNetLogger.info(LOGGER_NAME, "Parsing valid address " + ADDRESS_TEST_VALID + " ?= "
 				+ RakNetUtils.parseAddressPassive(ADDRESS_TEST_VALID));
 		RakNetLogger.info(LOGGER_NAME, "Parsing invalid address " + ADDRESS_TEST_INVALID + " ?= "

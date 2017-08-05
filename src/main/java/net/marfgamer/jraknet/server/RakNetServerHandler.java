@@ -98,8 +98,6 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	}
 
 	/**
-	 * Returns whether or not the specified address is blocked.
-	 * 
 	 * @param address
 	 *            the address to check.
 	 * @return whether or not the specified address is blocked.
@@ -134,10 +132,10 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			// Handle the packet and release the buffer
 			server.handleMessage(packet, sender);
 			datagram.content().readerIndex(0); // Reset position
-			RakNetLogger.info(loggerName, "Sent packet to server and reset Datagram buffer read position");
+			RakNetLogger.debug(loggerName, "Sent packet to server and reset Datagram buffer read position");
 			server.getListener().handleNettyMessage(datagram.content(), sender);
 			datagram.content().release(); // No longer needed
-			RakNetLogger.info(loggerName, "Sent Datagram buffer to server and released it");
+			RakNetLogger.debug(loggerName, "Sent Datagram buffer to server and released it");
 
 			// No exceptions occurred, release the suspect
 			this.causeAddress = null;

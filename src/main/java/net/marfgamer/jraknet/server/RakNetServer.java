@@ -397,7 +397,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 				if (sessions.containsKey(address)) {
 					sessions.remove(address);
-					RakNetLogger.info(this, "Removed session with address " + address);
+					RakNetLogger.debug(this, "Removed session with address " + address);
 				} else {
 					RakNetLogger.warn(this, "Attempted to remove session that had not been added to the server");
 				}
@@ -643,10 +643,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		}
 
 		if (MessageIdentifier.hasPacket(packet.getId())) {
-			RakNetLogger.info(this, "Handled internal packet with ID " + MessageIdentifier.getName(packet.getId())
+			RakNetLogger.debug(this, "Handled internal packet with ID " + MessageIdentifier.getName(packet.getId())
 					+ " (" + packet.getId() + ")");
 		} else {
-			RakNetLogger.info(this, "Sent packet with ID " + packet.getId() + " to session handler");
+			RakNetLogger.debug(this, "Sent packet with ID " + packet.getId() + " to session handler");
 		}
 	}
 
@@ -691,7 +691,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 */
 	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(buf, address));
-		RakNetLogger.info(this, "Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8)
+		RakNetLogger.debug(this, "Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8)
 				+ ") to " + address);
 	}
 
@@ -747,7 +747,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false);
 			this.channel = bootstrap.bind(port).sync().channel();
 			this.running = true;
-			RakNetLogger.info(this, "Created and bound bootstrap");
+			RakNetLogger.debug(this, "Created and bound bootstrap");
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 			this.running = false;
@@ -775,7 +775,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				}
 			}
 		}
-
 		RakNetLogger.info(this, "Started server");
 	}
 
