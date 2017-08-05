@@ -44,7 +44,7 @@ public class StopCommand extends Command {
 	private final ChatServer server;
 
 	public StopCommand(ChatServer server) {
-		super(false, "stop", "");
+		super(false, "stop", "", "Stops the server");
 		this.server = server;
 	}
 

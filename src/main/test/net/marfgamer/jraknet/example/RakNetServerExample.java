@@ -51,7 +51,7 @@ public class RakNetServerExample {
 	public static void main(String[] args) throws RakNetException {
 		// Create server
 		RakNetServer server = new RakNetServer(19132, 10, new MCPEIdentifier("JRakNet Example Server", 91, "0.16.2", 0,
-				10, new Random().nextLong() /* Server ID */, "New World", "Survival"));
+				10, new Random().nextLong() /* Server broadcast ID */, "New World", "Survival"));
 
 		// Set listener
 		server.setListener(new RakNetServerListener() {

@@ -91,6 +91,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	private final int maximumTransferUnit;
 	private boolean broadcastingEnabled;
 	private Identifier identifier;
+	private Thread serverThread;
 
 	// Networking data
 	private final Bootstrap bootstrap;
@@ -264,6 +265,14 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
+	 * @return the thread the server is running on if it was started using
+	 *         <code>startThreaded()</code>.
+	 */
+	public final Thread getThread() {
+		return this.serverThread;
+	}
+
+	/**
 	 * @return the server's listener.
 	 */
 	public final RakNetServerListener getListener() {
@@ -387,20 +396,19 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	public final void removeSession(InetSocketAddress address, String reason) {
 		synchronized (sessions) {
 			if (sessions.containsKey(address)) {
-				RakNetClientSession session = sessions.get(address);
+				// Notify client of disconnection
+				RakNetClientSession session = sessions.remove(address);
+				session.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
+				
+				// Notify API
+				RakNetLogger.debug(this, "Removed session with address " + address);
 				if (session.getState() == RakNetState.CONNECTED) {
 					listener.onClientDisconnect(session, reason);
 				} else {
 					listener.onClientPreDisconnect(address, reason);
 				}
-				session.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
-
-				if (sessions.containsKey(address)) {
-					sessions.remove(address);
-					RakNetLogger.debug(this, "Removed session with address " + address);
-				} else {
-					RakNetLogger.warn(this, "Attempted to remove session that had not been added to the server");
-				}
+			} else {
+				RakNetLogger.warn(this, "Attempted to remove session that had not been added to the server");
 			}
 		}
 	}
@@ -500,11 +508,14 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            the exception caught by the handler.
 	 */
 	protected final void handleHandlerException(InetSocketAddress address, Throwable cause) {
+		// Remove session that caused the error
 		if (this.hasSession(address)) {
 			this.removeSession(address, cause.getClass().getName());
 		}
-		listener.onHandlerException(address, cause);
+		
+		// Notify API
 		RakNetLogger.warn(this, "Handled exception " + cause.getClass().getName() + " caused by address " + address);
+		listener.onHandlerException(address, cause);
 	}
 
 	/**
@@ -754,6 +765,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		}
 
 		// Notify API
+		RakNetLogger.info(this, "Started server");
 		listener.onServerStart();
 
 		// Update system
@@ -769,13 +781,12 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 						}
 					} catch (Throwable throwable) {
 						// An error related to the session occurred, remove it
-						listener.onSessionException(session, throwable);
+						listener.onSessionException(session, throwable); // TODO?
 						this.removeSession(session, throwable.getMessage());
 					}
 				}
 			}
 		}
-		RakNetLogger.info(this, "Started server");
 	}
 
 	/**
@@ -804,6 +815,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		};
 		thread.setName("JRAKNET_SERVER_" + server.getGloballyUniqueId());
 		thread.start();
+		this.serverThread = thread;
 		RakNetLogger.info(this, "Started on thread with name " + thread.getName());
 
 		// Return the thread so it can be modified
@@ -812,17 +824,37 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 	/**
 	 * Stops the server.
+	 * 
+	 * @param reason
+	 *            the reason the server shutdown.
 	 */
-	public final void shutdown() {
+	public final void shutdown(String reason) {
+		// Tell the server to stop running
 		this.running = false;
+
+		// Disconnect sessions
 		synchronized (sessions) {
 			for (RakNetClientSession session : sessions.values()) {
-				this.removeSession(session, "Server shutdown");
+				this.removeSession(session, reason);
 			}
 			sessions.clear();
 		}
+
+		// Interrupt it's thread if it owns one
+		if (this.serverThread != null) {
+			serverThread.interrupt();
+		}
+
+		// Notify API
+		RakNetLogger.info(this, "Shutdown server");
 		listener.onServerShutdown();
-		RakNetLogger.info(this, "Shutdown");
+	}
+
+	/**
+	 * Stops the server.
+	 */
+	public final void shutdown() {
+		this.shutdown("Server shutdown");
 	}
 
 }

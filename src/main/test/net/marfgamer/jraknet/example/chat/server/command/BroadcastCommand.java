@@ -42,7 +42,7 @@ public class BroadcastCommand extends Command {
 	private final ChatServer server;
 
 	public BroadcastCommand(ChatServer server) {
-		super("broadcast", "<message>");
+		super("broadcast", "<message>", "Broadcasts a message to all channels");
 		this.server = server;
 	}
 

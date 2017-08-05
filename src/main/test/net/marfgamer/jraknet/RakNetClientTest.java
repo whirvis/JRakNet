@@ -35,6 +35,8 @@ import java.net.UnknownHostException;
 
 import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.client.RakNetClientListener;
+import net.marfgamer.jraknet.protocol.MessageIdentifier;
+import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 import net.marfgamer.jraknet.session.RakNetServerSession;
 
@@ -60,6 +62,7 @@ public class RakNetClientTest {
 			@Override
 			public void onConnect(RakNetServerSession session) {
 				RakNetLogger.info(LOGGER_NAME, "Connected to server with address " + session.getAddress() + "!");
+				session.sendMessage(Reliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT, MessageIdentifier.ID_DETECT_LOST_CONNECTIONS);
 				client.disconnectAndShutdown();
 			}
 

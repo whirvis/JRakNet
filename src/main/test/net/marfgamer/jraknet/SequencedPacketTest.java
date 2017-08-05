@@ -89,8 +89,7 @@ public class SequencedPacketTest {
 		long currentTime = System.currentTimeMillis();
 		while (true) {
 			if (currentTime - startSend >= 5000 && startSend > -1) {
-				System.err
-						.println("Failed to complete test due to timeout (Took over 30 seconds!), printing results...");
+				RakNetLogger.error(LOGGER_NAME, "Failed to complete test due to timeout (Took over 30 seconds!), printing results...");
 				printResults();
 				System.exit(1);
 			} else {

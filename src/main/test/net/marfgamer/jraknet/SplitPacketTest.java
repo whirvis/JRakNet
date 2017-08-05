@@ -119,7 +119,7 @@ public class SplitPacketTest {
 				// Check packet ID
 				RakNetLogger.info(LOGGER_NAME, "Server: Checking header byte...");
 				if (packet.getId() != SPLIT_START_ID) {
-					System.err.println("Server: Packet header is " + packet.getId() + " when it should be "
+					RakNetLogger.error(LOGGER_NAME, "Server: Packet header is " + packet.getId() + " when it should be "
 							+ SPLIT_START_ID + "!");
 					System.exit(1);
 				}
@@ -131,7 +131,7 @@ public class SplitPacketTest {
 				while (packet.remaining() >= 4) {
 					long currentInt = packet.readUInt();
 					if (currentInt - lastInt != 1) {
-						System.err.println("Server: Short data was not split correctly!");
+						RakNetLogger.error(LOGGER_NAME, "Server: Short data was not split correctly!");
 						System.exit(1);
 					} else {
 						lastInt = currentInt;
@@ -143,7 +143,7 @@ public class SplitPacketTest {
 				// Check packet footer
 				RakNetLogger.info(LOGGER_NAME, "Server: Checking footer byte...");
 				if (packet.readUByte() != SPLIT_END_ID) {
-					System.err.println("Server: Packet footer is " + packet.getId() + " when it should be "
+					RakNetLogger.error(LOGGER_NAME, "Server: Packet footer is " + packet.getId() + " when it should be "
 							+ SPLIT_START_ID + "!");
 					System.exit(1);
 				}
@@ -209,7 +209,7 @@ public class SplitPacketTest {
 
 			@Override
 			public void onDisconnect(RakNetServerSession session, String reason) {
-				System.err.println("Client: Lost connection to server! (" + reason + ")");
+				RakNetLogger.error(LOGGER_NAME, "Client: Lost connection to server! (" + reason + ")");
 				System.exit(1);
 			}
 

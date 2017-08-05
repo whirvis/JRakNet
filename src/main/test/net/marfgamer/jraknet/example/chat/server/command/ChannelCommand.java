@@ -46,7 +46,7 @@ public class ChannelCommand extends Command {
 	private final ChatServer server;
 
 	public ChannelCommand(ChatServer server) {
-		super("channel", "<add:remove> [id] <name>");
+		super("channel", "<add:remove> [id] <name>", "Used to modify channel data");
 		this.server = server;
 	}
 

@@ -47,6 +47,7 @@ import net.marfgamer.jraknet.example.chat.protocol.UpdateUsername;
 import net.marfgamer.jraknet.example.chat.server.command.BroadcastCommand;
 import net.marfgamer.jraknet.example.chat.server.command.ChannelCommand;
 import net.marfgamer.jraknet.example.chat.server.command.CommandHandler;
+import net.marfgamer.jraknet.example.chat.server.command.HelpCommand;
 import net.marfgamer.jraknet.example.chat.server.command.KickCommand;
 import net.marfgamer.jraknet.example.chat.server.command.StopCommand;
 import net.marfgamer.jraknet.protocol.Reliability;
@@ -387,7 +388,7 @@ public class ChatServer implements RakNetServerListener {
 
 	public static void main(String[] args) {
 		// Enable logging
-		RakNet.enableLogging();
+		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
 
 		// Create and start server
 		ChatServer server = new ChatServer("JRakNet Server Example", "This is a test server made for JRakNet",
@@ -401,6 +402,7 @@ public class ChatServer implements RakNetServerListener {
 		commandHandler.registerCommand(new KickCommand(server));
 		commandHandler.registerCommand(new ChannelCommand(server));
 		commandHandler.registerCommand(new BroadcastCommand(server));
+		commandHandler.registerCommand(HelpCommand.class);
 
 		// Listen for commands
 		@SuppressWarnings("resource")

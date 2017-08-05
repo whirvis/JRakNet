@@ -34,34 +34,26 @@ import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.example.chat.server.ChatServer;
 
 /**
- * Allows the server to kick players.
- *
+ * Displays all of the commands that can be used on the server.
+ * 
  * @author Trent "MarfGamer" Summerlin
  */
-public class KickCommand extends Command {
+public class HelpCommand extends Command {
 
-	// Command data
-	private final ChatServer server;
-
-	public KickCommand(ChatServer server) {
-		super("kick", "<player> [reason]", "Removes the user from the server");
-		this.server = server;
+	public HelpCommand() {
+		super("help", "Displays all the commands that can be used");
 	}
 
 	@Override
 	public boolean handleCommand(String[] args) {
-		if (args.length >= 1) {
-			String reason = (args.length >= 2 ? remainingArguments(1, args) : "Kicked from server");
-			if (server.hasClient(args[0])) {
-				server.kickClient(server.getClient(args[0]), reason);
-				RakNetLogger.info(ChatServer.LOGGER_NAME,
-						"Kicked client \"" + args[0] + "\" with reason \"" + reason + "\"");
-			} else {
-				RakNetLogger.info(ChatServer.LOGGER_NAME, "Client \"" + args[0] + "\" is not online!");
-			}
-			return true;
+		StringBuilder helpMessage = new StringBuilder();
+		helpMessage.append("Showing all " + Command.getRegisteredCommands().length + " commands:\n");
+		for (Command command : Command.getRegisteredCommands()) {
+			helpMessage.append("\t\t");
+			helpMessage.append(command.getUsage() + ": " + command.getDescription() + "\n");
 		}
-		return false;
+		RakNetLogger.info(ChatServer.LOGGER_NAME, helpMessage.toString());
+		return true;
 	}
 
 }
