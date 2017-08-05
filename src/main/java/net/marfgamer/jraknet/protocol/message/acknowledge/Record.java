@@ -71,8 +71,8 @@ public class Record {
 	}
 
 	/**
-	 * @return the ending index of the record or <code>-1</code> if the record
-	 *         is not ranged.
+	 * @return the ending index of the record or <code>-1</code> if the record is
+	 *         not ranged.
 	 */
 	public int getEndIndex() {
 		return this.endIndex;
@@ -80,9 +80,9 @@ public class Record {
 
 	/**
 	 * Sets the ending index of the record. <br>
-	 * <b>Note:</b> If the ending index is set to -1 or lower (It will be set to
-	 * -1 automatically if the new end index is lower than the starting index),
-	 * it is assumed that the record is a single record and not a ranged one.
+	 * <b>Note:</b> If the ending index is set to -1 or lower (It will be set to -1
+	 * automatically if the new end index is lower than the starting index), it is
+	 * assumed that the record is a single record and not a ranged one.
 	 * 
 	 * @param endIndex
 	 *            the new ending index.

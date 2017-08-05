@@ -35,7 +35,6 @@ import java.net.UnknownHostException;
 
 import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.client.RakNetClientListener;
-import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 import net.marfgamer.jraknet.session.RakNetServerSession;
 
@@ -48,44 +47,50 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
  */
 public class RakNetClientTest {
 
+	// Logger name
+	private static final String LOGGER_NAME = "client test";
+
 	public static void main(String[] args) throws RakNetException, UnknownHostException {
+		// Enable logging
+		RakNet.enableLogging();
+
 		RakNetClient client = new RakNetClient();
 		client.setListener(new RakNetClientListener() {
 
 			@Override
 			public void onConnect(RakNetServerSession session) {
-				System.out.println("Connected to server with address " + session.getAddress() + "!");
-				session.sendMessage(Reliability.UNRELIABLE, new RakNetPacket(0xFF));
+				RakNetLogger.info(LOGGER_NAME, "Connected to server with address " + session.getAddress() + "!");
 			}
 
 			@Override
 			public void onDisconnect(RakNetServerSession session, String reason) {
-				System.out.println("Disconnected from server with address " + session.getAddress() + " for reason \""
-						+ reason + "\"");
+				RakNetLogger.info(LOGGER_NAME, "Disconnected from server with address " + session.getAddress()
+						+ " for reason \"" + reason + "\"");
 			}
 
 			@Override
 			public void onAcknowledge(RakNetServerSession session, Record record) {
-				System.out.println("Received ACK for record(s) " + record.toString());
+				RakNetLogger.info(LOGGER_NAME, "Received ACK for record(s) " + record.toString());
 				client.disconnectAndShutdown();
 			}
 
 			@Override
 			public void onNotAcknowledge(RakNetServerSession session, Record record) {
-				System.out.println("Received NACK for record(s) " + record.toString());
+				RakNetLogger.info(LOGGER_NAME, "Received NACK for record(s) " + record.toString());
 				client.disconnectAndShutdown();
 			}
 
 			@Override
 			public void onHandlerException(InetSocketAddress address, Throwable cause) {
-				System.err.println("Exception caused by " + address);
+				RakNetLogger.error(LOGGER_NAME, "Exception caused by " + address);
 				cause.printStackTrace();
 			}
 
 		});
-		System.out.println("Created client, connecting to " + UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
+		RakNetLogger.info(LOGGER_NAME,
+				"Created client, connecting to " + UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
 
-		client.connect("192.168.1.21", 19132);
+		client.connect(UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
 	}
 
 }

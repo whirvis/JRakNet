@@ -30,6 +30,7 @@
  */
 package net.marfgamer.jraknet.example.chat.server.command;
 
+import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.example.chat.server.ChatServer;
 
 /**
@@ -39,6 +40,7 @@ import net.marfgamer.jraknet.example.chat.server.ChatServer;
  */
 public class KickCommand extends Command {
 
+	// Command data
 	private final ChatServer server;
 
 	public KickCommand(ChatServer server) {
@@ -52,9 +54,10 @@ public class KickCommand extends Command {
 			String reason = (args.length >= 2 ? remainingArguments(1, args) : "Kicked from server");
 			if (server.hasClient(args[0])) {
 				server.kickClient(server.getClient(args[0]), reason);
-				System.out.println("Kicked client \"" + args[0] + "\" with reason \"" + reason + "\"");
+				RakNetLogger.info(ChatServer.LOGGER_NAME,
+						"Kicked client \"" + args[0] + "\" with reason \"" + reason + "\"");
 			} else {
-				System.err.println("Client \"" + args[0] + "\" is not online!");
+				RakNetLogger.info(ChatServer.LOGGER_NAME, "Client \"" + args[0] + "\" is not online!");
 			}
 			return true;
 		}

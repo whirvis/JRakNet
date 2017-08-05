@@ -30,6 +30,7 @@
  */
 package net.marfgamer.jraknet.example.chat.server.command;
 
+import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.example.chat.server.ChatServer;
 
 /**
@@ -39,6 +40,7 @@ import net.marfgamer.jraknet.example.chat.server.ChatServer;
  */
 public class StopCommand extends Command {
 
+	// Command data
 	private final ChatServer server;
 
 	public StopCommand(ChatServer server) {
@@ -48,7 +50,7 @@ public class StopCommand extends Command {
 
 	@Override
 	public boolean handleCommand(String[] args) {
-		System.out.println("Stopping the server...");
+		RakNetLogger.info(ChatServer.LOGGER_NAME, "Stopping the server...");
 		server.stop();
 		return true;
 	}

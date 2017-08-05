@@ -57,8 +57,8 @@ public class RakNetClientSession extends RakNetSession {
 
 	/**
 	 * Constructs a <code>RakNetClientSession</code> with the specified
-	 * <code>RakNetServer</code>, the time the server was created, globally
-	 * unique ID, maximum transfer unit, <code>Channel</code>, and address.
+	 * <code>RakNetServer</code>, the time the server was created, globally unique
+	 * ID, maximum transfer unit, <code>Channel</code>, and address.
 	 * 
 	 * @param server
 	 *            the <code>RakNetServer</code>.

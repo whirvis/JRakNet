@@ -49,7 +49,7 @@ public class MCPEIdentifier extends Identifier {
 	/**
 	 * @param versionTag
 	 *            the version tag to validate.
-	 * @return true if the version tag is valid.
+	 * @return <code>true</code> if the version tag is valid.
 	 */
 	private static boolean verifyVersionTag(String versionTag) {
 		for (char vtc : versionTag.toCharArray()) {
@@ -72,8 +72,8 @@ public class MCPEIdentifier extends Identifier {
 	/**
 	 * @param identifier
 	 *            the identifier to check.
-	 * @return true if the specified identifier is a Minecraft: Pocket Edition
-	 *         identifier.
+	 * @return <code>true</code> if the specified identifier is a Minecraft: Pocket
+	 *         Edition identifier.
 	 */
 	public static boolean isMCPEIdentifier(Identifier identifier) {
 		return identifier.build().startsWith(HEADER);
@@ -91,8 +91,8 @@ public class MCPEIdentifier extends Identifier {
 
 	/**
 	 * Constructs an <code>MCPEIdentifier</code> with the specified server name,
-	 * server protocol, version tag, online player count, max player count,
-	 * globally unique ID, world name, and gamemode.
+	 * server protocol, version tag, online player count, max player count, globally
+	 * unique ID, world name, and gamemode.
 	 * 
 	 * @param serverName
 	 *            the server name.
@@ -263,7 +263,7 @@ public class MCPEIdentifier extends Identifier {
 	 * 
 	 * @param versionTag
 	 *            the new version tag.
-	 * @return true if the version tag was set
+	 * @return <code>true</code> if the version tag was set
 	 */
 	public boolean setVersionTag(String versionTag) {
 		if (verifyVersionTag(versionTag)) {
@@ -334,7 +334,7 @@ public class MCPEIdentifier extends Identifier {
 	}
 
 	/**
-	 * @return true if the identifier is in legacy mode.
+	 * @return <code>true</code> if the identifier is in legacy mode.
 	 */
 	public boolean isLegacyMode() {
 		return this.legacy;

@@ -28,39 +28,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package net.marfgamer.jraknet.example.chat.client;
-
-import net.marfgamer.jraknet.RakNetException;
+package net.marfgamer.jraknet.protocol.message;
 
 /**
- * A generic exception used by the client to warn the user of a problem that has
- * occurred.
- *
+ * Represents a packet class whose size in bytes can be calculated before being
+ * encoded.
+ * 
  * @author Whirvis "MarfGamer" Ardenaur
  */
-public class ChatException extends Exception {
-
-	private static final long serialVersionUID = 4497482433048975592L;
+public interface Sizable {
 
 	/**
-	 * Constructs a <code>ChatException</code> with the specified exception message.
-	 * 
-	 * @param exception
-	 *            the exception message.
+	 * @return the size of the packet would be if it had been encoded.
 	 */
-	public ChatException(String exception) {
-		super(exception);
-	}
-
-	/**
-	 * Constructs a <code>ChatException</code> with the specified
-	 * <code>RakNetExcetion</code>.
-	 * 
-	 * @param exception
-	 *            the <code>RakNetException</code>.
-	 */
-	public ChatException(RakNetException exception) {
-		this(exception.getMessage());
-	}
+	public int calculateSize();
 
 }

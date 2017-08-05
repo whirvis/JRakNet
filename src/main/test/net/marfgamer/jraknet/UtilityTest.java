@@ -44,6 +44,10 @@ import net.marfgamer.jraknet.util.RakNetUtils;
  */
 public class UtilityTest {
 
+	// Logger name
+	private static final String LOGGER_NAME = "utility test";
+
+	// Test data
 	private static final String ADDRESS_TEST_VALID = "255.255.255.255:65535";
 	private static final String ADDRESS_TEST_INVALID = "275.3.6.28:83245";
 	private static final char UNICODE_MINECRAFT_COLOR_SYMBOL = '\u00A7';
@@ -53,34 +57,37 @@ public class UtilityTest {
 			MINECRAFT_POCKET_EDITION_DEFAULT_PORT);
 
 	public static void main(String[] args) throws RakNetException {
-		System.out.println("Parsing valid address " + ADDRESS_TEST_VALID + " ?= "
+		// Enable logging
+		RakNet.enableLogging();
+		
+		RakNetLogger.info(LOGGER_NAME, "Parsing valid address " + ADDRESS_TEST_VALID + " ?= "
 				+ RakNetUtils.parseAddressPassive(ADDRESS_TEST_VALID));
-		System.out.println("Parsing invalid address " + ADDRESS_TEST_INVALID + " ?= "
+		RakNetLogger.info(LOGGER_NAME, "Parsing invalid address " + ADDRESS_TEST_INVALID + " ?= "
 				+ RakNetUtils.parseAddressPassive(ADDRESS_TEST_INVALID));
 
 		// Tell the user the sever we are pinging
-		System.out.println("Server address: " + LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
-		System.out.println("Maximum Transfer Unit: " + RakNetUtils.getMaximumTransferUnit());
+		RakNetLogger.info(LOGGER_NAME, "Server address: " + LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
+		RakNetLogger.info(LOGGER_NAME, "Maximum Transfer Unit: " + RakNetUtils.getMaximumTransferUnit());
 
 		// Check if the server is online
-		System.out.print("Pinging server... ");
+		RakNetLogger.info(LOGGER_NAME, "Pinging server... ");
 		if (isServerOnline(LIFEBOAT_SURVIVAL_GAMES_ADDRESS)) {
-			System.out.println("Success!");
+			RakNetLogger.info(LOGGER_NAME, "Success!");
 		} else {
-			throw new RakNetException("Failed to connect to server, unable to proceed with testing!");
+			throw new RakNetException("Failed to ping server, unable to proceed with testing!");
 		}
 
-		System.out.print("Checking compatibility... ");
+		RakNetLogger.info(LOGGER_NAME, "Checking compatibility... ");
 		if (isServerCompatible(LIFEBOAT_SURVIVAL_GAMES_ADDRESS)) {
-			System.out.println("Success!");
+			RakNetLogger.info(LOGGER_NAME, "Success!");
 		} else {
 			throw new RakNetException("Invalid protocol, we are unable to continue with testing!");
 		}
 
 		// Get the server identifier
-		System.out.print("Server identifier: ");
+		RakNetLogger.info(LOGGER_NAME, "Getting server identifier...");
 		MCPEIdentifier identifier = new MCPEIdentifier(getServerIdentifier(LIFEBOAT_SURVIVAL_GAMES_ADDRESS));
-		System.out.println(formatMCPEIdentifier(identifier));
+		RakNetLogger.info(LOGGER_NAME, formatMCPEIdentifier(identifier));
 	}
 
 	/**

@@ -40,7 +40,7 @@ import net.marfgamer.jraknet.protocol.Reliability;
  *
  * @author Whirvis "MarfGamer" Ardenaur
  */
-public class EncapsulatedPacket {
+public class EncapsulatedPacket implements Sizable {
 
 	// Length constants
 	public static final int MINIMUM_BUFFER_LENGTH = 0x03;
@@ -73,8 +73,8 @@ public class EncapsulatedPacket {
 	 * Encodes the packet.
 	 */
 	public void encode() {
-		buffer.writeByte((byte) ((reliability.asByte() << RELIABILITY_POSITION) | (split ? FLAG_SPLIT : 0)));
-		buffer.writeUShort(payload.size() * 8);
+		buffer.writeByte((byte) ((reliability.getId() << RELIABILITY_POSITION) | (split ? FLAG_SPLIT : 0)));
+		buffer.writeUShort(payload.size() * 8); // Size is in bits
 
 		if (reliability.isReliable()) {
 			buffer.writeTriadLE(messageIndex);
@@ -98,10 +98,10 @@ public class EncapsulatedPacket {
 	 * Decodes the packet.
 	 */
 	public void decode() {
-		byte flags = buffer.readByte();
-		this.reliability = Reliability.lookup((byte) (byte) ((flags & 0b11100000) >> 5));
+		short flags = buffer.readUByte();
+		this.reliability = Reliability.lookup((byte) ((flags & FLAG_RELIABILITY) >> RELIABILITY_POSITION));
 		this.split = (flags & FLAG_SPLIT) > 0;
-		int length = buffer.readUShort() / 8;
+		int length = buffer.readUShort() / 8; // Size is in bits
 
 		if (reliability.isReliable()) {
 			this.messageIndex = buffer.readTriadLE();
@@ -124,9 +124,9 @@ public class EncapsulatedPacket {
 	/**
 	 * @return what the size of the packet would be if it had been encoded.
 	 */
+	@Override
 	public int calculateSize() {
-		int packetSize = 0; // Unlike CustomPacket EncapsulatedPacket has no ID,
-		// so this starts at 0 instead of 1
+		int packetSize = 0;
 		packetSize += BITFLAG_LENGTH;
 		packetSize += PAYLOAD_LENGTH_LENGTH;
 
@@ -153,9 +153,9 @@ public class EncapsulatedPacket {
 	 *            whether or not the packet is split.
 	 * @param payload
 	 *            the payload of the packet
-	 * @return the size of an <code>EncapsulatedPacket</code> based on the
-	 *         specified reliability, whether or not it is split, and the size
-	 *         of the specified payload without any extra data written to it.
+	 * @return the size of an <code>EncapsulatedPacket</code> based on the specified
+	 *         reliability, whether or not it is split, and the size of the
+	 *         specified payload without any extra data written to it.
 	 */
 	public static int calculateDummy(Reliability reliability, boolean split, Packet payload) {
 		EncapsulatedPacket dummy = new EncapsulatedPacket();
@@ -171,9 +171,9 @@ public class EncapsulatedPacket {
 	 *            the reliability of the packet.
 	 * @param split
 	 *            whether or not the packet is split.
-	 * @return the size of an <code>EncapsulatedPacket</code> based on the
-	 *         specified reliability and whether or not it is split without any
-	 *         extra data written to it.
+	 * @return the size of an <code>EncapsulatedPacket</code> based on the specified
+	 *         reliability and whether or not it is split without any extra data
+	 *         written to it.
 	 */
 	public static int calculateDummy(Reliability reliability, boolean split) {
 		return EncapsulatedPacket.calculateDummy(reliability, split, new Packet());

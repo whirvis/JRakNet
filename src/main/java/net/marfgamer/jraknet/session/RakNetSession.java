@@ -41,7 +41,9 @@ import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramPacket;
 import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNet;
+import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.RakNetPacket;
+import net.marfgamer.jraknet.protocol.MessageIdentifier;
 import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.message.CustomPacket;
 import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
@@ -60,6 +62,7 @@ import net.marfgamer.jraknet.util.map.IntMap;
 public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer {
 
 	// Session data
+	private String loggerName;
 	private final long guid;
 	private final int maximumTransferUnit;
 	private final Channel channel;
@@ -105,8 +108,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	private long highestLatency;
 
 	/**
-	 * Constructs a <code>RakNetSession</code> with the specified globally
-	 * unique ID, maximum transfer unit, <code>Channel</code>, and address.
+	 * Constructs a <code>RakNetSession</code> with the specified globally unique
+	 * ID, maximum transfer unit, <code>Channel</code>, and address.
 	 * 
 	 * @param guid
 	 *            the globally unique ID.
@@ -119,6 +122,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 */
 	public RakNetSession(long guid, int maximumTransferUnit, Channel channel, InetSocketAddress address) {
 		// Session data
+		this.loggerName = "session #" + guid;
 		this.guid = guid;
 		this.maximumTransferUnit = maximumTransferUnit;
 		this.channel = channel;
@@ -204,6 +208,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 */
 	public void setState(RakNetState state) {
 		this.state = state;
+		RakNetLogger.info(loggerName, "set state to " + state);
 	}
 
 	/**
@@ -221,6 +226,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 */
 	public void setKeepAliveState(int keepAliveState) {
 		this.keepAliveState = keepAliveState;
+		RakNetLogger.info(loggerName, "set keep alive state " + keepAliveState);
 	}
 
 	/**
@@ -262,19 +268,20 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	}
 
 	/**
-	 * Bumps the message index and returns the new one, this should only be
-	 * called by the <code>SplitPacket</code> class.
+	 * Bumps the message index and returns the new one, this should only be called
+	 * by the <code>SplitPacket</code> class.
 	 * 
 	 * @return the new message index.
 	 */
 	protected int bumpMessageIndex() {
+		RakNetLogger.info(loggerName, "Bumped message index from " + messageIndex + " to " + (messageIndex + 1));
 		return this.messageIndex++;
 	}
 
 	/**
 	 * Enables/disables latency detection, when disabled the latency will always
-	 * return -1. If the session is not yet in the keep alive state then the
-	 * packets needed to detect the latency will not be sent until then.
+	 * return -1. If the session is not yet in the keep alive state then the packets
+	 * needed to detect the latency will not be sent until then.
 	 * 
 	 * @param enabled
 	 *            whether or not latency detection is enabled
@@ -283,6 +290,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		this.latencyEnabled = enabled;
 		this.latency = (enabled ? this.latency : -1);
 		this.pongsReceived = (enabled ? this.pongsReceived : 0);
+		RakNetLogger.info(loggerName, (enabled ? "Enabled" : "Disabled") + " latency detection.");
 	}
 
 	/**
@@ -333,11 +341,15 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		encapsulated.orderChannel = (byte) channel;
 		encapsulated.payload = packet;
 		if (reliability.isReliable()) {
-			encapsulated.messageIndex = this.messageIndex++;
+			encapsulated.messageIndex = this.bumpMessageIndex();
 		}
 		if (reliability.isOrdered() || reliability.isSequenced()) {
 			encapsulated.orderIndex = (reliability.isOrdered() ? this.orderSendIndex[channel]++
 					: this.sequenceSendIndex[channel]++);
+			RakNetLogger.info(loggerName, "Bumped " + (reliability.isOrdered() ? "order" : "sequence") + " index from "
+					+ ((reliability.isOrdered() ? this.orderSendIndex[channel] : this.sequenceSendIndex[channel]) - 1)
+					+ " to "
+					+ (reliability.isOrdered() ? this.orderSendIndex[channel] : this.sequenceSendIndex[channel]));
 		}
 
 		// Do we need to split the packet?
@@ -347,10 +359,15 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 				for (EncapsulatedPacket split : SplitPacket.splitPacket(this, encapsulated)) {
 					sendQueue.add(split);
 				}
+				RakNetLogger.info(loggerName,
+						"Split encapsulated packet " + encapsulated.splitId + " and added it to the send queue");
 			} else {
 				sendQueue.add(encapsulated);
+				RakNetLogger.info(loggerName, "Added encapsulated packet to the send queue");
 			}
 		}
+		RakNetLogger.info(loggerName, "Sent packet with size of " + packet.size() + " bytes (" + (packet.size() * 8)
+				+ " bits) with reliability " + reliability + " on channel " + channel);
 	}
 
 	@Override
@@ -371,6 +388,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 */
 	public final void sendRawMessage(Packet packet) {
 		channel.writeAndFlush(new DatagramPacket(packet.buffer(), this.address));
+		RakNetLogger.info(loggerName,
+				"Sent raw packet with size of " + packet.size() + " bytes (" + (packet.size() * 8) + " bits)");
 	}
 
 	/**
@@ -380,9 +399,9 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 * @param encapsulated
 	 *            the encapsulated packets to send.
 	 * @param updateRecoveryQueue
-	 *            whether or not to store the encapsulated packets in the
-	 *            recovery queue for later, only set this to <code>true</code>
-	 *            if you are sending new data and not resending old data.
+	 *            whether or not to store the encapsulated packets in the recovery
+	 *            queue for later, only set this to <code>true</code> if you are
+	 *            sending new data and not resending old data.
 	 * @return the sequence number of the <code>CustomPacket</code>.
 	 */
 	private final int sendCustomPacket(ArrayList<EncapsulatedPacket> encapsulated, boolean updateRecoveryQueue) {
@@ -410,6 +429,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		// Update packet data
 		this.packetsSentThisSecond++;
 		this.lastPacketSendTime = System.currentTimeMillis();
+		RakNetLogger.info(loggerName, "Sent custom packet with sequence number " + custom.sequenceNumber);
 		return custom.sequenceNumber;
 	}
 
@@ -420,9 +440,9 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 * @param encapsulated
 	 *            The encapsulated packets to send
 	 * @param updateRecoveryQueue
-	 *            Whether or not to store the encapsulated packets in the
-	 *            recovery queue for later, only set this to <code>true</code>
-	 *            if you are sending new data and not resending old data
+	 *            Whether or not to store the encapsulated packets in the recovery
+	 *            queue for later, only set this to <code>true</code> if you are
+	 *            sending new data and not resending old data
 	 * @return The sequence number of the <code>CustomPacket</code>
 	 */
 	private final int sendCustomPacket(EncapsulatedPacket[] encapsulated, boolean updateRecoveryQueue) {
@@ -453,6 +473,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 		// Update packet data
 		this.lastPacketSendTime = System.currentTimeMillis();
+		RakNetLogger.info(loggerName, "Sent " + acknowledge.records.size() + " records in "
+				+ (type == AcknowledgeType.ACKNOWLEDGED ? "ACK" : "NACK") + " packet");
 	}
 
 	/**
@@ -471,22 +493,19 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 		/*
 		 * 1. The reason we subtract one from the difference is because the last
-		 * sequence number we received should always be one less than the next
-		 * one
+		 * sequence number we received should always be one less than the next one
 		 */
 
 		/*
-		 * 2. The reason we add one to the last sequence number to the record
-		 * when the difference is bigger than one is because we have already
-		 * received that record, this is also the same reason we subtract one
-		 * from the CustomPacket's sequence number even when the difference is
-		 * not greater than one
+		 * 2. The reason we add one to the last sequence number to the record when the
+		 * difference is bigger than one is because we have already received that
+		 * record, this is also the same reason we subtract one from the CustomPacket's
+		 * sequence number even when the difference is not greater than one
 		 */
 
 		/*
-		 * 3. We always generate the NACK response first because the previous
-		 * sequence number data would be destroyed, making it impossible to
-		 * generate it
+		 * 3. We always generate the NACK response first because the previous sequence
+		 * number data would be destroyed, making it impossible to generate it
 		 */
 
 		// Generate NACK queue if needed
@@ -513,6 +532,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 		// Send ACK
 		this.sendAcknowledge(AcknowledgeType.ACKNOWLEDGED, new Record(custom.sequenceNumber));
+		RakNetLogger.info(loggerName, "Handle custom packet with sequence number " + custom.sequenceNumber);
 	}
 
 	/**
@@ -559,6 +579,9 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 		// Update packet data
 		this.lastPacketReceiveTime = System.currentTimeMillis();
+		RakNetLogger.info(loggerName,
+				"Handled " + (acknowledge.getType() == AcknowledgeType.ACKNOWLEDGED ? "ACK" : "NACK") + " packet with "
+						+ acknowledge.records.size() + " records");
 	}
 
 	/**
@@ -601,9 +624,9 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 			}
 
 			/*
-			 * It is safe to set the payload here because the old payload is no
-			 * longer needed and split EncapsulatedPackets share the exact same
-			 * data except for split data and payload.
+			 * It is safe to set the payload here because the old payload is no longer
+			 * needed and split EncapsulatedPackets share the exact same data except for
+			 * split data and payload.
 			 */
 			encapsulated.payload = finalPayload;
 			splitQueue.remove(encapsulated.splitId);
@@ -625,8 +648,6 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		} else {
 			// Channel is valid, it is safe to handle
 			if (reliability.isOrdered()) {
-				// System.out.println("Received ordered packet on channel " +
-				// orderChannel + " with index " + orderIndex);
 				handleQueue.get(orderChannel).put(orderIndex, encapsulated);
 				while (handleQueue.get(orderChannel).containsKey(orderReceiveIndex[orderChannel])) {
 					EncapsulatedPacket orderedEncapsulated = handleQueue.get(orderChannel)
@@ -634,12 +655,6 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 					handleQueue.get(orderChannel).remove(orderReceiveIndex[orderChannel] - 1);
 					this.handleMessage0(encapsulated.orderChannel, new RakNetPacket(orderedEncapsulated.payload));
 				}
-				/*
-				 * System.out.println("Current order index for channel " +
-				 * orderChannel + ": " + (orderReceiveIndex[orderChannel] - 1) +
-				 * " (Leftover: " + handleQueue.get(orderChannel).size() +
-				 * ") (Last index on channel: " + orderIndex + ")");
-				 */
 			} else if (reliability.isSequenced()) {
 				if (orderIndex > sequenceReceiveIndex[orderChannel]) {
 					sequenceReceiveIndex[orderChannel] = orderIndex;
@@ -649,11 +664,12 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 				this.handleMessage0(encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
 			}
 		}
+		RakNetLogger.info(loggerName, "Handled encapsulated packet with " + encapsulated.reliability + " reliability");
 	}
 
 	/**
-	 * Handles an internal packet related to RakNet, if the ID is unrecognized
-	 * it is passed on to the underlying session class.
+	 * Handles an internal packet related to RakNet, if the ID is unrecognized it is
+	 * passed on to the underlying session class.
 	 * 
 	 * @param channel
 	 *            the channel the packet was sent on.
@@ -704,6 +720,13 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 			this.latencyIdentifier = (pong.identifier + 1);
 		} else {
 			this.handleMessage(packet, channel);
+		}
+
+		if (MessageIdentifier.hasPacket(packet.getId())) {
+			RakNetLogger.info(loggerName, "Handled internal packet with ID " + MessageIdentifier.getName(packet.getId())
+					+ " (" + packet.getId() + ")");
+		} else {
+			RakNetLogger.info(loggerName, "Sent packet with ID " + packet.getId() + " to session handler");
 		}
 	}
 
@@ -796,8 +819,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	public abstract void onAcknowledge(Record record);
 
 	/**
-	 * This function is called when a not acknowledged receipt is received for
-	 * the packet.
+	 * This function is called when a not acknowledged receipt is received for the
+	 * packet.
 	 * 
 	 * @param record
 	 *            the lost record.
