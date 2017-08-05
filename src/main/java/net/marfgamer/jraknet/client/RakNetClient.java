@@ -96,6 +96,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	private final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> discovered;
 	/** synchronize this second! (<code>discovered</code> goes first!) */
 	private final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> externalServers;
+	private Thread clientThread;
 
 	// Networking data
 	private final Bootstrap bootstrap;
@@ -269,6 +270,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		synchronized (discovered) {
 			if (this.discoveryMode == DiscoveryMode.NONE) {
 				for (InetSocketAddress address : discovered.keySet()) {
+					// Notify API
 					listener.onServerForgotten(address);
 				}
 				discovered.clear(); // We are not discovering servers anymore!
@@ -277,6 +279,14 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			}
 		}
 		RakNetLogger.debug(this, "Set discovery mode to " + mode);
+	}
+
+	/**
+	 * @return the thread the server is running on if it was started using
+	 *         <code>startThreaded()</code>.
+	 */
+	public final Thread getThread() {
+		return this.clientThread;
 	}
 
 	/**
@@ -290,9 +300,12 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	public final void addExternalServer(InetSocketAddress address) {
 		synchronized (externalServers) {
 			if (!externalServers.contains(address)) {
+				// Add newly discovered server
 				externalServers.put(address, new DiscoveredServer(address, -1, null));
-				listener.onExternalServerAdded(address);
+
+				// Notify API
 				RakNetLogger.debug(this, "Added external server with address " + address);
+				listener.onExternalServerAdded(address);
 			}
 		}
 	}
@@ -336,9 +349,12 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	public final void removeExternalServer(InetSocketAddress address) {
 		synchronized (externalServers) {
 			if (externalServers.contains(address)) {
+				// Remove now forgotten server
 				externalServers.remove(address);
-				listener.onExternalServerRemoved(address);
+
+				// Notify API
 				RakNetLogger.debug(this, "Removed external server with address " + address);
+				listener.onExternalServerRemoved(address);
 			}
 		}
 	}
@@ -503,19 +519,20 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            the exception caught by the handler.
 	 */
 	protected final void handleHandlerException(InetSocketAddress address, Throwable cause) {
-		listener.onHandlerException(address, cause);
+		// Handle exception based on connection state
 		if (preparation != null) {
 			if (address.equals(preparation.address)) {
 				preparation.cancelReason = new NettyHandlerException(this, handler, cause);
 			}
-		} else {
-			if (session != null) {
-				if (address.equals(preparation.address)) {
-					this.disconnect(cause.getClass().getName() + ": " + cause.getLocalizedMessage());
-				}
+		} else if (session != null) {
+			if (address.equals(preparation.address)) {
+				this.disconnect(cause.getClass().getName() + ": " + cause.getLocalizedMessage());
 			}
 		}
+
+		// Notify API
 		RakNetLogger.warn(this, "Handled exception " + cause.getClass().getName() + " caused by address " + address);
+		listener.onHandlerException(address, cause);
 	}
 
 	/**
@@ -638,7 +655,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 					if (System.currentTimeMillis()
 							- discoveredServer.getDiscoveryTimestamp() >= DiscoveredServer.SERVER_TIMEOUT_MILLI) {
 						forgottenServers.add(discoveredServerAddress);
-						listener.onServerForgotten(discoveredServerAddress);
+						listener.onServerForgotten(discoveredServerAddress); // TODO?
 					}
 				}
 				discovered.keySet().removeAll(forgottenServers);
@@ -696,33 +713,38 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 				if (sender.getAddress().isSiteLocalAddress() && !externalServers.containsKey(sender)) {
 					// This is a local server
 					if (!discovered.containsKey(sender)) {
-						// Server discovered
+						// Add newly discovered server
 						discovered.put(sender,
 								new DiscoveredServer(sender, System.currentTimeMillis(), pong.identifier));
-						listener.onServerDiscovered(sender, pong.identifier);
+
+						// Notify API
 						RakNetLogger.info(this, "Discovered local server with address " + sender);
+						listener.onServerDiscovered(sender, pong.identifier);
 					} else {
 						// Server already discovered, but data has changed
 						DiscoveredServer server = discovered.get(sender);
 						server.setDiscoveryTimestamp(System.currentTimeMillis());
 						if (!pong.identifier.equals(server.getIdentifier())) {
+							// Update server identifier
 							server.setIdentifier(pong.identifier);
-							listener.onServerIdentifierUpdate(sender, pong.identifier);
+
+							// Notify API
 							RakNetLogger.debug(this, "Updated local server with address " + sender + " identifier to \""
 									+ pong.identifier + "\"");
+							listener.onServerIdentifierUpdate(sender, pong.identifier);
 						}
 					}
-				} else {
-					// This is an external server
-					if (externalServers.containsKey(sender)) {
-						DiscoveredServer server = externalServers.get(sender);
-						server.setDiscoveryTimestamp(System.currentTimeMillis());
-						if (!pong.identifier.equals(server.getIdentifier())) {
-							server.setIdentifier(pong.identifier);
-							listener.onExternalServerIdentifierUpdate(sender, pong.identifier);
-							RakNetLogger.debug(this, "Updated local server with address " + sender + " identifier to \""
-									+ pong.identifier + "\"");
-						}
+				} else if (externalServers.containsKey(sender)) {
+					DiscoveredServer server = externalServers.get(sender);
+					server.setDiscoveryTimestamp(System.currentTimeMillis());
+					if (!pong.identifier.equals(server.getIdentifier())) {
+						// Update server identifier
+						server.setIdentifier(pong.identifier);
+						
+						// Notify API
+						RakNetLogger.debug(this, "Updated local server with address " + sender + " identifier to \""
+								+ pong.identifier + "\"");
+						listener.onExternalServerIdentifierUpdate(sender, pong.identifier);
 					}
 				}
 			}
@@ -893,6 +915,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		};
 		thread.setName("JRAKNET_CLIENT_" + client.getGloballyUniqueId());
 		thread.start();
+		this.clientThread = thread;
 		RakNetLogger.info(this, "Started on thread with name " + thread.getName());
 
 		// Return the thread so it can be modified
@@ -973,15 +996,23 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	public final void disconnect(String reason) {
 		if (session != null) {
+			// Disconnect session
 			session.closeConnection();
-			listener.onDisconnect(session, reason);
+			this.session = null;
+
+			// Interrupt it's thread if it owns one
+			if (this.clientThread != null) {
+				clientThread.interrupt();
+			}
+
+			// Notify API
 			RakNetLogger.info(this, "Disconnected from server with address " + session.getAddress() + " with reason \""
 					+ reason + "\"");
+			listener.onDisconnect(session, reason);
 		} else {
 			RakNetLogger.warn(this,
 					"Attempted to disconnect from server even though it was not connected to as server in the first place");
 		}
-		this.session = null;
 	}
 
 	/**
@@ -1030,7 +1061,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * called the client can no longer connect to servers.
 	 */
 	public final void disconnectAndShutdown() {
-		this.disconnectAndShutdown("Shutdown");
+		this.disconnectAndShutdown("Client shutdown");
 	}
 
 	@Override

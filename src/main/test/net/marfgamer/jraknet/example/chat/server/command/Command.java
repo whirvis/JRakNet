@@ -30,6 +30,8 @@
  */
 package net.marfgamer.jraknet.example.chat.server.command;
 
+import java.util.HashMap;
+
 /**
  * Used to easily implements instructions given from the console to be handled
  * by the server.
@@ -38,9 +40,21 @@ package net.marfgamer.jraknet.example.chat.server.command;
  */
 public abstract class Command {
 
+	// Pre-registered commands
+	private static final HashMap<String, Command> commands = new HashMap<String, Command>();
+
+	/**
+	 * @return the pre-registered commands.
+	 */
+	public static final Command[] getRegisteredCommands() {
+		return commands.values().toArray(new Command[commands.size()]);
+	}
+
+	// Command data
 	private final boolean overridable;
 	private final String label;
 	private final String usage;
+	private final String description;
 
 	/**
 	 * Constructs a <code>Command</code> with whether or not it is overridable along
@@ -52,11 +66,23 @@ public abstract class Command {
 	 *            the command label.
 	 * @param usage
 	 *            the command usage.
+	 * @param description
+	 *            the command description.
 	 */
-	protected Command(boolean overridable, String label, String usage) {
+	protected Command(boolean overridable, String label, String usage, String description) {
+		// Set command data
 		this.overridable = overridable;
 		this.label = label;
 		this.usage = usage;
+		this.description = description;
+
+		// Add ourself to the command list
+		if (commands.containsKey(label)) {
+			if (!commands.get(label).isOverridable()) {
+				throw new IllegalArgumentException("Command with label \"" + label + "\" cannot be overriden");
+			}
+		}
+		commands.put(label, this);
 	}
 
 	/**
@@ -66,9 +92,11 @@ public abstract class Command {
 	 *            the command label.
 	 * @param usage
 	 *            the command usage.
+	 * @param description
+	 *            the command description.
 	 */
-	public Command(String label, String usage) {
-		this(true, label, usage);
+	public Command(String label, String usage, String description) {
+		this(true, label, usage, description);
 	}
 
 	/**
@@ -76,30 +104,39 @@ public abstract class Command {
 	 * 
 	 * @param label
 	 *            the command label.
+	 * @param description
+	 *            the command description.
 	 */
-	public Command(String label) {
-		this(label, label);
+	public Command(String label, String description) {
+		this(label, label, description);
 	}
 
 	/**
 	 * @return <code>true</code> if this command by overridden by another command.
 	 */
-	protected boolean isOverridable() {
+	protected final boolean isOverridable() {
 		return this.overridable;
 	}
 
 	/**
 	 * @return the label of the command.
 	 */
-	public String getLabel() {
+	public final String getLabel() {
 		return this.label;
 	}
 
 	/**
 	 * @return the usage of the command.
 	 */
-	public String getUsage() {
+	public final String getUsage() {
 		return (this.label + " " + this.usage);
+	}
+
+	/**
+	 * @return the description of the command.
+	 */
+	public final String getDescription() {
+		return this.description;
 	}
 
 	/**
@@ -111,7 +148,7 @@ public abstract class Command {
 	 *            the array to convert to a single String.
 	 * @return the converted String
 	 */
-	protected String remainingArguments(int startIndex, String[] stringArray) {
+	protected final String remainingArguments(int startIndex, String[] stringArray) {
 		StringBuilder builder = new StringBuilder();
 		for (int i = startIndex; i < stringArray.length; i++) {
 			builder.append(stringArray[i] + (i + 1 < stringArray.length ? " " : ""));
