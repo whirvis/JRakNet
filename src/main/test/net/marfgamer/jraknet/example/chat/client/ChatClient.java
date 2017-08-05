@@ -37,6 +37,7 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 
 import net.marfgamer.jraknet.RakNet;
+import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.UtilityTest;
 import net.marfgamer.jraknet.client.RakNetClient;
@@ -369,7 +370,7 @@ public class ChatClient implements RakNetClientListener {
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 			// Enable logging
-			RakNet.enableLogging();
+			RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
 
 			// Create client
 			@SuppressWarnings("unused")

@@ -30,30 +30,30 @@
  */
 package net.marfgamer.jraknet.example.chat.server.command;
 
+import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.example.chat.server.ChatServer;
 
 /**
- * Allows the server to broadcast messages.
- *
+ * Displays all of the commands that can be used on the server.
+ * 
  * @author Whirvis "MarfGamer" Ardenaur
  */
-public class BroadcastCommand extends Command {
+public class HelpCommand extends Command {
 
-	private final ChatServer server;
-
-	public BroadcastCommand(ChatServer server) {
-		super("broadcast", "<message>", "Broadcasts a message to all channels");
-		this.server = server;
+	public HelpCommand() {
+		super("help", "Displays all the commands that can be used");
 	}
 
 	@Override
 	public boolean handleCommand(String[] args) {
-		if (args.length >= 1) {
-			String message = remainingArguments(0, args);
-			server.broadcastMessage("<Server> " + message);
-			return true;
+		StringBuilder helpMessage = new StringBuilder();
+		helpMessage.append("Showing all " + Command.getRegisteredCommands().length + " commands:\n");
+		for (Command command : Command.getRegisteredCommands()) {
+			helpMessage.append("\t\t");
+			helpMessage.append(command.getUsage() + ": " + command.getDescription() + "\n");
 		}
-		return false;
+		RakNetLogger.info(ChatServer.LOGGER_NAME, helpMessage.toString());
+		return true;
 	}
 
 }

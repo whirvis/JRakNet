@@ -35,7 +35,7 @@ Creating a server in JRakNet is extremely easy, all it takes to create one can b
 ```java
 // Create server
 RakNetServer server = new RakNetServer(19132, 10, new MCPEIdentifier("JRakNet Example Server", 101, "1.0.3", 0,
-		10, new Random().nextLong() /* Server ID */, "New World", "Survival"));
+		10, new Random().nextLong() /* Server broadcast ID */, "New World", "Survival"));
 
 // Set listener
 server.setListener(new RakNetServerListener() {

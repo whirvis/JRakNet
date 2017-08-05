@@ -33,6 +33,9 @@ package net.marfgamer.jraknet.example.chat.server.command;
 import java.util.Arrays;
 import java.util.HashMap;
 
+import net.marfgamer.jraknet.RakNetLogger;
+import net.marfgamer.jraknet.example.chat.server.ChatServer;
+
 /**
  * Used by the server to register and handle commands easily.
  *
@@ -62,6 +65,23 @@ public class CommandHandler {
 	}
 
 	/**
+	 * Registers a command.
+	 * 
+	 * @param commandClazz
+	 *            the command class.
+	 */
+	public void registerCommand(Class<? extends Command> commandClazz) {
+		try {
+			Command command = (Command) commandClazz.newInstance();
+			this.registerCommand(command);
+		} catch (InstantiationException e) {
+			throw new IllegalArgumentException("Command must have a nullary constructor");
+		} catch (IllegalAccessException e) {
+			throw new IllegalArgumentException("Command constructor must be accessible");
+		}
+	}
+
+	/**
 	 * Unregisters a command.
 	 * 
 	 * @param label
@@ -87,10 +107,10 @@ public class CommandHandler {
 		if (commands.containsKey(label)) {
 			Command command = commands.get(label);
 			if (command.handleCommand(arguments) == false) {
-				System.err.println("Usage: " + command.getUsage());
+				RakNetLogger.error(ChatServer.LOGGER_NAME, "Usage: " + command.getUsage());
 			}
 		} else {
-			System.err.println("Unknown command!");
+			RakNetLogger.error(ChatServer.LOGGER_NAME, "Unknown command!");
 		}
 	}
 

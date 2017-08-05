@@ -44,7 +44,7 @@ public class KickCommand extends Command {
 	private final ChatServer server;
 
 	public KickCommand(ChatServer server) {
-		super("kick", "<player> [reason]");
+		super("kick", "<player> [reason]", "Removes the user from the server");
 		this.server = server;
 	}
 
