@@ -37,7 +37,9 @@ import java.net.InetSocketAddress;
 import io.netty.channel.Channel;
 import net.marfgamer.jraknet.RakNet;
 import net.marfgamer.jraknet.RakNetException;
+import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.RakNetPacket;
+import net.marfgamer.jraknet.protocol.MessageIdentifier;
 import net.marfgamer.jraknet.protocol.login.ConnectionBanned;
 import net.marfgamer.jraknet.protocol.login.IncompatibleProtocol;
 import net.marfgamer.jraknet.protocol.login.OpenConnectionResponseOne;
@@ -53,6 +55,7 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
 public class SessionPreparation {
 
 	// Preparation data
+	private final String loggerName;
 	private final RakNetClient client;
 	private final int initialMaximumTransferUnit;
 	public RakNetException cancelReason;
@@ -73,13 +76,13 @@ public class SessionPreparation {
 	 *            the initial maximum transfer unit.
 	 */
 	public SessionPreparation(RakNetClient client, int initialMaximumTransferUnit) {
+		this.loggerName = "session planner #" + client.getGloballyUniqueId();
 		this.client = client;
 		this.initialMaximumTransferUnit = initialMaximumTransferUnit;
 	}
 
 	/**
-	 * Handles the specified packet and automatically updates the preparation
-	 * data.
+	 * Handles the specified packet and automatically updates the preparation data.
 	 * 
 	 * @param packet
 	 *            the packet to handle.
@@ -102,6 +105,8 @@ public class SessionPreparation {
 				this.maximumTransferUnit = connectionResponseOne.maximumTransferUnit;
 				this.guid = connectionResponseOne.serverGuid;
 				this.loginPackets[0] = true;
+				RakNetLogger.info(loggerName, "Applied maximum transfer unit and globally unique ID from "
+						+ MessageIdentifier.getName(packetId) + " packet");
 			}
 		} else if (packetId == ID_OPEN_CONNECTION_REPLY_2) {
 			OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo(packet);
@@ -120,6 +125,8 @@ public class SessionPreparation {
 			} else {
 				this.loginPackets[1] = true;
 				this.maximumTransferUnit = connectionResponseTwo.maximumTransferUnit;
+				RakNetLogger.info(loggerName,
+						"Applied maximum transfer unit from " + MessageIdentifier.getName(packetId) + " packet");
 			}
 		} else if (packetId == ID_ALREADY_CONNECTED) {
 			this.cancelReason = new AlreadyConnectedException(client);
@@ -143,7 +150,7 @@ public class SessionPreparation {
 	}
 
 	/**
-	 * @return true if the session has enough data to be created
+	 * @return <code>true</code> if the session has enough data to be created
 	 */
 	public boolean readyForSession() {
 		// It was cancelled, why are we finishing?
@@ -178,6 +185,10 @@ public class SessionPreparation {
 		if (!this.readyForSession()) {
 			return null;
 		}
+		RakNetLogger.info(loggerName,
+				"Created server session using globally unique ID " + guid + " and maximum transfer unit with size of "
+						+ maximumTransferUnit + " bytes (" + (maximumTransferUnit * 8) + " bits) for server address "
+						+ address);
 		return new RakNetServerSession(client, guid, maximumTransferUnit, channel, address);
 	}
 

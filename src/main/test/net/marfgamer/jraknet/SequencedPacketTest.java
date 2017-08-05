@@ -55,32 +55,34 @@ import net.marfgamer.jraknet.util.RakNetUtils;
  * <br>
  * 
  * This test was created in a response to GitHub issue #35 after it was
- * discovered during beta testing of MarfGamer's port of Five Night's at
- * Freddy's 3 to Java in it's spectator mode inside multiplayer mode.
+ * discovered during beta testing of Trent's remake of Five Night's at Freddy's
+ * 3 to Java in it's spectator mode inside multiplayer mode.
  *
  * @author Trent "MarfGamer" Summerlin
  */
 public class SequencedPacketTest {
 
+	// Logger name
+	private static final String LOGGER_NAME = "sequenced packet test";
+
+	// Test data
 	private static final short SEQUENCE_START_ID = 0xFE;
 	private static final int PACKET_SEND_COUNT = 1000;
-
 	private static long startSend = -1;
 	private static int packetReceiveCount = 0;
 	private static boolean[] packetsReceived = new boolean[PACKET_SEND_COUNT];
 
 	public static void main(String[] args) throws RakNetException, UnknownHostException {
-		System.out.println("Creating server...");
+		// Enable logging
+		RakNet.enableLogging();
+
+		RakNetLogger.info(LOGGER_NAME, "Creating server...");
 		createServer();
 
-		System.out.print("Sleeping 3000MS");
-		for (int i = 0; i < 3; i++) {
-			RakNetUtils.threadLock(1000);
-			System.out.print(".");
-		}
-		System.out.println();
+		RakNetLogger.info(LOGGER_NAME, "Sleeping 3000MS");
+		RakNetUtils.threadLock(3000L);
 
-		System.out.println("Creating client...");
+		RakNetLogger.info(LOGGER_NAME, "Creating client...");
 		createClient();
 
 		// In case of timeout
@@ -101,11 +103,12 @@ public class SequencedPacketTest {
 	 * Prints the results of the test
 	 */
 	private static void printResults() {
-		System.out.print("Server: Sequenced packet test finished, lost " + (packetReceiveCount >= PACKET_SEND_COUNT
-				? "no"
-				: Float.toString(((float) PACKET_SEND_COUNT - packetReceiveCount / (float) PACKET_SEND_COUNT) * 100)
-						.substring(0, 3).replace(".", "") + "% of")
-				+ " packets");
+		RakNetLogger.info(LOGGER_NAME,
+				"Server - Sequenced packet test finished, lost " + (packetReceiveCount >= PACKET_SEND_COUNT ? "no"
+						: Float.toString(
+								((float) PACKET_SEND_COUNT - packetReceiveCount / (float) PACKET_SEND_COUNT) * 100)
+								.substring(0, 3).replace(".", "") + "% of")
+						+ " packets");
 		if (packetReceiveCount < PACKET_SEND_COUNT) {
 			// Create list of lost packets
 			ArrayList<Integer> packetsLost = new ArrayList<Integer>();
@@ -116,14 +119,15 @@ public class SequencedPacketTest {
 			}
 
 			// Print out said list
-			System.out.print(" [");
+			StringBuilder builder = new StringBuilder();
 			for (int i = 0; i < packetsLost.size(); i++) {
 				Integer wi = packetsLost.get(i);
-				System.out.print(wi.intValue() + (i + 1 < packetsLost.size() ? ", " : ""));
+				builder.append(wi.intValue() + (i + 1 < packetsLost.size() ? ", " : ""));
 			}
-			System.out.print("]");
+			RakNetLogger.info(LOGGER_NAME,
+					"Packet" + (packetsLost.size() == 1 ? "" : "s") + " lost: " + builder.toString());
 		}
-		System.out.println(" (Took " + (System.currentTimeMillis() - startSend) + "MS)");
+		RakNetLogger.info(LOGGER_NAME, " (Took " + (System.currentTimeMillis() - startSend) + "MS)");
 	}
 
 	/**
@@ -150,12 +154,13 @@ public class SequencedPacketTest {
 					e.printStackTrace();
 				}
 
-				System.out.println("Server: Client connected from " + session.getAddress() + "!");
+				RakNetLogger.info(LOGGER_NAME, "Server - Client connected from " + session.getAddress() + "!");
 			}
 
 			@Override
 			public void onClientDisconnect(RakNetClientSession session, String reason) {
-				System.out.println("Server: Client from " + session.getAddress() + " disconnected! (" + reason + ")");
+				RakNetLogger.info(LOGGER_NAME,
+						"Server - Client from " + session.getAddress() + " disconnected! (" + reason + ")");
 				System.exit(1);
 			}
 
@@ -203,26 +208,27 @@ public class SequencedPacketTest {
 
 			@Override
 			public void onConnect(RakNetServerSession session) {
-				System.out.println("Client: Connected to server with MTU " + session.getMaximumTransferUnit());
+				RakNetLogger.info(LOGGER_NAME,
+						"Client - Connected to server with MTU " + session.getMaximumTransferUnit());
 
 				// Send 100 sequenced packets
-				System.out.println("Client: Sending " + PACKET_SEND_COUNT + " packets...");
+				RakNetLogger.info(LOGGER_NAME, "Client - Sending " + PACKET_SEND_COUNT + " packets...");
 				startSend = System.currentTimeMillis();
 				for (int i = 0; i < PACKET_SEND_COUNT; i++) {
 					RakNetPacket sequencedPacket = new RakNetPacket(SEQUENCE_START_ID);
 					sequencedPacket.writeInt(i);
 					packetSize += sequencedPacket.size();
-					session.sendMessage(Reliability.RELIABLE_SEQUENCED, sequencedPacket);
+					session.sendMessage(Reliability.UNRELIABLE_SEQUENCED, sequencedPacket);
 				}
 
 				// Notify user
-				System.out.println("Client: Sent " + PACKET_SEND_COUNT + " packets (" + packetSize + " bytes, "
-						+ (packetSize / 4) + " ints)");
+				RakNetLogger.info(LOGGER_NAME, "Client - Sent " + PACKET_SEND_COUNT + " packets (" + packetSize
+						+ " bytes, " + (packetSize / 4) + " ints)");
 			}
 
 			@Override
 			public void onDisconnect(RakNetServerSession session, String reason) {
-				System.err.println("Client: Lost connection to server! (" + reason + ")");
+				RakNetLogger.error(LOGGER_NAME, "Client - Lost connection to server! (" + reason + ")");
 				System.exit(1);
 			}
 

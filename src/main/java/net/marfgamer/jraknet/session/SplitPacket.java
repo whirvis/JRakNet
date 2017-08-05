@@ -96,12 +96,11 @@ public class SplitPacket {
 	}
 
 	/**
-	 * Updates the data for the split packet while also verifying that the
-	 * specified <code>EncapsulatedPacket</code> belongs to this split packet.
+	 * Updates the data for the split packet while also verifying that the specified
+	 * <code>EncapsulatedPacket</code> belongs to this split packet.
 	 * 
 	 * @param encapsulated
-	 *            the <code>EncapsulatedPacket</code> being used to update the
-	 *            data.
+	 *            the <code>EncapsulatedPacket</code> being used to update the data.
 	 * @return the packet if finished, null if data is still missing.
 	 */
 	public Packet update(EncapsulatedPacket encapsulated) {

@@ -43,8 +43,7 @@ public class ChatException extends Exception {
 	private static final long serialVersionUID = 4497482433048975592L;
 
 	/**
-	 * Constructs a <code>ChatException</code> with the specified exception
-	 * message.
+	 * Constructs a <code>ChatException</code> with the specified exception message.
 	 * 
 	 * @param exception
 	 *            the exception message.

@@ -37,6 +37,7 @@ import java.util.Scanner;
 import java.util.UUID;
 
 import net.marfgamer.jraknet.RakNet;
+import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.UtilityTest;
 import net.marfgamer.jraknet.example.chat.ChatMessageIdentifier;
@@ -61,6 +62,10 @@ import net.marfgamer.jraknet.session.RakNetClientSession;
  */
 public class ChatServer implements RakNetServerListener {
 
+	// Logger name
+	public static final String LOGGER_NAME = "chat server";
+
+	// Server data
 	private final String name;
 	private final String motd;
 	private final RakNetServer server;
@@ -68,8 +73,8 @@ public class ChatServer implements RakNetServerListener {
 	private final HashMap<InetSocketAddress, ConnectedClient> connected;
 
 	/**
-	 * Constructs a <code>ChatServer</code> with the specified name, message of
-	 * the day, port, and maximum amount of connections.
+	 * Constructs a <code>ChatServer</code> with the specified name, message of the
+	 * day, port, and maximum amount of connections.
 	 * 
 	 * @param name
 	 *            the name.
@@ -121,7 +126,8 @@ public class ChatServer implements RakNetServerListener {
 	/**
 	 * @param username
 	 *            the username to check.
-	 * @return true if the server has a client with the specified username.
+	 * @return <code>true</code> if the server has a client with the specified
+	 *         username.
 	 */
 	private boolean hasUsername(String username) {
 		for (ConnectedClient client : connected.values()) {
@@ -193,7 +199,7 @@ public class ChatServer implements RakNetServerListener {
 	/**
 	 * @param channel
 	 *            the channel ID.
-	 * @return true if the server has a channel with the specified ID.
+	 * @return <code>true</code> if the server has a channel with the specified ID.
 	 * @throws InvalidChannelException
 	 *             if the channel exceeds the limit.
 	 */
@@ -232,8 +238,8 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Broadcasts the specified message to the specified channel and prints it
-	 * out to the console if needed.
+	 * Broadcasts the specified message to the specified channel and prints it out
+	 * to the console if needed.
 	 * 
 	 * @param message
 	 *            the message to send.
@@ -252,7 +258,7 @@ public class ChatServer implements RakNetServerListener {
 			client.sendChatMessage(message, channel);
 		}
 		if (print == true) {
-			System.out.println(message + " [" + serverChannels[channel].getName() + "]");
+			RakNetLogger.info(LOGGER_NAME, message + " [" + serverChannels[channel].getName() + "]");
 		}
 	}
 
@@ -278,7 +284,7 @@ public class ChatServer implements RakNetServerListener {
 		for (ServerChannel channel : getChannels()) {
 			this.broadcastMessage(message + " [Global]", channel.getChannel(), false);
 		}
-		System.out.println(message + " [Global]");
+		RakNetLogger.info(LOGGER_NAME, message + " [Global]");
 	}
 
 	/**
@@ -298,7 +304,8 @@ public class ChatServer implements RakNetServerListener {
 	/**
 	 * @param username
 	 *            the username to check.
-	 * @return true if the server has a client with the specified username.
+	 * @return <code>true</code> if the server has a client with the specified
+	 *         username.
 	 */
 	public boolean hasClient(String username) {
 		return (getClient(username) != null);
@@ -379,11 +386,14 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	public static void main(String[] args) {
+		// Enable logging
+		RakNet.enableLogging();
+		
 		// Create and start server
 		ChatServer server = new ChatServer("JRakNet Server Example", "This is a test server made for JRakNet",
 				UtilityTest.MARFGAMER_DEVELOPMENT_PORT, 10);
 		server.start();
-		System.out.println("Started server!");
+		RakNetLogger.info(LOGGER_NAME, "Started server!");
 
 		// Register commands
 		CommandHandler commandHandler = new CommandHandler();

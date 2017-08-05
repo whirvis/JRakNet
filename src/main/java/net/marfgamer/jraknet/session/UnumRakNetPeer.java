@@ -59,8 +59,8 @@ public interface UnumRakNetPeer {
 	public void sendMessage(Reliability reliability, int channel, Packet packet);
 
 	/**
-	 * Sends the specified messages with the specified reliability on the
-	 * specified channel.
+	 * Sends the specified messages with the specified reliability on the specified
+	 * channel.
 	 * 
 	 * @param reliability
 	 *            the reliability of the packet.
@@ -93,8 +93,8 @@ public interface UnumRakNetPeer {
 	}
 
 	/**
-	 * Sends the specified messages with the specified reliability on the
-	 * default channel.
+	 * Sends the specified messages with the specified reliability on the default
+	 * channel.
 	 * 
 	 * @param reliability
 	 *            the reliability of the packet.
@@ -110,8 +110,8 @@ public interface UnumRakNetPeer {
 	}
 
 	/**
-	 * Sends a message identifier with the specified reliability on the
-	 * specified channel.
+	 * Sends a message identifier with the specified reliability on the specified
+	 * channel.
 	 * 
 	 * @param reliability
 	 *            the reliability of the packet.
@@ -127,8 +127,8 @@ public interface UnumRakNetPeer {
 	}
 
 	/**
-	 * Sends the specified message identifiers with the specified reliability on
-	 * the specified channel.
+	 * Sends the specified message identifiers with the specified reliability on the
+	 * specified channel.
 	 * 
 	 * @param reliability
 	 *            the reliability of the packet.
@@ -161,8 +161,8 @@ public interface UnumRakNetPeer {
 	}
 
 	/**
-	 * Sends the specified message identifiers with the specified reliability on
-	 * the default channel.
+	 * Sends the specified message identifiers with the specified reliability on the
+	 * default channel.
 	 * 
 	 * @param reliability
 	 *            the reliability of the packet.

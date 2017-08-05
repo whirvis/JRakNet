@@ -28,30 +28,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package net.marfgamer.jraknet.client.discovery;
+package net.marfgamer.jraknet.protocol.message;
 
 /**
- * Used by the <code>RakNetClient</code> to determine how it will discover
- * servers.
- *
+ * Represents a packet class whose size in bytes can be calculated before being
+ * encoded.
+ * 
  * @author Trent "MarfGamer" Summerlin
  */
-public enum DiscoveryMode {
+public interface Sizable {
 
 	/**
-	 * the client will not attempt to discover servers on the local network.
+	 * @return the size of the packet would be if it had been encoded.
 	 */
-	NONE,
-
-	/**
-	 * any servers found on the local network will appear.
-	 */
-	ALL_CONNECTIONS,
-
-	/**
-	 * any servers found on the local network will appear as long as they have open
-	 * connections.
-	 */
-	OPEN_CONNECTIONS;
+	public int calculateSize();
 
 }

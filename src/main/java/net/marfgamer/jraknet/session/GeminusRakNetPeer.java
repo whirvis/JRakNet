@@ -45,8 +45,8 @@ import net.marfgamer.jraknet.protocol.Reliability;
 public interface GeminusRakNetPeer {
 
 	/**
-	 * Sends a message with the specified reliability on the specified channel
-	 * to the session with the specified globally unique ID.
+	 * Sends a message with the specified reliability on the specified channel to
+	 * the session with the specified globally unique ID.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -62,8 +62,8 @@ public interface GeminusRakNetPeer {
 	public void sendMessage(long guid, Reliability reliability, int channel, Packet packet);
 
 	/**
-	 * Sends the specified messages with the specified reliability on the
-	 * specified channel to the session with the specified globally unique ID.
+	 * Sends the specified messages with the specified reliability on the specified
+	 * channel to the session with the specified globally unique ID.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -84,8 +84,8 @@ public interface GeminusRakNetPeer {
 	}
 
 	/**
-	 * Sends a message with the specified reliability on the default channel to
-	 * the session with the specified globally unique ID.
+	 * Sends a message with the specified reliability on the default channel to the
+	 * session with the specified globally unique ID.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -101,8 +101,8 @@ public interface GeminusRakNetPeer {
 	}
 
 	/**
-	 * Sends the specified messages with the specified reliability on the
-	 * default channel to the session with the specified globally unique ID.
+	 * Sends the specified messages with the specified reliability on the default
+	 * channel to the session with the specified globally unique ID.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -121,8 +121,8 @@ public interface GeminusRakNetPeer {
 	}
 
 	/**
-	 * Sends a message identifier with the specified reliability on the
-	 * specified channel to the session with the specified globally unique ID.
+	 * Sends a message identifier with the specified reliability on the specified
+	 * channel to the session with the specified globally unique ID.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -140,9 +140,8 @@ public interface GeminusRakNetPeer {
 	}
 
 	/**
-	 * Sends the specified message identifiers with the specified reliability on
-	 * the specified channel to the session with the specified globally unique
-	 * ID
+	 * Sends the specified message identifiers with the specified reliability on the
+	 * specified channel to the session with the specified globally unique ID
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -179,8 +178,8 @@ public interface GeminusRakNetPeer {
 	}
 
 	/**
-	 * Sends the specified message identifiers with the specified reliability on
-	 * the default channel to the session with the specified globally unique ID.
+	 * Sends the specified message identifiers with the specified reliability on the
+	 * default channel to the session with the specified globally unique ID.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.

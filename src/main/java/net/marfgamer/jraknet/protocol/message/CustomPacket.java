@@ -36,7 +36,7 @@ import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.protocol.MessageIdentifier;
 
-public class CustomPacket extends RakNetPacket {
+public class CustomPacket extends RakNetPacket implements Sizable {
 
 	public static final int SEQUENCE_NUMBER_LENGTH = 0x03;
 
@@ -84,6 +84,7 @@ public class CustomPacket extends RakNetPacket {
 	/**
 	 * @return the size of the packet would be if it had been encoded.
 	 */
+	@Override
 	public int calculateSize() {
 		int packetSize = 1; // Packet ID
 		packetSize += SEQUENCE_NUMBER_LENGTH;
@@ -94,7 +95,7 @@ public class CustomPacket extends RakNetPacket {
 	}
 
 	/**
-	 * @return true if the packet contains any unreliable messages.
+	 * @return <code>true</code> if the packet contains any unreliable messages.
 	 */
 	public boolean containsUnreliables() {
 		if (messages.size() <= 0) {

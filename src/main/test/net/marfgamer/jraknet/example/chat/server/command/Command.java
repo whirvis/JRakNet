@@ -43,8 +43,8 @@ public abstract class Command {
 	private final String usage;
 
 	/**
-	 * Constructs a <code>Command</code> with whether or not it is overridable
-	 * along the specified label and usage.
+	 * Constructs a <code>Command</code> with whether or not it is overridable along
+	 * the specified label and usage.
 	 * 
 	 * @param overridable
 	 *            whether or not the command is overridable.
@@ -82,7 +82,7 @@ public abstract class Command {
 	}
 
 	/**
-	 * @return true if this command by overridden by another command.
+	 * @return <code>true</code> if this command by overridden by another command.
 	 */
 	protected boolean isOverridable() {
 		return this.overridable;
@@ -124,7 +124,7 @@ public abstract class Command {
 	 * 
 	 * @param args
 	 *            the command arguments.
-	 * @return true if the command was handled successfully.
+	 * @return <code>true</code> if the command was handled successfully.
 	 */
 	public abstract boolean handleCommand(String[] args);
 

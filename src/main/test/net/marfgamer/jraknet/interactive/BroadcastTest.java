@@ -37,6 +37,7 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import net.marfgamer.jraknet.RakNet;
 import net.marfgamer.jraknet.UtilityTest;
 import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.client.RakNetClientListener;
@@ -108,6 +109,7 @@ public class BroadcastTest {
 	public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException, UnsupportedLookAndFeelException {
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		RakNet.enableLogging();
 		BroadcastTest test = new BroadcastTest();
 		test.start();
 	}

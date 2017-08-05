@@ -34,6 +34,7 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import net.marfgamer.jraknet.RakNet;
 import net.marfgamer.jraknet.UtilityTest;
 import net.marfgamer.jraknet.identifier.MCPEIdentifier;
 import net.marfgamer.jraknet.server.RakNetServer;
@@ -79,6 +80,7 @@ public class LatencyTest {
 	public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException, UnsupportedLookAndFeelException {
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		RakNet.enableLogging();
 		LatencyTest test = new LatencyTest();
 		test.start();
 	}

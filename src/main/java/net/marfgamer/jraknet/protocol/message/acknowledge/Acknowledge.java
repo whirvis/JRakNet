@@ -99,11 +99,11 @@ public class Acknowledge extends RakNetPacket {
 
 	/**
 	 * This method condenses the records, converting all single records (ranged
-	 * records are converted back to single records through the
-	 * <code>toArray</code> method in <code>Record</code>) back to as many
-	 * ranged records as possible and then storing the single records that could
-	 * not be converted to ranged records. For example, let's say we have
-	 * records <code>[1, 2, 3, 4, 5, 66, 77]</code> and the ranged records
+	 * records are converted back to single records through the <code>toArray</code>
+	 * method in <code>Record</code>) back to as many ranged records as possible and
+	 * then storing the single records that could not be converted to ranged
+	 * records. For example, let's say we have records
+	 * <code>[1, 2, 3, 4, 5, 66, 77]</code> and the ranged records
 	 * <code>[4:7, 12:17]</code>. The output will now be
 	 * <code> [1:3, 4:7, 12:17, 66, 77]</code>.
 	 */
@@ -142,9 +142,8 @@ public class Acknowledge extends RakNetPacket {
 
 	/**
 	 * This method simplifies the records, converting the single records and the
-	 * ranged records to an ordered array of single records. For example, let's
-	 * say we have records <code>[1, 2, 3]</code> and the ranged records
-	 * <code>[4:7,
+	 * ranged records to an ordered array of single records. For example, let's say
+	 * we have records <code>[1, 2, 3]</code> and the ranged records <code>[4:7,
 	 * 12:17]</code>. The output will now be
 	 * <code>[1, 2, 3, 4, 5, 6, 7, 12, 13, 14, 15, 16,
 	 * 17]</code>.

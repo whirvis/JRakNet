@@ -87,8 +87,8 @@ public abstract class ArrayUtils {
 	}
 
 	/**
-	 * Convert the specified list of objects to a String. Used primarily by
-	 * JRakNet objects to easily convert their data to a readable String.
+	 * Convert the specified list of objects to a String. Used primarily by JRakNet
+	 * objects to easily convert their data to a readable String.
 	 * 
 	 * @param obj
 	 *            the objects to convert.

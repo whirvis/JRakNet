@@ -61,8 +61,8 @@ public class Packet {
 	private PacketDataOutput output;
 
 	/**
-	 * Constructs a <code>Packet</code> that reads from and writes to the
-	 * specified <code>ByteBuf</code>.
+	 * Constructs a <code>Packet</code> that reads from and writes to the specified
+	 * <code>ByteBuf</code>.
 	 * 
 	 * @param buffer
 	 *            the <code>ByteBuf</code> to read from and write to.
@@ -74,8 +74,8 @@ public class Packet {
 	}
 
 	/**
-	 * Constructs a <code>Packet</code> that reads from and writes to the
-	 * specified <code>DatagramPacket</code>
+	 * Constructs a <code>Packet</code> that reads from and writes to the specified
+	 * <code>DatagramPacket</code>
 	 * 
 	 * @param datagram
 	 *            the <code>DatagramPacket</code> to read from and write to.
@@ -85,8 +85,8 @@ public class Packet {
 	}
 
 	/**
-	 * Constructs a <code>Packet</code> that reads from and writes to the
-	 * specified byte array.
+	 * Constructs a <code>Packet</code> that reads from and writes to the specified
+	 * byte array.
 	 * 
 	 * @param data
 	 *            the byte[] to read from and write to.
@@ -96,8 +96,8 @@ public class Packet {
 	}
 
 	/**
-	 * Constructs a <code>Packet</code> that reads from and writes to the
-	 * specified <code>Packet</code>.
+	 * Constructs a <code>Packet</code> that reads from and writes to the specified
+	 * <code>Packet</code>.
 	 * 
 	 * @param packet
 	 *            the <code>Packet</code> to read from and write to.
@@ -107,8 +107,7 @@ public class Packet {
 	}
 
 	/**
-	 * Constructs a blank <code>Packet</code> using an empty
-	 * <code>ByteBuf</code>.
+	 * Constructs a blank <code>Packet</code> using an empty <code>ByteBuf</code>.
 	 */
 	public Packet() {
 		this(Unpooled.buffer());
@@ -333,8 +332,8 @@ public class Packet {
 	}
 
 	/**
-	 * Reads a UTF-8 String with it's length prefixed by a unsigned little
-	 * endian short.
+	 * Reads a UTF-8 String with it's length prefixed by a unsigned little endian
+	 * short.
 	 * 
 	 * @return a String.
 	 */
@@ -433,8 +432,8 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a byte array of the specified flipped unsigned byte's casted back
-	 * to a byte to the packet.
+	 * Writes a byte array of the specified flipped unsigned byte's casted back to a
+	 * byte to the packet.
 	 * 
 	 * @param data
 	 *            the data to write.
@@ -746,7 +745,7 @@ public class Packet {
 	}
 
 	/**
-	 * @return How many bytes are left in the packet's buffer.
+	 * @return how many bytes are left in the packet's buffer.
 	 */
 	public int remaining() {
 		return buffer.readableBytes();
