@@ -220,8 +220,6 @@ public class MessageIdentifier {
 	}
 
 	/**
-	 * Returns the packet's ID based on it's name.
-	 * 
 	 * @param name
 	 *            the name of the packet.
 	 * @return the packet's ID based on it's name.
@@ -235,8 +233,6 @@ public class MessageIdentifier {
 	}
 
 	/**
-	 * Returns whether or not a packet with the specified ID exists.
-	 * 
 	 * @param id
 	 *            the ID of the packet to check for.
 	 * @return whether or not a packet with the specified ID exists.
@@ -246,8 +242,6 @@ public class MessageIdentifier {
 	}
 
 	/**
-	 * Returns whether or not a packet with the specified name exists.
-	 * 
 	 * @param name
 	 *            the name of the packet to check for.
 	 * @return whether or not a packet with the specified name exists.

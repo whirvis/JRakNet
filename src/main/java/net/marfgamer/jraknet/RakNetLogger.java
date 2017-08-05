@@ -30,8 +30,9 @@
  */
 package net.marfgamer.jraknet;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.text.DecimalFormat;
+
+import org.joda.time.DateTime;
 
 import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.server.RakNetServer;
@@ -44,45 +45,79 @@ import net.marfgamer.jraknet.server.RakNetServer;
  */
 public class RakNetLogger {
 
-	private static Logger logger;
+	// Logger levels
+	public static final int LEVEL_ERROR = 0;
+	public static final int LEVEL_WARN = 1;
+	public static final int LEVEL_INFO = 2;
+	public static final int LEVEL_DEBUG = 3;
+	private static final String[] LEVEL_NAMES = { "ERROR", "WARN", "INFO", "DEBUG" };
+	private static final String[] LEVEL_SPACERS = new String[LEVEL_NAMES.length];
+	private static final DecimalFormat LOGGER_DATE_FORMAT = new DecimalFormat("00");
 
-	static {
-		init();
-	}
+	// Logger data
+	private static int loggerLevel = Integer.MAX_VALUE;
 
 	/**
-	 * Initializes the logger
+	 * Sets the logger level.
+	 * 
+	 * @param level
+	 *            the logger level to use, use <code>-1</code> to enable logging for
+	 *            all levels.
 	 */
-	public static void init() {
-		logger = LogManager.getLogger("JRakNet");
+	public static void setLevel(int level) {
+		// Set level
+		loggerLevel = level;
+		if (loggerLevel < 0 || loggerLevel >= LEVEL_NAMES.length) {
+			loggerLevel = LEVEL_NAMES.length - 1;
+		}
+
+		// Get spacer size
+		int spacerSize = 0;
+		for (int i = 0; i <= loggerLevel; i++) {
+			if (spacerSize < LEVEL_NAMES[i].length()) {
+				spacerSize = LEVEL_NAMES[i].length();
+			}
+		}
+
+		// Build spacers
+		for (int i = 0; i <= loggerLevel; i++) {
+			StringBuilder spacer = new StringBuilder();
+			for (int j = 0; j < spacerSize - LEVEL_NAMES[i].length(); j++) {
+				spacer.append(' ');
+			}
+			LEVEL_SPACERS[i] = spacer.toString();
+		}
 	}
 
 	/**
-	 * Logs a message with the severity level set to info.
+	 * Logs a message if logging is enabled by the <code>RakNet</code> class and the
+	 * current level is greater than or equal to the current logging level.
+	 * 
+	 * @param level
+	 *            the level of the log.
+	 * @param message
+	 *            the message to log.
+	 */
+	private static final void log(int level, String message) {
+		if (RakNet.isLoggingEnabled() && loggerLevel >= level && level < LEVEL_NAMES.length) {
+			DateTime loggerDate = new DateTime(System.currentTimeMillis());
+			System.out.println("[" + LOGGER_DATE_FORMAT.format(loggerDate.getHourOfDay()) + ":"
+					+ LOGGER_DATE_FORMAT.format(loggerDate.getMinuteOfHour()) + ":"
+					+ LOGGER_DATE_FORMAT.format(loggerDate.getSecondOfMinute()) + "] ["
+					+ LEVEL_NAMES[level].toUpperCase() + "]" + LEVEL_SPACERS[level] + " JRakNet " + message);
+		}
+	}
+
+	/**
+	 * Logs a message with the severity level set to debug.
 	 * 
 	 * @param name
 	 *            the name of the logger.
 	 * @param msg
 	 *            the message to log.
 	 */
-	public static void info(String name, String msg) {
-		if (RakNet.isLoggingEnabled()) {
-			logger.info(name + ": " + msg);
-		}
-	}
-
-	/**
-	 * Logs a message with the severity level set to warn.
-	 * 
-	 * @param name
-	 *            the name of the logger.
-	 * @param msg
-	 *            the message to log.
-	 */
-	public static void warn(String name, String msg) {
-		if (RakNet.isLoggingEnabled()) {
-			logger.warn(name + ": " + msg);
-		}
+	public static void debug(String name, String msg) {
+		log(LEVEL_DEBUG, name + ": " + msg);
 	}
 
 	/**
@@ -94,37 +129,43 @@ public class RakNetLogger {
 	 *            the message to log.
 	 */
 	public static void error(String name, String msg) {
-		if (RakNet.isLoggingEnabled()) {
-			logger.error(name + ": " + msg);
-		}
-	}
-
-	/**
-	 * Logs a message with the severity level set to info.
-	 * 
-	 * @param server
-	 *            the server that is logging.
-	 * @param msg
-	 *            the message to log.
-	 */
-	public static void info(RakNetServer server, String msg) {
-		if (RakNet.isLoggingEnabled()) {
-			logger.info("server #" + server.getGloballyUniqueId() + ": " + msg);
-		}
+		log(LEVEL_ERROR, name + ": " + msg);
 	}
 
 	/**
 	 * Logs a message with the severity level set to warn.
 	 * 
+	 * @param name
+	 *            the name of the logger.
+	 * @param msg
+	 *            the message to log.
+	 */
+	public static void warn(String name, String msg) {
+		log(LEVEL_WARN, name + ": " + msg);
+	}
+
+	/**
+	 * Logs a message with the severity level set to info.
+	 * 
+	 * @param name
+	 *            the name of the logger.
+	 * @param msg
+	 *            the message to log.
+	 */
+	public static void info(String name, String msg) {
+		log(LEVEL_INFO, name + ": " + msg);
+	}
+
+	/**
+	 * Logs a message with the severity level set to debug.
+	 * 
 	 * @param server
 	 *            the server that is logging.
 	 * @param msg
 	 *            the message to log.
 	 */
-	public static void warn(RakNetServer server, String msg) {
-		if (RakNet.isLoggingEnabled()) {
-			logger.warn("server #" + server.getGloballyUniqueId() + ": " + msg);
-		}
+	public static void debug(RakNetServer server, String msg) {
+		log(LEVEL_DEBUG, "server #" + server.getGloballyUniqueId() + ": " + msg);
 	}
 
 	/**
@@ -136,37 +177,43 @@ public class RakNetLogger {
 	 *            the message to log.
 	 */
 	public static void error(RakNetServer server, String msg) {
-		if (RakNet.isLoggingEnabled()) {
-			logger.error("server #" + server.getGloballyUniqueId() + ": " + msg);
-		}
-	}
-
-	/**
-	 * Logs a message with the severity level set to info.
-	 * 
-	 * @param client
-	 *            the client that is logging.
-	 * @param msg
-	 *            the message to log.
-	 */
-	public static void info(RakNetClient client, String msg) {
-		if (RakNet.isLoggingEnabled()) {
-			logger.info("client #" + client.getGloballyUniqueId() + ": " + msg);
-		}
+		log(LEVEL_ERROR, "server #" + server.getGloballyUniqueId() + ": " + msg);
 	}
 
 	/**
 	 * Logs a message with the severity level set to warn.
 	 * 
+	 * @param server
+	 *            the server that is logging.
+	 * @param msg
+	 *            the message to log.
+	 */
+	public static void warn(RakNetServer server, String msg) {
+		log(LEVEL_WARN, "server #" + server.getGloballyUniqueId() + ": " + msg);
+	}
+
+	/**
+	 * Logs a message with the severity level set to info.
+	 * 
+	 * @param server
+	 *            the server that is logging.
+	 * @param msg
+	 *            the message to log.
+	 */
+	public static void info(RakNetServer server, String msg) {
+		log(LEVEL_INFO, "server #" + server.getGloballyUniqueId() + ": " + msg);
+	}
+
+	/**
+	 * Logs a message with the severity level set to debug.
+	 * 
 	 * @param client
 	 *            the client that is logging.
 	 * @param msg
 	 *            the message to log.
 	 */
-	public static void warn(RakNetClient client, String msg) {
-		if (RakNet.isLoggingEnabled()) {
-			logger.warn("client #" + client.getGloballyUniqueId() + ": " + msg);
-		}
+	public static void debug(RakNetClient client, String msg) {
+		log(LEVEL_DEBUG, "client #" + client.getGloballyUniqueId() + ": " + msg);
 	}
 
 	/**
@@ -178,9 +225,31 @@ public class RakNetLogger {
 	 *            the message to log.
 	 */
 	public static void error(RakNetClient client, String msg) {
-		if (RakNet.isLoggingEnabled()) {
-			logger.error("client #" + client.getGloballyUniqueId() + ": " + msg);
-		}
+		log(LEVEL_ERROR, "client #" + client.getGloballyUniqueId() + ": " + msg);
+	}
+
+	/**
+	 * Logs a message with the severity level set to warn.
+	 * 
+	 * @param client
+	 *            the client that is logging.
+	 * @param msg
+	 *            the message to log.
+	 */
+	public static void warn(RakNetClient client, String msg) {
+		log(LEVEL_WARN, "client #" + client.getGloballyUniqueId() + ": " + msg);
+	}
+
+	/**
+	 * Logs a message with the severity level set to info.
+	 * 
+	 * @param client
+	 *            the client that is logging.
+	 * @param msg
+	 *            the message to log.
+	 */
+	public static void info(RakNetClient client, String msg) {
+		log(LEVEL_INFO, "client #" + client.getGloballyUniqueId() + ": " + msg);
 	}
 
 }
