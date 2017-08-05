@@ -65,14 +65,15 @@ import net.marfgamer.jraknet.protocol.status.UnconnectedPong;
  */
 public class RakNetUtils {
 
+	// Utility data
 	private static final long UTILS_TIMESTAMP = System.currentTimeMillis();
 	private static final int SERVER_PING_RETRIES = 5;
 	private static final int IDENTIFIER_RETRIES = 3;
 
 	/**
 	 * Sends a raw message to the specified address for the specified amount of
-	 * times in the specified interval until the packet is received or there is
-	 * a timeout.
+	 * times in the specified interval until the packet is received or there is a
+	 * timeout.
 	 * 
 	 * @param address
 	 *            the address to send the packet to.
@@ -120,6 +121,7 @@ public class RakNetUtils {
 			e.printStackTrace();
 		}
 
+		// Shutdown bootstrap
 		group.shutdownGracefully();
 		return packetReceived;
 	}
@@ -127,7 +129,7 @@ public class RakNetUtils {
 	/**
 	 * @param address
 	 *            the address of the server.
-	 * @return true if the server is online.
+	 * @return <code>true</code> if the server is online.
 	 */
 	public static boolean isServerOnline(InetSocketAddress address) {
 		// Create connection packet
@@ -155,7 +157,7 @@ public class RakNetUtils {
 	 *            the address of the server.
 	 * @param port
 	 *            the port of the server.
-	 * @return true if the server is online.
+	 * @return <code>true</code> if the server is online.
 	 */
 	public static boolean isServerOnline(InetAddress address, int port) {
 		return isServerOnline(new InetSocketAddress(address, port));
@@ -166,7 +168,7 @@ public class RakNetUtils {
 	 *            the address of the server.
 	 * @param port
 	 *            the port of the server.
-	 * @return true if the server is online.
+	 * @return <code>true</code> if the server is online.
 	 * @throws UnknownHostException
 	 *             if the specified address is an unknown host.
 	 */
@@ -177,7 +179,8 @@ public class RakNetUtils {
 	/**
 	 * @param address
 	 *            the address of the server.
-	 * @return true if the server is compatible to the current client protocol.
+	 * @return <code>true</code> if the server is compatible to the current client
+	 *         protocol.
 	 */
 	public static boolean isServerCompatible(InetSocketAddress address) {
 		// Create connection packet
@@ -210,7 +213,8 @@ public class RakNetUtils {
 	 *            the address of the server.
 	 * @param port
 	 *            the port of the server.
-	 * @return true if the server is compatible to the current client protocol.
+	 * @return <code>true</code> if the server is compatible to the current client
+	 *         protocol.
 	 */
 	public static boolean isServerCompatible(InetAddress address, int port) {
 		return isServerCompatible(new InetSocketAddress(address, port));
@@ -221,7 +225,8 @@ public class RakNetUtils {
 	 *            the address of the server.
 	 * @param port
 	 *            the port of the server.
-	 * @return true if the server is compatible to the current client protocol.
+	 * @return <code>true</code> if the server is compatible to the current client
+	 *         protocol.
 	 * @throws UnknownHostException
 	 *             if the specified address is an unknown host.
 	 */
@@ -288,9 +293,9 @@ public class RakNetUtils {
 		} catch (Throwable throwable) {
 			try {
 				/*
-				 * We failed to get the NetworkInterface, we're gonna have to
-				 * cycle through them manually and choose the lowest one to make
-				 * sure we never exceed any hardware limitations
+				 * We failed to get the NetworkInterface, we're gonna have to cycle through them
+				 * manually and choose the lowest one to make sure we never exceed any hardware
+				 * limitations
 				 */
 				boolean foundDevice = false;
 				int lowestMaximumTransferUnit = Integer.MAX_VALUE;
@@ -318,10 +323,6 @@ public class RakNetUtils {
 		}
 	}
 
-	public static void main(String[] args) throws IOException {
-		System.out.println(getMaximumTransferUnit());
-	}
-
 	/**
 	 * Parses a single String as an address and port and converts it to an
 	 * <code>InetSocketAddress</code>.
@@ -332,8 +333,8 @@ public class RakNetUtils {
 	 *            the default port to use if one is not specified.
 	 * @return the parsed <code>InetSocketAddress</code>.
 	 * @throws UnknownHostException
-	 *             if the address is in an invalid format or if the host cannot
-	 *             be found.
+	 *             if the address is in an invalid format or if the host cannot be
+	 *             found.
 	 */
 	public static InetSocketAddress parseAddress(String address, int defaultPort) throws UnknownHostException {
 		String[] addressSplit = address.split(":");
@@ -358,8 +359,8 @@ public class RakNetUtils {
 	 *            the address to convert.
 	 * @return the parsed <code>InetSocketAddress</code>.
 	 * @throws UnknownHostException
-	 *             if the address is in an invalid format or if the host cannot
-	 *             be found.
+	 *             if the address is in an invalid format or if the host cannot be
+	 *             found.
 	 */
 	public static InetSocketAddress parseAddress(String address) throws UnknownHostException {
 		return parseAddress(address, -1);
@@ -466,6 +467,7 @@ public class RakNetUtils {
 	 * @author Whirvis "MarfGamer" Ardenaur
 	 */
 	private static class BootstrapHandler extends ChannelInboundHandlerAdapter {
+
 		public volatile RakNetPacket packet;
 
 		@Override
@@ -479,6 +481,7 @@ public class RakNetUtils {
 		public void channelReadComplete(ChannelHandlerContext ctx) {
 			ctx.flush();
 		}
+
 	}
 
 }

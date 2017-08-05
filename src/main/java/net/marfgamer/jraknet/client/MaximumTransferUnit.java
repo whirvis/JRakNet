@@ -37,6 +37,7 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 
+import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.util.map.IntMap;
 
 /**
@@ -47,28 +48,17 @@ import net.marfgamer.jraknet.util.map.IntMap;
  */
 public class MaximumTransferUnit {
 
+	// Logger name
+	private static final String LOGGER_NAME = "transfer unit";
+
+	// Unit data
 	private final int maximumTransferUnit;
 	private final int retries;
 	private int retriesLeft;
 
 	/**
-	 * Constructs a <code>MaximumTransferUnit</code> with the specified maximum
-	 * transfer unit and amount of retries before it should stop being used.
-	 * 
-	 * @param maximumTransferUnit
-	 *            the maximum transfer unit.
-	 * @param retries
-	 *            the amount of retries before it should stop being used.
-	 */
-	public MaximumTransferUnit(int maximumTransferUnit, int retries) {
-		this.maximumTransferUnit = maximumTransferUnit;
-		this.retries = retries;
-		this.retriesLeft = retries;
-	}
-
-	/**
-	 * Sorts an array of <code>MaximumTransferUnit</code>'s from highest to
-	 * lowest maximum transfer units.
+	 * Sorts an array of <code>MaximumTransferUnit</code>'s from highest to lowest
+	 * maximum transfer units.
 	 * 
 	 * @param units
 	 *            the <code>MaximumTransferUnit</code>s to sort.
@@ -91,7 +81,25 @@ public class MaximumTransferUnit {
 			Entry<Integer, MaximumTransferUnit> unitEntry = unitI.next();
 			unitList.add(unitEntry.getValue());
 		}
+
+		RakNetLogger.info(LOGGER_NAME,
+				"Sorted array of " + units.length + " MaximumTransferUnits by their size in bytes");
 		return unitList.toArray(new MaximumTransferUnit[unitList.size()]);
+	}
+
+	/**
+	 * Constructs a <code>MaximumTransferUnit</code> with the specified maximum
+	 * transfer unit and amount of retries before it should stop being used.
+	 * 
+	 * @param maximumTransferUnit
+	 *            the maximum transfer unit.
+	 * @param retries
+	 *            the amount of retries before it should stop being used.
+	 */
+	public MaximumTransferUnit(int maximumTransferUnit, int retries) {
+		this.maximumTransferUnit = maximumTransferUnit;
+		this.retries = retries;
+		this.retriesLeft = retries;
 	}
 
 	/**
@@ -110,8 +118,8 @@ public class MaximumTransferUnit {
 	}
 
 	/**
-	 * @return how many times <code>retry()</code> can be called before yielding
-	 *         0 or lower without calling <code>reset()</code>.
+	 * @return how many times <code>retry()</code> can be called before yielding 0
+	 *         or lower without calling <code>reset()</code>.
 	 */
 	public int getRetriesLeft() {
 		return this.retriesLeft;
@@ -123,6 +131,8 @@ public class MaximumTransferUnit {
 	 * @return the amount of retries left.
 	 */
 	public int retry() {
+		RakNetLogger.info(LOGGER_NAME, "Retried MaximumTransferUnit with size of " + maximumTransferUnit + " bytes ("
+				+ (maximumTransferUnit * 8) + " bits)");
 		return this.retriesLeft--;
 	}
 
@@ -130,6 +140,8 @@ public class MaximumTransferUnit {
 	 * Sets the amount of retries left back to the default.
 	 */
 	public void reset() {
+		RakNetLogger.info(LOGGER_NAME, "Reset MaximumTransferUnit with size of " + maximumTransferUnit + " bytes ("
+				+ (maximumTransferUnit * 8) + " bits)");
 		this.retriesLeft = this.retries;
 	}
 

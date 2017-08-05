@@ -91,7 +91,7 @@ public class BroadcastFrame extends JFrame {
 		// Used to update the discovery port
 		JTextField textFieldDiscoveryPort = new JTextField();
 		textFieldDiscoveryPort.setBounds(370, 45, 115, 20);
-		textFieldDiscoveryPort.setText(Integer.toString(client.getDiscoveryPort()));
+		textFieldDiscoveryPort.setText(Integer.toString(client.getDiscoveryPorts()[0]));
 		getContentPane().add(textFieldDiscoveryPort);
 		textFieldDiscoveryPort.setColumns(10);
 		JButton btnUpdatePort = new JButton("Update Port");
@@ -159,9 +159,9 @@ public class BroadcastFrame extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			int newDiscoveryPort = RakNetUtils.parseIntPassive(textFieldDiscoveryPort.getText());
 			if (newDiscoveryPort > -1) {
-				client.setDiscoveryPort(newDiscoveryPort);
+				client.setDiscoveryPorts(newDiscoveryPort);
 			} else {
-				textFieldDiscoveryPort.setText(Integer.toString(client.getDiscoveryPort()));
+				textFieldDiscoveryPort.setText(Integer.toString(client.getDiscoveryPorts()[0]));
 			}
 		}
 

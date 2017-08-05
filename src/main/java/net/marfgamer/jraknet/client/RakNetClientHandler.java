@@ -35,6 +35,7 @@ import java.net.InetSocketAddress;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.DatagramPacket;
+import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.RakNetPacket;
 
 /**
@@ -45,6 +46,10 @@ import net.marfgamer.jraknet.RakNetPacket;
  */
 public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 
+	// Logger name
+	private final String loggerName;
+
+	// Handler data
 	private final RakNetClient client;
 	private InetSocketAddress causeAddress;
 
@@ -56,6 +61,7 @@ public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 	 *            the <code>RakNetClient</code> to send received packets to.
 	 */
 	public RakNetClientHandler(RakNetClient client) {
+		this.loggerName = "client handler #" + client.getGloballyUniqueId();
 		this.client = client;
 	}
 
@@ -73,8 +79,10 @@ public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 			// Handle the packet and release the buffer
 			client.handleMessage(packet, sender);
 			datagram.content().readerIndex(0); // Reset position
+			RakNetLogger.info(loggerName, "Sent packet to client and reset Datagram buffer read position");
 			client.getListener().handleNettyMessage(datagram.content(), sender);
 			datagram.content().release(); // No longer needed
+			RakNetLogger.info(loggerName, "Sent Datagram buffer to client and released it");
 
 			// No exceptions occurred, release the suspect
 			this.causeAddress = null;

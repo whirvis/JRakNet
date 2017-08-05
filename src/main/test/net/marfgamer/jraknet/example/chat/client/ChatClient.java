@@ -34,6 +34,7 @@ import java.net.InetSocketAddress;
 import java.util.UUID;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import net.marfgamer.jraknet.RakNet;
@@ -123,7 +124,7 @@ public class ChatClient implements RakNetClientListener {
 		ChatMessage messagePacket = new ChatMessage();
 		messagePacket.message = message;
 		messagePacket.encode();
-		session.sendMessage(Reliability.RELIABLE_ORDERED, channel, messagePacket);
+		session.sendMessage(Reliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT, channel, messagePacket);
 	}
 
 	/**
@@ -299,7 +300,9 @@ public class ChatClient implements RakNetClientListener {
 
 			// Update channel text if the channel is valid
 			if (channels[channel] != null) {
-				// TODO: Display error if invalid channel
+				if (channel >= RakNet.MAX_CHANNELS || channel < 0) {
+					frame.displayError("Invalid channel", "Channel " + channel + " is an invalid channel");
+				}
 				channels[channel].addChatMessage(chat.message);
 				this.updateChannelText();
 			}
@@ -365,6 +368,9 @@ public class ChatClient implements RakNetClientListener {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			ChatFrame frame = new ChatFrame();
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+			
+			// Enable logging
+			RakNet.enableLogging();
 
 			// Create client
 			@SuppressWarnings("unused")

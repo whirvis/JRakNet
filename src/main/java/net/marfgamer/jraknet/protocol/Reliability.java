@@ -37,13 +37,49 @@ package net.marfgamer.jraknet.protocol;
  */
 public enum Reliability {
 
-	UNRELIABLE(0, false, false, false, false), UNRELIABLE_SEQUENCED(1, false, false, true, false),
-	RELIABLE(2, true, false, false, false), RELIABLE_ORDERED(3, true, true, false, false),
-	RELIABLE_SEQUENCED(4, true, false, true, false), UNRELIABLE_WITH_ACK_RECEIPT(5, false, false, false, true),
-	UNRELIABLE_SEQUENCED_WITH_ACK_RECEIPT(6, false, false, true, true),
-	RELIABLE_WITH_ACK_RECEIPT(7, true, false, false, true),
-	RELIABLE_ORDERED_WITH_ACK_RECEIPT(8, true, true, false, true),
-	RELIABLE_SEQUENCED_WITH_ACK_RECEIPT(9, true, false, true, true);
+	/**
+	 * The packet packet will be sent, but it is not guaranteed that it will be
+	 * received.
+	 */
+	UNRELIABLE(0, false, false, false, false),
+
+	/**
+	 * Same as <code>UNRELIABLE</code>, however it will not be handled if a newer
+	 * sequenced packet on the channel has already arrived.
+	 */
+	UNRELIABLE_SEQUENCED(1, false, false, true, false),
+
+	/**
+	 * The packet will be sent and is guaranteed to be received at some point.
+	 */
+	RELIABLE(2, true, false, false, false),
+
+	/**
+	 * Same as <code>RELIABLE</code>, however it will not be handled until all
+	 * packets sent before it are also received.
+	 */
+	RELIABLE_ORDERED(3, true, true, false, false),
+
+	/**
+	 * Same as <code>RELIABLE</code>, however it will not be handled if a newer
+	 * sequenced packet on the channel has already arrived.
+	 */
+	RELIABLE_SEQUENCED(4, true, false, true, false),
+
+	/**
+	 * TODO
+	 */
+	UNRELIABLE_WITH_ACK_RECEIPT(5, false, false, false, true),
+
+	/**
+	 * TODO
+	 */
+	RELIABLE_WITH_ACK_RECEIPT(6, true, false, false, true),
+
+	/**
+	 * TODO
+	 */
+	RELIABLE_ORDERED_WITH_ACK_RECEIPT(7, true, true, false, true);
 
 	private final byte reliability;
 	private final boolean reliable;
@@ -53,8 +89,8 @@ public enum Reliability {
 
 	/**
 	 * Constructs a <code>Reliability</code> with the specified reliability and
-	 * whether or not it is reliable, ordered, sequenced, or requires an
-	 * acknowledge receipt.
+	 * whether or not it is reliable, ordered, sequenced, or requires an acknowledge
+	 * receipt.
 	 * 
 	 * @param reliability
 	 *            the reliability.
@@ -76,35 +112,35 @@ public enum Reliability {
 	}
 
 	/**
-	 * @return the reliability as a byte.
+	 * @return the ID of the reliability as a byte.
 	 */
-	public byte asByte() {
+	public byte getId() {
 		return this.reliability;
 	}
 
 	/**
-	 * @return true if the reliability is reliable.
+	 * @return <code>true</code> if the reliability is reliable.
 	 */
 	public boolean isReliable() {
 		return this.reliable;
 	}
 
 	/**
-	 * @return true if the reliability is ordered.
+	 * @return <code>true</code> if the reliability is ordered.
 	 */
 	public boolean isOrdered() {
 		return this.ordered;
 	}
 
 	/**
-	 * @return true if the reliability is sequenced.
+	 * @return <code>true</code> if the reliability is sequenced.
 	 */
 	public boolean isSequenced() {
 		return this.sequenced;
 	}
 
 	/**
-	 * @return true if the reliability requires acknowledgement.
+	 * @return <code>true</code> if the reliability requires acknowledgement.
 	 */
 	public boolean requiresAck() {
 		return this.requiresAck;
@@ -118,7 +154,7 @@ public enum Reliability {
 	public static Reliability lookup(int reliability) {
 		Reliability[] reliabilities = Reliability.values();
 		for (Reliability sReliability : reliabilities) {
-			if (sReliability.asByte() == reliability) {
+			if (sReliability.getId() == reliability) {
 				return sReliability;
 			}
 		}
