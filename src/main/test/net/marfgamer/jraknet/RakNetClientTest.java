@@ -52,7 +52,7 @@ public class RakNetClientTest {
 
 	public static void main(String[] args) throws RakNetException, UnknownHostException {
 		// Enable logging
-		RakNet.enableLogging(2);
+		RakNet.enableLogging();
 
 		RakNetClient client = new RakNetClient();
 		client.setListener(new RakNetClientListener() {
@@ -60,6 +60,7 @@ public class RakNetClientTest {
 			@Override
 			public void onConnect(RakNetServerSession session) {
 				RakNetLogger.info(LOGGER_NAME, "Connected to server with address " + session.getAddress() + "!");
+				client.disconnectAndShutdown();
 			}
 
 			@Override
@@ -71,13 +72,11 @@ public class RakNetClientTest {
 			@Override
 			public void onAcknowledge(RakNetServerSession session, Record record) {
 				RakNetLogger.info(LOGGER_NAME, "Received ACK for record(s) " + record.toString());
-				client.disconnectAndShutdown();
 			}
 
 			@Override
 			public void onNotAcknowledge(RakNetServerSession session, Record record) {
 				RakNetLogger.info(LOGGER_NAME, "Received NACK for record(s) " + record.toString());
-				client.disconnectAndShutdown();
 			}
 
 			@Override
