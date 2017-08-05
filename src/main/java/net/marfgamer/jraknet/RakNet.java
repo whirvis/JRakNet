@@ -89,24 +89,33 @@ public class RakNet {
 	}
 
 	/**
-	 * Returns whether or not JRakNet should log to the console, useful for
-	 * debugging.
-	 * 
-	 * @return <code>true</code> if JRakNet should log to the console.
+	 * @return whether or not if JRakNet should log to the console.
 	 */
 	public static boolean isLoggingEnabled() {
 		return USE_LOGGING;
 	}
 
 	/**
-	 * Enables JRakNet logging
+	 * Enables JRakNet logging.
 	 */
 	public static void enableLogging() {
+		RakNetLogger.setLevel(-1);
 		USE_LOGGING = true;
 	}
 
 	/**
-	 * Disables JRakNet logging
+	 * Enables JRakNet logging with the specified logger level.
+	 * 
+	 * @param level
+	 *            the logger level to use.
+	 */
+	public static void enableLogging(int level) {
+		RakNetLogger.setLevel(level);
+		USE_LOGGING = true;
+	}
+
+	/**
+	 * Disables JRakNet logging.
 	 */
 	public static void disableLogging() {
 		USE_LOGGING = false;

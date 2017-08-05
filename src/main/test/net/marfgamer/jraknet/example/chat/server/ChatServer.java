@@ -388,7 +388,7 @@ public class ChatServer implements RakNetServerListener {
 	public static void main(String[] args) {
 		// Enable logging
 		RakNet.enableLogging();
-		
+
 		// Create and start server
 		ChatServer server = new ChatServer("JRakNet Server Example", "This is a test server made for JRakNet",
 				UtilityTest.MARFGAMER_DEVELOPMENT_PORT, 10);

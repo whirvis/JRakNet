@@ -34,7 +34,6 @@ import java.net.InetSocketAddress;
 import java.util.UUID;
 
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import net.marfgamer.jraknet.RakNet;
@@ -368,7 +367,7 @@ public class ChatClient implements RakNetClientListener {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 			ChatFrame frame = new ChatFrame();
 			frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-			
+
 			// Enable logging
 			RakNet.enableLogging();
 

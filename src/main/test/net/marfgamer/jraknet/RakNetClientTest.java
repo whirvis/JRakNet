@@ -52,7 +52,7 @@ public class RakNetClientTest {
 
 	public static void main(String[] args) throws RakNetException, UnknownHostException {
 		// Enable logging
-		RakNet.enableLogging();
+		RakNet.enableLogging(2);
 
 		RakNetClient client = new RakNetClient();
 		client.setListener(new RakNetClientListener() {

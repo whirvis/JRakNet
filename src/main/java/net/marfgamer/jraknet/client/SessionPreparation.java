@@ -105,7 +105,7 @@ public class SessionPreparation {
 				this.maximumTransferUnit = connectionResponseOne.maximumTransferUnit;
 				this.guid = connectionResponseOne.serverGuid;
 				this.loginPackets[0] = true;
-				RakNetLogger.info(loggerName, "Applied maximum transfer unit and globally unique ID from "
+				RakNetLogger.debug(loggerName, "Applied maximum transfer unit and globally unique ID from "
 						+ MessageIdentifier.getName(packetId) + " packet");
 			}
 		} else if (packetId == ID_OPEN_CONNECTION_REPLY_2) {
@@ -125,7 +125,7 @@ public class SessionPreparation {
 			} else {
 				this.loginPackets[1] = true;
 				this.maximumTransferUnit = connectionResponseTwo.maximumTransferUnit;
-				RakNetLogger.info(loggerName,
+				RakNetLogger.debug(loggerName,
 						"Applied maximum transfer unit from " + MessageIdentifier.getName(packetId) + " packet");
 			}
 		} else if (packetId == ID_ALREADY_CONNECTED) {
