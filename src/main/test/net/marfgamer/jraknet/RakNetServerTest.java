@@ -51,10 +51,11 @@ public class RakNetServerTest {
 	// Logger name
 	private static final String LOGGER_NAME = "server test";
 
-	public static void main(String[] args) throws RakNetException {
+	public static void main(String[] args) {
 		// Enable logging
 		RakNet.enableLogging();
 
+		// Create server and set listener
 		RakNetServer server = new RakNetServer(UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT, 10);
 		server.setListener(new RakNetServerListener() {
 
@@ -117,8 +118,8 @@ public class RakNetServerTest {
 
 		});
 
-		server.startThreaded();
-		RakNetLogger.info(LOGGER_NAME, "Started server!");
+		// Start server
+		server.start();
 	}
 
 }

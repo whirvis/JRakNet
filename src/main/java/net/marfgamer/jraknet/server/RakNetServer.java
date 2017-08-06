@@ -119,7 +119,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 */
 	public RakNetServer(int port, int maxConnections, int maximumTransferUnit, Identifier identifier) {
 		// Set server data
-		this.guid = Math.abs(UUID.randomUUID().getMostSignificantBits());
+		this.guid = UUID.randomUUID().getMostSignificantBits();
 		this.timestamp = System.currentTimeMillis();
 		this.port = port;
 		this.maxConnections = maxConnections;
