@@ -33,6 +33,7 @@ package net.marfgamer.jraknet;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
+import io.netty.buffer.ByteBuf;
 import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.client.RakNetClientListener;
 import net.marfgamer.jraknet.protocol.MessageIdentifier;
@@ -52,10 +53,11 @@ public class RakNetClientTest {
 	// Logger name
 	private static final String LOGGER_NAME = "client test";
 
-	public static void main(String[] args) throws RakNetException, UnknownHostException {
+	public static void main(String[] args) {
 		// Enable logging
 		RakNet.enableLogging();
-
+		
+		// Create client and set listener
 		RakNetClient client = new RakNetClient();
 		client.setListener(new RakNetClientListener() {
 
@@ -64,6 +66,11 @@ public class RakNetClientTest {
 				RakNetLogger.info(LOGGER_NAME, "Connected to server with address " + session.getAddress() + "!");
 				session.sendMessage(Reliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT, MessageIdentifier.ID_DETECT_LOST_CONNECTIONS);
 				client.disconnectAndShutdown();
+			}
+			
+			@Override
+			public void handleNettyMessage(ByteBuf buf, InetSocketAddress address) {
+				RakNetLogger.info(LOGGER_NAME, "Received RakNetPacket with name " + MessageIdentifier.getName(buf.readUnsignedByte()));
 			}
 
 			@Override
@@ -91,8 +98,14 @@ public class RakNetClientTest {
 		});
 		RakNetLogger.info(LOGGER_NAME,
 				"Created client, connecting to " + UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
-
-		client.connect(UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
+		
+		// Connect to server
+		try {
+			//client.connect(UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
+			client.connect("192.168.0.65", 19132);
+		} catch(RakNetException | UnknownHostException e) {
+			client.disconnectAndShutdown(e.getClass().getName() + ": " + e.getMessage());
+		}
 	}
 
 }

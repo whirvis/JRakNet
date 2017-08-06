@@ -66,6 +66,12 @@ public interface RakNetClientListener {
 	 */
 	public default void onDisconnect(RakNetServerSession session, String reason) {
 	}
+	
+	/**
+	 * Called when the client has been shutdown.
+	 */
+	public default void onClientShutdown() {
+	}
 
 	/**
 	 * Called when a server is discovered on the local network.
