@@ -44,6 +44,7 @@ public class ServerPing {
 
 	private final InetSocketAddress sender;
 	private Identifier identifier;
+	private final boolean isJraknet;
 
 	/**
 	 * Constructs a <code>ServerPing</code> with the specified address and
@@ -53,10 +54,13 @@ public class ServerPing {
 	 *            the address of the ping sender.
 	 * @param identifier
 	 *            the <code>Identifier</code> to respond with.
+	 * @param isJraknet
+	 *            whether or not the ping is from a JRakNet client.
 	 */
-	public ServerPing(InetSocketAddress sender, Identifier identifier) {
+	public ServerPing(InetSocketAddress sender, Identifier identifier, boolean isJraknet) {
 		this.sender = sender;
 		this.identifier = identifier;
+		this.isJraknet = isJraknet;
 	}
 
 	/**
@@ -71,6 +75,13 @@ public class ServerPing {
 	 */
 	public Identifier getIdentifier() {
 		return this.identifier;
+	}
+	
+	/**
+	 * @return whether or not the ping is from a JRakNet client.
+	 */
+	public boolean isJRakNet() {
+		return this.isJraknet;
 	}
 
 	/**

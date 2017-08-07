@@ -30,15 +30,7 @@
  */
 package net.marfgamer.jraknet.server;
 
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_ALREADY_CONNECTED;
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_CUSTOM_0;
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_CUSTOM_F;
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_DISCONNECTION_NOTIFICATION;
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_NO_FREE_INCOMING_CONNECTIONS;
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_OPEN_CONNECTION_REQUEST_1;
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_OPEN_CONNECTION_REQUEST_2;
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_UNCONNECTED_PING;
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_UNCONNECTED_PING_OPEN_CONNECTIONS;
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.*;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -399,7 +391,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				// Notify client of disconnection
 				RakNetClientSession session = sessions.remove(address);
 				session.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
-				
+
 				// Notify API
 				RakNetLogger.debug(this, "Removed session with address " + address);
 				if (session.getState() == RakNetState.CONNECTED) {
@@ -512,7 +504,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		if (this.hasSession(address)) {
 			this.removeSession(address, cause.getClass().getName());
 		}
-		
+
 		// Notify API
 		RakNetLogger.warn(this, "Handled exception " + cause.getClass().getName() + " caused by address " + address);
 		listener.onHandlerException(address, cause);
@@ -537,7 +529,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			synchronized (sessions) {
 				if ((packetId == ID_UNCONNECTED_PING || sessions.size() < this.maxConnections)
 						&& this.broadcastingEnabled == true) {
-					ServerPing pingEvent = new ServerPing(sender, identifier);
+					ServerPing pingEvent = new ServerPing(sender, identifier, ping.isJraknet);
 					listener.handlePing(pingEvent);
 
 					if (ping.magic == true && pingEvent.getIdentifier() != null) {
@@ -617,8 +609,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 								// Create session
 								synchronized (sessions) {
 									RakNetClientSession clientSession = new RakNetClientSession(this,
-											System.currentTimeMillis(), connectionRequestTwo.clientGuid,
-											connectionRequestTwo.maximumTransferUnit, channel, sender);
+											System.currentTimeMillis(), connectionRequestTwo.isJraknet,
+											connectionRequestTwo.clientGuid, connectionRequestTwo.maximumTransferUnit,
+											channel, sender);
 									sessions.put(sender, clientSession);
 								}
 
@@ -631,7 +624,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 					this.sendNettyMessage(errorPacket, sender);
 				}
 			}
-		} else if (packetId >= ID_CUSTOM_0 && packetId <= ID_CUSTOM_F) {
+		} else if (packetId >= ID_RESERVED_3 && packetId <= ID_RESERVED_9) {
 			synchronized (sessions) {
 				if (sessions.containsKey(sender)) {
 					CustomPacket custom = new CustomPacket(packet);

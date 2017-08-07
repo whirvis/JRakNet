@@ -35,6 +35,7 @@ import java.net.InetSocketAddress;
 import io.netty.buffer.ByteBuf;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.identifier.Identifier;
+import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 import net.marfgamer.jraknet.session.RakNetServerSession;
 
@@ -66,7 +67,7 @@ public interface RakNetClientListener {
 	 */
 	public default void onDisconnect(RakNetServerSession session, String reason) {
 	}
-	
+
 	/**
 	 * Called when the client has been shutdown.
 	 */
@@ -142,9 +143,10 @@ public interface RakNetClientListener {
 	 *            the server that received the packet.
 	 * @param record
 	 *            the received record.
+	 * @param the
+	 *            received packet.
 	 */
-	@Deprecated
-	public default void onAcknowledge(RakNetServerSession session, Record record) {
+	public default void onAcknowledge(RakNetServerSession session, Record record, EncapsulatedPacket packet) {
 	}
 
 	/**
@@ -154,9 +156,10 @@ public interface RakNetClientListener {
 	 *            the server that lost the packet.
 	 * @param record
 	 *            the lost record.
+	 * @param packet
+	 *            the lost packet.
 	 */
-	@Deprecated
-	public default void onNotAcknowledge(RakNetServerSession session, Record record) {
+	public default void onNotAcknowledge(RakNetServerSession session, Record record, EncapsulatedPacket packet) {
 	}
 
 	/**

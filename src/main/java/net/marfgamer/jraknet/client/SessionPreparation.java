@@ -63,6 +63,7 @@ public class SessionPreparation {
 	// Server data
 	public long guid = -1;
 	public int maximumTransferUnit = -1;
+	public boolean isJraknet = false;
 	public InetSocketAddress address = null;
 	public boolean loginPackets[] = new boolean[2];
 
@@ -125,6 +126,7 @@ public class SessionPreparation {
 			} else {
 				this.loginPackets[1] = true;
 				this.maximumTransferUnit = connectionResponseTwo.maximumTransferUnit;
+				this.isJraknet = connectionResponseTwo.isJraknet;
 				RakNetLogger.debug(loggerName,
 						"Applied maximum transfer unit from " + MessageIdentifier.getName(packetId) + " packet");
 			}
@@ -189,7 +191,8 @@ public class SessionPreparation {
 				"Created server session using globally unique ID " + guid + " and maximum transfer unit with size of "
 						+ maximumTransferUnit + " bytes (" + (maximumTransferUnit * 8) + " bits) for server address "
 						+ address);
-		return new RakNetServerSession(client, guid, maximumTransferUnit, channel, address);
+		return new RakNetServerSession(this.client, this.isJraknet, this.guid, this.maximumTransferUnit, channel,
+				this.address);
 	}
 
 }

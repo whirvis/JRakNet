@@ -30,8 +30,11 @@
  */
 package net.marfgamer.jraknet.protocol.login;
 
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.JRAKNET_MAGIC;
+
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNetPacket;
@@ -45,6 +48,7 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 	public InetSocketAddress clientAddress;
 	public int maximumTransferUnit;
 	public boolean encryptionEnabled;
+	public boolean isJraknet;
 	private boolean failed;
 
 	public OpenConnectionResponseTwo(Packet packet) {
@@ -57,12 +61,14 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 
 	@Override
 	public void encode() {
+		this.isJraknet = true;
 		try {
 			this.writeMagic();
 			this.writeLong(serverGuid);
 			this.writeAddress(clientAddress);
 			this.writeUShort(maximumTransferUnit);
 			this.writeBoolean(encryptionEnabled);
+			this.write(JRAKNET_MAGIC);
 		} catch (UnknownHostException e) {
 			this.failed = true;
 			this.magic = false;
@@ -70,6 +76,7 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 			this.clientAddress = null;
 			this.maximumTransferUnit = 0;
 			this.encryptionEnabled = false;
+			this.isJraknet = false;
 			this.clear();
 		}
 	}
@@ -82,6 +89,10 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 			this.clientAddress = this.readAddress();
 			this.maximumTransferUnit = this.readUShort();
 			this.encryptionEnabled = this.readBoolean();
+			if (this.remaining() >= JRAKNET_MAGIC.length) {
+				byte[] jraknetMagic = this.read(JRAKNET_MAGIC.length);
+				this.isJraknet = Arrays.equals(jraknetMagic, JRAKNET_MAGIC);
+			}
 		} catch (UnknownHostException e) {
 			this.failed = true;
 			this.magic = false;
@@ -89,6 +100,7 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 			this.clientAddress = null;
 			this.maximumTransferUnit = 0;
 			this.encryptionEnabled = false;
+			this.isJraknet = false;
 			this.clear();
 		}
 	}
