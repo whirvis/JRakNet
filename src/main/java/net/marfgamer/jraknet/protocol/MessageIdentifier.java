@@ -43,6 +43,9 @@ public class MessageIdentifier {
 			(byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xFD, (byte) 0xFD, (byte) 0xFD, (byte) 0xFD, (byte) 0x12,
 			(byte) 0x34, (byte) 0x56, (byte) 0x78 };
 
+	public final static byte[] JRAKNET_MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B,
+			(byte) 0x4A, (byte) 0x41, (byte) 0x56, (byte) 0x41 };
+
 	public static final short ID_CONNECTED_PING = 0x00;
 	public static final short ID_UNCONNECTED_PING = 0x01;
 	public static final short ID_UNCONNECTED_PING_OPEN_CONNECTIONS = 0x02;
@@ -178,23 +181,6 @@ public class MessageIdentifier {
 	public static final short ID_RESERVED_8 = 0x84;
 	public static final short ID_RESERVED_9 = 0x85;
 	public static final short ID_USER_PACKET_ENUM = 0x86;
-
-	public static final short ID_CUSTOM_0 = 0x80;
-	public static final short ID_CUSTOM_1 = 0x81;
-	public static final short ID_CUSTOM_2 = 0x82;
-	public static final short ID_CUSTOM_3 = 0x83;
-	public static final short ID_CUSTOM_4 = 0x84;
-	public static final short ID_CUSTOM_5 = 0x85;
-	public static final short ID_CUSTOM_6 = 0x86;
-	public static final short ID_CUSTOM_7 = 0x87;
-	public static final short ID_CUSTOM_8 = 0x88;
-	public static final short ID_CUSTOM_9 = 0x89;
-	public static final short ID_CUSTOM_A = 0x8A;
-	public static final short ID_CUSTOM_B = 0x8B;
-	public static final short ID_CUSTOM_C = 0x8C;
-	public static final short ID_CUSTOM_D = 0x8D;
-	public static final short ID_CUSTOM_E = 0x8E;
-	public static final short ID_CUSTOM_F = 0x8F;
 
 	/**
 	 * Return the packet's name based on it's ID.

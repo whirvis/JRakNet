@@ -118,33 +118,6 @@ public class Record {
 		}
 	}
 
-	@Override
-	public boolean equals(Object object) {
-		if (object instanceof Record) {
-			Record compare = (Record) object;
-			if (this.isRanged() == true) {
-				return this.getIndex() == compare.getIndex() && this.getEndIndex() == compare.getEndIndex();
-			} else {
-				return this.getIndex() == compare.getIndex();
-			}
-		} else if (object instanceof Byte || object instanceof Short || object instanceof Integer
-				|| object instanceof Long) {
-			if (this.isRanged() == false) {
-				return (this.getIndex() == (long) object);
-			}
-		}
-		return false;
-	}
-
-	@Override
-	public String toString() {
-		if (this.isRanged() == true) {
-			return (this.getIndex() + ":" + this.getEndIndex());
-		} else {
-			return Integer.toString(this.getIndex());
-		}
-	}
-
 	/**
 	 * @param records
 	 *            the records to convert to an <code>int</code> array.
@@ -183,6 +156,33 @@ public class Record {
 	 */
 	public static final int[] toArray(List<Record> records) {
 		return Record.toArray(records.toArray(new Record[records.size()]));
+	}
+	
+	@Override
+	public boolean equals(Object object) {
+		if (object instanceof Record) {
+			Record compare = (Record) object;
+			if (this.isRanged() == true) {
+				return this.getIndex() == compare.getIndex() && this.getEndIndex() == compare.getEndIndex();
+			} else {
+				return this.getIndex() == compare.getIndex();
+			}
+		} else if (object instanceof Number) {
+			if (this.isRanged() == false) {
+				Number compare = (Number) object;
+				return (this.getIndex() == compare.longValue());
+			}
+		}
+		return false;
+	}
+
+	@Override
+	public String toString() {
+		if (this.isRanged() == true) {
+			return (this.getIndex() + ":" + this.getEndIndex());
+		} else {
+			return Integer.toString(this.getIndex());
+		}
 	}
 
 }

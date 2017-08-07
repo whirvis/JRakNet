@@ -30,7 +30,11 @@
  */
 package net.marfgamer.jraknet.session;
 
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.*;
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_CONNECTION_ATTEMPT_FAILED;
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_CONNECTION_REQUEST;
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_DISCONNECTION_NOTIFICATION;
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_NEW_INCOMING_CONNECTION;
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_USER_PACKET_ENUM;
 
 import java.net.InetSocketAddress;
 
@@ -40,6 +44,7 @@ import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.login.ConnectionRequest;
 import net.marfgamer.jraknet.protocol.login.ConnectionRequestAccepted;
 import net.marfgamer.jraknet.protocol.login.NewIncomingConnection;
+import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 import net.marfgamer.jraknet.server.RakNetServer;
 
@@ -64,6 +69,8 @@ public class RakNetClientSession extends RakNetSession {
 	 *            the <code>RakNetServer</code>.
 	 * @param timeCreated
 	 *            the time the server was created.
+	 * @param isJraknet
+	 *            whether or not the session belongs to a JRakNet server/client.
 	 * @param guid
 	 *            the globally unique ID.
 	 * @param maximumTransferUnit
@@ -73,12 +80,11 @@ public class RakNetClientSession extends RakNetSession {
 	 * @param address
 	 *            the address.
 	 */
-	public RakNetClientSession(RakNetServer server, long timeCreated, long guid, int maximumTransferUnit,
+	public RakNetClientSession(RakNetServer server, long timeCreated, boolean isJraknet, long guid, int maximumTransferUnit,
 			Channel channel, InetSocketAddress address) {
-		super(guid, maximumTransferUnit, channel, address);
+		super(isJraknet, guid, maximumTransferUnit, channel, address);
 		this.server = server;
 		this.timeCreated = timeCreated;
-		// The timestamp is determined during login
 	}
 
 	/**
@@ -101,17 +107,15 @@ public class RakNetClientSession extends RakNetSession {
 	public long getTimestamp() {
 		return (System.currentTimeMillis() - this.timestamp);
 	}
-
-	@SuppressWarnings("deprecation")
+	
 	@Override
-	public void onAcknowledge(Record record) {
-		server.getListener().onAcknowledge(this, record);
+	public void onAcknowledge(Record record, EncapsulatedPacket packet) {
+		server.getListener().onAcknowledge(this, record, packet);
 	}
-
-	@SuppressWarnings("deprecation")
+	
 	@Override
-	public void onNotAcknowledge(Record record) {
-		server.getListener().onNotAcknowledge(this, record);
+	public void onNotAcknowledge(Record record, EncapsulatedPacket packet) {
+		server.getListener().onNotAcknowledge(this, record, packet);
 	}
 
 	@Override

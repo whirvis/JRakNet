@@ -33,19 +33,30 @@ package net.marfgamer.jraknet.protocol.message;
 import java.util.ArrayList;
 
 import net.marfgamer.jraknet.Packet;
+import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.protocol.MessageIdentifier;
+import net.marfgamer.jraknet.session.RakNetSession;
 
 public class CustomPacket extends RakNetPacket implements Sizable {
 
 	public static final int SEQUENCE_NUMBER_LENGTH = 0x03;
 
+	// Logger name
+	private static final String LOGGER_NAME = "custom packet";
+
+	// Custom packet data
 	public int sequenceNumber;
 	public ArrayList<EncapsulatedPacket> messages;
 
+	// Session ACK data
+	public RakNetSession session;
+	private ArrayList<EncapsulatedPacket> ackMessages;
+
 	public CustomPacket() {
-		super(MessageIdentifier.ID_CUSTOM_4);
+		super(MessageIdentifier.ID_RESERVED_8);
 		this.messages = new ArrayList<EncapsulatedPacket>();
+		this.ackMessages = new ArrayList<EncapsulatedPacket>();
 	}
 
 	public CustomPacket(Packet packet) {
@@ -59,10 +70,23 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 		for (EncapsulatedPacket packet : messages) {
 			// Encode packet and write to buffer
 			packet.buffer = this;
+			packet.ackReceiptId = this.sequenceNumber;
+			if (packet.reliability.requiresAck()) {
+				ackMessages.add(packet);
+			}
 			packet.encode();
 
 			// Buffer is no longer needed, proceed
 			packet.buffer = null;
+		}
+
+		// Send session packets
+		if (session != null) {
+			session.setPacketsForAckReceipt(sequenceNumber,
+					ackMessages.toArray(new EncapsulatedPacket[ackMessages.size()]));
+		} else if (ackMessages.size() > 0) {
+			RakNetLogger.error(LOGGER_NAME, "No session specified for " + ackMessages.size()
+					+ " encapsulated packets that require ACK receipts");
 		}
 	}
 
@@ -74,6 +98,9 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 			EncapsulatedPacket packet = new EncapsulatedPacket();
 			packet.buffer = new Packet(this.buffer());
 			packet.decode();
+			if (packet.reliability.requiresAck()) {
+				packet.ackReceiptId = this.sequenceNumber;
+			}
 
 			// Buffer is no longer needed, add the packet to the list
 			packet.buffer = null;

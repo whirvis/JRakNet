@@ -38,6 +38,7 @@ import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.client.RakNetClientListener;
 import net.marfgamer.jraknet.protocol.MessageIdentifier;
 import net.marfgamer.jraknet.protocol.Reliability;
+import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 import net.marfgamer.jraknet.session.RakNetServerSession;
 
@@ -55,7 +56,7 @@ public class RakNetClientTest {
 
 	public static void main(String[] args) {
 		// Enable logging
-		RakNet.enableLogging();
+		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
 		
 		// Create client and set listener
 		RakNetClient client = new RakNetClient();
@@ -64,13 +65,8 @@ public class RakNetClientTest {
 			@Override
 			public void onConnect(RakNetServerSession session) {
 				RakNetLogger.info(LOGGER_NAME, "Connected to server with address " + session.getAddress() + "!");
-				session.sendMessage(Reliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT, MessageIdentifier.ID_DETECT_LOST_CONNECTIONS);
-				client.disconnectAndShutdown();
-			}
-			
-			@Override
-			public void handleNettyMessage(ByteBuf buf, InetSocketAddress address) {
-				RakNetLogger.info(LOGGER_NAME, "Received RakNetPacket with name " + MessageIdentifier.getName(buf.readUnsignedByte()));
+				session.sendMessage(Reliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT, MessageIdentifier.ID_USER_PACKET_ENUM + 20);
+				//client.disconnectAndShutdown();
 			}
 
 			@Override
@@ -80,12 +76,13 @@ public class RakNetClientTest {
 			}
 
 			@Override
-			public void onAcknowledge(RakNetServerSession session, Record record) {
-				RakNetLogger.info(LOGGER_NAME, "Received ACK for record(s) " + record.toString());
+			public void onAcknowledge(RakNetServerSession session, Record record, EncapsulatedPacket packet) {
+				//RakNetLogger.info(LOGGER_NAME, "Received ACK for record(s) " + record.toString());
+				RakNetLogger.debug(LOGGER_NAME, "Received ACK for packet with ID: " + MessageIdentifier.getName(packet.payload.readUByte()));
 			}
 
 			@Override
-			public void onNotAcknowledge(RakNetServerSession session, Record record) {
+			public void onNotAcknowledge(RakNetServerSession session, Record record, EncapsulatedPacket packet) {
 				RakNetLogger.info(LOGGER_NAME, "Received NACK for record(s) " + record.toString());
 			}
 
@@ -101,9 +98,9 @@ public class RakNetClientTest {
 		
 		// Connect to server
 		try {
-			//client.connect(UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
-			client.connect("192.168.0.65", 19132);
-		} catch(RakNetException | UnknownHostException e) {
+			client.connect(UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
+			//client.connect("localhost", 19132);
+		} catch(RakNetException e) {
 			client.disconnectAndShutdown(e.getClass().getName() + ": " + e.getMessage());
 		}
 	}

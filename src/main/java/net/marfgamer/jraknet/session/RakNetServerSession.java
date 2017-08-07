@@ -30,7 +30,9 @@
  */
 package net.marfgamer.jraknet.session;
 
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.*;
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_CONNECTION_REQUEST_ACCEPTED;
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_DISCONNECTION_NOTIFICATION;
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_USER_PACKET_ENUM;
 
 import java.net.InetSocketAddress;
 
@@ -40,6 +42,7 @@ import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.login.ConnectionRequestAccepted;
 import net.marfgamer.jraknet.protocol.login.NewIncomingConnection;
+import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 
 /**
@@ -59,6 +62,8 @@ public class RakNetServerSession extends RakNetSession {
 	 * 
 	 * @param client
 	 *            the <code>RakNetClient</code>.
+	 * @param isJraknet
+	 *            whether or not the session belongs to a JRakNet server/client.
 	 * @param guid
 	 *            the globally unique ID.
 	 * @param maximumTransferUnit
@@ -68,23 +73,21 @@ public class RakNetServerSession extends RakNetSession {
 	 * @param address
 	 *            the address.
 	 */
-	public RakNetServerSession(RakNetClient client, long guid, int maximumTransferUnit, Channel channel,
-			InetSocketAddress address) {
-		super(guid, maximumTransferUnit, channel, address);
+	public RakNetServerSession(RakNetClient client, boolean isJraknet, long guid, int maximumTransferUnit,
+			Channel channel, InetSocketAddress address) {
+		super(isJraknet, guid, maximumTransferUnit, channel, address);
 		this.client = client;
 		this.setState(RakNetState.HANDSHAKING); // We start at the handshake
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
-	public void onAcknowledge(Record record) {
-		client.getListener().onAcknowledge(this, record);
+	public void onAcknowledge(Record record, EncapsulatedPacket packet) {
+		client.getListener().onAcknowledge(this, record, packet);
 	}
 
-	@SuppressWarnings("deprecation")
 	@Override
-	public void onNotAcknowledge(Record record) {
-		client.getListener().onNotAcknowledge(this, record);
+	public void onNotAcknowledge(Record record, EncapsulatedPacket packet) {
+		client.getListener().onNotAcknowledge(this, record, packet);
 	}
 
 	@Override
