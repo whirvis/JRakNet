@@ -32,6 +32,7 @@ package net.marfgamer.jraknet.protocol.message;
 
 import io.netty.buffer.Unpooled;
 import net.marfgamer.jraknet.Packet;
+import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.protocol.Reliability;
 
 /**
@@ -41,6 +42,9 @@ import net.marfgamer.jraknet.protocol.Reliability;
  * @author Trent "MarfGamer" Summerlin
  */
 public class EncapsulatedPacket implements Sizable {
+
+	// Logger name
+	private static final String LOGGER_NAME = "encapsulated packet";
 
 	// Length constants
 	public static final int MINIMUM_BUFFER_LENGTH = 0x03;
@@ -57,7 +61,8 @@ public class EncapsulatedPacket implements Sizable {
 
 	// Used to encode and decode, modified by CustomPacket only
 	protected Packet buffer = new Packet();
-
+	public int ackReceiptId = -1;
+	
 	// Encapsulation data
 	public Reliability reliability;
 	public boolean split;
@@ -75,6 +80,11 @@ public class EncapsulatedPacket implements Sizable {
 	public void encode() {
 		buffer.writeByte((byte) ((reliability.getId() << RELIABILITY_POSITION) | (split ? FLAG_SPLIT : 0)));
 		buffer.writeUShort(payload.size() * 8); // Size is in bits
+		
+		if (reliability.requiresAck() && ackReceiptId < 0) {
+			RakNetLogger.error(LOGGER_NAME,
+					"no ACK Receipt ID set for encapsualted packet with reliability " + reliability);
+		}
 
 		if (reliability.isReliable()) {
 			buffer.writeTriadLE(messageIndex);
@@ -102,7 +112,7 @@ public class EncapsulatedPacket implements Sizable {
 		this.reliability = Reliability.lookup((byte) ((flags & FLAG_RELIABILITY) >> RELIABILITY_POSITION));
 		this.split = (flags & FLAG_SPLIT) > 0;
 		int length = buffer.readUShort() / 8; // Size is in bits
-
+		
 		if (reliability.isReliable()) {
 			this.messageIndex = buffer.readTriadLE();
 		}

@@ -30,6 +30,10 @@
  */
 package net.marfgamer.jraknet.protocol.status;
 
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.*;
+
+import java.util.Arrays;
+
 import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.protocol.MessageIdentifier;
@@ -38,6 +42,7 @@ public class UnconnectedPing extends RakNetPacket {
 
 	public long timestamp;
 	public boolean magic;
+	public boolean isJraknet;
 
 	protected UnconnectedPing(boolean requiresOpenConnections) {
 		super((requiresOpenConnections ? MessageIdentifier.ID_UNCONNECTED_PING_OPEN_CONNECTIONS
@@ -54,14 +59,20 @@ public class UnconnectedPing extends RakNetPacket {
 
 	@Override
 	public void encode() {
+		this.isJraknet = true;
 		this.writeLong(timestamp);
 		this.writeMagic();
+		this.write(JRAKNET_MAGIC);
 	}
 
 	@Override
 	public void decode() {
 		this.timestamp = this.readLong();
 		this.magic = this.checkMagic();
+		if (this.remaining() >= JRAKNET_MAGIC.length) {
+			byte[] jraknetMagic = this.read(JRAKNET_MAGIC.length);
+			this.isJraknet = Arrays.equals(jraknetMagic, JRAKNET_MAGIC);
+		}
 	}
 
 }

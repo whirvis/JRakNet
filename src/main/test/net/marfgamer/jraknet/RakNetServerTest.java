@@ -53,7 +53,7 @@ public class RakNetServerTest {
 
 	public static void main(String[] args) {
 		// Enable logging
-		RakNet.enableLogging();
+		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
 
 		// Create server and set listener
 		RakNetServer server = new RakNetServer(UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT, 10);
@@ -74,20 +74,22 @@ public class RakNetServerTest {
 
 			@Override
 			public void onClientConnect(RakNetClientSession session) {
-				RakNetLogger.info(LOGGER_NAME,
-						"Client from address " + session.getAddress() + " has connected to the server");
+				RakNetLogger.info(LOGGER_NAME, (session.isJRakNet() ? "JRakNet" : "Vanilla")
+						+ " client from address " + session.getAddress() + " has connected to the server");
 			}
 
 			@Override
 			public void onClientDisconnect(RakNetClientSession session, String reason) {
-				RakNetLogger.info(LOGGER_NAME, "Client from address " + session.getAddress()
-						+ " has been disconnected for \"" + reason + "\"");
+				RakNetLogger.info(LOGGER_NAME,
+						(session.isJRakNet() ? "JRakNet" : "Vanilla") + " client from address "
+								+ session.getAddress() + " has been disconnected for \"" + reason + "\"");
 			}
 
 			@Override
 			public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
 				RakNetLogger.info(LOGGER_NAME,
-						"Received packet from client with address " + session.getAddress() + " with packet ID 0x"
+						"Received packet from " + (session.isJRakNet() ? "JRakNet" : "Vanilla")
+								+ " client with address " + session.getAddress() + " with packet ID 0x"
 								+ Integer.toHexString(packet.getId()).toUpperCase() + " on channel " + channel);
 			}
 

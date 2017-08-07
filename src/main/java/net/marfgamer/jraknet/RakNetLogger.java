@@ -30,6 +30,7 @@
  */
 package net.marfgamer.jraknet;
 
+import java.io.PrintStream;
 import java.text.DecimalFormat;
 
 import org.joda.time.DateTime;
@@ -101,7 +102,9 @@ public class RakNetLogger {
 	private static final void log(int level, String message) {
 		if (RakNet.isLoggingEnabled() && loggerLevel >= level && level < LEVEL_NAMES.length) {
 			DateTime loggerDate = new DateTime(System.currentTimeMillis());
-			System.out.println("[" + LOGGER_DATE_FORMAT.format(loggerDate.getHourOfDay()) + ":"
+			@SuppressWarnings("resource") // Closing the streams would break the console
+			PrintStream logStream = (level != LEVEL_ERROR ? System.out : System.err);
+			logStream.println("[" + LOGGER_DATE_FORMAT.format(loggerDate.getHourOfDay()) + ":"
 					+ LOGGER_DATE_FORMAT.format(loggerDate.getMinuteOfHour()) + ":"
 					+ LOGGER_DATE_FORMAT.format(loggerDate.getSecondOfMinute()) + "] ["
 					+ LEVEL_NAMES[level].toUpperCase() + "]" + LEVEL_SPACERS[level] + " JRakNet " + message);

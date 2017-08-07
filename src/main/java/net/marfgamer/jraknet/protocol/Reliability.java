@@ -70,11 +70,21 @@ public enum Reliability {
 	 * TODO
 	 */
 	UNRELIABLE_WITH_ACK_RECEIPT(5, false, false, false, true),
+	
+	/**
+	 * TODO
+	 */
+	UNRELIABLE_SEQUENCED_WITH_ACK_RECEIPT(UNRELIABLE_SEQUENCED.reliability, false, false, true, true),
 
 	/**
 	 * TODO
 	 */
 	RELIABLE_WITH_ACK_RECEIPT(6, true, false, false, true),
+	
+	/**
+	 * TODO
+	 */
+	RELIABLE_SEQUENCED_WITH_ACK_RECEIPT(RELIABLE_SEQUENCED.reliability, true, false, true, true),
 
 	/**
 	 * TODO

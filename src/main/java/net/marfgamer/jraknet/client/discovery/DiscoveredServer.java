@@ -45,10 +45,13 @@ import net.marfgamer.jraknet.util.ArrayUtils;
 public class DiscoveredServer {
 
 	public static final long SERVER_TIMEOUT_MILLI = 5000L;
+	public static final String IS_JRAKNET_FIELD = "isJraknet";
 
+	// Server data
 	private final InetSocketAddress address;
 	private long discoveryTimestamp;
 	private Identifier identifier;
+	private boolean isJraknet;
 
 	/**
 	 * Constructs a <code>DiscoveredServer</code> with the specified address,
@@ -60,11 +63,15 @@ public class DiscoveredServer {
 	 *            the time the server was initially discovered.
 	 * @param identifier
 	 *            the server's identifier.
+	 * @param isJraknet
+	 *            whether or not the discovered server is a JRakNet server.
 	 */
-	public DiscoveredServer(InetSocketAddress address, long discoveryTimestamp, Identifier identifier) {
+	public DiscoveredServer(InetSocketAddress address, long discoveryTimestamp, Identifier identifier,
+			boolean isJraknet) {
 		this.address = address;
 		this.discoveryTimestamp = discoveryTimestamp;
 		this.identifier = identifier;
+		this.isJraknet = isJraknet;
 	}
 
 	/**
@@ -106,6 +113,13 @@ public class DiscoveredServer {
 	 */
 	public void setIdentifier(Identifier identifier) {
 		this.identifier = identifier;
+	}
+
+	/**
+	 * @return whether or not the discovered server is a JRakNet server.
+	 */
+	public boolean isJRakNet() {
+		return this.isJraknet;
 	}
 
 	@Override

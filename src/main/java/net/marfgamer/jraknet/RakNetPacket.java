@@ -54,7 +54,9 @@ public class RakNetPacket extends Packet {
 	public RakNetPacket(int id) {
 		super();
 		if (id < 0) {
-			throw new IllegalArgumentException("The packet ID is unsigned, it must be at least 0");
+			throw new IllegalArgumentException("The packet ID is an unsigned byte, it must be at least 0");
+		} else if (id > 255) {
+			throw new IllegalArgumentException("The packet ID is an unsigned byte, it can be no higher than 255");
 		}
 		this.writeUByte(this.id = (short) id);
 	}
