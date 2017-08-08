@@ -30,29 +30,33 @@
  */
 package net.marfgamer.jraknet.session;
 
+import net.marfgamer.jraknet.util.map.IntMap;
+
 /**
  * Represents the current status of a connection in a
  * <code>RakNetSession</code>.
  *
  * @author Trent "MarfGamer" Summerlin
  */
-public enum RakNetState {
+public class RakNetState {
+	
+	private static final IntMap<RakNetState> registeredStates = new IntMap<RakNetState>();
 
 	/**
-	 * the session is disconnected.
+	 * The session is disconnected.
 	 */
-	DISCONNECTED(0),
+	public static final RakNetState DISCONNECTED = new RakNetState(0);
 
 	/**
-	 * the session is handshaking.
+	 * The session is handshaking.
 	 */
-	HANDSHAKING(1),
+	public static final RakNetState HANDSHAKING = new RakNetState(1);
 
 	/**
-	 * the session is connected.
+	 * The session is connected.
 	 */
-	CONNECTED(2);
-
+	public static final RakNetState CONNECTED = new RakNetState(2);
+	
 	private final int order;
 
 	/**
@@ -63,6 +67,7 @@ public enum RakNetState {
 	 */
 	private RakNetState(int order) {
 		this.order = order;
+		registeredStates.put(order, this);
 	}
 
 	/**
@@ -72,18 +77,22 @@ public enum RakNetState {
 		return this.order;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof RakNetState) {
+			RakNetState stateObj = (RakNetState) obj;
+			return this.getOrder() >= stateObj.getOrder();
+		}
+		return false;
+	}
+
 	/**
 	 * @param order
 	 *            the order of the state.
-	 * @return the state by it's numerical order.
+	 * @return the state based on it's order.
 	 */
 	public static RakNetState getState(int order) {
-		for (RakNetState state : RakNetState.values()) {
-			if (state.getOrder() == order) {
-				return state;
-			}
-		}
-		return null;
+		return registeredStates.get(order);
 	}
 
 }

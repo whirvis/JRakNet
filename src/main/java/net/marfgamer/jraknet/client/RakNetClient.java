@@ -500,13 +500,27 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * @return <code>true</code> if the client is connected.
+	 * @return <code>true</code> if the client is currently connected to a server.
 	 */
 	public final boolean isConnected() {
-		if (session != null) {
-			return (session.getState() == RakNetState.CONNECTED);
+		if (session == null) {
+			return false;
 		}
-		return false;
+		return session.getState().equals(RakNetState.CONNECTED);
+	}
+
+	/**
+	 * Returns whether or not the client is doing something on a thread. This can
+	 * mean multiple things, with being connected to a server or looking for servers
+	 * on the local network to name a few.
+	 * 
+	 * @return <code>true</code> if the client is running.
+	 */
+	public final boolean isRunning() {
+		if (channel == null) {
+			return false;
+		}
+		return channel.isOpen();
 	}
 
 	/**
@@ -1028,7 +1042,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	public final void shutdown() {
 		// Close channel
-		if (channel.isOpen()) {
+		if (this.isRunning()) {
 			channel.close();
 			group.shutdownGracefully();
 
@@ -1055,6 +1069,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            the reason the client shutdown.
 	 */
 	public final void disconnectAndShutdown(String reason) {
+		// Disconnect from server
 		if (this.isConnected()) {
 			this.disconnect(reason);
 		}
