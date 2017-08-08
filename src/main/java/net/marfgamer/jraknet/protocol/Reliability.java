@@ -30,6 +30,8 @@
  */
 package net.marfgamer.jraknet.protocol;
 
+import net.marfgamer.jraknet.util.ArrayUtils;
+
 /**
  * Contains all the reliability types for RakNet.
  * 
@@ -67,43 +69,59 @@ public enum Reliability {
 	RELIABLE_SEQUENCED(4, true, false, true, false),
 
 	/**
-	 * TODO
+	 * Same as <code>UNRELIABLE</code>, however you will be notified whether the
+	 * packet was lost or received through <code>onAcknowledge()</code> and
+	 * <code>onNotAcknowledge()</code> methods through the
+	 * <code>RakNetServerListener</code> and <code>RakNetClientListener</code>
+	 * classes.
 	 */
-	UNRELIABLE_WITH_ACK_RECEIPT(UNRELIABLE.reliability, false, false, false, true),
+	UNRELIABLE_WITH_ACK_RECEIPT(UNRELIABLE.id, false, false, false, true),
 
 	/**
-	 * TODO
+	 * Same as <code>UNRELIABLE_SEQUENCED</code>, however you will be notified
+	 * whether the packet was lost or received through <code>onAcknowledge()</code>
+	 * and <code>onNotAcknowledge()</code> methods through the
+	 * <code>RakNetServerListener</code> and <code>RakNetClientListener</code>
+	 * classes.
 	 */
-	UNRELIABLE_SEQUENCED_WITH_ACK_RECEIPT(UNRELIABLE_SEQUENCED.reliability, false, false, true, true),
+	UNRELIABLE_SEQUENCED_WITH_ACK_RECEIPT(UNRELIABLE_SEQUENCED.id, false, false, true, true),
 
 	/**
-	 * TODO
+	 * Same as <code>RELIABLE</code>, however you will be notified when the packet
+	 * was received through the <code>onAcknowledge()</code> method through the
+	 * <code>RakNetServerListener</code> and <code>RakNetClientListener</code>
+	 * classes.
 	 */
-	RELIABLE_WITH_ACK_RECEIPT(RELIABLE.reliability, true, false, false, true),
+	RELIABLE_WITH_ACK_RECEIPT(RELIABLE.id, true, false, false, true),
 
 	/**
-	 * TODO
+	 * Same as <code>RELIABLE_SEQUENCED</code>, however you will be notified when
+	 * the packet was received through the <code>onAcknowledge()</code> method
+	 * through the <code>RakNetServerListener</code> and
+	 * <code>RakNetClientListener</code> classes.
 	 */
-	RELIABLE_SEQUENCED_WITH_ACK_RECEIPT(RELIABLE_SEQUENCED.reliability, true, false, true, true),
+	RELIABLE_SEQUENCED_WITH_ACK_RECEIPT(RELIABLE_SEQUENCED.id, true, false, true, true),
 
 	/**
-	 * TODO
+	 * Same as <code>RELIABLE_ORDERED</code>, however you will be notified when the
+	 * packet was received through the <code>onAcknowledge()</code> method through
+	 * the <code>RakNetServerListener</code> and <code>RakNetClientListener</code>
+	 * classes.
 	 */
-	RELIABLE_ORDERED_WITH_ACK_RECEIPT(RELIABLE_ORDERED.reliability, true, true, false, true);
+	RELIABLE_ORDERED_WITH_ACK_RECEIPT(RELIABLE_ORDERED.id, true, true, false, true);
 
-	private final byte reliability;
+	private final byte id;
 	private final boolean reliable;
 	private final boolean ordered;
 	private final boolean sequenced;
 	private final boolean requiresAck;
 
 	/**
-	 * Constructs a <code>Reliability</code> with the specified reliability and
-	 * whether or not it is reliable, ordered, sequenced, or requires an acknowledge
-	 * receipt.
+	 * Constructs a <code>Reliability</code> with the specified ID and whether or
+	 * not it is reliable, ordered, sequenced, or requires an acknowledge receipt.
 	 * 
-	 * @param reliability
-	 *            the reliability.
+	 * @param id
+	 *            the ID of the reliability.
 	 * @param reliable
 	 *            whether or not it is reliable.
 	 * @param ordered
@@ -113,19 +131,24 @@ public enum Reliability {
 	 * @param requiresAck
 	 *            whether or not it requires an acknowledge receipt.
 	 */
-	private Reliability(int reliability, boolean reliable, boolean ordered, boolean sequenced, boolean requiresAck) {
-		this.reliability = (byte) reliability;
+	private Reliability(int id, boolean reliable, boolean ordered, boolean sequenced, boolean requiresAck) {
+		this.id = (byte) id;
 		this.reliable = reliable;
 		this.ordered = ordered;
 		this.sequenced = sequenced;
 		this.requiresAck = requiresAck;
+
+		// This would cause a logical contradiction
+		if (ordered == true && sequenced == true) {
+			throw new IllegalArgumentException("A reliability cannot be both ordered and sequenced");
+		}
 	}
 
 	/**
 	 * @return the ID of the reliability as a byte.
 	 */
 	public byte getId() {
-		return this.reliability;
+		return this.id;
 	}
 
 	/**
@@ -154,6 +177,12 @@ public enum Reliability {
 	 */
 	public boolean requiresAck() {
 		return this.requiresAck;
+	}
+
+	@Override
+	public String toString() {
+		return ArrayUtils.toJRakNetString(this.name(), "id:" + this.id, "reliable:" + this.reliable,
+				"ordered:" + this.ordered, "sequenced:" + this.sequenced, "ack:" + this.requiresAck);
 	}
 
 	/**

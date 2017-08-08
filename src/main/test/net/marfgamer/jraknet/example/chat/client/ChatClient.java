@@ -124,7 +124,7 @@ public class ChatClient implements RakNetClientListener {
 		ChatMessage messagePacket = new ChatMessage();
 		messagePacket.message = message;
 		messagePacket.encode();
-		session.sendMessage(Reliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT, channel, messagePacket);
+		session.sendMessage(Reliability.RELIABLE_ORDERED, channel, messagePacket);
 	}
 
 	/**

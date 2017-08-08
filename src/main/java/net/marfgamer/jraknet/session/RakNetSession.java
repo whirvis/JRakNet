@@ -35,6 +35,7 @@ import static net.marfgamer.jraknet.protocol.MessageIdentifier.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import io.netty.buffer.ByteBuf;
@@ -88,7 +89,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	private final IntMap<SplitPacket> splitQueue;
 	private final ArrayList<EncapsulatedPacket> sendQueue;
 	private final IntMap<EncapsulatedPacket[]> recoveryQueue;
-	private final IntMap<ArrayList<EncapsulatedPacket>> ackReceiptPackets;
+	private final HashMap<EncapsulatedPacket, Integer> ackReceiptPackets;
 
 	// Ordering and sequencing
 	private int sendSequenceNumber;
@@ -143,7 +144,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		this.splitQueue = new IntMap<SplitPacket>();
 		this.sendQueue = new ArrayList<EncapsulatedPacket>();
 		this.recoveryQueue = new IntMap<EncapsulatedPacket[]>();
-		this.ackReceiptPackets = new IntMap<ArrayList<EncapsulatedPacket>>();
+		this.ackReceiptPackets = new HashMap<EncapsulatedPacket, Integer>();
 
 		// Ordering and sequencing
 		this.orderSendIndex = new int[RakNet.MAX_CHANNELS];
@@ -374,32 +375,21 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	}
 
 	/**
-	 * Tells the sessions to assign the specified encapsulated packets to the
-	 * specified sequence number. <br>
-	 * <br>
-	 * This should only be called by <code>CustomPacket</code>.
+	 * Used to tell the session to assign the given packets to an ACK receipt to be
+	 * used for when an ACK or NACK arrives.
 	 * 
-	 * @param sequenceNumber
-	 *            the sequence number of the custom packet that the encapsulated
-	 *            packets belong to.
 	 * @param packets
-	 *            the packets that belong to the custom packet with the specified
-	 *            sequence number.
+	 *            the packets.
 	 */
-	public final void setPacketsForAckReceipt(int sequenceNumber, EncapsulatedPacket[] packets) {
-		// Flip cloned packet payloads
-		ArrayList<EncapsulatedPacket> clones = new ArrayList<EncapsulatedPacket>();
+	public final void setAckReceiptPackets(EncapsulatedPacket[] packets) {
 		for (EncapsulatedPacket packet : packets) {
 			EncapsulatedPacket clone = packet.getClone();
 			if (!clone.reliability.requiresAck()) {
 				throw new IllegalArgumentException("Invalid reliability " + packet.reliability);
 			}
 			clone.ackRecord = packet.ackRecord;
-			clones.add(clone);
+			ackReceiptPackets.put(clone, clone.ackRecord.getIndex());
 		}
-
-		// Add clones to receipt queue
-		ackReceiptPackets.put(sequenceNumber, clones);
 	}
 
 	/**
@@ -583,16 +573,14 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 					// Get record data
 					int recordIndex = record.getIndex();
 
-					// Is the record associated with an ACK receipt?
-					if (ackReceiptPackets.containsKey(recordIndex)) {
-						// Iterate through and notify receiving of all packets
-						for (EncapsulatedPacket packet : ackReceiptPackets.get(recordIndex)) {
+					// Are any packets associated with an ACK receipt tied to this record?
+					for (EncapsulatedPacket packet : ackReceiptPackets.keySet()) {
+						int packetRecordIndex = ackReceiptPackets.get(packet).intValue();
+						if (recordIndex == packetRecordIndex) {
 							this.onAcknowledge(record, packet);
 							packet.ackRecord = null;
+							ackReceiptPackets.remove(packet);
 						}
-
-						// Remove record from the map
-						ackReceiptPackets.remove(recordIndex);
 					}
 
 					// Remove acknowledged packet from the recovery queue
@@ -608,30 +596,18 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 					Record record = acknowledge.records.get(i);
 					int recordIndex = record.getIndex();
 
-					// Is the record associated with an ACK receipt?
-					if (ackReceiptPackets.containsKey(recordIndex)) {
-						// Get packets
-						ArrayList<EncapsulatedPacket> packets = ackReceiptPackets.get(recordIndex);
-						Iterator<EncapsulatedPacket> packetI = packets.iterator();
+					// Are any packets associated with an ACK receipt tied to this record?
+					for (EncapsulatedPacket packet : ackReceiptPackets.keySet()) {
+						int packetRecordIndex = ackReceiptPackets.get(packet).intValue();
 
-						// Iterate through, notify lost of, and remove all unreliable packets
-						while (packetI.hasNext()) {
-							EncapsulatedPacket packet = packetI.next();
-
-							/*
-							 * We only call onNotAcknowledge() for unreliable packets, as they can be lost.
-							 * However, reliable packets will always eventually be received.
-							 */
-							if (!packet.reliability.isReliable()) {
-								this.onNotAcknowledge(record, packet);
-								packet.ackRecord = null;
-								packetI.remove();
-							}
-						}
-
-						// If no packets are left, remove the record from the map
-						if (packets.size() <= 0) {
-							ackReceiptPackets.remove(recordIndex);
+						/*
+						 * We only call onNotAcknowledge() for unreliable packets, as they can be lost.
+						 * However, reliable packets will always eventually be received.
+						 */
+						if (recordIndex == packetRecordIndex && !packet.reliability.isReliable()) {
+							this.onNotAcknowledge(record, packet);
+							packet.ackRecord = null;
+							ackReceiptPackets.remove(packet);
 						}
 					}
 
