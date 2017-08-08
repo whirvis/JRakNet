@@ -48,11 +48,18 @@ public class Identifier {
 	}
 	
 	public Identifier(String identifier) {
-		this(identifier, true);
+		this.identifier = identifier;
+		this.isJraknet = true;
 	}
 	
 	public Identifier(Identifier identifier) {
-		this(identifier.identifier, identifier.isJraknet);
+		this.identifier = identifier.identifier;
+		this.isJraknet = identifier.isJraknet;
+	}
+	
+	public Identifier() {
+		this.identifier = null;
+		this.isJraknet = true;
 	}
 
 	/**

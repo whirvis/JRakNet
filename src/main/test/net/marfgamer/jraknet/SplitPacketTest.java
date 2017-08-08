@@ -65,7 +65,7 @@ public class SplitPacketTest {
 
 	public static void main(String[] args) throws RakNetException, UnknownHostException {
 		// Enable logging
-		RakNet.enableLogging();
+		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
 
 		RakNetLogger.info(LOGGER_NAME, "Creating server...");
 		createServer();

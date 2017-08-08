@@ -98,7 +98,7 @@ public abstract class ArrayUtils {
 		StringBuilder str = new StringBuilder();
 		str.append("[");
 		for (int i = 0; i < obj.length; i++) {
-			str.append(obj.toString() + (i + 1 < obj.length ? ", " : "]"));
+			str.append((obj[i] instanceof Number ? ((Number) obj[i]).longValue() : obj[i].toString()) + (i + 1 < obj.length ? ", " : "]"));
 		}
 		return str.toString();
 	}
