@@ -129,7 +129,7 @@ public class SplitPacketTest {
 				StringBuilder sequencedIntegers = new StringBuilder();
 				long lastInt = -1;
 				while (packet.remaining() >= 4) {
-					long currentInt = packet.readUInt();
+					long currentInt = packet.readUnsignedInt();
 					if (currentInt - lastInt != 1) {
 						RakNetLogger.error(LOGGER_NAME, "Server: Short data was not split correctly!");
 						System.exit(1);
@@ -142,7 +142,7 @@ public class SplitPacketTest {
 
 				// Check packet footer
 				RakNetLogger.info(LOGGER_NAME, "Server: Checking footer byte...");
-				if (packet.readUByte() != SPLIT_END_ID) {
+				if (packet.readUnsignedByte() != SPLIT_END_ID) {
 					RakNetLogger.error(LOGGER_NAME, "Server: Packet footer is " + packet.getId() + " when it should be "
 							+ SPLIT_START_ID + "!");
 					System.exit(1);
@@ -195,10 +195,10 @@ public class SplitPacketTest {
 				// Fill up packet
 				int integersWritten = 0;
 				for (int i = 0; i < (maximumPacketSize - 2) / 4; i++) {
-					packet.writeUInt(i);
+					packet.writeUnsignedInt(i);
 					integersWritten++;
 				}
-				packet.writeUByte(SPLIT_END_ID);
+				packet.writeUnsignedByte(SPLIT_END_ID);
 
 				// Send packet
 				RakNetLogger.info(LOGGER_NAME,

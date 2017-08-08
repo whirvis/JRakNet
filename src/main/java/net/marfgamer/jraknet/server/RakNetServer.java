@@ -60,6 +60,7 @@ import net.marfgamer.jraknet.protocol.login.OpenConnectionRequestTwo;
 import net.marfgamer.jraknet.protocol.login.OpenConnectionResponseOne;
 import net.marfgamer.jraknet.protocol.login.OpenConnectionResponseTwo;
 import net.marfgamer.jraknet.protocol.message.CustomPacket;
+import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Acknowledge;
 import net.marfgamer.jraknet.protocol.status.UnconnectedPing;
 import net.marfgamer.jraknet.protocol.status.UnconnectedPong;
@@ -371,9 +372,11 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	@Override
-	public final void sendMessage(long guid, Reliability reliability, int channel, Packet packet) {
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, Packet packet) {
 		if (this.hasSession(guid)) {
-			this.getSession(guid).sendMessage(reliability, channel, packet);
+			return this.getSession(guid).sendMessage(reliability, channel, packet);
+		} else {
+			throw new IllegalArgumentException("No such session with GUID");
 		}
 	}
 
@@ -774,7 +777,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 						}
 					} catch (Throwable throwable) {
 						// An error related to the session occurred, remove it
-						listener.onSessionException(session, throwable); // TODO?
+						listener.onSessionException(session, throwable);
 						this.removeSession(session, throwable.getMessage());
 					}
 				}

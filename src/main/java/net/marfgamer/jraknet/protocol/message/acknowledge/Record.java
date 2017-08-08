@@ -157,7 +157,7 @@ public class Record {
 	public static final int[] toArray(List<Record> records) {
 		return Record.toArray(records.toArray(new Record[records.size()]));
 	}
-	
+
 	@Override
 	public boolean equals(Object object) {
 		if (object instanceof Record) {

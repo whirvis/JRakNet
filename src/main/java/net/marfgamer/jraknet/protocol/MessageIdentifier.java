@@ -31,6 +31,10 @@
 package net.marfgamer.jraknet.protocol;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
+
+import net.marfgamer.jraknet.RakNetLogger;
+import net.marfgamer.jraknet.util.map.ShortMap;
 
 /**
  * Contains all of the packet IDs for RakNet.
@@ -39,13 +43,19 @@ import java.lang.reflect.Field;
  */
 public class MessageIdentifier {
 
+	// Logger name
+	private static final String LOGGER_NAME = "message identifiers";
+
+	// Magic identifier
 	public final static byte[] MAGIC = new byte[] { (byte) 0x00, (byte) 0xFF, (byte) 0xFF, 0x00, (byte) 0xFE,
 			(byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xFD, (byte) 0xFD, (byte) 0xFD, (byte) 0xFD, (byte) 0x12,
 			(byte) 0x34, (byte) 0x56, (byte) 0x78 };
 
+	// JRakNet magic identifier
 	public final static byte[] JRAKNET_MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B,
 			(byte) 0x4A, (byte) 0x41, (byte) 0x56, (byte) 0x41 };
 
+	// Packet IDs
 	public static final short ID_CONNECTED_PING = 0x00;
 	public static final short ID_UNCONNECTED_PING = 0x01;
 	public static final short ID_UNCONNECTED_PING_OPEN_CONNECTIONS = 0x02;
@@ -182,6 +192,40 @@ public class MessageIdentifier {
 	public static final short ID_RESERVED_9 = 0x85;
 	public static final short ID_USER_PACKET_ENUM = 0x86;
 
+	// Map names and IDs
+	private static final ShortMap<String> packetNames = new ShortMap<String>();
+	private static final HashMap<String, Short> packetIds = new HashMap<String, Short>();
+	private static boolean mappedNameIds = false;
+
+	/**
+	 * Maps all of the packet IDs to their respective field name and vice-versa.
+	 */
+	private static void mapNameIds() {
+		for (Field field : MessageIdentifier.class.getDeclaredFields()) {
+			if (field.getType().equals(short.class)) {
+				try {
+					short packetId = field.getShort(null);
+					String packetName = field.getName();
+					if (packetNames.containsKey(packetId)) {
+						String currentName = packetNames.get(packetId);
+						RakNetLogger.warn(LOGGER_NAME,
+								"Found duplicate ID 0x" + Integer.toHexString(packetId).toUpperCase() + " for \""
+										+ packetName + "\" and \"" + currentName + "\", overriding name and ID");
+						packetIds.remove(currentName);
+					} else {
+						RakNetLogger.debug(LOGGER_NAME, "Assigned packet ID 0x"
+								+ Integer.toHexString(packetId).toUpperCase() + " to " + packetName);
+					}
+					packetNames.put(packetId, packetName);
+					packetIds.put(packetName, packetId);
+				} catch (ReflectiveOperationException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		mappedNameIds = true;
+	}
+
 	/**
 	 * Return the packet's name based on it's ID.
 	 * 
@@ -190,19 +234,10 @@ public class MessageIdentifier {
 	 * @return the packet's name based on it's ID.
 	 */
 	public static String getName(int id) {
-		for (Field field : MessageIdentifier.class.getDeclaredFields()) {
-			if (field.getType().equals(short.class)) {
-				try {
-					short packetId = field.getShort(null);
-					if (packetId == id) {
-						return field.getName();
-					}
-				} catch (ReflectiveOperationException e) {
-					e.printStackTrace();
-				}
-			}
+		if (mappedNameIds == false) {
+			mapNameIds();
 		}
-		return null;
+		return packetNames.get((short) id);
 	}
 
 	/**
@@ -211,11 +246,13 @@ public class MessageIdentifier {
 	 * @return the packet's ID based on it's name.
 	 */
 	public static int getId(String name) {
-		try {
-			return MessageIdentifier.class.getDeclaredField(name.toUpperCase()).getInt(null);
-		} catch (Exception e) {
+		if (mappedNameIds == false) {
+			mapNameIds();
+		}
+		if (!packetIds.containsKey(name)) {
 			return -1;
 		}
+		return packetIds.get(name);
 	}
 
 	/**
@@ -224,7 +261,7 @@ public class MessageIdentifier {
 	 * @return whether or not a packet with the specified ID exists.
 	 */
 	public static boolean hasPacket(int id) {
-		return getName(id) != null;
+		return packetNames.containsKey((short) id);
 	}
 
 	/**
@@ -233,7 +270,7 @@ public class MessageIdentifier {
 	 * @return whether or not a packet with the specified name exists.
 	 */
 	public static boolean hasPacket(String name) {
-		return getId(name) >= 0;
+		return packetIds.containsKey(name);
 	}
 
 }

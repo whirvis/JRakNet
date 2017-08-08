@@ -34,6 +34,7 @@ import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNet;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.protocol.Reliability;
+import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
 
 /**
  * This interface represents a server connection to a client, this is used
@@ -46,7 +47,8 @@ public interface GeminusRakNetPeer {
 
 	/**
 	 * Sends a message with the specified reliability on the specified channel to
-	 * the session with the specified globally unique ID.
+	 * the session with the specified globally unique ID and returns a copy of the
+	 * generated encapsulated packet that will be used when it is actually sent.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -56,14 +58,17 @@ public interface GeminusRakNetPeer {
 	 *            the channel to send the packet on.
 	 * @param packet
 	 *            the packet to send.
+	 * @return the generated encapsulated packet.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than the maximum.
 	 */
-	public void sendMessage(long guid, Reliability reliability, int channel, Packet packet);
+	public EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, Packet packet);
 
 	/**
 	 * Sends the specified messages with the specified reliability on the specified
-	 * channel to the session with the specified globally unique ID.
+	 * channel to the session with the specified globally unique ID and returns
+	 * copies of the generated encapsulated packets that will be used when it is
+	 * actually sent.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -73,19 +78,23 @@ public interface GeminusRakNetPeer {
 	 *            the channel to send the packet on.
 	 * @param packets
 	 *            the packets to send.
+	 * @return the generated encapsulated packets.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than the maximum.
 	 */
-	public default void sendMessage(long guid, Reliability reliability, int channel, Packet... packets)
+	public default EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, Packet... packets)
 			throws InvalidChannelException {
-		for (Packet packet : packets) {
-			this.sendMessage(guid, reliability, channel, packet);
+		EncapsulatedPacket[] encapsulated = new EncapsulatedPacket[packets.length];
+		for (int i = 0; i < encapsulated.length; i++) {
+			encapsulated[i] = this.sendMessage(guid, reliability, channel, packets[i]);
 		}
+		return encapsulated;
 	}
 
 	/**
 	 * Sends a message with the specified reliability on the default channel to the
-	 * session with the specified globally unique ID.
+	 * session with the specified globally unique ID and returns a copy of the
+	 * generated encapsulated packet that will be used when it is actually sent.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -93,16 +102,20 @@ public interface GeminusRakNetPeer {
 	 *            the reliability of the packet.
 	 * @param packet
 	 *            the packet to send.
+	 * @return the generated encapsulated packet.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than the maximum.
 	 */
-	public default void sendMessage(long guid, Reliability reliability, Packet packet) throws InvalidChannelException {
-		this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, packet);
+	public default EncapsulatedPacket sendMessage(long guid, Reliability reliability, Packet packet)
+			throws InvalidChannelException {
+		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, packet);
 	}
 
 	/**
 	 * Sends the specified messages with the specified reliability on the default
-	 * channel to the session with the specified globally unique ID.
+	 * channel to the session with the specified globally unique ID and returns
+	 * copies of the generated encapsulated packets that will be used when it is
+	 * actually sent.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -110,19 +123,24 @@ public interface GeminusRakNetPeer {
 	 *            the reliability of the packet.
 	 * @param packets
 	 *            the packets to send.
+	 * @return the generated encapsulated packets.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than the maximum.
 	 */
-	public default void sendMessage(long guid, Reliability reliability, Packet... packets)
+	public default EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, Packet... packets)
 			throws InvalidChannelException {
-		for (Packet packet : packets) {
-			this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, packet);
+		EncapsulatedPacket[] encapsulated = new EncapsulatedPacket[packets.length];
+		for (int i = 0; i < encapsulated.length; i++) {
+			encapsulated[i] = this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, packets[i]);
 		}
+		return encapsulated;
 	}
 
 	/**
 	 * Sends a message identifier with the specified reliability on the specified
-	 * channel to the session with the specified globally unique ID.
+	 * channel to the session with the specified globally unique ID and returns a
+	 * copy of the generated encapsulated packet that will be used when it is
+	 * actually sent.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -132,16 +150,19 @@ public interface GeminusRakNetPeer {
 	 *            the channel to send the packet on.
 	 * @param packetId
 	 *            the packet ID to send.
+	 * @return the generated encapsulated packet.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than the maximum.
 	 */
-	public default void sendMessage(long guid, Reliability reliability, int channel, int packetId) {
-		this.sendMessage(guid, reliability, channel, new RakNetPacket(packetId));
+	public default EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, int packetId) {
+		return this.sendMessage(guid, reliability, channel, new RakNetPacket(packetId));
 	}
 
 	/**
 	 * Sends the specified message identifiers with the specified reliability on the
-	 * specified channel to the session with the specified globally unique ID
+	 * specified channel to the session with the specified globally unique ID and
+	 * returns copies of the generated encapsulated packets that will be used when
+	 * it is actually sent.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -151,18 +172,23 @@ public interface GeminusRakNetPeer {
 	 *            the channel to send the packet on.
 	 * @param packetIds
 	 *            the packet IDs to send.
+	 * @return the generated encapsulated packets.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than the maximum.
 	 */
-	public default void sendMessage(long guid, Reliability reliability, int channel, int... packetIds) {
-		for (int packetId : packetIds) {
-			this.sendMessage(guid, reliability, channel, packetId);
+	public default EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, int... packetIds) {
+		EncapsulatedPacket[] encapsulated = new EncapsulatedPacket[packetIds.length];
+		for (int i = 0; i < encapsulated.length; i++) {
+			encapsulated[i] = this.sendMessage(guid, reliability, channel, packetIds[i]);
 		}
+		return encapsulated;
 	}
 
 	/**
 	 * Sends a message identifier with the specified reliability on the default
-	 * channel to the session with the specified globally unique ID.
+	 * channel to the session with the specified globally unique ID and returns a
+	 * copy of the generated encapsulated packet that will be used when it is
+	 * actually sent.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -170,16 +196,19 @@ public interface GeminusRakNetPeer {
 	 *            the reliability of the packet.
 	 * @param packetId
 	 *            the packet ID to send.
+	 * @return the generated encapsulated packet.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than the maximum.
 	 */
-	public default void sendMessage(long guid, Reliability reliability, int packetId) {
-		this.sendMessage(guid, reliability, new RakNetPacket(packetId));
+	public default EncapsulatedPacket sendMessage(long guid, Reliability reliability, int packetId) {
+		return this.sendMessage(guid, reliability, new RakNetPacket(packetId));
 	}
 
 	/**
 	 * Sends the specified message identifiers with the specified reliability on the
-	 * default channel to the session with the specified globally unique ID.
+	 * default channel to the session with the specified globally unique ID and
+	 * returns copies of the generated encapsulated packets that will be used when
+	 * it is actually sent.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -187,13 +216,16 @@ public interface GeminusRakNetPeer {
 	 *            the reliability of the packet.
 	 * @param packetIds
 	 *            the packet IDs to send.
+	 * @return the generated encapsulated packets.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than the maximum.
 	 */
-	public default void sendMessage(long guid, Reliability reliability, int... packetIds) {
-		for (int packetId : packetIds) {
-			this.sendMessage(guid, reliability, packetId);
+	public default EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int... packetIds) {
+		EncapsulatedPacket[] encapsulated = new EncapsulatedPacket[packetIds.length];
+		for (int i = 0; i < encapsulated.length; i++) {
+			encapsulated[i] = this.sendMessage(guid, reliability, packetIds[i]);
 		}
+		return encapsulated;
 	}
 
 }

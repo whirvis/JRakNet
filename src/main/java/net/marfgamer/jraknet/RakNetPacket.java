@@ -58,7 +58,7 @@ public class RakNetPacket extends Packet {
 		} else if (id > 255) {
 			throw new IllegalArgumentException("The packet ID is an unsigned byte, it can be no higher than 255");
 		}
-		this.writeUByte(this.id = (short) id);
+		this.writeUnsignedByte(this.id = (short) id);
 	}
 
 	/**
@@ -74,7 +74,7 @@ public class RakNetPacket extends Packet {
 		if (this.remaining() < 1) {
 			throw new IllegalArgumentException("The packet contains no data, it has no ID to be read");
 		}
-		this.id = this.readUByte();
+		this.id = this.readUnsignedByte();
 	}
 
 	/**
@@ -117,7 +117,7 @@ public class RakNetPacket extends Packet {
 		if (packet instanceof RakNetPacket) {
 			this.id = ((RakNetPacket) packet).id;
 		} else {
-			this.id = this.readUByte();
+			this.id = this.readUnsignedByte();
 		}
 	}
 
@@ -151,14 +151,14 @@ public class RakNetPacket extends Packet {
 	public void setBuffer(byte[] buffer, boolean updateId) {
 		super.setBuffer(buffer);
 		if (updateId == true) {
-			this.id = this.readUByte();
+			this.id = this.readUnsignedByte();
 		}
 	}
 
 	@Override
 	public void flip() {
 		super.flip();
-		this.id = this.readUByte();
+		this.id = this.readUnsignedByte();
 	}
 
 }

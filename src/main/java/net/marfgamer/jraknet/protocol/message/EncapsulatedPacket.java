@@ -34,6 +34,7 @@ import io.netty.buffer.Unpooled;
 import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.protocol.Reliability;
+import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 
 /**
  * Used by <code>RakNetSession</code> to properly send data to connected clients
@@ -41,28 +42,30 @@ import net.marfgamer.jraknet.protocol.Reliability;
  *
  * @author Whirvis "MarfGamer" Ardenaur
  */
-public class EncapsulatedPacket implements Sizable {
+public class EncapsulatedPacket implements Sizable, Cloneable {
 
 	// Logger name
 	private static final String LOGGER_NAME = "encapsulated packet";
 
 	// Length constants
-	public static final int MINIMUM_BUFFER_LENGTH = 0x03;
-	public static final int BITFLAG_LENGTH = 0x01;
-	public static final int PAYLOAD_LENGTH_LENGTH = 0x02;
-	public static final int MESSAGE_INDEX_LENGTH = 0x03;
-	public static final int ORDER_INDEX_ORDER_CHANNEL_LENGTH = 0x04;
-	public static final int SPLIT_COUNT_SPLIT_ID_SPLIT_INDEX_LENGTH = 0x0A;
+	public static final int MINIMUM_BUFFER_LENGTH = 3;
+	public static final int BITFLAG_LENGTH = 1;
+	public static final int PAYLOAD_LENGTH_LENGTH = 2;
+	public static final int MESSAGE_INDEX_LENGTH = 3;
+	public static final int ORDER_INDEX_ORDER_CHANNEL_LENGTH = 4;
+	public static final int SPLIT_COUNT_SPLIT_ID_SPLIT_INDEX_LENGTH = 10;
 
 	// Bitflags
 	public static final byte RELIABILITY_POSITION = (byte) 0b00000101;
 	public static final byte FLAG_RELIABILITY = (byte) 0b11100000;
 	public static final byte FLAG_SPLIT = (byte) 0b00010000;
 
-	// Used to encode and decode, modified by CustomPacket only
+	// Used to encode and decode, modified by CustomPacket and RakNetSession only
 	protected Packet buffer = new Packet();
-	public int ackReceiptId = -1;
-	
+	public Record ackRecord = null;
+	private EncapsulatedPacket clone = null;
+	private boolean isClone = false;
+
 	// Encapsulation data
 	public Reliability reliability;
 	public boolean split;
@@ -75,15 +78,22 @@ public class EncapsulatedPacket implements Sizable {
 	public Packet payload;
 
 	/**
+	 * @return the cloned object of the packet.
+	 */
+	public EncapsulatedPacket getClone() {
+		return this.clone;
+	}
+
+	/**
 	 * Encodes the packet.
 	 */
 	public void encode() {
 		buffer.writeByte((byte) ((reliability.getId() << RELIABILITY_POSITION) | (split ? FLAG_SPLIT : 0)));
-		buffer.writeUShort(payload.size() * 8); // Size is in bits
-		
-		if (reliability.requiresAck() && ackReceiptId < 0) {
+		buffer.writeUnsignedShort(payload.size() * 8); // Size is in bits
+
+		if (reliability.requiresAck() && ackRecord == null) {
 			RakNetLogger.error(LOGGER_NAME,
-					"no ACK Receipt ID set for encapsualted packet with reliability " + reliability);
+					"No ACK record ID set for encapsulated packet with reliability " + reliability);
 		}
 
 		if (reliability.isReliable()) {
@@ -92,12 +102,12 @@ public class EncapsulatedPacket implements Sizable {
 
 		if (reliability.isOrdered() || reliability.isSequenced()) {
 			buffer.writeTriadLE(orderIndex);
-			buffer.writeUByte(orderChannel);
+			buffer.writeUnsignedByte(orderChannel);
 		}
 
 		if (split == true) {
 			buffer.writeInt(splitCount);
-			buffer.writeUShort(splitId);
+			buffer.writeUnsignedShort(splitId);
 			buffer.writeInt(splitIndex);
 		}
 
@@ -108,11 +118,11 @@ public class EncapsulatedPacket implements Sizable {
 	 * Decodes the packet.
 	 */
 	public void decode() {
-		short flags = buffer.readUByte();
+		short flags = buffer.readUnsignedByte();
 		this.reliability = Reliability.lookup((byte) ((flags & FLAG_RELIABILITY) >> RELIABILITY_POSITION));
 		this.split = (flags & FLAG_SPLIT) > 0;
-		int length = buffer.readUShort() / 8; // Size is in bits
-		
+		int length = buffer.readUnsignedShort() / 8; // Size is in bits
+
 		if (reliability.isReliable()) {
 			this.messageIndex = buffer.readTriadLE();
 		}
@@ -124,16 +134,13 @@ public class EncapsulatedPacket implements Sizable {
 
 		if (split == true) {
 			this.splitCount = buffer.readInt();
-			this.splitId = buffer.readUShort();
+			this.splitId = buffer.readUnsignedShort();
 			this.splitIndex = buffer.readInt();
 		}
 
 		this.payload = new Packet(Unpooled.copiedBuffer(buffer.read(length)));
 	}
 
-	/**
-	 * @return what the size of the packet would be if it had been encoded.
-	 */
 	@Override
 	public int calculateSize() {
 		int packetSize = 0;
@@ -156,6 +163,26 @@ public class EncapsulatedPacket implements Sizable {
 		return packetSize;
 	}
 
+	@Override
+	public EncapsulatedPacket clone() {
+		try {
+			// Make sure clone is valid
+			if (this.clone != null) {
+				throw new CloneNotSupportedException("EncapsulatedPackets can only be cloned once");
+			} else if (this.isClone == true) {
+				throw new CloneNotSupportedException("Clones of EncapsulatedPackets cannot be cloned");
+			}
+
+			// Create clone and return it
+			this.clone = (EncapsulatedPacket) super.clone();
+			clone.isClone = true;
+			return this.clone;
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
 	/**
 	 * @param reliability
 	 *            the reliability of the packet.
@@ -169,6 +196,7 @@ public class EncapsulatedPacket implements Sizable {
 	 */
 	public static int calculateDummy(Reliability reliability, boolean split, Packet payload) {
 		EncapsulatedPacket dummy = new EncapsulatedPacket();
+		dummy.ackRecord = new Record(0);
 		dummy.reliability = reliability;
 		dummy.payload = payload;
 		dummy.split = true;

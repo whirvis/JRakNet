@@ -48,13 +48,13 @@ public class RenameChannel extends ChatPacket {
 
 	@Override
 	public void encode() {
-		this.writeUByte(channel);
+		this.writeUnsignedByte(channel);
 		this.writeString(newChannelName);
 	}
 
 	@Override
 	public void decode() {
-		this.channel = this.readUByte();
+		this.channel = this.readUnsignedByte();
 		this.newChannelName = this.readString();
 	}
 
