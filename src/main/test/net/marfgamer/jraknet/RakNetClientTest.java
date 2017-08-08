@@ -58,17 +58,12 @@ public class RakNetClientTest {
 		// Create client and set listener
 		RakNetClient client = new RakNetClient();
 		client.setListener(new RakNetClientListener() {
+
 			@Override
 			public void onConnect(RakNetServerSession session) {
 				RakNetLogger.info(LOGGER_NAME, "Connected to " + (session.isJRakNet() ? "JRakNet" : "vanilla")
 						+ " server with address " + session.getAddress() + "!");
 				client.disconnectAndShutdown();
-			}
-
-			@Override
-			public void onDisconnect(RakNetServerSession session, String reason) {
-				RakNetLogger.info(LOGGER_NAME, "Disconnected from " + (session.isJRakNet() ? "JRakNet" : "vanilla")
-						+ " server with address " + session.getAddress() + " for reason \"" + reason + "\"");
 			}
 
 			@Override
@@ -98,7 +93,7 @@ public class RakNetClientTest {
 		// Connect to server
 		try {
 			client.connect(UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
-		} catch (RakNetException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			client.disconnectAndShutdown(e.getClass().getName() + ": " + e.getMessage());
 		}
