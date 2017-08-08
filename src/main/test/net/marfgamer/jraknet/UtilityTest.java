@@ -58,7 +58,7 @@ public class UtilityTest {
 
 	public static void main(String[] args) throws RakNetException {
 		// Enable logging
-		RakNet.enableLogging();
+		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
 
 		RakNetLogger.info(LOGGER_NAME, "Parsing valid address " + ADDRESS_TEST_VALID + " ?= "
 				+ RakNetUtils.parseAddressPassive(ADDRESS_TEST_VALID));
@@ -87,7 +87,7 @@ public class UtilityTest {
 		// Get the server identifier
 		RakNetLogger.info(LOGGER_NAME, "Getting server identifier...");
 		MCPEIdentifier identifier = new MCPEIdentifier(getServerIdentifier(LIFEBOAT_SURVIVAL_GAMES_ADDRESS));
-		RakNetLogger.info(LOGGER_NAME, formatMCPEIdentifier(identifier));
+		RakNetLogger.info(LOGGER_NAME, "Success!: " + formatMCPEIdentifier(identifier));
 	}
 
 	/**

@@ -113,7 +113,6 @@ public class MCPEIdentifier extends Identifier {
 	 */
 	public MCPEIdentifier(String serverName, int serverProtocol, String versionTag, int onlinePlayerCount,
 			int maxPlayerCount, long guid, String worldName, String gamemode) {
-		super(null, true);
 		this.serverName = serverName;
 		this.serverProtocol = serverProtocol;
 		this.versionTag = versionTag;

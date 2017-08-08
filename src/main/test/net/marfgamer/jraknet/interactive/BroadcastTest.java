@@ -38,6 +38,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import net.marfgamer.jraknet.RakNet;
+import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.UtilityTest;
 import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.client.RakNetClientListener;
@@ -98,6 +99,9 @@ public class BroadcastTest {
 	 * Starts the test.
 	 */
 	public void start() {
+		// Enable logging
+		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
+
 		// Set client options
 		client.setListener(new ServerDiscoveryListener());
 

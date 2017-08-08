@@ -144,7 +144,7 @@ public class RakNetClientSession extends RakNetSession {
 				} else if (request.useSecurity == true) {
 					reason = "client has security enabled";
 				}
-				this.sendMessage(Reliability.RELIABLE_ORDERED, ID_CONNECTION_ATTEMPT_FAILED);
+				this.sendMessage(Reliability.RELIABLE, ID_CONNECTION_ATTEMPT_FAILED);
 				this.setState(RakNetState.DISCONNECTED);
 				server.removeSession(this, "Login failed, " + reason);
 			}

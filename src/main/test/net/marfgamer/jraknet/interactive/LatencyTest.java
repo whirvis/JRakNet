@@ -35,6 +35,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import net.marfgamer.jraknet.RakNet;
+import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.UtilityTest;
 import net.marfgamer.jraknet.identifier.MCPEIdentifier;
 import net.marfgamer.jraknet.server.RakNetServer;
@@ -63,6 +64,9 @@ public class LatencyTest {
 	 * Starts the test.
 	 */
 	public void start() {
+		// Enable logging
+		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
+
 		// Set server options and start it
 		LATENCY_TEST_IDENTIFIER.setServerGloballyUniqueId(server.getGloballyUniqueId());
 		server.setListenerSelf();

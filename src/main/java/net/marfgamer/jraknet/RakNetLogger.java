@@ -56,7 +56,7 @@ public class RakNetLogger {
 	private static final DecimalFormat LOGGER_DATE_FORMAT = new DecimalFormat("00");
 
 	// Logger data
-	private static int loggerLevel = Integer.MAX_VALUE;
+	private static int loggerLevel = LEVEL_NAMES.length - 1;
 
 	/**
 	 * Sets the logger level.
@@ -88,6 +88,18 @@ public class RakNetLogger {
 			}
 			LEVEL_SPACERS[i] = spacer.toString();
 		}
+	}
+
+	/**
+	 * @param level
+	 *            the logger level.
+	 * @return the name of the level.
+	 */
+	public String getLevelName(int level) {
+		if (level >= LEVEL_NAMES.length) {
+			return null;
+		}
+		return LEVEL_NAMES[level];
 	}
 
 	/**

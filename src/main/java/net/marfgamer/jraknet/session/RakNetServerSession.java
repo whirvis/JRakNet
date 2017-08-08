@@ -81,6 +81,8 @@ public class RakNetServerSession extends RakNetSession {
 
 	@Override
 	public void onAcknowledge(Record record, EncapsulatedPacket packet) {
+		client.getListener().onAcknowledge(this, record, packet);
+
 		// If the server received our IncomingConnectionPacket we are connected
 		if (this.getState().getOrder() < RakNetState.CONNECTED.getOrder() && incomingConnectionPacket != null) {
 			if (record.equals(incomingConnectionPacket.ackRecord)) {
@@ -88,7 +90,6 @@ public class RakNetServerSession extends RakNetSession {
 				client.getListener().onConnect(this);
 			}
 		}
-		client.getListener().onAcknowledge(this, record, packet);
 	}
 
 	@Override

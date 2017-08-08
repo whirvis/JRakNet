@@ -52,7 +52,7 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 
 	// Session ACK data
 	public RakNetSession session;
-	private final ArrayList<EncapsulatedPacket> ackMessages;
+	private ArrayList<EncapsulatedPacket> ackMessages;
 
 	public CustomPacket() {
 		super(MessageIdentifier.ID_RESERVED_8);
@@ -63,7 +63,6 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 	public CustomPacket(Packet packet) {
 		super(packet);
 		this.messages = new ArrayList<EncapsulatedPacket>();
-		this.ackMessages = new ArrayList<EncapsulatedPacket>();
 	}
 
 	@Override
@@ -89,8 +88,7 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 		// Tell session we have packets that require an ACK receipt
 		if (ackMessages.size() > 0) {
 			if (session != null) {
-				session.setPacketsForAckReceipt(sequenceNumber,
-						ackMessages.toArray(new EncapsulatedPacket[ackMessages.size()]));
+				session.setAckReceiptPackets(ackMessages.toArray(new EncapsulatedPacket[ackMessages.size()]));
 			} else {
 				RakNetLogger.error(LOGGER_NAME, "No session specified for " + ackMessages.size()
 						+ " encapsulated packets that require ACK receipts");
@@ -106,12 +104,6 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 			EncapsulatedPacket packet = new EncapsulatedPacket();
 			packet.buffer = this;
 			packet.decode();
-
-			// Set ACK record if the reliability requires an ACK receipt
-			if (packet.reliability.requiresAck()) {
-				packet.ackRecord = new Record(sequenceNumber);
-				ackMessages.add(packet);
-			}
 
 			// Nullify buffer so it can not be abused
 			packet.buffer = null;
