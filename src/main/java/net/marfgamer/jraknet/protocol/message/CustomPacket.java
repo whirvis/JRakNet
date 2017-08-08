@@ -52,7 +52,7 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 
 	// Session ACK data
 	public RakNetSession session;
-	private ArrayList<EncapsulatedPacket> ackMessages;
+	private final ArrayList<EncapsulatedPacket> ackMessages;
 
 	public CustomPacket() {
 		super(MessageIdentifier.ID_RESERVED_8);
@@ -63,6 +63,7 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 	public CustomPacket(Packet packet) {
 		super(packet);
 		this.messages = new ArrayList<EncapsulatedPacket>();
+		this.ackMessages = new ArrayList<EncapsulatedPacket>();
 	}
 
 	@Override

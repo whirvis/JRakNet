@@ -69,27 +69,27 @@ public enum Reliability {
 	/**
 	 * TODO
 	 */
-	UNRELIABLE_WITH_ACK_RECEIPT(5, false, false, false, true),
+	UNRELIABLE_WITH_ACK_RECEIPT(UNRELIABLE.reliability, false, false, false, true),
 
 	/**
 	 * TODO
 	 */
-	UNRELIABLE_SEQUENCED_WITH_ACK_RECEIPT(1, false, false, true, true),
+	UNRELIABLE_SEQUENCED_WITH_ACK_RECEIPT(UNRELIABLE_SEQUENCED.reliability, false, false, true, true),
 
 	/**
 	 * TODO
 	 */
-	RELIABLE_WITH_ACK_RECEIPT(6, true, false, false, true),
+	RELIABLE_WITH_ACK_RECEIPT(RELIABLE.reliability, true, false, false, true),
 
 	/**
 	 * TODO
 	 */
-	RELIABLE_SEQUENCED_WITH_ACK_RECEIPT(4, true, false, true, true),
+	RELIABLE_SEQUENCED_WITH_ACK_RECEIPT(RELIABLE_SEQUENCED.reliability, true, false, true, true),
 
 	/**
 	 * TODO
 	 */
-	RELIABLE_ORDERED_WITH_ACK_RECEIPT(7, true, true, false, true);
+	RELIABLE_ORDERED_WITH_ACK_RECEIPT(RELIABLE_ORDERED.reliability, true, true, false, true);
 
 	private final byte reliability;
 	private final boolean reliable;

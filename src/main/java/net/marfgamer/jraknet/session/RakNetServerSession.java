@@ -52,6 +52,7 @@ import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 public class RakNetServerSession extends RakNetSession {
 
 	private final RakNetClient client;
+	private EncapsulatedPacket incomingConnectionPacket;
 
 	/**
 	 * Constructs a <code>RakNetClientSession</code> with the specified
@@ -80,6 +81,13 @@ public class RakNetServerSession extends RakNetSession {
 
 	@Override
 	public void onAcknowledge(Record record, EncapsulatedPacket packet) {
+		// If the server received our IncomingConnectionPacket we are connected
+		if (this.getState().getOrder() < RakNetState.CONNECTED.getOrder() && incomingConnectionPacket != null) {
+			if (record.equals(incomingConnectionPacket.ackRecord)) {
+				this.setState(RakNetState.CONNECTED);
+				client.getListener().onConnect(this);
+			}
+		}
 		client.getListener().onAcknowledge(this, record, packet);
 	}
 
@@ -104,9 +112,8 @@ public class RakNetServerSession extends RakNetSession {
 				clientHandshake.encode();
 
 				if (!clientHandshake.failed()) {
-					this.sendMessage(Reliability.RELIABLE_ORDERED, clientHandshake);
-					this.setState(RakNetState.CONNECTED);
-					client.getListener().onConnect(this);
+					this.incomingConnectionPacket = this.sendMessage(Reliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT,
+							clientHandshake);
 				} else {
 					client.disconnect("Failed to login");
 				}
