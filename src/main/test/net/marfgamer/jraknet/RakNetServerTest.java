@@ -56,7 +56,7 @@ public class RakNetServerTest {
 
 	public static void main(String[] args) {
 		// Enable logging
-		RakNet.enableLogging();
+		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
 
 		// Create server and set listener
 		RakNetServer server = new RakNetServer(UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT, 10);
