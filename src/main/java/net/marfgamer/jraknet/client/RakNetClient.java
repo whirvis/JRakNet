@@ -32,7 +32,6 @@ package net.marfgamer.jraknet.client;
 
 import static net.marfgamer.jraknet.protocol.MessageIdentifier.*;
 
-import java.lang.reflect.Field;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -66,6 +65,7 @@ import net.marfgamer.jraknet.protocol.login.ConnectionRequest;
 import net.marfgamer.jraknet.protocol.login.OpenConnectionRequestOne;
 import net.marfgamer.jraknet.protocol.login.OpenConnectionRequestTwo;
 import net.marfgamer.jraknet.protocol.message.CustomPacket;
+import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Acknowledge;
 import net.marfgamer.jraknet.protocol.status.UnconnectedPing;
 import net.marfgamer.jraknet.protocol.status.UnconnectedPingOpenConnections;
@@ -300,7 +300,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		synchronized (externalServers) {
 			if (!externalServers.contains(address)) {
 				// Add newly discovered server
-				externalServers.put(address, new DiscoveredServer(address, -1, null, false));
+				externalServers.put(address, new DiscoveredServer(address, -1, null));
 
 				// Notify API
 				RakNetLogger.debug(this, "Added external server with address " + address);
@@ -519,12 +519,10 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	protected final void handleHandlerException(InetSocketAddress address, Throwable cause) {
 		// Handle exception based on connection state
-		if (preparation != null) {
-			if (address.equals(preparation.address)) {
+		if (address.equals(preparation.address)) {
+			if (preparation != null) {
 				preparation.cancelReason = new NettyHandlerException(this, handler, cause);
-			}
-		} else if (session != null) {
-			if (address.equals(preparation.address)) {
+			} else if (session != null) {
 				this.disconnect(cause.getClass().getName() + ": " + cause.getLocalizedMessage());
 			}
 		}
@@ -654,7 +652,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 					if (System.currentTimeMillis()
 							- discoveredServer.getDiscoveryTimestamp() >= DiscoveredServer.SERVER_TIMEOUT_MILLI) {
 						forgottenServers.add(discoveredServerAddress);
-						listener.onServerForgotten(discoveredServerAddress); // TODO?
+						listener.onServerForgotten(discoveredServerAddress);
 					}
 				}
 				discovered.keySet().removeAll(forgottenServers);
@@ -713,8 +711,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 					// This is a local server
 					if (!discovered.containsKey(sender)) {
 						// Add newly discovered server
-						discovered.put(sender, new DiscoveredServer(sender, System.currentTimeMillis(), pong.identifier,
-								pong.isJraknet));
+						discovered.put(sender,
+								new DiscoveredServer(sender, System.currentTimeMillis(), pong.identifier));
 
 						// Notify API
 						RakNetLogger.info(this, "Discovered local server with address " + sender);
@@ -736,19 +734,6 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 				} else if (externalServers.containsKey(sender)) {
 					DiscoveredServer server = externalServers.get(sender);
 					server.setDiscoveryTimestamp(System.currentTimeMillis());
-
-					/*
-					 * We use reflection because we don't want anyone else modifying this field
-					 */
-					if (!server.isJRakNet()) {
-						try {
-							Field isJraknetField = server.getClass().getField(DiscoveredServer.IS_JRAKNET_FIELD);
-							isJraknetField.setBoolean(server, pong.isJraknet);
-						} catch (Exception e) {
-							// It is not worth our time
-						}
-					}
-
 					if (!pong.identifier.equals(server.getIdentifier())) {
 						// Update server identifier
 						server.setIdentifier(pong.identifier);
@@ -994,10 +979,11 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	@Override
-	public final void sendMessage(Reliability reliability, int channel, Packet packet) {
+	public final EncapsulatedPacket sendMessage(Reliability reliability, int channel, Packet packet) {
 		if (this.isConnected()) {
-			session.sendMessage(reliability, channel, packet);
+			return session.sendMessage(reliability, channel, packet);
 		}
+		return null;
 	}
 
 	/**
@@ -1069,7 +1055,9 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            the reason the client shutdown.
 	 */
 	public final void disconnectAndShutdown(String reason) {
-		this.disconnect(reason);
+		if (this.isConnected()) {
+			this.disconnect(reason);
+		}
 		this.shutdown();
 	}
 

@@ -31,13 +31,10 @@
 package net.marfgamer.jraknet;
 
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 
-import io.netty.buffer.ByteBuf;
 import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.client.RakNetClientListener;
 import net.marfgamer.jraknet.protocol.MessageIdentifier;
-import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 import net.marfgamer.jraknet.session.RakNetServerSession;
@@ -57,33 +54,35 @@ public class RakNetClientTest {
 	public static void main(String[] args) {
 		// Enable logging
 		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
-		
+
 		// Create client and set listener
 		RakNetClient client = new RakNetClient();
 		client.setListener(new RakNetClientListener() {
-
 			@Override
 			public void onConnect(RakNetServerSession session) {
-				RakNetLogger.info(LOGGER_NAME, "Connected to server with address " + session.getAddress() + "!");
-				session.sendMessage(Reliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT, MessageIdentifier.ID_USER_PACKET_ENUM + 20);
-				//client.disconnectAndShutdown();
+				RakNetLogger.info(LOGGER_NAME, "Connected to " + (session.isJRakNet() ? "JRakNet" : "vanilla")
+						+ " server with address " + session.getAddress() + "!");
+				client.disconnectAndShutdown();
 			}
 
 			@Override
 			public void onDisconnect(RakNetServerSession session, String reason) {
-				RakNetLogger.info(LOGGER_NAME, "Disconnected from server with address " + session.getAddress()
-						+ " for reason \"" + reason + "\"");
+				RakNetLogger.info(LOGGER_NAME, "Disconnected from " + (session.isJRakNet() ? "JRakNet" : "vanilla")
+						+ " server with address " + session.getAddress() + " for reason \"" + reason + "\"");
 			}
 
 			@Override
 			public void onAcknowledge(RakNetServerSession session, Record record, EncapsulatedPacket packet) {
-				//RakNetLogger.info(LOGGER_NAME, "Received ACK for record(s) " + record.toString());
-				RakNetLogger.debug(LOGGER_NAME, "Received ACK for packet with ID: " + MessageIdentifier.getName(packet.payload.readUByte()));
+				RakNetLogger.info(LOGGER_NAME,
+						(session.isJRakNet() ? "JRakNet" : "vanilla") + " server has received packet with ID: "
+								+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
 
 			@Override
 			public void onNotAcknowledge(RakNetServerSession session, Record record, EncapsulatedPacket packet) {
-				RakNetLogger.info(LOGGER_NAME, "Received NACK for record(s) " + record.toString());
+				RakNetLogger.info(LOGGER_NAME,
+						(session.isJRakNet() ? "JRakNet" : "vanilla") + " server has lost packet with ID: "
+								+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
 
 			@Override
@@ -95,12 +94,12 @@ public class RakNetClientTest {
 		});
 		RakNetLogger.info(LOGGER_NAME,
 				"Created client, connecting to " + UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
-		
+
 		// Connect to server
 		try {
 			client.connect(UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
-			//client.connect("localhost", 19132);
-		} catch(RakNetException e) {
+		} catch (Exception e) {
+			e.printStackTrace();
 			client.disconnectAndShutdown(e.getClass().getName() + ": " + e.getMessage());
 		}
 	}

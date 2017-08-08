@@ -65,6 +65,7 @@ public class LatencyTest {
 	public void start() {
 		// Set server options and start it
 		LATENCY_TEST_IDENTIFIER.setServerGloballyUniqueId(server.getGloballyUniqueId());
+		server.setListenerSelf();
 		server.setIdentifier(LATENCY_TEST_IDENTIFIER);
 		server.startThreaded();
 

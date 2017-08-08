@@ -113,6 +113,7 @@ public class MCPEIdentifier extends Identifier {
 	 */
 	public MCPEIdentifier(String serverName, int serverProtocol, String versionTag, int onlinePlayerCount,
 			int maxPlayerCount, long guid, String worldName, String gamemode) {
+		super(null, true);
 		this.serverName = serverName;
 		this.serverProtocol = serverProtocol;
 		this.versionTag = versionTag;
@@ -138,6 +139,7 @@ public class MCPEIdentifier extends Identifier {
 	 *            the <code>Identifier</code> to parse.
 	 */
 	public MCPEIdentifier(Identifier identifier) {
+		super(identifier);
 		String[] data = identifier.build().split(SEPERATOR);
 		if (data.length >= DATA_COUNT_LEGACY) {
 			if (data[0].equals(HEADER) == false) {

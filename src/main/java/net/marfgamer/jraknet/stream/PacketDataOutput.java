@@ -122,7 +122,7 @@ public class PacketDataOutput extends OutputStream implements DataOutput {
 
 	@Override
 	public void writeChar(int v) throws IOException {
-		packet.writeUShort(v);
+		packet.writeUnsignedShort(v);
 	}
 
 	@Override
@@ -153,7 +153,7 @@ public class PacketDataOutput extends OutputStream implements DataOutput {
 	@Override
 	public void writeChars(String s) throws IOException {
 		for (char c : s.toCharArray()) {
-			packet.writeUShort(c);
+			packet.writeUnsignedShort(c);
 		}
 	}
 

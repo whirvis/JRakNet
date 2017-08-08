@@ -76,7 +76,7 @@ public class ServerPing {
 	public Identifier getIdentifier() {
 		return this.identifier;
 	}
-	
+
 	/**
 	 * @return whether or not the ping is from a JRakNet client.
 	 */
