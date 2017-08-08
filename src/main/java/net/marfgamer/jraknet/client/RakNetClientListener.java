@@ -143,8 +143,8 @@ public interface RakNetClientListener {
 	 *            the server that received the packet.
 	 * @param record
 	 *            the received record.
-	 * @param the
-	 *            received packet.
+	 * @param packet
+	 *            the received packet.
 	 */
 	public default void onAcknowledge(RakNetServerSession session, Record record, EncapsulatedPacket packet) {
 	}
