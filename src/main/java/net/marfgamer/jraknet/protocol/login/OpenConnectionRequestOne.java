@@ -54,14 +54,14 @@ public class OpenConnectionRequestOne extends RakNetPacket {
 	@Override
 	public void encode() {
 		this.writeMagic();
-		this.writeUByte(protocolVersion);
+		this.writeUnsignedByte(protocolVersion);
 		this.pad(maximumTransferUnit - MTU_PADDING);
 	}
 
 	@Override
 	public void decode() {
 		this.magic = this.checkMagic();
-		this.protocolVersion = this.readUByte();
+		this.protocolVersion = this.readUnsignedByte();
 		this.maximumTransferUnit = (this.remaining() + MTU_PADDING);
 		this.read(this.remaining()); // Go ahead and get rid of those bytes
 	}

@@ -36,6 +36,7 @@ import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.protocol.MessageIdentifier;
+import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 import net.marfgamer.jraknet.session.RakNetSession;
 
 public class CustomPacket extends RakNetPacket implements Sizable {
@@ -68,25 +69,31 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 	public void encode() {
 		this.writeTriadLE(sequenceNumber);
 		for (EncapsulatedPacket packet : messages) {
-			// Encode packet and write to buffer
+			// Tell the packet to use ourself as a buffer since we are a container for it
 			packet.buffer = this;
-			packet.ackReceiptId = this.sequenceNumber;
+
+			// Set ACK record if the reliability requires an ACK receipt
 			if (packet.reliability.requiresAck()) {
+				packet.ackRecord = new Record(sequenceNumber);
 				ackMessages.add(packet);
 			}
+
+			// Encode packet
 			packet.encode();
 
-			// Buffer is no longer needed, proceed
+			// Nullify buffer so it cannot be abused
 			packet.buffer = null;
 		}
 
-		// Send session packets
-		if (session != null) {
-			session.setPacketsForAckReceipt(sequenceNumber,
-					ackMessages.toArray(new EncapsulatedPacket[ackMessages.size()]));
-		} else if (ackMessages.size() > 0) {
-			RakNetLogger.error(LOGGER_NAME, "No session specified for " + ackMessages.size()
-					+ " encapsulated packets that require ACK receipts");
+		// Tell session we have packets that require an ACK receipt
+		if (ackMessages.size() > 0) {
+			if (session != null) {
+				session.setPacketsForAckReceipt(sequenceNumber,
+						ackMessages.toArray(new EncapsulatedPacket[ackMessages.size()]));
+			} else {
+				RakNetLogger.error(LOGGER_NAME, "No session specified for " + ackMessages.size()
+						+ " encapsulated packets that require ACK receipts");
+			}
 		}
 	}
 
@@ -94,23 +101,25 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 	public void decode() {
 		this.sequenceNumber = this.readTriadLE();
 		while (this.remaining() >= EncapsulatedPacket.MINIMUM_BUFFER_LENGTH) {
-			// Decode packet
+			// Create an encapsulated packet while using ourself as a buffer
 			EncapsulatedPacket packet = new EncapsulatedPacket();
-			packet.buffer = new Packet(this.buffer());
+			packet.buffer = this;
 			packet.decode();
+
+			// Set ACK record if the reliability requires an ACK receipt
 			if (packet.reliability.requiresAck()) {
-				packet.ackReceiptId = this.sequenceNumber;
+				packet.ackRecord = new Record(sequenceNumber);
+				ackMessages.add(packet);
 			}
 
-			// Buffer is no longer needed, add the packet to the list
+			// Nullify buffer so it can not be abused
 			packet.buffer = null;
+
+			// Add packet to list
 			messages.add(packet);
 		}
 	}
 
-	/**
-	 * @return the size of the packet would be if it had been encoded.
-	 */
 	@Override
 	public int calculateSize() {
 		int packetSize = 1; // Packet ID

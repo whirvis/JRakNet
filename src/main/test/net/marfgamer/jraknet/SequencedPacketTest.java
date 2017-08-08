@@ -89,7 +89,8 @@ public class SequencedPacketTest {
 		long currentTime = System.currentTimeMillis();
 		while (true) {
 			if (currentTime - startSend >= 5000 && startSend > -1) {
-				RakNetLogger.error(LOGGER_NAME, "Failed to complete test due to timeout (Took over 30 seconds!), printing results...");
+				RakNetLogger.error(LOGGER_NAME,
+						"Failed to complete test due to timeout (Took over 30 seconds!), printing results...");
 				printResults();
 				System.exit(1);
 			} else {
@@ -102,12 +103,14 @@ public class SequencedPacketTest {
 	 * Prints the results of the test
 	 */
 	private static void printResults() {
-		RakNetLogger.info(LOGGER_NAME,
-				"Server - Sequenced packet test finished, lost " + (packetReceiveCount >= PACKET_SEND_COUNT ? "no"
-						: Float.toString(
-								((float) PACKET_SEND_COUNT - packetReceiveCount / (float) PACKET_SEND_COUNT) * 100)
-								.substring(0, 3).replace(".", "") + "% of")
-						+ " packets");
+		RakNetLogger
+				.info(LOGGER_NAME,
+						"Server - Sequenced packet test finished, lost "
+								+ (packetReceiveCount >= PACKET_SEND_COUNT ? "no"
+										: Float.toString(((float) PACKET_SEND_COUNT
+												- packetReceiveCount / (float) PACKET_SEND_COUNT) * 100).substring(0, 3)
+												.replace(".", "") + "% of")
+								+ " packets (Took " + (System.currentTimeMillis() - startSend) + "MS)");
 		if (packetReceiveCount < PACKET_SEND_COUNT) {
 			// Create list of lost packets
 			ArrayList<Integer> packetsLost = new ArrayList<Integer>();
@@ -126,7 +129,6 @@ public class SequencedPacketTest {
 			RakNetLogger.info(LOGGER_NAME,
 					"Packet" + (packetsLost.size() == 1 ? "" : "s") + " lost: " + builder.toString());
 		}
-		RakNetLogger.info(LOGGER_NAME, " (Took " + (System.currentTimeMillis() - startSend) + "MS)");
 	}
 
 	/**

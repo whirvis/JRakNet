@@ -30,11 +30,7 @@
  */
 package net.marfgamer.jraknet.session;
 
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_CONNECTION_ATTEMPT_FAILED;
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_CONNECTION_REQUEST;
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_DISCONNECTION_NOTIFICATION;
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_NEW_INCOMING_CONNECTION;
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_USER_PACKET_ENUM;
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.*;
 
 import java.net.InetSocketAddress;
 
@@ -80,8 +76,8 @@ public class RakNetClientSession extends RakNetSession {
 	 * @param address
 	 *            the address.
 	 */
-	public RakNetClientSession(RakNetServer server, long timeCreated, boolean isJraknet, long guid, int maximumTransferUnit,
-			Channel channel, InetSocketAddress address) {
+	public RakNetClientSession(RakNetServer server, long timeCreated, boolean isJraknet, long guid,
+			int maximumTransferUnit, Channel channel, InetSocketAddress address) {
 		super(isJraknet, guid, maximumTransferUnit, channel, address);
 		this.server = server;
 		this.timeCreated = timeCreated;
@@ -107,12 +103,12 @@ public class RakNetClientSession extends RakNetSession {
 	public long getTimestamp() {
 		return (System.currentTimeMillis() - this.timestamp);
 	}
-	
+
 	@Override
 	public void onAcknowledge(Record record, EncapsulatedPacket packet) {
 		server.getListener().onAcknowledge(this, record, packet);
 	}
-	
+
 	@Override
 	public void onNotAcknowledge(Record record, EncapsulatedPacket packet) {
 		server.getListener().onNotAcknowledge(this, record, packet);

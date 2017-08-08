@@ -57,35 +57,6 @@ public class MaximumTransferUnit {
 	private int retriesLeft;
 
 	/**
-	 * Sorts an array of <code>MaximumTransferUnit</code>'s from highest to lowest
-	 * maximum transfer units.
-	 * 
-	 * @param units
-	 *            the <code>MaximumTransferUnit</code>s to sort.
-	 * @return the sorted <code>MaximumTransferUnit</code>s.
-	 */
-	public static MaximumTransferUnit[] sort(MaximumTransferUnit[] units) {
-		// Convert array to IntMap
-		IntMap<MaximumTransferUnit> unitMap = new IntMap<MaximumTransferUnit>();
-		for (MaximumTransferUnit unit : units) {
-			unitMap.put(unit.getMaximumTransferUnit(), unit);
-		}
-
-		// Sort IntMap
-		ArrayList<MaximumTransferUnit> unitList = new ArrayList<MaximumTransferUnit>();
-		NavigableMap<Integer, MaximumTransferUnit> unitTreeMap = new TreeMap<Integer, MaximumTransferUnit>(unitMap)
-				.descendingMap();
-		Set<Entry<Integer, MaximumTransferUnit>> unitSet = unitTreeMap.entrySet();
-		Iterator<Entry<Integer, MaximumTransferUnit>> unitI = unitSet.iterator();
-		while (unitI.hasNext()) {
-			Entry<Integer, MaximumTransferUnit> unitEntry = unitI.next();
-			unitList.add(unitEntry.getValue());
-		}
-
-		return unitList.toArray(new MaximumTransferUnit[unitList.size()]);
-	}
-
-	/**
 	 * Constructs a <code>MaximumTransferUnit</code> with the specified maximum
 	 * transfer unit and amount of retries before it should stop being used.
 	 * 
@@ -141,6 +112,35 @@ public class MaximumTransferUnit {
 		RakNetLogger.debug(LOGGER_NAME, "Reset transfer unit with size of " + maximumTransferUnit + " bytes ("
 				+ (maximumTransferUnit * 8) + " bits)");
 		this.retriesLeft = this.retries;
+	}
+
+	/**
+	 * Sorts an array of <code>MaximumTransferUnit</code>'s from highest to lowest
+	 * maximum transfer units.
+	 * 
+	 * @param units
+	 *            the <code>MaximumTransferUnit</code>s to sort.
+	 * @return the sorted <code>MaximumTransferUnit</code>s.
+	 */
+	public static MaximumTransferUnit[] sort(MaximumTransferUnit[] units) {
+		// Convert array to IntMap
+		IntMap<MaximumTransferUnit> unitMap = new IntMap<MaximumTransferUnit>();
+		for (MaximumTransferUnit unit : units) {
+			unitMap.put(unit.getMaximumTransferUnit(), unit);
+		}
+
+		// Sort IntMap
+		ArrayList<MaximumTransferUnit> unitList = new ArrayList<MaximumTransferUnit>();
+		NavigableMap<Integer, MaximumTransferUnit> unitTreeMap = new TreeMap<Integer, MaximumTransferUnit>(unitMap)
+				.descendingMap();
+		Set<Entry<Integer, MaximumTransferUnit>> unitSet = unitTreeMap.entrySet();
+		Iterator<Entry<Integer, MaximumTransferUnit>> unitI = unitSet.iterator();
+		while (unitI.hasNext()) {
+			Entry<Integer, MaximumTransferUnit> unitEntry = unitI.next();
+			unitList.add(unitEntry.getValue());
+		}
+
+		return unitList.toArray(new MaximumTransferUnit[unitList.size()]);
 	}
 
 }

@@ -85,8 +85,8 @@ public class LatencyFrame extends JFrame {
 		StringBuilder discoverString = new StringBuilder();
 		for (int i = 0; i < sessions.length; i++) {
 			RakNetClientSession session = sessions[i];
-			discoverString.append((session.getAddress() + ": " + session.getLatency() + "MS")
-					+ (i + 1 < sessions.length ? "\n" : ""));
+			discoverString.append((session.isJRakNet() ? "JRakNet" : "Vanilla") + " client " + session.getAddress()
+					+ ": " + session.getLatency() + "MS" + (i + 1 < sessions.length ? "\n" : ""));
 		}
 		txtPnClientLatencies.setText(discoverString.toString());
 	}

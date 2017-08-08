@@ -58,7 +58,7 @@ public class LoginAccepted extends ChatPacket {
 		this.writeString(serverMotd);
 		this.writeInt(channels.length);
 		for (int i = 0; i < channels.length; i++) {
-			this.writeUByte(channels[i].getChannel());
+			this.writeUnsignedByte(channels[i].getChannel());
 			this.writeString(channels[i].getName());
 		}
 	}
@@ -70,7 +70,7 @@ public class LoginAccepted extends ChatPacket {
 		this.serverMotd = this.readString();
 		this.channels = new ServerChannel[this.readInt()];
 		for (int i = 0; i < channels.length; i++) {
-			short channel = this.readUByte();
+			short channel = this.readUnsignedByte();
 			String channelName = this.readString();
 			channels[i] = new ServerChannel(channel, channelName);
 		}

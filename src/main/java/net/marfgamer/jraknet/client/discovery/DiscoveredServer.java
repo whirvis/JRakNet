@@ -51,7 +51,6 @@ public class DiscoveredServer {
 	private final InetSocketAddress address;
 	private long discoveryTimestamp;
 	private Identifier identifier;
-	private boolean isJraknet;
 
 	/**
 	 * Constructs a <code>DiscoveredServer</code> with the specified address,
@@ -63,15 +62,11 @@ public class DiscoveredServer {
 	 *            the time the server was initially discovered.
 	 * @param identifier
 	 *            the server's identifier.
-	 * @param isJraknet
-	 *            whether or not the discovered server is a JRakNet server.
 	 */
-	public DiscoveredServer(InetSocketAddress address, long discoveryTimestamp, Identifier identifier,
-			boolean isJraknet) {
+	public DiscoveredServer(InetSocketAddress address, long discoveryTimestamp, Identifier identifier) {
 		this.address = address;
 		this.discoveryTimestamp = discoveryTimestamp;
 		this.identifier = identifier;
-		this.isJraknet = isJraknet;
 	}
 
 	/**
@@ -113,13 +108,6 @@ public class DiscoveredServer {
 	 */
 	public void setIdentifier(Identifier identifier) {
 		this.identifier = identifier;
-	}
-
-	/**
-	 * @return whether or not the discovered server is a JRakNet server.
-	 */
-	public boolean isJRakNet() {
-		return this.isJraknet;
 	}
 
 	@Override

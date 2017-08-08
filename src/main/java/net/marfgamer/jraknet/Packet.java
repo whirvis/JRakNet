@@ -154,7 +154,7 @@ public class Packet {
 	 * 
 	 * @return an unsigned byte.
 	 */
-	public short readUByte() {
+	public short readUnsignedByte() {
 		return (short) (buffer.readByte() & 0xFF);
 	}
 
@@ -190,7 +190,7 @@ public class Packet {
 	 * @return a boolean.
 	 */
 	public boolean readBoolean() {
-		return (this.readUByte() > 0x00);
+		return (this.readUnsignedByte() > 0x00);
 	}
 
 	/**
@@ -216,7 +216,7 @@ public class Packet {
 	 * 
 	 * @return an unsigned short.
 	 */
-	public int readUShort() {
+	public int readUnsignedShort() {
 		return (buffer.readShort() & 0xFFFF);
 	}
 
@@ -225,7 +225,7 @@ public class Packet {
 	 * 
 	 * @return an unsigned little endian short.
 	 */
-	public int readUShortLE() {
+	public int readUnsignedShortLE() {
 		return (buffer.readShortLE() & 0xFFFF);
 	}
 
@@ -261,7 +261,7 @@ public class Packet {
 	 * 
 	 * @return an unsigned integer.
 	 */
-	public long readUInt() {
+	public long readUnsignedInt() {
 		return (buffer.readInt() & 0x00000000FFFFFFFFL);
 	}
 
@@ -270,7 +270,7 @@ public class Packet {
 	 * 
 	 * @return an unsigned little endian integer.
 	 */
-	public long readUIntLE() {
+	public long readUnsignedIntLE() {
 		return (buffer.readIntLE() & 0x00000000FFFFFFFFL);
 	}
 
@@ -321,12 +321,30 @@ public class Packet {
 	}
 
 	/**
+	 * Returns a JRakNet magic array and returns whether or not it is valid. Unlike
+	 * the <code>checkMagic()</code> method, this one will check to make sure if
+	 * enough data is remaining to read the JRakNet magic code before actually
+	 * reading it. This is because it is meant to be used strictly at the end of
+	 * packets that can be used to signify that the machine is a JRakNet
+	 * server/client.
+	 * 
+	 * @return whether or not the JRakNet magic array was valid.
+	 */
+	public boolean checkJRakNetMagic() {
+		if (this.remaining() >= JRAKNET_MAGIC.length) {
+			byte[] jraknetMagicCheck = this.read(JRAKNET_MAGIC.length);
+			return Arrays.equals(JRAKNET_MAGIC, jraknetMagicCheck);
+		}
+		return false;
+	}
+
+	/**
 	 * Reads a UTF-8 String with it's length prefixed by a unsigned short.
 	 * 
 	 * @return a String.
 	 */
 	public String readString() {
-		int len = this.readUShort();
+		int len = this.readUnsignedShort();
 		byte[] data = this.read(len);
 		return new String(data);
 	}
@@ -338,7 +356,7 @@ public class Packet {
 	 * @return a String.
 	 */
 	public String readStringLE() {
-		int len = this.readUShortLE();
+		int len = this.readUnsignedShortLE();
 		byte[] data = this.read(len);
 		return new String(data);
 	}
@@ -351,16 +369,16 @@ public class Packet {
 	 *             if an error occurs when reading the address.
 	 */
 	public InetSocketAddress readAddress() throws UnknownHostException {
-		short version = this.readUByte();
+		short version = this.readUnsignedByte();
 		if (version == ADDRESS_VERSION_IPV4) {
 			byte[] addressBytes = this.readCFU(ADDRESS_VERSION_IPV4_LENGTH);
-			int port = this.readUShort();
+			int port = this.readUnsignedShort();
 			return new InetSocketAddress(InetAddress.getByAddress(addressBytes), port);
 		} else if (version == ADDRESS_VERSION_IPV6) {
 			// Read data
 			byte[] addressBytes = this.readCFU(ADDRESS_VERSION_IPV6_LENGTH);
 			this.read(ADDRESS_VERSION_IPV6_MYSTERY_LENGTH); // Mystery bytes
-			int port = this.readUShort();
+			int port = this.readUnsignedShort();
 			return new InetSocketAddress(InetAddress.getByAddress(Arrays.copyOfRange(addressBytes, 0, 16)), port);
 		} else {
 			throw new UnknownHostException("Unknown protocol IPv" + version);
@@ -414,7 +432,7 @@ public class Packet {
 	 *            the unsigned byte.
 	 * @return the packet.
 	 */
-	public Packet writeUByte(int b) {
+	public Packet writeUnsignedByte(int b) {
 		buffer.writeByte(((byte) b) & 0xFF);
 		return this;
 	}
@@ -489,7 +507,7 @@ public class Packet {
 	 *            the short.
 	 * @return the packet.
 	 */
-	public Packet writeUShort(int s) {
+	public Packet writeUnsignedShort(int s) {
 		buffer.writeShort(((short) s) & 0xFFFF);
 		return this;
 	}
@@ -501,7 +519,7 @@ public class Packet {
 	 *            the short.
 	 * @return the packet.
 	 */
-	public Packet writeUShortLE(int s) {
+	public Packet writeUnsignedShortLE(int s) {
 		buffer.writeShortLE(((short) s) & 0xFFFF);
 		return this;
 	}
@@ -539,7 +557,7 @@ public class Packet {
 	 *            the integer.
 	 * @return the packet.
 	 */
-	public Packet writeUInt(long i) {
+	public Packet writeUnsignedInt(long i) {
 		buffer.writeInt(((int) i) & 0xFFFFFFFF);
 		return this;
 	}
@@ -563,7 +581,7 @@ public class Packet {
 	 *            the integer.
 	 * @return the packet.
 	 */
-	public Packet writeUIntLE(long i) {
+	public Packet writeUnsignedIntLE(long i) {
 		buffer.writeIntLE(((int) i) & 0xFFFFFFFF);
 		return this;
 	}
@@ -627,6 +645,16 @@ public class Packet {
 	}
 
 	/**
+	 * Writes the JRakNet magic sequence to the packet.
+	 * 
+	 * @return the packet.
+	 */
+	public Packet writeJRakNetMagic() {
+		this.write(JRAKNET_MAGIC);
+		return this;
+	}
+
+	/**
 	 * Writes a UTF-8 String prefixed by an unsigned short to the packet.
 	 * 
 	 * @param s
@@ -635,7 +663,7 @@ public class Packet {
 	 */
 	public Packet writeString(String s) {
 		byte[] data = s.getBytes();
-		this.writeUShort(data.length);
+		this.writeUnsignedShort(data.length);
 		this.write(data);
 		return this;
 	}
@@ -650,7 +678,7 @@ public class Packet {
 	 */
 	public Packet writeStringLE(String s) {
 		byte[] data = s.getBytes();
-		this.writeUShortLE(data.length);
+		this.writeUnsignedShortLE(data.length);
 		this.write(data);
 		return this;
 	}
@@ -667,14 +695,14 @@ public class Packet {
 	public Packet writeAddress(InetSocketAddress address) throws UnknownHostException {
 		byte[] addressBytes = address.getAddress().getAddress();
 		if (addressBytes.length == ADDRESS_VERSION_IPV4_LENGTH) {
-			this.writeUByte(ADDRESS_VERSION_IPV4);
+			this.writeUnsignedByte(ADDRESS_VERSION_IPV4);
 			this.writeCFU(addressBytes);
-			this.writeUShort(address.getPort());
+			this.writeUnsignedShort(address.getPort());
 		} else if (addressBytes.length == ADDRESS_VERSION_IPV6_LENGTH) {
-			this.writeUByte(ADDRESS_VERSION_IPV6);
+			this.writeUnsignedByte(ADDRESS_VERSION_IPV6);
 			this.writeCFU(addressBytes);
 			this.pad(ADDRESS_VERSION_IPV6_MYSTERY_LENGTH); // Mystery bytes
-			this.writeUShort(address.getPort());
+			this.writeUnsignedShort(address.getPort());
 		} else {
 			throw new UnknownHostException("Unknown protocol IPv" + addressBytes.length);
 		}

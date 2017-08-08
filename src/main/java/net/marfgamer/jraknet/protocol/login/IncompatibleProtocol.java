@@ -49,7 +49,7 @@ public class IncompatibleProtocol extends RakNetPacket {
 
 	@Override
 	public void encode() {
-		this.writeUByte(networkProtocol);
+		this.writeUnsignedByte(networkProtocol);
 		this.writeMagic();
 		this.writeLong(serverGuid);
 	}

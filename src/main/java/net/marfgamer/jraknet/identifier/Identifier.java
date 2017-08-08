@@ -40,13 +40,19 @@ package net.marfgamer.jraknet.identifier;
 public class Identifier {
 
 	private final String identifier;
+	private final boolean isJraknet;
 
-	public Identifier(String identifier) {
+	public Identifier(String identifier, boolean isJraknet) {
 		this.identifier = identifier;
+		this.isJraknet = isJraknet;
 	}
-
-	public Identifier() {
-		this(null);
+	
+	public Identifier(String identifier) {
+		this(identifier, true);
+	}
+	
+	public Identifier(Identifier identifier) {
+		this(identifier.identifier, identifier.isJraknet);
 	}
 
 	/**
@@ -54,6 +60,13 @@ public class Identifier {
 	 */
 	public String build() {
 		return this.identifier;
+	}
+
+	/**
+	 * @return whether or not the identifier is from a JRakNet server.
+	 */
+	public final boolean isJRakNet() {
+		return this.isJraknet;
 	}
 
 	@Override

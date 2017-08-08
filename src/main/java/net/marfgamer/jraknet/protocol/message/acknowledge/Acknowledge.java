@@ -70,13 +70,13 @@ public class Acknowledge extends RakNetPacket {
 	@Override
 	public void encode() {
 		this.condenseRecords();
-		this.writeUShort(records.size());
+		this.writeUnsignedShort(records.size());
 		for (Record record : records) {
 			if (record.isRanged() == false) {
-				this.writeByte(0x01); // Record is not ranged
+				this.writeUnsignedByte(0x01); // Record is not ranged
 				this.writeTriadLE(record.getIndex());
 			} else {
-				this.writeByte(0x00); // Record is indeed ranged
+				this.writeUnsignedByte(0x00); // Record is indeed ranged
 				this.writeTriadLE(record.getIndex());
 				this.writeTriadLE(record.getEndIndex());
 			}
@@ -85,9 +85,9 @@ public class Acknowledge extends RakNetPacket {
 
 	@Override
 	public void decode() {
-		int size = this.readUShort();
+		int size = this.readUnsignedShort();
 		for (int i = 0; i < size; i++) {
-			boolean ranged = (this.readUByte() == 0x00);
+			boolean ranged = (this.readUnsignedByte() == 0x00);
 			if (ranged == false) {
 				records.add(new Record(this.readTriadLE()));
 			} else {

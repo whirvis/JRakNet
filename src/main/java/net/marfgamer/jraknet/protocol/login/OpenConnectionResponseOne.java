@@ -64,8 +64,8 @@ public class OpenConnectionResponseOne extends RakNetPacket {
 		// Set security flags
 		byte securityFlags = 0x00;
 		securityFlags |= (useSecurity ? USE_SECURITY_BIT : 0x00);
-		this.writeUByte(securityFlags);
-		this.writeUShort(maximumTransferUnit);
+		this.writeUnsignedByte(securityFlags);
+		this.writeUnsignedShort(maximumTransferUnit);
 	}
 
 	@Override
@@ -74,11 +74,11 @@ public class OpenConnectionResponseOne extends RakNetPacket {
 		this.serverGuid = this.readLong();
 
 		byte securityFlags = 0x00;
-		securityFlags |= this.readUByte(); // Use security
+		securityFlags |= this.readUnsignedByte(); // Use security
 		if ((securityFlags & USE_SECURITY_BIT) == USE_SECURITY_BIT) {
 			this.useSecurity = true;
 		}
-		this.maximumTransferUnit = this.readUShort();
+		this.maximumTransferUnit = this.readUnsignedShort();
 	}
 
 }

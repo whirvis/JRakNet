@@ -34,7 +34,10 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 import net.marfgamer.jraknet.identifier.MCPEIdentifier;
+import net.marfgamer.jraknet.protocol.MessageIdentifier;
 import net.marfgamer.jraknet.protocol.login.NewIncomingConnection;
+import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
+import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 import net.marfgamer.jraknet.server.RakNetServer;
 import net.marfgamer.jraknet.server.RakNetServerListener;
 import net.marfgamer.jraknet.server.ServerPing;
@@ -53,7 +56,7 @@ public class RakNetServerTest {
 
 	public static void main(String[] args) {
 		// Enable logging
-		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
+		RakNet.enableLogging();
 
 		// Create server and set listener
 		RakNetServer server = new RakNetServer(UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT, 10);
@@ -74,21 +77,20 @@ public class RakNetServerTest {
 
 			@Override
 			public void onClientConnect(RakNetClientSession session) {
-				RakNetLogger.info(LOGGER_NAME, (session.isJRakNet() ? "JRakNet" : "Vanilla")
-						+ " client from address " + session.getAddress() + " has connected to the server");
+				RakNetLogger.info(LOGGER_NAME, (session.isJRakNet() ? "JRakNet" : "vanilla") + " client from address "
+						+ session.getAddress() + " has connected to the server");
 			}
 
 			@Override
 			public void onClientDisconnect(RakNetClientSession session, String reason) {
-				RakNetLogger.info(LOGGER_NAME,
-						(session.isJRakNet() ? "JRakNet" : "Vanilla") + " client from address "
-								+ session.getAddress() + " has been disconnected for \"" + reason + "\"");
+				RakNetLogger.info(LOGGER_NAME, (session.isJRakNet() ? "JRakNet" : "vanilla") + " client from address "
+						+ session.getAddress() + " has been disconnected for \"" + reason + "\"");
 			}
 
 			@Override
 			public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
 				RakNetLogger.info(LOGGER_NAME,
-						"Received packet from " + (session.isJRakNet() ? "JRakNet" : "Vanilla")
+						"Received packet from " + (session.isJRakNet() ? "JRakNet" : "vanilla")
 								+ " client with address " + session.getAddress() + " with packet ID 0x"
 								+ Integer.toHexString(packet.getId()).toUpperCase() + " on channel " + channel);
 			}
@@ -99,6 +101,22 @@ public class RakNetServerTest {
 						server.getSessionCount(), server.getMaxConnections(), server.getGloballyUniqueId(), "New World",
 						"Survival");
 				ping.setIdentifier(identifier);
+			}
+
+			@Override
+			public void onAcknowledge(RakNetClientSession session, Record record, EncapsulatedPacket packet) {
+				RakNetLogger.info(LOGGER_NAME,
+						(session.isJRakNet() ? "JRakNet" : "vanilla") + " client with address " + session.getAddress()
+								+ " has received packet with ID: "
+								+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
+			}
+
+			@Override
+			public void onNotAcknowledge(RakNetClientSession session, Record record, EncapsulatedPacket packet) {
+				RakNetLogger.info(LOGGER_NAME,
+						(session.isJRakNet() ? "JRakNet" : "vanilla") + " client with address " + session.getAddress()
+								+ " has lost packet with ID: "
+								+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
 
 			@Override

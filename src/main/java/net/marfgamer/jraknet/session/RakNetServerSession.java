@@ -30,9 +30,7 @@
  */
 package net.marfgamer.jraknet.session;
 
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_CONNECTION_REQUEST_ACCEPTED;
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_DISCONNECTION_NOTIFICATION;
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_USER_PACKET_ENUM;
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.*;
 
 import java.net.InetSocketAddress;
 
@@ -106,7 +104,7 @@ public class RakNetServerSession extends RakNetSession {
 				clientHandshake.encode();
 
 				if (!clientHandshake.failed()) {
-					this.sendMessage(Reliability.RELIABLE, clientHandshake);
+					this.sendMessage(Reliability.RELIABLE_ORDERED, clientHandshake);
 					this.setState(RakNetState.CONNECTED);
 					client.getListener().onConnect(this);
 				} else {

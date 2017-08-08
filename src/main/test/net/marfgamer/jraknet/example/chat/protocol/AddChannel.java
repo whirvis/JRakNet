@@ -48,13 +48,13 @@ public class AddChannel extends ChatPacket {
 
 	@Override
 	public void encode() {
-		this.writeUByte(channel);
+		this.writeUnsignedByte(channel);
 		this.writeString(channelName);
 	}
 
 	@Override
 	public void decode() {
-		this.channel = this.readUByte();
+		this.channel = this.readUnsignedByte();
 		this.channelName = this.readString();
 	}
 

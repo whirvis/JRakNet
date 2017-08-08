@@ -63,7 +63,7 @@ public class PacketDataInput extends InputStream implements DataInput {
 		if (packet.remaining() <= 0) {
 			return -1;
 		} else {
-			return packet.readUByte();
+			return packet.readUnsignedByte();
 		}
 	}
 
@@ -103,7 +103,7 @@ public class PacketDataInput extends InputStream implements DataInput {
 
 	@Override
 	public int readUnsignedByte() throws IOException {
-		return packet.readUByte();
+		return packet.readUnsignedByte();
 	}
 
 	@Override
@@ -113,12 +113,12 @@ public class PacketDataInput extends InputStream implements DataInput {
 
 	@Override
 	public int readUnsignedShort() throws IOException {
-		return packet.readUShort();
+		return packet.readUnsignedShort();
 	}
 
 	@Override
 	public char readChar() throws IOException {
-		return (char) packet.readUShort();
+		return (char) packet.readUnsignedShort();
 	}
 
 	@Override

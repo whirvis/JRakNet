@@ -30,11 +30,8 @@
  */
 package net.marfgamer.jraknet.protocol.login;
 
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.JRAKNET_MAGIC;
-
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 
 import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNetPacket;
@@ -66,9 +63,9 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 			this.writeMagic();
 			this.writeLong(serverGuid);
 			this.writeAddress(clientAddress);
-			this.writeUShort(maximumTransferUnit);
+			this.writeUnsignedShort(maximumTransferUnit);
 			this.writeBoolean(encryptionEnabled);
-			this.write(JRAKNET_MAGIC);
+			this.writeJRakNetMagic();
 		} catch (UnknownHostException e) {
 			this.failed = true;
 			this.magic = false;
@@ -87,12 +84,9 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 			this.magic = this.checkMagic();
 			this.serverGuid = this.readLong();
 			this.clientAddress = this.readAddress();
-			this.maximumTransferUnit = this.readUShort();
+			this.maximumTransferUnit = this.readUnsignedShort();
 			this.encryptionEnabled = this.readBoolean();
-			if (this.remaining() >= JRAKNET_MAGIC.length) {
-				byte[] jraknetMagic = this.read(JRAKNET_MAGIC.length);
-				this.isJraknet = Arrays.equals(jraknetMagic, JRAKNET_MAGIC);
-			}
+			this.isJraknet = this.checkJRakNetMagic();
 		} catch (UnknownHostException e) {
 			this.failed = true;
 			this.magic = false;

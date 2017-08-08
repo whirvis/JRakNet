@@ -47,12 +47,12 @@ public class RemoveChannel extends ChatPacket {
 
 	@Override
 	public void encode() {
-		this.writeUByte(channel);
+		this.writeUnsignedByte(channel);
 	}
 
 	@Override
 	public void decode() {
-		this.channel = this.readUByte();
+		this.channel = this.readUnsignedByte();
 	}
 
 }
