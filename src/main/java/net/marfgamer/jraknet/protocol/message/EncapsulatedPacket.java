@@ -67,8 +67,8 @@ public class EncapsulatedPacket implements Sizable, Cloneable {
 
 	/**
 	 * If the reliability requires an ACK receipt (The name ends with
-	 * "_WITH_ACK_RECEIPT") then this can be used to determine if this is the packet
-	 * that was received or lost once you are notified through
+	 * <code>_WITH_ACK_RECEIPT</code>) then this can be used to determine if this is
+	 * the packet that was received or lost once you are notified through
 	 * <code>onAcknowledge()</code> or <code>onNotAcknowledge()</code>.<br>
 	 * <br>
 	 * This will <i>always</i> be <code>null</code> before and after the two

@@ -85,9 +85,13 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	// Packet data
 	private int messageIndex;
 	private int splitId;
-	private final ArrayList<Integer> reliables;
+	private final ArrayList<Integer> reliablePackets;
 	private final IntMap<SplitPacket> splitQueue;
-	private final ArrayList<EncapsulatedPacket> sendQueue;
+	/**
+	 * Cleared by <code>RakNetServerSession</code> to help make sure the
+	 * <code>ID_DISCONNECTION_NOTIFICATION</code> packet is sent out
+	 */
+	protected final ArrayList<EncapsulatedPacket> sendQueue;
 	private final IntMap<EncapsulatedPacket[]> recoveryQueue;
 	private final HashMap<EncapsulatedPacket, Integer> ackReceiptPackets;
 
@@ -140,7 +144,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		this.lastPacketReceiveTime = System.currentTimeMillis();
 
 		// Packet data
-		this.reliables = new ArrayList<Integer>();
+		this.reliablePackets = new ArrayList<Integer>();
 		this.splitQueue = new IntMap<SplitPacket>();
 		this.sendQueue = new ArrayList<EncapsulatedPacket>();
 		this.recoveryQueue = new IntMap<EncapsulatedPacket[]>();
@@ -687,10 +691,10 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 		// Make sure we are not handling a duplicate
 		if (reliability.isReliable()) {
-			if (reliables.contains(encapsulated.messageIndex)) {
+			if (reliablePackets.contains(encapsulated.messageIndex)) {
 				return; // Do not handle, it is a duplicate
 			}
-			reliables.add(encapsulated.messageIndex);
+			reliablePackets.add(encapsulated.messageIndex);
 		}
 
 		// Make sure we are handling everything in an ordered/sequenced fashion
@@ -832,7 +836,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 		// Send ping to detect latency if it is enabled
 		if (this.latencyEnabled == true && currentTime - this.lastPingSendTime >= RakNet.PING_SEND_INTERVAL
-				&& state.getOrder() >= RakNetState.CONNECTED.getOrder()) {
+				&& state.equals(RakNetState.CONNECTED)) {
 			ConnectedPing ping = new ConnectedPing();
 			ping.identifier = this.latencyIdentifier++;
 			ping.encode();
@@ -845,7 +849,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		// Make sure the client is still connected
 		if (currentTime - this.lastPacketReceiveTime >= RakNet.DETECTION_SEND_INTERVAL
 				&& currentTime - this.lastKeepAliveSendTime >= RakNet.DETECTION_SEND_INTERVAL
-				&& state.getOrder() >= RakNetState.CONNECTED.getOrder()) {
+				&& state.equals(RakNetState.CONNECTED)) {
 			this.sendMessage(Reliability.UNRELIABLE, ID_DETECT_LOST_CONNECTIONS);
 			this.lastKeepAliveSendTime = currentTime;
 			RakNetLogger.debug(loggerName,

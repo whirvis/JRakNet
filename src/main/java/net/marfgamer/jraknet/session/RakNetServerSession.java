@@ -55,6 +55,15 @@ public class RakNetServerSession extends RakNetSession {
 	private EncapsulatedPacket incomingConnectionPacket;
 
 	/**
+	 * Called by the client when the connection is closed.
+	 */
+	public void closeConnection() {
+		sendQueue.clear(); // Make sure disconnect packet is first in-line
+		this.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
+		this.update(); // Make sure the packet is sent out
+	}
+
+	/**
 	 * Constructs a <code>RakNetClientSession</code> with the specified
 	 * <code>RakNetClient</code>, globally unique ID, maximum transfer unit,
 	 * <code>Channel</code>, and address.
@@ -84,7 +93,7 @@ public class RakNetServerSession extends RakNetSession {
 		client.getListener().onAcknowledge(this, record, packet);
 
 		// If the server received our IncomingConnectionPacket we are connected
-		if (this.getState().getOrder() < RakNetState.CONNECTED.getOrder() && incomingConnectionPacket != null) {
+		if (!this.getState().equals(RakNetState.CONNECTED) && incomingConnectionPacket != null) {
 			if (record.equals(incomingConnectionPacket.ackRecord)) {
 				this.setState(RakNetState.CONNECTED);
 				client.getListener().onConnect(this);
@@ -127,13 +136,6 @@ public class RakNetServerSession extends RakNetSession {
 		} else if (packetId >= ID_USER_PACKET_ENUM) {
 			client.getListener().handleMessage(this, packet, channel);
 		}
-	}
-
-	/**
-	 * Called by the client when the connection is closed.
-	 */
-	public void closeConnection() {
-		this.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
 	}
 
 }
