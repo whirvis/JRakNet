@@ -79,10 +79,10 @@ public class Record {
 	}
 
 	/**
-	 * Sets the ending index of the record. <br>
-	 * <b>Note:</b> If the ending index is set to -1 or lower (It will be set to -1
-	 * automatically if the new end index is lower than the starting index), it is
-	 * assumed that the record is a single record and not a ranged one.
+	 * Sets the ending index of the record. If the ending index is set to
+	 * <code>-1</code> or lower (It will be set to <code>-1</code> automatically if
+	 * the new end index is lower than the starting index), it is assumed that the
+	 * record is a single record and not a ranged one.
 	 * 
 	 * @param endIndex
 	 *            the new ending index.

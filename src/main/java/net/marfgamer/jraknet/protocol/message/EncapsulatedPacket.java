@@ -62,9 +62,25 @@ public class EncapsulatedPacket implements Sizable, Cloneable {
 
 	// Used to encode and decode, modified by CustomPacket and RakNetSession only
 	protected Packet buffer = new Packet();
-	public Record ackRecord = null;
 	private EncapsulatedPacket clone = null;
 	private boolean isClone = false;
+
+	/**
+	 * If the reliability requires an ACK receipt (The name ends with
+	 * "_WITH_ACK_RECEIPT") then this can be used to determine if this is the packet
+	 * that was received or lost once you are notified through
+	 * <code>onAcknowledge()</code> or <code>onNotAcknowledge()</code>.<br>
+	 * <br>
+	 * This will <i>always</i> be <code>null</code> before and after the two
+	 * notifier methods stated above are called. This is due to the fact that the
+	 * ACK record for an encapsulated packet can change as the custom packet that
+	 * sends it might not ever arrive, causing it to be resent in another custom
+	 * packet with another sequence ID (ACK record), causing it to be changed.
+	 * Because of this, it is recommended to only read data from the packet when
+	 * either the <code>onAcknowledge()</code> or <code>onNotAcknowledge()</code>
+	 * methods are called.
+	 */
+	public Record ackRecord = null;
 
 	// Encapsulation data
 	public Reliability reliability;

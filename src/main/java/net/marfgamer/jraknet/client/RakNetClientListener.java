@@ -41,8 +41,8 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
 
 /**
  * This interface is used by the <code>RakNetClient</code> to let the user know
- * when specific events are triggered. Do <b>not</b> use in any sleeps methods
- * any of these methods, as it will cause the client to timeout.
+ * when specific events are triggered. Do <i>not</i> use any sleep methods that
+ * will cause the client thread to pause, as it will cause a timeout.
  *
  * @author Whirvis "MarfGamer" Ardenaur
  */
