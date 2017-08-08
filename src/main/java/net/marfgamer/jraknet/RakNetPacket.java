@@ -104,8 +104,8 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Constructs a <code>RakNetPacket</code> that reads from and writes to the
 	 * specified <code>Packet</code>. On instantiation, the first byte of the buffer
-	 * will be read and set as the ID <b>unless</b> the specified packet is a
-	 * subclass of <code>RakNetPacket</code>.
+	 * will be read and set as the ID unless the specified packet is a subclass of
+	 * <code>RakNetPacket</code>.
 	 * 
 	 * @param packet
 	 *            the <code>Packet</code> to read from and write to.

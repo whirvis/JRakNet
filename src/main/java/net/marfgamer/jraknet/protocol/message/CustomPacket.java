@@ -52,7 +52,7 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 
 	// Session ACK data
 	public RakNetSession session;
-	private ArrayList<EncapsulatedPacket> ackMessages;
+	private final ArrayList<EncapsulatedPacket> ackMessages;
 
 	public CustomPacket() {
 		super(MessageIdentifier.ID_RESERVED_8);
@@ -63,14 +63,18 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 	public CustomPacket(Packet packet) {
 		super(packet);
 		this.messages = new ArrayList<EncapsulatedPacket>();
+		this.ackMessages = new ArrayList<EncapsulatedPacket>();
 	}
 
 	@Override
 	public void encode() {
 		this.writeTriadLE(sequenceNumber);
 		for (EncapsulatedPacket packet : messages) {
-			// Tell the packet to use ourself as a buffer since we are a container for it
-			packet.buffer = this;
+			/*
+			 * We have to use wrap our buffer around a packet otherwise data will be written
+			 * incorrectly due to how Netty's ByteBufs work.
+			 */
+			packet.buffer = new Packet(this.buffer());
 
 			// Set ACK record if the reliability requires an ACK receipt
 			if (packet.reliability.requiresAck()) {
@@ -100,10 +104,23 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 	public void decode() {
 		this.sequenceNumber = this.readTriadLE();
 		while (this.remaining() >= EncapsulatedPacket.MINIMUM_BUFFER_LENGTH) {
-			// Create an encapsulated packet while using ourself as a buffer
+			// Create encapsulated packet so it can be decoded later
 			EncapsulatedPacket packet = new EncapsulatedPacket();
-			packet.buffer = this;
+
+			/*
+			 * We have to use wrap our buffer around a packet otherwise data will be read
+			 * incorrectly due to how Netty's ByteBufs work.
+			 */
+			packet.buffer = new Packet(this.buffer());
+
+			// Decode packet
 			packet.decode();
+
+			// Set ACK record if the reliability requires an ACK receipt
+			if (packet.reliability.requiresAck()) {
+				packet.ackRecord = new Record(sequenceNumber);
+				ackMessages.add(packet);
+			}
 
 			// Nullify buffer so it can not be abused
 			packet.buffer = null;
