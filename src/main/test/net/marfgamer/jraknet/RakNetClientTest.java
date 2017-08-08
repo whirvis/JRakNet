@@ -74,14 +74,14 @@ public class RakNetClientTest {
 			@Override
 			public void onAcknowledge(RakNetServerSession session, Record record, EncapsulatedPacket packet) {
 				RakNetLogger.info(LOGGER_NAME,
-						(session.isJRakNet() ? "JRakNet" : "vanilla") + " server has received packet with ID: "
+						(session.isJRakNet() ? "JRakNet" : "vanilla") + " server has acknowledged packet with ID: "
 								+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
 
 			@Override
 			public void onNotAcknowledge(RakNetServerSession session, Record record, EncapsulatedPacket packet) {
 				RakNetLogger.info(LOGGER_NAME,
-						(session.isJRakNet() ? "JRakNet" : "vanilla") + " server has lost packet with ID: "
+						(session.isJRakNet() ? "JRakNet" : "vanilla") + " server has not acknowledged packet with ID: "
 								+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
 

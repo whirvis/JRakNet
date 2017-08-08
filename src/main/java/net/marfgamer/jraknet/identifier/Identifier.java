@@ -46,17 +46,17 @@ public class Identifier {
 		this.identifier = identifier;
 		this.isJraknet = isJraknet;
 	}
-	
+
 	public Identifier(String identifier) {
 		this.identifier = identifier;
 		this.isJraknet = true;
 	}
-	
+
 	public Identifier(Identifier identifier) {
 		this.identifier = identifier.identifier;
 		this.isJraknet = identifier.isJraknet;
 	}
-	
+
 	public Identifier() {
 		this.identifier = null;
 		this.isJraknet = true;

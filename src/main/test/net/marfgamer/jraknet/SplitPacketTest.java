@@ -126,7 +126,6 @@ public class SplitPacketTest {
 
 				// Check shorts
 				RakNetLogger.info(LOGGER_NAME, "Server: Checking if data is sequenced correctly...");
-				StringBuilder sequencedIntegers = new StringBuilder();
 				long lastInt = -1;
 				while (packet.remaining() >= 4) {
 					long currentInt = packet.readUnsignedInt();
@@ -135,10 +134,8 @@ public class SplitPacketTest {
 						System.exit(1);
 					} else {
 						lastInt = currentInt;
-						sequencedIntegers.append(lastInt + (packet.remaining() >= 4 ? ", " : "\n"));
 					}
 				}
-				RakNetLogger.info(LOGGER_NAME, sequencedIntegers.toString());
 
 				// Check packet footer
 				RakNetLogger.info(LOGGER_NAME, "Server: Checking footer byte...");
