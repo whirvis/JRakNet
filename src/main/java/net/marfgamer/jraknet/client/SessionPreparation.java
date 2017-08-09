@@ -83,7 +83,8 @@ public class SessionPreparation {
 	}
 
 	/**
-	 * Handles the specified packet and automatically updates the preparation data.
+	 * Handles the specified packet and automatically updates the preparation
+	 * data.
 	 * 
 	 * @param packet
 	 *            the packet to handle.

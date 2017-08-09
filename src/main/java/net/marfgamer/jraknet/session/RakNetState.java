@@ -39,7 +39,7 @@ import net.marfgamer.jraknet.util.map.IntMap;
  * @author Whirvis "MarfGamer" Ardenaur
  */
 public class RakNetState {
-	
+
 	private static final IntMap<RakNetState> registeredStates = new IntMap<RakNetState>();
 
 	/**
@@ -56,7 +56,7 @@ public class RakNetState {
 	 * The session is connected.
 	 */
 	public static final RakNetState CONNECTED = new RakNetState(2);
-	
+
 	private final int order;
 
 	/**

@@ -261,8 +261,8 @@ public class ChatFrame extends JFrame {
 	}
 
 	/**
-	 * Updates the listeners required for the frame to function properly based on
-	 * the client.
+	 * Updates the listeners required for the frame to function properly based
+	 * on the client.
 	 * 
 	 * @param client
 	 *            the client to assign the listeners to.
