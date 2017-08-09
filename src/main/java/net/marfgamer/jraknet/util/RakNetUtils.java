@@ -456,11 +456,6 @@ public class RakNetUtils {
 	 * @return the generated hex string.
 	 */
 	public static String toHexStringId(int id) {
-		if (id < 0) {
-			throw new IllegalArgumentException("The packet ID is an unsigned byte, it must be at least 0");
-		} else if (id > 255) {
-			throw new IllegalArgumentException("The packet ID is an unsigned byte, it can be no higher than 255");
-		}
 		return ("0x" + Integer.toHexString(id).toUpperCase());
 	}
 
