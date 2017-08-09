@@ -46,9 +46,10 @@ import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
 public interface GeminusRakNetPeer {
 
 	/**
-	 * Sends a message with the specified reliability on the specified channel to
-	 * the session with the specified globally unique ID and returns a copy of the
-	 * generated encapsulated packet that will be used when it is actually sent.
+	 * Sends a message with the specified reliability on the specified channel
+	 * to the session with the specified globally unique ID and returns a copy
+	 * of the generated encapsulated packet that will be used when it is
+	 * actually sent.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -65,10 +66,10 @@ public interface GeminusRakNetPeer {
 	public EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, Packet packet);
 
 	/**
-	 * Sends the specified messages with the specified reliability on the specified
-	 * channel to the session with the specified globally unique ID and returns
-	 * copies of the generated encapsulated packets that will be used when it is
-	 * actually sent.
+	 * Sends the specified messages with the specified reliability on the
+	 * specified channel to the session with the specified globally unique ID
+	 * and returns copies of the generated encapsulated packets that will be
+	 * used when it is actually sent.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -92,9 +93,10 @@ public interface GeminusRakNetPeer {
 	}
 
 	/**
-	 * Sends a message with the specified reliability on the default channel to the
-	 * session with the specified globally unique ID and returns a copy of the
-	 * generated encapsulated packet that will be used when it is actually sent.
+	 * Sends a message with the specified reliability on the default channel to
+	 * the session with the specified globally unique ID and returns a copy of
+	 * the generated encapsulated packet that will be used when it is actually
+	 * sent.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -112,10 +114,10 @@ public interface GeminusRakNetPeer {
 	}
 
 	/**
-	 * Sends the specified messages with the specified reliability on the default
-	 * channel to the session with the specified globally unique ID and returns
-	 * copies of the generated encapsulated packets that will be used when it is
-	 * actually sent.
+	 * Sends the specified messages with the specified reliability on the
+	 * default channel to the session with the specified globally unique ID and
+	 * returns copies of the generated encapsulated packets that will be used
+	 * when it is actually sent.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -137,10 +139,10 @@ public interface GeminusRakNetPeer {
 	}
 
 	/**
-	 * Sends a message identifier with the specified reliability on the specified
-	 * channel to the session with the specified globally unique ID and returns a
-	 * copy of the generated encapsulated packet that will be used when it is
-	 * actually sent.
+	 * Sends a message identifier with the specified reliability on the
+	 * specified channel to the session with the specified globally unique ID
+	 * and returns a copy of the generated encapsulated packet that will be used
+	 * when it is actually sent.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -159,10 +161,10 @@ public interface GeminusRakNetPeer {
 	}
 
 	/**
-	 * Sends the specified message identifiers with the specified reliability on the
-	 * specified channel to the session with the specified globally unique ID and
-	 * returns copies of the generated encapsulated packets that will be used when
-	 * it is actually sent.
+	 * Sends the specified message identifiers with the specified reliability on
+	 * the specified channel to the session with the specified globally unique
+	 * ID and returns copies of the generated encapsulated packets that will be
+	 * used when it is actually sent.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
@@ -186,8 +188,8 @@ public interface GeminusRakNetPeer {
 
 	/**
 	 * Sends a message identifier with the specified reliability on the default
-	 * channel to the session with the specified globally unique ID and returns a
-	 * copy of the generated encapsulated packet that will be used when it is
+	 * channel to the session with the specified globally unique ID and returns
+	 * a copy of the generated encapsulated packet that will be used when it is
 	 * actually sent.
 	 * 
 	 * @param guid
@@ -205,10 +207,10 @@ public interface GeminusRakNetPeer {
 	}
 
 	/**
-	 * Sends the specified message identifiers with the specified reliability on the
-	 * default channel to the session with the specified globally unique ID and
-	 * returns copies of the generated encapsulated packets that will be used when
-	 * it is actually sent.
+	 * Sends the specified message identifiers with the specified reliability on
+	 * the default channel to the session with the specified globally unique ID
+	 * and returns copies of the generated encapsulated packets that will be
+	 * used when it is actually sent.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the session.
