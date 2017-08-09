@@ -55,7 +55,7 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 	private final ArrayList<EncapsulatedPacket> ackMessages;
 
 	public CustomPacket() {
-		super(MessageIdentifier.ID_RESERVED_8);
+		super(MessageIdentifier.ID_CUSTOM_4);
 		this.messages = new ArrayList<EncapsulatedPacket>();
 		this.ackMessages = new ArrayList<EncapsulatedPacket>();
 	}

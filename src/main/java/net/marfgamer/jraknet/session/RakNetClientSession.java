@@ -58,8 +58,8 @@ public class RakNetClientSession extends RakNetSession {
 
 	/**
 	 * Constructs a <code>RakNetClientSession</code> with the specified
-	 * <code>RakNetServer</code>, the time the server was created, globally unique
-	 * ID, maximum transfer unit, <code>Channel</code>, and address.
+	 * <code>RakNetServer</code>, the time the server was created, globally
+	 * unique ID, maximum transfer unit, <code>Channel</code>, and address.
 	 * 
 	 * @param server
 	 *            the <code>RakNetServer</code>.
@@ -162,8 +162,17 @@ public class RakNetClientSession extends RakNetSession {
 			}
 		} else if (packetId == ID_DISCONNECTION_NOTIFICATION) {
 			server.removeSession(this, "Disconnected");
-		} else if (packetId >= ID_USER_PACKET_ENUM) {
-			server.getListener().handleMessage(this, packet, channel);
+		} else {
+			/*
+			 * If the packet is a user packet, we use handleMessage(). If the ID
+			 * is not a user packet but it is unknown to the session, we use
+			 * handleUnknownMessage().
+			 */
+			if (packetId >= ID_USER_PACKET_ENUM) {
+				server.getListener().handleMessage(this, packet, channel);
+			} else {
+				server.getListener().handleUnknownMessage(this, packet, channel);
+			}
 		}
 	}
 
