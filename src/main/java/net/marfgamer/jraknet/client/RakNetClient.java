@@ -577,7 +577,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		// Only handle these from the server we're connected to!
 		if (session != null) {
 			if (sender.equals(session.getAddress())) {
-				if (packetId >= ID_RESERVED_3 && packetId <= ID_RESERVED_9) {
+				if (packetId >= ID_CUSTOM_0 && packetId <= ID_CUSTOM_F) {
 					CustomPacket custom = new CustomPacket(packet);
 					custom.decode();
 

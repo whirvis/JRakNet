@@ -627,7 +627,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 					this.sendNettyMessage(errorPacket, sender);
 				}
 			}
-		} else if (packetId >= ID_RESERVED_3 && packetId <= ID_RESERVED_9) {
+		} else if (packetId >= ID_CUSTOM_0 && packetId <= ID_CUSTOM_F) {
 			synchronized (sessions) {
 				if (sessions.containsKey(sender)) {
 					CustomPacket custom = new CustomPacket(packet);

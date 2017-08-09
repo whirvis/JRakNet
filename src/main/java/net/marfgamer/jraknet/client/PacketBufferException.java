@@ -31,6 +31,7 @@
 package net.marfgamer.jraknet.client;
 
 import net.marfgamer.jraknet.RakNetPacket;
+import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
  * Signals that a packet critical to the <code>RakNetClient</code> failed to
@@ -54,8 +55,7 @@ public class PacketBufferException extends RakNetClientException {
 	 *            the <code>RakNetPacket</code> that failed to encode/decode.
 	 */
 	public PacketBufferException(RakNetClient client, RakNetPacket packet) {
-		super(client,
-				"Packet with ID 0x" + Integer.toHexString(((byte) packet.getId()) & 0xFF) + " failed to encode/decode");
+		super(client, "Packet with ID " + RakNetUtils.toHexStringId(packet) + " failed to encode/decode");
 		this.packet = packet;
 	}
 

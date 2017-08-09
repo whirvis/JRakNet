@@ -34,6 +34,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 
 import net.marfgamer.jraknet.RakNetLogger;
+import net.marfgamer.jraknet.util.RakNetUtils;
 import net.marfgamer.jraknet.util.map.ShortMap;
 
 /**
@@ -192,6 +193,24 @@ public class MessageIdentifier {
 	public static final short ID_RESERVED_9 = 0x85;
 	public static final short ID_USER_PACKET_ENUM = 0x86;
 
+	// These are for custom packets, they share ID's but that does not matter
+	public static final short ID_CUSTOM_0 = 0x80;
+	public static final short ID_CUSTOM_1 = 0x81;
+	public static final short ID_CUSTOM_2 = 0x82;
+	public static final short ID_CUSTOM_3 = 0x83;
+	public static final short ID_CUSTOM_4 = 0x84;
+	public static final short ID_CUSTOM_5 = 0x85;
+	public static final short ID_CUSTOM_6 = 0x86;
+	public static final short ID_CUSTOM_7 = 0x87;
+	public static final short ID_CUSTOM_8 = 0x88;
+	public static final short ID_CUSTOM_9 = 0x89;
+	public static final short ID_CUSTOM_A = 0x8A;
+	public static final short ID_CUSTOM_B = 0x8B;
+	public static final short ID_CUSTOM_C = 0x8C;
+	public static final short ID_CUSTOM_D = 0x8D;
+	public static final short ID_CUSTOM_E = 0x8E;
+	public static final short ID_CUSTOM_F = 0x8F;
+
 	// Map names and IDs
 	private static final ShortMap<String> packetNames = new ShortMap<String>();
 	private static final HashMap<String, Short> packetIds = new HashMap<String, Short>();
@@ -204,20 +223,28 @@ public class MessageIdentifier {
 		for (Field field : MessageIdentifier.class.getDeclaredFields()) {
 			if (field.getType().equals(short.class)) {
 				try {
+					// Get packet name and ID
 					short packetId = field.getShort(null);
 					String packetName = field.getName();
+
+					// Warn users of duplicate IDs
 					if (packetNames.containsKey(packetId)) {
 						String currentName = packetNames.get(packetId);
 						RakNetLogger.warn(LOGGER_NAME,
-								"Found duplicate ID 0x" + Integer.toHexString(packetId).toUpperCase() + " for \""
+								"Found duplicate ID " + RakNetUtils.toHexStringId(packetId) + " for \""
 										+ packetName + "\" and \"" + currentName + "\", overriding name and ID");
 						packetIds.remove(currentName);
 					} else {
-						RakNetLogger.debug(LOGGER_NAME, "Assigned packet ID 0x"
-								+ Integer.toHexString(packetId).toUpperCase() + " to " + packetName);
+						RakNetLogger.debug(LOGGER_NAME, "Assigned packet ID "
+								+ RakNetUtils.toHexStringId(packetId) + " to " + packetName);
 					}
 					packetNames.put(packetId, packetName);
 					packetIds.put(packetName, packetId);
+
+					// Do not register custom packets
+					if (packetId >= ID_USER_PACKET_ENUM) {
+						break;
+					}
 				} catch (ReflectiveOperationException e) {
 					e.printStackTrace();
 				}
