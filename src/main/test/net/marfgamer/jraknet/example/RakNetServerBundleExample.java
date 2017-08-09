@@ -34,6 +34,7 @@ import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.identifier.MCPEIdentifier;
 import net.marfgamer.jraknet.server.RakNetServer;
 import net.marfgamer.jraknet.session.RakNetClientSession;
+import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
  * A simple <code>RakNetServer</code> that is extending
@@ -66,8 +67,8 @@ public class RakNetServerBundleExample extends RakNetServer {
 	// Packet received
 	@Override
 	public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
-		System.out.println("Client from address " + session.getAddress() + " sent packet with ID 0x"
-				+ Integer.toHexString(packet.getId()).toUpperCase() + " on channel " + channel);
+		System.out.println("Client from address " + session.getAddress() + " sent packet with ID "
+				+ RakNetUtils.toHexStringId(packet) + " on channel " + channel);
 	}
 
 	public static void main(String[] args) {

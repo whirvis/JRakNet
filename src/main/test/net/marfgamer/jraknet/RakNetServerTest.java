@@ -42,6 +42,7 @@ import net.marfgamer.jraknet.server.RakNetServer;
 import net.marfgamer.jraknet.server.RakNetServerListener;
 import net.marfgamer.jraknet.server.ServerPing;
 import net.marfgamer.jraknet.session.RakNetClientSession;
+import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
  * Used to test <code>RakNetServer</code> by starting a server on the default
@@ -91,8 +92,8 @@ public class RakNetServerTest {
 			public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
 				RakNetLogger.info(LOGGER_NAME,
 						"Received packet from " + (session.isJRakNet() ? "JRakNet" : "vanilla")
-								+ " client with address " + session.getAddress() + " with packet ID 0x"
-								+ Integer.toHexString(packet.getId()).toUpperCase() + " on channel " + channel);
+								+ " client with address " + session.getAddress() + " with packet ID "
+								+ RakNetUtils.toHexStringId(packet) + " on channel " + channel);
 			}
 
 			@Override

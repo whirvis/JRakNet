@@ -72,8 +72,8 @@ public class RakNetUtils {
 
 	/**
 	 * Sends a raw message to the specified address for the specified amount of
-	 * times in the specified interval until the packet is received or there is a
-	 * timeout.
+	 * times in the specified interval until the packet is received or there is
+	 * a timeout.
 	 * 
 	 * @param address
 	 *            the address to send the packet to.
@@ -179,8 +179,8 @@ public class RakNetUtils {
 	/**
 	 * @param address
 	 *            the address of the server.
-	 * @return <code>true</code> if the server is compatible to the current client
-	 *         protocol.
+	 * @return <code>true</code> if the server is compatible to the current
+	 *         client protocol.
 	 */
 	public static boolean isServerCompatible(InetSocketAddress address) {
 		// Create connection packet
@@ -213,8 +213,8 @@ public class RakNetUtils {
 	 *            the address of the server.
 	 * @param port
 	 *            the port of the server.
-	 * @return <code>true</code> if the server is compatible to the current client
-	 *         protocol.
+	 * @return <code>true</code> if the server is compatible to the current
+	 *         client protocol.
 	 */
 	public static boolean isServerCompatible(InetAddress address, int port) {
 		return isServerCompatible(new InetSocketAddress(address, port));
@@ -225,8 +225,8 @@ public class RakNetUtils {
 	 *            the address of the server.
 	 * @param port
 	 *            the port of the server.
-	 * @return <code>true</code> if the server is compatible to the current client
-	 *         protocol.
+	 * @return <code>true</code> if the server is compatible to the current
+	 *         client protocol.
 	 * @throws UnknownHostException
 	 *             if the specified address is an unknown host.
 	 */
@@ -293,9 +293,9 @@ public class RakNetUtils {
 		} catch (Throwable throwable) {
 			try {
 				/*
-				 * We failed to get the NetworkInterface, we're gonna have to cycle through them
-				 * manually and choose the lowest one to make sure we never exceed any hardware
-				 * limitations
+				 * We failed to get the NetworkInterface, we're gonna have to
+				 * cycle through them manually and choose the lowest one to make
+				 * sure we never exceed any hardware limitations
 				 */
 				boolean foundDevice = false;
 				int lowestMaximumTransferUnit = Integer.MAX_VALUE;
@@ -333,8 +333,8 @@ public class RakNetUtils {
 	 *            the default port to use if one is not specified.
 	 * @return the parsed <code>InetSocketAddress</code>.
 	 * @throws UnknownHostException
-	 *             if the address is in an invalid format or if the host cannot be
-	 *             found.
+	 *             if the address is in an invalid format or if the host cannot
+	 *             be found.
 	 */
 	public static InetSocketAddress parseAddress(String address, int defaultPort) throws UnknownHostException {
 		String[] addressSplit = address.split(":");
@@ -359,8 +359,8 @@ public class RakNetUtils {
 	 *            the address to convert.
 	 * @return the parsed <code>InetSocketAddress</code>.
 	 * @throws UnknownHostException
-	 *             if the address is in an invalid format or if the host cannot be
-	 *             found.
+	 *             if the address is in an invalid format or if the host cannot
+	 *             be found.
 	 */
 	public static InetSocketAddress parseAddress(String address) throws UnknownHostException {
 		return parseAddress(address, -1);
@@ -446,6 +446,37 @@ public class RakNetUtils {
 	 */
 	public static byte parseBytePassive(String byteStr) {
 		return (byte) RakNetUtils.parseLongPassive(byteStr);
+	}
+
+	/**
+	 * Converts the given ID to a hex string.
+	 * 
+	 * @param id
+	 *            the ID to convert to a hex string.
+	 * @return the generated hex string.
+	 */
+	public static String toHexStringId(int id) {
+		if (id < 0) {
+			throw new IllegalArgumentException("The packet ID is an unsigned byte, it must be at least 0");
+		} else if (id > 255) {
+			throw new IllegalArgumentException("The packet ID is an unsigned byte, it can be no higher than 255");
+		}
+		return ("0x" + Integer.toHexString(id).toUpperCase());
+	}
+
+	/**
+	 * Converts the ID of the given <code>RakNetPacket</code> to a hex string.
+	 * 
+	 * @param packet
+	 *            the packet to get the ID from.
+	 * @return the generated hex string.
+	 */
+	public static String toHexStringId(RakNetPacket packet) {
+		return toHexStringId(packet.getId());
+	}
+
+	public static void main(String[] args) {
+		System.out.println(toHexStringId(255));
 	}
 
 	/**
