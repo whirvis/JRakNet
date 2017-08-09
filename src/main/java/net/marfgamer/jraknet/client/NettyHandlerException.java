@@ -51,7 +51,8 @@ public class NettyHandlerException extends RakNetClientException {
 	 * @param client
 	 *            the <code>RakNetClient</code> that threw the exception.
 	 * @param handler
-	 *            the <code>RakNetClientHandler</code> that caught the exception.
+	 *            the <code>RakNetClientHandler</code> that caught the
+	 *            exception.
 	 * @param cause
 	 *            the <code>Throwable</code> that was caught by the handler.
 	 */

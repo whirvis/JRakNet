@@ -62,8 +62,8 @@ public class RakNetLogger {
 	 * Sets the logger level.
 	 * 
 	 * @param level
-	 *            the logger level to use, use <code>-1</code> to enable logging for
-	 *            all levels.
+	 *            the logger level to use, use <code>-1</code> to enable logging
+	 *            for all levels.
 	 */
 	public static void setLevel(int level) {
 		// Set level
@@ -103,8 +103,8 @@ public class RakNetLogger {
 	}
 
 	/**
-	 * Logs a message if logging is enabled by the <code>RakNet</code> class and the
-	 * current level is greater than or equal to the current logging level.
+	 * Logs a message if logging is enabled by the <code>RakNet</code> class and
+	 * the current level is greater than or equal to the current logging level.
 	 * 
 	 * @param level
 	 *            the level of the log.
@@ -114,7 +114,8 @@ public class RakNetLogger {
 	private static final void log(int level, String message) {
 		if (RakNet.isLoggingEnabled() && loggerLevel >= level && level < LEVEL_NAMES.length) {
 			DateTime loggerDate = new DateTime(System.currentTimeMillis());
-			@SuppressWarnings("resource") // Closing the streams would break the console
+			@SuppressWarnings("resource") // Closing the streams would break the
+											// console
 			PrintStream logStream = (level != LEVEL_ERROR ? System.out : System.err);
 			logStream.println("[" + LOGGER_DATE_FORMAT.format(loggerDate.getHourOfDay()) + ":"
 					+ LOGGER_DATE_FORMAT.format(loggerDate.getMinuteOfHour()) + ":"

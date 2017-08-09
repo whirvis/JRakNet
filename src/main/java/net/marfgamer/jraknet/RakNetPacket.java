@@ -79,8 +79,8 @@ public class RakNetPacket extends Packet {
 
 	/**
 	 * Constructs a <code>RakNetPacket</code> that reads from and writes to the
-	 * specified <code>DatagramPacket</code>. On instantiation, the first byte of
-	 * the datagram will be read and set as the ID.
+	 * specified <code>DatagramPacket</code>. On instantiation, the first byte
+	 * of the datagram will be read and set as the ID.
 	 * 
 	 * @param datagram
 	 *            the <code>DatagramPacket</code> to read from and write to.
@@ -91,8 +91,8 @@ public class RakNetPacket extends Packet {
 
 	/**
 	 * Constructs a <code>RakNetPacket</code> that reads from and writes to the
-	 * specified byte array. On instantiation, the first byte of the byte array will
-	 * be read and set as the ID.
+	 * specified byte array. On instantiation, the first byte of the byte array
+	 * will be read and set as the ID.
 	 * 
 	 * @param data
 	 *            the byte array to read from and write to.
@@ -103,9 +103,9 @@ public class RakNetPacket extends Packet {
 
 	/**
 	 * Constructs a <code>RakNetPacket</code> that reads from and writes to the
-	 * specified <code>Packet</code>. On instantiation, the first byte of the buffer
-	 * will be read and set as the ID unless the specified packet is a subclass of
-	 * <code>RakNetPacket</code>.
+	 * specified <code>Packet</code>. On instantiation, the first byte of the
+	 * buffer will be read and set as the ID unless the specified packet is a
+	 * subclass of <code>RakNetPacket</code>.
 	 * 
 	 * @param packet
 	 *            the <code>Packet</code> to read from and write to.

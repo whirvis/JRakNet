@@ -193,7 +193,10 @@ public class MessageIdentifier {
 	public static final short ID_RESERVED_9 = 0x85;
 	public static final short ID_USER_PACKET_ENUM = 0x86;
 
-	// These are for custom packets, they share ID's but that does not matter
+	/*
+	 * These IDs are ignored by the mapNameIds() method as they override other
+	 * packet IDs
+	 */
 	public static final short ID_CUSTOM_0 = 0x80;
 	public static final short ID_CUSTOM_1 = 0x81;
 	public static final short ID_CUSTOM_2 = 0x82;
@@ -230,13 +233,12 @@ public class MessageIdentifier {
 					// Warn users of duplicate IDs
 					if (packetNames.containsKey(packetId)) {
 						String currentName = packetNames.get(packetId);
-						RakNetLogger.warn(LOGGER_NAME,
-								"Found duplicate ID " + RakNetUtils.toHexStringId(packetId) + " for \""
-										+ packetName + "\" and \"" + currentName + "\", overriding name and ID");
+						RakNetLogger.warn(LOGGER_NAME, "Found duplicate ID " + RakNetUtils.toHexStringId(packetId)
+								+ " for \"" + packetName + "\" and \"" + currentName + "\", overriding name and ID");
 						packetIds.remove(currentName);
 					} else {
-						RakNetLogger.debug(LOGGER_NAME, "Assigned packet ID "
-								+ RakNetUtils.toHexStringId(packetId) + " to " + packetName);
+						RakNetLogger.debug(LOGGER_NAME,
+								"Assigned packet ID " + RakNetUtils.toHexStringId(packetId) + " to " + packetName);
 					}
 					packetNames.put(packetId, packetName);
 					packetIds.put(packetName, packetId);
