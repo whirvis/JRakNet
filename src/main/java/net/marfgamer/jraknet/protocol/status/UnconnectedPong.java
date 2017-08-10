@@ -54,12 +54,11 @@ public class UnconnectedPong extends RakNetPacket {
 
 	@Override
 	public void encode() {
-		this.connectionType = ConnectionType.JRAKNET;
 		this.writeLong(pingId);
 		this.writeLong(pongId);
 		this.writeMagic();
 		this.writeString(identifier.build());
-		this.writeConnectionType();
+		this.connectionType = this.writeConnectionType();
 	}
 
 	@Override

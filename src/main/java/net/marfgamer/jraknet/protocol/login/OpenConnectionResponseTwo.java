@@ -59,14 +59,13 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 
 	@Override
 	public void encode() {
-		this.connectionType = ConnectionType.JRAKNET;
 		try {
 			this.writeMagic();
 			this.writeLong(serverGuid);
 			this.writeAddress(clientAddress);
 			this.writeUnsignedShort(maximumTransferUnit);
 			this.writeBoolean(encryptionEnabled);
-			this.writeConnectionType();
+			this.connectionType = this.writeConnectionType();
 		} catch (UnknownHostException e) {
 			this.failed = true;
 			this.magic = false;

@@ -154,9 +154,10 @@ public class RakNetPacket extends Packet {
 	}
 
 	@Override
-	public void flip() {
+	public Packet flip() {
 		super.flip();
 		this.id = this.readUnsignedByte();
+		return this;
 	}
 
 }
