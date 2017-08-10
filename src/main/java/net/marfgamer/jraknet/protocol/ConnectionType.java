@@ -31,15 +31,32 @@
 package net.marfgamer.jraknet.protocol;
 
 /**
- * Use to signify which implementation of the RakNet protocol is being used by a
+ * Used to signify which implementation of the RakNet protocol is being used by a
  * connection.
  * 
  * @author Trent "MarfGamer" Summerlin
  */
 public enum ConnectionType {
 
-	VANILLA("Vanilla", 0x00), JRAKNET("JRakNet", 0x01), RAKLIB("RakLib", 0x02), JRAKLIB("JRakLib",
-			0x03), JRAKLIB_PLUS("JRakLib+", 0x04);
+	/**
+	 * A vanilla connection.
+	 */
+	VANILLA("Vanilla", 0x00),
+
+	/**
+	 * A JRakNet connection.
+	 */
+	JRAKNET("JRakNet", 0x01),
+
+	/**
+	 * A RakLib connection.
+	 */
+	RAKLIB("RakLib", 0x02),
+
+	/**
+	 * A JRakLib+ connection.
+	 */
+	JRAKLIB_PLUS("JRakLib+", 0x03);
 
 	// Connection type header magic
 	public static final byte[] MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B, 0x43,
@@ -81,7 +98,7 @@ public enum ConnectionType {
 				return type;
 			}
 		}
-		return null;
+		return ConnectionType.VANILLA;
 	}
 
 }
