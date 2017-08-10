@@ -61,7 +61,7 @@ public class RakNetClientTest {
 
 			@Override
 			public void onConnect(RakNetServerSession session) {
-				RakNetLogger.info(LOGGER_NAME, "Connected to " + (session.isJRakNet() ? "JRakNet" : "vanilla")
+				RakNetLogger.info(LOGGER_NAME, "Connected to " + session.getConnectionType().getName()
 						+ " server with address " + session.getAddress() + "!");
 				client.disconnectAndShutdown();
 			}
@@ -69,14 +69,14 @@ public class RakNetClientTest {
 			@Override
 			public void onAcknowledge(RakNetServerSession session, Record record, EncapsulatedPacket packet) {
 				RakNetLogger.info(LOGGER_NAME,
-						(session.isJRakNet() ? "JRakNet" : "vanilla") + " server has acknowledged packet with ID: "
+						session.getConnectionType().getName() + " server has acknowledged packet with ID: "
 								+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
 
 			@Override
 			public void onNotAcknowledge(RakNetServerSession session, Record record, EncapsulatedPacket packet) {
 				RakNetLogger.info(LOGGER_NAME,
-						(session.isJRakNet() ? "JRakNet" : "vanilla") + " server has not acknowledged packet with ID: "
+						session.getConnectionType().getName() + " server has not acknowledged packet with ID: "
 								+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
 

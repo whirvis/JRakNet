@@ -40,20 +40,16 @@ public class RakNet {
 	// Network protocol data
 	public static final int SERVER_NETWORK_PROTOCOL = 8;
 	public static final int CLIENT_NETWORK_PROTOCOL = 8;
-
-	// Maximum Transfer Unit data
 	public static final int MINIMUM_TRANSFER_UNIT = 548;
 
-	// Session limiting
+	// Session data
 	public static final int MAX_CHANNELS = 32;
 	public static final byte DEFAULT_CHANNEL = 0;
 	public static final int MAX_SPLIT_COUNT = 128;
 	public static final int MAX_SPLITS_PER_QUEUE = 4;
 
-	// Max packet count
+	// Configurable options
 	private static long MAX_PACKETS_PER_SECOND = 500;
-
-	// Logging
 	private static boolean USE_LOGGING = false;
 
 	/**
