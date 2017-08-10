@@ -85,7 +85,6 @@ public class LatencyTest {
 	public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException, UnsupportedLookAndFeelException {
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		RakNet.enableLogging();
 		LatencyTest test = new LatencyTest();
 		test.start();
 	}

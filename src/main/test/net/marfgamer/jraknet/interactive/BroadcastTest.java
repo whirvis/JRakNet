@@ -113,7 +113,6 @@ public class BroadcastTest {
 	public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException, UnsupportedLookAndFeelException {
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-		RakNet.enableLogging();
 		BroadcastTest test = new BroadcastTest();
 		test.start();
 	}
