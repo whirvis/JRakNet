@@ -75,7 +75,7 @@ public enum Reliability {
 	 * <code>RakNetServerListener</code> and <code>RakNetClientListener</code>
 	 * classes.
 	 */
-	UNRELIABLE_WITH_ACK_RECEIPT(UNRELIABLE.id, false, false, false, true),
+	UNRELIABLE_WITH_ACK_RECEIPT(5, false, false, false, true),
 
 	/**
 	 * Same as <code>UNRELIABLE_SEQUENCED</code>, however you will be notified
@@ -84,7 +84,9 @@ public enum Reliability {
 	 * through the <code>RakNetServerListener</code> and
 	 * <code>RakNetClientListener</code> classes.
 	 */
-	UNRELIABLE_SEQUENCED_WITH_ACK_RECEIPT(UNRELIABLE_SEQUENCED.id, false, false, true, true),
+	/*
+	 * UNRELIABLE_SEQUENCED_WITH_ACK_RECEIPT(-1, false, false, true, true),
+	 */
 
 	/**
 	 * Same as <code>RELIABLE</code>, however you will be notified when the
@@ -92,7 +94,7 @@ public enum Reliability {
 	 * through the <code>RakNetServerListener</code> and
 	 * <code>RakNetClientListener</code> classes.
 	 */
-	RELIABLE_WITH_ACK_RECEIPT(RELIABLE.id, true, false, false, true),
+	RELIABLE_WITH_ACK_RECEIPT(6, true, false, false, true),
 
 	/**
 	 * Same as <code>RELIABLE_SEQUENCED</code>, however you will be notified
@@ -100,7 +102,9 @@ public enum Reliability {
 	 * method through the <code>RakNetServerListener</code> and
 	 * <code>RakNetClientListener</code> classes.
 	 */
-	RELIABLE_SEQUENCED_WITH_ACK_RECEIPT(RELIABLE_SEQUENCED.id, true, false, true, true),
+	/*
+	 * RELIABLE_SEQUENCED_WITH_ACK_RECEIPT(-1, true, false, true, true),
+	 */
 
 	/**
 	 * Same as <code>RELIABLE_ORDERED</code>, however you will be notified when
@@ -108,7 +112,7 @@ public enum Reliability {
 	 * through the <code>RakNetServerListener</code> and
 	 * <code>RakNetClientListener</code> classes.
 	 */
-	RELIABLE_ORDERED_WITH_ACK_RECEIPT(RELIABLE_ORDERED.id, true, true, false, true);
+	RELIABLE_ORDERED_WITH_ACK_RECEIPT(7, true, true, false, true);
 
 	private final byte id;
 	private final boolean reliable;

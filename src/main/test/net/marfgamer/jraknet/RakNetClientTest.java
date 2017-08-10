@@ -93,7 +93,7 @@ public class RakNetClientTest {
 		// Connect to server
 		try {
 			client.connect(UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
-		} catch (Exception e) {
+		} catch (RakNetException e) {
 			e.printStackTrace();
 			client.disconnectAndShutdown(e.getClass().getName() + ": " + e.getMessage());
 		}

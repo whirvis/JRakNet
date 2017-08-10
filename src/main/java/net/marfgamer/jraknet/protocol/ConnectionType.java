@@ -31,10 +31,14 @@
 package net.marfgamer.jraknet.protocol;
 
 /**
- * Used to signify which implementation of the RakNet protocol is being used by a
- * connection.
+ * Used to signify which implementation of the RakNet protocol is being used by
+ * a connection. If you would like your implementation to be listed here,
+ * message Create an issue on the JRakNet repository with the tag "Connection
+ * type support".
  * 
  * @author Trent "MarfGamer" Summerlin
+ * @see <a href=
+ *      "https://github.com/JRakNet/JRakNet/issues/new">https://github.com/JRakNet/JRakNet/issues/new</a>
  */
 public enum ConnectionType {
 
