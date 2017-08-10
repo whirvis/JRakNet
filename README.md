@@ -24,7 +24,7 @@ In order to add this project to your maven project, you will need to add the mav
   <dependency>
     <groupId>net.marfgamer</groupId>
     <artifactId>jraknet</artifactId>
-    <version>2.7.2</version>
+    <version>2.7.3</version>
   </dependency>
 </dependencies>
 ```
