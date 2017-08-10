@@ -28,46 +28,60 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package net.marfgamer.jraknet.protocol.status;
+package net.marfgamer.jraknet.protocol;
 
-import net.marfgamer.jraknet.Packet;
-import net.marfgamer.jraknet.RakNetPacket;
-import net.marfgamer.jraknet.identifier.Identifier;
-import net.marfgamer.jraknet.protocol.ConnectionType;
-import net.marfgamer.jraknet.protocol.MessageIdentifier;
+/**
+ * Use to signify which implementation of the RakNet protocol is being used by a
+ * connection.
+ * 
+ * @author Whirvis "MarfGamer" Ardenaur
+ */
+public enum ConnectionType {
 
-public class UnconnectedPong extends RakNetPacket {
+	VANILLA("Vanilla", 0x00), JRAKNET("JRakNet", 0x01), RAKLIB("RakLib", 0x02), JRAKLIB("JRakLib",
+			0x03), JRAKLIB_PLUS("JRakLib+", 0x04);
 
-	public long pingId;
-	public long pongId;
-	public boolean magic;
-	public Identifier identifier;
-	public ConnectionType connectionType;
+	// Connection type header magic
+	public static final byte[] MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B, 0x43,
+			(byte) 0x54, (byte) 0x49 };
 
-	public UnconnectedPong() {
-		super(MessageIdentifier.ID_UNCONNECTED_PONG);
+	private final String name;
+	private final short id;
+
+	private ConnectionType(String name, int id) {
+		this.name = name;
+		this.id = (short) id;
+		if (id < 0 || id > 255) {
+			throw new IllegalArgumentException("Invalid ID, must be in between 0-255");
+		}
 	}
 
-	public UnconnectedPong(Packet packet) {
-		super(packet);
+	/**
+	 * @return the name of the implementation.
+	 */
+	public String getName() {
+		return this.name;
 	}
 
-	@Override
-	public void encode() {
-		this.connectionType = ConnectionType.JRAKNET;
-		this.writeLong(pingId);
-		this.writeLong(pongId);
-		this.writeMagic();
-		this.writeString(identifier.build());
-		this.writeConnectionType();
+	/**
+	 * @return the ID of the implementation.
+	 */
+	public short getId() {
+		return this.id;
 	}
 
-	@Override
-	public void decode() {
-		this.pingId = this.readLong();
-		this.pongId = this.readLong();
-		this.magic = this.checkMagic();
-		this.identifier = new Identifier(this.readString(), this.connectionType = this.readConnectionType());
+	/**
+	 * @param id
+	 *            the ID of the implementation.
+	 * @return the <code>ConnectionType</code> based on it's implementation ID.
+	 */
+	public static ConnectionType getType(int id) {
+		for (ConnectionType type : ConnectionType.values()) {
+			if (type.id == id) {
+				return type;
+			}
+		}
+		return null;
 	}
 
 }

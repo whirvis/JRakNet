@@ -98,8 +98,8 @@ public class UtilityTest {
 	public static String formatMCPEIdentifier(MCPEIdentifier identifier) {
 		return ("[Name: " + identifier.getServerName().replaceAll(UNICODE_MINECRAFT_COLOR_SYMBOL + ".", "")
 				+ "] [Version: " + identifier.getVersionTag() + "] [Player count: " + identifier.getOnlinePlayerCount()
-				+ "/" + identifier.getMaxPlayerCount() + "] [Server type: "
-				+ (identifier.isJRakNet() ? "JRakNet" : "Vanilla") + "]");
+				+ "/" + identifier.getMaxPlayerCount() + "] [Server type: " + identifier.getConnectionType().getName()
+				+ "]");
 	}
 
 }

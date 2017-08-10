@@ -532,7 +532,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			synchronized (sessions) {
 				if ((packetId == ID_UNCONNECTED_PING || sessions.size() < this.maxConnections)
 						&& this.broadcastingEnabled == true) {
-					ServerPing pingEvent = new ServerPing(sender, identifier, ping.isJraknet);
+					ServerPing pingEvent = new ServerPing(sender, identifier, ping.connectionType);
 					listener.handlePing(pingEvent);
 
 					if (ping.magic == true && pingEvent.getIdentifier() != null) {
@@ -612,7 +612,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 								// Create session
 								synchronized (sessions) {
 									RakNetClientSession clientSession = new RakNetClientSession(this,
-											System.currentTimeMillis(), connectionRequestTwo.isJraknet,
+											System.currentTimeMillis(), connectionRequestTwo.connectionType,
 											connectionRequestTwo.clientGuid, connectionRequestTwo.maximumTransferUnit,
 											channel, sender);
 									sessions.put(sender, clientSession);

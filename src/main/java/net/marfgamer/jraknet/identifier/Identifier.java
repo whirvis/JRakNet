@@ -30,6 +30,8 @@
  */
 package net.marfgamer.jraknet.identifier;
 
+import net.marfgamer.jraknet.protocol.ConnectionType;
+
 /**
  * Represents an identifier sent from a server on the local network, any class
  * extending this only has to override the <code>build()</code> method in order
@@ -40,26 +42,26 @@ package net.marfgamer.jraknet.identifier;
 public class Identifier {
 
 	private final String identifier;
-	private final boolean isJraknet;
+	private final ConnectionType connectionType;
 
-	public Identifier(String identifier, boolean isJraknet) {
+	public Identifier(String identifier, ConnectionType connectionType) {
 		this.identifier = identifier;
-		this.isJraknet = isJraknet;
+		this.connectionType = connectionType;
 	}
 
 	public Identifier(String identifier) {
 		this.identifier = identifier;
-		this.isJraknet = true;
+		this.connectionType = ConnectionType.JRAKNET;
 	}
 
 	public Identifier(Identifier identifier) {
 		this.identifier = identifier.identifier;
-		this.isJraknet = identifier.isJraknet;
+		this.connectionType = identifier.connectionType;
 	}
 
 	public Identifier() {
 		this.identifier = null;
-		this.isJraknet = true;
+		this.connectionType = ConnectionType.JRAKNET;
 	}
 
 	/**
@@ -70,10 +72,10 @@ public class Identifier {
 	}
 
 	/**
-	 * @return whether or not the identifier is from a JRakNet server.
+	 * @return the connection type of the identifier's sender.
 	 */
-	public final boolean isJRakNet() {
-		return this.isJraknet;
+	public final ConnectionType getConnectionType() {
+		return this.connectionType;
 	}
 
 	@Override

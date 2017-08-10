@@ -36,6 +36,7 @@ import java.net.InetSocketAddress;
 
 import io.netty.channel.Channel;
 import net.marfgamer.jraknet.RakNetPacket;
+import net.marfgamer.jraknet.protocol.ConnectionType;
 import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.login.ConnectionRequest;
 import net.marfgamer.jraknet.protocol.login.ConnectionRequestAccepted;
@@ -58,15 +59,15 @@ public class RakNetClientSession extends RakNetSession {
 
 	/**
 	 * Constructs a <code>RakNetClientSession</code> with the specified
-	 * <code>RakNetServer</code>, the time the server was created, globally
-	 * unique ID, maximum transfer unit, <code>Channel</code>, and address.
+	 * <code>RakNetServer</code>, the time the server was created, globally unique
+	 * ID, maximum transfer unit, <code>Channel</code>, and address.
 	 * 
 	 * @param server
 	 *            the <code>RakNetServer</code>.
 	 * @param timeCreated
 	 *            the time the server was created.
-	 * @param isJraknet
-	 *            whether or not the session belongs to a JRakNet server/client.
+	 * @param connectionType
+	 *            the connection type of the session.
 	 * @param guid
 	 *            the globally unique ID.
 	 * @param maximumTransferUnit
@@ -76,9 +77,9 @@ public class RakNetClientSession extends RakNetSession {
 	 * @param address
 	 *            the address.
 	 */
-	public RakNetClientSession(RakNetServer server, long timeCreated, boolean isJraknet, long guid,
+	public RakNetClientSession(RakNetServer server, long timeCreated, ConnectionType connectionType, long guid,
 			int maximumTransferUnit, Channel channel, InetSocketAddress address) {
-		super(isJraknet, guid, maximumTransferUnit, channel, address);
+		super(connectionType, guid, maximumTransferUnit, channel, address);
 		this.server = server;
 		this.timeCreated = timeCreated;
 	}
@@ -164,9 +165,8 @@ public class RakNetClientSession extends RakNetSession {
 			server.removeSession(this, "Disconnected");
 		} else {
 			/*
-			 * If the packet is a user packet, we use handleMessage(). If the ID
-			 * is not a user packet but it is unknown to the session, we use
-			 * handleUnknownMessage().
+			 * If the packet is a user packet, we use handleMessage(). If the ID is not a
+			 * user packet but it is unknown to the session, we use handleUnknownMessage().
 			 */
 			if (packetId >= ID_USER_PACKET_ENUM) {
 				server.getListener().handleMessage(this, packet, channel);

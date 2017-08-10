@@ -37,6 +37,7 @@ import java.net.InetSocketAddress;
 import io.netty.channel.Channel;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.client.RakNetClient;
+import net.marfgamer.jraknet.protocol.ConnectionType;
 import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.login.ConnectionRequestAccepted;
 import net.marfgamer.jraknet.protocol.login.NewIncomingConnection;
@@ -70,8 +71,8 @@ public class RakNetServerSession extends RakNetSession {
 	 * 
 	 * @param client
 	 *            the <code>RakNetClient</code>.
-	 * @param isJraknet
-	 *            whether or not the session belongs to a JRakNet server/client.
+	 * @param connectionType
+	 *            the connection type of the session.
 	 * @param guid
 	 *            the globally unique ID.
 	 * @param maximumTransferUnit
@@ -81,9 +82,9 @@ public class RakNetServerSession extends RakNetSession {
 	 * @param address
 	 *            the address.
 	 */
-	public RakNetServerSession(RakNetClient client, boolean isJraknet, long guid, int maximumTransferUnit,
+	public RakNetServerSession(RakNetClient client, ConnectionType connectionType, long guid, int maximumTransferUnit,
 			Channel channel, InetSocketAddress address) {
-		super(isJraknet, guid, maximumTransferUnit, channel, address);
+		super(connectionType, guid, maximumTransferUnit, channel, address);
 		this.client = client;
 		this.setState(RakNetState.HANDSHAKING); // We start at the handshake
 	}
@@ -135,9 +136,8 @@ public class RakNetServerSession extends RakNetSession {
 			client.disconnect("Server disconnected");
 		} else {
 			/*
-			 * If the packet is a user packet, we use handleMessage(). If the ID
-			 * is not a user packet but it is unknown to the session, we use
-			 * handleUnknownMessage().
+			 * If the packet is a user packet, we use handleMessage(). If the ID is not a
+			 * user packet but it is unknown to the session, we use handleUnknownMessage().
 			 */
 			if (packetId >= ID_USER_PACKET_ENUM) {
 				client.getListener().handleMessage(this, packet, channel);
