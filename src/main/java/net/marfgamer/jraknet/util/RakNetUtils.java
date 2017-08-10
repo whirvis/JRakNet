@@ -470,10 +470,6 @@ public class RakNetUtils {
 		return toHexStringId(packet.getId());
 	}
 
-	public static void main(String[] args) {
-		System.out.println(toHexStringId(255));
-	}
-
 	/**
 	 * Causes a sleep on the main thread using a simple while loop.
 	 * 

@@ -78,22 +78,22 @@ public class RakNetServerTest {
 
 			@Override
 			public void onClientConnect(RakNetClientSession session) {
-				RakNetLogger.info(LOGGER_NAME, (session.isJRakNet() ? "JRakNet" : "vanilla") + " client from address "
+				RakNetLogger.info(LOGGER_NAME, session.getConnectionType().getName() + " client from address "
 						+ session.getAddress() + " has connected to the server");
 			}
 
 			@Override
 			public void onClientDisconnect(RakNetClientSession session, String reason) {
-				RakNetLogger.info(LOGGER_NAME, (session.isJRakNet() ? "JRakNet" : "vanilla") + " client from address "
+				RakNetLogger.info(LOGGER_NAME, session.getConnectionType().getName() + " client from address "
 						+ session.getAddress() + " has been disconnected for \"" + reason + "\"");
 			}
 
 			@Override
 			public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
 				RakNetLogger.info(LOGGER_NAME,
-						"Received packet from " + (session.isJRakNet() ? "JRakNet" : "vanilla")
-								+ " client with address " + session.getAddress() + " with packet ID "
-								+ RakNetUtils.toHexStringId(packet) + " on channel " + channel);
+						"Received packet from " + session.getConnectionType().getName() + " client with address "
+								+ session.getAddress() + " with packet ID " + RakNetUtils.toHexStringId(packet)
+								+ " on channel " + channel);
 			}
 
 			@Override
@@ -107,7 +107,7 @@ public class RakNetServerTest {
 			@Override
 			public void onAcknowledge(RakNetClientSession session, Record record, EncapsulatedPacket packet) {
 				RakNetLogger.info(LOGGER_NAME,
-						(session.isJRakNet() ? "JRakNet" : "vanilla") + " client with address " + session.getAddress()
+						session.getConnectionType().getName() + " client with address " + session.getAddress()
 								+ " has received packet with ID: "
 								+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
@@ -115,7 +115,7 @@ public class RakNetServerTest {
 			@Override
 			public void onNotAcknowledge(RakNetClientSession session, Record record, EncapsulatedPacket packet) {
 				RakNetLogger.info(LOGGER_NAME,
-						(session.isJRakNet() ? "JRakNet" : "vanilla") + " client with address " + session.getAddress()
+						session.getConnectionType().getName() + " client with address " + session.getAddress()
 								+ " has lost packet with ID: "
 								+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
@@ -140,7 +140,7 @@ public class RakNetServerTest {
 		});
 
 		// Start server
-		server.start();
+		server.startThreaded();
 	}
 
 }

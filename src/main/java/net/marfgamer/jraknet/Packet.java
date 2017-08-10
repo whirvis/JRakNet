@@ -30,7 +30,7 @@
  */
 package net.marfgamer.jraknet;
 
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.*;
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.MAGIC;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -40,6 +40,7 @@ import java.util.Arrays;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.socket.DatagramPacket;
+import net.marfgamer.jraknet.protocol.ConnectionType;
 import net.marfgamer.jraknet.stream.PacketDataInput;
 import net.marfgamer.jraknet.stream.PacketDataOutput;
 
@@ -61,8 +62,8 @@ public class Packet {
 	private PacketDataOutput output;
 
 	/**
-	 * Constructs a <code>Packet</code> that reads from and writes to the
-	 * specified <code>ByteBuf</code>.
+	 * Constructs a <code>Packet</code> that reads from and writes to the specified
+	 * <code>ByteBuf</code>.
 	 * 
 	 * @param buffer
 	 *            the <code>ByteBuf</code> to read from and write to.
@@ -74,8 +75,8 @@ public class Packet {
 	}
 
 	/**
-	 * Constructs a <code>Packet</code> that reads from and writes to the
-	 * specified <code>DatagramPacket</code>
+	 * Constructs a <code>Packet</code> that reads from and writes to the specified
+	 * <code>DatagramPacket</code>
 	 * 
 	 * @param datagram
 	 *            the <code>DatagramPacket</code> to read from and write to.
@@ -85,8 +86,8 @@ public class Packet {
 	}
 
 	/**
-	 * Constructs a <code>Packet</code> that reads from and writes to the
-	 * specified byte array.
+	 * Constructs a <code>Packet</code> that reads from and writes to the specified
+	 * byte array.
 	 * 
 	 * @param data
 	 *            the byte[] to read from and write to.
@@ -96,8 +97,8 @@ public class Packet {
 	}
 
 	/**
-	 * Constructs a <code>Packet</code> that reads from and writes to the
-	 * specified <code>Packet</code>.
+	 * Constructs a <code>Packet</code> that reads from and writes to the specified
+	 * <code>Packet</code>.
 	 * 
 	 * @param packet
 	 *            the <code>Packet</code> to read from and write to.
@@ -107,8 +108,7 @@ public class Packet {
 	}
 
 	/**
-	 * Constructs a blank <code>Packet</code> using an empty
-	 * <code>ByteBuf</code>.
+	 * Constructs a blank <code>Packet</code> using an empty <code>ByteBuf</code>.
 	 */
 	public Packet() {
 		this(Unpooled.buffer());
@@ -322,21 +322,24 @@ public class Packet {
 	}
 
 	/**
-	 * Returns a JRakNet magic array and returns whether or not it is valid.
-	 * Unlike the <code>checkMagic()</code> method, this one will check to make
-	 * sure if enough data is remaining to read the JRakNet magic code before
-	 * actually reading it. This is because it is meant to be used strictly at
-	 * the end of packets that can be used to signify that the machine is a
-	 * JRakNet server/client.
+	 * Reads and returns the connection type. Unlike most other methods, this one
+	 * will check to make sure if there is enough data to read the connection type
+	 * before actually reading it. This is because it is meant to be used strictly
+	 * at the end of packets that can be used to signify the protocol implementation
+	 * of the sender.
 	 * 
-	 * @return whether or not the JRakNet magic array was valid.
+	 * @return the connection type.
 	 */
-	public boolean checkJRakNetMagic() {
-		if (this.remaining() >= JRAKNET_MAGIC.length) {
-			byte[] jraknetMagicCheck = this.read(JRAKNET_MAGIC.length);
-			return Arrays.equals(JRAKNET_MAGIC, jraknetMagicCheck);
+	public ConnectionType readConnectionType() {
+		// We add an extra byte because we need to read the ID
+		if (this.remaining() >= ConnectionType.MAGIC.length + 1) {
+			byte[] connectionMagicCheck = this.read(ConnectionType.MAGIC.length);
+			if (Arrays.equals(ConnectionType.MAGIC, connectionMagicCheck)) {
+				short id = this.readUnsignedByte();
+				return ConnectionType.getType(id);
+			}
 		}
-		return false;
+		return ConnectionType.VANILLA;
 	}
 
 	/**
@@ -351,8 +354,8 @@ public class Packet {
 	}
 
 	/**
-	 * Reads a UTF-8 String with it's length prefixed by a unsigned little
-	 * endian short.
+	 * Reads a UTF-8 String with it's length prefixed by a unsigned little endian
+	 * short.
 	 * 
 	 * @return a String.
 	 */
@@ -451,8 +454,8 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a byte array of the specified flipped unsigned byte's casted back
-	 * to a byte to the packet.
+	 * Writes a byte array of the specified flipped unsigned byte's casted back to a
+	 * byte to the packet.
 	 * 
 	 * @param data
 	 *            the data to write.
@@ -650,8 +653,9 @@ public class Packet {
 	 * 
 	 * @return the packet.
 	 */
-	public Packet writeJRakNetMagic() {
-		this.write(JRAKNET_MAGIC);
+	public Packet writeConnectionType() {
+		this.write(ConnectionType.MAGIC);
+		this.writeUnsignedByte(ConnectionType.JRAKNET.getId());
 		return this;
 	}
 

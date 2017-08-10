@@ -35,6 +35,7 @@ import java.net.UnknownHostException;
 
 import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNetPacket;
+import net.marfgamer.jraknet.protocol.ConnectionType;
 import net.marfgamer.jraknet.protocol.Failable;
 import net.marfgamer.jraknet.protocol.MessageIdentifier;
 
@@ -45,7 +46,7 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 	public InetSocketAddress clientAddress;
 	public int maximumTransferUnit;
 	public boolean encryptionEnabled;
-	public boolean isJraknet;
+	public ConnectionType connectionType;
 	private boolean failed;
 
 	public OpenConnectionResponseTwo(Packet packet) {
@@ -58,14 +59,14 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 
 	@Override
 	public void encode() {
-		this.isJraknet = true;
+		this.connectionType = ConnectionType.JRAKNET;
 		try {
 			this.writeMagic();
 			this.writeLong(serverGuid);
 			this.writeAddress(clientAddress);
 			this.writeUnsignedShort(maximumTransferUnit);
 			this.writeBoolean(encryptionEnabled);
-			this.writeJRakNetMagic();
+			this.writeConnectionType();
 		} catch (UnknownHostException e) {
 			this.failed = true;
 			this.magic = false;
@@ -73,7 +74,7 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 			this.clientAddress = null;
 			this.maximumTransferUnit = 0;
 			this.encryptionEnabled = false;
-			this.isJraknet = false;
+			this.connectionType = null;
 			this.clear();
 		}
 	}
@@ -86,7 +87,7 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 			this.clientAddress = this.readAddress();
 			this.maximumTransferUnit = this.readUnsignedShort();
 			this.encryptionEnabled = this.readBoolean();
-			this.isJraknet = this.checkJRakNetMagic();
+			this.connectionType = this.readConnectionType();
 		} catch (UnknownHostException e) {
 			this.failed = true;
 			this.magic = false;
@@ -94,7 +95,7 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 			this.clientAddress = null;
 			this.maximumTransferUnit = 0;
 			this.encryptionEnabled = false;
-			this.isJraknet = false;
+			this.connectionType = null;
 			this.clear();
 		}
 	}

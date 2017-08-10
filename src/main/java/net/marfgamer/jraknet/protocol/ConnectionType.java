@@ -28,68 +28,60 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package net.marfgamer.jraknet.identifier;
-
-import net.marfgamer.jraknet.protocol.ConnectionType;
+package net.marfgamer.jraknet.protocol;
 
 /**
- * Represents an identifier sent from a server on the local network, any class
- * extending this only has to override the <code>build()</code> method in order
- * to have their identifier be dynamic.
- *
+ * Use to signify which implementation of the RakNet protocol is being used by a
+ * connection.
+ * 
  * @author Trent "MarfGamer" Summerlin
  */
-public class Identifier {
+public enum ConnectionType {
 
-	private final String identifier;
-	private final ConnectionType connectionType;
+	VANILLA("Vanilla", 0x00), JRAKNET("JRakNet", 0x01), RAKLIB("RakLib", 0x02), JRAKLIB("JRakLib",
+			0x03), JRAKLIB_PLUS("JRakLib+", 0x04);
 
-	public Identifier(String identifier, ConnectionType connectionType) {
-		this.identifier = identifier;
-		this.connectionType = connectionType;
-	}
+	// Connection type header magic
+	public static final byte[] MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B, 0x43,
+			(byte) 0x54, (byte) 0x49 };
 
-	public Identifier(String identifier) {
-		this.identifier = identifier;
-		this.connectionType = ConnectionType.JRAKNET;
-	}
+	private final String name;
+	private final short id;
 
-	public Identifier(Identifier identifier) {
-		this.identifier = identifier.identifier;
-		this.connectionType = identifier.connectionType;
-	}
-
-	public Identifier() {
-		this.identifier = null;
-		this.connectionType = ConnectionType.JRAKNET;
-	}
-
-	/**
-	 * @return the identifier as a String.
-	 */
-	public String build() {
-		return this.identifier;
-	}
-
-	/**
-	 * @return the connection type of the identifier's sender.
-	 */
-	public final ConnectionType getConnectionType() {
-		return this.connectionType;
-	}
-
-	@Override
-	public final String toString() {
-		return this.build();
-	}
-
-	@Override
-	public boolean equals(Object object) {
-		if (object instanceof Identifier) {
-			Identifier identifier = (Identifier) object;
-			return this.build().equals(identifier.build());
+	private ConnectionType(String name, int id) {
+		this.name = name;
+		this.id = (short) id;
+		if (id < 0 || id > 255) {
+			throw new IllegalArgumentException("Invalid ID, must be in between 0-255");
 		}
-		return false;
+	}
+
+	/**
+	 * @return the name of the implementation.
+	 */
+	public String getName() {
+		return this.name;
+	}
+
+	/**
+	 * @return the ID of the implementation.
+	 */
+	public short getId() {
+		return this.id;
+	}
+
+	/**
+	 * @param id
+	 *            the ID of the implementation.
+	 * @return the <code>ConnectionType</code> based on it's implementation ID.
+	 */
+	public static ConnectionType getType(int id) {
+		for (ConnectionType type : ConnectionType.values()) {
+			if (type.id == id) {
+				return type;
+			}
+		}
+		return null;
 	}
 
 }

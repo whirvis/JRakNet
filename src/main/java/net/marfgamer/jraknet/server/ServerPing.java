@@ -33,6 +33,7 @@ package net.marfgamer.jraknet.server;
 import java.net.InetSocketAddress;
 
 import net.marfgamer.jraknet.identifier.Identifier;
+import net.marfgamer.jraknet.protocol.ConnectionType;
 
 /**
  * Used primarily to box an identifier sent in the response of a server to a
@@ -44,7 +45,7 @@ public class ServerPing {
 
 	private final InetSocketAddress sender;
 	private Identifier identifier;
-	private final boolean isJraknet;
+	private final ConnectionType connectionType;
 
 	/**
 	 * Constructs a <code>ServerPing</code> with the specified address and
@@ -54,13 +55,13 @@ public class ServerPing {
 	 *            the address of the ping sender.
 	 * @param identifier
 	 *            the <code>Identifier</code> to respond with.
-	 * @param isJraknet
-	 *            whether or not the ping is from a JRakNet client.
+	 * @param connectionType
+	 *            the connection type of the ping sender.
 	 */
-	public ServerPing(InetSocketAddress sender, Identifier identifier, boolean isJraknet) {
+	public ServerPing(InetSocketAddress sender, Identifier identifier, ConnectionType connectionType) {
 		this.sender = sender;
 		this.identifier = identifier;
-		this.isJraknet = isJraknet;
+		this.connectionType = connectionType;
 	}
 
 	/**
@@ -78,10 +79,10 @@ public class ServerPing {
 	}
 
 	/**
-	 * @return whether or not the ping is from a JRakNet client.
+	 * @return the connection type of the ping sender.
 	 */
-	public boolean isJRakNet() {
-		return this.isJraknet;
+	public final ConnectionType getConnectionType() {
+		return this.connectionType;
 	}
 
 	/**

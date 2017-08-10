@@ -52,10 +52,6 @@ public class MessageIdentifier {
 			(byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xFD, (byte) 0xFD, (byte) 0xFD, (byte) 0xFD, (byte) 0x12,
 			(byte) 0x34, (byte) 0x56, (byte) 0x78 };
 
-	// JRakNet magic identifier
-	public final static byte[] JRAKNET_MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B,
-			(byte) 0x4A, (byte) 0x41, (byte) 0x56, (byte) 0x41 };
-
 	// Packet IDs
 	public static final short ID_CONNECTED_PING = 0x00;
 	public static final short ID_UNCONNECTED_PING = 0x01;

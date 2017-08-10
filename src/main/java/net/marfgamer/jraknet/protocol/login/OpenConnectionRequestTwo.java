@@ -35,6 +35,7 @@ import java.net.UnknownHostException;
 
 import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNetPacket;
+import net.marfgamer.jraknet.protocol.ConnectionType;
 import net.marfgamer.jraknet.protocol.Failable;
 import net.marfgamer.jraknet.protocol.MessageIdentifier;
 
@@ -44,7 +45,7 @@ public class OpenConnectionRequestTwo extends RakNetPacket implements Failable {
 	public InetSocketAddress address;
 	public int maximumTransferUnit;
 	public long clientGuid;
-	public boolean isJraknet;
+	public ConnectionType connectionType;
 	private boolean failed;
 
 	public OpenConnectionRequestTwo(Packet packet) {
@@ -57,20 +58,20 @@ public class OpenConnectionRequestTwo extends RakNetPacket implements Failable {
 
 	@Override
 	public void encode() {
-		this.isJraknet = true;
+		this.connectionType = ConnectionType.JRAKNET;
 		try {
 			this.writeMagic();
 			this.writeAddress(address);
 			this.writeUnsignedShort(maximumTransferUnit);
 			this.writeLong(clientGuid);
-			this.writeJRakNetMagic();
+			this.writeConnectionType();
 		} catch (UnknownHostException e) {
 			this.failed = true;
 			this.magic = false;
 			this.address = null;
 			this.maximumTransferUnit = 0;
 			this.clientGuid = 0;
-			this.isJraknet = false;
+			this.connectionType = null;
 			this.clear();
 		}
 	}
@@ -82,14 +83,14 @@ public class OpenConnectionRequestTwo extends RakNetPacket implements Failable {
 			this.address = this.readAddress();
 			this.maximumTransferUnit = this.readUnsignedShort();
 			this.clientGuid = this.readLong();
-			this.isJraknet = this.checkJRakNetMagic();
+			this.connectionType = this.readConnectionType();
 		} catch (UnknownHostException e) {
 			this.failed = true;
 			this.magic = false;
 			this.address = null;
 			this.maximumTransferUnit = 0;
 			this.clientGuid = 0;
-			this.isJraknet = false;
+			this.connectionType = null;
 			this.clear();
 		}
 	}

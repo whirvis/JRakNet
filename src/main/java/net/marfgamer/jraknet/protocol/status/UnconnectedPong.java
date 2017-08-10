@@ -33,6 +33,7 @@ package net.marfgamer.jraknet.protocol.status;
 import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.identifier.Identifier;
+import net.marfgamer.jraknet.protocol.ConnectionType;
 import net.marfgamer.jraknet.protocol.MessageIdentifier;
 
 public class UnconnectedPong extends RakNetPacket {
@@ -41,7 +42,7 @@ public class UnconnectedPong extends RakNetPacket {
 	public long pongId;
 	public boolean magic;
 	public Identifier identifier;
-	public boolean isJraknet;
+	public ConnectionType connectionType;
 
 	public UnconnectedPong() {
 		super(MessageIdentifier.ID_UNCONNECTED_PONG);
@@ -53,12 +54,12 @@ public class UnconnectedPong extends RakNetPacket {
 
 	@Override
 	public void encode() {
-		this.isJraknet = true;
+		this.connectionType = ConnectionType.JRAKNET;
 		this.writeLong(pingId);
 		this.writeLong(pongId);
 		this.writeMagic();
 		this.writeString(identifier.build());
-		this.writeJRakNetMagic();
+		this.writeConnectionType();
 	}
 
 	@Override
@@ -66,7 +67,7 @@ public class UnconnectedPong extends RakNetPacket {
 		this.pingId = this.readLong();
 		this.pongId = this.readLong();
 		this.magic = this.checkMagic();
-		this.identifier = new Identifier(this.readString(), this.isJraknet = this.checkJRakNetMagic());
+		this.identifier = new Identifier(this.readString(), this.connectionType = this.readConnectionType());
 	}
 
 }
