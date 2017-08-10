@@ -50,13 +50,18 @@ import net.marfgamer.jraknet.stream.PacketDataOutput;
  * @author Trent "MarfGamer" Summerlin
  */
 public class Packet {
-
+	
+	// Logger name
+	private static final String LOGGER_NAME = "packet";
+	
+	// Packet constants
 	public static final int ADDRESS_VERSION_IPV4 = 0x04;
 	public static final int ADDRESS_VERSION_IPV6 = 0x06;
 	public static final int ADDRESS_VERSION_IPV4_LENGTH = 0x04;
 	public static final int ADDRESS_VERSION_IPV6_LENGTH = 0x10;
 	public static final int ADDRESS_VERSION_IPV6_MYSTERY_LENGTH = 0x0A;
-
+	
+	// Packet data
 	private ByteBuf buffer;
 	private PacketDataInput input;
 	private PacketDataOutput output;
@@ -386,6 +391,10 @@ public class Packet {
 			byte[] connectionMagicCheck = this.read(ConnectionType.MAGIC.length);
 			if (Arrays.equals(ConnectionType.MAGIC, connectionMagicCheck)) {
 				short id = this.readUnsignedByte();
+				if (id == ConnectionType.VANILLA.getId()) {
+					RakNetLogger.debug(LOGGER_NAME, "Connection type " + ConnectionType.VANILLA
+							+ " returned after connection type magic sequence");
+				}
 				return ConnectionType.getType(id);
 			}
 		}

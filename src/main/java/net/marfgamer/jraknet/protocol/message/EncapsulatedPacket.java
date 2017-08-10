@@ -60,8 +60,10 @@ public class EncapsulatedPacket implements Sizable, Cloneable {
 	public static final byte FLAG_RELIABILITY = (byte) 0b11100000;
 	public static final byte FLAG_SPLIT = (byte) 0b00010000;
 
-	// Used to encode and decode, modified by CustomPacket and RakNetSession
-	// only
+	/*
+	 * Used for encoding and decoding, should be modified by CustomPacket and
+	 * RakNetSession only
+	 */
 	protected Packet buffer = new Packet();
 	private EncapsulatedPacket clone = null;
 	private boolean isClone = false;
