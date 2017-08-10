@@ -766,6 +766,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 		// Update system
 		while (this.running == true) {
+			if (sessions.size() <= 0) {
+				continue; // Do not loop through non-existent sessions
+			}
 			synchronized (sessions) {
 				for (RakNetClientSession session : sessions.values()) {
 					try {

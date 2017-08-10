@@ -56,10 +56,9 @@ public class UnconnectedPing extends RakNetPacket {
 
 	@Override
 	public void encode() {
-		this.connectionType = ConnectionType.JRAKNET;
 		this.writeLong(timestamp);
 		this.writeMagic();
-		this.writeConnectionType();
+		this.connectionType = this.writeConnectionType();
 	}
 
 	@Override
