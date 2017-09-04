@@ -30,8 +30,9 @@
  */
 package net.marfgamer.jraknet;
 
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.MAGIC;
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.*;
 
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -50,17 +51,17 @@ import net.marfgamer.jraknet.stream.PacketDataOutput;
  * @author Whirvis "MarfGamer" Ardenaur
  */
 public class Packet {
-	
+
 	// Logger name
 	private static final String LOGGER_NAME = "packet";
-	
+
 	// Packet constants
 	public static final int ADDRESS_VERSION_IPV4 = 0x04;
 	public static final int ADDRESS_VERSION_IPV6 = 0x06;
 	public static final int ADDRESS_VERSION_IPV4_LENGTH = 0x04;
 	public static final int ADDRESS_VERSION_IPV6_LENGTH = 0x10;
 	public static final int ADDRESS_VERSION_IPV6_MYSTERY_LENGTH = 0x0A;
-	
+
 	// Packet data
 	private ByteBuf buffer;
 	private PacketDataInput input;
@@ -299,6 +300,30 @@ public class Packet {
 	 */
 	public long readLongLE() {
 		return buffer.readLongLE();
+	}
+
+	/**
+	 * Reads an unsigned long.
+	 * 
+	 * @return an unsigned long.
+	 */
+	public BigInteger readUnsignedLong() {
+		byte[] ulBytes = this.read(8);
+		return new BigInteger(ulBytes);
+	}
+
+	/**
+	 * Reads an unsigned little endian long.
+	 * 
+	 * @return an unsigned little endian long.
+	 */
+	public BigInteger readUnsignedLongLE() {
+		byte[] ulBytesReversed = this.read(8);
+		byte[] ulBytes = new byte[ulBytesReversed.length];
+		for (int i = 0; i < ulBytes.length; i++) {
+			ulBytes[i] = ulBytesReversed[ulBytesReversed.length - i - 1];
+		}
+		return new BigInteger(ulBytes);
 	}
 
 	/**
@@ -624,6 +649,70 @@ public class Packet {
 	public Packet writeLongLE(long l) {
 		buffer.writeLongLE(l);
 		return this;
+	}
+
+	/**
+	 * Writes an unsigned long to the packet.
+	 * 
+	 * @param bi
+	 *            the long.
+	 * @return the packet.
+	 */
+	public Packet writeUnsignedLong(BigInteger bi) {
+		byte[] ulBytes = bi.toByteArray();
+		if (ulBytes.length > 8) {
+			throw new IllegalArgumentException("BigInteger is too big to fit into a long");
+		}
+		for (int i = 0; i < 8 - ulBytes.length; i++) {
+			this.writeByte(0x00);
+		}
+		for (int i = 0; i < ulBytes.length; i++) {
+			this.writeByte(ulBytes[i]);
+		}
+		return this;
+	}
+
+	/**
+	 * Writes an unsigned long to the packet.
+	 * 
+	 * @param l
+	 *            the long.
+	 * @return the packet.
+	 */
+	public Packet writeUnsignedLong(long l) {
+		return this.writeUnsignedLong(new BigInteger(Long.toString(l)));
+	}
+
+	/**
+	 * Writes an unsigned little endian long to the packet.
+	 * 
+	 * @param bi
+	 *            the long.
+	 * @return the packet.
+	 */
+	public Packet writeUnsignedLongLE(BigInteger bi) {
+		byte[] ulBytes = bi.toByteArray();
+		if (ulBytes.length > 8) {
+			throw new IllegalArgumentException("BigInteger is too big to fit into a long");
+		}
+		for (int i = ulBytes.length - 1; i >= 0; i--) {
+			this.writeByte(ulBytes[i]);
+		}
+		for (int i = 0; i < 8 - ulBytes.length; i++) {
+			this.writeByte(0x00);
+		}
+		return this;
+	}
+
+	/**
+	 * Writes an unsigned little endian long to the packet.
+	 * 
+	 * @param l
+	 *            the long.
+	 * @return the packet.
+	 */
+	public Packet writeUnsignedLongLE(long l) {
+		return this.writeUnsignedLongLE(new BigInteger(Long.toString(l)));
 	}
 
 	/**
