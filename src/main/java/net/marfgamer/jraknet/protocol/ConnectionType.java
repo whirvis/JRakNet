@@ -34,6 +34,9 @@ package net.marfgamer.jraknet.protocol;
  * Used to signify which implementation of the RakNet protocol is being used by
  * a connection. If you would like your implementation to be listed here, create
  * an issue on the JRakNet repository with the tag "Connection type support".
+ * Keep in mind that this functionality has <i>no</i> guarantees to function
+ * completely, as it is completely dependent on the implementation to implement
+ * this feature.
  * 
  * @author Trent "MarfGamer" Summerlin
  * @see <a href=
@@ -42,7 +45,7 @@ package net.marfgamer.jraknet.protocol;
 public enum ConnectionType {
 
 	/**
-	 * A vanilla connection.
+	 * A connection from a vanilla client or an unknown implementation.
 	 */
 	VANILLA("Vanilla", null, 0x00),
 
@@ -59,7 +62,17 @@ public enum ConnectionType {
 	/**
 	 * A JRakLib+ connection.
 	 */
-	JRAKLIB_PLUS("JRakLib+", "Java", 0x03);
+	JRAKLIB_PLUS("JRakLib+", "Java", 0x03),
+
+	/**
+	 * A CRakNet++ connection.
+	 */
+	CRAKNET_PLUS_PLUS("CRakNet++", "C++", 0x04),
+
+	/**
+	 * A PyRaknet connection.
+	 */
+	PYRAKNET("PyRakNet", "Python", 0x05);
 
 	// Connection type header magic
 	public static final byte[] MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B, 0x43,
@@ -110,7 +123,7 @@ public enum ConnectionType {
 				return type;
 			}
 		}
-		return ConnectionType.VANILLA;
+		return VANILLA;
 	}
 
 }
