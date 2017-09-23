@@ -39,6 +39,7 @@ public class UnconnectedPing extends RakNetPacket {
 
 	public long timestamp;
 	public boolean magic;
+	public long pingId;
 	public ConnectionType connectionType;
 
 	protected UnconnectedPing(boolean requiresOpenConnections) {
@@ -58,6 +59,7 @@ public class UnconnectedPing extends RakNetPacket {
 	public void encode() {
 		this.writeLong(timestamp);
 		this.writeMagic();
+		this.writeLong(pingId);
 		this.connectionType = this.writeConnectionType();
 	}
 
@@ -65,6 +67,7 @@ public class UnconnectedPing extends RakNetPacket {
 	public void decode() {
 		this.timestamp = this.readLong();
 		this.magic = this.checkMagic();
+		this.pingId = this.readLong();
 		this.connectionType = this.readConnectionType();
 	}
 
