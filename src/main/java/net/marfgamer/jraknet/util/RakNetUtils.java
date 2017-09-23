@@ -36,7 +36,7 @@ import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
-import java.util.Random;
+import java.util.UUID;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -68,7 +68,7 @@ public class RakNetUtils {
 
 	// Utility data
 	private static final long UTILS_TIMESTAMP = System.currentTimeMillis();
-	private static final long UTILS_PING_ID = new Random().nextLong();
+	private static final long UTILS_PING_ID = UUID.randomUUID().getLeastSignificantBits();
 	private static final int SERVER_PING_RETRIES = 5;
 	private static final int IDENTIFIER_RETRIES = 3;
 
