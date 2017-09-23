@@ -78,6 +78,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 	// Server data
 	private final long guid;
+	private final long pongId;
 	private final long timestamp;
 	private final int port;
 	private final int maxConnections;
@@ -112,7 +113,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 */
 	public RakNetServer(int port, int maxConnections, int maximumTransferUnit, Identifier identifier) {
 		// Set server data
-		this.guid = UUID.randomUUID().getMostSignificantBits();
+		UUID uuid = UUID.randomUUID();
+		this.guid = uuid.getMostSignificantBits();
+		this.pongId = uuid.getLeastSignificantBits();
 		this.timestamp = System.currentTimeMillis();
 		this.port = port;
 		this.maxConnections = maxConnections;
@@ -537,11 +540,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 					if (ping.magic == true && pingEvent.getIdentifier() != null) {
 						UnconnectedPong pong = new UnconnectedPong();
-						// Should this be "pong.pingId = ping.pingId"?
-						pong.pingId = ping.timestamp;
-						// Should this be "pong.timestamp =
-						// this.getTimestamp()"?
-						pong.pongId = this.getTimestamp();
+						pong.timestamp = ping.timestamp;
+						pong.pongId = this.pongId;
 						pong.identifier = pingEvent.getIdentifier();
 
 						pong.encode();

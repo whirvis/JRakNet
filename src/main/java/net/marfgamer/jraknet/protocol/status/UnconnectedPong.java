@@ -38,7 +38,7 @@ import net.marfgamer.jraknet.protocol.MessageIdentifier;
 
 public class UnconnectedPong extends RakNetPacket {
 
-	public long pingId;
+	public long timestamp;
 	public long pongId;
 	public boolean magic;
 	public Identifier identifier;
@@ -54,7 +54,7 @@ public class UnconnectedPong extends RakNetPacket {
 
 	@Override
 	public void encode() {
-		this.writeLong(pingId);
+		this.writeLong(timestamp);
 		this.writeLong(pongId);
 		this.writeMagic();
 		this.writeString(identifier.build());
@@ -63,7 +63,7 @@ public class UnconnectedPong extends RakNetPacket {
 
 	@Override
 	public void decode() {
-		this.pingId = this.readLong();
+		this.timestamp = this.readLong();
 		this.pongId = this.readLong();
 		this.magic = this.checkMagic();
 		this.identifier = new Identifier(this.readString(), this.connectionType = this.readConnectionType());
