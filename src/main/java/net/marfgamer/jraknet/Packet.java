@@ -850,6 +850,9 @@ public class Packet {
 	 * @return the packet as a byte array.
 	 */
 	public byte[] array() {
+		if(buffer.isDirect()) {
+			return null;
+		}
 		return Arrays.copyOfRange(buffer.array(), 0, buffer.writerIndex());
 	}
 

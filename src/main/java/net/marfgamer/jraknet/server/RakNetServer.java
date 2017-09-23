@@ -537,7 +537,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 					if (ping.magic == true && pingEvent.getIdentifier() != null) {
 						UnconnectedPong pong = new UnconnectedPong();
+						// Should this be "pong.pingId = ping.pingId"?
 						pong.pingId = ping.timestamp;
+						// Should this be "pong.timestamp =
+						// this.getTimestamp()"?
 						pong.pongId = this.getTimestamp();
 						pong.identifier = pingEvent.getIdentifier();
 

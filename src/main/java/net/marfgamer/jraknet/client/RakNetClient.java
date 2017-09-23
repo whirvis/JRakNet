@@ -88,6 +88,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	// Client data
 	private final long guid;
+	private final long pingId;
 	private final long timestamp;
 	private HashSet<Integer> discoveryPorts;
 	private DiscoveryMode discoveryMode;
@@ -123,7 +124,9 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	public RakNetClient(DiscoveryMode discoveryMode, int... discoveryPorts) {
 		// Set client data
-		this.guid = UUID.randomUUID().getLeastSignificantBits();
+		UUID uuid = UUID.randomUUID();
+		this.guid = uuid.getMostSignificantBits();
+		this.pingId = uuid.getLeastSignificantBits();
 		this.timestamp = System.currentTimeMillis();
 
 		// Set discovery data
@@ -187,6 +190,13 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	public final long getGloballyUniqueId() {
 		return this.guid;
+	}
+	
+	/**
+	 * @return the client's ping ID.
+	 */
+	public final long getPingId() {
+		return this.pingId;
 	}
 
 	/**
@@ -690,6 +700,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 							ping = new UnconnectedPingOpenConnections();
 						}
 						ping.timestamp = this.getTimestamp();
+						ping.pingId = this.pingId;
 						ping.encode();
 
 						this.sendNettyMessage(ping, new InetSocketAddress("255.255.255.255", discoveryPort));
@@ -702,6 +713,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 					if (!externalServers.isEmpty()) {
 						UnconnectedPing ping = new UnconnectedPing();
 						ping.timestamp = this.getTimestamp();
+						ping.pingId = this.pingId;
 						ping.encode();
 
 						for (InetSocketAddress externalAddress : externalServers.keySet()) {
