@@ -191,7 +191,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	public final long getGloballyUniqueId() {
 		return this.guid;
 	}
-	
+
 	/**
 	 * @return the client's ping ID.
 	 */

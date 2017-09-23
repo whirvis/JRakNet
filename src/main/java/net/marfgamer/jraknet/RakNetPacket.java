@@ -41,7 +41,7 @@ import io.netty.channel.socket.DatagramPacket;
  * @author Trent "MarfGamer" Summerlin
  */
 public class RakNetPacket extends Packet {
-	
+
 	// RakNet packet data
 	private short id;
 
