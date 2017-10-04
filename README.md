@@ -107,7 +107,7 @@ A simple RakNet client, this example attempts to connect to the main [LBSG](http
 
 # Notes
 - Some DataPacket ID's are reserved by RakNet. Because of this, it is recommended that all game packets not relating to RakNet begin with their own special ID, Minecraft does this (It's header byte is currently 0xFE). It is also recommended that game servers and game clients do not use raw packets at all.
-- For anyone coding server softwares for Minecraft: Pocket/Windows 10 edition, be aware that the game reserves ports 19132 and 19133 on the machine for server discovery. If you are on the same machine as your server make sure to set the port to anything BUT 19132 or 19133.
+- For anyone coding server softwares for Minecraft, be aware that the game reserves ports 19132 and 19133 on the machine for server discovery. If you are on the same machine as your server make sure to set the port to anything BUT 19132 or 19133.
 
 <br>
 
