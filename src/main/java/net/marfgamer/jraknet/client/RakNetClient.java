@@ -91,9 +91,9 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	private final long timestamp;
 	private HashSet<Integer> discoveryPorts;
 	private DiscoveryMode discoveryMode;
-	/** synchronize this first! (<code>externalServers</code> goes second!) */
+	/** Synchronize this first! (<code>externalServers</code> goes second!) */
 	private final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> discovered;
-	/** synchronize this second! (<code>discovered</code> goes first!) */
+	/** Synchronize this second! (<code>discovered</code> goes first!) */
 	private final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> externalServers;
 	private final ArrayList<RakNetClientListener> listeners;
 	private Thread clientThread;
