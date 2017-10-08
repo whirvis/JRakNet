@@ -34,11 +34,12 @@ Creating a server in JRakNet is extremely easy, all it takes to create one can b
 
 ```java
 // Create server
-RakNetServer server = new RakNetServer(19132, 10, new MCPEIdentifier("JRakNet Example Server", 101, "1.0.3", 0,
-		10, new Random().nextLong() /* Server broadcast ID */, "New World", "Survival"));
+RakNetServer server = new RakNetServer(19132, 10,
+		new MinecraftIdentifier("JRakNet Example Server", 137, "1.2.0", 0, 10,
+				new Random().nextLong() /* Server broadcast ID */, "New World", "Survival"));
 
-// Set listener
-server.setListener(new RakNetServerListener() {
+// Add listener
+server.addListener(new RakNetServerListener() {
 
 	// Client connected
 	@Override
@@ -56,8 +57,8 @@ server.setListener(new RakNetServerListener() {
 	// Packet received
 	@Override
 	public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
-		System.out.println("Client from address " + session.getAddress() + " sent packet with ID 0x"
-				+ Integer.toHexString(packet.getId()).toUpperCase() + " on channel " + channel);
+		System.out.println("Client from address " + session.getAddress() + " sent packet with ID "
+				+ RakNetUtils.toHexStringId(packet) + " on channel " + channel);
 	}
 
 });
@@ -78,9 +79,9 @@ private static final int SERVER_PORT = 19132;
 
 // Create client
 RakNetClient client = new RakNetClient();
-
-// Set listener
-client.setListener(new RakNetClientListener() {
+		
+// Add listener
+client.addListener(new RakNetClientListener() {
 
 	// Server connected
 	@Override
@@ -93,7 +94,7 @@ client.setListener(new RakNetClientListener() {
 	@Override
 	public void onDisconnect(RakNetServerSession session, String reason) {
 		System.out.println("Sucessfully disconnected from server with address " + session.getAddress()
-			+ " for the reason \"" + reason + "\"");
+				+ " for the reason \"" + reason + "\"");
 		client.shutdown();
 	}
 

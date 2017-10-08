@@ -51,7 +51,7 @@ public class RakNetServerExample {
 	public static void main(String[] args) throws RakNetException {
 		// Create server
 		RakNetServer server = new RakNetServer(19132, 10,
-				new MinecraftIdentifier("JRakNet Example Server", 91, "0.16.2", 0, 10,
+				new MinecraftIdentifier("JRakNet Example Server", 137, "1.2.0", 0, 10,
 						new Random().nextLong() /* Server broadcast ID */, "New World", "Survival"));
 
 		// Add listener

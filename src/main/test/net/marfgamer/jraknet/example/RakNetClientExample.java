@@ -45,15 +45,15 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
  */
 public class RakNetClientExample {
 
-	// Server address and port
-	private static final String SERVER_ADDRESS = "sg.lbsg.net";
-	private static final int SERVER_PORT = 19132;
-
 	public static void main(String[] args) throws RakNetException, UnknownHostException {
+		// Server address and port
+		String SERVER_ADDRESS = "sg.lbsg.net";
+		int SERVER_PORT = 19132;
+
 		// Create client
 		RakNetClient client = new RakNetClient();
 
-		// Set listener
+		// Add listener
 		client.addListener(new RakNetClientListener() {
 
 			// Server connected
