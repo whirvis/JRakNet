@@ -44,7 +44,7 @@ import javax.swing.UIManager;
 import net.marfgamer.jraknet.UtilityTest;
 import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.client.discovery.DiscoveryMode;
-import net.marfgamer.jraknet.identifier.MCPEIdentifier;
+import net.marfgamer.jraknet.identifier.MinecraftIdentifier;
 import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
@@ -173,10 +173,10 @@ public class BroadcastFrame extends JFrame {
 	 * @param identifiers
 	 *            the identifiers of the discovered servers.
 	 */
-	public void updatePaneText(MCPEIdentifier[] identifiers) {
+	public void updatePaneText(MinecraftIdentifier[] identifiers) {
 		StringBuilder discoverString = new StringBuilder();
 		for (int i = 0; i < identifiers.length; i++) {
-			MCPEIdentifier identifier = identifiers[i];
+			MinecraftIdentifier identifier = identifiers[i];
 			discoverString
 					.append(UtilityTest.formatMCPEIdentifier(identifier) + (i + 1 < identifiers.length ? "\n" : ""));
 

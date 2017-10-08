@@ -44,7 +44,7 @@ import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.client.RakNetClientListener;
 import net.marfgamer.jraknet.client.discovery.DiscoveryMode;
 import net.marfgamer.jraknet.identifier.Identifier;
-import net.marfgamer.jraknet.identifier.MCPEIdentifier;
+import net.marfgamer.jraknet.identifier.MinecraftIdentifier;
 
 /**
  * Used to test the broadcast feature in <code>RakNetClient</code>.
@@ -54,13 +54,13 @@ import net.marfgamer.jraknet.identifier.MCPEIdentifier;
 public class BroadcastTest {
 
 	private final RakNetClient client;
-	private final HashMap<InetSocketAddress, MCPEIdentifier> discovered;
+	private final HashMap<InetSocketAddress, MinecraftIdentifier> discovered;
 	private final BroadcastFrame frame;
 
 	public BroadcastTest() {
 		this.client = new RakNetClient(DiscoveryMode.ALL_CONNECTIONS,
 				UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT);
-		this.discovered = new HashMap<InetSocketAddress, MCPEIdentifier>();
+		this.discovered = new HashMap<InetSocketAddress, MinecraftIdentifier>();
 		this.frame = new BroadcastFrame(client);
 	}
 
@@ -73,24 +73,24 @@ public class BroadcastTest {
 
 		@Override
 		public void onServerDiscovered(InetSocketAddress address, Identifier identifier) {
-			if (MCPEIdentifier.isMCPEIdentifier(identifier)) {
-				discovered.put(address, new MCPEIdentifier(identifier));
+			if (MinecraftIdentifier.isMCPEIdentifier(identifier)) {
+				discovered.put(address, new MinecraftIdentifier(identifier));
 			}
-			frame.updatePaneText(discovered.values().toArray(new MCPEIdentifier[discovered.size()]));
+			frame.updatePaneText(discovered.values().toArray(new MinecraftIdentifier[discovered.size()]));
 		}
 
 		@Override
 		public void onServerIdentifierUpdate(InetSocketAddress address, Identifier identifier) {
-			if (MCPEIdentifier.isMCPEIdentifier(identifier)) {
-				discovered.put(address, new MCPEIdentifier(identifier));
+			if (MinecraftIdentifier.isMCPEIdentifier(identifier)) {
+				discovered.put(address, new MinecraftIdentifier(identifier));
 			}
-			frame.updatePaneText(discovered.values().toArray(new MCPEIdentifier[discovered.size()]));
+			frame.updatePaneText(discovered.values().toArray(new MinecraftIdentifier[discovered.size()]));
 		}
 
 		@Override
 		public void onServerForgotten(InetSocketAddress address) {
 			discovered.remove(address);
-			frame.updatePaneText(discovered.values().toArray(new MCPEIdentifier[discovered.size()]));
+			frame.updatePaneText(discovered.values().toArray(new MinecraftIdentifier[discovered.size()]));
 		}
 
 	}
@@ -103,7 +103,7 @@ public class BroadcastTest {
 		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
 
 		// Set client options
-		client.setListener(new ServerDiscoveryListener());
+		client.addListener(new ServerDiscoveryListener());
 
 		// Create window
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

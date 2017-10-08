@@ -44,6 +44,7 @@ import net.marfgamer.jraknet.protocol.login.NewIncomingConnection;
 import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 import net.marfgamer.jraknet.server.RakNetServer;
+import net.marfgamer.jraknet.server.RakNetServerListener;
 
 /**
  * This class represents a client connection and handles the login sequence
@@ -107,12 +108,16 @@ public class RakNetClientSession extends RakNetSession {
 
 	@Override
 	public void onAcknowledge(Record record, EncapsulatedPacket packet) {
-		server.getListener().onAcknowledge(this, record, packet);
+		for (RakNetServerListener listener : server.getListeners()) {
+			listener.onAcknowledge(this, record, packet);
+		}
 	}
 
 	@Override
 	public void onNotAcknowledge(Record record, EncapsulatedPacket packet) {
-		server.getListener().onNotAcknowledge(this, record, packet);
+		for (RakNetServerListener listener : server.getListeners()) {
+			listener.onNotAcknowledge(this, record, packet);
+		}
 	}
 
 	@Override
@@ -156,7 +161,9 @@ public class RakNetClientSession extends RakNetSession {
 			if (!clientHandshake.failed()) {
 				this.timestamp = (System.currentTimeMillis() - clientHandshake.clientTimestamp);
 				this.setState(RakNetState.CONNECTED);
-				server.getListener().onClientConnect(this);
+				for (RakNetServerListener listener : server.getListeners()) {
+					listener.onClientConnect(this);
+				}
 			} else {
 				server.removeSession(this,
 						"Login failed, " + NewIncomingConnection.class.getSimpleName() + " packet failed to decode");
@@ -170,9 +177,13 @@ public class RakNetClientSession extends RakNetSession {
 			 * handleUnknownMessage().
 			 */
 			if (packetId >= ID_USER_PACKET_ENUM) {
-				server.getListener().handleMessage(this, packet, channel);
+				for (RakNetServerListener listener : server.getListeners()) {
+					listener.handleMessage(this, packet, channel);
+				}
 			} else {
-				server.getListener().handleUnknownMessage(this, packet, channel);
+				for (RakNetServerListener listener : server.getListeners()) {
+					listener.handleUnknownMessage(this, packet, channel);
+				}
 			}
 		}
 	}

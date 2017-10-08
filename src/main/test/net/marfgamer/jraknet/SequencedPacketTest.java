@@ -43,7 +43,6 @@ import net.marfgamer.jraknet.server.RakNetServer;
 import net.marfgamer.jraknet.server.RakNetServerListener;
 import net.marfgamer.jraknet.session.RakNetClientSession;
 import net.marfgamer.jraknet.session.RakNetServerSession;
-import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
  * Used to test the sequenced packet feature of <code>RakNetSession</code>
@@ -72,7 +71,7 @@ public class SequencedPacketTest {
 	private static int packetReceiveCount = 0;
 	private static boolean[] packetsReceived = new boolean[PACKET_SEND_COUNT];
 
-	public static void main(String[] args) throws RakNetException, UnknownHostException {
+	public static void main(String[] args) throws RakNetException, InterruptedException, UnknownHostException {
 		// Enable logging
 		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
 
@@ -80,7 +79,7 @@ public class SequencedPacketTest {
 		createServer();
 
 		RakNetLogger.info(LOGGER_NAME, "Sleeping 3000MS");
-		RakNetUtils.threadLock(3000L);
+		Thread.sleep(3000L);
 
 		RakNetLogger.info(LOGGER_NAME, "Creating client...");
 		createClient();
@@ -88,14 +87,14 @@ public class SequencedPacketTest {
 		// In case of timeout
 		long currentTime = System.currentTimeMillis();
 		while (true) {
+			Thread.sleep(0, 1); // Lower CPU usage
 			if (currentTime - startSend >= 5000 && startSend > -1) {
 				RakNetLogger.error(LOGGER_NAME,
 						"Failed to complete test due to timeout (Took over 30 seconds!), printing results...");
 				printResults();
 				System.exit(1);
-			} else {
-				currentTime = System.currentTimeMillis();
 			}
+			currentTime = System.currentTimeMillis();
 		}
 	}
 
@@ -139,8 +138,8 @@ public class SequencedPacketTest {
 	private static RakNetServer createServer() throws RakNetException {
 		RakNetServer server = new RakNetServer(UtilityTest.MARFGAMER_DEVELOPMENT_PORT, 1);
 
-		// Client connected
-		server.setListener(new RakNetServerListener() {
+		// Add listener
+		server.addListener(new RakNetServerListener() {
 
 			@Override
 			public void onClientConnect(RakNetClientSession session) {
@@ -202,8 +201,8 @@ public class SequencedPacketTest {
 		// Create client and add hooks
 		RakNetClient client = new RakNetClient();
 
-		// Server connected
-		client.setListener(new RakNetClientListener() {
+		// Add listener
+		client.addListener(new RakNetClientListener() {
 
 			int packetSize;
 

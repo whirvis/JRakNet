@@ -99,7 +99,7 @@ public class ChatServer implements RakNetServerListener {
 	 * Starts the server.
 	 */
 	public void start() {
-		server.setListener(this);
+		server.addListener(this);
 		server.startThreaded();
 	}
 
@@ -387,7 +387,7 @@ public class ChatServer implements RakNetServerListener {
 		}
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		// Enable logging
 		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
 
@@ -409,6 +409,7 @@ public class ChatServer implements RakNetServerListener {
 		@SuppressWarnings("resource")
 		Scanner commandScanner = new Scanner(System.in);
 		while (true) {
+			Thread.sleep(0, 1); // Lower CPU usage
 			if (commandScanner.hasNextLine()) {
 				String input = commandScanner.nextLine();
 				commandHandler.handleInput(input);

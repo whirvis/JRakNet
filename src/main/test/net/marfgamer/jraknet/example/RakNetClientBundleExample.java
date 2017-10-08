@@ -51,7 +51,7 @@ public class RakNetClientBundleExample extends RakNetClient {
 
 	public RakNetClientBundleExample() {
 		super();
-		this.setListenerSelf();
+		this.addSelfListener();
 	}
 
 	// Server connected

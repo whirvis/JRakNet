@@ -44,7 +44,6 @@ import net.marfgamer.jraknet.server.RakNetServer;
 import net.marfgamer.jraknet.server.RakNetServerListener;
 import net.marfgamer.jraknet.session.RakNetClientSession;
 import net.marfgamer.jraknet.session.RakNetServerSession;
-import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
  * Used to test the split packet feature of <code>RakNetSession</code> through a
@@ -63,7 +62,7 @@ public class SplitPacketTest {
 	private static final short SPLIT_END_ID = 0xFF;
 	private static long startSend = -1;
 
-	public static void main(String[] args) throws RakNetException, UnknownHostException {
+	public static void main(String[] args) throws RakNetException, InterruptedException, UnknownHostException {
 		// Enable logging
 		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
 
@@ -71,7 +70,7 @@ public class SplitPacketTest {
 		createServer();
 
 		RakNetLogger.info(LOGGER_NAME, "Sleeping 3000MS");
-		RakNetUtils.threadLock(3000L);
+		Thread.sleep(3000L);
 
 		RakNetLogger.info(LOGGER_NAME, "Creating client...");
 		createClient();
@@ -85,8 +84,8 @@ public class SplitPacketTest {
 	private static RakNetServer createServer() throws RakNetException {
 		RakNetServer server = new RakNetServer(UtilityTest.MARFGAMER_DEVELOPMENT_PORT, 1);
 
-		// Client connected
-		server.setListener(new RakNetServerListener() {
+		// Add listener
+		server.addListener(new RakNetServerListener() {
 
 			@Override
 			public void onClientConnect(RakNetClientSession session) {
@@ -173,8 +172,8 @@ public class SplitPacketTest {
 		// Create client and add hooks
 		RakNetClient client = new RakNetClient();
 
-		// Server connected
-		client.setListener(new RakNetClientListener() {
+		// Add listener
+		client.addListener(new RakNetClientListener() {
 
 			private Packet packet;
 

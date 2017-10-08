@@ -33,11 +33,11 @@ package net.marfgamer.jraknet.identifier;
 import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
- * Represents an identifier from a Minecraft: Pocket Edition server.
+ * Represents an identifier from a Minecraft server.
  *
  * @author Trent "MarfGamer" Summerlin
  */
-public class MCPEIdentifier extends Identifier {
+public class MinecraftIdentifier extends Identifier {
 
 	private static final char[] VERSION_TAG_ALPHABET = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 			'.' };
@@ -72,8 +72,8 @@ public class MCPEIdentifier extends Identifier {
 	/**
 	 * @param identifier
 	 *            the identifier to check.
-	 * @return <code>true</code> if the specified identifier is a Minecraft:
-	 *         Pocket Edition identifier.
+	 * @return <code>true</code> if the specified identifier is a Minecraft
+	 *         identifier.
 	 */
 	public static boolean isMCPEIdentifier(Identifier identifier) {
 		return identifier.build().startsWith(HEADER);
@@ -88,6 +88,8 @@ public class MCPEIdentifier extends Identifier {
 	private String worldName;
 	private String gamemode;
 	private boolean legacy;
+
+	// MCPE;§r§l§9Play>> §3SURVIVAL GAMES§l;101;1.2;7940;9000;
 
 	/**
 	 * Constructs an <code>MCPEIdentifier</code> with the specified server name,
@@ -111,7 +113,7 @@ public class MCPEIdentifier extends Identifier {
 	 * @param gamemode
 	 *            the gamemode.
 	 */
-	public MCPEIdentifier(String serverName, int serverProtocol, String versionTag, int onlinePlayerCount,
+	public MinecraftIdentifier(String serverName, int serverProtocol, String versionTag, int onlinePlayerCount,
 			int maxPlayerCount, long guid, String worldName, String gamemode) {
 		this.serverName = serverName;
 		this.serverProtocol = serverProtocol;
@@ -137,7 +139,7 @@ public class MCPEIdentifier extends Identifier {
 	 * @param identifier
 	 *            the <code>Identifier</code> to parse.
 	 */
-	public MCPEIdentifier(Identifier identifier) {
+	public MinecraftIdentifier(Identifier identifier) {
 		super(identifier);
 		String[] data = identifier.build().split(SEPERATOR);
 		if (data.length >= DATA_COUNT_LEGACY) {
@@ -172,14 +174,14 @@ public class MCPEIdentifier extends Identifier {
 	 * @param identifier
 	 *            the identifier to parse.
 	 */
-	public MCPEIdentifier(String identifier) {
+	public MinecraftIdentifier(String identifier) {
 		this(new Identifier(identifier));
 	}
 
 	/**
 	 * Constructs a blank <code>MCPEIdentifier</code>.
 	 */
-	public MCPEIdentifier() {
+	public MinecraftIdentifier() {
 		this("", -1, "", -1, -1, -1, "", "");
 	}
 
