@@ -54,7 +54,7 @@ public class LatencyTest {
 	private final LatencyFrame frame;
 
 	public LatencyTest() {
-		this.server = new RakNetServer(UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT,
+		this.server = new RakNetServer(UtilityTest.MINECRAFT_DEFAULT_PORT,
 				LATENCY_TEST_IDENTIFIER.getMaxPlayerCount());
 		this.frame = new LatencyFrame();
 	}

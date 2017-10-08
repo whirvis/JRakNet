@@ -46,7 +46,7 @@ import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
  * Used to test <code>RakNetServer</code> by starting a server on the default
- * Minecraft: Pocket Edition port.
+ * Minecraft port.
  *
  * @author Trent "MarfGamer" Summerlin
  */
@@ -60,7 +60,7 @@ public class RakNetServerTest {
 		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
 
 		// Create server and add listener
-		RakNetServer server = new RakNetServer(UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT, 10);
+		RakNetServer server = new RakNetServer(UtilityTest.MINECRAFT_DEFAULT_PORT, 10);
 		server.addListener(new RakNetServerListener() {
 
 			@Override

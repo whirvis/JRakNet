@@ -59,7 +59,7 @@ public class BroadcastTest {
 
 	public BroadcastTest() {
 		this.client = new RakNetClient(DiscoveryMode.ALL_CONNECTIONS,
-				UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT);
+				UtilityTest.MINECRAFT_DEFAULT_PORT);
 		this.discovered = new HashMap<InetSocketAddress, MinecraftIdentifier>();
 		this.frame = new BroadcastFrame(client);
 	}
