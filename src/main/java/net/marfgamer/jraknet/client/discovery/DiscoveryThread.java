@@ -34,7 +34,6 @@ import java.util.ArrayList;
 
 import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.client.RakNetClient;
-import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
  * This <code>Thread</code> is used by the <code>RakNetClient</code> to discover
@@ -122,16 +121,20 @@ public class DiscoveryThread extends Thread {
 		this.running = true;
 		RakNetLogger.info(LOGGER_NAME, "Started discovery thread");
 		while (this.running) {
-			for (RakNetClient client : this.clients) {
-				client.updateDiscoveryData();
-			}
-			if (clients.size() > 0) {
+			try {
+				Thread.sleep(1000); // Lower CPU usage and prevent spamming
+				if (clients.size() <= 0) {
+					continue; // Do not loop through non-existent clients
+				}
+				for (RakNetClient client : this.clients) {
+					client.updateDiscoveryData();
+				}
 				RakNetLogger.debug(LOGGER_NAME,
 						"Sent discovery info out for " + clients.size() + " client" + (clients.size() == 1 ? "" : "s"));
-			} else {
-				RakNetLogger.warn(LOGGER_NAME, "Sent discovery info out for no clients");
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				RakNetLogger.error(LOGGER_NAME, "Discovery thread has crashed");
 			}
-			RakNetUtils.threadLock(1000L);
 		}
 	}
 

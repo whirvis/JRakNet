@@ -34,16 +34,15 @@ import java.util.Random;
 
 import net.marfgamer.jraknet.RakNetException;
 import net.marfgamer.jraknet.RakNetPacket;
-import net.marfgamer.jraknet.identifier.MCPEIdentifier;
+import net.marfgamer.jraknet.identifier.MinecraftIdentifier;
 import net.marfgamer.jraknet.server.RakNetServer;
 import net.marfgamer.jraknet.server.RakNetServerListener;
 import net.marfgamer.jraknet.session.RakNetClientSession;
 import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
- * A simple <code>RakNetServer</code> that can be tested through a Minecraft:
- * Pocket Edition client using the local multiplayer features built into the
- * game.
+ * A simple <code>RakNetServer</code> that can be tested through a Minecraft
+ * client using the local multiplayer features built into the game.
  *
  * @author Whirvis "MarfGamer" Ardenaur
  */
@@ -51,11 +50,12 @@ public class RakNetServerExample {
 
 	public static void main(String[] args) throws RakNetException {
 		// Create server
-		RakNetServer server = new RakNetServer(19132, 10, new MCPEIdentifier("JRakNet Example Server", 91, "0.16.2", 0,
-				10, new Random().nextLong() /* Server broadcast ID */, "New World", "Survival"));
+		RakNetServer server = new RakNetServer(19132, 10,
+				new MinecraftIdentifier("JRakNet Example Server", 91, "0.16.2", 0, 10,
+						new Random().nextLong() /* Server broadcast ID */, "New World", "Survival"));
 
-		// Set listener
-		server.setListener(new RakNetServerListener() {
+		// Add listener
+		server.addListener(new RakNetServerListener() {
 
 			// Client connected
 			@Override

@@ -34,7 +34,7 @@ import static net.marfgamer.jraknet.util.RakNetUtils.*;
 
 import java.net.InetSocketAddress;
 
-import net.marfgamer.jraknet.identifier.MCPEIdentifier;
+import net.marfgamer.jraknet.identifier.MinecraftIdentifier;
 import net.marfgamer.jraknet.util.RakNetUtils;
 
 /**
@@ -86,16 +86,16 @@ public class UtilityTest {
 
 		// Get the server identifier
 		RakNetLogger.info(LOGGER_NAME, "Getting server identifier...");
-		MCPEIdentifier identifier = new MCPEIdentifier(getServerIdentifier(LIFEBOAT_SURVIVAL_GAMES_ADDRESS));
+		MinecraftIdentifier identifier = new MinecraftIdentifier(getServerIdentifier(LIFEBOAT_SURVIVAL_GAMES_ADDRESS));
 		RakNetLogger.info(LOGGER_NAME, "Success!: " + formatMCPEIdentifier(identifier));
 	}
 
 	/**
 	 * @param identifier
 	 *            the <code>Identifier</code> to format.
-	 * @return a formated Minecraft: Pocket Edition identifier.
+	 * @return a formated Minecraft identifier.
 	 */
-	public static String formatMCPEIdentifier(MCPEIdentifier identifier) {
+	public static String formatMCPEIdentifier(MinecraftIdentifier identifier) {
 		return ("[Name: " + identifier.getServerName().replaceAll(UNICODE_MINECRAFT_COLOR_SYMBOL + ".", "")
 				+ "] [Version: " + identifier.getVersionTag() + "] [Player count: " + identifier.getOnlinePlayerCount()
 				+ "/" + identifier.getMaxPlayerCount() + "] [Server type: " + identifier.getConnectionType().getName()

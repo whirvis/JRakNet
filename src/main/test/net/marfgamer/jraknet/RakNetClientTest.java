@@ -55,9 +55,9 @@ public class RakNetClientTest {
 		// Enable logging
 		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
 
-		// Create client and set listener
+		// Create client and add listener
 		RakNetClient client = new RakNetClient();
-		client.setListener(new RakNetClientListener() {
+		client.addListener(new RakNetClientListener() {
 
 			@Override
 			public void onConnect(RakNetServerSession session) {

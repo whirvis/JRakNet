@@ -54,7 +54,7 @@ public class RakNetClientExample {
 		RakNetClient client = new RakNetClient();
 
 		// Set listener
-		client.setListener(new RakNetClientListener() {
+		client.addListener(new RakNetClientListener() {
 
 			// Server connected
 			@Override

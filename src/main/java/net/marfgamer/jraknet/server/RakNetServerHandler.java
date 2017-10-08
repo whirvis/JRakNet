@@ -80,7 +80,9 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	 */
 	public void blockAddress(InetAddress address, String reason, long time) {
 		blocked.put(address, new BlockedAddress(System.currentTimeMillis(), time));
-		server.getListener().onAddressBlocked(address, reason, time);
+		for (RakNetServerListener listener : server.getListeners()) {
+			listener.onAddressBlocked(address, reason, time);
+		}
 		RakNetLogger.info(loggerName,
 				"Blocked address " + address + " due to \"" + reason + "\" for " + time + " milliseconds");
 	}
@@ -93,7 +95,9 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	 */
 	public void unblockAddress(InetAddress address) {
 		blocked.remove(address);
-		server.getListener().onAddressUnblocked(address);
+		for (RakNetServerListener listener : server.getListeners()) {
+			listener.onAddressUnblocked(address);
+		}
 		RakNetLogger.info(loggerName, "Unblocked address " + address);
 	}
 
@@ -133,7 +137,9 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			server.handleMessage(packet, sender);
 			datagram.content().readerIndex(0); // Reset position
 			RakNetLogger.debug(loggerName, "Sent packet to server and reset Datagram buffer read position");
-			server.getListener().handleNettyMessage(datagram.content(), sender);
+			for (RakNetServerListener listener : server.getListeners()) {
+				listener.handleNettyMessage(datagram.content(), sender);
+			}
 			datagram.content().release(); // No longer needed
 			RakNetLogger.debug(loggerName, "Sent Datagram buffer to server and released it");
 
