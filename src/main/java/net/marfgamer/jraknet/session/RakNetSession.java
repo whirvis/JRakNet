@@ -388,13 +388,15 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 *            the packets.
 	 */
 	public final void setAckReceiptPackets(EncapsulatedPacket[] packets) {
-		for (EncapsulatedPacket packet : packets) {
-			EncapsulatedPacket clone = packet.getClone();
-			if (!clone.reliability.requiresAck()) {
-				throw new IllegalArgumentException("Invalid reliability " + packet.reliability);
+		synchronized (ackReceiptPackets) {
+			for (EncapsulatedPacket packet : packets) {
+				EncapsulatedPacket clone = packet.getClone();
+				if (!clone.reliability.requiresAck()) {
+					throw new IllegalArgumentException("Invalid reliability " + packet.reliability);
+				}
+				clone.ackRecord = packet.ackRecord;
+				ackReceiptPackets.put(clone, clone.ackRecord.getIndex());
 			}
-			clone.ackRecord = packet.ackRecord;
-			ackReceiptPackets.put(clone, clone.ackRecord.getIndex());
 		}
 	}
 
@@ -584,12 +586,16 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 					// Are any packets associated with an ACK receipt tied to
 					// this record?
-					for (EncapsulatedPacket packet : ackReceiptPackets.keySet()) {
-						int packetRecordIndex = ackReceiptPackets.get(packet).intValue();
-						if (recordIndex == packetRecordIndex) {
-							this.onAcknowledge(record, packet);
-							packet.ackRecord = null;
-							ackReceiptPackets.remove(packet);
+					synchronized (ackReceiptPackets) {
+						Iterator<EncapsulatedPacket> ackReceiptPacketsI = ackReceiptPackets.keySet().iterator();
+						while (ackReceiptPacketsI.hasNext()) {
+							EncapsulatedPacket packet = ackReceiptPacketsI.next();
+							int packetRecordIndex = ackReceiptPackets.get(packet).intValue();
+							if (recordIndex == packetRecordIndex) {
+								this.onAcknowledge(record, packet);
+								packet.ackRecord = null;
+								ackReceiptPacketsI.remove();
+							}
 						}
 					}
 
@@ -608,18 +614,22 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 					// Are any packets associated with an ACK receipt tied to
 					// this record?
-					for (EncapsulatedPacket packet : ackReceiptPackets.keySet()) {
-						int packetRecordIndex = ackReceiptPackets.get(packet).intValue();
+					synchronized (ackReceiptPackets) {
+						Iterator<EncapsulatedPacket> ackReceiptPacketsI = ackReceiptPackets.keySet().iterator();
+						while (ackReceiptPacketsI.hasNext()) {
+							EncapsulatedPacket packet = ackReceiptPacketsI.next();
+							int packetRecordIndex = ackReceiptPackets.get(packet).intValue();
 
-						/*
-						 * We only call onNotAcknowledge() for unreliable
-						 * packets, as they can be lost. However, reliable
-						 * packets will always eventually be received.
-						 */
-						if (recordIndex == packetRecordIndex && !packet.reliability.isReliable()) {
-							this.onNotAcknowledge(record, packet);
-							packet.ackRecord = null;
-							ackReceiptPackets.remove(packet);
+							/*
+							 * We only call onNotAcknowledge() for unreliable
+							 * packets, as they can be lost. However, reliable
+							 * packets will always eventually be received.
+							 */
+							if (recordIndex == packetRecordIndex && !packet.reliability.isReliable()) {
+								this.onNotAcknowledge(record, packet);
+								packet.ackRecord = null;
+								ackReceiptPackets.remove(packet);
+							}
 						}
 					}
 
@@ -665,11 +675,11 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 				// Prevent queue from overflowing
 				if (splitQueue.size() + 1 > RakNet.MAX_SPLITS_PER_QUEUE) {
 					// Remove unreliable packets from the queue
-					Iterator<SplitPacket> splitPackets = splitQueue.values().iterator();
-					while (splitPackets.hasNext()) {
-						SplitPacket splitPacket = splitPackets.next();
+					Iterator<SplitPacket> splitQueueI = splitQueue.values().iterator();
+					while (splitQueueI.hasNext()) {
+						SplitPacket splitPacket = splitQueueI.next();
 						if (!splitPacket.getReliability().isReliable()) {
-							splitPackets.remove();
+							splitQueueI.remove();
 						}
 					}
 
@@ -835,9 +845,9 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 		// Resend lost packets
 		synchronized (recoveryQueue) {
-			Iterator<EncapsulatedPacket[]> recovering = recoveryQueue.values().iterator();
-			if (currentTime - this.lastRecoverySendTime >= RakNet.RECOVERY_SEND_INTERVAL && recovering.hasNext()) {
-				this.sendCustomPacket(recovering.next(), false);
+			Iterator<EncapsulatedPacket[]> recoveryQueueI = recoveryQueue.values().iterator();
+			if (currentTime - this.lastRecoverySendTime >= RakNet.RECOVERY_SEND_INTERVAL && recoveryQueueI.hasNext()) {
+				this.sendCustomPacket(recoveryQueueI.next(), false);
 				this.lastRecoverySendTime = currentTime;
 			}
 		}

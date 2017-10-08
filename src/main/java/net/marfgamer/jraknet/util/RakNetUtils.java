@@ -474,18 +474,6 @@ public class RakNetUtils {
 	}
 
 	/**
-	 * Causes a sleep on the main thread using a simple while loop.
-	 * 
-	 * @param time
-	 *            How long the thread will sleep in milliseconds.
-	 */
-	public static void threadLock(long time) {
-		long sleepStart = System.currentTimeMillis();
-		while (System.currentTimeMillis() - sleepStart < time)
-			;
-	}
-
-	/**
 	 * Used by <code>createBootstrapAndSend()</code> to wait for the packet and
 	 * return it.
 	 *

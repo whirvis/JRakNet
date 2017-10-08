@@ -37,6 +37,7 @@ import java.net.InetSocketAddress;
 import io.netty.channel.Channel;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.client.RakNetClient;
+import net.marfgamer.jraknet.client.RakNetClientListener;
 import net.marfgamer.jraknet.protocol.ConnectionType;
 import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.login.ConnectionRequestAccepted;
@@ -91,20 +92,26 @@ public class RakNetServerSession extends RakNetSession {
 
 	@Override
 	public void onAcknowledge(Record record, EncapsulatedPacket packet) {
-		client.getListener().onAcknowledge(this, record, packet);
+		for (RakNetClientListener listener : client.getListeners()) {
+			listener.onAcknowledge(this, record, packet);
+		}
 
 		// If the server received our IncomingConnectionPacket we are connected
 		if (!this.getState().equals(RakNetState.CONNECTED) && incomingConnectionPacket != null) {
 			if (record.equals(incomingConnectionPacket.ackRecord)) {
 				this.setState(RakNetState.CONNECTED);
-				client.getListener().onConnect(this);
+				for (RakNetClientListener listener : client.getListeners()) {
+					listener.onConnect(this);
+				}
 			}
 		}
 	}
 
 	@Override
 	public void onNotAcknowledge(Record record, EncapsulatedPacket packet) {
-		client.getListener().onNotAcknowledge(this, record, packet);
+		for (RakNetClientListener listener : client.getListeners()) {
+			listener.onNotAcknowledge(this, record, packet);
+		}
 	}
 
 	@Override
@@ -141,9 +148,13 @@ public class RakNetServerSession extends RakNetSession {
 			 * handleUnknownMessage().
 			 */
 			if (packetId >= ID_USER_PACKET_ENUM) {
-				client.getListener().handleMessage(this, packet, channel);
+				for (RakNetClientListener listener : client.getListeners()) {
+					listener.handleMessage(this, packet, channel);
+				}
 			} else {
-				client.getListener().handleUnknownMessage(this, packet, channel);
+				for (RakNetClientListener listener : client.getListeners()) {
+					listener.handleUnknownMessage(this, packet, channel);
+				}
 			}
 		}
 	}

@@ -33,7 +33,7 @@ package net.marfgamer.jraknet;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
-import net.marfgamer.jraknet.identifier.MCPEIdentifier;
+import net.marfgamer.jraknet.identifier.MinecraftIdentifier;
 import net.marfgamer.jraknet.protocol.MessageIdentifier;
 import net.marfgamer.jraknet.protocol.login.NewIncomingConnection;
 import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
@@ -59,9 +59,9 @@ public class RakNetServerTest {
 		// Enable logging
 		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
 
-		// Create server and set listener
+		// Create server and add listener
 		RakNetServer server = new RakNetServer(UtilityTest.MINECRAFT_POCKET_EDITION_DEFAULT_PORT, 10);
-		server.setListener(new RakNetServerListener() {
+		server.addListener(new RakNetServerListener() {
 
 			@Override
 			public void onClientPreConnect(InetSocketAddress address) {
@@ -98,7 +98,7 @@ public class RakNetServerTest {
 
 			@Override
 			public void handlePing(ServerPing ping) {
-				MCPEIdentifier identifier = new MCPEIdentifier("A JRakNet server test", 91, "0.16.2",
+				MinecraftIdentifier identifier = new MinecraftIdentifier("A JRakNet server test", 91, "0.16.2",
 						server.getSessionCount(), server.getMaxConnections(), server.getGloballyUniqueId(), "New World",
 						"Survival");
 				ping.setIdentifier(identifier);
@@ -140,7 +140,15 @@ public class RakNetServerTest {
 		});
 
 		// Start server
-		server.startThreaded();
+		try {
+			server.start();
+		} catch (NoListenerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (RakNetException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 }
