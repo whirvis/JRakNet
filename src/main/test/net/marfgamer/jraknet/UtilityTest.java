@@ -52,9 +52,9 @@ public class UtilityTest {
 	private static final String ADDRESS_TEST_INVALID = "275.3.6.28:83245";
 	private static final char UNICODE_MINECRAFT_COLOR_SYMBOL = '\u00A7';
 	public static final int MARFGAMER_DEVELOPMENT_PORT = 30851;
-	public static final int MINECRAFT_POCKET_EDITION_DEFAULT_PORT = 19132;
+	public static final int MINECRAFT_DEFAULT_PORT = 19132;
 	public static final InetSocketAddress LIFEBOAT_SURVIVAL_GAMES_ADDRESS = new InetSocketAddress("sg.lbsg.net",
-			MINECRAFT_POCKET_EDITION_DEFAULT_PORT);
+			MINECRAFT_DEFAULT_PORT);
 
 	public static void main(String[] args) throws RakNetException {
 		// Enable logging
