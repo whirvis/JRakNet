@@ -88,7 +88,7 @@ public class SequencedPacketTest {
 		long currentTime = System.currentTimeMillis();
 		while (true) {
 			Thread.sleep(0, 1); // Lower CPU usage
-			if (currentTime - startSend >= 5000 && startSend > -1) {
+			if (currentTime - startSend >= 30000 && startSend > -1) {
 				RakNetLogger.error(LOGGER_NAME,
 						"Failed to complete test due to timeout (Took over 30 seconds!), printing results...");
 				printResults();
