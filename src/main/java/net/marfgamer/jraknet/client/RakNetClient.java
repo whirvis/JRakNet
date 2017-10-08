@@ -514,7 +514,6 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			discoverySystem.start();
 		}
 		discoverySystem.addClient(this);
-		// TODO: UPDATE
 
 		return this;
 	}
