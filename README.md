@@ -74,8 +74,8 @@ Creating a client in JRakNet is also very easy. The code required to create a cl
 
 ```java
 // Server address and port
-private static final String SERVER_ADDRESS = "sg.lbsg.net";
-private static final int SERVER_PORT = 19132;
+String SERVER_ADDRESS = "sg.lbsg.net";
+int SERVER_PORT = 19132;
 
 // Create client
 RakNetClient client = new RakNetClient();
