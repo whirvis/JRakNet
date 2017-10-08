@@ -346,18 +346,16 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		}
 
 		// Do we need to split the packet?
-		synchronized (sendQueue) {
-			if (SplitPacket.needsSplit(reliability, packet, this.maximumTransferUnit)) {
-				encapsulated.splitId = ++this.splitId % 65536;
-				for (EncapsulatedPacket split : SplitPacket.splitPacket(this, encapsulated)) {
-					sendQueue.add(split);
-				}
-				RakNetLogger.debug(loggerName,
-						"Split encapsulated packet " + encapsulated.splitId + " and added it to the send queue");
-			} else {
-				sendQueue.add(encapsulated);
-				RakNetLogger.debug(loggerName, "Added encapsulated packet to the send queue");
+		if (SplitPacket.needsSplit(reliability, packet, this.maximumTransferUnit)) {
+			encapsulated.splitId = ++this.splitId % 65536;
+			for (EncapsulatedPacket split : SplitPacket.splitPacket(this, encapsulated)) {
+				sendQueue.add(split);
 			}
+			RakNetLogger.debug(loggerName,
+					"Split encapsulated packet " + encapsulated.splitId + " and added it to the send queue");
+		} else {
+			sendQueue.add(encapsulated);
+			RakNetLogger.debug(loggerName, "Added encapsulated packet to the send queue");
 		}
 		RakNetLogger.debug(loggerName, "Sent packet with size of " + packet.size() + " bytes (" + (packet.size() * 8)
 				+ " bits) with reliability " + reliability + " on channel " + channel);
@@ -844,12 +842,10 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		}
 
 		// Resend lost packets
-		synchronized (recoveryQueue) {
-			Iterator<EncapsulatedPacket[]> recoveryQueueI = recoveryQueue.values().iterator();
-			if (currentTime - this.lastRecoverySendTime >= RakNet.RECOVERY_SEND_INTERVAL && recoveryQueueI.hasNext()) {
-				this.sendCustomPacket(recoveryQueueI.next(), false);
-				this.lastRecoverySendTime = currentTime;
-			}
+		Iterator<EncapsulatedPacket[]> recoveryQueueI = recoveryQueue.values().iterator();
+		if (currentTime - this.lastRecoverySendTime >= RakNet.RECOVERY_SEND_INTERVAL && recoveryQueueI.hasNext()) {
+			this.sendCustomPacket(recoveryQueueI.next(), false);
+			this.lastRecoverySendTime = currentTime;
 		}
 
 		// Send ping to detect latency if it is enabled
