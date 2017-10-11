@@ -98,9 +98,9 @@ public class SessionPreparation {
 
 			if (connectionResponseOne.magic != true) {
 				this.cancelReason = new LoginFailureException(client, "MAGIC failed to validate");
-			} else if (connectionResponseOne.maximumTransferUnit < RakNet.MINIMUM_TRANSFER_UNIT) {
-				this.cancelReason = new LoginFailureException(client,
-						"Maximum transfer unit is is lower than the minimum");
+			} else if (connectionResponseOne.maximumTransferUnit > RakNet.MAXIMUM_MTU_SIZE
+					|| connectionResponseOne.maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE) {
+				this.cancelReason = new LoginFailureException(client, "Invalid maximum transfer unit size");
 			} else if (connectionResponseOne.maximumTransferUnit > this.initialMaximumTransferUnit) {
 				this.cancelReason = new LoginFailureException(client,
 						"Server maximum transfer unit is higher than the client can handle");

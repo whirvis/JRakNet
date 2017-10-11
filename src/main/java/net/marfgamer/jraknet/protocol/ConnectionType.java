@@ -110,9 +110,14 @@ public enum ConnectionType {
 	NODERAKNET("NodeRakNet", "Node.js", 0x0C),
 
 	/**
-	 * An AsnRaknet connection.
+	 * An AsmRaknet connection.
 	 */
-	ASMRAKNET("AsmRakNet", "Assembly", 0x0D);
+	ASMRAKNET("AsmRakNet", "Assembly", 0x0D),
+
+	/**
+	 * A JungleTree connection.
+	 */
+	JUNGLETREE("JungleTree", "Java", 0x0E);
 
 	// Connection type header magic
 	public static final byte[] MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B, 0x43,

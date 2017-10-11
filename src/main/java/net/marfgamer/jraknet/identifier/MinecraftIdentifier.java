@@ -42,7 +42,7 @@ public class MinecraftIdentifier extends Identifier {
 	private static final char[] VERSION_TAG_ALPHABET = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 			'.' };
 	private static final String HEADER = "MCPE";
-	private static final String SEPERATOR = ";";
+	private static final String SEPARATOR = ";";
 	private static final int DATA_COUNT_LEGACY = 6;
 	private static final int DATA_COUNT = 9;
 
@@ -88,8 +88,6 @@ public class MinecraftIdentifier extends Identifier {
 	private String worldName;
 	private String gamemode;
 	private boolean legacy;
-
-	// MCPE;§r§l§9Play>> §3SURVIVAL GAMES§l;101;1.2;7940;9000;
 
 	/**
 	 * Constructs an <code>MCPEIdentifier</code> with the specified server name,
@@ -141,19 +139,25 @@ public class MinecraftIdentifier extends Identifier {
 	 */
 	public MinecraftIdentifier(Identifier identifier) {
 		super(identifier);
-		String[] data = identifier.build().split(SEPERATOR);
+		String[] data = identifier.build().split(SEPARATOR);
 		if (data.length >= DATA_COUNT_LEGACY) {
+			// Validate header
 			if (data[0].equals(HEADER) == false) {
 				throw new IllegalArgumentException("Invalid header");
 			}
 
+			// Convert empty data strings to null
+			for (int i = 0; i < data.length; i++) {
+				data[i] = (data[i].length() <= 0 ? data[i] : null);
+			}
+
+			// Parse data
 			this.serverName = data[1];
 			this.serverProtocol = RakNetUtils.parseIntPassive(data[2]);
 			this.versionTag = data[3];
 			this.onlinePlayerCount = RakNetUtils.parseIntPassive(data[4]);
 			this.maxPlayerCount = RakNetUtils.parseIntPassive(data[5]);
 			this.legacy = true;
-
 			if (data.length >= DATA_COUNT) {
 				this.guid = RakNetUtils.parseLongPassive(data[6]);
 				this.worldName = data[7];
@@ -161,6 +165,7 @@ public class MinecraftIdentifier extends Identifier {
 				this.legacy = false;
 			}
 
+			// Validate version tag
 			if (verifyVersionTag(this.versionTag) == false) {
 				throw new IllegalArgumentException("Invalid version tag");
 			}
@@ -346,12 +351,12 @@ public class MinecraftIdentifier extends Identifier {
 	@Override
 	public String build() {
 		if (this.legacy == true) {
-			return (HEADER + SEPERATOR + serverName + SEPERATOR + serverProtocol + SEPERATOR + versionTag + SEPERATOR
-					+ onlinePlayerCount + SEPERATOR + maxPlayerCount);
+			return (HEADER + SEPARATOR + serverName + SEPARATOR + serverProtocol + SEPARATOR + versionTag + SEPARATOR
+					+ onlinePlayerCount + SEPARATOR + maxPlayerCount);
 		} else {
-			return (HEADER + SEPERATOR + serverName + SEPERATOR + serverProtocol + SEPERATOR + versionTag + SEPERATOR
-					+ onlinePlayerCount + SEPERATOR + maxPlayerCount + SEPERATOR + guid + SEPERATOR + worldName
-					+ SEPERATOR + gamemode);
+			return (HEADER + SEPARATOR + serverName + SEPARATOR + serverProtocol + SEPARATOR + versionTag + SEPARATOR
+					+ onlinePlayerCount + SEPARATOR + maxPlayerCount + SEPARATOR + guid + SEPARATOR + worldName
+					+ SEPARATOR + gamemode);
 		}
 	}
 

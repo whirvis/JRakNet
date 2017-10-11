@@ -98,8 +98,8 @@ public class RakNetUtils {
 			Bootstrap bootstrap = new Bootstrap();
 			BootstrapHandler handler = new BootstrapHandler();
 			bootstrap.group(group).channel(NioDatagramChannel.class).option(ChannelOption.SO_BROADCAST, true)
-					.option(ChannelOption.SO_RCVBUF, RakNet.MINIMUM_TRANSFER_UNIT)
-					.option(ChannelOption.SO_SNDBUF, RakNet.MINIMUM_TRANSFER_UNIT).handler(handler);
+					.option(ChannelOption.SO_RCVBUF, RakNet.MINIMUM_MTU_SIZE)
+					.option(ChannelOption.SO_SNDBUF, RakNet.MINIMUM_MTU_SIZE).handler(handler);
 
 			// Create channel, send packet, and close it
 			Channel channel = bootstrap.bind(0).sync().channel();
@@ -136,7 +136,7 @@ public class RakNetUtils {
 	public static boolean isServerOnline(InetSocketAddress address) {
 		// Create connection packet
 		OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne();
-		connectionRequestOne.maximumTransferUnit = RakNet.MINIMUM_TRANSFER_UNIT;
+		connectionRequestOne.maximumTransferUnit = RakNet.MINIMUM_MTU_SIZE;
 		connectionRequestOne.protocolVersion = RakNet.CLIENT_NETWORK_PROTOCOL;
 		connectionRequestOne.encode();
 
@@ -187,7 +187,7 @@ public class RakNetUtils {
 	public static boolean isServerCompatible(InetSocketAddress address) {
 		// Create connection packet
 		OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne();
-		connectionRequestOne.maximumTransferUnit = RakNet.MINIMUM_TRANSFER_UNIT;
+		connectionRequestOne.maximumTransferUnit = RakNet.MINIMUM_MTU_SIZE;
 		connectionRequestOne.protocolVersion = RakNet.CLIENT_NETWORK_PROTOCOL;
 		connectionRequestOne.encode();
 
@@ -296,7 +296,7 @@ public class RakNetUtils {
 		} catch (Throwable throwable) {
 			try {
 				/*
-				 * We failed to get the NetworkInterface, we're gonna have to
+				 * We failed to get the NetworkInterface, we're going to have to
 				 * cycle through them manually and choose the lowest one to make
 				 * sure we never exceed any hardware limitations
 				 */
@@ -307,7 +307,7 @@ public class RakNetUtils {
 					NetworkInterface networkInterface = networkInterfaces.nextElement();
 					int maximumTransferUnit = networkInterface.getMTU();
 					if (maximumTransferUnit < lowestMaximumTransferUnit
-							&& maximumTransferUnit >= RakNet.MINIMUM_TRANSFER_UNIT) {
+							&& maximumTransferUnit >= RakNet.MINIMUM_MTU_SIZE) {
 						lowestMaximumTransferUnit = maximumTransferUnit;
 						foundDevice = true;
 					}
@@ -316,7 +316,7 @@ public class RakNetUtils {
 				// This is a serious error and will cause startup to fail
 				if (foundDevice == false) {
 					throw new IOException("Failed to locate a network interface with an MTU higher than the minimum ("
-							+ RakNet.MINIMUM_TRANSFER_UNIT + ")");
+							+ RakNet.MINIMUM_MTU_SIZE + ")");
 				}
 				return lowestMaximumTransferUnit;
 			} catch (Throwable throwable2) {
