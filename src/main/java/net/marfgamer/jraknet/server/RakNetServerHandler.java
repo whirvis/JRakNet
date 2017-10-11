@@ -32,7 +32,7 @@ package net.marfgamer.jraknet.server;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -51,7 +51,7 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	// Handler data
 	private final String loggerName;
 	private final RakNetServer server;
-	private final HashMap<InetAddress, BlockedAddress> blocked;
+	private final ConcurrentHashMap<InetAddress, BlockedAddress> blocked;
 	private InetSocketAddress causeAddress;
 
 	/**
@@ -64,7 +64,7 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	public RakNetServerHandler(RakNetServer server) {
 		this.loggerName = "server handler #" + server.getGloballyUniqueId();
 		this.server = server;
-		this.blocked = new HashMap<InetAddress, BlockedAddress>();
+		this.blocked = new ConcurrentHashMap<InetAddress, BlockedAddress>();
 	}
 
 	/**

@@ -40,7 +40,8 @@ public class RakNet {
 	// Network protocol data
 	public static final int SERVER_NETWORK_PROTOCOL = 8;
 	public static final int CLIENT_NETWORK_PROTOCOL = 8;
-	public static final int MINIMUM_TRANSFER_UNIT = 548;
+	public static final int MAXIMUM_MTU_SIZE = 1492;
+	public static final int MINIMUM_MTU_SIZE = 400;
 
 	// Session data
 	public static final int MAX_CHANNELS = 32;

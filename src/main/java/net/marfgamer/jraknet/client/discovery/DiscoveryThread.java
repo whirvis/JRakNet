@@ -30,7 +30,7 @@
  */
 package net.marfgamer.jraknet.client.discovery;
 
-import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.client.RakNetClient;
@@ -48,14 +48,14 @@ public class DiscoveryThread extends Thread {
 	private static final String LOGGER_NAME = "discovery thread";
 
 	// Discovery data
-	private ArrayList<RakNetClient> clients;
+	private ConcurrentLinkedQueue<RakNetClient> clients;
 	private volatile boolean running;
 
 	/**
 	 * Constructs a <code>DiscoveryThread</code>.
 	 */
 	public DiscoveryThread() {
-		this.clients = new ArrayList<RakNetClient>();
+		this.clients = new ConcurrentLinkedQueue<RakNetClient>();
 	}
 
 	/**
@@ -117,7 +117,7 @@ public class DiscoveryThread extends Thread {
 	}
 
 	@Override
-	public synchronized void run() {
+	public void run() {
 		this.running = true;
 		RakNetLogger.info(LOGGER_NAME, "Started discovery thread");
 		while (this.running) {
