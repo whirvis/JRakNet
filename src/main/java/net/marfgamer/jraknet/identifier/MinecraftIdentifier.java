@@ -52,6 +52,10 @@ public class MinecraftIdentifier extends Identifier {
 	 * @return <code>true</code> if the version tag is valid.
 	 */
 	private static boolean verifyVersionTag(String versionTag) {
+		if(versionTag == null) {
+			return false;
+		}
+		
 		for (char vtc : versionTag.toCharArray()) {
 			boolean valid = false;
 
@@ -148,7 +152,7 @@ public class MinecraftIdentifier extends Identifier {
 
 			// Convert empty data strings to null
 			for (int i = 0; i < data.length; i++) {
-				data[i] = (data[i].length() <= 0 ? data[i] : null);
+				data[i] = (data[i].length() > 0 ? data[i] : null);
 			}
 
 			// Parse data

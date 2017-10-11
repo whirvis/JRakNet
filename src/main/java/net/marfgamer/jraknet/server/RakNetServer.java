@@ -564,7 +564,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			ping.decode();
 
 			// Make sure parameters match and that broadcasting is enabled
-			if ((packetId == ID_UNCONNECTED_PING || (sessions.size() < this.maxConnections && this.maxConnections > 0))
+			if ((packetId == ID_UNCONNECTED_PING || (sessions.size() < this.maxConnections || this.maxConnections < 0))
 					&& this.broadcastingEnabled == true) {
 				ServerPing pingEvent = new ServerPing(sender, identifier, ping.connectionType);
 				for (RakNetServerListener listener : listeners) {
