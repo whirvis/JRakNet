@@ -30,8 +30,6 @@
  */
 package net.marfgamer.jraknet;
 
-import static net.marfgamer.jraknet.util.RakNetUtils.*;
-
 import java.net.InetSocketAddress;
 
 import net.marfgamer.jraknet.identifier.MinecraftIdentifier;
@@ -71,14 +69,14 @@ public class UtilityTest {
 
 		// Check if the server is online
 		RakNetLogger.info(LOGGER_NAME, "Pinging server... ");
-		if (isServerOnline(LIFEBOAT_SURVIVAL_GAMES_ADDRESS)) {
+		if (RakNetUtils.isServerOnline(LIFEBOAT_SURVIVAL_GAMES_ADDRESS)) {
 			RakNetLogger.info(LOGGER_NAME, "Success!");
 		} else {
 			throw new RakNetException("Failed to ping server, unable to proceed with testing!");
 		}
 
 		RakNetLogger.info(LOGGER_NAME, "Checking compatibility... ");
-		if (isServerCompatible(LIFEBOAT_SURVIVAL_GAMES_ADDRESS)) {
+		if (RakNetUtils.isServerCompatible(LIFEBOAT_SURVIVAL_GAMES_ADDRESS)) {
 			RakNetLogger.info(LOGGER_NAME, "Success!");
 		} else {
 			throw new RakNetException("Invalid protocol, we are unable to continue with testing!");
@@ -86,7 +84,8 @@ public class UtilityTest {
 
 		// Get the server identifier
 		RakNetLogger.info(LOGGER_NAME, "Getting server identifier...");
-		MinecraftIdentifier identifier = new MinecraftIdentifier(getServerIdentifier(LIFEBOAT_SURVIVAL_GAMES_ADDRESS));
+		MinecraftIdentifier identifier = new MinecraftIdentifier(
+				RakNetUtils.getServerIdentifier(LIFEBOAT_SURVIVAL_GAMES_ADDRESS));
 		RakNetLogger.info(LOGGER_NAME, "Success!: " + formatMCPEIdentifier(identifier));
 	}
 
