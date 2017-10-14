@@ -10,6 +10,8 @@ This library was meant to be used for Minecraft servers and clients, but can sti
 
 **Note:** Always use the newest version of JRakNet, including bug fix updates as they almost always fix major bugs, add new features, or have optimizations to make the API run faster.
 
+**Note 2:** Since people are always creating issues on the repo about this, Minecraft clients do not work with JRakNet if you are on the same machine as the server due to how Minecraft is programmed. However, JRakNet clients work fine with Minecraft servers running on the same machine.
+
 # How to use with Maven
 In order to add this project to your maven project, you will need to add the maven repository and then the actual dependency:
 ```xml
