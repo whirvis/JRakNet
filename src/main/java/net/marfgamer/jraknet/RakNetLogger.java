@@ -62,8 +62,8 @@ public class RakNetLogger {
 	 * Sets the logger level.
 	 * 
 	 * @param level
-	 *            the logger level to use, use <code>-1</code> to enable logging
-	 *            for all levels.
+	 *            the logger level to use, use <code>-1</code> to enable logging for
+	 *            all levels.
 	 */
 	public static void setLevel(int level) {
 		// Set level
@@ -103,8 +103,8 @@ public class RakNetLogger {
 	}
 
 	/**
-	 * Logs a message if logging is enabled by the <code>RakNet</code> class and
-	 * the current level is greater than or equal to the current logging level.
+	 * Logs a message if logging is enabled by the <code>RakNet</code> class and the
+	 * current level is greater than or equal to the current logging level.
 	 * 
 	 * @param level
 	 *            the level of the log.

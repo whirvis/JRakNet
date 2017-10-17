@@ -37,7 +37,7 @@ Creating a server in JRakNet is extremely easy, all it takes to create one can b
 ```java
 // Create server
 RakNetServer server = new RakNetServer(19132, 10,
-		new MinecraftIdentifier("JRakNet Example Server", 137, "1.2.0", 0, 10,
+		new MinecraftIdentifier("JRakNet Example Server", 137, "1.2", 0, 10,
 				new Random().nextLong() /* Server broadcast ID */, "New World", "Survival"));
 
 // Add listener
@@ -95,7 +95,7 @@ client.addListener(new RakNetClientListener() {
 	// Server disconnected
 	@Override
 	public void onDisconnect(RakNetServerSession session, String reason) {
-		System.out.println("Sucessfully disconnected from server with address " + session.getAddress()
+		System.out.println("Successfully disconnected from server with address " + session.getAddress()
 				+ " for the reason \"" + reason + "\"");
 		client.shutdown();
 	}
