@@ -40,8 +40,8 @@ public class ConnectionRequest extends RakNetPacket {
 	public long timestamp;
 
 	/*
-	 * JRakNet does not support RakNet's built in security function, it is
-	 * poorly documented
+	 * JRakNet does not support RakNet's built in security function, it is poorly
+	 * documented
 	 */
 	public boolean useSecurity = false;
 

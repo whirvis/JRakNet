@@ -87,8 +87,8 @@ public class MaximumTransferUnit {
 	}
 
 	/**
-	 * @return how many times <code>retry()</code> can be called before yielding
-	 *         0 or lower without calling <code>reset()</code>.
+	 * @return how many times <code>retry()</code> can be called before yielding 0
+	 *         or lower without calling <code>reset()</code>.
 	 */
 	public int getRetriesLeft() {
 		return this.retriesLeft;
@@ -100,8 +100,8 @@ public class MaximumTransferUnit {
 	 * @return the amount of retries left.
 	 */
 	public int retry() {
-		RakNetLogger.debug(LOGGER_NAME, "Retried transfer unit with size of " + size + " bytes ("
-				+ (size * 8) + " bits)");
+		RakNetLogger.debug(LOGGER_NAME,
+				"Retried transfer unit with size of " + size + " bytes (" + (size * 8) + " bits)");
 		return this.retriesLeft--;
 	}
 
@@ -109,14 +109,14 @@ public class MaximumTransferUnit {
 	 * Sets the amount of retries left back to the default.
 	 */
 	public void reset() {
-		RakNetLogger.debug(LOGGER_NAME, "Reset transfer unit with size of " + size + " bytes ("
-				+ (size * 8) + " bits)");
+		RakNetLogger.debug(LOGGER_NAME,
+				"Reset transfer unit with size of " + size + " bytes (" + (size * 8) + " bits)");
 		this.retriesLeft = this.retries;
 	}
 
 	/**
-	 * Sorts an array of <code>MaximumTransferUnit</code>'s from highest to
-	 * lowest maximum transfer units.
+	 * Sorts an array of <code>MaximumTransferUnit</code>'s from highest to lowest
+	 * maximum transfer units.
 	 * 
 	 * @param units
 	 *            the <code>MaximumTransferUnit</code>s to sort.

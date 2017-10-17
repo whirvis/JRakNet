@@ -51,6 +51,8 @@ public class UtilityTest {
 	private static final char UNICODE_MINECRAFT_COLOR_SYMBOL = '\u00A7';
 	public static final int MARFGAMER_DEVELOPMENT_PORT = 30851;
 	public static final int MINECRAFT_DEFAULT_PORT = 19132;
+	public static final int MINECRAFT_PROTOCOL_NUMBER = 137;
+	public static final String MINECRAFT_VERSION = "1.2";
 	public static final InetSocketAddress LIFEBOAT_SURVIVAL_GAMES_ADDRESS = new InetSocketAddress("sg.lbsg.net",
 			MINECRAFT_DEFAULT_PORT);
 
@@ -95,6 +97,9 @@ public class UtilityTest {
 	 * @return a formated Minecraft identifier.
 	 */
 	public static String formatMCPEIdentifier(MinecraftIdentifier identifier) {
+		if (identifier.getServerName() == null) {
+			identifier.setServerName("Unknown name");
+		}
 		return ("[Name: " + identifier.getServerName().replaceAll(UNICODE_MINECRAFT_COLOR_SYMBOL + ".", "")
 				+ "] [Version: " + identifier.getVersionTag() + "] [Player count: " + identifier.getOnlinePlayerCount()
 				+ "/" + identifier.getMaxPlayerCount() + "] [Server type: " + identifier.getConnectionType().getName()
