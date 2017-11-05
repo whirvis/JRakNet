@@ -35,7 +35,6 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import net.marfgamer.jraknet.RakNet;
-import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.UtilityTest;
 import net.marfgamer.jraknet.identifier.MinecraftIdentifier;
 import net.marfgamer.jraknet.server.RakNetServer;
@@ -66,8 +65,6 @@ public class LatencyTest {
 	 *             if the thread is interrupted while it is sleeping.
 	 */
 	public void start() throws InterruptedException {
-		// Enable logging
-		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
 
 		// Set server options and start it
 		LATENCY_TEST_IDENTIFIER.setServerGloballyUniqueId(server.getGloballyUniqueId());
