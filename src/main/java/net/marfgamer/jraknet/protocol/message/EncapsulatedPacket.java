@@ -30,9 +30,11 @@
  */
 package net.marfgamer.jraknet.protocol.message;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.buffer.Unpooled;
 import net.marfgamer.jraknet.Packet;
-import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.protocol.Reliability;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 
@@ -44,8 +46,7 @@ import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
  */
 public class EncapsulatedPacket implements Sizable, Cloneable {
 
-	// Logger name
-	private static final String LOGGER_NAME = "encapsulated packet";
+   private static final Logger log = LoggerFactory.getLogger(EncapsulatedPacket.class);
 
 	// Length constants
 	public static final int MINIMUM_BUFFER_LENGTH = 3;
@@ -111,8 +112,7 @@ public class EncapsulatedPacket implements Sizable, Cloneable {
 		buffer.writeUnsignedShort(payload.size() * 8); // Size is in bits
 
 		if (reliability.requiresAck() && ackRecord == null) {
-			RakNetLogger.error(LOGGER_NAME,
-					"No ACK record ID set for encapsulated packet with reliability " + reliability);
+			log.error("No ACK record ID set for encapsulated packet with reliability " + reliability);
 		}
 
 		if (reliability.isReliable()) {

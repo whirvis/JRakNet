@@ -38,6 +38,9 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.socket.DatagramPacket;
@@ -51,9 +54,8 @@ import net.marfgamer.jraknet.stream.PacketDataOutput;
  * @author Trent "MarfGamer" Summerlin
  */
 public class Packet {
-
-	// Logger name
-	private static final String LOGGER_NAME = "packet";
+   // Logger
+   private static final Logger log = LoggerFactory.getLogger("packet");
 
 	// Packet constants
 	public static final int ADDRESS_VERSION_IPV4 = 0x04;
@@ -416,7 +418,7 @@ public class Packet {
 			if (Arrays.equals(ConnectionType.MAGIC, connectionMagicCheck)) {
 				short id = this.readUnsignedByte();
 				if (id == ConnectionType.VANILLA.getId()) {
-					RakNetLogger.debug(LOGGER_NAME, "Connection type " + ConnectionType.VANILLA
+					log.debug("Connection type " + ConnectionType.VANILLA
 							+ " returned after connection type magic sequence");
 				}
 				return ConnectionType.getType(id);

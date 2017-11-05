@@ -36,8 +36,10 @@ import java.util.HashMap;
 import java.util.Scanner;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.marfgamer.jraknet.RakNet;
-import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.UtilityTest;
 import net.marfgamer.jraknet.example.chat.ChatMessageIdentifier;
@@ -63,8 +65,7 @@ import net.marfgamer.jraknet.session.RakNetClientSession;
  */
 public class ChatServer implements RakNetServerListener {
 
-	// Logger name
-	public static final String LOGGER_NAME = "chat server";
+   private static final Logger log = LoggerFactory.getLogger(ChatServer.class);
 
 	// Server data
 	private final String name;
@@ -259,7 +260,7 @@ public class ChatServer implements RakNetServerListener {
 			client.sendChatMessage(message, channel);
 		}
 		if (print == true) {
-			RakNetLogger.info(LOGGER_NAME, message + " [" + serverChannels[channel].getName() + "]");
+			log.info(message + " [" + serverChannels[channel].getName() + "]");
 		}
 	}
 
@@ -285,7 +286,7 @@ public class ChatServer implements RakNetServerListener {
 		for (ServerChannel channel : getChannels()) {
 			this.broadcastMessage(message + " [Global]", channel.getChannel(), false);
 		}
-		RakNetLogger.info(LOGGER_NAME, message + " [Global]");
+		log.info(message + " [Global]");
 	}
 
 	/**
@@ -387,14 +388,12 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	public static void main(String[] args) throws InterruptedException {
-		// Enable logging
-		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
 
 		// Create and start server
 		ChatServer server = new ChatServer("JRakNet Server Example", "This is a test server made for JRakNet",
 				UtilityTest.MARFGAMER_DEVELOPMENT_PORT, 10);
 		server.start();
-		RakNetLogger.info(LOGGER_NAME, "Started server!");
+		log.info("Started server!");
 
 		// Register commands
 		CommandHandler commandHandler = new CommandHandler();

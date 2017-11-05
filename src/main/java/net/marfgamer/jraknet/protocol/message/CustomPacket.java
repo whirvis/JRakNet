@@ -32,8 +32,10 @@ package net.marfgamer.jraknet.protocol.message;
 
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.marfgamer.jraknet.Packet;
-import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.protocol.MessageIdentifier;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
@@ -43,8 +45,7 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 
 	public static final int SEQUENCE_NUMBER_LENGTH = 0x03;
 
-	// Logger name
-	private static final String LOGGER_NAME = "custom packet";
+	private static final Logger log = LoggerFactory.getLogger(CustomPacket.class);
 
 	// Custom packet data
 	public int sequenceNumber;
@@ -94,7 +95,7 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 			if (session != null) {
 				session.setAckReceiptPackets(ackMessages.toArray(new EncapsulatedPacket[ackMessages.size()]));
 			} else {
-				RakNetLogger.error(LOGGER_NAME, "No session specified for " + ackMessages.size()
+				log.error("No session specified for " + ackMessages.size()
 						+ " encapsulated packets that require ACK receipts");
 			}
 		}
