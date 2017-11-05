@@ -33,7 +33,10 @@ package net.marfgamer.jraknet.protocol;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
-import net.marfgamer.jraknet.RakNetLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.jraknet.util.RakNetUtils;
 import net.marfgamer.jraknet.util.map.ShortMap;
 
@@ -43,9 +46,7 @@ import net.marfgamer.jraknet.util.map.ShortMap;
  * @author Whirvis "MarfGamer" Ardenaur
  */
 public class MessageIdentifier {
-
-	// Logger name
-	private static final String LOGGER_NAME = "message identifiers";
+   private static final Logger log = LoggerFactory.getLogger(MessageIdentifier.class);
 
 	// Magic identifier
 	public final static byte[] MAGIC = new byte[] { (byte) 0x00, (byte) 0xFF, (byte) 0xFF, 0x00, (byte) 0xFE,
@@ -229,12 +230,11 @@ public class MessageIdentifier {
 					// Warn users of duplicate IDs
 					if (packetNames.containsKey(packetId)) {
 						String currentName = packetNames.get(packetId);
-						RakNetLogger.warn(LOGGER_NAME, "Found duplicate ID " + RakNetUtils.toHexStringId(packetId)
+						log.warn("Found duplicate ID " + RakNetUtils.toHexStringId(packetId)
 								+ " for \"" + packetName + "\" and \"" + currentName + "\", overriding name and ID");
 						packetIds.remove(currentName);
 					} else {
-						RakNetLogger.debug(LOGGER_NAME,
-								"Assigned packet ID " + RakNetUtils.toHexStringId(packetId) + " to " + packetName);
+						log.debug("Assigned packet ID " + RakNetUtils.toHexStringId(packetId) + " to " + packetName);
 					}
 					packetNames.put(packetId, packetName);
 					packetIds.put(packetName, packetId);

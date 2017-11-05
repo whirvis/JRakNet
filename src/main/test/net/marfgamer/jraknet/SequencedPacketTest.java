@@ -35,6 +35,9 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.client.RakNetClientListener;
 import net.marfgamer.jraknet.protocol.Reliability;
@@ -61,6 +64,8 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
  */
 public class SequencedPacketTest {
 
+   private static final Logger log = LoggerFactory.getLogger(SequencedPacketTest.class);
+   
 	// Logger name
 	private static final String LOGGER_NAME = "sequenced packet test";
 
@@ -72,16 +77,14 @@ public class SequencedPacketTest {
 	private static boolean[] packetsReceived = new boolean[PACKET_SEND_COUNT];
 
 	public static void main(String[] args) throws RakNetException, InterruptedException, UnknownHostException {
-		// Enable logging
-		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
 
-		RakNetLogger.info(LOGGER_NAME, "Creating server...");
+		log.info("Creating server...");
 		createServer();
 
-		RakNetLogger.info(LOGGER_NAME, "Sleeping 3000MS");
+		log.info("Sleeping 3000MS");
 		Thread.sleep(3000L);
 
-		RakNetLogger.info(LOGGER_NAME, "Creating client...");
+		log.info("Creating client...");
 		createClient();
 
 		// In case of timeout
@@ -89,7 +92,7 @@ public class SequencedPacketTest {
 		while (true) {
 			Thread.sleep(0, 1); // Lower CPU usage
 			if (currentTime - startSend >= 30000 && startSend > -1) {
-				RakNetLogger.error(LOGGER_NAME,
+				log.error(LOGGER_NAME,
 						"Failed to complete test due to timeout (Took over 30 seconds!), printing results...");
 				printResults();
 				System.exit(1);
@@ -102,7 +105,7 @@ public class SequencedPacketTest {
 	 * Prints the results of the test
 	 */
 	private static void printResults() {
-		RakNetLogger
+		log
 				.info(LOGGER_NAME,
 						"Server - Sequenced packet test finished, lost "
 								+ (packetReceiveCount >= PACKET_SEND_COUNT ? "no"
@@ -125,7 +128,7 @@ public class SequencedPacketTest {
 				Integer wi = packetsLost.get(i);
 				builder.append(wi.intValue() + (i + 1 < packetsLost.size() ? ", " : ""));
 			}
-			RakNetLogger.info(LOGGER_NAME,
+			log.info(LOGGER_NAME,
 					"Packet" + (packetsLost.size() == 1 ? "" : "s") + " lost: " + builder.toString());
 		}
 	}
@@ -154,12 +157,12 @@ public class SequencedPacketTest {
 					e.printStackTrace();
 				}
 
-				RakNetLogger.info(LOGGER_NAME, "Server - Client connected from " + session.getAddress() + "!");
+				log.info("Server - Client connected from " + session.getAddress() + "!");
 			}
 
 			@Override
 			public void onClientDisconnect(RakNetClientSession session, String reason) {
-				RakNetLogger.info(LOGGER_NAME,
+				log.info(LOGGER_NAME,
 						"Server - Client from " + session.getAddress() + " disconnected! (" + reason + ")");
 				System.exit(1);
 			}
@@ -208,11 +211,11 @@ public class SequencedPacketTest {
 
 			@Override
 			public void onConnect(RakNetServerSession session) {
-				RakNetLogger.info(LOGGER_NAME,
+				log.info(LOGGER_NAME,
 						"Client - Connected to server with MTU " + session.getMaximumTransferUnit());
 
 				// Send 100 sequenced packets
-				RakNetLogger.info(LOGGER_NAME, "Client - Sending " + PACKET_SEND_COUNT + " packets...");
+				log.info("Client - Sending " + PACKET_SEND_COUNT + " packets...");
 				startSend = System.currentTimeMillis();
 				for (int i = 0; i < PACKET_SEND_COUNT; i++) {
 					RakNetPacket sequencedPacket = new RakNetPacket(SEQUENCE_START_ID);
@@ -222,13 +225,13 @@ public class SequencedPacketTest {
 				}
 
 				// Notify user
-				RakNetLogger.info(LOGGER_NAME, "Client - Sent " + PACKET_SEND_COUNT + " packets (" + packetSize
+				log.info("Client - Sent " + PACKET_SEND_COUNT + " packets (" + packetSize
 						+ " bytes, " + (packetSize / 4) + " ints)");
 			}
 
 			@Override
 			public void onDisconnect(RakNetServerSession session, String reason) {
-				RakNetLogger.error(LOGGER_NAME, "Client - Lost connection to server! (" + reason + ")");
+				log.error("Client - Lost connection to server! (" + reason + ")");
 				System.exit(1);
 			}
 

@@ -30,7 +30,9 @@
  */
 package net.marfgamer.jraknet.example.chat.server.command;
 
-import net.marfgamer.jraknet.RakNetLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.marfgamer.jraknet.example.chat.server.ChatServer;
 
 /**
@@ -40,6 +42,8 @@ import net.marfgamer.jraknet.example.chat.server.ChatServer;
  */
 public class HelpCommand extends Command {
 
+   private static final Logger log = LoggerFactory.getLogger(HelpCommand.class);
+   
 	public HelpCommand() {
 		super("help", "Displays all the commands that can be used");
 	}
@@ -52,7 +56,7 @@ public class HelpCommand extends Command {
 			helpMessage.append("\t\t");
 			helpMessage.append(command.getUsage() + ": " + command.getDescription() + "\n");
 		}
-		RakNetLogger.info(ChatServer.LOGGER_NAME, helpMessage.toString());
+		log.info(helpMessage.toString());
 		return true;
 	}
 
