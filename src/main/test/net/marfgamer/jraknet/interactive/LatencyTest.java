@@ -47,8 +47,9 @@ import net.marfgamer.jraknet.server.RakNetServer;
  */
 public class LatencyTest {
 
-	private static final MinecraftIdentifier LATENCY_TEST_IDENTIFIER = new MinecraftIdentifier("JRakNet Latency Test",
-			91, "0.16.2", 0, 10, -1 /* We don't know the GUID yet */, "New World", "Developer");
+	private static final MinecraftIdentifier LATENCY_TEST_IDENTIFIER = new MinecraftIdentifier("A JRakNet latency test",
+			UtilityTest.MINECRAFT_PROTOCOL_NUMBER, UtilityTest.MINECRAFT_VERSION, 0, 10,
+			-1 /* We don't know the GUID yet */, "New World", "Developer");
 
 	private final RakNetServer server;
 	private final LatencyFrame frame;
