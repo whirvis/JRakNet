@@ -143,9 +143,8 @@ public class RakNetServerSession extends RakNetSession {
 			client.disconnect("Server disconnected");
 		} else {
 			/*
-			 * If the packet is a user packet, we use handleMessage(). If the ID
-			 * is not a user packet but it is unknown to the session, we use
-			 * handleUnknownMessage().
+			 * If the packet is a user packet, we use handleMessage(). If the ID is not a
+			 * user packet but it is unknown to the session, we use handleUnknownMessage().
 			 */
 			if (packetId >= ID_USER_PACKET_ENUM) {
 				for (RakNetClientListener listener : client.getListeners()) {

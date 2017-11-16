@@ -30,6 +30,7 @@
  */
 package net.marfgamer.jraknet.example.chat.server.command;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -72,8 +73,10 @@ public class CommandHandler {
 	 */
 	public void registerCommand(Class<? extends Command> commandClazz) {
 		try {
-			Command command = (Command) commandClazz.newInstance();
+			Command command = (Command) commandClazz.getDeclaredConstructor().newInstance();
 			this.registerCommand(command);
+		} catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException e) {
+			throw new IllegalArgumentException("Invalid Command constructor");
 		} catch (InstantiationException e) {
 			throw new IllegalArgumentException("Command must have a nullary constructor");
 		} catch (IllegalAccessException e) {
