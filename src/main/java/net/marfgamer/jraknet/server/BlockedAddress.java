@@ -44,8 +44,8 @@ public class BlockedAddress {
 	private final long time;
 
 	/**
-	 * Constructs a <code>BlockedClient</code> with the specified start time and
-	 * the amount of time that the client is blocked.
+	 * Constructs a <code>BlockedClient</code> with the specified start time and the
+	 * amount of time that the client is blocked.
 	 * 
 	 * @param startTime
 	 *            the time the address was first blocked.

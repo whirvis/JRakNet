@@ -46,8 +46,8 @@ public enum Reliability {
 	UNRELIABLE(0, false, false, false, false),
 
 	/**
-	 * Same as <code>UNRELIABLE</code>, however it will not be handled if a
-	 * newer sequenced packet on the channel has already arrived.
+	 * Same as <code>UNRELIABLE</code>, however it will not be handled if a newer
+	 * sequenced packet on the channel has already arrived.
 	 */
 	UNRELIABLE_SEQUENCED(1, false, false, true, false),
 
@@ -79,27 +79,27 @@ public enum Reliability {
 
 	/**
 	 * Same as <code>UNRELIABLE_SEQUENCED</code>, however you will be notified
-	 * whether the packet was lost or received through
-	 * <code>onAcknowledge()</code> and <code>onNotAcknowledge()</code> methods
-	 * through the <code>RakNetServerListener</code> and
-	 * <code>RakNetClientListener</code> classes.
+	 * whether the packet was lost or received through <code>onAcknowledge()</code>
+	 * and <code>onNotAcknowledge()</code> methods through the
+	 * <code>RakNetServerListener</code> and <code>RakNetClientListener</code>
+	 * classes.
 	 */
 	/*
 	 * UNRELIABLE_SEQUENCED_WITH_ACK_RECEIPT(-1, false, false, true, true),
 	 */
 
 	/**
-	 * Same as <code>RELIABLE</code>, however you will be notified when the
-	 * packet was received through the <code>onAcknowledge()</code> method
-	 * through the <code>RakNetServerListener</code> and
-	 * <code>RakNetClientListener</code> classes.
+	 * Same as <code>RELIABLE</code>, however you will be notified when the packet
+	 * was received through the <code>onAcknowledge()</code> method through the
+	 * <code>RakNetServerListener</code> and <code>RakNetClientListener</code>
+	 * classes.
 	 */
 	RELIABLE_WITH_ACK_RECEIPT(6, true, false, false, true),
 
 	/**
-	 * Same as <code>RELIABLE_SEQUENCED</code>, however you will be notified
-	 * when the packet was received through the <code>onAcknowledge()</code>
-	 * method through the <code>RakNetServerListener</code> and
+	 * Same as <code>RELIABLE_SEQUENCED</code>, however you will be notified when
+	 * the packet was received through the <code>onAcknowledge()</code> method
+	 * through the <code>RakNetServerListener</code> and
 	 * <code>RakNetClientListener</code> classes.
 	 */
 	/*
@@ -107,10 +107,10 @@ public enum Reliability {
 	 */
 
 	/**
-	 * Same as <code>RELIABLE_ORDERED</code>, however you will be notified when
-	 * the packet was received through the <code>onAcknowledge()</code> method
-	 * through the <code>RakNetServerListener</code> and
-	 * <code>RakNetClientListener</code> classes.
+	 * Same as <code>RELIABLE_ORDERED</code>, however you will be notified when the
+	 * packet was received through the <code>onAcknowledge()</code> method through
+	 * the <code>RakNetServerListener</code> and <code>RakNetClientListener</code>
+	 * classes.
 	 */
 	RELIABLE_ORDERED_WITH_ACK_RECEIPT(7, true, true, false, true);
 
@@ -121,9 +121,8 @@ public enum Reliability {
 	private final boolean requiresAck;
 
 	/**
-	 * Constructs a <code>Reliability</code> with the specified ID and whether
-	 * or not it is reliable, ordered, sequenced, or requires an acknowledge
-	 * receipt.
+	 * Constructs a <code>Reliability</code> with the specified ID and whether or
+	 * not it is reliable, ordered, sequenced, or requires an acknowledge receipt.
 	 * 
 	 * @param id
 	 *            the ID of the reliability.
