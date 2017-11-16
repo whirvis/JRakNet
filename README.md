@@ -10,6 +10,8 @@ This library was meant to be used for Minecraft servers and clients, but can sti
 
 **Note:** Always use the newest version of JRakNet, including bug fix updates as they almost always fix major bugs, add new features, or have optimizations to make the API run faster.
 
+**Note 2:** Since people are always creating issues on the repo about this, Minecraft clients do not work with JRakNet if you are on the same machine as the server due to how Minecraft is programmed. You will have to use another device or change the server port to anything but 19132 or 19133 (This will prevent the server from showing up in the LAN list, but will allow Minecraft to communicate with the server.) However, JRakNet clients work fine with Minecraft servers running on the same machine.
+
 # How to use with Maven
 In order to add this project to your maven project, you will need to add the maven repository and then the actual dependency:
 ```xml
@@ -35,7 +37,7 @@ Creating a server in JRakNet is extremely easy, all it takes to create one can b
 ```java
 // Create server
 RakNetServer server = new RakNetServer(19132, 10,
-		new MinecraftIdentifier("JRakNet Example Server", 137, "1.2.0", 0, 10,
+		new MinecraftIdentifier("JRakNet Example Server", 137, "1.2", 0, 10,
 				new Random().nextLong() /* Server broadcast ID */, "New World", "Survival"));
 
 // Add listener
@@ -93,7 +95,7 @@ client.addListener(new RakNetClientListener() {
 	// Server disconnected
 	@Override
 	public void onDisconnect(RakNetServerSession session, String reason) {
-		System.out.println("Sucessfully disconnected from server with address " + session.getAddress()
+		System.out.println("Successfully disconnected from server with address " + session.getAddress()
 				+ " for the reason \"" + reason + "\"");
 		client.shutdown();
 	}

@@ -48,7 +48,7 @@ import net.marfgamer.jraknet.util.RakNetUtils;
 public class RakNetServerBundleExample extends RakNetServer {
 
 	public RakNetServerBundleExample() {
-		super(19132, 10, new MinecraftIdentifier("JRakNet Example Server", 91, "0.16.2", 0, 10,
+		super(19132, 10, new MinecraftIdentifier("JRakNet Example Server", 137, "1.2", 0, 10,
 				System.currentTimeMillis(), "New World", "Survival"));
 		this.addSelfListener();
 	}
