@@ -51,7 +51,7 @@ public class ByteMap<T> extends HashMap<Byte, T> implements Map<Byte, T>, Dynami
 	 * @return <tt>true</tt> if this map contains a mapping for the specified key.
 	 */
 	public boolean containsKey(byte key) {
-		return super.containsKey(new Byte(key));
+		return super.containsKey(key);
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class ByteMap<T> extends HashMap<Byte, T> implements Map<Byte, T>, Dynami
 	 * @return the value to which the specified key is mapped.
 	 */
 	public T get(byte key) {
-		return super.get(new Byte(key));
+		return super.get(key);
 	}
 
 	/**
@@ -106,7 +106,7 @@ public class ByteMap<T> extends HashMap<Byte, T> implements Map<Byte, T>, Dynami
 	 *         <tt>key</tt>.)
 	 */
 	public T put(byte key, T value) {
-		return super.put(new Byte(key), value);
+		return super.put(key, value);
 	}
 
 	/**
@@ -120,7 +120,7 @@ public class ByteMap<T> extends HashMap<Byte, T> implements Map<Byte, T>, Dynami
 	 *         <tt>key</tt>.)
 	 */
 	public T remove(byte key) {
-		return super.remove(new Byte(key));
+		return super.remove(key);
 	}
 
 	@Override

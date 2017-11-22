@@ -128,7 +128,7 @@ public class Record {
 		ArrayList<Integer> boxedPacketsOld = new ArrayList<Integer>();
 		for (Record record : records) {
 			for (int recordNum : record.toArray()) {
-				boxedPacketsOld.add(new Integer(recordNum));
+				boxedPacketsOld.add(recordNum);
 			}
 		}
 

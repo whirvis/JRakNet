@@ -226,7 +226,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			if (discoveryPort < 0 || discoveryPort > 65535) {
 				throw new IllegalArgumentException("Invalid port range for discovery port");
 			}
-			discoverySet.add(new Integer(discoveryPort));
+			discoverySet.add(discoveryPort);
 		}
 
 		// Set discovery ports
@@ -243,7 +243,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            the discovery port to start broadcasting to.
 	 */
 	public final void addDiscoveryPort(int discoveryPort) {
-		discoveryPorts.add(new Integer(discoveryPort));
+		discoveryPorts.add(discoveryPort);
 		log.debug("Added discovery port " + discoveryPort);
 	}
 
@@ -254,7 +254,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            the discovery part to stop broadcasting from.
 	 */
 	public final void removeDiscoveryPort(int discoveryPort) {
-		discoveryPorts.remove(new Integer(discoveryPort));
+    discoveryPorts.remove(discoveryPort);
 		log.debug("Removed discovery port " + discoveryPort);
 	}
 
