@@ -51,7 +51,7 @@ public class LongMap<T> extends HashMap<Long, T> implements Map<Long, T>, Dynami
 	 * @return <tt>true</tt> if this map contains a mapping for the specified key.
 	 */
 	public boolean containsKey(long key) {
-		return super.containsKey(new Long(key));
+		return super.containsKey(key);
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class LongMap<T> extends HashMap<Long, T> implements Map<Long, T>, Dynami
 	 * @return the value to which the specified key is mapped.
 	 */
 	public T get(long key) {
-		return super.get(new Long(key));
+		return super.get(key);
 	}
 
 	/**
@@ -106,7 +106,7 @@ public class LongMap<T> extends HashMap<Long, T> implements Map<Long, T>, Dynami
 	 *         <tt>key</tt>.)
 	 */
 	public T put(long key, T value) {
-		return super.put(new Long(key), value);
+		return super.put(key, value);
 	}
 
 	/**
@@ -120,7 +120,7 @@ public class LongMap<T> extends HashMap<Long, T> implements Map<Long, T>, Dynami
 	 *         <tt>key</tt>.)
 	 */
 	public T remove(long key) {
-		return super.remove(new Long(key));
+		return super.remove(key);
 	}
 
 	@Override

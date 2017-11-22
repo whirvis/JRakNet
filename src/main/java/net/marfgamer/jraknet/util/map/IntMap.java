@@ -51,7 +51,7 @@ public class IntMap<T> extends HashMap<Integer, T> implements Map<Integer, T>, D
 	 * @return <tt>true</tt> if this map contains a mapping for the specified key.
 	 */
 	public boolean containsKey(int key) {
-		return super.containsKey(new Integer(key));
+		return super.containsKey(key);
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class IntMap<T> extends HashMap<Integer, T> implements Map<Integer, T>, D
 	 * @return the value to which the specified key is mapped.
 	 */
 	public T get(int key) {
-		return super.get(new Integer(key));
+		return super.get(key);
 	}
 
 	/**
@@ -106,7 +106,7 @@ public class IntMap<T> extends HashMap<Integer, T> implements Map<Integer, T>, D
 	 *         <tt>key</tt>.)
 	 */
 	public T put(int key, T value) {
-		return super.put(new Integer(key), value);
+		return super.put(key, value);
 	}
 
 	/**
@@ -120,7 +120,7 @@ public class IntMap<T> extends HashMap<Integer, T> implements Map<Integer, T>, D
 	 *         <tt>key</tt>.)
 	 */
 	public T remove(int key) {
-		return super.remove(new Integer(key));
+		return super.remove(key);
 	}
 
 	@Override

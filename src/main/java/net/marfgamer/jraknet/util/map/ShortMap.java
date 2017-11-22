@@ -51,7 +51,7 @@ public class ShortMap<T> extends HashMap<Short, T> implements Map<Short, T>, Dyn
 	 * @return <tt>true</tt> if this map contains a mapping for the specified key.
 	 */
 	public boolean containsKey(short key) {
-		return super.containsKey(new Short(key));
+		return super.containsKey(key);
 	}
 
 	/**
@@ -89,7 +89,7 @@ public class ShortMap<T> extends HashMap<Short, T> implements Map<Short, T>, Dyn
 	 * @return the value to which the specified key is mapped.
 	 */
 	public T get(short key) {
-		return super.get(new Short(key));
+		return super.get(key);
 	}
 
 	/**
@@ -106,7 +106,7 @@ public class ShortMap<T> extends HashMap<Short, T> implements Map<Short, T>, Dyn
 	 *         <tt>key</tt>.)
 	 */
 	public T put(short key, T value) {
-		return super.put(new Short(key), value);
+		return super.put(key, value);
 	}
 
 	/**
@@ -120,7 +120,7 @@ public class ShortMap<T> extends HashMap<Short, T> implements Map<Short, T>, Dyn
 	 *         <tt>key</tt>.)
 	 */
 	public T remove(short key) {
-		return super.remove(new Short(key));
+		return super.remove(key);
 	}
 
 	@Override
