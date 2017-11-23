@@ -38,6 +38,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -49,7 +52,6 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNet;
 import net.marfgamer.jraknet.RakNetException;
-import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.identifier.Identifier;
@@ -78,6 +80,8 @@ import net.marfgamer.jraknet.util.RakNetUtils;
  */
 public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
+   private static final Logger log = LoggerFactory.getLogger(RakNetServer.class);
+   
 	// Server data
 	private final long guid;
 	private final long pongId;
@@ -235,7 +239,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 */
 	public final void setBroadcastingEnabled(boolean enabled) {
 		this.broadcastingEnabled = enabled;
-		RakNetLogger.info(this, (enabled ? "Enabled" : "Disabled") + " broadcasting");
+		log.info((enabled ? "Enabled" : "Disabled") + " broadcasting");
 	}
 
 	/**
@@ -260,7 +264,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 */
 	public final void setIdentifier(Identifier identifier) {
 		this.identifier = identifier;
-		RakNetLogger.info(this, "Set identifier to \"" + identifier.build() + "\"");
+		log.info("Set identifier to \"" + identifier.build() + "\"");
 	}
 
 	/**
@@ -299,7 +303,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 		// Add listener
 		listeners.add(listener);
-		RakNetLogger.info(this, "Added listener " + listener.getClass().getName());
+		log.info("Added listener " + listener.getClass().getName());
 
 		return this;
 	}
@@ -325,9 +329,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	public final RakNetServer removeListener(RakNetServerListener listener) {
 		boolean hadListener = listeners.remove(listener);
 		if (hadListener == true) {
-			RakNetLogger.info(this, "Removed listener " + listener.getClass().getName());
+			log.info("Removed listener " + listener.getClass().getName());
 		} else {
-			RakNetLogger.warn(this, "Attempted to removed unregistered listener " + listener.getClass().getName());
+			log.warn("Attempted to removed unregistered listener " + listener.getClass().getName());
 		}
 		return this;
 	}
@@ -428,7 +432,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			session.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
 
 			// Notify API
-			RakNetLogger.debug(this, "Removed session with address " + address);
+			log.debug("Removed session with address " + address);
 			if (session.getState() == RakNetState.CONNECTED) {
 				for (RakNetServerListener listener : listeners) {
 					listener.onClientDisconnect(session, reason);
@@ -439,7 +443,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				}
 			}
 		} else {
-			RakNetLogger.warn(this, "Attempted to remove session that had not been added to the server");
+			log.warn("Attempted to remove session that had not been added to the server");
 		}
 	}
 
@@ -542,7 +546,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		}
 
 		// Notify API
-		RakNetLogger.warn(this, "Handled exception " + cause.getClass().getName() + " caused by address " + address);
+		log.warn("Handled exception " + cause.getClass().getName() + " caused by address " + address);
 		for (RakNetServerListener listener : listeners) {
 			listener.onHandlerException(address, cause);
 		}
@@ -679,10 +683,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		}
 
 		if (MessageIdentifier.hasPacket(packet.getId())) {
-			RakNetLogger.debug(this, "Handled internal packet with ID " + MessageIdentifier.getName(packet.getId())
+			log.debug("Handled internal packet with ID " + MessageIdentifier.getName(packet.getId())
 					+ " (" + packet.getId() + ")");
 		} else {
-			RakNetLogger.debug(this, "Sent packet with ID " + packet.getId() + " to session handler");
+			log.debug("Sent packet with ID " + packet.getId() + " to session handler");
 		}
 	}
 
@@ -727,7 +731,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 */
 	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(buf, address));
-		RakNetLogger.debug(this, "Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8)
+		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8)
 				+ ") to " + address);
 	}
 
@@ -774,7 +778,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	public final void start() throws RakNetException {
 		// Make sure we have a listener
 		if (listeners.size() <= 0) {
-			RakNetLogger.warn(this, "Server has no listeners");
+			log.warn("Server has no listeners");
 		}
 
 		// Create bootstrap and bind the channel
@@ -783,10 +787,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false);
 			this.channel = bootstrap.bind(port).sync().channel();
 			this.running = true;
-			RakNetLogger.debug(this, "Created and bound bootstrap");
+			log.debug("Created and bound bootstrap");
 
 			// Notify API
-			RakNetLogger.info(this, "Started server");
+			log.info("Started server");
 			for (RakNetServerListener listener : listeners) {
 				listener.onServerStart();
 			}
@@ -849,7 +853,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		thread.setName("JRAKNET_SERVER_" + server.getGloballyUniqueId());
 		thread.start();
 		this.serverThread = thread;
-		RakNetLogger.info(this, "Started on thread with name " + thread.getName());
+		log.info("Started on thread with name " + thread.getName());
 
 		// Return the thread so it can be modified
 		return thread;
@@ -877,7 +881,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		}
 
 		// Notify API
-		RakNetLogger.info(this, "Shutdown server");
+		log.info("Shutdown server");
 		for (RakNetServerListener listener : listeners) {
 			listener.onServerShutdown();
 		}

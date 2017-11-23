@@ -37,7 +37,9 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 
-import net.marfgamer.jraknet.RakNetLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.marfgamer.jraknet.util.map.IntMap;
 
 /**
@@ -48,8 +50,7 @@ import net.marfgamer.jraknet.util.map.IntMap;
  */
 public class MaximumTransferUnit {
 
-	// Logger name
-	private static final String LOGGER_NAME = "transfer unit";
+   private static final Logger log = LoggerFactory.getLogger(MaximumTransferUnit.class);
 
 	// Unit data
 	private final int size;
@@ -100,8 +101,7 @@ public class MaximumTransferUnit {
 	 * @return the amount of retries left.
 	 */
 	public int retry() {
-		RakNetLogger.debug(LOGGER_NAME,
-				"Retried transfer unit with size of " + size + " bytes (" + (size * 8) + " bits)");
+		log.debug("Retried transfer unit with size of " + size + " bytes (" + (size * 8) + " bits)");
 		return this.retriesLeft--;
 	}
 
@@ -109,8 +109,7 @@ public class MaximumTransferUnit {
 	 * Sets the amount of retries left back to the default.
 	 */
 	public void reset() {
-		RakNetLogger.debug(LOGGER_NAME,
-				"Reset transfer unit with size of " + size + " bytes (" + (size * 8) + " bits)");
+		log.debug("Reset transfer unit with size of " + size + " bytes (" + (size * 8) + " bits)");
 		this.retriesLeft = this.retries;
 	}
 

@@ -32,8 +32,12 @@ package net.marfgamer.jraknet;
 
 import java.net.InetSocketAddress;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.client.RakNetClientListener;
+import net.marfgamer.jraknet.interactive.BroadcastTest;
 import net.marfgamer.jraknet.protocol.MessageIdentifier;
 import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
@@ -47,13 +51,9 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
  * @author Trent "MarfGamer" Summerlin
  */
 public class RakNetClientTest {
-
-	// Logger name
-	private static final String LOGGER_NAME = "client test";
+   private static final Logger log = LoggerFactory.getLogger(RakNetClientTest.class);
 
 	public static void main(String[] args) {
-		// Enable logging
-		RakNet.enableLogging(RakNetLogger.LEVEL_INFO);
 
 		// Create client and add listener
 		RakNetClient client = new RakNetClient();
@@ -61,33 +61,33 @@ public class RakNetClientTest {
 
 			@Override
 			public void onConnect(RakNetServerSession session) {
-				RakNetLogger.info(LOGGER_NAME, "Connected to " + session.getConnectionType().getName()
+				log.info("Connected to " + session.getConnectionType().getName()
 						+ " server with address " + session.getAddress() + "!");
 				client.disconnectAndShutdown();
 			}
 
 			@Override
 			public void onAcknowledge(RakNetServerSession session, Record record, EncapsulatedPacket packet) {
-				RakNetLogger.info(LOGGER_NAME,
+				log.info(
 						session.getConnectionType().getName() + " server has acknowledged packet with ID: "
 								+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
 
 			@Override
 			public void onNotAcknowledge(RakNetServerSession session, Record record, EncapsulatedPacket packet) {
-				RakNetLogger.info(LOGGER_NAME,
+				log.info(
 						session.getConnectionType().getName() + " server has not acknowledged packet with ID: "
 								+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
 
 			@Override
 			public void onHandlerException(InetSocketAddress address, Throwable cause) {
-				RakNetLogger.error(LOGGER_NAME, "Exception caused by " + address);
+				log.error( "Exception caused by " + address);
 				cause.printStackTrace();
 			}
 
 		});
-		RakNetLogger.info(LOGGER_NAME,
+		log.info(
 				"Created client, connecting to " + UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
 
 		// Connect to server
