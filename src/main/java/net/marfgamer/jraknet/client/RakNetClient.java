@@ -31,6 +31,7 @@
 package net.marfgamer.jraknet.client;
 
 import static net.marfgamer.jraknet.protocol.MessageIdentifier.*;
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_CUSTOM_0;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -43,6 +44,9 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -54,7 +58,6 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import net.marfgamer.jraknet.Packet;
 import net.marfgamer.jraknet.RakNet;
 import net.marfgamer.jraknet.RakNetException;
-import net.marfgamer.jraknet.RakNetLogger;
 import net.marfgamer.jraknet.RakNetPacket;
 import net.marfgamer.jraknet.client.discovery.DiscoveredServer;
 import net.marfgamer.jraknet.client.discovery.DiscoveryMode;
@@ -82,6 +85,8 @@ import net.marfgamer.jraknet.util.RakNetUtils;
  */
 public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
+   private static final Logger log = LoggerFactory.getLogger(RakNetClient.class);
+   
 	// Used to discover systems without relying on the main thread
 	private static DiscoveryThread discoverySystem = new DiscoveryThread();
 	private static final int[] DEFAULT_TRANSFER_UNITS = new int[] { RakNet.MAXIMUM_MTU_SIZE, 1200, 576,
@@ -154,7 +159,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			bootstrap.channel(NioDatagramChannel.class).group(group).handler(handler);
 			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false);
 			this.channel = bootstrap.bind(0).sync().channel();
-			RakNetLogger.debug(this, "Created and bound bootstrap");
+			log.debug("Created and bound bootstrap");
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -227,7 +232,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		// Set discovery ports
 		this.discoveryPorts = discoverySet;
 		String discoveryString = Arrays.toString(discoveryPorts);
-		RakNetLogger.debug(this, "Set discovery ports to "
+		log.debug("Set discovery ports to "
 				+ (discoverySet.size() > 0 ? discoveryString.substring(1, discoveryString.length() - 1) : "nothing"));
 	}
 
@@ -239,7 +244,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	public final void addDiscoveryPort(int discoveryPort) {
 		discoveryPorts.add(discoveryPort);
-		RakNetLogger.debug(this, "Added discovery port " + discoveryPort);
+		log.debug("Added discovery port " + discoveryPort);
 	}
 
 	/**
@@ -249,8 +254,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            the discovery part to stop broadcasting from.
 	 */
 	public final void removeDiscoveryPort(int discoveryPort) {
-		discoveryPorts.remove(discoveryPort);
-		RakNetLogger.debug(this, "Removed discovery port " + discoveryPort);
+    discoveryPorts.remove(discoveryPort);
+		log.debug("Removed discovery port " + discoveryPort);
 	}
 
 	/**
@@ -268,7 +273,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	public final void setDiscoveryMode(DiscoveryMode mode) {
 		if (listeners.size() <= 0) {
-			RakNetLogger.warn(this, "Client has no listeners");
+			log.warn("Client has no listeners");
 		}
 		this.discoveryMode = (mode != null ? mode : DiscoveryMode.NONE);
 		if (this.discoveryMode == DiscoveryMode.NONE) {
@@ -279,10 +284,9 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 				}
 			}
 			discovered.clear(); // We are not discovering servers anymore!
-			RakNetLogger.debug(this,
-					"Cleared discovered servers due to discovery mode being set to " + DiscoveryMode.NONE);
+			log.debug("Cleared discovered servers due to discovery mode being set to " + DiscoveryMode.NONE);
 		}
-		RakNetLogger.debug(this, "Set discovery mode to " + mode);
+		log.debug("Set discovery mode to " + mode);
 	}
 
 	/**
@@ -307,7 +311,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			externalServers.put(address, new DiscoveredServer(address, -1, null));
 
 			// Notify API
-			RakNetLogger.debug(this, "Added external server with address " + address);
+			log.debug("Added external server with address " + address);
 			for (RakNetClientListener listener : listeners) {
 				listener.onExternalServerAdded(address);
 			}
@@ -356,7 +360,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			externalServers.remove(address);
 
 			// Notify API
-			RakNetLogger.debug(this, "Removed external server with address " + address);
+			log.debug("Removed external server with address " + address);
 			for (RakNetClientListener listener : listeners) {
 				listener.onExternalServerRemoved(address);
 			}
@@ -398,7 +402,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	/**
 	 * Sets the size of the maximum transfer units that will be used by the client
-	 * during login.
+	 * during in.
 	 * 
 	 * @param maximumTransferUnitSizes
 	 *            the maximum transfer unit sizes.
@@ -418,7 +422,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 						(i * 2) + (i + 1 < maximumTransferUnits.length ? 2 : 1));
 				foundTransferUnit = true;
 			} else {
-				RakNetLogger.warn(this, "Valid maximum transfer unit " + maximumTransferUnitSize
+				log.warn("Valid maximum transfer unit " + maximumTransferUnitSize
 						+ " failed to register due to network card limitations");
 			}
 		}
@@ -428,7 +432,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * @return the maximum transfer units the client will use during login.
+	 * @return the maximum transfer units the client will use during in.
 	 */
 	public final int[] getMaximumTransferUnits() {
 		int[] maximumTransferUnitSizes = new int[maximumTransferUnits.length];
@@ -473,7 +477,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 		// Add listener
 		listeners.add(listener);
-		RakNetLogger.info(this, "Added listener " + listener.getClass().getName());
+		log.info("Added listener " + listener.getClass().getName());
 
 		// Initiate discovery system if it is not yet started
 		if (discoverySystem.isRunning() == false) {
@@ -505,9 +509,9 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	public final RakNetClient removeListener(RakNetClientListener listener) {
 		boolean hadListener = listeners.remove(listener);
 		if (hadListener == true) {
-			RakNetLogger.info(this, "Removed listener " + listener.getClass().getName());
+			log.info("Removed listener " + listener.getClass().getName());
 		} else {
-			RakNetLogger.warn(this, "Attempted to removed unregistered listener " + listener.getClass().getName());
+			log.warn("Attempted to removed unregistered listener " + listener.getClass().getName());
 		}
 		return this;
 	}
@@ -566,7 +570,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		}
 
 		// Notify API
-		RakNetLogger.warn(this, "Handled exception " + cause.getClass().getName() + " caused by address " + address);
+		log.warn("Handled exception " + cause.getClass().getName() + " caused by address " + address);
 		for (RakNetClientListener listener : listeners) {
 			listener.onHandlerException(address, cause);
 		}
@@ -592,7 +596,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			}
 		}
 
-		// Are we still logging in?
+		// Are we still ging in?
 		if (preparation != null) {
 			if (sender.equals(preparation.address)) {
 				preparation.handleMessage(packet);
@@ -618,10 +622,10 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		}
 
 		if (MessageIdentifier.hasPacket(packet.getId())) {
-			RakNetLogger.debug(this, "Handled internal packet with ID " + MessageIdentifier.getName(packet.getId())
+			log.debug("Handled internal packet with ID " + MessageIdentifier.getName(packet.getId())
 					+ " (" + packet.getId() + ")");
 		} else {
-			RakNetLogger.debug(this, "Sent packet with ID " + packet.getId() + " to session handler");
+			log.debug("Sent packet with ID " + packet.getId() + " to session handler");
 		}
 	}
 
@@ -640,7 +644,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(buf, address));
-		RakNetLogger.debug(this, "Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8)
+		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8)
 				+ " bits) to " + address);
 	}
 
@@ -699,7 +703,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		}
 		discovered.keySet().removeAll(forgottenServers);
 		if (forgottenServers.size() > 0) {
-			RakNetLogger.debug(this, "Forgot " + forgottenServers.size() + " servers");
+			log.debug("Forgot " + forgottenServers.size() + " servers");
 		}
 
 		// Broadcast ping to local network
@@ -716,7 +720,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 				ping.encode();
 
 				this.sendNettyMessage(ping, new InetSocketAddress("255.255.255.255", discoveryPort));
-				RakNetLogger.debug(this, "Broadcasted unconnected ping to port " + discoveryPort);
+				log.debug("Broadcasted unconnected ping to port " + discoveryPort);
 			}
 		}
 
@@ -729,7 +733,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 			for (InetSocketAddress externalAddress : externalServers.keySet()) {
 				this.sendNettyMessage(ping, externalAddress);
-				RakNetLogger.debug(this, "Broadcasting ping to server with address " + externalAddress);
+				log.debug("Broadcasting ping to server with address " + externalAddress);
 			}
 		}
 	}
@@ -752,7 +756,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 				discovered.put(sender, new DiscoveredServer(sender, System.currentTimeMillis(), pong.identifier));
 
 				// Notify API
-				RakNetLogger.info(this, "Discovered local server with address " + sender);
+				log.info("Discovered local server with address " + sender);
 				for (RakNetClientListener listener : listeners) {
 					listener.onServerDiscovered(sender, pong.identifier);
 				}
@@ -765,7 +769,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 					server.setIdentifier(pong.identifier);
 
 					// Notify API
-					RakNetLogger.debug(this, "Updated local server with address " + sender + " identifier to \""
+					log.debug("Updated local server with address " + sender + " identifier to \""
 							+ pong.identifier + "\"");
 					for (RakNetClientListener listener : listeners) {
 						listener.onServerIdentifierUpdate(sender, pong.identifier);
@@ -780,8 +784,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 				server.setIdentifier(pong.identifier);
 
 				// Notify API
-				RakNetLogger.debug(this,
-						"Updated local server with address " + sender + " identifier to \"" + pong.identifier + "\"");
+				log.debug("Updated local server with address " + sender + " identifier to \"" + pong.identifier + "\"");
 				for (RakNetClientListener listener : listeners) {
 					listener.onExternalServerIdentifierUpdate(sender, pong.identifier);
 				}
@@ -795,12 +798,12 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param address
 	 *            the address of the server to connect to.
 	 * @throws RakNetException
-	 *             if an error occurs during connection or login.
+	 *             if an error occurs during connection or in.
 	 */
 	public final void connect(InetSocketAddress address) throws RakNetException {
 		// Make sure we have a listener
 		if (listeners.size() <= 0) {
-			RakNetLogger.warn(this, "Client has no listeners");
+			log.warn("Client has no listeners");
 		}
 
 		// Reset client data
@@ -877,7 +880,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			connectionRequest.timestamp = (System.currentTimeMillis() - this.timestamp);
 			connectionRequest.encode();
 			session.sendMessage(Reliability.RELIABLE_ORDERED, connectionRequest);
-			RakNetLogger.debug(this, "Sent connection packet to server");
+			log.debug("Sent connection packet to server");
 
 			// Initiate connection loop required for the session to function
 			this.initConnection();
@@ -898,7 +901,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param port
 	 *            the port of the server to connect to.
 	 * @throws RakNetException
-	 *             if an error occurs during connection or login.
+	 *             if an error occurs during connection or in.
 	 */
 	public final void connect(InetAddress address, int port) throws RakNetException {
 		this.connect(new InetSocketAddress(address, port));
@@ -912,7 +915,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param port
 	 *            the port of the server to connect to.
 	 * @throws RakNetException
-	 *             if an error occurs during connection or login.
+	 *             if an error occurs during connection or in.
 	 * @throws UnknownHostException
 	 *             if the specified address is an unknown host.
 	 */
@@ -926,7 +929,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param server
 	 *            the discovered server to connect to.
 	 * @throws RakNetException
-	 *             if an error occurs during connection or login.
+	 *             if an error occurs during connection or in.
 	 */
 	public final void connect(DiscoveredServer server) throws RakNetException {
 		this.connect(server.getAddress());
@@ -964,7 +967,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		thread.setName("JRAKNET_CLIENT_" + client.getGloballyUniqueId());
 		thread.start();
 		this.clientThread = thread;
-		RakNetLogger.info(this, "Started on thread with name " + thread.getName());
+		log.info("Started on thread with name " + thread.getName());
 
 		// Return the thread so it can be modified
 		return thread;
@@ -1020,7 +1023,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	private final void initConnection() throws RakNetException {
 		if (session != null) {
-			RakNetLogger.debug(this, "Initiated connected with server");
+			log.debug("Initiated connected with server");
 			while (session != null) {
 				try {
 					session.update();
@@ -1064,7 +1067,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			}
 
 			// Notify API
-			RakNetLogger.info(this, "Disconnected from server with address " + session.getAddress() + " with reason \""
+			log.info("Disconnected from server with address " + session.getAddress() + " with reason \""
 					+ reason + "\"");
 			for (RakNetClientListener listener : listeners) {
 				listener.onDisconnect(session, reason);
@@ -1073,8 +1076,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			// Destroy session
 			this.session = null;
 		} else {
-			RakNetLogger.warn(this,
-					"Attempted to disconnect from server even though it was not connected to as server in the first place");
+			log.warn("Attempted to disconnect from server even though it was not connected to as server in the first place");
 		}
 	}
 
@@ -1103,12 +1105,12 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			}
 
 			// Notify API
-			RakNetLogger.info(this, "Shutdown client");
+			log.info("Shutdown client");
 			for (RakNetClientListener listener : listeners) {
 				listener.onClientShutdown();
 			}
 		} else {
-			RakNetLogger.warn(this, "Client attempted to shutdown after it was already shutdown");
+			log.warn("Client attempted to shutdown after it was already shutdown");
 		}
 	}
 
@@ -1138,7 +1140,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	@Override
 	public final void finalize() {
 		this.shutdown();
-		RakNetLogger.debug(this, "Finalized and collected by garbage heap");
+		log.debug("Finalized and collected by garbage heap");
 	}
 
 }
