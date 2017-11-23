@@ -34,7 +34,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import net.marfgamer.jraknet.RakNetLogger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.marfgamer.jraknet.example.chat.server.ChatServer;
 
 /**
@@ -43,7 +45,8 @@ import net.marfgamer.jraknet.example.chat.server.ChatServer;
  * @author Whirvis "MarfGamer" Ardenaur
  */
 public class CommandHandler {
-
+   private static final Logger log = LoggerFactory.getLogger(CommandHandler.class);
+   
 	private HashMap<String, Command> commands;
 
 	public CommandHandler() {
@@ -110,10 +113,10 @@ public class CommandHandler {
 		if (commands.containsKey(label)) {
 			Command command = commands.get(label);
 			if (command.handleCommand(arguments) == false) {
-				RakNetLogger.error(ChatServer.LOGGER_NAME, "Usage: " + command.getUsage());
+				log.error("Usage: " + command.getUsage());
 			}
 		} else {
-			RakNetLogger.error(ChatServer.LOGGER_NAME, "Unknown command!");
+			log.error("Unknown command!");
 		}
 	}
 
