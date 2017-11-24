@@ -43,9 +43,9 @@ import net.marfgamer.jraknet.session.RakNetSession;
 
 public class CustomPacket extends RakNetPacket implements Sizable {
 
-	public static final int SEQUENCE_NUMBER_LENGTH = 0x03;
-
 	private static final Logger log = LoggerFactory.getLogger(CustomPacket.class);
+
+	public static final int SEQUENCE_NUMBER_LENGTH = 0x03;
 
 	// Custom packet data
 	public int sequenceNumber;
