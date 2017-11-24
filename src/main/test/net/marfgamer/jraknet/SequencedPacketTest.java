@@ -64,8 +64,8 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
  */
 public class SequencedPacketTest {
 
-   private static final Logger log = LoggerFactory.getLogger(SequencedPacketTest.class);
-   
+	private static final Logger log = LoggerFactory.getLogger(SequencedPacketTest.class);
+
 	// Logger name
 	private static final String LOGGER_NAME = "sequenced packet test";
 
@@ -105,14 +105,12 @@ public class SequencedPacketTest {
 	 * Prints the results of the test
 	 */
 	private static void printResults() {
-		log
-				.info(LOGGER_NAME,
-						"Server - Sequenced packet test finished, lost "
-								+ (packetReceiveCount >= PACKET_SEND_COUNT ? "no"
-										: Float.toString(((float) PACKET_SEND_COUNT
-												- packetReceiveCount / (float) PACKET_SEND_COUNT) * 100).substring(0, 3)
-												.replace(".", "") + "% of")
-								+ " packets (Took " + (System.currentTimeMillis() - startSend) + "MS)");
+		log.info(LOGGER_NAME, "Server - Sequenced packet test finished, lost "
+				+ (packetReceiveCount >= PACKET_SEND_COUNT ? "no"
+						: Float.toString(
+								((float) PACKET_SEND_COUNT - packetReceiveCount / (float) PACKET_SEND_COUNT) * 100)
+								.substring(0, 3).replace(".", "") + "% of")
+				+ " packets (Took " + (System.currentTimeMillis() - startSend) + "MS)");
 		if (packetReceiveCount < PACKET_SEND_COUNT) {
 			// Create list of lost packets
 			ArrayList<Integer> packetsLost = new ArrayList<Integer>();
@@ -128,8 +126,7 @@ public class SequencedPacketTest {
 				Integer wi = packetsLost.get(i);
 				builder.append(wi.intValue() + (i + 1 < packetsLost.size() ? ", " : ""));
 			}
-			log.info(LOGGER_NAME,
-					"Packet" + (packetsLost.size() == 1 ? "" : "s") + " lost: " + builder.toString());
+			log.info(LOGGER_NAME, "Packet" + (packetsLost.size() == 1 ? "" : "s") + " lost: " + builder.toString());
 		}
 	}
 
@@ -211,8 +208,7 @@ public class SequencedPacketTest {
 
 			@Override
 			public void onConnect(RakNetServerSession session) {
-				log.info(LOGGER_NAME,
-						"Client - Connected to server with MTU " + session.getMaximumTransferUnit());
+				log.info(LOGGER_NAME, "Client - Connected to server with MTU " + session.getMaximumTransferUnit());
 
 				// Send 100 sequenced packets
 				log.info("Client - Sending " + PACKET_SEND_COUNT + " packets...");
@@ -225,8 +221,8 @@ public class SequencedPacketTest {
 				}
 
 				// Notify user
-				log.info("Client - Sent " + PACKET_SEND_COUNT + " packets (" + packetSize
-						+ " bytes, " + (packetSize / 4) + " ints)");
+				log.info("Client - Sent " + PACKET_SEND_COUNT + " packets (" + packetSize + " bytes, "
+						+ (packetSize / 4) + " ints)");
 			}
 
 			@Override

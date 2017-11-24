@@ -45,7 +45,7 @@ import net.marfgamer.jraknet.util.RakNetUtils;
  */
 public class UtilityTest {
 
-   private static final Logger log = LoggerFactory.getLogger(UtilityTest.class);
+	private static final Logger log = LoggerFactory.getLogger(UtilityTest.class);
 
 	// Test data
 	private static final String ADDRESS_TEST_VALID = "255.255.255.255:65535";

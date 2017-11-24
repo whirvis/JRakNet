@@ -42,8 +42,8 @@ import net.marfgamer.jraknet.example.chat.server.ChatServer;
  */
 public class StopCommand extends Command {
 
-   private static final Logger log = LoggerFactory.getLogger(StopCommand.class);
-   
+	private static final Logger log = LoggerFactory.getLogger(StopCommand.class);
+
 	// Command data
 	private final ChatServer server;
 
