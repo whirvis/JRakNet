@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
  * @author Trent "MarfGamer" Summerlin
  */
 public class CommandHandler {
+
 	private static final Logger log = LoggerFactory.getLogger(CommandHandler.class);
 
 	private HashMap<String, Command> commands;
