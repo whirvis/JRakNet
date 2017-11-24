@@ -39,7 +39,8 @@
       <version>2.9.1</version>
     </dependency>
   </dependencies>
-
+  
+  <!-- Deploy to maven repository -->
   <distributionManagement>
     <repository>
       <id>maven-repo</id>
