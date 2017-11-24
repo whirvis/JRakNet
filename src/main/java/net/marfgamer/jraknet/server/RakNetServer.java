@@ -80,8 +80,8 @@ import net.marfgamer.jraknet.util.RakNetUtils;
  */
 public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
-   private static final Logger log = LoggerFactory.getLogger(RakNetServer.class);
-   
+	private static final Logger log = LoggerFactory.getLogger(RakNetServer.class);
+
 	// Server data
 	private final long guid;
 	private final long pongId;
@@ -683,8 +683,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		}
 
 		if (MessageIdentifier.hasPacket(packet.getId())) {
-			log.debug("Handled internal packet with ID " + MessageIdentifier.getName(packet.getId())
-					+ " (" + packet.getId() + ")");
+			log.debug("Handled internal packet with ID " + MessageIdentifier.getName(packet.getId()) + " ("
+					+ packet.getId() + ")");
 		} else {
 			log.debug("Sent packet with ID " + packet.getId() + " to session handler");
 		}
@@ -731,8 +731,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 */
 	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(buf, address));
-		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8)
-				+ ") to " + address);
+		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + ") to "
+				+ address);
 	}
 
 	/**

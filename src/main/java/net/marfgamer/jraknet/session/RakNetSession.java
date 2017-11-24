@@ -58,7 +58,6 @@ import net.marfgamer.jraknet.protocol.message.acknowledge.AcknowledgeType;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 import net.marfgamer.jraknet.protocol.status.ConnectedPing;
 import net.marfgamer.jraknet.protocol.status.ConnectedPong;
-import net.marfgamer.jraknet.server.RakNetServerHandler;
 import net.marfgamer.jraknet.util.map.IntMap;
 
 /**
@@ -68,8 +67,8 @@ import net.marfgamer.jraknet.util.map.IntMap;
  */
 public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer {
 
-   private static final Logger log = LoggerFactory.getLogger(RakNetSession.class);
-   
+	private static final Logger log = LoggerFactory.getLogger(RakNetSession.class);
+
 	// Session data
 	private String loggerName;
 	private final ConnectionType connectionType;
@@ -357,8 +356,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 			for (EncapsulatedPacket split : SplitPacket.splitPacket(this, encapsulated)) {
 				sendQueue.add(split);
 			}
-			log.debug(loggerName +
-					"Split encapsulated packet " + encapsulated.splitId + " and added it to the send queue");
+			log.debug(loggerName + "Split encapsulated packet " + encapsulated.splitId
+					+ " and added it to the send queue");
 		} else {
 			sendQueue.add(encapsulated);
 			log.debug(loggerName + "Added encapsulated packet to the send queue");
@@ -410,8 +409,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 */
 	public final void sendRawMessage(Packet packet) {
 		channel.writeAndFlush(new DatagramPacket(packet.buffer(), this.address));
-		log.debug(loggerName +
-				"Sent raw packet with size of " + packet.size() + " bytes (" + (packet.size() * 8) + " bits)");
+		log.debug(loggerName + "Sent raw packet with size of " + packet.size() + " bytes (" + (packet.size() * 8)
+				+ " bits)");
 	}
 
 	/**
@@ -422,8 +421,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 */
 	public final void sendRawMessage(ByteBuf buf) {
 		channel.writeAndFlush(new DatagramPacket(buf, this.address));
-		log.debug(loggerName +
-				"Sent raw buffer with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits)");
+		log.debug(loggerName + "Sent raw buffer with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8)
+				+ " bits)");
 	}
 
 	/**
@@ -644,9 +643,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 		// Update packet data
 		this.lastPacketReceiveTime = System.currentTimeMillis();
-		log.debug(loggerName +
-				"Handled " + (acknowledge.getType() == AcknowledgeType.ACKNOWLEDGED ? "ACK" : "NACK") + " packet with "
-						+ acknowledge.records.size() + " records");
+		log.debug(loggerName + "Handled " + (acknowledge.getType() == AcknowledgeType.ACKNOWLEDGED ? "ACK" : "NACK")
+				+ " packet with " + acknowledge.records.size() + " records");
 	}
 
 	/**
@@ -788,8 +786,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		}
 
 		if (MessageIdentifier.hasPacket(packet.getId())) {
-			log.debug(loggerName + "Handled internal packet with ID "
-					+ MessageIdentifier.getName(packet.getId()) + " (" + packet.getId() + ")");
+			log.debug(loggerName + "Handled internal packet with ID " + MessageIdentifier.getName(packet.getId()) + " ("
+					+ packet.getId() + ")");
 		} else {
 			log.debug(loggerName + "Sent packet with ID " + packet.getId() + " to session handler");
 		}
@@ -856,8 +854,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 				&& state.equals(RakNetState.CONNECTED)) {
 			this.sendMessage(Reliability.UNRELIABLE, ID_DETECT_LOST_CONNECTIONS);
 			this.lastKeepAliveSendTime = currentTime;
-			log.debug(loggerName +
-					"Sent " + MessageIdentifier.getName(ID_DETECT_LOST_CONNECTIONS) + " packet to session");
+			log.debug(loggerName + "Sent " + MessageIdentifier.getName(ID_DETECT_LOST_CONNECTIONS)
+					+ " packet to session");
 		}
 
 		// Client timed out

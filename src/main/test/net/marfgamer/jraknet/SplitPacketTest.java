@@ -57,7 +57,7 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
  */
 public class SplitPacketTest {
 
-   private static final Logger log = LoggerFactory.getLogger(SplitPacketTest.class);
+	private static final Logger log = LoggerFactory.getLogger(SplitPacketTest.class);
 
 	// Test data
 	private static final short SPLIT_START_ID = 0xFE;
@@ -105,21 +105,20 @@ public class SplitPacketTest {
 
 			@Override
 			public void onClientDisconnect(RakNetClientSession session, String reason) {
-				log.info(
-						"Server: Client from " + session.getAddress() + " disconnected! (" + reason + ")");
+				log.info("Server: Client from " + session.getAddress() + " disconnected! (" + reason + ")");
 				System.exit(1);
 			}
 
 			@Override
 			public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
-				log.info("Server: Received packet of " + packet.size() + " bytes from "
-						+ session.getAddress() + ", checking data...");
+				log.info("Server: Received packet of " + packet.size() + " bytes from " + session.getAddress()
+						+ ", checking data...");
 
 				// Check packet ID
 				log.info("Server: Checking header byte...");
 				if (packet.getId() != SPLIT_START_ID) {
-					log.error("Server: Packet header is " + packet.getId() + " when it should be "
-							+ SPLIT_START_ID + "!");
+					log.error("Server: Packet header is " + packet.getId() + " when it should be " + SPLIT_START_ID
+							+ "!");
 					System.exit(1);
 				}
 
@@ -139,13 +138,12 @@ public class SplitPacketTest {
 				// Check packet footer
 				log.info("Server: Checking footer byte...");
 				if (packet.readUnsignedByte() != SPLIT_END_ID) {
-					log.error("Server: Packet footer is " + packet.getId() + " when it should be "
-							+ SPLIT_START_ID + "!");
+					log.error("Server: Packet footer is " + packet.getId() + " when it should be " + SPLIT_START_ID
+							+ "!");
 					System.exit(1);
 				}
 
-				log.info(
-						"Server: Split packet test passed! (Took " + (System.currentTimeMillis() - startSend) + "MS)");
+				log.info("Server: Split packet test passed! (Took " + (System.currentTimeMillis() - startSend) + "MS)");
 				System.exit(0);
 			}
 
@@ -179,8 +177,7 @@ public class SplitPacketTest {
 
 			@Override
 			public void onConnect(RakNetServerSession session) {
-				log.info(
-						"Client: Connected to server with MTU " + session.getMaximumTransferUnit());
+				log.info("Client: Connected to server with MTU " + session.getMaximumTransferUnit());
 
 				// Calculate maximum packet size
 				this.packet = new RakNetPacket(SPLIT_START_ID);
@@ -197,8 +194,7 @@ public class SplitPacketTest {
 				packet.writeUnsignedByte(SPLIT_END_ID);
 
 				// Send packet
-				log.info(
-						"Client: Sending giant packet... (" + packet.size() + " bytes, " + integersWritten + " ints)");
+				log.info("Client: Sending giant packet... (" + packet.size() + " bytes, " + integersWritten + " ints)");
 				startSend = System.currentTimeMillis();
 				session.sendMessage(Reliability.RELIABLE_ORDERED, packet);
 			}

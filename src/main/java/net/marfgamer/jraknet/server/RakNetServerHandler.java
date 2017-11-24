@@ -50,8 +50,8 @@ import net.marfgamer.jraknet.RakNetPacket;
  */
 public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 
-   private static final Logger log = LoggerFactory.getLogger(RakNetServerHandler.class);
-   
+	private static final Logger log = LoggerFactory.getLogger(RakNetServerHandler.class);
+
 	// Handler data
 	private final String loggerName;
 	private final RakNetServer server;
@@ -87,8 +87,8 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 		for (RakNetServerListener listener : server.getListeners()) {
 			listener.onAddressBlocked(address, reason, time);
 		}
-		log.info(loggerName +
-				"Blocked address " + address + " due to \"" + reason + "\" for " + time + " milliseconds");
+		log.info(
+				loggerName + "Blocked address " + address + " due to \"" + reason + "\" for " + time + " milliseconds");
 	}
 
 	/**

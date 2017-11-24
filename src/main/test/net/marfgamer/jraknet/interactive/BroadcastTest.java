@@ -37,10 +37,6 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import net.marfgamer.jraknet.RakNet;
 import net.marfgamer.jraknet.UtilityTest;
 import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.client.RakNetClientListener;
@@ -55,8 +51,6 @@ import net.marfgamer.jraknet.identifier.MinecraftIdentifier;
  */
 public class BroadcastTest {
 
-   private static final Logger log = LoggerFactory.getLogger(BroadcastTest.class);
-      
 	private final RakNetClient client;
 	private final HashMap<InetSocketAddress, MinecraftIdentifier> discovered;
 	private final BroadcastFrame frame;

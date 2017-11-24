@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import net.marfgamer.jraknet.client.RakNetClient;
 import net.marfgamer.jraknet.client.RakNetClientListener;
-import net.marfgamer.jraknet.interactive.BroadcastTest;
 import net.marfgamer.jraknet.protocol.MessageIdentifier;
 import net.marfgamer.jraknet.protocol.message.EncapsulatedPacket;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
@@ -51,7 +50,8 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
  * @author Trent "MarfGamer" Summerlin
  */
 public class RakNetClientTest {
-   private static final Logger log = LoggerFactory.getLogger(RakNetClientTest.class);
+
+	private static final Logger log = LoggerFactory.getLogger(RakNetClientTest.class);
 
 	public static void main(String[] args) {
 
@@ -61,34 +61,31 @@ public class RakNetClientTest {
 
 			@Override
 			public void onConnect(RakNetServerSession session) {
-				log.info("Connected to " + session.getConnectionType().getName()
-						+ " server with address " + session.getAddress() + "!");
+				log.info("Connected to " + session.getConnectionType().getName() + " server with address "
+						+ session.getAddress() + "!");
 				client.disconnectAndShutdown();
 			}
 
 			@Override
 			public void onAcknowledge(RakNetServerSession session, Record record, EncapsulatedPacket packet) {
-				log.info(
-						session.getConnectionType().getName() + " server has acknowledged packet with ID: "
-								+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
+				log.info(session.getConnectionType().getName() + " server has acknowledged packet with ID: "
+						+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
 
 			@Override
 			public void onNotAcknowledge(RakNetServerSession session, Record record, EncapsulatedPacket packet) {
-				log.info(
-						session.getConnectionType().getName() + " server has not acknowledged packet with ID: "
-								+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
+				log.info(session.getConnectionType().getName() + " server has not acknowledged packet with ID: "
+						+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
 
 			@Override
 			public void onHandlerException(InetSocketAddress address, Throwable cause) {
-				log.error( "Exception caused by " + address);
+				log.error("Exception caused by " + address);
 				cause.printStackTrace();
 			}
 
 		});
-		log.info(
-				"Created client, connecting to " + UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
+		log.info("Created client, connecting to " + UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
 
 		// Connect to server
 		try {

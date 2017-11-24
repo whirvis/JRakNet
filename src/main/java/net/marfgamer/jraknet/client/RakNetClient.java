@@ -85,8 +85,8 @@ import net.marfgamer.jraknet.util.RakNetUtils;
  */
 public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
-   private static final Logger log = LoggerFactory.getLogger(RakNetClient.class);
-   
+	private static final Logger log = LoggerFactory.getLogger(RakNetClient.class);
+
 	// Used to discover systems without relying on the main thread
 	private static DiscoveryThread discoverySystem = new DiscoveryThread();
 	private static final int[] DEFAULT_TRANSFER_UNITS = new int[] { RakNet.MAXIMUM_MTU_SIZE, 1200, 576,
@@ -254,7 +254,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            the discovery part to stop broadcasting from.
 	 */
 	public final void removeDiscoveryPort(int discoveryPort) {
-    discoveryPorts.remove(discoveryPort);
+		discoveryPorts.remove(discoveryPort);
 		log.debug("Removed discovery port " + discoveryPort);
 	}
 
@@ -622,8 +622,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		}
 
 		if (MessageIdentifier.hasPacket(packet.getId())) {
-			log.debug("Handled internal packet with ID " + MessageIdentifier.getName(packet.getId())
-					+ " (" + packet.getId() + ")");
+			log.debug("Handled internal packet with ID " + MessageIdentifier.getName(packet.getId()) + " ("
+					+ packet.getId() + ")");
 		} else {
 			log.debug("Sent packet with ID " + packet.getId() + " to session handler");
 		}
@@ -644,8 +644,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(buf, address));
-		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8)
-				+ " bits) to " + address);
+		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to "
+				+ address);
 	}
 
 	/**
@@ -769,8 +769,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 					server.setIdentifier(pong.identifier);
 
 					// Notify API
-					log.debug("Updated local server with address " + sender + " identifier to \""
-							+ pong.identifier + "\"");
+					log.debug("Updated local server with address " + sender + " identifier to \"" + pong.identifier
+							+ "\"");
 					for (RakNetClientListener listener : listeners) {
 						listener.onServerIdentifierUpdate(sender, pong.identifier);
 					}
@@ -1067,8 +1067,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			}
 
 			// Notify API
-			log.info("Disconnected from server with address " + session.getAddress() + " with reason \""
-					+ reason + "\"");
+			log.info("Disconnected from server with address " + session.getAddress() + " with reason \"" + reason
+					+ "\"");
 			for (RakNetClientListener listener : listeners) {
 				listener.onDisconnect(session, reason);
 			}
@@ -1076,7 +1076,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			// Destroy session
 			this.session = null;
 		} else {
-			log.warn("Attempted to disconnect from server even though it was not connected to as server in the first place");
+			log.warn(
+					"Attempted to disconnect from server even though it was not connected to as server in the first place");
 		}
 	}
 

@@ -47,7 +47,7 @@ import net.marfgamer.jraknet.client.RakNetClient;
 public class DiscoveryThread extends Thread {
 
 	// Logger name
-   private static final Logger log = LoggerFactory.getLogger(DiscoveryThread.class);
+	private static final Logger log = LoggerFactory.getLogger(DiscoveryThread.class);
 
 	// Discovery data
 	private ConcurrentLinkedQueue<RakNetClient> clients;
@@ -58,6 +58,7 @@ public class DiscoveryThread extends Thread {
 	 */
 	public DiscoveryThread() {
 		this.clients = new ConcurrentLinkedQueue<RakNetClient>();
+		this.setName("DiscoveryThread");
 	}
 
 	/**
@@ -98,8 +99,7 @@ public class DiscoveryThread extends Thread {
 			return;
 		}
 		clients.remove(client);
-		log.debug(
-				"Removed client #" + client.getGloballyUniqueId() + " from the discovery thread");
+		log.debug("Removed client #" + client.getGloballyUniqueId() + " from the discovery thread");
 	}
 
 	/**
@@ -130,7 +130,8 @@ public class DiscoveryThread extends Thread {
 				for (RakNetClient client : this.clients) {
 					client.updateDiscoveryData();
 				}
-				log.debug("Sent discovery info out for " + clients.size() + " client" + (clients.size() == 1 ? "" : "s"));
+				log.debug(
+						"Sent discovery info out for " + clients.size() + " client" + (clients.size() == 1 ? "" : "s"));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 				log.error("Discovery thread has crashed");

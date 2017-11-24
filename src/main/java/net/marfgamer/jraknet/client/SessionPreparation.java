@@ -62,8 +62,8 @@ import net.marfgamer.jraknet.session.RakNetServerSession;
  */
 public class SessionPreparation {
 
-   private static final Logger log = LoggerFactory.getLogger(SessionPreparation.class);
-      
+	private static final Logger log = LoggerFactory.getLogger(SessionPreparation.class);
+
 	// Preparation data
 	private final String loggerName;
 	private final RakNetClient client;
@@ -137,8 +137,8 @@ public class SessionPreparation {
 				this.loginPackets[1] = true;
 				this.maximumTransferUnit = connectionResponseTwo.maximumTransferUnit;
 				this.connectionType = connectionResponseTwo.connectionType;
-				log.debug(loggerName +
-						"Applied maximum transfer unit from " + MessageIdentifier.getName(packetId) + " packet");
+				log.debug(loggerName + "Applied maximum transfer unit from " + MessageIdentifier.getName(packetId)
+						+ " packet");
 			}
 		} else if (packetId == ID_ALREADY_CONNECTED) {
 			this.cancelReason = new AlreadyConnectedException(client);
@@ -197,10 +197,9 @@ public class SessionPreparation {
 		if (!this.readyForSession()) {
 			return null;
 		}
-		log.info(loggerName +
-				"Created server session using globally unique ID " + guid + " and maximum transfer unit with size of "
-						+ maximumTransferUnit + " bytes (" + (maximumTransferUnit * 8) + " bits) for server address "
-						+ address);
+		log.info(loggerName + "Created server session using globally unique ID " + guid
+				+ " and maximum transfer unit with size of " + maximumTransferUnit + " bytes ("
+				+ (maximumTransferUnit * 8) + " bits) for server address " + address);
 		return new RakNetServerSession(this.client, this.connectionType, this.guid, this.maximumTransferUnit, channel,
 				this.address);
 	}
