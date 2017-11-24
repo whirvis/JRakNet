@@ -54,7 +54,7 @@ import net.marfgamer.jraknet.stream.PacketDataOutput;
  * @author Whirvis "MarfGamer" Ardenaur
  */
 public class Packet {
-	// Logger
+
 	private static final Logger log = LoggerFactory.getLogger("packet");
 
 	// Packet constants
