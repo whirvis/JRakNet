@@ -46,7 +46,7 @@ import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
  */
 public class EncapsulatedPacket implements Sizable, Cloneable {
 
-   private static final Logger log = LoggerFactory.getLogger(EncapsulatedPacket.class);
+	private static final Logger log = LoggerFactory.getLogger(EncapsulatedPacket.class);
 
 	// Length constants
 	public static final int MINIMUM_BUFFER_LENGTH = 3;

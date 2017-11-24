@@ -50,7 +50,7 @@ import net.marfgamer.jraknet.util.map.IntMap;
  */
 public class MaximumTransferUnit {
 
-   private static final Logger log = LoggerFactory.getLogger(MaximumTransferUnit.class);
+	private static final Logger log = LoggerFactory.getLogger(MaximumTransferUnit.class);
 
 	// Unit data
 	private final int size;

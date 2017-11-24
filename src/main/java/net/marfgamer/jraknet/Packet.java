@@ -54,8 +54,8 @@ import net.marfgamer.jraknet.stream.PacketDataOutput;
  * @author Whirvis "MarfGamer" Ardenaur
  */
 public class Packet {
-   // Logger
-   private static final Logger log = LoggerFactory.getLogger("packet");
+	// Logger
+	private static final Logger log = LoggerFactory.getLogger("packet");
 
 	// Packet constants
 	public static final int ADDRESS_VERSION_IPV4 = 0x04;

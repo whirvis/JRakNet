@@ -37,16 +37,14 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.marfgamer.jraknet.example.chat.server.ChatServer;
-
 /**
  * Used by the server to register and handle commands easily.
  *
  * @author Whirvis "MarfGamer" Ardenaur
  */
 public class CommandHandler {
-   private static final Logger log = LoggerFactory.getLogger(CommandHandler.class);
-   
+	private static final Logger log = LoggerFactory.getLogger(CommandHandler.class);
+
 	private HashMap<String, Command> commands;
 
 	public CommandHandler() {

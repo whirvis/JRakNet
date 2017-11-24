@@ -65,7 +65,7 @@ import net.marfgamer.jraknet.session.RakNetClientSession;
  */
 public class ChatServer implements RakNetServerListener {
 
-   private static final Logger log = LoggerFactory.getLogger(ChatServer.class);
+	private static final Logger log = LoggerFactory.getLogger(ChatServer.class);
 
 	// Server data
 	private final String name;

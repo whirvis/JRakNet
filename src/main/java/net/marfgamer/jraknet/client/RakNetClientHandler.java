@@ -48,7 +48,7 @@ import net.marfgamer.jraknet.RakNetPacket;
  */
 public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 
-   private static final Logger log = LoggerFactory.getLogger(RakNetClientHandler.class);
+	private static final Logger log = LoggerFactory.getLogger(RakNetClientHandler.class);
 	// Logger name
 	private final String loggerName;
 

@@ -55,7 +55,7 @@ import net.marfgamer.jraknet.util.RakNetUtils;
  */
 public class RakNetServerTest {
 
-   private static final Logger log = LoggerFactory.getLogger(RakNetServerTest.class);
+	private static final Logger log = LoggerFactory.getLogger(RakNetServerTest.class);
 
 	public static void main(String[] args) {
 
@@ -65,35 +65,32 @@ public class RakNetServerTest {
 
 			@Override
 			public void onClientPreConnect(InetSocketAddress address) {
-				log.info(
-						"Client from " + address + " has instantiated the connection, waiting for "
-								+ NewIncomingConnection.class.getSimpleName() + " packet");
+				log.info("Client from " + address + " has instantiated the connection, waiting for "
+						+ NewIncomingConnection.class.getSimpleName() + " packet");
 			}
 
 			@Override
 			public void onClientPreDisconnect(InetSocketAddress address, String reason) {
-				log.info(
-						"Client from " + address + " has failed to login for \"" + reason + "\"");
+				log.info("Client from " + address + " has failed to login for \"" + reason + "\"");
 			}
 
 			@Override
 			public void onClientConnect(RakNetClientSession session) {
-				log.info( session.getConnectionType().getName() + " client from address "
-						+ session.getAddress() + " has connected to the server");
+				log.info(session.getConnectionType().getName() + " client from address " + session.getAddress()
+						+ " has connected to the server");
 			}
 
 			@Override
 			public void onClientDisconnect(RakNetClientSession session, String reason) {
-				log.info( session.getConnectionType().getName() + " client from address "
-						+ session.getAddress() + " has been disconnected for \"" + reason + "\"");
+				log.info(session.getConnectionType().getName() + " client from address " + session.getAddress()
+						+ " has been disconnected for \"" + reason + "\"");
 			}
 
 			@Override
 			public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
-				log.info(
-						"Received packet from " + session.getConnectionType().getName() + " client with address "
-								+ session.getAddress() + " with packet ID " + RakNetUtils.toHexStringId(packet)
-								+ " on channel " + channel);
+				log.info("Received packet from " + session.getConnectionType().getName() + " client with address "
+						+ session.getAddress() + " with packet ID " + RakNetUtils.toHexStringId(packet) + " on channel "
+						+ channel);
 			}
 
 			@Override
@@ -106,23 +103,20 @@ public class RakNetServerTest {
 
 			@Override
 			public void onAcknowledge(RakNetClientSession session, Record record, EncapsulatedPacket packet) {
-				log.info(
-						session.getConnectionType().getName() + " client with address " + session.getAddress()
-								+ " has received packet with ID: "
-								+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
+				log.info(session.getConnectionType().getName() + " client with address " + session.getAddress()
+						+ " has received packet with ID: "
+						+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
 
 			@Override
 			public void onNotAcknowledge(RakNetClientSession session, Record record, EncapsulatedPacket packet) {
-				log.info(
-						session.getConnectionType().getName() + " client with address " + session.getAddress()
-								+ " has lost packet with ID: "
-								+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
+				log.info(session.getConnectionType().getName() + " client with address " + session.getAddress()
+						+ " has lost packet with ID: " + MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
 
 			@Override
 			public void onHandlerException(InetSocketAddress address, Throwable cause) {
-				log.error( "Exception caused by " + address);
+				log.error("Exception caused by " + address);
 				cause.printStackTrace();
 			}
 
@@ -134,7 +128,7 @@ public class RakNetServerTest {
 
 			@Override
 			public void onAddressUnblocked(InetAddress address) {
-				log.info( "Unblocked address " + address);
+				log.info("Unblocked address " + address);
 			}
 
 		});
@@ -142,12 +136,9 @@ public class RakNetServerTest {
 		// Start server
 		try {
 			server.start();
-		} catch (NoListenerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		} catch (RakNetException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			server.shutdown(e.getClass().getName() + ": " + e.getMessage());
 		}
 	}
 
