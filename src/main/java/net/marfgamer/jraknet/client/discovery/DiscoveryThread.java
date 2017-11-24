@@ -46,7 +46,6 @@ import net.marfgamer.jraknet.client.RakNetClient;
  */
 public class DiscoveryThread extends Thread {
 
-	// Logger name
 	private static final Logger log = LoggerFactory.getLogger(DiscoveryThread.class);
 
 	// Discovery data
