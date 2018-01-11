@@ -30,7 +30,9 @@
  */
 package net.marfgamer.jraknet.session;
 
-import static net.marfgamer.jraknet.protocol.MessageIdentifier.*;
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_CONNECTED_PING;
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_CONNECTED_PONG;
+import static net.marfgamer.jraknet.protocol.MessageIdentifier.ID_DETECT_LOST_CONNECTIONS;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -58,7 +60,7 @@ import net.marfgamer.jraknet.protocol.message.acknowledge.AcknowledgeType;
 import net.marfgamer.jraknet.protocol.message.acknowledge.Record;
 import net.marfgamer.jraknet.protocol.status.ConnectedPing;
 import net.marfgamer.jraknet.protocol.status.ConnectedPong;
-import net.marfgamer.jraknet.util.map.IntMap;
+import net.marfgamer.jraknet.util.map.concurrent.ConcurrentIntMap;
 
 /**
  * This class is used to easily manage connections in RakNet.
@@ -92,13 +94,13 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	private int messageIndex;
 	private int splitId;
 	private final ConcurrentLinkedQueue<Integer> reliablePackets;
-	private final IntMap<SplitPacket> splitQueue;
+	private final ConcurrentIntMap<SplitPacket> splitQueue;
 	/**
 	 * Cleared by <code>RakNetServerSession</code> to help make sure the
 	 * <code>ID_DISCONNECTION_NOTIFICATION</code> packet is sent out
 	 */
 	protected final ConcurrentLinkedQueue<EncapsulatedPacket> sendQueue;
-	private final IntMap<EncapsulatedPacket[]> recoveryQueue;
+	private final ConcurrentIntMap<EncapsulatedPacket[]> recoveryQueue;
 	private final ConcurrentHashMap<EncapsulatedPacket, Integer> ackReceiptPackets;
 
 	// Ordering and sequencing
@@ -108,7 +110,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	private final int[] orderReceiveIndex;
 	private final int[] sequenceSendIndex;
 	private final int[] sequenceReceiveIndex;
-	private final IntMap<IntMap<EncapsulatedPacket>> handleQueue;
+	private final ConcurrentIntMap<ConcurrentIntMap<EncapsulatedPacket>> handleQueue;
 
 	// Latency detection
 	private boolean latencyEnabled;
@@ -151,9 +153,9 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 		// Packet data
 		this.reliablePackets = new ConcurrentLinkedQueue<Integer>();
-		this.splitQueue = new IntMap<SplitPacket>();
+		this.splitQueue = new ConcurrentIntMap<SplitPacket>();
 		this.sendQueue = new ConcurrentLinkedQueue<EncapsulatedPacket>();
-		this.recoveryQueue = new IntMap<EncapsulatedPacket[]>();
+		this.recoveryQueue = new ConcurrentIntMap<EncapsulatedPacket[]>();
 		this.ackReceiptPackets = new ConcurrentHashMap<EncapsulatedPacket, Integer>();
 
 		// Ordering and sequencing
@@ -161,10 +163,10 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		this.orderReceiveIndex = new int[RakNet.MAX_CHANNELS];
 		this.sequenceSendIndex = new int[RakNet.MAX_CHANNELS];
 		this.sequenceReceiveIndex = new int[RakNet.MAX_CHANNELS];
-		this.handleQueue = new IntMap<IntMap<EncapsulatedPacket>>();
+		this.handleQueue = new ConcurrentIntMap<ConcurrentIntMap<EncapsulatedPacket>>();
 		for (int i = 0; i < RakNet.MAX_CHANNELS; i++) {
 			sequenceReceiveIndex[i] = -1;
-			handleQueue.put(i, new IntMap<EncapsulatedPacket>());
+			handleQueue.put(i, new ConcurrentIntMap<EncapsulatedPacket>());
 		}
 
 		// Latency detection
