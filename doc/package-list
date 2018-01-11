@@ -20,3 +20,4 @@ net.marfgamer.jraknet.session
 net.marfgamer.jraknet.stream
 net.marfgamer.jraknet.util
 net.marfgamer.jraknet.util.map
+net.marfgamer.jraknet.util.map.concurrent
