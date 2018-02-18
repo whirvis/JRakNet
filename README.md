@@ -24,7 +24,7 @@ In order to add this project to your maven project, you will need to add the mav
 
 <dependencies>
   <dependency>
-    <groupId>net.marfgamer</groupId>
+    <groupId>com.whirvis</groupId>
     <artifactId>jraknet</artifactId>
     <version>2.8.4</version>
   </dependency>
@@ -114,4 +114,4 @@ A simple RakNet client, this example attempts to connect to the main [LBSG](http
 
 <br>
 
-<a href="http://marfgamer.net"><img src="http://i.imgur.com/LhUiCjL.png" width="135" height="145"></a> <a href="https://github.com/JRakNet/JRakNet"><img src="https://i.imgur.com/heiZXpr.png" width="135" height="145" hspace="50"></a> <a href="https://github.com/OculusVR/RakNet"><img src="http://imgur.com/9p1asD8.png" width="135" height="145"></a> <a href="https://www.oculus.com/"><img src="http://i.imgur.com/PmrfSsc.png" height="145" /></a>
+<a href="https://whirvis.com"><img src="http://i.imgur.com/LhUiCjL.png" width="135" height="145"></a> <a href="https://github.com/JRakNet/JRakNet"><img src="https://i.imgur.com/heiZXpr.png" width="135" height="145" hspace="50"></a> <a href="https://github.com/OculusVR/RakNet"><img src="http://imgur.com/9p1asD8.png" width="135" height="145"></a> <a href="https://www.oculus.com/"><img src="http://i.imgur.com/PmrfSsc.png" height="145" /></a>
