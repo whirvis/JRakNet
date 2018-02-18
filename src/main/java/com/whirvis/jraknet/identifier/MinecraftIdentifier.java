@@ -95,8 +95,8 @@ public class MinecraftIdentifier extends Identifier {
 
 	/**
 	 * Constructs an <code>MCPEIdentifier</code> with the specified server name,
-	 * server protocol, version tag, online player count, max player count, globally
-	 * unique ID, world name, and gamemode.
+	 * server protocol, version tag, online player count, max player count,
+	 * globally unique ID, world name, and gamemode.
 	 * 
 	 * @param serverName
 	 *            the server name.

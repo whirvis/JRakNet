@@ -75,8 +75,8 @@ public class ChatServer implements RakNetServerListener {
 	private final HashMap<InetSocketAddress, ConnectedClient> connected;
 
 	/**
-	 * Constructs a <code>ChatServer</code> with the specified name, message of the
-	 * day, port, and maximum amount of connections.
+	 * Constructs a <code>ChatServer</code> with the specified name, message of
+	 * the day, port, and maximum amount of connections.
 	 * 
 	 * @param name
 	 *            the name.
@@ -201,7 +201,8 @@ public class ChatServer implements RakNetServerListener {
 	/**
 	 * @param channel
 	 *            the channel ID.
-	 * @return <code>true</code> if the server has a channel with the specified ID.
+	 * @return <code>true</code> if the server has a channel with the specified
+	 *         ID.
 	 * @throws InvalidChannelException
 	 *             if the channel exceeds the limit.
 	 */
@@ -240,8 +241,8 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Broadcasts the specified message to the specified channel and prints it out
-	 * to the console if needed.
+	 * Broadcasts the specified message to the specified channel and prints it
+	 * out to the console if needed.
 	 * 
 	 * @param message
 	 *            the message to send.

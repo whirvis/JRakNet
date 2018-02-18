@@ -68,8 +68,8 @@ public class DiscoveryThread extends Thread {
 	}
 
 	/**
-	 * Adds a <code>RakNetClient</code> to the discovery system so it can discover
-	 * servers.
+	 * Adds a <code>RakNetClient</code> to the discovery system so it can
+	 * discover servers.
 	 * 
 	 * @param client
 	 *            the <code>RakNetClient</code> enabling its discovery system.
@@ -85,8 +85,9 @@ public class DiscoveryThread extends Thread {
 	}
 
 	/**
-	 * Removes a <code>RakNetClient</code> from the discovery system, this method is
-	 * also called automatically by the client when it is garbage collected.
+	 * Removes a <code>RakNetClient</code> from the discovery system, this
+	 * method is also called automatically by the client when it is garbage
+	 * collected.
 	 * 
 	 * @param client
 	 *            the <code>RakNetClient</code> disabling its discovery system.

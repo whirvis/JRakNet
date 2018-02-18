@@ -53,8 +53,8 @@ public class RakNet {
 	private static long MAX_PACKETS_PER_SECOND = 500;
 
 	/**
-	 * Returns how many packets can be received in the span of a single second (1000
-	 * milliseconds) before a session is blocked.
+	 * Returns how many packets can be received in the span of a single second
+	 * (1000 milliseconds) before a session is blocked.
 	 * 
 	 * @return how many packets can be received in the span of a single second
 	 *         before a session is blocked.
@@ -64,21 +64,21 @@ public class RakNet {
 	}
 
 	/**
-	 * Sets how many packets can be received in the span of a single second (1000
-	 * milliseconds) before a session is blocked.
+	 * Sets how many packets can be received in the span of a single second
+	 * (1000 milliseconds) before a session is blocked.
 	 * 
 	 * @param maxPacketsPerSecond
-	 *            how many packets can be received in the span of a single second
-	 *            before a session is blocked.
+	 *            how many packets can be received in the span of a single
+	 *            second before a session is blocked.
 	 */
 	public static void setMaxPacketsPerSecond(long maxPacketsPerSecond) {
 		MAX_PACKETS_PER_SECOND = maxPacketsPerSecond;
 	}
 
 	/**
-	 * Removes the max packets per second limit so that no matter how many packets a
-	 * session sends it will never be blocked. This is unrecommended, as it can open
-	 * your server to DOS/DDOS attacks.
+	 * Removes the max packets per second limit so that no matter how many
+	 * packets a session sends it will never be blocked. This is unrecommended,
+	 * as it can open your server to DOS/DDOS attacks.
 	 */
 	public static void setMaxPacketsPerSecondUnlimited() {
 		MAX_PACKETS_PER_SECOND = Long.MAX_VALUE;

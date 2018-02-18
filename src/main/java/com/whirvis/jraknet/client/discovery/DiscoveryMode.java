@@ -49,8 +49,8 @@ public enum DiscoveryMode {
 	ALL_CONNECTIONS,
 
 	/**
-	 * any servers found on the local network will appear as long as they have open
-	 * connections.
+	 * any servers found on the local network will appear as long as they have
+	 * open connections.
 	 */
 	OPEN_CONNECTIONS;
 
