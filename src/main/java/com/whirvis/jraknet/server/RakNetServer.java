@@ -162,8 +162,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Constructs a <code>RakNetServer</code> with the specified port and maximum
-	 * amount of connections.
+	 * Constructs a <code>RakNetServer</code> with the specified port and
+	 * maximum amount of connections.
 	 *
 	 * @param port
 	 *            the server port.
@@ -338,8 +338,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Removes the server from it's own set of listeners, used when extending the
-	 * <code>RakNetServer</code> directly.
+	 * Removes the server from it's own set of listeners, used when extending
+	 * the <code>RakNetServer</code> directly.
 	 * 
 	 * @return the server.
 	 */
@@ -481,8 +481,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Blocks the address and disconnects all the clients on the address with the
-	 * specified reason for the specified amount of time.
+	 * Blocks the address and disconnects all the clients on the address with
+	 * the specified reason for the specified amount of time.
 	 * 
 	 * @param address
 	 *            the address to block.
@@ -720,8 +720,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	/**
 	 * Sends a raw message to the specified address. Be careful when using this
 	 * method, because if it is used incorrectly it could break server sessions
-	 * entirely! If you are wanting to send a message to a session, you are probably
-	 * looking for the
+	 * entirely! If you are wanting to send a message to a session, you are
+	 * probably looking for the
 	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, com.whirvis.jraknet.Packet)
 	 * sendMessage} method.
 	 * 
@@ -739,8 +739,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	/**
 	 * Sends a raw message to the specified address. Be careful when using this
 	 * method, because if it is used incorrectly it could break server sessions
-	 * entirely! If you are wanting to send a message to a session, you are probably
-	 * looking for the
+	 * entirely! If you are wanting to send a message to a session, you are
+	 * probably looking for the
 	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, com.whirvis.jraknet.Packet)
 	 * sendMessage} method.
 	 * 
@@ -756,8 +756,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	/**
 	 * Sends a raw message to the specified address. Be careful when using this
 	 * method, because if it is used incorrectly it could break server sessions
-	 * entirely! If you are wanting to send a message to a session, you are probably
-	 * looking for the
+	 * entirely! If you are wanting to send a message to a session, you are
+	 * probably looking for the
 	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, int)
 	 * sendMessage} method.
 	 * 

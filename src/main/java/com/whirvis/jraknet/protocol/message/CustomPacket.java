@@ -72,8 +72,8 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 		this.writeTriadLE(sequenceNumber);
 		for (EncapsulatedPacket packet : messages) {
 			/*
-			 * We have to use wrap our buffer around a packet otherwise data will be written
-			 * incorrectly due to how Netty's ByteBufs work.
+			 * We have to use wrap our buffer around a packet otherwise data
+			 * will be written incorrectly due to how Netty's ByteBufs work.
 			 */
 			packet.buffer = new Packet(this.buffer());
 
@@ -109,8 +109,8 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 			EncapsulatedPacket packet = new EncapsulatedPacket();
 
 			/*
-			 * We have to use wrap our buffer around a packet otherwise data will be read
-			 * incorrectly due to how Netty's ByteBufs work.
+			 * We have to use wrap our buffer around a packet otherwise data
+			 * will be read incorrectly due to how Netty's ByteBufs work.
 			 */
 			packet.buffer = new Packet(this.buffer());
 

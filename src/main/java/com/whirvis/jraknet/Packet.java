@@ -71,8 +71,8 @@ public class Packet {
 	private PacketDataOutput output;
 
 	/**
-	 * Constructs a <code>Packet</code> that reads from and writes to the specified
-	 * <code>ByteBuf</code>.
+	 * Constructs a <code>Packet</code> that reads from and writes to the
+	 * specified <code>ByteBuf</code>.
 	 * 
 	 * @param buffer
 	 *            the <code>ByteBuf</code> to read from and write to.
@@ -84,8 +84,8 @@ public class Packet {
 	}
 
 	/**
-	 * Constructs a <code>Packet</code> that reads from and writes to the specified
-	 * <code>DatagramPacket</code>
+	 * Constructs a <code>Packet</code> that reads from and writes to the
+	 * specified <code>DatagramPacket</code>
 	 * 
 	 * @param datagram
 	 *            the <code>DatagramPacket</code> to read from and write to.
@@ -95,8 +95,8 @@ public class Packet {
 	}
 
 	/**
-	 * Constructs a <code>Packet</code> that reads from and writes to the specified
-	 * byte array.
+	 * Constructs a <code>Packet</code> that reads from and writes to the
+	 * specified byte array.
 	 * 
 	 * @param data
 	 *            the byte[] to read from and write to.
@@ -106,8 +106,8 @@ public class Packet {
 	}
 
 	/**
-	 * Constructs a <code>Packet</code> that reads from and writes to the specified
-	 * <code>Packet</code>.
+	 * Constructs a <code>Packet</code> that reads from and writes to the
+	 * specified <code>Packet</code>.
 	 * 
 	 * @param packet
 	 *            the <code>Packet</code> to read from and write to.
@@ -117,7 +117,8 @@ public class Packet {
 	}
 
 	/**
-	 * Constructs a blank <code>Packet</code> using an empty <code>ByteBuf</code>.
+	 * Constructs a blank <code>Packet</code> using an empty
+	 * <code>ByteBuf</code>.
 	 */
 	public Packet() {
 		this(Unpooled.buffer());
@@ -368,8 +369,8 @@ public class Packet {
 	}
 
 	/**
-	 * Reads a UTF-8 String with it's length prefixed by a unsigned little endian
-	 * short.
+	 * Reads a UTF-8 String with it's length prefixed by a unsigned little
+	 * endian short.
 	 * 
 	 * @return a String.
 	 */
@@ -404,11 +405,11 @@ public class Packet {
 	}
 
 	/**
-	 * Reads and returns the connection type. Unlike most other methods, this one
-	 * will check to make sure if there is enough data to read the connection type
-	 * before actually reading it. This is because it is meant to be used strictly
-	 * at the end of packets that can be used to signify the protocol implementation
-	 * of the sender.
+	 * Reads and returns the connection type. Unlike most other methods, this
+	 * one will check to make sure if there is enough data to read the
+	 * connection type before actually reading it. This is because it is meant
+	 * to be used strictly at the end of packets that can be used to signify the
+	 * protocol implementation of the sender.
 	 * 
 	 * @return the connection type.
 	 */
@@ -493,8 +494,8 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a byte array of the specified flipped unsigned byte's casted back to a
-	 * byte to the packet.
+	 * Writes a byte array of the specified flipped unsigned byte's casted back
+	 * to a byte to the packet.
 	 * 
 	 * @param data
 	 *            the data to write.
@@ -837,8 +838,8 @@ public class Packet {
 	}
 
 	/**
-	 * Writes the connection type magic sequence and the ID of the JRakNet RakNet
-	 * protocol implementation.
+	 * Writes the connection type magic sequence and the ID of the JRakNet
+	 * RakNet protocol implementation.
 	 * 
 	 * @return the connection type.
 	 */
