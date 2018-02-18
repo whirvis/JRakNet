@@ -71,7 +71,8 @@ public interface RakNetServerListener {
 	}
 
 	/**
-	 * Called when a client has connected to the server but has not logged yet in.
+	 * Called when a client has connected to the server but has not logged yet
+	 * in.
 	 * 
 	 * @param address
 	 *            the address of the client.
@@ -111,8 +112,8 @@ public interface RakNetServerListener {
 	}
 
 	/**
-	 * Called when a session exception has occurred, these normally do not matter as
-	 * the server will kick the client.
+	 * Called when a session exception has occurred, these normally do not
+	 * matter as the server will kick the client.
 	 * 
 	 * @param session
 	 *            the session that caused the exception.
@@ -186,10 +187,10 @@ public interface RakNetServerListener {
 
 	/**
 	 * Called when a packet with an ID below the user enumeration
-	 * (<code>ID_USER_PACKET_ENUM</code>) cannot be handled by the session because
-	 * it is not programmed to handle it. This function can be used to add missing
-	 * features from the regular RakNet protocol that are absent in JRakNet if
-	 * needed.
+	 * (<code>ID_USER_PACKET_ENUM</code>) cannot be handled by the session
+	 * because it is not programmed to handle it. This function can be used to
+	 * add missing features from the regular RakNet protocol that are absent in
+	 * JRakNet if needed.
 	 * 
 	 * @param session
 	 *            the client that sent the packet.
@@ -203,10 +204,11 @@ public interface RakNetServerListener {
 
 	/**
 	 * Called when the handler receives a packet after the server has already
-	 * handled it, this method is useful for handling packets outside of the RakNet
-	 * protocol. However, be weary when using this as packets meant for the server
-	 * will have already been handled by the client; and it is not a good idea to
-	 * try to manipulate JRakNet's RakNet protocol implementation using this method.
+	 * handled it, this method is useful for handling packets outside of the
+	 * RakNet protocol. However, be weary when using this as packets meant for
+	 * the server will have already been handled by the client; and it is not a
+	 * good idea to try to manipulate JRakNet's RakNet protocol implementation
+	 * using this method.
 	 * 
 	 * @param buf
 	 *            the packet buffer.
@@ -217,8 +219,8 @@ public interface RakNetServerListener {
 	}
 
 	/**
-	 * Called when a handler exception has occurred, these normally do not matter as
-	 * long as the server handles them on it's own.
+	 * Called when a handler exception has occurred, these normally do not
+	 * matter as long as the server handles them on it's own.
 	 * 
 	 * @param address
 	 *            the address that caused the exception.

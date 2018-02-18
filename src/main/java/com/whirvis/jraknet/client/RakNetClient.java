@@ -123,8 +123,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param discoveryMode
 	 *            how the client will discover servers. If this is set to
 	 *            <code>null</code>, the client will enable set it to
-	 *            <code>DiscoveryMode.ALL_CONNECTIONS</code> as long as the port is
-	 *            greater than -1.
+	 *            <code>DiscoveryMode.ALL_CONNECTIONS</code> as long as the port
+	 *            is greater than -1.
 	 * @param discoveryPorts
 	 *            the ports the client will attempt to discover servers on.
 	 */
@@ -166,10 +166,10 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Constructs a <code>RakNetClient</code> with the specified server discovery
-	 * port with the <code>DiscoveryMode</code> set to
-	 * <code>DiscoveryMode.ALL_CONNECTIONS</code> or <code>DiscoveryMode.NONE</code>
-	 * if no discovery ports are specified.
+	 * Constructs a <code>RakNetClient</code> with the specified server
+	 * discovery port with the <code>DiscoveryMode</code> set to
+	 * <code>DiscoveryMode.ALL_CONNECTIONS</code> or
+	 * <code>DiscoveryMode.NONE</code> if no discovery ports are specified.
 	 * 
 	 * @param discoveryPorts
 	 *            the ports the client will attempt to discover servers on.
@@ -298,8 +298,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Adds a server to the client's external server discovery list. This functions
-	 * like the normal discovery system but is not affected by the
+	 * Adds a server to the client's external server discovery list. This
+	 * functions like the normal discovery system but is not affected by the
 	 * <code>DiscoveryMode</code> or discovery port set for the client.
 	 * 
 	 * @param address
@@ -319,8 +319,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Adds a server to the client's external server discovery list. This functions
-	 * like the normal discovery system but is not affected by the
+	 * Adds a server to the client's external server discovery list. This
+	 * functions like the normal discovery system but is not affected by the
 	 * <code>DiscoveryMode</code> or discovery port set for the client.
 	 * 
 	 * @param address
@@ -333,8 +333,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Adds a server to the client's external server discovery list. This functions
-	 * like the normal discovery system but is not affected by the
+	 * Adds a server to the client's external server discovery list. This
+	 * functions like the normal discovery system but is not affected by the
 	 * <code>DiscoveryMode</code> or discovery port set for the client.
 	 * 
 	 * @param address
@@ -349,7 +349,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Removes an external server from the client's external server discovery list.
+	 * Removes an external server from the client's external server discovery
+	 * list.
 	 * 
 	 * @param address
 	 *            the server address.
@@ -368,7 +369,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Removes an external server from the client's external server discovery list.
+	 * Removes an external server from the client's external server discovery
+	 * list.
 	 * 
 	 * @param address
 	 *            the server address.
@@ -380,7 +382,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Removes an external server from the client's external server discovery list.
+	 * Removes an external server from the client's external server discovery
+	 * list.
 	 * 
 	 * @param address
 	 *            the server address.
@@ -401,8 +404,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Sets the size of the maximum transfer units that will be used by the client
-	 * during in.
+	 * Sets the size of the maximum transfer units that will be used by the
+	 * client during in.
 	 * 
 	 * @param maximumTransferUnitSizes
 	 *            the maximum transfer unit sizes.
@@ -517,8 +520,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Removes the client from it's own set of listeners, used when extending the
-	 * <code>RakNetClient</code> directly.
+	 * Removes the client from it's own set of listeners, used when extending
+	 * the <code>RakNetClient</code> directly.
 	 * 
 	 * @return the client.
 	 */
@@ -528,7 +531,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * @return <code>true</code> if the client is currently connected to a server.
+	 * @return <code>true</code> if the client is currently connected to a
+	 *         server.
 	 */
 	public final boolean isConnected() {
 		if (session == null) {
@@ -538,9 +542,9 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Returns whether or not the client is doing something on a thread. This can
-	 * mean multiple things, with being connected to a server or looking for servers
-	 * on the local network to name a few.
+	 * Returns whether or not the client is doing something on a thread. This
+	 * can mean multiple things, with being connected to a server or looking for
+	 * servers on the local network to name a few.
 	 * 
 	 * @return <code>true</code> if the client is running.
 	 */
@@ -632,8 +636,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	/**
 	 * Sends a raw message to the specified address. Be careful when using this
 	 * method, because if it is used incorrectly it could break server sessions
-	 * entirely! If you are wanting to send a message to a session, you are probably
-	 * looking for the
+	 * entirely! If you are wanting to send a message to a session, you are
+	 * probably looking for the
 	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, com.whirvis.jraknet.Packet)
 	 * sendMessage} method.
 	 * 
@@ -651,8 +655,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	/**
 	 * Sends a raw message to the specified address. Be careful when using this
 	 * method, because if it is used incorrectly it could break server sessions
-	 * entirely! If you are wanting to send a message to a session, you are probably
-	 * looking for the
+	 * entirely! If you are wanting to send a message to a session, you are
+	 * probably looking for the
 	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, com.whirvis.jraknet.Packet)
 	 * sendMessage} method.
 	 * 
@@ -668,8 +672,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	/**
 	 * Sends a raw message to the specified address. Be careful when using this
 	 * method, because if it is used incorrectly it could break server sessions
-	 * entirely! If you are wanting to send a message to a session, you are probably
-	 * looking for the
+	 * entirely! If you are wanting to send a message to a session, you are
+	 * probably looking for the
 	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, int)
 	 * sendMessage} method.
 	 * 
@@ -1029,8 +1033,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 					session.update();
 
 					/*
-					 * The order here is important, as the session could end up becoming null if we
-					 * sleep before we actually update it.
+					 * The order here is important, as the session could end up
+					 * becoming null if we sleep before we actually update it.
 					 */
 					Thread.sleep(0, 1); // Lower CPU usage
 				} catch (InterruptedException e) {
@@ -1089,8 +1093,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Shuts down the client for good, once this is called the client can no longer
-	 * connect to servers.
+	 * Shuts down the client for good, once this is called the client can no
+	 * longer connect to servers.
 	 */
 	public final void shutdown() {
 		// Close channel
@@ -1116,8 +1120,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Disconnects from the server and shuts down the client for good, once this is
-	 * called the client can no longer connect to servers.
+	 * Disconnects from the server and shuts down the client for good, once this
+	 * is called the client can no longer connect to servers.
 	 * 
 	 * @param reason
 	 *            the reason the client shutdown.
@@ -1131,8 +1135,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Disconnects from the server and shuts down the client for good, once this is
-	 * called the client can no longer connect to servers.
+	 * Disconnects from the server and shuts down the client for good, once this
+	 * is called the client can no longer connect to servers.
 	 */
 	public final void disconnectAndShutdown() {
 		this.disconnectAndShutdown("Client shutdown");

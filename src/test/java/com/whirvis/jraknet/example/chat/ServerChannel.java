@@ -46,7 +46,8 @@ public class ServerChannel {
 	private final StringBuilder channelText;
 
 	/**
-	 * Constructs a <code>ServerChannel</code> with the specified channel and name.
+	 * Constructs a <code>ServerChannel</code> with the specified channel and
+	 * name.
 	 * 
 	 * @param channel
 	 *            the channel.
