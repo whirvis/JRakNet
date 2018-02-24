@@ -8,9 +8,10 @@ This library was meant to be used for Minecraft servers and clients, but can sti
 | Supported server protocol | 8       |
 | Supported client protocol | 8       |
 
-**Note:** Always use the newest version of JRakNet, including bug fix updates as they almost always fix major bugs, add new features, or have optimizations to make the API run faster.
-
-**Note 2:** Since people are always creating issues on the repo about this, Minecraft clients do not work with JRakNet if you are on the same machine as the server due to how Minecraft is programmed. You will have to use another device or change the server port to anything but 19132 or 19133 (This will prevent the server from showing up in the LAN list, but will allow Minecraft to communicate with the server.) However, JRakNet clients work fine with Minecraft servers running on the same machine.
+# Notes
+- Always use the newest version of JRakNet, including bug fix updates as they almost always fix major bugs, add new features, or have optimizations to make the API run faster. As a general rule, it is also not a good idea to fork this repository as it is almost always being updated like stated before. This means it is very possible for it to become out of date very quickly unless you are intending to create a new feature or fixing a bug to be merged back into the original repository through a pull request.
+- Some data packet IDs are reserved by RakNet. Because of this, it is recommended that all game packets not relating to RakNet begin with their own special ID (add a byte at the beginning of all packets that is not used as an internal packet ID by RakNet). It is also recommended that game servers and game clients do not use raw packets (the netty based functions) at all unless it is absolutely necessary.
+- Since people are always creating issues on the repo about this, Minecraft clients do not work with JRakNet servers if you are on the same machine as the server. As a result, you will have to use another device (iPhone, Android, XBOX One, etc.) due to an error on Mojang's part. However, JRakNet clients work fine with Minecraft servers running on the same machine.
 
 # How to use with Maven
 In order to add this project to your maven project, you will need to add the maven repository and then the actual dependency:
@@ -106,11 +107,7 @@ client.addListener(new RakNetClientListener() {
 client.connect(SERVER_ADDRESS, SERVER_PORT);
 ```
 
-A simple RakNet client, this example attempts to connect to the main [LBSG](http://lbsg.net/) server. When it is connected, it closes the connection and shuts down.
-
-# Notes
-- Some DataPacket ID's are reserved by RakNet. Because of this, it is recommended that all game packets not relating to RakNet begin with their own special ID, Minecraft does this (It's header byte is currently 0xFE). It is also recommended that game servers and game clients do not use raw packets at all.
-- For anyone coding server softwares for Minecraft, be aware that the game reserves ports 19132 and 19133 on the machine for server discovery. If you are on the same machine as your server make sure to set the port to anything BUT 19132 or 19133.
+This is a simple RakNet client that attempts to connect to the main [LBSG](http://lbsg.net/) server. When it is connected, it closes the connection and shuts down.
 
 <br>
 
