@@ -753,7 +753,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	public final void updateDiscoveryData(InetSocketAddress sender, UnconnectedPong pong) {
 		// Is this a local or an external server?
-		if (sender.getAddress().isSiteLocalAddress() && !externalServers.containsKey(sender)) {
+		if (RakNetUtils.isLocalAddress(sender) && !externalServers.containsKey(sender)) {
 			// This is a local server
 			if (!discovered.containsKey(sender)) {
 				// Add newly discovered server

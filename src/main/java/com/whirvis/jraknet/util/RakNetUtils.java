@@ -293,7 +293,11 @@ public class RakNetUtils {
 	 */
 	public static int getMaximumTransferUnit() {
 		try {
-			return NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getMTU();
+			int maximumTransferUnit = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getMTU();
+			if (maximumTransferUnit < 0) {
+				throw new RuntimeException("Invalid maximum transfer unit for localhost address");
+			}
+			return maximumTransferUnit;
 		} catch (Throwable throwable) {
 			try {
 				/*
@@ -325,6 +329,30 @@ public class RakNetUtils {
 				return -1;
 			}
 		}
+	}
+
+	/**
+	 * @param address
+	 *            the address to check.
+	 * @return <code>true</code> if the address is a local address,
+	 *         <code>false</code> otherwise.
+	 */
+	public static boolean isLocalAddress(InetAddress address) {
+		try {
+			return address.isSiteLocalAddress() || address.equals(InetAddress.getByName("127.0.0.1"));
+		} catch (UnknownHostException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * @param address
+	 *            the address to check.
+	 * @return <code>true</code> if the address is a local address,
+	 *         <code>false</code> otherwise.
+	 */
+	public static boolean isLocalAddress(InetSocketAddress address) {
+		return isLocalAddress(address.getAddress());
 	}
 
 	/**
