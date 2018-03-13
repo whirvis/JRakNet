@@ -117,7 +117,7 @@ public enum ConnectionType {
 	/**
 	 * A JungleTree connection.
 	 */
-	JUNGLETREE("JungleTree", "Java", 0x0E);
+	MINERAKNET("MineRakNet", "Go", 0x0E);
 
 	// Connection type header magic
 	public static final byte[] MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B, 0x43,
