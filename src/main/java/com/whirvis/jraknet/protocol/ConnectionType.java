@@ -117,7 +117,7 @@ public enum ConnectionType {
 	/**
 	 * A JungleTree connection.
 	 */
-	MINERAKNET("JungleTree", "Java", 0x0E),
+	JUNGLETREE("JungleTree", "Java", 0x0E),
 
 	/**
 	 * A MineRakNet connection.
