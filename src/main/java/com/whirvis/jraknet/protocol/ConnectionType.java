@@ -30,110 +30,45 @@
  */
 package com.whirvis.jraknet.protocol;
 
+import java.util.HashMap;
+import java.util.UUID;
+
 /**
  * Used to signify which implementation of the RakNet protocol is being used by
- * a connection. If you would like your implementation to be listed here, create
- * an issue on the JRakNet repository with the tag "Connection type support".
- * Keep in mind that this functionality has <i>no</i> guarantees to function
- * completely, as it is completely dependent on the implementation to implement
- * this feature.
+ * a connection. Keep in mind that this functionality has <i>no</i> guarantees
+ * to function completely, as it is completely dependent on the implementation
+ * to implement this feature.
  * 
  * @author Trent Summerlin
- * @see <a href=
- *      "https://github.com/JRakNet/JRakNet/issues/new">https://github.com/JRakNet/JRakNet/issues/new</a>
  */
-public enum ConnectionType {
+public class ConnectionType {
 
-	/**
-	 * A connection from a vanilla client or an unknown implementation.
-	 */
-	VANILLA("Vanilla", null, 0x00),
+	public static final ConnectionType VANILLA = new ConnectionType(null, null, null, null);
 
-	/**
-	 * A JRakNet connection.
-	 */
-	JRAKNET("JRakNet", "Java", 0x01),
-
-	/**
-	 * A RakLib connection.
-	 */
-	RAKLIB("RakLib", "PHP", 0x02),
-
-	/**
-	 * A JRakLib+ connection.
-	 */
-	JRAKLIB_PLUS("JRakLib+", "Java", 0x03),
-
-	/**
-	 * A CRakNet++ connection.
-	 */
-	CRAKNET_PLUS_PLUS("CRakNet++", "C++", 0x04),
-
-	/**
-	 * A PyRaknet connection.
-	 */
-	PYRAKNET("PyRakNet", "Python", 0x05),
-
-	/**
-	 * A GoRakNet connection.
-	 */
-	GORAKNET("GoRakNet", "Go", 0x06),
-
-	/**
-	 * A LuaRakNet connection.
-	 */
-	LUARAKNET("LuaRakNet", "Lua", 0x07),
-
-	/**
-	 * A CRakNet# connection.
-	 */
-	CRAKNET_SHARP("CRakNet#", "C#", 0x08),
-
-	/**
-	 * A PHPRakNet connection.
-	 */
-	PHPRAKNET("PHPRakNet", "PHP", 0x09),
-
-	/**
-	 * A CRakNet connection.
-	 */
-	CRAKNET("CRakNet", "C", 0x0A),
-
-	/**
-	 * A DRakNet connection.
-	 */
-	DRAKNET("DRakNet", "D", 0x0B),
-
-	/**
-	 * A NodeRakNet connection.
-	 */
-	NODERAKNET("NodeRakNet", "Node.js", 0x0C),
-
-	/**
-	 * An AsmRaknet connection.
-	 */
-	ASMRAKNET("AsmRakNet", "Assembly", 0x0D),
-
-	/**
-	 * A JungleTree connection.
-	 */
-	JUNGLETREE("JungleTree", "Java", 0x0E);
-
-	// Connection type header magic
-	public static final byte[] MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B, 0x43,
-			(byte) 0x54, (byte) 0x49 };
-
+	// Connection type data
+	private final UUID uuid;
 	private final String name;
 	private final String language;
-	private final short id;
+	private final String version;
+	private final HashMap<String, String> metadata;
 
-	private ConnectionType(String name, String language, int id) {
+	public ConnectionType(UUID uuid, String name, String language, String version, HashMap<String, String> metadata) {
+		this.uuid = uuid;
 		this.name = name;
 		this.language = language;
-		this.id = (short) id;
-		if (id < 0 || id > 255) {
-			throw new IllegalArgumentException("Invalid ID, must be in between 0-255");
-		}
+		this.version = version;
+		this.metadata = metadata;
+	}
+
+	public ConnectionType(UUID uuid, String name, String language, String version) {
+		this(uuid, name, language, version, new HashMap<String, String>());
+	}
+
+	/**
+	 * @return the universally unique ID of the implementation.
+	 */
+	public UUID getUUID() {
+		return this.uuid;
 	}
 
 	/**
@@ -151,24 +86,34 @@ public enum ConnectionType {
 	}
 
 	/**
-	 * @return the ID of the implementation.
+	 * @return the version of the implementation.
 	 */
-	public short getId() {
-		return this.id;
+	public String getVersion() {
+		return this.version;
 	}
 
 	/**
-	 * @param id
-	 *            the ID of the implementation.
-	 * @return the <code>ConnectionType</code> based on it's implementation ID.
+	 * @param key
+	 *            the key of the value to retrieve.
+	 * @return the value associated with the specified key.
 	 */
-	public static ConnectionType getType(int id) {
-		for (ConnectionType type : ConnectionType.values()) {
-			if (type.id == id) {
-				return type;
+	public String getMetaData(String key) {
+		return metadata.get(key);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof ConnectionType) {
+			ConnectionType connectionType = (ConnectionType) obj;
+			if (connectionType.getUUID() != null) {
+				if (connectionType.getUUID().equals(uuid)) {
+					return true;
+				}
+			} else if (connectionType.getUUID() == null && uuid == null) {
+				return true;
 			}
 		}
-		return VANILLA;
+		return false;
 	}
 
 }

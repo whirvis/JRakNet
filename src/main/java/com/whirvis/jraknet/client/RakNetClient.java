@@ -1029,16 +1029,16 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		if (session != null) {
 			log.debug("Initiated connected with server");
 			while (session != null) {
-				try {
-					session.update();
+				session.update();
 
-					/*
-					 * The order here is important, as the session could end up
-					 * becoming null if we sleep before we actually update it.
-					 */
+				/*
+				 * The order here is important, as the session could end up
+				 * becoming null if we sleep before we actually update it.
+				 */
+				try {
 					Thread.sleep(0, 1); // Lower CPU usage
 				} catch (InterruptedException e) {
-					throw new RakNetException(e);
+					log.warn("Client sleep interrupted");
 				}
 			}
 		} else {
