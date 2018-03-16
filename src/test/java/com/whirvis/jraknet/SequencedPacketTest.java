@@ -92,7 +92,6 @@ public class SequencedPacketTest {
 		// In case of timeout
 		long currentTime = System.currentTimeMillis();
 		while (true) {
-			Thread.sleep(0, 1); // Lower CPU usage
 			if (currentTime - startSend >= 30000 && startSend > -1) {
 				log.error(LOGGER_NAME,
 						"Failed to complete test due to timeout (Took over 30 seconds!), printing results...");
@@ -100,6 +99,12 @@ public class SequencedPacketTest {
 				System.exit(1);
 			}
 			currentTime = System.currentTimeMillis();
+
+			try {
+				Thread.sleep(0, 1); // Lower CPU usage
+			} catch (InterruptedException e) {
+				log.warn("Sequenced packet test sleep interrupted");
+			}
 		}
 	}
 
