@@ -388,8 +388,7 @@ public class ChatServer implements RakNetServerListener {
 		}
 	}
 
-	public static void main(String[] args) throws InterruptedException {
-
+	public static void main(String[] args) {
 		// Create and start server
 		ChatServer server = new ChatServer("JRakNet Server Example", "This is a test server made for JRakNet",
 				UtilityTest.WHIRVIS_DEVELOPMENT_PORT, 10);
@@ -408,10 +407,15 @@ public class ChatServer implements RakNetServerListener {
 		@SuppressWarnings("resource")
 		Scanner commandScanner = new Scanner(System.in);
 		while (true) {
-			Thread.sleep(0, 1); // Lower CPU usage
 			if (commandScanner.hasNextLine()) {
 				String input = commandScanner.nextLine();
 				commandHandler.handleInput(input);
+			}
+
+			try {
+				Thread.sleep(0, 1); // Lower CPU usage
+			} catch (InterruptedException e) {
+				log.warn("Chat server sleep interrupted");
 			}
 		}
 	}
