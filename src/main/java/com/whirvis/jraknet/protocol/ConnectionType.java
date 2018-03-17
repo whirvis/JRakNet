@@ -43,10 +43,37 @@ import java.util.UUID;
  */
 public class ConnectionType {
 
+	// Maximum value of unsigned byte
+	public static final int MAX_METADATA_VALUES = 0xFF;
+
+	/**
+	 * Converts the specified metadata keys and values to a
+	 * <code>HashMap</code>.
+	 * 
+	 * @param metadata
+	 *            the metadata keys and values.
+	 * @return the metadata as a <code>HashMap</code>.
+	 */
+	public static HashMap<String, String> createMetaData(String... metadata) {
+		// Validate input
+		if (metadata.length % 2 != 0) {
+			throw new IllegalArgumentException("There must be a value for every key");
+		} else if (metadata.length / 2 > MAX_METADATA_VALUES) {
+			throw new IllegalArgumentException("Too many metadata values");
+		}
+
+		// Generate HashMap
+		HashMap<String, String> metadataMap = new HashMap<String, String>();
+		for (int i = 0; i < metadata.length; i += 2) {
+			metadataMap.put(metadata[i], metadata[i + 1]);
+		}
+		return metadataMap;
+	}
+
 	/**
 	 * A connection from a vanilla client or an unknown implementation.
 	 */
-	public static final ConnectionType VANILLA = new ConnectionType(null, "Vanilla", null, null);
+	public static final ConnectionType VANILLA = new ConnectionType(null, "Vanilla", null, null, null, true);
 
 	/**
 	 * A JRakNet connection.
@@ -64,13 +91,23 @@ public class ConnectionType {
 	private final String language;
 	private final String version;
 	private final HashMap<String, String> metadata;
+	private final boolean vanilla;
 
-	public ConnectionType(UUID uuid, String name, String language, String version, HashMap<String, String> metadata) {
+	private ConnectionType(UUID uuid, String name, String language, String version, HashMap<String, String> metadata,
+			boolean vanilla) {
 		this.uuid = uuid;
 		this.name = name;
 		this.language = language;
 		this.version = version;
 		this.metadata = (metadata != null ? metadata : new HashMap<String, String>());
+		if (metadata.size() > MAX_METADATA_VALUES) {
+			throw new IllegalArgumentException("Too many metadata values");
+		}
+		this.vanilla = vanilla;
+	}
+
+	public ConnectionType(UUID uuid, String name, String language, String version, HashMap<String, String> metadata) {
+		this(uuid, name, language, version, metadata, false);
 	}
 
 	public ConnectionType(UUID uuid, String name, String language, String version) {
@@ -122,6 +159,14 @@ public class ConnectionType {
 		return (HashMap<String, String>) metadata.clone();
 	}
 
+	/**
+	 * @return whether or not the connection type is of the <code>VANILLA</code>
+	 *         implementation.
+	 */
+	public boolean isVanilla() {
+		return this.vanilla;
+	}
+
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof ConnectionType) {
@@ -130,8 +175,6 @@ public class ConnectionType {
 				if (connectionType.getUUID().equals(uuid)) {
 					return true;
 				}
-			} else if (connectionType.getUUID() == null && uuid == null) {
-				return true;
 			}
 		}
 		return false;
