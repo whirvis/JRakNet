@@ -46,7 +46,7 @@ import com.whirvis.jraknet.example.chat.ServerChannel;
 import com.whirvis.jraknet.example.chat.client.ChatClient;
 
 /**
- * The frame used by the <code>ChatClient</code> to visualize it's data.
+ * The frame used by the <code>ChatClient</code> to visualize its data.
  *
  * @author Whirvis T. Wheatley
  */

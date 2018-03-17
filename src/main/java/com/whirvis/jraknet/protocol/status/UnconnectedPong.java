@@ -31,18 +31,21 @@
 package com.whirvis.jraknet.protocol.status;
 
 import com.whirvis.jraknet.Packet;
+import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.identifier.Identifier;
 import com.whirvis.jraknet.protocol.ConnectionType;
+import com.whirvis.jraknet.protocol.Failable;
 import com.whirvis.jraknet.protocol.MessageIdentifier;
 
-public class UnconnectedPong extends RakNetPacket {
+public class UnconnectedPong extends RakNetPacket implements Failable {
 
 	public long timestamp;
 	public long pongId;
 	public boolean magic;
 	public Identifier identifier;
 	public ConnectionType connectionType;
+	private boolean failed;
 
 	public UnconnectedPong() {
 		super(MessageIdentifier.ID_UNCONNECTED_PONG);
@@ -54,19 +57,44 @@ public class UnconnectedPong extends RakNetPacket {
 
 	@Override
 	public void encode() {
-		this.writeLong(timestamp);
-		this.writeLong(pongId);
-		this.writeMagic();
-		this.writeString(identifier.build());
-		this.connectionType = this.writeConnectionType();
+		try {
+			this.writeLong(timestamp);
+			this.writeLong(pongId);
+			this.writeMagic();
+			this.writeString(identifier.build());
+			this.writeConnectionType(this.connectionType = ConnectionType.JRAKNET);
+		} catch (RakNetException e) {
+			this.timestamp = 0;
+			this.pongId = 0;
+			this.magic = false;
+			this.identifier = null;
+			this.connectionType = null;
+			this.clear();
+			this.failed = true;
+		}
 	}
 
 	@Override
 	public void decode() {
-		this.timestamp = this.readLong();
-		this.pongId = this.readLong();
-		this.magic = this.checkMagic();
-		this.identifier = new Identifier(this.readString(), this.connectionType = this.readConnectionType());
+		try {
+			this.timestamp = this.readLong();
+			this.pongId = this.readLong();
+			this.magic = this.checkMagic();
+			this.identifier = new Identifier(this.readString(), this.connectionType = this.readConnectionType());
+		} catch (RakNetException e) {
+			this.timestamp = 0;
+			this.pongId = 0;
+			this.magic = false;
+			this.identifier = null;
+			this.connectionType = null;
+			this.clear();
+			this.failed = true;
+		}
+	}
+
+	@Override
+	public boolean failed() {
+		return this.failed;
 	}
 
 }

@@ -252,11 +252,11 @@ public class MessageIdentifier {
 	}
 
 	/**
-	 * Return the packet's name based on it's ID.
+	 * Return the packet's name based on its ID.
 	 * 
 	 * @param id
 	 *            the ID of the packet.
-	 * @return the packet's name based on it's ID.
+	 * @return the packet's name based on its ID.
 	 */
 	public static String getName(int id) {
 		if (mappedNameIds == false) {
@@ -268,7 +268,7 @@ public class MessageIdentifier {
 	/**
 	 * @param name
 	 *            the name of the packet.
-	 * @return the packet's ID based on it's name.
+	 * @return the packet's ID based on its name.
 	 */
 	public static int getId(String name) {
 		if (mappedNameIds == false) {

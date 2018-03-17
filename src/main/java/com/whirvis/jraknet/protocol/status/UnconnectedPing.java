@@ -31,16 +31,19 @@
 package com.whirvis.jraknet.protocol.status;
 
 import com.whirvis.jraknet.Packet;
+import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.protocol.ConnectionType;
+import com.whirvis.jraknet.protocol.Failable;
 import com.whirvis.jraknet.protocol.MessageIdentifier;
 
-public class UnconnectedPing extends RakNetPacket {
+public class UnconnectedPing extends RakNetPacket implements Failable {
 
 	public long timestamp;
 	public boolean magic;
 	public long pingId;
 	public ConnectionType connectionType;
+	private boolean failed;
 
 	protected UnconnectedPing(boolean requiresOpenConnections) {
 		super((requiresOpenConnections ? MessageIdentifier.ID_UNCONNECTED_PING_OPEN_CONNECTIONS
@@ -57,18 +60,41 @@ public class UnconnectedPing extends RakNetPacket {
 
 	@Override
 	public void encode() {
-		this.writeLong(timestamp);
-		this.writeMagic();
-		this.writeLong(pingId);
-		this.connectionType = this.writeConnectionType();
+		try {
+			this.writeLong(timestamp);
+			this.writeMagic();
+			this.writeLong(pingId);
+			this.writeConnectionType(this.connectionType = ConnectionType.JRAKNET);
+		} catch (RakNetException e) {
+			this.timestamp = 0;
+			this.magic = false;
+			this.pingId = 0;
+			this.connectionType = null;
+			this.clear();
+			this.failed = true;
+		}
 	}
 
 	@Override
 	public void decode() {
-		this.timestamp = this.readLong();
-		this.magic = this.checkMagic();
-		this.pingId = this.readLong();
-		this.connectionType = this.readConnectionType();
+		try {
+			this.timestamp = this.readLong();
+			this.magic = this.checkMagic();
+			this.pingId = this.readLong();
+			this.connectionType = this.readConnectionType();
+		} catch (RakNetException e) {
+			this.timestamp = 0;
+			this.magic = false;
+			this.pingId = 0;
+			this.connectionType = null;
+			this.clear();
+			this.failed = true;
+		}
+	}
+
+	@Override
+	public boolean failed() {
+		return this.failed;
 	}
 
 }

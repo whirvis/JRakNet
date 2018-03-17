@@ -60,7 +60,7 @@ import com.whirvis.jraknet.session.RakNetServerSession;
  * 
  * This test was created in a response to GitHub issue #35 after it was
  * discovered during beta testing of Whirvis's remake of Five Night's at Freddy's
- * 3 to Java in it's spectator mode inside multiplayer mode.
+ * 3 to Java in its spectator mode inside multiplayer mode.
  *
  * @author Whirvis T. Wheatley
  */
