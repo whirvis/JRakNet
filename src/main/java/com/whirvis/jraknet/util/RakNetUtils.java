@@ -38,6 +38,9 @@ import java.net.UnknownHostException;
 import java.util.Enumeration;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetPacket;
@@ -66,6 +69,8 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
  * @author Trent Summerlin
  */
 public class RakNetUtils {
+
+	private static final Logger log = LoggerFactory.getLogger(RakNetUtils.class);
 
 	// Utility data
 	private static final long UTILS_TIMESTAMP = System.currentTimeMillis();
@@ -248,6 +253,10 @@ public class RakNetUtils {
 		ping.timestamp = (System.currentTimeMillis() - UTILS_TIMESTAMP);
 		ping.pingId = UTILS_PING_ID;
 		ping.encode();
+		if (ping.failed()) {
+			log.error(UnconnectedPing.class.getSimpleName() + " failed to encode");
+			return null;
+		}
 
 		// Wait for response to come in
 		RakNetPacket packet = createBootstrapAndSend(address, ping, 1000, IDENTIFIER_RETRIES);
@@ -255,7 +264,7 @@ public class RakNetUtils {
 			if (packet.getId() == MessageIdentifier.ID_UNCONNECTED_PONG) {
 				UnconnectedPong pong = new UnconnectedPong(packet);
 				pong.decode();
-				if (pong.magic == true) {
+				if (!pong.failed() && pong.magic == true) {
 					return pong.identifier;
 				}
 			}

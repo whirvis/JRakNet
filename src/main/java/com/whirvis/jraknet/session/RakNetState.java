@@ -89,7 +89,7 @@ public class RakNetState {
 	/**
 	 * @param order
 	 *            the order of the state.
-	 * @return the state based on it's order.
+	 * @return the state based on its order.
 	 */
 	public static RakNetState getState(int order) {
 		return registeredStates.get(order);

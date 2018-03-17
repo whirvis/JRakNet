@@ -193,7 +193,7 @@ public enum Reliability {
 	/**
 	 * @param reliability
 	 *            the ID of the reliability to lookup.
-	 * @return the reliability based on it's ID.
+	 * @return the reliability based on its ID.
 	 */
 	public static Reliability lookup(int reliability) {
 		Reliability[] reliabilities = Reliability.values();

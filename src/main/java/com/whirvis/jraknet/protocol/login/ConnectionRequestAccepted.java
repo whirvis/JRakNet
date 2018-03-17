@@ -64,11 +64,11 @@ public class ConnectionRequestAccepted extends RakNetPacket implements Failable 
 			this.writeLong(clientTimestamp);
 			this.writeLong(serverTimestamp);
 		} catch (UnknownHostException e) {
-			this.failed = true;
 			this.clientAddress = null;
 			this.clientTimestamp = 0;
 			this.serverTimestamp = 0;
 			this.clear();
+			this.failed = true;
 		}
 	}
 
@@ -83,11 +83,11 @@ public class ConnectionRequestAccepted extends RakNetPacket implements Failable 
 			this.clientTimestamp = this.readLong();
 			this.serverTimestamp = this.readLong();
 		} catch (UnknownHostException e) {
-			this.failed = true;
 			this.clientAddress = null;
 			this.clientTimestamp = 0;
 			this.serverTimestamp = 0;
 			this.clear();
+			this.failed = true;
 		}
 	}
 

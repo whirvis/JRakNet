@@ -89,13 +89,13 @@ public class ChatMessageIdentifier {
 	public static final int ID_UPDATE_USERNAME_REQUEST = 0x90;
 
 	/**
-	 * Sent from the server to let the client know it's new username was
+	 * Sent from the server to let the client know its new username was
 	 * accepted.
 	 */
 	public static final int ID_UPDATE_USERNAME_ACCEPTED = 0x91;
 
 	/**
-	 * Sent from the server to let the client know it's new username was denied.
+	 * Sent from the server to let the client know its new username was denied.
 	 */
 	public static final int ID_UPDATE_USERNAME_FAILURE = 0x92;
 

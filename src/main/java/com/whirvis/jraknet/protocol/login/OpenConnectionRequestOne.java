@@ -36,8 +36,11 @@ import com.whirvis.jraknet.protocol.MessageIdentifier;
 
 public class OpenConnectionRequestOne extends RakNetPacket {
 
-	public static final int MTU_PADDING = 18; // 1 for ID, 1 for protocol
-	// version, 16 for magic
+	/*
+	 * 1 byte for the ID, 1 byte for the protocol version, and 16 bytes for the
+	 * magic sequence.
+	 */
+	public static final int MTU_PADDING = 18;
 
 	public boolean magic;
 	public int protocolVersion;

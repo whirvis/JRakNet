@@ -43,7 +43,20 @@ import java.util.UUID;
  */
 public class ConnectionType {
 
+	/**
+	 * A connection from a vanilla client or an unknown implementation.
+	 */
 	public static final ConnectionType VANILLA = new ConnectionType(null, null, null, null);
+
+	/**
+	 * A JRakNet connection.
+	 */
+	public static final ConnectionType JRAKNET = new ConnectionType(
+			UUID.fromString("504da9b2-a31c-4db6-bcc3-18e5fe2fb178"), "JRakNet", "Java", "2.9.2");
+
+	// Connection type header magic
+	public static final byte[] MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B, 0x43,
+			(byte) 0x54, (byte) 0x49 };
 
 	// Connection type data
 	private final UUID uuid;
@@ -99,6 +112,14 @@ public class ConnectionType {
 	 */
 	public String getMetaData(String key) {
 		return metadata.get(key);
+	}
+
+	/**
+	 * @return a copy of the metadata HashMap of the connection type.
+	 */
+	@SuppressWarnings("unchecked") // We know what type the clone is
+	public HashMap<String, String> getMetaData() {
+		return (HashMap<String, String>) metadata.clone();
 	}
 
 	@Override

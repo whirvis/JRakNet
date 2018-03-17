@@ -34,6 +34,7 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 import com.whirvis.jraknet.Packet;
+import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.protocol.Failable;
@@ -65,9 +66,8 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 			this.writeAddress(clientAddress);
 			this.writeUnsignedShort(maximumTransferUnit);
 			this.writeBoolean(encryptionEnabled);
-			this.connectionType = this.writeConnectionType();
-		} catch (UnknownHostException e) {
-			this.failed = true;
+			this.writeConnectionType(this.connectionType = ConnectionType.JRAKNET);
+		} catch (UnknownHostException | RakNetException e) {
 			this.magic = false;
 			this.serverGuid = 0;
 			this.clientAddress = null;
@@ -75,6 +75,7 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 			this.encryptionEnabled = false;
 			this.connectionType = null;
 			this.clear();
+			this.failed = true;
 		}
 	}
 
@@ -87,8 +88,7 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 			this.maximumTransferUnit = this.readUnsignedShort();
 			this.encryptionEnabled = this.readBoolean();
 			this.connectionType = this.readConnectionType();
-		} catch (UnknownHostException e) {
-			this.failed = true;
+		} catch (UnknownHostException | RakNetException e) {
 			this.magic = false;
 			this.serverGuid = 0;
 			this.clientAddress = null;
@@ -96,6 +96,7 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 			this.encryptionEnabled = false;
 			this.connectionType = null;
 			this.clear();
+			this.failed = true;
 		}
 	}
 
