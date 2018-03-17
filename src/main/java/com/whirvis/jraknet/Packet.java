@@ -893,8 +893,7 @@ public class Packet {
 		this.writeString(connectionType.getVersion());
 
 		// Write connection type metadata
-		if (connectionType.getMetaData()
-				.size() > 0xFF /* Maximum value of unsigned byte */) {
+		if (connectionType.getMetaData().size() > ConnectionType.MAX_METADATA_VALUES) {
 			throw new RakNetException("Too many metadata values");
 		}
 		this.writeUnsignedByte(connectionType.getMetaData().size());
