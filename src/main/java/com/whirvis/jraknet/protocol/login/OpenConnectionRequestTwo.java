@@ -34,6 +34,7 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 import com.whirvis.jraknet.Packet;
+import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.protocol.Failable;
@@ -63,15 +64,15 @@ public class OpenConnectionRequestTwo extends RakNetPacket implements Failable {
 			this.writeAddress(address);
 			this.writeUnsignedShort(maximumTransferUnit);
 			this.writeLong(clientGuid);
-			this.connectionType = this.writeConnectionType();
-		} catch (UnknownHostException e) {
-			this.failed = true;
+			this.writeConnectionType(this.connectionType = ConnectionType.JRAKNET);
+		} catch (UnknownHostException | RakNetException e) {
 			this.magic = false;
 			this.address = null;
 			this.maximumTransferUnit = 0;
 			this.clientGuid = 0;
 			this.connectionType = null;
 			this.clear();
+			this.failed = true;
 		}
 	}
 
@@ -83,14 +84,14 @@ public class OpenConnectionRequestTwo extends RakNetPacket implements Failable {
 			this.maximumTransferUnit = this.readUnsignedShort();
 			this.clientGuid = this.readLong();
 			this.connectionType = this.readConnectionType();
-		} catch (UnknownHostException e) {
-			this.failed = true;
+		} catch (UnknownHostException | RakNetException e) {
 			this.magic = false;
 			this.address = null;
 			this.maximumTransferUnit = 0;
 			this.clientGuid = 0;
 			this.connectionType = null;
 			this.clear();
+			this.failed = true;
 		}
 	}
 

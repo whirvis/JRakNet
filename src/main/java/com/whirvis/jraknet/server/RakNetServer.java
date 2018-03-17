@@ -310,7 +310,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Adds the server to it's own set of listeners, used when extending the
+	 * Adds the server to its own set of listeners, used when extending the
 	 * <code>RakNetServer</code> directly.
 	 * 
 	 * @return the server.
@@ -338,8 +338,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Removes the server from it's own set of listeners, used when extending
-	 * the <code>RakNetServer</code> directly.
+	 * Removes the server from its own set of listeners, used when extending the
+	 * <code>RakNetServer</code> directly.
 	 * 
 	 * @return the server.
 	 */
@@ -567,6 +567,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		if (packetId == ID_UNCONNECTED_PING || packetId == ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
 			UnconnectedPing ping = new UnconnectedPing(packet);
 			ping.decode();
+			if (ping.failed()) {
+				return; // Bad packet, ignore
+			}
 
 			// Make sure parameters match and that broadcasting is enabled
 			if ((packetId == ID_UNCONNECTED_PING || (sessions.size() < this.maxConnections || this.maxConnections < 0))
@@ -583,7 +586,11 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 					pong.identifier = pingEvent.getIdentifier();
 
 					pong.encode();
-					this.sendNettyMessage(pong, sender);
+					if (!pong.failed()) {
+						this.sendNettyMessage(pong, sender);
+					} else {
+						log.error(UnconnectedPong.class.getSimpleName() + " packet failed to encode");
+					}
 				}
 			}
 		} else if (packetId == ID_OPEN_CONNECTION_REQUEST_1) {
@@ -830,7 +837,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Starts the server on it's own <code>Thread</code>.
+	 * Starts the server on its own <code>Thread</code>.
 	 * 
 	 * @return the <code>Thread</code> the server is running on.
 	 */
@@ -880,7 +887,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		}
 		sessions.clear();
 
-		// Interrupt it's thread if it owns one
+		// Interrupt its thread if it owns one
 		if (this.serverThread != null) {
 			serverThread.interrupt();
 		}

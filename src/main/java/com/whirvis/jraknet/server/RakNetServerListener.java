@@ -220,7 +220,7 @@ public interface RakNetServerListener {
 
 	/**
 	 * Called when a handler exception has occurred, these normally do not
-	 * matter as long as the server handles them on it's own.
+	 * matter as long as the server handles them on its own.
 	 * 
 	 * @param address
 	 *            the address that caused the exception.

@@ -293,7 +293,7 @@ public class ChatServer implements RakNetServerListener {
 	/**
 	 * @param username
 	 *            the client's username.
-	 * @return the client based on it's username.
+	 * @return the client based on its username.
 	 */
 	public ConnectedClient getClient(String username) {
 		for (ConnectedClient client : connected.values()) {

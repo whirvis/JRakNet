@@ -37,9 +37,9 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.HashMap;
+import java.util.Map.Entry;
+import java.util.UUID;
 
 import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.stream.PacketDataInput;
@@ -56,9 +56,7 @@ import io.netty.channel.socket.DatagramPacket;
  */
 public class Packet {
 
-	private static final Logger log = LoggerFactory.getLogger("packet");
-
-	// Packet constants
+	// Packet address data
 	public static final int ADDRESS_VERSION_IPV4 = 0x04;
 	public static final int ADDRESS_VERSION_IPV6 = 0x06;
 	public static final int ADDRESS_VERSION_IPV4_LENGTH = 0x04;
@@ -216,9 +214,9 @@ public class Packet {
 	}
 
 	/**
-	 * Reads a little endian short.
+	 * Reads a little-endian short.
 	 * 
-	 * @return a little endian short.
+	 * @return a little-endian short.
 	 */
 	public short readShortLE() {
 		return buffer.readShortLE();
@@ -234,18 +232,18 @@ public class Packet {
 	}
 
 	/**
-	 * Reads an unsigned little endian short.
+	 * Reads an unsigned little-endian short.
 	 * 
-	 * @return an unsigned little endian short.
+	 * @return an unsigned little-endian short.
 	 */
 	public int readUnsignedShortLE() {
 		return (buffer.readShortLE() & 0xFFFF);
 	}
 
 	/**
-	 * Reads a little endian triad.
+	 * Reads a little-endian triad.
 	 * 
-	 * @return a little endian triad.
+	 * @return a little-endian triad.
 	 */
 	public int readTriadLE() {
 		return (buffer.readByte() & 0xFF) | ((buffer.readByte() & 0xFF) << 8) | ((buffer.readByte() & 0x0F) << 16);
@@ -261,9 +259,9 @@ public class Packet {
 	}
 
 	/**
-	 * Reads a little endian integer.
+	 * Reads a little-endian integer.
 	 * 
-	 * @return a little endian integer.
+	 * @return a little-endian integer.
 	 */
 	public int readIntLE() {
 		return buffer.readIntLE();
@@ -279,9 +277,9 @@ public class Packet {
 	}
 
 	/**
-	 * Reads an unsigned little endian integer.
+	 * Reads an unsigned little-endian integer.
 	 * 
-	 * @return an unsigned little endian integer.
+	 * @return an unsigned little-endian integer.
 	 */
 	public long readUnsignedIntLE() {
 		return (buffer.readIntLE() & 0x00000000FFFFFFFFL);
@@ -297,9 +295,9 @@ public class Packet {
 	}
 
 	/**
-	 * Reads a little endian long.
+	 * Reads a little-endian long.
 	 * 
-	 * @return a little endian long.
+	 * @return a little-endian long.
 	 */
 	public long readLongLE() {
 		return buffer.readLongLE();
@@ -316,9 +314,9 @@ public class Packet {
 	}
 
 	/**
-	 * Reads an unsigned little endian long.
+	 * Reads an unsigned little-endian long.
 	 * 
-	 * @return an unsigned little endian long.
+	 * @return an unsigned little-endian long.
 	 */
 	public BigInteger readUnsignedLongLE() {
 		byte[] ulBytesReversed = this.read(8);
@@ -358,7 +356,7 @@ public class Packet {
 	}
 
 	/**
-	 * Reads a UTF-8 String with it's length prefixed by a unsigned short.
+	 * Reads a UTF-8 String with its length prefixed by a unsigned short.
 	 * 
 	 * @return a String.
 	 */
@@ -369,8 +367,8 @@ public class Packet {
 	}
 
 	/**
-	 * Reads a UTF-8 String with it's length prefixed by a unsigned little
-	 * endian short.
+	 * Reads a UTF-8 String with its length prefixed by a unsigned little
+	 * -endian short.
 	 * 
 	 * @return a String.
 	 */
@@ -405,25 +403,50 @@ public class Packet {
 	}
 
 	/**
+	 * Reads an universally unique identifier.
+	 * 
+	 * @return an universally unique identifier.
+	 */
+	public UUID readUUID() {
+		long mostSignificantBits = this.readLong();
+		long leastSignificantBits = this.readLong();
+		return new UUID(mostSignificantBits, leastSignificantBits);
+	}
+
+	/**
 	 * Reads and returns the connection type. Unlike most other methods, this
-	 * one will check to make sure if there is enough data to read the
-	 * connection type before actually reading it. This is because it is meant
-	 * to be used strictly at the end of packets that can be used to signify the
-	 * protocol implementation of the sender.
+	 * one will check to make sure if there is at least enough data to read the
+	 * the connection type magic before actually reading it. This is because it
+	 * is meant to be used strictly at the end of packets that can be used to
+	 * signify the protocol implementation of the sender.
 	 * 
 	 * @return the connection type.
+	 * @throws RakNetException
+	 *             if there isn't enough data in the packet after the connection
+	 *             type magic or there are duplicate keys in the metadata
 	 */
-	public ConnectionType readConnectionType() {
-		// We add an extra byte because we need to read the ID
-		if (this.remaining() >= ConnectionType.MAGIC.length + 1) {
+	public ConnectionType readConnectionType() throws RakNetException {
+		if (this.remaining() >= ConnectionType.MAGIC.length) {
 			byte[] connectionMagicCheck = this.read(ConnectionType.MAGIC.length);
 			if (Arrays.equals(ConnectionType.MAGIC, connectionMagicCheck)) {
-				short id = this.readUnsignedByte();
-				if (id == ConnectionType.VANILLA.getId()) {
-					log.debug("Connection type " + ConnectionType.VANILLA
-							+ " returned after connection type magic sequence");
+				// Read the connection type data
+				UUID uuid = this.readUUID();
+				String name = this.readString();
+				String language = this.readString();
+				String version = this.readString();
+
+				// Read the connection type metadata
+				HashMap<String, String> metadata = new HashMap<String, String>();
+				int metadataLength = this.readUnsignedByte();
+				for (int i = 0; i < metadataLength; i++) {
+					String key = this.readString();
+					String value = this.readString();
+					if (metadata.containsKey(key)) {
+						throw new RakNetException("Duplicate key \"" + key + "\"");
+					}
+					metadata.put(key, value);
 				}
-				return ConnectionType.getType(id);
+				return new ConnectionType(uuid, name, language, version, metadata);
 			}
 		}
 		return ConnectionType.VANILLA;
@@ -533,7 +556,7 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a little endian short to the packet.
+	 * Writes a little-endian short to the packet.
 	 * 
 	 * @param s
 	 *            the short.
@@ -557,7 +580,7 @@ public class Packet {
 	}
 
 	/**
-	 * Writes an unsigned little endian short to the packet.
+	 * Writes an unsigned little-endian short to the packet.
 	 * 
 	 * @param s
 	 *            the short.
@@ -569,7 +592,7 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a little endian triad to the packet.
+	 * Writes a little-endian triad to the packet.
 	 * 
 	 * @param t
 	 *            the triad.
@@ -607,7 +630,7 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a little endian integer to the packet.
+	 * Writes a little-endian integer to the packet.
 	 * 
 	 * @param i
 	 *            the integer.
@@ -619,7 +642,7 @@ public class Packet {
 	}
 
 	/**
-	 * Writes an unsigned little endian integer to the packet.
+	 * Writes an unsigned little-endian integer to the packet.
 	 * 
 	 * @param i
 	 *            the integer.
@@ -643,7 +666,7 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a little endian long to the packet.
+	 * Writes a little-endian long to the packet.
 	 * 
 	 * @param l
 	 *            the long.
@@ -687,7 +710,7 @@ public class Packet {
 	}
 
 	/**
-	 * Writes an unsigned little endian long to the packet.
+	 * Writes an unsigned little-endian long to the packet.
 	 * 
 	 * @param bi
 	 *            the long.
@@ -708,7 +731,7 @@ public class Packet {
 	}
 
 	/**
-	 * Writes an unsigned little endian long to the packet.
+	 * Writes an unsigned little-endian long to the packet.
 	 * 
 	 * @param l
 	 *            the long.
@@ -767,7 +790,7 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a UTF-8 String prefixed by a little endian unsigned short to the
+	 * Writes a UTF-8 String prefixed by a little-endian unsigned short to the
 	 * packet.
 	 * 
 	 * @param s
@@ -838,15 +861,48 @@ public class Packet {
 	}
 
 	/**
-	 * Writes the connection type magic sequence and the ID of the JRakNet
-	 * RakNet protocol implementation.
+	 * Writes an universally unique identifier to the packet.
 	 * 
-	 * @return the connection type.
+	 * @param uuid
+	 *            the universally unique identifier.
+	 * @return the packet.
 	 */
-	public ConnectionType writeConnectionType() {
+	public Packet writeUUID(UUID uuid) {
+		this.writeLong(uuid.getMostSignificantBits());
+		this.writeLong(uuid.getLeastSignificantBits());
+		return this;
+	}
+
+	/**
+	 * Writes a connection type to the packet.
+	 * 
+	 * @param connectionType
+	 *            the connection type.
+	 * @return the packet.
+	 * @throws RakNetException
+	 *             if there are too many values in the metadata.
+	 */
+	public Packet writeConnectionType(ConnectionType connectionType) throws RakNetException {
+		// Write magic
 		this.write(ConnectionType.MAGIC);
-		this.writeUnsignedByte(ConnectionType.JRAKNET.getId());
-		return ConnectionType.JRAKNET;
+
+		// Write connection type data
+		this.writeUUID(connectionType.getUUID());
+		this.writeString(connectionType.getName());
+		this.writeString(connectionType.getLanguage());
+		this.writeString(connectionType.getVersion());
+
+		// Write connection type metadata
+		if (connectionType.getMetaData()
+				.size() > 0xFF /* Maximum value of unsigned byte */) {
+			throw new RakNetException("Too many metadata values");
+		}
+		this.writeUnsignedByte(connectionType.getMetaData().size());
+		for (Entry<String, String> metadataEntry : connectionType.getMetaData().entrySet()) {
+			this.writeString(metadataEntry.getKey());
+			this.writeString(metadataEntry.getValue());
+		}
+		return this;
 	}
 
 	/**

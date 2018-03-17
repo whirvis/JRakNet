@@ -492,7 +492,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Adds the client to it's own set of listeners, used when extending the
+	 * Adds the client to its own set of listeners, used when extending the
 	 * <code>RakNetClient</code> directly.
 	 * 
 	 * @return the client.
@@ -520,8 +520,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Removes the client from it's own set of listeners, used when extending
-	 * the <code>RakNetClient</code> directly.
+	 * Removes the client from its own set of listeners, used when extending the
+	 * <code>RakNetClient</code> directly.
 	 * 
 	 * @return the client.
 	 */
@@ -723,8 +723,12 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 				ping.pingId = this.pingId;
 				ping.encode();
 
-				this.sendNettyMessage(ping, new InetSocketAddress("255.255.255.255", discoveryPort));
-				log.debug("Broadcasted unconnected ping to port " + discoveryPort);
+				if (!ping.failed()) {
+					this.sendNettyMessage(ping, new InetSocketAddress("255.255.255.255", discoveryPort));
+					log.debug("Broadcasted unconnected ping to port " + discoveryPort);
+				} else {
+					log.error(UnconnectedPing.class.getSimpleName() + " failed to encode");
+				}
 			}
 		}
 
@@ -735,9 +739,13 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			ping.pingId = this.pingId;
 			ping.encode();
 
-			for (InetSocketAddress externalAddress : externalServers.keySet()) {
-				this.sendNettyMessage(ping, externalAddress);
-				log.debug("Broadcasting ping to server with address " + externalAddress);
+			if (!ping.failed()) {
+				for (InetSocketAddress externalAddress : externalServers.keySet()) {
+					this.sendNettyMessage(ping, externalAddress);
+					log.debug("Broadcasting ping to server with address " + externalAddress);
+				}
+			} else {
+				log.error(UnconnectedPing.class.getSimpleName() + " failed to encode");
 			}
 		}
 	}
@@ -837,7 +845,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			throw new RakNetException(e);
 		}
 
-		// Reset MaximumTransferUnit's so they can be used again
+		// Reset maximum transfer units so they can be used again
 		for (MaximumTransferUnit unit : maximumTransferUnits) {
 			unit.reset();
 		}
@@ -940,7 +948,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Connects the client to a server with the specified address on it's own
+	 * Connects the client to a server with the specified address on its own
 	 * <code>Thread</code>.
 	 * 
 	 * @param address
@@ -978,7 +986,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Connects the client to a server with the specified address on it's own
+	 * Connects the client to a server with the specified address on its own
 	 * <code>Thread</code>.
 	 * 
 	 * @param address
@@ -992,7 +1000,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Connects the client to a server with the specified address on it's own
+	 * Connects the client to a server with the specified address on its own
 	 * <code>Thread</code>.
 	 * 
 	 * @param address
@@ -1008,7 +1016,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Connects the the client to the specified discovered server on it's own
+	 * Connects the the client to the specified discovered server on its own
 	 * <code>Thread</code>.
 	 * 
 	 * @param server
@@ -1065,7 +1073,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			// Disconnect session
 			session.closeConnection();
 
-			// Interrupt it's thread if it owns one
+			// Interrupt its thread if it owns one
 			if (this.clientThread != null) {
 				clientThread.interrupt();
 			}

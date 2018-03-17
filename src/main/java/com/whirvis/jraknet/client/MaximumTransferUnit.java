@@ -44,7 +44,7 @@ import com.whirvis.jraknet.util.map.IntMap;
 
 /**
  * Used by the <code>RakNetClient</code> during login to track how and when it
- * should modify it's maximum transfer unit in the login process.
+ * should modify its maximum transfer unit in the login process.
  *
  * @author Trent "Whirvis" Summerlin
  */
