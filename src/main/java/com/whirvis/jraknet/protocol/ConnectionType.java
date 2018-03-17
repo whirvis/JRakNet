@@ -46,7 +46,7 @@ public class ConnectionType {
 	/**
 	 * A connection from a vanilla client or an unknown implementation.
 	 */
-	public static final ConnectionType VANILLA = new ConnectionType(null, null, null, null);
+	public static final ConnectionType VANILLA = new ConnectionType(null, "Vanilla", null, null);
 
 	/**
 	 * A JRakNet connection.
@@ -70,7 +70,7 @@ public class ConnectionType {
 		this.name = name;
 		this.language = language;
 		this.version = version;
-		this.metadata = metadata;
+		this.metadata = (metadata != null ? metadata : new HashMap<String, String>());
 	}
 
 	public ConnectionType(UUID uuid, String name, String language, String version) {
