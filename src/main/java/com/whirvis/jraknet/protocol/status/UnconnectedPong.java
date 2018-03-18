@@ -62,7 +62,7 @@ public class UnconnectedPong extends RakNetPacket implements Failable {
 			this.writeLong(pongId);
 			this.writeMagic();
 			this.writeString(identifier.build());
-			this.writeConnectionType(this.connectionType = ConnectionType.JRAKNET);
+			this.writeConnectionType(connectionType);
 		} catch (RakNetException e) {
 			this.timestamp = 0;
 			this.pongId = 0;

@@ -64,7 +64,7 @@ public class OpenConnectionRequestTwo extends RakNetPacket implements Failable {
 			this.writeAddress(address);
 			this.writeUnsignedShort(maximumTransferUnit);
 			this.writeLong(clientGuid);
-			this.writeConnectionType(this.connectionType = ConnectionType.JRAKNET);
+			this.writeConnectionType(connectionType);
 		} catch (UnknownHostException | RakNetException e) {
 			this.magic = false;
 			this.address = null;
