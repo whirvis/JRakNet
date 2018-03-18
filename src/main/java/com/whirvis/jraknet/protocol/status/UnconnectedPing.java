@@ -64,7 +64,7 @@ public class UnconnectedPing extends RakNetPacket implements Failable {
 			this.writeLong(timestamp);
 			this.writeMagic();
 			this.writeLong(pingId);
-			this.writeConnectionType(this.connectionType = ConnectionType.JRAKNET);
+			this.writeConnectionType(connectionType);
 		} catch (RakNetException e) {
 			this.timestamp = 0;
 			this.magic = false;

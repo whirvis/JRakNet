@@ -99,7 +99,7 @@ public class ConnectionType {
 		this.name = name;
 		this.language = language;
 		this.version = version;
-		this.metadata = (metadata != null ? metadata : new HashMap<String, String>());
+		this.metadata = metadata = (metadata != null ? metadata : new HashMap<String, String>());
 		if (metadata.size() > MAX_METADATA_VALUES) {
 			throw new IllegalArgumentException("Too many metadata values");
 		}

@@ -877,12 +877,16 @@ public class Packet {
 	 * Writes a connection type to the packet.
 	 * 
 	 * @param connectionType
-	 *            the connection type.
+	 *            the connection type, if <code>null</code> is given
+	 *            <code>JRAKNET</code> will be used instead.
 	 * @return the packet.
 	 * @throws RakNetException
 	 *             if there are too many values in the metadata.
 	 */
 	public Packet writeConnectionType(ConnectionType connectionType) throws RakNetException {
+		// Should we default to our connection type?
+		connectionType = (connectionType != null ? connectionType : ConnectionType.JRAKNET);
+
 		// Write magic
 		this.write(ConnectionType.MAGIC);
 
@@ -901,6 +905,18 @@ public class Packet {
 			this.writeString(metadataEntry.getKey());
 			this.writeString(metadataEntry.getValue());
 		}
+		return this;
+	}
+
+	/**
+	 * Writes the default connection type <code>JRAKNET</code> to the packet.
+	 * 
+	 * @return the packet.
+	 * @throws RakNetException
+	 *             if there are too many values in the metadata.
+	 */
+	public Packet writeConnectionType() throws RakNetException {
+		this.writeConnectionType(null);
 		return this;
 	}
 
