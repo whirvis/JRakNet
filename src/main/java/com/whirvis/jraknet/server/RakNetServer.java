@@ -805,14 +805,17 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 			// Update system
 			while (this.running == true) {
+				/*
+				 * The order here is important, as the sleep could fail to
+				 * execute (thus increasing the CPU usage dramatically) if we
+				 * sleep before we execute the code in the for loop.
+				 */
 				try {
 					Thread.sleep(0, 1); // Lower CPU usage
 				} catch (InterruptedException e) {
 					// Ignore this, it does not matter
 				}
-				if (sessions.size() <= 0) {
-					continue; // Do not loop through non-existent sessions
-				}
+
 				for (RakNetClientSession session : sessions.values()) {
 					try {
 						// Update session and make sure it isn't DOSing us
