@@ -837,7 +837,6 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 					connectionRequestOne.protocolVersion = this.getProtocolVersion();
 					connectionRequestOne.encode();
 					this.sendNettyMessage(connectionRequestOne, address);
-
 					Thread.sleep(500);
 				}
 			}
@@ -1046,8 +1045,9 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 				try {
 					Thread.sleep(0, 1); // Lower CPU usage
 				} catch (InterruptedException e) {
-					log.warn("Client sleep interrupted");
+					// Ignore this, it does not matter
 				}
+
 			}
 		} else {
 			throw new RakNetClientException(this, "Attempted to initiate connection without session");

@@ -27,7 +27,7 @@ In order to add this project to your maven project, you will need to add the mav
   <dependency>
     <groupId>com.whirvis</groupId>
     <artifactId>jraknet</artifactId>
-    <version>2.9.2</version>
+    <version>2.9.3</version>
   </dependency>
 </dependencies>
 ```
