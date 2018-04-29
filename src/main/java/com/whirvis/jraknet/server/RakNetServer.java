@@ -805,6 +805,11 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 			// Update system
 			while (this.running == true) {
+				try {
+					Thread.sleep(0, 1); // Lower CPU usage
+				} catch (InterruptedException e) {
+					// Ignore this, it does not matter
+				}
 				if (sessions.size() <= 0) {
 					continue; // Do not loop through non-existent sessions
 				}
@@ -823,11 +828,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 						}
 						this.removeSession(session, throwable.getMessage());
 					}
-				}
-				try {
-					Thread.sleep(0, 1); // Lower CPU usage
-				} catch (InterruptedException e) {
-					log.warn("Server sleep interrupted");
 				}
 			}
 		} catch (InterruptedException e) {
