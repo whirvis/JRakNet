@@ -228,7 +228,6 @@ public interface RakNetServerListener {
 	 *            the throwable exception that was caught.
 	 */
 	public default void onHandlerException(InetSocketAddress address, Throwable throwable) {
-		throwable.printStackTrace();
 	}
 
 	/**
