@@ -116,6 +116,9 @@ public class RakNetPacket extends Packet {
 		if (packet instanceof RakNetPacket) {
 			this.id = ((RakNetPacket) packet).id;
 		} else {
+			if (this.remaining() < 1) {
+				throw new IllegalArgumentException("The packet contains no data, it has no ID to be read");
+			}
 			this.id = this.readUnsignedByte();
 		}
 	}

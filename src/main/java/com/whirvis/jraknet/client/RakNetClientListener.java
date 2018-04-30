@@ -223,7 +223,6 @@ public interface RakNetClientListener {
 	 *            the <code>Throwable</code> that was caught.
 	 */
 	public default void onHandlerException(InetSocketAddress address, Throwable throwable) {
-		throwable.printStackTrace();
 	}
 
 	/**
