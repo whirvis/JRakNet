@@ -1,12 +1,12 @@
 /*
- *       _   _____            _      _   _          _   
- *      | | |  __ \          | |    | \ | |        | |  
- *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_ 
+ *       _   _____            _      _   _          _
+ *      | | |  __ \          | |    | \ | |        | |
+ *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_
  *  _   | | |  _  /   / _` | | |/ / | . ` |  / _ \ | __|
- * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
+ * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
- *                                                  
- * The MIT License (MIT)
+ *
+ * the MIT License (MIT)
  *
  * Copyright (c) 2016-2018 Whirvis T. Wheatley
  *
@@ -17,7 +17,7 @@
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
  *
- * The above copyright notice and this permission notice shall be included in all
+ * the above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
  *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
@@ -26,7 +26,7 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.  
+ * SOFTWARE.
  */
 package com.whirvis.jraknet.session;
 
