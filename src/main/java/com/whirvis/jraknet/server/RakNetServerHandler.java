@@ -130,9 +130,11 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			if (this.addressBlocked(sender.getAddress())) {
 				BlockedAddress status = blocked.get(sender.getAddress());
 				if (status.getTime() <= BlockedAddress.PERMANENT_BLOCK) {
+					datagram.content().release(); // No longer needed
 					return; // Permanently blocked
 				}
 				if (System.currentTimeMillis() - status.getStartTime() < status.getTime()) {
+					datagram.content().release(); // No longer needed
 					return; // Time hasn't expired
 				}
 				this.unblockAddress(sender.getAddress());
