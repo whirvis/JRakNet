@@ -14,6 +14,17 @@ This library was meant to be used for Minecraft servers and clients, but can sti
 - Since people are always creating issues on the repo about this, Minecraft clients do not work with JRakNet servers if you are on the same machine as the server. As a result, you will have to use another device (iPhone, Android, XBOX One, etc.) due to an error on Mojang's part. However, JRakNet clients work fine with Minecraft servers running on the same machine.
 
 # How to use with Maven
+**NOTE**: Maven for JRakNet is currently not functioning, use the JAR file with dependencies that can be found in the releases section. Once you've downloaded the JAR, here is how to include it with Maven:
+```xml
+<dependency>
+    <groupId>com.whirvis</groupId>
+    <artifactId>jraknet</artifactId>
+    <version>2.9.5</version>
+    <scope>system</scope>
+    <systemPath>PATH_TO_YOUR_LIBRARIES_HERE/jraknet-2.9.5-jar-with-dependencies.jar</systemPath>
+</dependency>
+```
+
 If you are using a release version, use this dependency:
 ```xml
 <dependency>
