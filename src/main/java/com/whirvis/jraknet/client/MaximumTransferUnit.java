@@ -122,9 +122,16 @@ public class MaximumTransferUnit {
 	 * @return the sorted <code>MaximumTransferUnit</code>s.
 	 */
 	public static MaximumTransferUnit[] sort(MaximumTransferUnit[] units) {
+		if (units == null) {
+			return new MaximumTransferUnit[0];
+		}
+
 		// Convert array to IntMap
 		IntMap<MaximumTransferUnit> unitMap = new IntMap<MaximumTransferUnit>();
 		for (MaximumTransferUnit unit : units) {
+			if (unit == null) {
+				throw new NullPointerException("Invalid maximum transfer unit");
+			}
 			unitMap.put(unit.getSize(), unit);
 		}
 
