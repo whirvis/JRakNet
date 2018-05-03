@@ -14,22 +14,27 @@ This library was meant to be used for Minecraft servers and clients, but can sti
 - Since people are always creating issues on the repo about this, Minecraft clients do not work with JRakNet servers if you are on the same machine as the server. As a result, you will have to use another device (iPhone, Android, XBOX One, etc.) due to an error on Mojang's part. However, JRakNet clients work fine with Minecraft servers running on the same machine.
 
 # How to use with Maven
-In order to add this project to your maven project, you will need to add the maven repository and then the actual dependency:
+If you are using a release version, use this dependency:
 ```xml
-<repositories>
-  <repository>
-    <id>maven-repo</id>
-    <url>https://raw.githubusercontent.com/JRakNet/MavenRepository/master</url>
-  </repository>
-</repositories>
-
-<dependencies>
-  <dependency>
+<dependency>
     <groupId>com.whirvis</groupId>
     <artifactId>jraknet</artifactId>
-    <version>2.9.4</version>
-  </dependency>
-</dependencies>
+    <version>2.9.5</version>
+</dependency>
+```
+
+If you are wanting to use a snapshot version, use this repository and dependency:
+```xml
+<repository>
+    <id>codemc-repo</id>
+    <url>https://repo.codemc.org/repository/maven-public/</url>
+</repository>
+
+<dependency>
+    <groupId>com.whirvis</groupId>
+    <artifactId>jraknet</artifactId>
+    <version>2.9.6-SNAPSHOT</version>
+</dependency>
 ```
 
 # How to create a server
