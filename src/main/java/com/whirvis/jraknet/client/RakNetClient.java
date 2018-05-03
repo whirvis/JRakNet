@@ -412,8 +412,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	public final void setMaximumTransferUnits(int... maximumTransferUnitSizes) {
 		boolean foundTransferUnit = false;
-		this.maximumTransferUnits = new MaximumTransferUnit[maximumTransferUnitSizes.length];
-		for (int i = 0; i < maximumTransferUnits.length; i++) {
+		ArrayList<MaximumTransferUnit> maximumTransferUnits = new ArrayList<MaximumTransferUnit>();
+		for (int i = 0; i < maximumTransferUnitSizes.length; i++) {
 			int maximumTransferUnitSize = maximumTransferUnitSizes[i];
 			if (maximumTransferUnitSize > RakNet.MAXIMUM_MTU_SIZE
 					|| maximumTransferUnitSize < RakNet.MINIMUM_MTU_SIZE) {
@@ -421,14 +421,15 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 						+ RakNet.MINIMUM_MTU_SIZE + "-" + RakNet.MAXIMUM_MTU_SIZE);
 			}
 			if (RakNetUtils.getMaximumTransferUnit() >= maximumTransferUnitSize) {
-				maximumTransferUnits[i] = new MaximumTransferUnit(maximumTransferUnitSize,
-						(i * 2) + (i + 1 < maximumTransferUnits.length ? 2 : 1));
+				maximumTransferUnits.add(new MaximumTransferUnit(maximumTransferUnitSize,
+						(i * 2) + (i + 1 < maximumTransferUnitSizes.length ? 2 : 1)));
 				foundTransferUnit = true;
 			} else {
 				log.warn("Valid maximum transfer unit " + maximumTransferUnitSize
 						+ " failed to register due to network card limitations");
 			}
 		}
+		this.maximumTransferUnits = maximumTransferUnits.toArray(new MaximumTransferUnit[maximumTransferUnits.size()]);
 		if (foundTransferUnit == false) {
 			throw new RuntimeException("No compatible maximum transfer unit found for machine network cards");
 		}
