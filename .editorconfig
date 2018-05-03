@@ -1,0 +1,18 @@
+# http://editorconfig.org/
+
+# Top-most EditorConfig file
+root = yes
+
+# Set the charset, unix-style newlines with a newline ending every file
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+
+# Set indention
+[*.java]
+indent_style = tab
+
+[*.xml]
+indent_style = space
+indent_size = 4
