@@ -18,8 +18,8 @@ In order to add this project to your maven project, you will need to add the mav
 ```xml
 <repositories>
   <repository>
-    <id>maven-repo</id>
-    <url>https://raw.githubusercontent.com/JRakNet/MavenRepository/master</url>
+    <id>codemc-repo</id>
+    <url>https://repo.codemc.org/repository/maven-public/</url>
   </repository>
 </repositories>
 
@@ -27,7 +27,7 @@ In order to add this project to your maven project, you will need to add the mav
   <dependency>
     <groupId>com.whirvis</groupId>
     <artifactId>jraknet</artifactId>
-    <version>2.9.4</version>
+    <version>2.9.5-SNAPSHOT</version>
   </dependency>
 </dependencies>
 ```
