@@ -3,36 +3,72 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    
+
+    <!-- Maven coordinates -->
     <groupId>com.whirvis</groupId>
     <artifactId>jraknet</artifactId>
     <version>2.9.5</version>
     <packaging>jar</packaging>
-    
+
+    <!-- Project information -->
     <name>JRakNet</name>
-    <description>A RakNet protocol implementation written in Java</description>
-    <inceptionYear>2016</inceptionYear>
+    <description>A RakNet protocol implementation written in Java.</description>
     <url>https://jraknet.github.io/</url>
-    
+    <inceptionYear>2016</inceptionYear>
     <licenses>
         <license>
             <name>MIT License</name>
-            <url>https://choosealicense.com/licenses/mit/</url>
+            <url>https://opensource.org/licenses/mit-license.php</url>
             <distribution>repo</distribution>
         </license>
     </licenses>
-    
+    <developers>
+        <developer>
+            <name>Trent Summerlin</name>
+            <email>whirvis@gmail.com</email>
+            <organization>JRakNet</organization>
+            <organizationUrl>https://github.com/JRakNet</organizationUrl>
+        </developer>
+    </developers>
     <organization>
-        <name>Trent Summerlin</name>
-        <url>http://whirvis.com/</url>
+        <name>JRakNet</name>
+        <url>https://github.com/JRakNet</url>
     </organization>
-   
+
+    <!-- Environment settings -->
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/JRakNet/JRakNet/issues/</url>
+    </issueManagement>
+    <ciManagement>
+        <system>jenkins</system>
+        <url>https://ci.codemc.org/job/JRakNet/job/JRakNet/</url>
+    </ciManagement>
+    <scm>
+        <connection>scm:git:https://github.com/JRakNet/JRakNet.git</connection>
+        <developerConnection>scm:git:git@github.com:JRakNet/JRakNet.git</developerConnection>
+        <url>https://github.com/JRakNet/JRakNet/</url>
+        <tag>HEAD</tag>
+    </scm>
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+    <!-- Build properties -->
     <properties>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <github.global.server>github</github.global.server>
+        <maven.build.timestamp.format>HHmm-ddMMyyyy</maven.build.timestamp.format>
     </properties>
-   
+
     <dependencies>
         <!-- Networking -->
         <dependency>
@@ -40,14 +76,14 @@
             <artifactId>netty-handler</artifactId>
             <version>4.1.24.Final</version>
         </dependency>
-        
+
         <!-- Logging interface -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.25</version>
         </dependency>
-        
+
         <!-- Logging implementation -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
@@ -56,41 +92,15 @@
             <optional>true</optional>
         </dependency>
     </dependencies>
-    
-    <scm>
-        <connection>scm:git:https://github.com/JRakNet/JRakNet.git</connection>
-        <developerConnection>scm:git:git@github.com:JRakNet/JRakNet.git</developerConnection>
-        <url>https://github.com/JRakNet/JRakNet/</url>
-    </scm>
-    
-    <ciManagement>
-        <system>jenkins</system>
-        <url>https://ci.codemc.org/job/JRakNet/job/JRakNet/</url>
-    </ciManagement>
-    
-    <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/JRakNet/JRakNet/issues/</url>
-    </issueManagement>
-    
-    <!-- Deploy to Maven repository -->
-    <distributionManagement>
-        <snapshotRepository>
-            <id>codemc-snapshots</id>
-            <url>https://repo.codemc.org/repository/maven-snapshots/</url>
-        </snapshotRepository>
-        <repository>
-            <id>codemc-releases</id>
-            <url>https://repo.codemc.org/repository/maven-releases/</url>
-        </repository>
-    </distributionManagement>
-    
+
+    <!-- Build lifecycle -->
     <build>
         <defaultGoal>clean package</defaultGoal>
-        
+
         <resources>
             <resource>
                 <directory>src/main/resources/</directory>
+                <!-- Filter variables inside resources -->
                 <filtering>true</filtering>
             </resource>
             <resource>
@@ -101,7 +111,7 @@
                 <filtering>false</filtering>
             </resource>
         </resources>
-        
+
         <plugins>
             <!-- Clean the workspace -->
             <plugin>
@@ -109,7 +119,7 @@
                 <artifactId>maven-clean-plugin</artifactId>
                 <version>3.0.0</version>
             </plugin>
-            
+
             <!-- Add license header to sources -->
             <plugin>
                 <groupId>com.mycila</groupId>
@@ -135,14 +145,14 @@
                     </execution>
                 </executions>
             </plugin>
-            
+
             <!-- Copy and process resource files -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
                 <version>3.0.2</version>
             </plugin>
-            
+
             <!-- Compile classes -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -153,55 +163,21 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
-            
+
             <!-- Perform unit testing -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.21.0</version>
             </plugin>
-            
+
             <!-- Generate the class jar file -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.0.2</version>
             </plugin>
-            
-            <!-- Generate the javadoc jar file -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <id>attach-javadoc</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <show>public</show>
-                    <failOnError>false</failOnError>
-                </configuration>
-            </plugin>
-            
-            <!-- Generate the sources jar file -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>3.0.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            
+
             <!-- Generate the shaded jar file -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -216,18 +192,17 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <createDependencyReducedPom>false</createDependencyReducedPom>
                     <shadedArtifactAttached>true</shadedArtifactAttached>
                 </configuration>
             </plugin>
-            
+
             <!-- Install jars in the local repository -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
                 <version>2.5.2</version>
             </plugin>
-            
+
             <!-- Deploy jars to the remote repository -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -236,4 +211,74 @@
             </plugin>
         </plugins>
     </build>
+
+    <!-- Build profiles -->
+    <profiles>
+        <!-- Jenkins profile with more plugins -->
+        <profile>
+            <id>jenkins</id>
+            <build>
+                <plugins>
+                    <!-- Generate the javadoc jar file -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadoc</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- Generate the sources jar file -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>3.0.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- GPG plugin: requires 'gpg' being installed and settings.xml with credentials -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- Nexus Staging plugin -->
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.6.8</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
