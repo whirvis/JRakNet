@@ -1,4 +1,4 @@
-![apm](https://img.shields.io/apm/l/vim-mode.svg) [![Build Status](https://ci.codemc.org/job/JRakNet/job/JRakNet/badge/icon)](https://ci.codemc.org/job/JRakNet/job/JRakNet/)
+![apm](https://img.shields.io/apm/l/vim-mode.svg) [![Build Status](https://ci.codemc.org/job/JRakNet/job/JRakNet/badge/icon)](https://ci.codemc.org/job/JRakNet/job/JRakNet/) ![GitHub Current Release](https://github-basic-badges.herokuapp.com/downloads/JRakNet/JRakNet/total.svg)
 
 # JRakNet
 JRakNet is a networking library for Java which implements the UDP based protocol [RakNet](https://github.com/OculusVR/RakNet).
