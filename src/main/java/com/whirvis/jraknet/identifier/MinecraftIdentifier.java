@@ -79,7 +79,7 @@ public class MinecraftIdentifier extends Identifier {
 	 * @return <code>true</code> if the specified identifier is a Minecraft
 	 *         identifier.
 	 */
-	public static boolean isMCPEIdentifier(Identifier identifier) {
+	public static boolean isMinecraftIdentifier(Identifier identifier) {
 		return identifier.build().startsWith(HEADER);
 	}
 
@@ -94,9 +94,9 @@ public class MinecraftIdentifier extends Identifier {
 	private boolean legacy;
 
 	/**
-	 * Constructs an <code>MCPEIdentifier</code> with the specified server name,
-	 * server protocol, version tag, online player count, max player count,
-	 * globally unique ID, world name, and gamemode.
+	 * Constructs an <code>MinecraftIdentifier</code> with the specified server
+	 * name, server protocol, version tag, online player count, max player
+	 * count, globally unique ID, world name, and gamemode.
 	 * 
 	 * @param serverName
 	 *            the server name.
@@ -135,7 +135,7 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Constructs a <code>MCPEIdentifer</code> by parsing the specified
+	 * Constructs a <code>MinecraftIdentifer</code> by parsing the specified
 	 * <code>Identifier</code>.
 	 * 
 	 * @param identifier
@@ -177,8 +177,8 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Constructs a <code>MCPEIdentifer</code> by parsing the specified String
-	 * identifier.
+	 * Constructs a <code>MinecraftIdentifer</code> by parsing the specified
+	 * String identifier.
 	 * 
 	 * @param identifier
 	 *            the identifier to parse.
@@ -188,7 +188,7 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Constructs a blank <code>MCPEIdentifier</code>.
+	 * Constructs a blank <code>MinecraftIdentifier</code>.
 	 */
 	public MinecraftIdentifier() {
 		this("", -1, "", -1, -1, -1, "", "");
