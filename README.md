@@ -115,7 +115,7 @@ client.addListener(new RakNetClientListener() {
 client.connect(SERVER_ADDRESS, SERVER_PORT);
 ```
 
-This is a simple RakNet client that attempts to connect to the main [LBSG](http://lbsg.net/) server. When it is connected, it closes the connection and shuts down.
+This is a simple RakNet client that attempts to connect to the main [LBSG](https://lbsg.net/) server. When it is connected, it closes the connection and shuts down.
 
 <br>
 
