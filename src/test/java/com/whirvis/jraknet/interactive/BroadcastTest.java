@@ -70,7 +70,7 @@ public class BroadcastTest {
 
 		@Override
 		public void onServerDiscovered(InetSocketAddress address, Identifier identifier) {
-			if (MinecraftIdentifier.isMCPEIdentifier(identifier)) {
+			if (MinecraftIdentifier.isMinecraftIdentifier(identifier)) {
 				discovered.put(address, new MinecraftIdentifier(identifier));
 			}
 			frame.updatePaneText(discovered.values().toArray(new MinecraftIdentifier[discovered.size()]));
@@ -78,7 +78,7 @@ public class BroadcastTest {
 
 		@Override
 		public void onServerIdentifierUpdate(InetSocketAddress address, Identifier identifier) {
-			if (MinecraftIdentifier.isMCPEIdentifier(identifier)) {
+			if (MinecraftIdentifier.isMinecraftIdentifier(identifier)) {
 				discovered.put(address, new MinecraftIdentifier(identifier));
 			}
 			frame.updatePaneText(discovered.values().toArray(new MinecraftIdentifier[discovered.size()]));
