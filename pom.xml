@@ -178,6 +178,20 @@
                 <version>3.0.2</version>
             </plugin>
 
+            <!-- Javadoc config (not run by default) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.0.0</version>
+            </plugin>
+
+            <!-- Sources config (not run by default) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.0.1</version>
+            </plugin>
+
             <!-- Generate the shaded jar file -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -246,7 +260,6 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.0.0</version>
                         <executions>
                             <execution>
                                 <id>attach-javadoc</id>
@@ -255,16 +268,12 @@
                                 </goals>
                             </execution>
                         </executions>
-                        <configuration>
-                            <skip>${isSnapshot}</skip>
-                        </configuration>
                     </plugin>
 
                     <!-- Generate the sources jar file -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>3.0.1</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -273,9 +282,6 @@
                                 </goals>
                             </execution>
                         </executions>
-                        <configuration>
-                            <skipSource>${isSnapshot}</skipSource>
-                        </configuration>
                     </plugin>
 
                     <!-- GPG plugin: requires 'gpg' being installed and settings.xml with credentials -->
