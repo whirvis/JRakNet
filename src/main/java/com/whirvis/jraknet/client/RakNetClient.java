@@ -356,7 +356,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            the server address.
 	 */
 	public final void removeExternalServer(InetSocketAddress address) {
-		if (externalServers.contains(address)) {
+		if (externalServers.containsKey(address)) {
 			// Remove now forgotten server
 			externalServers.remove(address);
 
@@ -394,6 +394,20 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	public final void removeExternalServer(String address, int port) throws UnknownHostException {
 		this.removeExternalServer(InetAddress.getByName(address), port);
+	}
+
+	/**
+	 * Removes an external server from the client's external server discovery
+	 * list.
+	 * 
+	 * @param server
+	 *            the discovered server.
+	 */
+	public final void removeExternalServer(DiscoveredServer server) {
+		if (!externalServers.contains(server)) {
+			throw new IllegalArgumentException("Discovered external server does not belong to client");
+		}
+		this.removeExternalServer(server.getAddress());
 	}
 
 	/**
