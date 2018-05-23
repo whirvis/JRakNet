@@ -990,7 +990,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 				}
 			}
 		};
-		thread.setName("JRAKNET_CLIENT_" + Long.toHexString(client.getGloballyUniqueId()));
+		thread.setName("JRAKNET_CLIENT_" + Long.toHexString(client.getGloballyUniqueId()).toUpperCase());
 		thread.start();
 		this.clientThread = thread;
 		log.info("Started on thread with name " + thread.getName());
