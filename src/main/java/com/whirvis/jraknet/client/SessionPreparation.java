@@ -83,7 +83,7 @@ public class SessionPreparation {
 	 *            the initial maximum transfer unit.
 	 */
 	public SessionPreparation(RakNetClient client, int initialMaximumTransferUnit) {
-		this.loggerName = "session planner #" + client.getGloballyUniqueId();
+		this.loggerName = "session planner #" + Long.toHexString(client.getGloballyUniqueId());
 		this.client = client;
 		this.initialMaximumTransferUnit = initialMaximumTransferUnit;
 	}
@@ -194,7 +194,7 @@ public class SessionPreparation {
 		if (!this.readyForSession()) {
 			return null;
 		}
-		log.info(loggerName + " created server session using globally unique ID " + guid
+		log.info(loggerName + " created server session using globally unique ID " + Long.toHexString(guid)
 				+ " and maximum transfer unit with size of " + maximumTransferUnit + " bytes ("
 				+ (maximumTransferUnit * 8) + " bits) for server address " + address);
 		return new RakNetServerSession(this.client, this.connectionType, this.guid, this.maximumTransferUnit, channel,
