@@ -190,7 +190,7 @@ public class Packet {
 	private byte[] readCFU(int length) {
 		byte[] data = new byte[length];
 		for (int i = 0; i < data.length; i++) {
-			data[0] = this.readCFUByte();
+			data[i] = this.readCFUByte();
 		}
 		return data;
 	}
