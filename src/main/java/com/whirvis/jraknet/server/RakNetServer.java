@@ -865,7 +865,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				}
 			}
 		};
-		thread.setName("JRAKNET_SERVER_" + Long.toHexString(server.getGloballyUniqueId()));
+		thread.setName("JRAKNET_SERVER_" + Long.toHexString(server.getGloballyUniqueId()).toUpperCase());
 		thread.start();
 		this.serverThread = thread;
 		log.info("Started on thread with name " + thread.getName());
