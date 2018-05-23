@@ -139,7 +139,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	public RakNetSession(ConnectionType connectionType, long guid, int maximumTransferUnit, Channel channel,
 			InetSocketAddress address) {
 		// Session data
-		this.loggerName = "session #" + guid;
+		this.loggerName = "(session #" + Long.toHexString(guid).toUpperCase() + ") ";
 		this.connectionType = connectionType;
 		this.guid = guid;
 		this.maximumTransferUnit = maximumTransferUnit;
