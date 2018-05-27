@@ -46,6 +46,7 @@ import com.whirvis.jraknet.stream.PacketDataInput;
 import com.whirvis.jraknet.stream.PacketDataOutput;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.EmptyByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.socket.DatagramPacket;
 
@@ -76,6 +77,11 @@ public class Packet {
 	 *            the <code>ByteBuf</code> to read from and write to.
 	 */
 	public Packet(ByteBuf buffer) {
+		if (buffer == null) {
+			throw new IllegalArgumentException("No content");
+		} else if (buffer instanceof EmptyByteBuf) {
+			throw new IllegalArgumentException("No content");
+		}
 		this.buffer = buffer;
 		this.input = new PacketDataInput(this);
 		this.output = new PacketDataOutput(this);
