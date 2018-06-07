@@ -411,6 +411,13 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
+	 * @return the local servers as an array.
+	 */
+	public final DiscoveredServer[] getLocalServers() {
+		return discovered.values().toArray(new DiscoveredServer[discovered.size()]);
+	}
+
+	/**
 	 * @return the external servers as an array.
 	 */
 	public final DiscoveredServer[] getExternalServers() {
