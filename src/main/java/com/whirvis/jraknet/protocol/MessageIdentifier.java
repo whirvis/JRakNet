@@ -227,12 +227,14 @@ public class MessageIdentifier {
 					short packetId = field.getShort(null);
 					String packetName = field.getName();
 
-					// Warn users of duplicate IDs
+					// Warn users of duplicate IDs with different names
 					if (packetNames.containsKey(packetId)) {
 						String currentName = packetNames.get(packetId);
-						log.warn("Found duplicate ID " + RakNetUtils.toHexStringId(packetId) + " for \"" + packetName
-								+ "\" and \"" + currentName + "\", overriding name and ID");
-						packetIds.remove(currentName);
+						if (!currentName.equals(packetName)) {
+							log.warn("Found duplicate ID " + RakNetUtils.toHexStringId(packetId) + " for \""
+									+ packetName + "\" and \"" + currentName + "\", overriding name and ID");
+							packetIds.remove(currentName);
+						}
 					} else {
 						log.debug("Assigned packet ID " + RakNetUtils.toHexStringId(packetId) + " to " + packetName);
 					}
