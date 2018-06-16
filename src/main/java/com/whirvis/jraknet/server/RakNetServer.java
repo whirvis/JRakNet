@@ -833,6 +833,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 					}
 				}
 			}
+
+			// Shutdown netty
+			group.shutdownGracefully().sync();
 		} catch (InterruptedException e) {
 			this.running = false;
 			throw new RakNetException(e);
