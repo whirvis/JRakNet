@@ -1174,7 +1174,9 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	@Override
 	public final void finalize() {
-		this.shutdown();
+		if (this.isRunning()) {
+			this.shutdown();
+		}
 		log.debug("Finalized and collected by garbage heap");
 	}
 
