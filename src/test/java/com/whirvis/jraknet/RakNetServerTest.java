@@ -48,6 +48,7 @@ import com.whirvis.jraknet.server.RakNetServerListener;
 import com.whirvis.jraknet.server.ServerPing;
 import com.whirvis.jraknet.session.RakNetClientSession;
 import com.whirvis.jraknet.util.RakNetUtils;
+import com.whirvis.jraknet.windows.UniversalWindowsProgram;
 
 /**
  * Used to test <code>RakNetServer</code> by starting a server on the default
@@ -60,6 +61,10 @@ public class RakNetServerTest {
 	private static final Logger log = LoggerFactory.getLogger(RakNetServerTest.class);
 
 	public static void main(String[] args) {
+		// Add loopback exemption for Minecraft
+		if (!UniversalWindowsProgram.MINECRAFT.addLoopbackExempt()) {
+			log.warn("Failed to add loopback exemption for Minecraft");
+		}
 
 		// Create server and add listener
 		RakNetServer server = new RakNetServer(UtilityTest.MINECRAFT_DEFAULT_PORT, 10);
