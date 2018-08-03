@@ -82,11 +82,15 @@ server.addListener(new RakNetServerListener() {
 server.start();
 ```
 
-This is a simple RakNet server that can be tested through Minecraft by going to the "Friends" tab where the server should show up. Once the server pops up, you should be able to click on it to trigger the connection and packet hooks.
+This is a simple RakNet server that can be tested through Minecraft by going to the "Friends" tab where the server should show up. Once
+the server pops up, you should be able to click on it to trigger the connection and packet hooks.
 
 # How to enable loopback exemption
-On Windows 10, applications that use the Universal Windows Program service by default are not able to connect to servers that are running on the same machine as them. As a result, many Minecraft players
-are disgruntled as they are not able to play on their own servers on their PC. Instead, they have to use another device like their mobile phone on the same LAN network in order to play on their server running from their PC. This annoying feature can be disabled simply by creating a ```UniversalWindowsProgram`` object with the first and only parameter being the ID of the application you are wanting to be able to connect to through localhost. An example would  be Microsoft Edges's which is ```Microsoft.MicrosoftEdge_8wekyb3d8bbwe``. So, in order to enable loopback exemption it would only take this:
+On Windows 10, applications that use the Universal Windows Program framework by default are not able to connect to servers that are
+running on the same machine as them. This annoying feature can be disabled by simply creating a ```UniversalWindowsProgram``` object
+with the first and only parameter being the ID of the application that you are wanting to be able to connect to. An example
+would be Microsoft's Edge which is ```Microsoft.MicrosoftEdge_8wekyb3d8bbwe```. So, in order to enable loopback exemption, it would only
+take this:
 
 ```java
 UniversalWindowsProgram MICROSOFT_EDGE = new UniversalWindowsProgram("Microsoft.MicrosoftEdge_8wekyb3d8bbwe");
@@ -95,7 +99,10 @@ if(!MICROSOFT_EDGE.addLoopbackExemption()) {
 }
 ```
 
-Simple, right? Feel free to implement this if you are running on a non-Windows 10 machine. This implementation was made specifically to work even if your machine does not run Windows 10 or does not have Windows PowerShell installed. Of course, if you are not on a Windows 10 machine with Windows PowerShell installed there really is no way to properly check if your application is loopback exempted. However, I'm sure that this can be solved with the help of a user that has Windows 10 with Windows PowerShell if needed.
+Simple, right? Feel free to implement this if you are running on a non-Windows 10 machine. This implementation was made specifically to
+work even if your machine does not run Windows 10 or does not have Windows PowerShell installed. Of course, if you are not on a Windows
+10 machine with Windows PowerShell installed there really is no way to properly check if your application is loopback exempted. However,
+I'm sure that this can be solved with the help of a user that has Windows 10 with Windows PowerShell if needed.
 
 # How to create a client
 Creating a client in JRakNet is also very easy. The code required to create a client can be seen here
@@ -132,7 +139,8 @@ client.addListener(new RakNetClientListener() {
 client.connect(SERVER_ADDRESS, SERVER_PORT);
 ```
 
-This is a simple RakNet client that attempts to connect to the main [LBSG](https://lbsg.net/) server. When it is connected, it closes the connection and shuts down.
+This is a simple RakNet client that attempts to connect to the main [LBSG](https://lbsg.net/) server. When it is connected, it closes
+the connection and shuts down.
 
 <br>
 
