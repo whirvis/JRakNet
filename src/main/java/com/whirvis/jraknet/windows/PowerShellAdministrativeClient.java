@@ -132,9 +132,9 @@ public class PowerShellAdministrativeClient {
 
 			// Send command output
 			System.out.println("Sending PowerShell command output");
-			administrativePowerShellDataOut.writeUTF(ioStr(administrativePowerShell.getErrorStream()));
+			administrativePowerShellDataOut.writeUTF(ioStr(administrativePowerShell.getErrorStream()).trim());
 			administrativePowerShellDataOut.flush();
-			administrativePowerShellDataOut.writeUTF(ioStr(administrativePowerShell.getInputStream()));
+			administrativePowerShellDataOut.writeUTF(ioStr(administrativePowerShell.getInputStream()).trim());
 			administrativePowerShellDataOut.flush();
 
 			// Shutdown client
