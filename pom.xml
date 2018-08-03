@@ -81,13 +81,6 @@
             <artifactId>netty-handler</artifactId>
             <version>4.1.28.Final</version>
         </dependency>
-        
-        <!-- IO Utils -->
-        <dependency>
-           <groupId>commons-io</groupId>
-           <artifactId>commons-io</artifactId>
-           <version>2.6</version>
-        </dependency>
 
         <!-- Logging interface -->
         <dependency>

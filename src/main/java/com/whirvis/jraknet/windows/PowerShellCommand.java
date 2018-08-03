@@ -30,9 +30,11 @@
  */
 package com.whirvis.jraknet.windows;
 
+import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -42,7 +44,6 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Random;
 
-import org.apache.logging.log4j.core.util.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,6 +97,34 @@ public class PowerShellCommand {
 			return null; // Not a JAR file
 		}
 		return runningJar;
+	}
+
+	/**
+	 * Converts the specified <code>InputStream</code> to a <code>String</code>.
+	 * This will result in the closing of the stream, as all available data will
+	 * be read from it during conversion.
+	 * 
+	 * @param in
+	 *            the stream to convert.
+	 * @return the converted stream.
+	 * @throws IOException
+	 *             if an I/O error occurs.
+	 */
+	private static String ioStr(InputStream in) throws IOException {
+		// Read input
+		String str = new String();
+		String next = null;
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		while ((next = reader.readLine()) != null) {
+			str += next + "\n";
+		}
+		in.close();
+
+		// Convert result accordingly
+		if (str.length() > 1) {
+			return str.substring(0, str.length() - 1);
+		}
+		return str;
 	}
 
 	// PowerShell command data
@@ -208,11 +237,11 @@ public class PowerShellCommand {
 			// Get result
 			try {
 				log.debug("Obtaining error and result information");
-				String error = IOUtils.toString(new InputStreamReader(powerShell.getErrorStream())).trim();
+				String error = ioStr(powerShell.getErrorStream()).trim();
 				if (!error.isEmpty()) {
 					throw new PowerShellException(error);
 				}
-				return IOUtils.toString(new InputStreamReader(powerShell.getInputStream())).trim();
+				return ioStr(powerShell.getInputStream()).trim();
 			} catch (IOException e) {
 				log.warn("Failed to get result of PowerShell command");
 				return RESULT_COMMAND_SUCCEEDED_FAILED_TO_GET_RESULT;
@@ -264,7 +293,7 @@ public class PowerShellCommand {
 							}
 							log.debug("Administrative PowerShell client has authenticated");
 						} else if (administrativePowerShellDataIn.available() >= 3 && state == 1) {
-							String errorResponse = administrativePowerShellDataIn.readUTF();
+							String errorResponse = administrativePowerShellDataIn.readUTF().trim();
 							if (errorResponse.length() > 0) {
 								administrativePowerShellServerSocket.close();
 								return errorResponse;
@@ -274,7 +303,7 @@ public class PowerShellCommand {
 						} else if (administrativePowerShellDataIn.available() >= 3 && state == 2) {
 							administrativePowerShellServerSocket.close();
 							log.debug("Administrative PowerShell client has sent result information");
-							return administrativePowerShellDataIn.readUTF();
+							return administrativePowerShellDataIn.readUTF().trim();
 						}
 					} else {
 						// Wait for connection
