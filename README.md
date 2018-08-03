@@ -43,8 +43,12 @@ If you are wanting to use a snapshot version, use this repository and dependency
 Creating a server in JRakNet is extremely easy, all it takes to create one can be seen right here
 
 ```java
+// Add loopback exemption for Minecraft
+if (!UniversalWindowsProgram.MINECRAFT.addLoopbackExempt()) {
+	log.warn("Failed to add loopback exemption for Minecraft");
+}
+
 // Create server
-UniversalWindowsProgram.MINECRAFT.addLoopbackExemption(); // Allow localhost connections on Windows 10
 RakNetServer server = new RakNetServer(19132, 10,
 		new MinecraftIdentifier("JRakNet Example Server", 137, "1.2", 0, 10,
 				new Random().nextLong() /* Server broadcast ID */, "New World", "Survival"));
@@ -82,11 +86,7 @@ This is a simple RakNet server that can be tested through Minecraft by going to 
 
 # How to enable loopback exemption
 On Windows 10, applications that use the Universal Windows Program service by default are not able to connect to servers that are running on the same machine as them. As a result, many Minecraft players
-are disgruntled as they are not able to even play on their own servers on their PC. Rather, they have to use another device like their mobile phone on the same LAN network in order to even play on a server
-they should be able to play on directly from their PC. As a result, when I found out there was a way to disable this I added a way to do enable and disable exemption (which is disabled by default!) The
-way this can be done is by creating a ```UniversalWindowsProgram``` object with the first and only parameter being the ID of the application you are wanting to be able to connect to. An example would
-be Minecraft's (which is already built into ```UniversalWindowsProgram```) which is ```Microsoft.MinecraftUWP_8wekyb3d8bbwe```. So, if we were say enabling this for Microsoft Edge, we would
-do the following:
+are disgruntled as they are not able to play on their own servers on their PC. Instead, they have to use another device like their mobile phone on the same LAN network in order to play on their server running from their PC. This annoying feature can be disabled simply by creating a ```UniversalWindowsProgram`` object with the first and only parameter being the ID of the application you are wanting to be able to connect to through localhost. An example would  be Microsoft Edges's which is ```Microsoft.MicrosoftEdge_8wekyb3d8bbwe``. So, in order to enable loopback exemption it would only take this:
 
 ```java
 UniversalWindowsProgram MICROSOFT_EDGE = new UniversalWindowsProgram("Microsoft.MicrosoftEdge_8wekyb3d8bbwe");
@@ -95,7 +95,7 @@ if(!MICROSOFT_EDGE.addLoopbackExemption()) {
 }
 ```
 
-Simple, right? On top of this, feel free to implement this if you are running on a non-Windows 10 machine. This implementation was made specifically to work even if your machine was not running Windows 10 or does not have Windows PowerShell installed! Of course, if you are not on a Windows 10 machine with Windows PowerShell installed there really is no way to check if your application is properly loopback exempted. However, I'm sure that this can be solved with a user if needed.
+Simple, right? Feel free to implement this if you are running on a non-Windows 10 machine. This implementation was made specifically to work even if your machine does not run Windows 10 or does not have Windows PowerShell installed. Of course, if you are not on a Windows 10 machine with Windows PowerShell installed there really is no way to properly check if your application is loopback exempted. However, I'm sure that this can be solved with the help of a user that has Windows 10 with Windows PowerShell if needed.
 
 # How to create a client
 Creating a client in JRakNet is also very easy. The code required to create a client can be seen here
