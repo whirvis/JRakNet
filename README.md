@@ -13,7 +13,6 @@ This library was meant to be used for Minecraft servers and clients, but can sti
 # Notes
 - Always use the newest version of JRakNet (with the exception of snapshots), including bug fix updates as they almost always fix major bugs, add new features, or have optimizations to make the API run faster. As a general rule, it is also not a good idea to fork this repository as it is almost always being updated like stated before. This means it is very possible for it to become out of date very quickly unless you are intending to create a new feature or fixing a bug to be merged back into the original repository through a pull request.
 - Some data packet IDs are reserved by RakNet. Because of this, it is recommended that all game packets not relating to RakNet begin with their own special ID (add a byte at the beginning of all packets that is not used as an internal packet ID by RakNet). It is also recommended that game servers and game clients do not use raw packets (the Netty based functions) at all unless it is absolutely necessary.
-- Since people are always creating issues on the repo about this, Minecraft clients do not work with JRakNet servers if you are on the same machine as the server. As a result, you will have to use another device (iPhone, Android, XBOX One, etc.) due to an error on Mojang's part. However, JRakNet clients work fine with Minecraft servers running on the same machine.
 
 # How to use with Maven
 If you are using a release version, use this dependency:
@@ -45,6 +44,7 @@ Creating a server in JRakNet is extremely easy, all it takes to create one can b
 
 ```java
 // Create server
+UniversalWindowsProgram.MINECRAFT.addLoopbackExemption(); // Allow localhost connections on Windows 10
 RakNetServer server = new RakNetServer(19132, 10,
 		new MinecraftIdentifier("JRakNet Example Server", 137, "1.2", 0, 10,
 				new Random().nextLong() /* Server broadcast ID */, "New World", "Survival"));
@@ -79,6 +79,23 @@ server.start();
 ```
 
 This is a simple RakNet server that can be tested through Minecraft by going to the "Friends" tab where the server should show up. Once the server pops up, you should be able to click on it to trigger the connection and packet hooks.
+
+# How to enable loopback exemption
+On Windows 10, applications that use the Universal Windows Program service by default are not able to connect to servers that are running on the same machine as them. As a result, many Minecraft players
+are disgruntled as they are not able to even play on their own servers on their PC. Rather, they have to use another device like their mobile phone on the same LAN network in order to even play on a server
+they should be able to play on directly from their PC. As a result, when I found out there was a way to disable this I added a way to do enable and disable exemption (which is disabled by default!) The
+way this can be done is by creating a ```UniversalWindowsProgram``` object with the first and only parameter being the ID of the application you are wanting to be able to connect to. An example would
+be Minecraft's (which is already built into ```UniversalWindowsProgram```) which is ```Microsoft.MinecraftUWP_8wekyb3d8bbwe```. So, if we were say enabling this for Microsoft Edge, we would
+do the following:
+
+```java
+UniversalWindowsProgram MICROSOFT_EDGE = new UniversalWindowsProgram("Microsoft.MicrosoftEdge_8wekyb3d8bbwe");
+if(!MICROSOFT_EDGE.addLoopbackExemption()) {
+	System.out.println("Warning: Microsoft Edge is not loopback exempt!"); // It is good practice to make sure that the application managed to become loopback exempted
+}
+```
+
+Simple, right? On top of this, feel free to implement this if you are running on a non-Windows 10 machine. This implementation was made specifically to work even if your machine was not running Windows 10 or does not have Windows PowerShell installed! Of course, if you are not on a Windows 10 machine with Windows PowerShell installed there really is no way to check if your application is properly loopback exempted. However, I'm sure that this can be solved with a user if needed.
 
 # How to create a client
 Creating a client in JRakNet is also very easy. The code required to create a client can be seen here
