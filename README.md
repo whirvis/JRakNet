@@ -20,7 +20,7 @@ If you are using a release version, use this dependency:
 <dependency>
     <groupId>com.whirvis</groupId>
     <artifactId>jraknet</artifactId>
-    <version>2.9.8</version>
+    <version>2.10.0</version>
 </dependency>
 ```
 
@@ -35,7 +35,7 @@ If you are wanting to use a snapshot version, use this repository and dependency
 <dependency>
     <groupId>com.whirvis</groupId>
     <artifactId>jraknet</artifactId>
-    <version>2.9.9-SNAPSHOT</version>
+    <version>2.10.1-SNAPSHOT</version>
 </dependency>
 ```
 
