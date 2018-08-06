@@ -260,14 +260,16 @@ public class PowerShellCommand {
 				// Create process and execute command to create client process
 				log.debug("Executing administrative PowerShell command");
 				String administrativeCommand = PowerShellCommand.POWERSHELL_EXECUTABLE
-						+ " Start-Process -Verb runAs javaw.exe \'" + "$path "
+						+ " Start-Process -Verb runAs javaw.exe \'" + "-cp \"$path\" "
 						+ PowerShellAdministrativeClient.class.getName() + " "
 						+ administrativePowerShellServerSocket.getLocalPort() + " " + password + " " + command
 						+ END_OF_TEXT + "\'";
 				if (getRunningJarFile() != null) {
-					administrativeCommand = administrativeCommand.replace("$path", "-jar " + getRunningJarFile());
+					administrativeCommand = administrativeCommand.replace("$path",
+							getRunningJarFile().getAbsolutePath());
 				} else {
-					administrativeCommand = administrativeCommand.replace("$path", "-cp " + getRunningLocation());
+					administrativeCommand = administrativeCommand.replace("$path",
+							getRunningLocation().getAbsolutePath());
 				}
 				Process administrativePowerShell = Runtime.getRuntime().exec(administrativeCommand);
 				administrativePowerShell.getOutputStream().close();
