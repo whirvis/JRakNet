@@ -129,6 +129,7 @@ public class PowerShellAdministrativeClient {
 			Process administrativePowerShell = Runtime.getRuntime().exec(command);
 			administrativePowerShell.getOutputStream().close();
 			administrativePowerShell.waitFor();
+			administrativePowerShell.destroyForcibly();
 
 			// Send command output
 			System.out.println("Sending PowerShell command output");
