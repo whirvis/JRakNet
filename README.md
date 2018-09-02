@@ -6,9 +6,9 @@ This library was meant to be used for Minecraft servers and clients, but can sti
 
 | Protocol Info             | Version |
 | --------------------------|:-------:|
-| Current protocol          | 8       |
-| Supported server protocol | 8       |
-| Supported client protocol | 8       |
+| Current protocol          | 9       |
+| Supported server protocol | 9       |
+| Supported client protocol | 9       |
 
 # Notes
 - Always use the newest version of JRakNet (with the exception of snapshots), including bug fix updates as they almost always fix major bugs, add new features, or have optimizations to make the API run faster. As a general rule, it is also not a good idea to fork this repository as it is almost always being updated like stated before. This means it is very possible for it to become out of date very quickly unless you are intending to create a new feature or fixing a bug to be merged back into the original repository through a pull request.
@@ -20,7 +20,7 @@ If you are using a release version, use this dependency:
 <dependency>
     <groupId>com.whirvis</groupId>
     <artifactId>jraknet</artifactId>
-    <version>2.10.0</version>
+    <version>2.10.1</version>
 </dependency>
 ```
 
@@ -35,7 +35,7 @@ If you are wanting to use a snapshot version, use this repository and dependency
 <dependency>
     <groupId>com.whirvis</groupId>
     <artifactId>jraknet</artifactId>
-    <version>2.10.1-SNAPSHOT</version>
+    <version>2.10.2-SNAPSHOT</version>
 </dependency>
 ```
 
