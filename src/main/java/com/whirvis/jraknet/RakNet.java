@@ -37,9 +37,18 @@ package com.whirvis.jraknet;
  */
 public class RakNet {
 
+	/**
+	 * Quick note about RakNet protocol versions: If the RakNet protocol version
+	 * for Minecraft is ever bumped, please let me know immediately. I would add
+	 * a function to change the network protocol values, however I would rather
+	 * have myself change it after being notified by someone through an issue on
+	 * GitHub so I know the protocol is possibly out of date and that I need to
+	 * bump the versions.
+	 */
+
 	// Network protocol data
-	public static final int SERVER_NETWORK_PROTOCOL = 8;
-	public static final int CLIENT_NETWORK_PROTOCOL = 8;
+	public static final int SERVER_NETWORK_PROTOCOL = 9;
+	public static final int CLIENT_NETWORK_PROTOCOL = 9;
 	public static final int MAXIMUM_MTU_SIZE = 1492;
 	public static final int MINIMUM_MTU_SIZE = 400;
 
