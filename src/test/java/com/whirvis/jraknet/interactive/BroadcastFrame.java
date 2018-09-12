@@ -41,11 +41,11 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
 
-import com.whirvis.jraknet.UtilityTest;
+import com.whirvis.jraknet.RakNet;
+import com.whirvis.jraknet.RakNetTest;
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.client.discovery.DiscoveryMode;
 import com.whirvis.jraknet.identifier.MinecraftIdentifier;
-import com.whirvis.jraknet.util.RakNetUtils;
 
 /**
  * The frame used to visualize the broadcast test.
@@ -157,7 +157,7 @@ public class BroadcastFrame extends JFrame {
 
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			int newDiscoveryPort = RakNetUtils.parseIntPassive(textFieldDiscoveryPort.getText());
+			int newDiscoveryPort = RakNet.parseIntPassive(textFieldDiscoveryPort.getText());
 			if (newDiscoveryPort > -1) {
 				client.setDiscoveryPorts(newDiscoveryPort);
 			} else {
@@ -178,7 +178,7 @@ public class BroadcastFrame extends JFrame {
 		for (int i = 0; i < identifiers.length; i++) {
 			MinecraftIdentifier identifier = identifiers[i];
 			discoverString
-					.append(UtilityTest.formatMCPEIdentifier(identifier) + (i + 1 < identifiers.length ? "\n" : ""));
+					.append(RakNetTest.formatMCPEIdentifier(identifier) + (i + 1 < identifiers.length ? "\n" : ""));
 
 		}
 		txtPnDiscoveredMcpeServerList.setText(discoverString.toString());

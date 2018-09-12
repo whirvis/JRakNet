@@ -63,7 +63,6 @@ import com.whirvis.jraknet.protocol.status.UnconnectedPong;
 import com.whirvis.jraknet.session.GeminusRakNetPeer;
 import com.whirvis.jraknet.session.RakNetClientSession;
 import com.whirvis.jraknet.session.RakNetState;
-import com.whirvis.jraknet.util.RakNetUtils;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -171,7 +170,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            the maximum amount of connections.
 	 */
 	public RakNetServer(int port, int maxConnections) {
-		this(port, maxConnections, RakNetUtils.getMaximumTransferUnit());
+		this(port, maxConnections, RakNet.getMaximumTransferUnit());
 	}
 
 	/**
@@ -619,7 +618,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 						if (connectionRequestOne.maximumTransferUnit <= this.maximumTransferUnit) {
 							OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne();
 							connectionResponseOne.serverGuid = this.guid;
-							connectionResponseOne.maximumTransferUnit = connectionRequestOne.maximumTransferUnit;
+							connectionResponseOne.maximumTransferUnit = this.maximumTransferUnit;
 							connectionResponseOne.encode();
 							this.sendNettyMessage(connectionResponseOne, sender);
 						}

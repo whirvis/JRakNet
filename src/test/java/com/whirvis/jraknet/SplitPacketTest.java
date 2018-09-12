@@ -86,7 +86,7 @@ public class SplitPacketTest {
 	 *             if any problems occur during the stress test.
 	 */
 	private static RakNetServer createServer() throws RakNetException {
-		RakNetServer server = new RakNetServer(UtilityTest.WHIRVIS_DEVELOPMENT_PORT, 1);
+		RakNetServer server = new RakNetServer(RakNetTest.WHIRVIS_DEVELOPMENT_PORT, 1);
 
 		// Add listener
 		server.addListener(new RakNetServerListener() {
@@ -218,7 +218,7 @@ public class SplitPacketTest {
 		});
 
 		// Connect to server
-		client.connectThreaded(InetAddress.getLocalHost(), UtilityTest.WHIRVIS_DEVELOPMENT_PORT);
+		client.connectThreaded(InetAddress.getLocalHost(), RakNetTest.WHIRVIS_DEVELOPMENT_PORT);
 		return client;
 	}
 

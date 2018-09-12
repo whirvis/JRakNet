@@ -45,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetPacket;
+import com.whirvis.jraknet.map.concurrent.ConcurrentIntMap;
 import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.protocol.MessageIdentifier;
 import com.whirvis.jraknet.protocol.Reliability;
@@ -55,7 +56,6 @@ import com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgeType;
 import com.whirvis.jraknet.protocol.message.acknowledge.Record;
 import com.whirvis.jraknet.protocol.status.ConnectedPing;
 import com.whirvis.jraknet.protocol.status.ConnectedPong;
-import com.whirvis.jraknet.util.map.concurrent.ConcurrentIntMap;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;

@@ -34,7 +34,7 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import com.whirvis.jraknet.UtilityTest;
+import com.whirvis.jraknet.RakNetTest;
 import com.whirvis.jraknet.identifier.MinecraftIdentifier;
 import com.whirvis.jraknet.server.RakNetServer;
 
@@ -46,14 +46,14 @@ import com.whirvis.jraknet.server.RakNetServer;
 public class LatencyTest {
 
 	private static final MinecraftIdentifier LATENCY_TEST_IDENTIFIER = new MinecraftIdentifier("A JRakNet latency test",
-			UtilityTest.MINECRAFT_PROTOCOL_NUMBER, UtilityTest.MINECRAFT_VERSION, 0, 10,
+			RakNetTest.MINECRAFT_PROTOCOL_NUMBER, RakNetTest.MINECRAFT_VERSION, 0, 10,
 			-1 /* We don't know the GUID yet */, "New World", "Developer");
 
 	private final RakNetServer server;
 	private final LatencyFrame frame;
 
 	public LatencyTest() {
-		this.server = new RakNetServer(UtilityTest.MINECRAFT_DEFAULT_PORT, LATENCY_TEST_IDENTIFIER.getMaxPlayerCount());
+		this.server = new RakNetServer(RakNetTest.MINECRAFT_DEFAULT_PORT, LATENCY_TEST_IDENTIFIER.getMaxPlayerCount());
 		this.frame = new LatencyFrame();
 	}
 

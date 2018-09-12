@@ -28,7 +28,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.util.map;
+package com.whirvis.jraknet.map;
 
 /**
  * Used in supporting <code>Map</code> classes to rename keys of values.

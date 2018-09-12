@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.UtilityTest;
+import com.whirvis.jraknet.RakNetTest;
 import com.whirvis.jraknet.example.chat.ChatMessageIdentifier;
 import com.whirvis.jraknet.example.chat.ServerChannel;
 import com.whirvis.jraknet.example.chat.protocol.LoginFailure;
@@ -391,7 +391,7 @@ public class ChatServer implements RakNetServerListener {
 	public static void main(String[] args) {
 		// Create and start server
 		ChatServer server = new ChatServer("JRakNet Server Example", "This is a test server made for JRakNet",
-				UtilityTest.WHIRVIS_DEVELOPMENT_PORT, 10);
+				RakNetTest.WHIRVIS_DEVELOPMENT_PORT, 10);
 		server.start();
 		log.info("Started server!");
 

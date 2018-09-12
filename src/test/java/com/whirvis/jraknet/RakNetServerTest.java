@@ -36,8 +36,6 @@ import java.net.InetSocketAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.whirvis.jraknet.RakNetException;
-import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.identifier.MinecraftIdentifier;
 import com.whirvis.jraknet.protocol.MessageIdentifier;
 import com.whirvis.jraknet.protocol.login.NewIncomingConnection;
@@ -47,7 +45,6 @@ import com.whirvis.jraknet.server.RakNetServer;
 import com.whirvis.jraknet.server.RakNetServerListener;
 import com.whirvis.jraknet.server.ServerPing;
 import com.whirvis.jraknet.session.RakNetClientSession;
-import com.whirvis.jraknet.util.RakNetUtils;
 import com.whirvis.jraknet.windows.UniversalWindowsProgram;
 
 /**
@@ -67,7 +64,7 @@ public class RakNetServerTest {
 		}
 
 		// Create server and add listener
-		RakNetServer server = new RakNetServer(UtilityTest.MINECRAFT_DEFAULT_PORT, 10);
+		RakNetServer server = new RakNetServer(RakNetTest.MINECRAFT_DEFAULT_PORT, 10);
 		server.addListener(new RakNetServerListener() {
 
 			@Override
@@ -96,14 +93,14 @@ public class RakNetServerTest {
 			@Override
 			public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
 				log.info("Received packet from " + session.getConnectionType().getName() + " client with address "
-						+ session.getAddress() + " with packet ID " + RakNetUtils.toHexStringId(packet) + " on channel "
+						+ session.getAddress() + " with packet ID " + RakNet.toHexStringId(packet) + " on channel "
 						+ channel);
 			}
 
 			@Override
 			public void handlePing(ServerPing ping) {
 				MinecraftIdentifier identifier = new MinecraftIdentifier("A JRakNet server test",
-						UtilityTest.MINECRAFT_PROTOCOL_NUMBER, UtilityTest.MINECRAFT_VERSION, server.getSessionCount(),
+						RakNetTest.MINECRAFT_PROTOCOL_NUMBER, RakNetTest.MINECRAFT_VERSION, server.getSessionCount(),
 						server.getMaxConnections(), server.getGloballyUniqueId(), "New World", "Survival");
 				ping.setIdentifier(identifier);
 			}

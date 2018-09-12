@@ -28,20 +28,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.util.map.concurrent;
+package com.whirvis.jraknet.map.concurrent;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.whirvis.jraknet.util.map.DynamicKey;
+import com.whirvis.jraknet.map.DynamicKey;
 
 /**
- * This class is used for using bytes as keys in normal maps without having to
+ * This class is used for using longs as keys in normal maps without having to
  * worry about boxing them.
  *
  * @author Whirvis T. Wheatley
  */
-public class ConcurrentByteMap<T> extends ConcurrentHashMap<Byte, T> implements Map<Byte, T>, DynamicKey<Byte> {
+public class ConcurrentLongMap<T> extends ConcurrentHashMap<Long, T> implements Map<Long, T>, DynamicKey<Long> {
 
 	private static final long serialVersionUID = 4324132003573381634L;
 
@@ -54,7 +54,7 @@ public class ConcurrentByteMap<T> extends ConcurrentHashMap<Byte, T> implements 
 	 * @return <tt>true</tt> if this map contains a mapping for the specified
 	 *         key.
 	 */
-	public boolean containsKey(byte key) {
+	public boolean containsKey(long key) {
 		return super.containsKey(key);
 	}
 
@@ -87,12 +87,12 @@ public class ConcurrentByteMap<T> extends ConcurrentHashMap<Byte, T> implements 
 	 * explicitly maps the key to {@code null}. The {@link #containsKey
 	 * containsKey} operation may be used to distinguish these two cases.
 	 *
-	 * @see #put(byte, Object)
+	 * @see #put(long, Object)
 	 * @param key
 	 *            they key the value is mapped to.
 	 * @return the value to which the specified key is mapped.
 	 */
-	public T get(byte key) {
+	public T get(long key) {
 		return super.get(key);
 	}
 
@@ -110,7 +110,7 @@ public class ConcurrentByteMap<T> extends ConcurrentHashMap<Byte, T> implements 
 	 *         can also indicate that the map previously associated
 	 *         <tt>null</tt> with <tt>key</tt>.)
 	 */
-	public T put(byte key, T value) {
+	public T put(long key, T value) {
 		return super.put(key, value);
 	}
 
@@ -124,17 +124,17 @@ public class ConcurrentByteMap<T> extends ConcurrentHashMap<Byte, T> implements 
 	 *         can also indicate that the map previously associated
 	 *         <tt>null</tt> with <tt>key</tt>.)
 	 */
-	public T remove(byte key) {
+	public T remove(long key) {
 		return super.remove(key);
 	}
 
 	@Override
-	public void renameKey(Byte oldKey, Byte newKey) throws NullPointerException {
-		T storedObject = this.remove(oldKey.byteValue());
+	public void renameKey(Long oldKey, Long newKey) throws NullPointerException {
+		T storedObject = this.remove(oldKey.longValue());
 		if (storedObject == null) {
 			throw new NullPointerException();
 		}
-		this.put(newKey.byteValue(), storedObject);
+		this.put(newKey.longValue(), storedObject);
 	}
 
 }

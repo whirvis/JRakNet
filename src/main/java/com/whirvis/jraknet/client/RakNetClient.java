@@ -67,7 +67,6 @@ import com.whirvis.jraknet.protocol.status.UnconnectedPong;
 import com.whirvis.jraknet.session.RakNetServerSession;
 import com.whirvis.jraknet.session.RakNetState;
 import com.whirvis.jraknet.session.UnumRakNetPeer;
-import com.whirvis.jraknet.util.RakNetUtils;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -110,6 +109,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	private final EventLoopGroup group;
 	private final RakNetClientHandler handler;
 	private MaximumTransferUnit[] maximumTransferUnits;
+	private int maximumMaximumTransferUnit;
 
 	// Session management
 	private Channel channel;
@@ -426,12 +426,13 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	/**
 	 * Sets the size of the maximum transfer units that will be used by the
-	 * client during in.
+	 * client during connection.
 	 * 
 	 * @param maximumTransferUnitSizes
 	 *            the maximum transfer unit sizes.
 	 */
 	public final void setMaximumTransferUnits(int... maximumTransferUnitSizes) {
+		// Determine valid maximum transfer units
 		boolean foundTransferUnit = false;
 		ArrayList<MaximumTransferUnit> maximumTransferUnits = new ArrayList<MaximumTransferUnit>();
 		for (int i = 0; i < maximumTransferUnitSizes.length; i++) {
@@ -441,7 +442,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 				throw new IllegalArgumentException("Maximum transfer unit size must be between "
 						+ RakNet.MINIMUM_MTU_SIZE + "-" + RakNet.MAXIMUM_MTU_SIZE);
 			}
-			if (RakNetUtils.getMaximumTransferUnit() >= maximumTransferUnitSize) {
+			if (RakNet.getMaximumTransferUnit() >= maximumTransferUnitSize) {
 				maximumTransferUnits.add(new MaximumTransferUnit(maximumTransferUnitSize,
 						(i * 2) + (i + 1 < maximumTransferUnitSizes.length ? 2 : 1)));
 				foundTransferUnit = true;
@@ -451,6 +452,16 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			}
 		}
 		this.maximumTransferUnits = maximumTransferUnits.toArray(new MaximumTransferUnit[maximumTransferUnits.size()]);
+
+		// Determine the highest maximum transfer unit
+		int maximumMaximumTransferUnit = Integer.MIN_VALUE;
+		for (MaximumTransferUnit maximumTransferUnit : maximumTransferUnits) {
+			if (maximumTransferUnit.getSize() > maximumMaximumTransferUnit) {
+				maximumMaximumTransferUnit = maximumTransferUnit.getSize();
+			}
+		}
+		this.maximumMaximumTransferUnit = maximumMaximumTransferUnit;
+
 		if (foundTransferUnit == false) {
 			throw new RuntimeException("No compatible maximum transfer unit found for machine network cards");
 		}
@@ -783,7 +794,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	public final void updateDiscoveryData(InetSocketAddress sender, UnconnectedPong pong) {
 		// Is this a local or an external server?
-		if (RakNetUtils.isLocalAddress(sender) && !externalServers.containsKey(sender)) {
+		if (RakNet.isLocalAddress(sender) && !externalServers.containsKey(sender)) {
 			// This is a local server
 			if (!discovered.containsKey(sender)) {
 				// Add newly discovered server
@@ -845,7 +856,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			this.disconnect("Disconnected");
 		}
 		MaximumTransferUnit[] units = MaximumTransferUnit.sort(maximumTransferUnits);
-		this.preparation = new SessionPreparation(this, units[0].getSize());
+		this.preparation = new SessionPreparation(this, units[0].getSize(), maximumMaximumTransferUnit);
 		preparation.address = address;
 
 		// Send OPEN_CONNECTION_REQUEST_ONE with a decreasing MTU

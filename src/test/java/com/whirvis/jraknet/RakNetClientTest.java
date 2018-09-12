@@ -35,7 +35,6 @@ import java.net.InetSocketAddress;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.client.RakNetClientListener;
 import com.whirvis.jraknet.protocol.MessageIdentifier;
@@ -86,11 +85,11 @@ public class RakNetClientTest {
 			}
 
 		});
-		log.info("Created client, connecting to " + UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
+		log.info("Created client, connecting to " + RakNetTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
 
 		// Connect to server
 		try {
-			client.connect(UtilityTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
+			client.connect(RakNetTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
 		} catch (RakNetException e) {
 			e.printStackTrace();
 			client.disconnectAndShutdown(e.getClass().getName() + ": " + e.getMessage());

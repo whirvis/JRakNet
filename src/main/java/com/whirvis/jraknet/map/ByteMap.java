@@ -28,18 +28,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.util.map;
+package com.whirvis.jraknet.map;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class is used for using ints as keys in normal maps without having to
+ * This class is used for using bytes as keys in normal maps without having to
  * worry about boxing them.
  *
  * @author Whirvis T. Wheatley
  */
-public class IntMap<T> extends HashMap<Integer, T> implements Map<Integer, T>, DynamicKey<Integer> {
+public class ByteMap<T> extends HashMap<Byte, T> implements Map<Byte, T>, DynamicKey<Byte> {
 
 	private static final long serialVersionUID = 4324132003573381634L;
 
@@ -52,7 +52,7 @@ public class IntMap<T> extends HashMap<Integer, T> implements Map<Integer, T>, D
 	 * @return <tt>true</tt> if this map contains a mapping for the specified
 	 *         key.
 	 */
-	public boolean containsKey(int key) {
+	public boolean containsKey(byte key) {
 		return super.containsKey(key);
 	}
 
@@ -85,12 +85,12 @@ public class IntMap<T> extends HashMap<Integer, T> implements Map<Integer, T>, D
 	 * explicitly maps the key to {@code null}. The {@link #containsKey
 	 * containsKey} operation may be used to distinguish these two cases.
 	 *
-	 * @see #put(int, Object)
+	 * @see #put(byte, Object)
 	 * @param key
 	 *            they key the value is mapped to.
 	 * @return the value to which the specified key is mapped.
 	 */
-	public T get(int key) {
+	public T get(byte key) {
 		return super.get(key);
 	}
 
@@ -108,7 +108,7 @@ public class IntMap<T> extends HashMap<Integer, T> implements Map<Integer, T>, D
 	 *         can also indicate that the map previously associated
 	 *         <tt>null</tt> with <tt>key</tt>.)
 	 */
-	public T put(int key, T value) {
+	public T put(byte key, T value) {
 		return super.put(key, value);
 	}
 
@@ -122,17 +122,17 @@ public class IntMap<T> extends HashMap<Integer, T> implements Map<Integer, T>, D
 	 *         can also indicate that the map previously associated
 	 *         <tt>null</tt> with <tt>key</tt>.)
 	 */
-	public T remove(int key) {
+	public T remove(byte key) {
 		return super.remove(key);
 	}
 
 	@Override
-	public void renameKey(Integer oldKey, Integer newKey) throws NullPointerException {
-		T storedObject = this.remove(oldKey.intValue());
+	public void renameKey(Byte oldKey, Byte newKey) throws NullPointerException {
+		T storedObject = this.remove(oldKey.byteValue());
 		if (storedObject == null) {
 			throw new NullPointerException();
 		}
-		this.put(newKey.intValue(), storedObject);
+		this.put(newKey.byteValue(), storedObject);
 	}
 
 }
