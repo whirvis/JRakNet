@@ -64,6 +64,7 @@ public class SessionPreparation {
 	private final String loggerName;
 	private final RakNetClient client;
 	private final int initialMaximumTransferUnit;
+	private final int maximumMaximumTransferUnit;
 	public RakNetException cancelReason;
 
 	// Server data
@@ -81,11 +82,14 @@ public class SessionPreparation {
 	 *            the <code>RakNetClient</code> that is logging into the server.
 	 * @param initialMaximumTransferUnit
 	 *            the initial maximum transfer unit.
+	 * @param maximumMaximumTransferUnit
+	 *            the maximum transfer unit with the highest size.
 	 */
-	public SessionPreparation(RakNetClient client, int initialMaximumTransferUnit) {
+	public SessionPreparation(RakNetClient client, int initialMaximumTransferUnit, int maximumMaximumTransferUnit) {
 		this.loggerName = "session planner #" + Long.toHexString(client.getGloballyUniqueId()).toUpperCase();
 		this.client = client;
 		this.initialMaximumTransferUnit = initialMaximumTransferUnit;
+		this.maximumMaximumTransferUnit = maximumMaximumTransferUnit;
 	}
 
 	/**
@@ -107,16 +111,24 @@ public class SessionPreparation {
 					|| connectionResponseOne.maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE) {
 				this.cancelReason = new LoginFailureException(client, "Invalid maximum transfer unit size");
 			} else {
-				this.maximumTransferUnit = connectionResponseOne.maximumTransferUnit < this.initialMaximumTransferUnit
-						? connectionResponseOne.maximumTransferUnit : this.initialMaximumTransferUnit;
+				// Determine which maximum transfer unit to use
+				if (connectionResponseOne.maximumTransferUnit <= this.maximumMaximumTransferUnit) {
+					this.maximumTransferUnit = connectionResponseOne.maximumTransferUnit;
+				} else {
+					this.maximumTransferUnit = connectionResponseOne.maximumTransferUnit < this.initialMaximumTransferUnit
+							? connectionResponseOne.maximumTransferUnit : this.initialMaximumTransferUnit;
+				}
+
+				// Validate maximum transfer unit and proceed
 				if (this.maximumTransferUnit > RakNet.MAXIMUM_MTU_SIZE
 						|| this.maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE) {
 					this.cancelReason = new LoginFailureException(client, "Invalid maximum transfer unit size");
 				} else {
 					this.guid = connectionResponseOne.serverGuid;
 					this.loginPackets[0] = true;
-					log.debug(loggerName + " applied maximum transfer unit and globally unique ID from "
-							+ MessageIdentifier.getName(packetId) + " packet");
+					log.debug(loggerName + " applied maximum transfer unit " + maximumTransferUnit
+							+ " and globally unique ID " + guid + " from " + MessageIdentifier.getName(packetId)
+							+ " packet");
 				}
 			}
 		} else if (packetId == ID_OPEN_CONNECTION_REPLY_2) {

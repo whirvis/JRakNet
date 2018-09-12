@@ -28,20 +28,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.util.map.concurrent;
+package com.whirvis.jraknet.map.concurrent;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.whirvis.jraknet.util.map.DynamicKey;
+import com.whirvis.jraknet.map.DynamicKey;
 
 /**
- * This class is used for using shorts as keys in normal maps without having to
+ * This class is used for using bytes as keys in normal maps without having to
  * worry about boxing them.
  *
  * @author Trent "Whirvis" Summerlin
  */
-public class ConcurrentShortMap<T> extends ConcurrentHashMap<Short, T> implements Map<Short, T>, DynamicKey<Short> {
+public class ConcurrentByteMap<T> extends ConcurrentHashMap<Byte, T> implements Map<Byte, T>, DynamicKey<Byte> {
 
 	private static final long serialVersionUID = 4324132003573381634L;
 
@@ -54,7 +54,7 @@ public class ConcurrentShortMap<T> extends ConcurrentHashMap<Short, T> implement
 	 * @return <tt>true</tt> if this map contains a mapping for the specified
 	 *         key.
 	 */
-	public boolean containsKey(short key) {
+	public boolean containsKey(byte key) {
 		return super.containsKey(key);
 	}
 
@@ -87,12 +87,12 @@ public class ConcurrentShortMap<T> extends ConcurrentHashMap<Short, T> implement
 	 * explicitly maps the key to {@code null}. The {@link #containsKey
 	 * containsKey} operation may be used to distinguish these two cases.
 	 *
-	 * @see #put(short, Object)
+	 * @see #put(byte, Object)
 	 * @param key
 	 *            they key the value is mapped to.
 	 * @return the value to which the specified key is mapped.
 	 */
-	public T get(short key) {
+	public T get(byte key) {
 		return super.get(key);
 	}
 
@@ -110,7 +110,7 @@ public class ConcurrentShortMap<T> extends ConcurrentHashMap<Short, T> implement
 	 *         can also indicate that the map previously associated
 	 *         <tt>null</tt> with <tt>key</tt>.)
 	 */
-	public T put(short key, T value) {
+	public T put(byte key, T value) {
 		return super.put(key, value);
 	}
 
@@ -124,17 +124,17 @@ public class ConcurrentShortMap<T> extends ConcurrentHashMap<Short, T> implement
 	 *         can also indicate that the map previously associated
 	 *         <tt>null</tt> with <tt>key</tt>.)
 	 */
-	public T remove(short key) {
+	public T remove(byte key) {
 		return super.remove(key);
 	}
 
 	@Override
-	public void renameKey(Short oldKey, Short newKey) throws NullPointerException {
-		T storedObject = this.remove(oldKey.shortValue());
+	public void renameKey(Byte oldKey, Byte newKey) throws NullPointerException {
+		T storedObject = this.remove(oldKey.byteValue());
 		if (storedObject == null) {
 			throw new NullPointerException();
 		}
-		this.put(newKey.shortValue(), storedObject);
+		this.put(newKey.byteValue(), storedObject);
 	}
 
 }

@@ -32,8 +32,8 @@ package com.whirvis.jraknet.client.discovery;
 
 import java.net.InetSocketAddress;
 
+import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.identifier.Identifier;
-import com.whirvis.jraknet.util.ArrayUtils;
 
 /**
  * This class represents a server that has been discovered by the
@@ -123,7 +123,7 @@ public class DiscoveredServer {
 
 	@Override
 	public String toString() {
-		return ArrayUtils.toJRakNetString(this.address, this.discoveryTimestamp, this.identifier);
+		return RakNet.toObjString(this.address, this.discoveryTimestamp, this.identifier);
 	}
 
 }

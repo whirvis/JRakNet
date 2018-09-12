@@ -30,7 +30,7 @@
  */
 package com.whirvis.jraknet.identifier;
 
-import com.whirvis.jraknet.util.RakNetUtils;
+import com.whirvis.jraknet.RakNet;
 
 /**
  * Represents an identifier from a Minecraft server.
@@ -157,13 +157,13 @@ public class MinecraftIdentifier extends Identifier {
 
 			// Parse data
 			this.serverName = data[1];
-			this.serverProtocol = RakNetUtils.parseIntPassive(data[2]);
+			this.serverProtocol = RakNet.parseIntPassive(data[2]);
 			this.versionTag = data[3];
-			this.onlinePlayerCount = RakNetUtils.parseIntPassive(data[4]);
-			this.maxPlayerCount = RakNetUtils.parseIntPassive(data[5]);
+			this.onlinePlayerCount = RakNet.parseIntPassive(data[4]);
+			this.maxPlayerCount = RakNet.parseIntPassive(data[5]);
 			this.legacy = true;
 			if (data.length >= DATA_COUNT) {
-				this.guid = RakNetUtils.parseLongPassive(data[6]);
+				this.guid = RakNet.parseLongPassive(data[6]);
 				this.worldName = data[7];
 				this.gamemode = data[8];
 				this.legacy = false;

@@ -28,10 +28,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.util.map;
+package com.whirvis.jraknet.map.concurrent;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.whirvis.jraknet.map.DynamicKey;
 
 /**
  * This class is used for using longs as keys in normal maps without having to
@@ -39,7 +41,7 @@ import java.util.Map;
  *
  * @author Trent "Whirvis" Summerlin
  */
-public class LongMap<T> extends HashMap<Long, T> implements Map<Long, T>, DynamicKey<Long> {
+public class ConcurrentLongMap<T> extends ConcurrentHashMap<Long, T> implements Map<Long, T>, DynamicKey<Long> {
 
 	private static final long serialVersionUID = 4324132003573381634L;
 

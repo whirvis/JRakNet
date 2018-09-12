@@ -30,8 +30,8 @@
  */
 package com.whirvis.jraknet.client;
 
+import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.util.RakNetUtils;
 
 /**
  * Signals that a packet critical to the <code>RakNetClient</code> failed to
@@ -55,7 +55,7 @@ public class PacketBufferException extends RakNetClientException {
 	 *            the <code>RakNetPacket</code> that failed to encode/decode.
 	 */
 	public PacketBufferException(RakNetClient client, RakNetPacket packet) {
-		super(client, "Packet with ID " + RakNetUtils.toHexStringId(packet) + " failed to encode/decode");
+		super(client, "Packet with ID " + RakNet.toHexStringId(packet) + " failed to encode/decode");
 		this.packet = packet;
 	}
 

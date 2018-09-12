@@ -30,7 +30,7 @@
  */
 package com.whirvis.jraknet.protocol;
 
-import com.whirvis.jraknet.util.ArrayUtils;
+import com.whirvis.jraknet.RakNet;
 
 /**
  * Contains all the reliability types for RakNet.
@@ -186,8 +186,8 @@ public enum Reliability {
 
 	@Override
 	public String toString() {
-		return ArrayUtils.toJRakNetString(this.name(), "id:" + this.id, "reliable:" + this.reliable,
-				"ordered:" + this.ordered, "sequenced:" + this.sequenced, "ack:" + this.requiresAck);
+		return RakNet.toObjString(this.name(), "id:" + this.id, "reliable:" + this.reliable, "ordered:" + this.ordered,
+				"sequenced:" + this.sequenced, "ack:" + this.requiresAck);
 	}
 
 	/**

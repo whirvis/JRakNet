@@ -30,7 +30,7 @@
  */
 package com.whirvis.jraknet.session;
 
-import com.whirvis.jraknet.util.map.IntMap;
+import com.whirvis.jraknet.map.IntMap;
 
 /**
  * Represents the current status of a connection in a
