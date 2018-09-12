@@ -36,8 +36,8 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.whirvis.jraknet.util.RakNetUtils;
-import com.whirvis.jraknet.util.map.ShortMap;
+import com.whirvis.jraknet.RakNet;
+import com.whirvis.jraknet.map.ShortMap;
 
 /**
  * Contains all of the packet IDs for RakNet.
@@ -231,11 +231,11 @@ public class MessageIdentifier {
 					String currentName = packetNames.get(packetId);
 					if (currentName != null) {
 						if (!currentName.equals(packetName)) {
-							log.warn("Found duplicate ID " + RakNetUtils.toHexStringId(packetId) + " for \""
-									+ packetName + "\" and \"" + currentName + "\", overriding name and ID");
+							log.warn("Found duplicate ID " + RakNet.toHexStringId(packetId) + " for \"" + packetName
+									+ "\" and \"" + currentName + "\", overriding name and ID");
 						}
 					} else {
-						log.debug("Assigned packet ID " + RakNetUtils.toHexStringId(packetId) + " to " + packetName);
+						log.debug("Assigned packet ID " + RakNet.toHexStringId(packetId) + " to " + packetName);
 					}
 					packetNames.put(packetId, packetName);
 					packetIds.put(packetName, packetId);

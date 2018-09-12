@@ -28,10 +28,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.util.map;
+package com.whirvis.jraknet.map.concurrent;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import com.whirvis.jraknet.map.DynamicKey;
 
 /**
  * This class is used for using bytes as keys in normal maps without having to
@@ -39,7 +41,7 @@ import java.util.Map;
  *
  * @author Trent Summerlin
  */
-public class ByteMap<T> extends HashMap<Byte, T> implements Map<Byte, T>, DynamicKey<Byte> {
+public class ConcurrentByteMap<T> extends ConcurrentHashMap<Byte, T> implements Map<Byte, T>, DynamicKey<Byte> {
 
 	private static final long serialVersionUID = 4324132003573381634L;
 

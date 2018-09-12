@@ -28,12 +28,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.util.map.concurrent;
+package com.whirvis.jraknet.map.concurrent;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.whirvis.jraknet.util.map.DynamicKey;
+import com.whirvis.jraknet.map.DynamicKey;
 
 /**
  * This class is used for using longs as keys in normal maps without having to

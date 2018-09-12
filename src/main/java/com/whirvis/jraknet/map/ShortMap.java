@@ -28,12 +28,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.util.map.concurrent;
+package com.whirvis.jraknet.map;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.whirvis.jraknet.util.map.DynamicKey;
 
 /**
  * This class is used for using shorts as keys in normal maps without having to
@@ -41,7 +39,7 @@ import com.whirvis.jraknet.util.map.DynamicKey;
  *
  * @author Trent Summerlin
  */
-public class ConcurrentShortMap<T> extends ConcurrentHashMap<Short, T> implements Map<Short, T>, DynamicKey<Short> {
+public class ShortMap<T> extends HashMap<Short, T> implements Map<Short, T>, DynamicKey<Short> {
 
 	private static final long serialVersionUID = 4324132003573381634L;
 

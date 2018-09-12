@@ -28,18 +28,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.util.map;
+package com.whirvis.jraknet.map;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class is used for using shorts as keys in normal maps without having to
+ * This class is used for using longs as keys in normal maps without having to
  * worry about boxing them.
  *
  * @author Trent Summerlin
  */
-public class ShortMap<T> extends HashMap<Short, T> implements Map<Short, T>, DynamicKey<Short> {
+public class LongMap<T> extends HashMap<Long, T> implements Map<Long, T>, DynamicKey<Long> {
 
 	private static final long serialVersionUID = 4324132003573381634L;
 
@@ -52,7 +52,7 @@ public class ShortMap<T> extends HashMap<Short, T> implements Map<Short, T>, Dyn
 	 * @return <tt>true</tt> if this map contains a mapping for the specified
 	 *         key.
 	 */
-	public boolean containsKey(short key) {
+	public boolean containsKey(long key) {
 		return super.containsKey(key);
 	}
 
@@ -85,12 +85,12 @@ public class ShortMap<T> extends HashMap<Short, T> implements Map<Short, T>, Dyn
 	 * explicitly maps the key to {@code null}. The {@link #containsKey
 	 * containsKey} operation may be used to distinguish these two cases.
 	 *
-	 * @see #put(short, Object)
+	 * @see #put(long, Object)
 	 * @param key
 	 *            they key the value is mapped to.
 	 * @return the value to which the specified key is mapped.
 	 */
-	public T get(short key) {
+	public T get(long key) {
 		return super.get(key);
 	}
 
@@ -108,7 +108,7 @@ public class ShortMap<T> extends HashMap<Short, T> implements Map<Short, T>, Dyn
 	 *         can also indicate that the map previously associated
 	 *         <tt>null</tt> with <tt>key</tt>.)
 	 */
-	public T put(short key, T value) {
+	public T put(long key, T value) {
 		return super.put(key, value);
 	}
 
@@ -122,17 +122,17 @@ public class ShortMap<T> extends HashMap<Short, T> implements Map<Short, T>, Dyn
 	 *         can also indicate that the map previously associated
 	 *         <tt>null</tt> with <tt>key</tt>.)
 	 */
-	public T remove(short key) {
+	public T remove(long key) {
 		return super.remove(key);
 	}
 
 	@Override
-	public void renameKey(Short oldKey, Short newKey) throws NullPointerException {
-		T storedObject = this.remove(oldKey.shortValue());
+	public void renameKey(Long oldKey, Long newKey) throws NullPointerException {
+		T storedObject = this.remove(oldKey.longValue());
 		if (storedObject == null) {
 			throw new NullPointerException();
 		}
-		this.put(newKey.shortValue(), storedObject);
+		this.put(newKey.longValue(), storedObject);
 	}
 
 }

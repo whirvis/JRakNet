@@ -37,7 +37,7 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import com.whirvis.jraknet.UtilityTest;
+import com.whirvis.jraknet.RakNetTest;
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.client.RakNetClientListener;
 import com.whirvis.jraknet.client.discovery.DiscoveryMode;
@@ -56,7 +56,7 @@ public class BroadcastTest {
 	private final BroadcastFrame frame;
 
 	public BroadcastTest() {
-		this.client = new RakNetClient(DiscoveryMode.ALL_CONNECTIONS, UtilityTest.MINECRAFT_DEFAULT_PORT);
+		this.client = new RakNetClient(DiscoveryMode.ALL_CONNECTIONS, RakNetTest.MINECRAFT_DEFAULT_PORT);
 		this.discovered = new HashMap<InetSocketAddress, MinecraftIdentifier>();
 		this.frame = new BroadcastFrame(client);
 	}

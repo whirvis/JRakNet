@@ -10,6 +10,8 @@ com.whirvis.jraknet.example.chat.server
 com.whirvis.jraknet.example.chat.server.command
 com.whirvis.jraknet.identifier
 com.whirvis.jraknet.interactive
+com.whirvis.jraknet.map
+com.whirvis.jraknet.map.concurrent
 com.whirvis.jraknet.protocol
 com.whirvis.jraknet.protocol.login
 com.whirvis.jraknet.protocol.message
@@ -18,6 +20,4 @@ com.whirvis.jraknet.protocol.status
 com.whirvis.jraknet.server
 com.whirvis.jraknet.session
 com.whirvis.jraknet.stream
-com.whirvis.jraknet.util
-com.whirvis.jraknet.util.map
-com.whirvis.jraknet.util.map.concurrent
+com.whirvis.jraknet.windows

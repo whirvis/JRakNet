@@ -28,20 +28,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.util.map.concurrent;
+package com.whirvis.jraknet.map.concurrent;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.whirvis.jraknet.util.map.DynamicKey;
+import com.whirvis.jraknet.map.DynamicKey;
 
 /**
- * This class is used for using ints as keys in normal maps without having to
+ * This class is used for using shorts as keys in normal maps without having to
  * worry about boxing them.
  *
  * @author Trent Summerlin
  */
-public class ConcurrentIntMap<T> extends ConcurrentHashMap<Integer, T> implements Map<Integer, T>, DynamicKey<Integer> {
+public class ConcurrentShortMap<T> extends ConcurrentHashMap<Short, T> implements Map<Short, T>, DynamicKey<Short> {
 
 	private static final long serialVersionUID = 4324132003573381634L;
 
@@ -54,7 +54,7 @@ public class ConcurrentIntMap<T> extends ConcurrentHashMap<Integer, T> implement
 	 * @return <tt>true</tt> if this map contains a mapping for the specified
 	 *         key.
 	 */
-	public boolean containsKey(int key) {
+	public boolean containsKey(short key) {
 		return super.containsKey(key);
 	}
 
@@ -87,12 +87,12 @@ public class ConcurrentIntMap<T> extends ConcurrentHashMap<Integer, T> implement
 	 * explicitly maps the key to {@code null}. The {@link #containsKey
 	 * containsKey} operation may be used to distinguish these two cases.
 	 *
-	 * @see #put(int, Object)
+	 * @see #put(short, Object)
 	 * @param key
 	 *            they key the value is mapped to.
 	 * @return the value to which the specified key is mapped.
 	 */
-	public T get(int key) {
+	public T get(short key) {
 		return super.get(key);
 	}
 
@@ -110,7 +110,7 @@ public class ConcurrentIntMap<T> extends ConcurrentHashMap<Integer, T> implement
 	 *         can also indicate that the map previously associated
 	 *         <tt>null</tt> with <tt>key</tt>.)
 	 */
-	public T put(int key, T value) {
+	public T put(short key, T value) {
 		return super.put(key, value);
 	}
 
@@ -124,17 +124,17 @@ public class ConcurrentIntMap<T> extends ConcurrentHashMap<Integer, T> implement
 	 *         can also indicate that the map previously associated
 	 *         <tt>null</tt> with <tt>key</tt>.)
 	 */
-	public T remove(int key) {
+	public T remove(short key) {
 		return super.remove(key);
 	}
 
 	@Override
-	public void renameKey(Integer oldKey, Integer newKey) throws NullPointerException {
-		T storedObject = this.remove(oldKey.intValue());
+	public void renameKey(Short oldKey, Short newKey) throws NullPointerException {
+		T storedObject = this.remove(oldKey.shortValue());
 		if (storedObject == null) {
 			throw new NullPointerException();
 		}
-		this.put(newKey.intValue(), storedObject);
+		this.put(newKey.shortValue(), storedObject);
 	}
 
 }

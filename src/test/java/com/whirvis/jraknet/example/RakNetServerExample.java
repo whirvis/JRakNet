@@ -32,13 +32,13 @@ package com.whirvis.jraknet.example;
 
 import java.util.Random;
 
+import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.identifier.MinecraftIdentifier;
 import com.whirvis.jraknet.server.RakNetServer;
 import com.whirvis.jraknet.server.RakNetServerListener;
 import com.whirvis.jraknet.session.RakNetClientSession;
-import com.whirvis.jraknet.util.RakNetUtils;
 
 /**
  * A simple <code>RakNetServer</code> that can be tested through a Minecraft
@@ -74,7 +74,7 @@ public class RakNetServerExample {
 			@Override
 			public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
 				System.out.println("Client from address " + session.getAddress() + " sent packet with ID "
-						+ RakNetUtils.toHexStringId(packet) + " on channel " + channel);
+						+ RakNet.toHexStringId(packet) + " on channel " + channel);
 			}
 
 		});

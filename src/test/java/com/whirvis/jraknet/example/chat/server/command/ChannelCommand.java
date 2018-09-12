@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.example.chat.server.ChatServer;
-import com.whirvis.jraknet.util.RakNetUtils;
 
 /**
  * Allows the server to add, remove, and rename channels.
@@ -57,7 +56,7 @@ public class ChannelCommand extends Command {
 	@Override
 	public boolean handleCommand(String[] args) {
 		if (args.length >= 2) {
-			int channelId = RakNetUtils.parseIntPassive(args[1]);
+			int channelId = RakNet.parseIntPassive(args[1]);
 
 			// Do we add or remove a channel?
 			if (args[0].equalsIgnoreCase("add")) {

@@ -31,12 +31,12 @@
 package com.whirvis.jraknet.example;
 
 import com.whirvis.jraknet.NoListenerException;
+import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.identifier.MinecraftIdentifier;
 import com.whirvis.jraknet.server.RakNetServer;
 import com.whirvis.jraknet.session.RakNetClientSession;
-import com.whirvis.jraknet.util.RakNetUtils;
 
 /**
  * A simple <code>RakNetServer</code> that is extending
@@ -70,7 +70,7 @@ public class RakNetServerBundleExample extends RakNetServer {
 	@Override
 	public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
 		System.out.println("Client from address " + session.getAddress() + " sent packet with ID "
-				+ RakNetUtils.toHexStringId(packet) + " on channel " + channel);
+				+ RakNet.toHexStringId(packet) + " on channel " + channel);
 	}
 
 	public static void main(String[] args) throws NoListenerException, RakNetException {

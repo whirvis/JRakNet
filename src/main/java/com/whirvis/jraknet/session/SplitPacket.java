@@ -32,11 +32,10 @@ package com.whirvis.jraknet.session;
 
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNet;
+import com.whirvis.jraknet.map.IntMap;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.message.CustomPacket;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
-import com.whirvis.jraknet.util.ArrayUtils;
-import com.whirvis.jraknet.util.map.IntMap;
 
 /**
  * Used to easily assemble split packets received from a
@@ -151,7 +150,7 @@ public class SplitPacket {
 	 */
 	public static final EncapsulatedPacket[] splitPacket(RakNetSession session, EncapsulatedPacket encapsulated) {
 		// Get split packet data
-		byte[][] split = ArrayUtils.splitArray(encapsulated.payload.array(), session.getMaximumTransferUnit()
+		byte[][] split = RakNet.splitArray(encapsulated.payload.array(), session.getMaximumTransferUnit()
 				- CustomPacket.calculateDummy() - EncapsulatedPacket.calculateDummy(encapsulated.reliability, true));
 		EncapsulatedPacket[] splitPackets = new EncapsulatedPacket[split.length];
 

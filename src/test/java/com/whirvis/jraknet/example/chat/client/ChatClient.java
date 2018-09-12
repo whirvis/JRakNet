@@ -38,7 +38,7 @@ import javax.swing.UIManager;
 
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.UtilityTest;
+import com.whirvis.jraknet.RakNetTest;
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.client.RakNetClientListener;
 import com.whirvis.jraknet.example.chat.ChatMessageIdentifier;
@@ -56,7 +56,6 @@ import com.whirvis.jraknet.example.chat.protocol.UpdateUsername;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.session.InvalidChannelException;
 import com.whirvis.jraknet.session.RakNetServerSession;
-import com.whirvis.jraknet.util.RakNetUtils;
 
 /**
  * A simple chat client built using JRakNet and a <code>JFrame</code>.
@@ -228,7 +227,7 @@ public class ChatClient implements RakNetClientListener {
 	 */
 	public void connect(String address) {
 		try {
-			InetSocketAddress socketAddress = RakNetUtils.parseAddress(address, UtilityTest.WHIRVIS_DEVELOPMENT_PORT);
+			InetSocketAddress socketAddress = RakNet.parseAddress(address, RakNetTest.WHIRVIS_DEVELOPMENT_PORT);
 			this.username = frame.getUsername();
 			client.connectThreaded(socketAddress);
 

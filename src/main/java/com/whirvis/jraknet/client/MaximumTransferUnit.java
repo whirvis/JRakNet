@@ -40,7 +40,7 @@ import java.util.TreeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.whirvis.jraknet.util.map.IntMap;
+import com.whirvis.jraknet.map.IntMap;
 
 /**
  * Used by the <code>RakNetClient</code> during login to track how and when it
