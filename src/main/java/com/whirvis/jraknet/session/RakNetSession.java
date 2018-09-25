@@ -114,12 +114,12 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	// Latency detection
 	private boolean latencyEnabled;
 	private int pongsReceived;
-	private long latencyIdentifier;
 	private long totalLatency;
 	private long latency;
 	private long lastLatency;
 	private long lowestLatency;
 	private long highestLatency;
+	private final ArrayList<Long> latencyTimestamps;
 
 	/**
 	 * Constructs a <code>RakNetSession</code> with the specified globally
@@ -174,6 +174,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		this.lastLatency = -1;
 		this.lowestLatency = -1;
 		this.highestLatency = -1;
+		this.latencyTimestamps = new ArrayList<Long>();
 	}
 
 	/**
@@ -747,46 +748,54 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 */
 	private final void handleMessage0(int channel, RakNetPacket packet) {
 		short packetId = packet.getId();
+		long currentTime = System.currentTimeMillis();
 
 		if (packetId == ID_CONNECTED_PING) {
 			ConnectedPing ping = new ConnectedPing(packet);
 			ping.decode();
 
 			ConnectedPong pong = new ConnectedPong();
-			pong.identifier = ping.identifier;
+			pong.timestamp = ping.timestamp;
+			pong.timestapPong = currentTime;
 			pong.encode();
 			this.sendMessage(Reliability.UNRELIABLE, pong);
 		} else if (packetId == ID_CONNECTED_PONG) {
 			ConnectedPong pong = new ConnectedPong(packet);
 			pong.decode();
 
-			if (latencyEnabled == true) {
-				if (latencyIdentifier - pong.identifier == 1) {
-					long latencyRaw = (this.lastPacketReceiveTime - this.lastPingSendTime);
+			// Calculate latency
+			if (latencyEnabled == true && latencyTimestamps.contains(Long.valueOf(pong.timestamp))) {
+				latencyTimestamps.remove(Long.valueOf(pong.timestamp));
+				long latencyRaw = (this.lastPacketReceiveTime - this.lastPingSendTime);
 
-					// Get last latency result
-					this.lastLatency = latencyRaw;
+				// Get last latency result
+				this.lastLatency = latencyRaw;
 
-					// Get lowest and highest latency
-					if (this.pongsReceived == 0) {
+				// Get lowest and highest latency
+				if (this.pongsReceived == 0) {
+					this.lowestLatency = latencyRaw;
+					this.highestLatency = latencyRaw;
+				} else {
+					if (latencyRaw < lowestLatency) {
 						this.lowestLatency = latencyRaw;
+					} else if (latencyRaw > highestLatency) {
 						this.highestLatency = latencyRaw;
-					} else {
-						if (latencyRaw < lowestLatency) {
-							this.lowestLatency = latencyRaw;
-						} else if (latencyRaw > highestLatency) {
-							this.highestLatency = latencyRaw;
-						}
 					}
-
-					// Get average latency
-					this.pongsReceived++;
-					this.totalLatency += latencyRaw;
-					this.latency = (totalLatency / pongsReceived);
 				}
+
+				// Get average latency
+				this.totalLatency += latencyRaw;
+				this.latency = (totalLatency / ++pongsReceived);
 			}
 
-			this.latencyIdentifier = (pong.identifier + 1);
+			// Clear overdue ping responses
+			Iterator<Long> timestampI = latencyTimestamps.iterator();
+			while (timestampI.hasNext()) {
+				long timestamp = timestampI.next().longValue();
+				if (currentTime - timestamp >= RakNet.SESSION_TIMEOUT) {
+					timestampI.remove();
+				}
+			}
 		} else {
 			this.handleMessage(packet, channel);
 		}
@@ -846,12 +855,13 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		if (this.latencyEnabled == true && currentTime - this.lastPingSendTime >= RakNet.PING_SEND_INTERVAL
 				&& state.equals(RakNetState.CONNECTED)) {
 			ConnectedPing ping = new ConnectedPing();
-			ping.identifier = this.latencyIdentifier++;
+			ping.timestamp = currentTime;
 			ping.encode();
 
 			this.sendMessage(Reliability.UNRELIABLE, ping);
 			this.lastPingSendTime = currentTime;
-			log.debug(loggerName + "Sent ping to session with latency identifier " + (latencyIdentifier - 1));
+			latencyTimestamps.add(Long.valueOf(ping.timestamp));
+			log.debug(loggerName + "Sent ping to session with timestamp " + ping.timestamp);
 		}
 
 		// Make sure the client is still connected
