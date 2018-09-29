@@ -55,7 +55,6 @@ import io.netty.channel.Channel;
 public class RakNetServerSession extends RakNetSession {
 
 	private final RakNetClient client;
-	private EncapsulatedPacket incomingConnectionPacket;
 
 	/**
 	 * Called by the client when the connection is closed.
@@ -96,16 +95,6 @@ public class RakNetServerSession extends RakNetSession {
 		for (RakNetClientListener listener : client.getListeners()) {
 			listener.onAcknowledge(this, record, packet);
 		}
-
-		// If the server received our IncomingConnectionPacket we are connected
-		if (!this.getState().equals(RakNetState.CONNECTED) && incomingConnectionPacket != null) {
-			if (record.equals(incomingConnectionPacket.ackRecord)) {
-				this.setState(RakNetState.CONNECTED);
-				for (RakNetClientListener listener : client.getListeners()) {
-					listener.onConnect(this);
-				}
-			}
-		}
 	}
 
 	@Override
@@ -131,8 +120,12 @@ public class RakNetServerSession extends RakNetSession {
 				clientHandshake.encode();
 
 				if (!clientHandshake.failed()) {
-					this.incomingConnectionPacket = this.sendMessage(Reliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT,
-							clientHandshake);
+					this.sendMessage(Reliability.RELIABLE, clientHandshake);
+
+					this.setState(RakNetState.CONNECTED);
+					for (RakNetClientListener listener : client.getListeners()) {
+						listener.onConnect(this);
+					}
 				} else {
 					client.disconnect("Failed to login");
 				}
