@@ -54,7 +54,6 @@ public class RakNetClientTest {
 	private static final Logger log = LoggerFactory.getLogger(RakNetClientTest.class);
 
 	public static void main(String[] args) {
-
 		// Create client and add listener
 		RakNetClient client = new RakNetClient();
 		client.addListener(new RakNetClientListener() {

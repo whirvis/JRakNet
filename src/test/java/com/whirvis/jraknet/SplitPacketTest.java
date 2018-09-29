@@ -37,10 +37,6 @@ import java.net.UnknownHostException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.whirvis.jraknet.Packet;
-import com.whirvis.jraknet.RakNet;
-import com.whirvis.jraknet.RakNetException;
-import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.client.RakNetClientListener;
 import com.whirvis.jraknet.protocol.Reliability;
