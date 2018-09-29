@@ -192,6 +192,11 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	}
 
 	/**
+	 * @return the session's timestamp.
+	 */
+	public abstract long getTimestamp();
+
+	/**
 	 * @return the session's address.
 	 */
 	public final InetSocketAddress getAddress() {
@@ -286,10 +291,13 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 *            whether or not latency detection is enabled
 	 */
 	public void enableLatencyDetection(boolean enabled) {
+		boolean wasEnabled = this.latencyEnabled;
 		this.latencyEnabled = enabled;
 		this.latency = (enabled ? this.latency : -1);
 		this.pongsReceived = (enabled ? this.pongsReceived : 0);
-		log.info(loggerName + (enabled ? "Enabled" : "Disabled") + " latency detection.");
+		if (wasEnabled != enabled) {
+			log.info(loggerName + (enabled ? "Enabled" : "Disabled") + " latency detection.");
+		}
 	}
 
 	/**
@@ -748,7 +756,6 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 */
 	private final void handleMessage0(int channel, RakNetPacket packet) {
 		short packetId = packet.getId();
-		long currentTime = System.currentTimeMillis();
 
 		if (packetId == ID_CONNECTED_PING) {
 			ConnectedPing ping = new ConnectedPing(packet);
@@ -756,7 +763,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 			ConnectedPong pong = new ConnectedPong();
 			pong.timestamp = ping.timestamp;
-			pong.timestapPong = currentTime;
+			pong.timestapPong = this.getTimestamp();
 			pong.encode();
 			this.sendMessage(Reliability.UNRELIABLE, pong);
 		} else if (packetId == ID_CONNECTED_PONG) {
@@ -789,10 +796,11 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 			}
 
 			// Clear overdue ping responses
+			long currentTimestamp = this.getTimestamp();
 			Iterator<Long> timestampI = latencyTimestamps.iterator();
 			while (timestampI.hasNext()) {
 				long timestamp = timestampI.next().longValue();
-				if (currentTime - timestamp >= RakNet.SESSION_TIMEOUT) {
+				if (currentTimestamp - timestamp >= RakNet.SESSION_TIMEOUT || latencyTimestamps.size() > 10) {
 					timestampI.remove();
 				}
 			}
@@ -855,7 +863,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		if (this.latencyEnabled == true && currentTime - this.lastPingSendTime >= RakNet.PING_SEND_INTERVAL
 				&& state.equals(RakNetState.CONNECTED)) {
 			ConnectedPing ping = new ConnectedPing();
-			ping.timestamp = currentTime;
+			ping.timestamp = this.getTimestamp();
 			ping.encode();
 
 			this.sendMessage(Reliability.UNRELIABLE, ping);

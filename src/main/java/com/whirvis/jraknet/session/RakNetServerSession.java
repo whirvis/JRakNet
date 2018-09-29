@@ -56,6 +56,7 @@ public class RakNetServerSession extends RakNetSession {
 
 	private final RakNetClient client;
 	private EncapsulatedPacket incomingConnectionPacket;
+	private long timestamp;
 
 	/**
 	 * Called by the client when the connection is closed.
@@ -92,6 +93,11 @@ public class RakNetServerSession extends RakNetSession {
 	}
 
 	@Override
+	public long getTimestamp() {
+		return System.currentTimeMillis() - this.timestamp;
+	}
+
+	@Override
 	public void onAcknowledge(Record record, EncapsulatedPacket packet) {
 		for (RakNetClientListener listener : client.getListeners()) {
 			listener.onAcknowledge(this, record, packet);
@@ -100,6 +106,7 @@ public class RakNetServerSession extends RakNetSession {
 		// If the server received our IncomingConnectionPacket we are connected
 		if (!this.getState().equals(RakNetState.CONNECTED) && incomingConnectionPacket != null) {
 			if (record.equals(incomingConnectionPacket.ackRecord)) {
+				this.timestamp = System.currentTimeMillis();
 				this.setState(RakNetState.CONNECTED);
 				for (RakNetClientListener listener : client.getListeners()) {
 					listener.onConnect(this);
