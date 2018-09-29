@@ -72,4 +72,4 @@ leadership.
 ## Attribution
 
 This Code of Conduct is adapted from the Politically Neutral Contributor Covenant
-Code of Conduct written by Whirvis â€œWhirvisâ€ Ardenaur, version 1.0, available at https://whirvis.com/coc/pncc.html
+Code of Conduct written by Trent Summerlin, version 1.0, available at https://whirvis.com/coc/pncc.html
