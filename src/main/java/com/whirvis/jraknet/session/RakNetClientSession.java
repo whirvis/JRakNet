@@ -100,11 +100,9 @@ public class RakNetClientSession extends RakNetSession {
 		return this.timeCreated;
 	}
 
-	/**
-	 * @return the client's timestamp.
-	 */
+	@Override
 	public long getTimestamp() {
-		return (System.currentTimeMillis() - this.timestamp);
+		return System.currentTimeMillis() - this.timestamp;
 	}
 
 	@Override
