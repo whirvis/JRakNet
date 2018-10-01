@@ -50,7 +50,7 @@ if (!UniversalWindowsProgram.MINECRAFT.addLoopbackExempt()) {
 
 // Create server
 RakNetServer server = new RakNetServer(19132, 10,
-		new MinecraftIdentifier("JRakNet Example Server", 137, "1.2", 0, 10,
+		new MinecraftIdentifier("JRakNet Example Server", 282, "1.6", 0, 10,
 				new Random().nextLong() /* Server broadcast ID */, "New World", "Survival"));
 
 // Add listener
