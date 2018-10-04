@@ -107,9 +107,9 @@ public class SessionPreparation {
 
 			if (connectionResponseOne.magic != true) {
 				this.cancelReason = new LoginFailureException(client, "MAGIC failed to validate");
-			} else if (connectionResponseOne.maximumTransferUnit > RakNet.MAXIMUM_MTU_SIZE
-					|| connectionResponseOne.maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE) {
-				this.cancelReason = new LoginFailureException(client, "Invalid maximum transfer unit size");
+			} else if (connectionResponseOne.maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE) {
+				this.cancelReason = new LoginFailureException(client,
+						"Invalid maximum transfer unit size" + connectionResponseOne.maximumTransferUnit);
 			} else {
 				// Determine which maximum transfer unit to use
 				if (connectionResponseOne.maximumTransferUnit <= this.maximumMaximumTransferUnit) {
@@ -120,8 +120,7 @@ public class SessionPreparation {
 				}
 
 				// Validate maximum transfer unit and proceed
-				if (this.maximumTransferUnit > RakNet.MAXIMUM_MTU_SIZE
-						|| this.maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE) {
+				if (this.maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE) {
 					this.cancelReason = new LoginFailureException(client, "Invalid maximum transfer unit size");
 				} else {
 					this.guid = connectionResponseOne.serverGuid;
@@ -142,11 +141,18 @@ public class SessionPreparation {
 				this.cancelReason = new LoginFailureException(client, "MAGIC failed to validate");
 			} else if (connectionResponseTwo.serverGuid != this.guid) {
 				this.cancelReason = new LoginFailureException(client, "Server responded with invalid GUID");
-			} else if (connectionResponseTwo.maximumTransferUnit != this.maximumTransferUnit) {
-				this.cancelReason = new LoginFailureException(client,
-						"Server did not respond with the agreed upon maximum transfer unit");
+			} else if (connectionResponseTwo.maximumTransferUnit > this.maximumMaximumTransferUnit
+					|| connectionResponseTwo.maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE) {
+				this.cancelReason = new LoginFailureException(client, "Invalid maximum transfer unit size");
 			} else {
 				this.loginPackets[1] = true;
+				if (connectionResponseTwo.maximumTransferUnit < this.maximumTransferUnit) {
+					this.maximumTransferUnit = connectionResponseTwo.maximumTransferUnit;
+					log.warn("Server responded with lower maximum transfer unit than agreed upon earlier");
+				} else if (connectionResponseTwo.maximumTransferUnit > this.maximumMaximumTransferUnit) {
+					this.maximumTransferUnit = connectionResponseTwo.maximumTransferUnit;
+					log.warn("Server responded with higher maximum transfer unit than agreed upon earlier");
+				}
 				this.connectionType = connectionResponseTwo.connectionType;
 				log.debug(loggerName + " applied maximum transfer unit from " + MessageIdentifier.getName(packetId)
 						+ " packet");

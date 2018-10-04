@@ -106,7 +106,6 @@ public class RakNet {
 	// Network protocol data
 	public static final int SERVER_NETWORK_PROTOCOL = 9;
 	public static final int CLIENT_NETWORK_PROTOCOL = 9;
-	public static final int MAXIMUM_MTU_SIZE = 1492;
 	public static final int MINIMUM_MTU_SIZE = 400;
 	private static final int PING_RETRIES = 5;
 	private static final long PING_TIMESTAMP = System.currentTimeMillis();
