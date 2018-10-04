@@ -88,8 +88,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
 	// Used to discover systems without relying on the main thread
 	private static DiscoveryThread discoverySystem = new DiscoveryThread();
-	private static final int[] DEFAULT_TRANSFER_UNITS = new int[] { RakNet.MAXIMUM_MTU_SIZE, 1200, 576,
-			RakNet.MINIMUM_MTU_SIZE };
+	private static final int[] DEFAULT_TRANSFER_UNITS = new int[] { 1492, 1200, 576, RakNet.MINIMUM_MTU_SIZE };
 
 	// Client data
 	private final long guid;
@@ -437,10 +436,9 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		ArrayList<MaximumTransferUnit> maximumTransferUnits = new ArrayList<MaximumTransferUnit>();
 		for (int i = 0; i < maximumTransferUnitSizes.length; i++) {
 			int maximumTransferUnitSize = maximumTransferUnitSizes[i];
-			if (maximumTransferUnitSize > RakNet.MAXIMUM_MTU_SIZE
-					|| maximumTransferUnitSize < RakNet.MINIMUM_MTU_SIZE) {
-				throw new IllegalArgumentException("Maximum transfer unit size must be between "
-						+ RakNet.MINIMUM_MTU_SIZE + "-" + RakNet.MAXIMUM_MTU_SIZE);
+			if (maximumTransferUnitSize < RakNet.MINIMUM_MTU_SIZE) {
+				throw new IllegalArgumentException(
+						"Maximum transfer unit size must be higher than " + RakNet.MINIMUM_MTU_SIZE);
 			}
 			if (RakNet.getMaximumTransferUnit() >= maximumTransferUnitSize) {
 				maximumTransferUnits.add(new MaximumTransferUnit(maximumTransferUnitSize,
