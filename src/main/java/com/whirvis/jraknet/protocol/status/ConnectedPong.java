@@ -37,7 +37,7 @@ import com.whirvis.jraknet.protocol.MessageIdentifier;
 public class ConnectedPong extends RakNetPacket {
 
 	public long timestamp;
-	public long timestampPong = 0;
+	public long timestampPong;
 
 	public ConnectedPong() {
 		super(MessageIdentifier.ID_CONNECTED_PONG);
@@ -56,8 +56,10 @@ public class ConnectedPong extends RakNetPacket {
 	@Override
 	public void decode() {
 		this.timestamp = this.readLong();
-		if(remaining() == 8){
+		if (this.remaining() >= Long.BYTES) {
 			this.timestampPong = this.readLong();
+		} else {
+			this.timestampPong = -1L; // We didn't get a pong timestamp
 		}
 	}
 
