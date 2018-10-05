@@ -763,7 +763,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 			ConnectedPong pong = new ConnectedPong();
 			pong.timestamp = ping.timestamp;
-			pong.timestapPong = this.getTimestamp();
+			pong.timestampPong = this.getTimestamp();
 			pong.encode();
 			this.sendMessage(Reliability.UNRELIABLE, pong);
 		} else if (packetId == ID_CONNECTED_PONG) {
