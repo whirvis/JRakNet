@@ -37,7 +37,7 @@ import com.whirvis.jraknet.protocol.MessageIdentifier;
 public class ConnectedPong extends RakNetPacket {
 
 	public long timestamp;
-	public long timestapPong;
+	public long timestampPong = 0;
 
 	public ConnectedPong() {
 		super(MessageIdentifier.ID_CONNECTED_PONG);
@@ -50,13 +50,15 @@ public class ConnectedPong extends RakNetPacket {
 	@Override
 	public void encode() {
 		this.writeLong(timestamp);
-		this.writeLong(timestapPong);
+		this.writeLong(timestampPong);
 	}
 
 	@Override
 	public void decode() {
 		this.timestamp = this.readLong();
-		this.timestapPong = this.readLong();
+		if(remaining() == 8){
+			this.timestampPong = this.readLong();
+		}
 	}
 
 }
