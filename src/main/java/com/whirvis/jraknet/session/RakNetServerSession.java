@@ -127,7 +127,6 @@ public class RakNetServerSession extends RakNetSession {
 
 				if (!clientHandshake.failed()) {
 					this.sendMessage(Reliability.RELIABLE, clientHandshake);
-
 					this.timestamp = System.currentTimeMillis();
 					this.setState(RakNetState.CONNECTED);
 					for (RakNetClientListener listener : client.getListeners()) {
