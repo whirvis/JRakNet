@@ -66,9 +66,6 @@ public class SequencedPacketTest {
 
 	private static final Logger log = LoggerFactory.getLogger(SequencedPacketTest.class);
 
-	// Logger name
-	private static final String LOGGER_NAME = "sequenced packet test";
-
 	// Test data
 	private static final short SEQUENCE_START_ID = 0xFE;
 	private static final int PACKET_SEND_COUNT = 1000;
@@ -91,8 +88,7 @@ public class SequencedPacketTest {
 		long currentTime = System.currentTimeMillis();
 		while (true) {
 			if (currentTime - startSend >= 30000 && startSend > -1) {
-				log.error(LOGGER_NAME,
-						"Failed to complete test due to timeout (Took over 30 seconds!), printing results...");
+				log.info("Failed to complete test due to timeout (Took over 30 seconds!), printing results...");
 				printResults();
 				System.exit(1);
 			}
@@ -110,7 +106,7 @@ public class SequencedPacketTest {
 	 * Prints the results of the test
 	 */
 	private static void printResults() {
-		log.info(LOGGER_NAME, "Server - Sequenced packet test finished, lost "
+		log.info("Server - Sequenced packet test finished, lost "
 				+ (packetReceiveCount >= PACKET_SEND_COUNT ? "no"
 						: Float.toString(
 								((float) PACKET_SEND_COUNT - packetReceiveCount / (float) PACKET_SEND_COUNT) * 100)
@@ -131,7 +127,7 @@ public class SequencedPacketTest {
 				Integer wi = packetsLost.get(i);
 				builder.append(wi.intValue() + (i + 1 < packetsLost.size() ? ", " : ""));
 			}
-			log.info(LOGGER_NAME, "Packet" + (packetsLost.size() == 1 ? "" : "s") + " lost: " + builder.toString());
+			log.info("Packet" + (packetsLost.size() == 1 ? "" : "s") + " lost: " + builder.toString());
 		}
 	}
 
@@ -164,8 +160,7 @@ public class SequencedPacketTest {
 
 			@Override
 			public void onClientDisconnect(RakNetClientSession session, String reason) {
-				log.info(LOGGER_NAME,
-						"Server - Client from " + session.getAddress() + " disconnected! (" + reason + ")");
+				log.info("Server - Client from " + session.getAddress() + " disconnected! (" + reason + ")");
 				System.exit(1);
 			}
 
@@ -213,7 +208,7 @@ public class SequencedPacketTest {
 
 			@Override
 			public void onConnect(RakNetServerSession session) {
-				log.info(LOGGER_NAME, "Client - Connected to server with MTU " + session.getMaximumTransferUnit());
+				log.info("Client - Connected to server with MTU " + session.getMaximumTransferUnit());
 
 				// Send 100 sequenced packets
 				log.info("Client - Sending " + PACKET_SEND_COUNT + " packets...");
@@ -232,7 +227,7 @@ public class SequencedPacketTest {
 
 			@Override
 			public void onDisconnect(RakNetServerSession session, String reason) {
-				log.error("Client - Lost connection to server! (" + reason + ")");
+				log.info("Client - Lost connection to server! (" + reason + ")");
 				System.exit(1);
 			}
 
