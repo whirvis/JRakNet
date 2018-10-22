@@ -410,6 +410,14 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
+	 * Removes all external servers from the client's external server discovery
+	 * list.
+	 */
+	public final void clearExternalServers() {
+		externalServers.clear();
+	}
+
+	/**
 	 * @return the local servers as an array.
 	 */
 	public final DiscoveredServer[] getLocalServers() {
