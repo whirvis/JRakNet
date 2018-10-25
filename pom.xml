@@ -118,7 +118,7 @@
         </resources>
 
         <plugins>
-            <!-- Clean the workspace -->
+            <!-- Clean workspace -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-clean-plugin</artifactId>
@@ -176,28 +176,28 @@
                 <version>2.21.0</version>
             </plugin>
 
-            <!-- Generate the class jar file -->
+            <!-- Generate class JAR file -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.0.2</version>
             </plugin>
 
-            <!-- Javadoc config (not run by default) -->
+            <!-- JavaDoc configuration -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.0.0</version>
             </plugin>
 
-            <!-- Sources config (not run by default) -->
+            <!-- Sources configuration -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
                 <version>3.0.1</version>
             </plugin>
 
-            <!-- Generate the shaded jar file -->
+            <!-- Generate shaded JAR file -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -215,14 +215,14 @@
                 </configuration>
             </plugin>
 
-            <!-- Install jars in the local repository -->
+            <!-- Install JARs to local repository -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
                 <version>2.5.2</version>
             </plugin>
 
-            <!-- Deploy jars to the remote repository -->
+            <!-- Deploy JARs to remote repository -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-deploy-plugin</artifactId>
@@ -261,7 +261,7 @@
                         </executions>
                     </plugin>
 
-                    <!-- Generate the javadoc jar file -->
+                    <!-- Generate JavaDoc JAR file -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
@@ -275,7 +275,7 @@
                         </executions>
                     </plugin>
 
-                    <!-- Generate the sources jar file -->
+                    <!-- Generate sources JAR file -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
@@ -289,7 +289,7 @@
                         </executions>
                     </plugin>
 
-                    <!-- GPG plugin: requires 'gpg' being installed and settings.xml with credentials -->
+                    <!-- GPG plugin: requires 'gpg' to be installed along with settings.xml with credentials -->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
@@ -312,7 +312,7 @@
                         </configuration>
                     </plugin>
 
-                    <!-- Nexus Staging plugin -->
+                    <!-- Nexus staging plugin -->
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
