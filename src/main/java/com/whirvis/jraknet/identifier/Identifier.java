@@ -87,6 +87,9 @@ public class Identifier {
 	public boolean equals(Object object) {
 		if (object instanceof Identifier) {
 			Identifier identifier = (Identifier) object;
+			if (this.build() == null && identifier.build() == null) {
+				return true; // We must check this first
+			}
 			return this.build().equals(identifier.build());
 		}
 		return false;

@@ -180,4 +180,9 @@ public class SplitPacket {
 		return splitPackets;
 	}
 
+	@Override
+	public String toString() {
+		return "SplitPacket [splitId=" + splitId + ", splitCount=" + splitCount + ", reliability=" + reliability + "]";
+	}
+
 }

@@ -149,4 +149,9 @@ public class MaximumTransferUnit {
 		return unitList.toArray(new MaximumTransferUnit[unitList.size()]);
 	}
 
+	@Override
+	public String toString() {
+		return "MaximumTransferUnit [size=" + size + ", retries=" + retries + ", retriesLeft=" + retriesLeft + "]";
+	}
+
 }

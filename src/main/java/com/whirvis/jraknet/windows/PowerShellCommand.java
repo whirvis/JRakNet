@@ -342,4 +342,9 @@ public class PowerShellCommand {
 		return this.execute(false);
 	}
 
+	@Override
+	public String toString() {
+		return "PowerShellCommand [command=" + command + "]";
+	}
+
 }

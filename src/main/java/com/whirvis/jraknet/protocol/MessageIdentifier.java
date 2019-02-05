@@ -44,9 +44,13 @@ import com.whirvis.jraknet.map.ShortMap;
  *
  * @author Whirvis T. Wheatley
  */
-public class MessageIdentifier {
+public final class MessageIdentifier {
 
 	private static final Logger log = LoggerFactory.getLogger(MessageIdentifier.class);
+	
+	private MessageIdentifier() {
+		// Static class
+	}
 
 	// Magic identifier
 	public final static byte[] MAGIC = new byte[] { (byte) 0x00, (byte) 0xFF, (byte) 0xFF, 0x00, (byte) 0xFE,
