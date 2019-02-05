@@ -28,49 +28,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.client;
+package com.whirvis.jraknet.example.chat.protocol;
 
-import com.whirvis.jraknet.RakNet;
-import com.whirvis.jraknet.RakNetPacket;
+import com.whirvis.jraknet.Packet;
+import com.whirvis.jraknet.example.chat.ChatMessageIdentifier;
 
-/**
- * Signals that a packet critical to the <code>RakNetClient</code> failed to
- * encode or decode correctly.
- *
- * @author Whirvis T. Wheatley
- */
-public class PacketBufferException extends RakNetClientException {
+public class RenameChannelPacket extends ChatPacket {
 
-	private static final long serialVersionUID = -3730545025991834599L;
+	public int channel;
+	public String newChannelName;
 
-	private final RakNetPacket packet;
-
-	/**
-	 * Constructs a <code>PacketBufferException</code> with the
-	 * <code>RakNetClient</code> and <code>RakNetPacket</code>.
-	 * 
-	 * @param client
-	 *            the <code>RakNetClient</code> that threw the exception.
-	 * @param packet
-	 *            the <code>RakNetPacket</code> that failed to encode/decode.
-	 */
-	public PacketBufferException(RakNetClient client, RakNetPacket packet) {
-		super(client, "Packet with ID " + RakNet.toHexStringId(packet) + " failed to encode/decode");
-		this.packet = packet;
+	public RenameChannelPacket(Packet packet) {
+		super(packet);
 	}
 
-	/**
-	 * Returns the packet that failed to encode/decode.
-	 * 
-	 * @return the packet that failed to encode/decode.
-	 */
-	public RakNetPacket getPacket() {
-		return this.packet;
+	public RenameChannelPacket() {
+		super(ChatMessageIdentifier.ID_RENAME_CHANNEL);
 	}
 
 	@Override
-	public String getLocalizedMessage() {
-		return "Packet failed to encode/decode";
+	public void encode() {
+		this.writeUnsignedByte(channel);
+		this.writeString(newChannelName);
+	}
+
+	@Override
+	public void decode() {
+		this.channel = this.readUnsignedByte();
+		this.newChannelName = this.readString();
 	}
 
 }

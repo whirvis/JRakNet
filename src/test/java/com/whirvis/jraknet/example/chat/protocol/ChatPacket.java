@@ -45,7 +45,7 @@ import com.whirvis.jraknet.protocol.MessageIdentifier;
 public class ChatPacket extends RakNetPacket {
 
 	/**
-	 * Constructs a <code>ChatPacket</code> with the specified ID.
+	 * Constructs a <code>ChatPacket</code> with the ID.
 	 * 
 	 * @param id
 	 *            The ID of the packet.
@@ -59,7 +59,7 @@ public class ChatPacket extends RakNetPacket {
 
 	/**
 	 * Constructs a <code>ChatPacket</code> that reads from and writes to the
-	 * specified <code>Packet</code>.
+	 * <code>Packet</code>.
 	 * 
 	 * @param packet
 	 *            the <code>Packet</code> to read from and write to.

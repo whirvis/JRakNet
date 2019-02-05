@@ -56,7 +56,7 @@ public enum AcknowledgeType {
 	/**
 	 * @param id
 	 *            the ID of the acknowledge receipt type to lookup.
-	 * @return an <code>AcknowledgeType</code> based on the specified ID.
+	 * @return an <code>AcknowledgeType</code> based on the ID.
 	 */
 	public static AcknowledgeType lookup(short id) {
 		for (AcknowledgeType type : AcknowledgeType.values()) {

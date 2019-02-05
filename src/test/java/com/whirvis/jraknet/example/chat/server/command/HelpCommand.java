@@ -40,7 +40,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class HelpCommand extends Command {
 
-	private static final Logger log = LogManager.getLogger(HelpCommand.class);
+	private static final Logger LOG = LogManager.getLogger(HelpCommand.class);
 
 	public HelpCommand() {
 		super("help", "Displays all the commands that can be used");
@@ -54,7 +54,7 @@ public class HelpCommand extends Command {
 			helpMessage.append("\t\t");
 			helpMessage.append(command.getUsage() + ": " + command.getDescription() + "\n");
 		}
-		log.info(helpMessage.toString());
+		LOG.info(helpMessage.toString());
 		return true;
 	}
 

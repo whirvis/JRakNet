@@ -35,12 +35,12 @@ import java.util.UUID;
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.example.chat.ChatMessageIdentifier;
 import com.whirvis.jraknet.example.chat.ServerChannel;
-import com.whirvis.jraknet.example.chat.protocol.AddChannel;
-import com.whirvis.jraknet.example.chat.protocol.ChatMessage;
-import com.whirvis.jraknet.example.chat.protocol.Kick;
-import com.whirvis.jraknet.example.chat.protocol.LoginAccepted;
-import com.whirvis.jraknet.example.chat.protocol.RemoveChannel;
-import com.whirvis.jraknet.example.chat.protocol.RenameChannel;
+import com.whirvis.jraknet.example.chat.protocol.AddChannelPacket;
+import com.whirvis.jraknet.example.chat.protocol.ChatMessagePacket;
+import com.whirvis.jraknet.example.chat.protocol.KickPacket;
+import com.whirvis.jraknet.example.chat.protocol.LoginAcceptedPacket;
+import com.whirvis.jraknet.example.chat.protocol.RemoveChannelPacket;
+import com.whirvis.jraknet.example.chat.protocol.RenameChannelPacket;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.session.InvalidChannelException;
 import com.whirvis.jraknet.session.RakNetClientSession;
@@ -61,7 +61,7 @@ public class ConnectedClient {
 	private String username;
 
 	/**
-	 * Constructs a <code>ConnectedClient</code> with the specified
+	 * Constructs a <code>ConnectedClient</code> with the
 	 * <code>RakNetClientSession</code>, <code>UUID</code> and username.
 	 * 
 	 * @param session
@@ -78,21 +78,27 @@ public class ConnectedClient {
 	}
 
 	/**
-	 * @return the client's assigned UUID.
+	 * Returns the assigned UUID of the client.
+	 * 
+	 * @return the assigned UUID of the client.
 	 */
 	public UUID getUUID() {
 		return this.uuid;
 	}
 
 	/**
-	 * @return the client's username.
+	 * Returns the username of the client.
+	 * 
+	 * @return the username of the client.
 	 */
 	public String getUsername() {
 		return this.username;
 	}
 
 	/**
-	 * @return the client's session.
+	 * Returns the session of the client.
+	 * 
+	 * @return the session of the client.
 	 */
 	public RakNetClientSession getSession() {
 		return this.session;
@@ -110,7 +116,7 @@ public class ConnectedClient {
 	 *            the channels the client can use.
 	 */
 	public void acceptLogin(String name, String motd, ServerChannel[] channels) {
-		LoginAccepted accepted = new LoginAccepted();
+		LoginAcceptedPacket accepted = new LoginAcceptedPacket();
 		accepted.userId = this.uuid;
 		accepted.serverName = name;
 		accepted.serverMotd = motd;
@@ -138,7 +144,7 @@ public class ConnectedClient {
 	}
 
 	/**
-	 * Sends a chat message to the client on the specified channel.
+	 * Sends a chat message to the client on the channel.
 	 * 
 	 * @param message
 	 *            the message to send.
@@ -150,7 +156,7 @@ public class ConnectedClient {
 			throw new InvalidChannelException();
 		}
 
-		ChatMessage chat = new ChatMessage();
+		ChatMessagePacket chat = new ChatMessagePacket();
 		chat.message = message;
 		chat.encode();
 		session.sendMessage(Reliability.RELIABLE_ORDERED, channel, chat);
@@ -165,7 +171,7 @@ public class ConnectedClient {
 	 *            the name of the channel.
 	 */
 	public void addChannel(int channel, String name) {
-		AddChannel addChannel = new AddChannel();
+		AddChannelPacket addChannel = new AddChannelPacket();
 		addChannel.channel = channel;
 		addChannel.channelName = name;
 		addChannel.encode();
@@ -181,7 +187,7 @@ public class ConnectedClient {
 	 *            the new name of the channel.
 	 */
 	public void renameChannel(int channel, String name) {
-		RenameChannel renameChannel = new RenameChannel();
+		RenameChannelPacket renameChannel = new RenameChannelPacket();
 		renameChannel.channel = channel;
 		renameChannel.newChannelName = name;
 		renameChannel.encode();
@@ -195,7 +201,7 @@ public class ConnectedClient {
 	 *            the ID of the channel.
 	 */
 	public void removeChannel(int channel) {
-		RemoveChannel removeChannel = new RemoveChannel();
+		RemoveChannelPacket removeChannel = new RemoveChannelPacket();
 		removeChannel.channel = channel;
 		removeChannel.encode();
 		session.sendMessage(Reliability.RELIABLE_ORDERED, removeChannel);
@@ -208,7 +214,7 @@ public class ConnectedClient {
 	 *            the reason the client was kicked.
 	 */
 	public void kick(String reason) {
-		Kick kick = new Kick();
+		KickPacket kick = new KickPacket();
 		kick.reason = reason;
 		kick.encode();
 		session.sendMessage(Reliability.UNRELIABLE, kick);

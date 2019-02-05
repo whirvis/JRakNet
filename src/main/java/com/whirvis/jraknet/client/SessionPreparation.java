@@ -58,7 +58,7 @@ import io.netty.channel.Channel;
  */
 public class SessionPreparation {
 
-	private static final Logger log = LogManager.getLogger(SessionPreparation.class);
+	private static final Logger LOG = LogManager.getLogger(SessionPreparation.class);
 
 	// Preparation data
 	private final String loggerName;
@@ -75,7 +75,7 @@ public class SessionPreparation {
 	public boolean loginPackets[] = new boolean[2];
 
 	/**
-	 * Constructs a <code>SessionPreperation</code> with the specified
+	 * Constructs a <code>SessionPreperation</code> with the
 	 * <code>RakNetClient</code> and initial maximum transfer unit.
 	 * 
 	 * @param client
@@ -93,7 +93,7 @@ public class SessionPreparation {
 	}
 
 	/**
-	 * Handles the specified packet and automatically updates the preparation
+	 * Handles the packet and automatically updates the preparation
 	 * data.
 	 * 
 	 * @param packet
@@ -125,7 +125,7 @@ public class SessionPreparation {
 				} else {
 					this.guid = connectionResponseOne.serverGuid;
 					this.loginPackets[0] = true;
-					log.debug(loggerName + " applied maximum transfer unit " + maximumTransferUnit
+					LOG.debug(loggerName + " applied maximum transfer unit " + maximumTransferUnit
 							+ " and globally unique ID " + guid + " from " + MessageIdentifier.getName(packetId)
 							+ " packet");
 				}
@@ -148,13 +148,13 @@ public class SessionPreparation {
 				this.loginPackets[1] = true;
 				if (connectionResponseTwo.maximumTransferUnit < this.maximumTransferUnit) {
 					this.maximumTransferUnit = connectionResponseTwo.maximumTransferUnit;
-					log.warn("Server responded with lower maximum transfer unit than agreed upon earlier");
+					LOG.warn("Server responded with lower maximum transfer unit than agreed upon earlier");
 				} else if (connectionResponseTwo.maximumTransferUnit > this.maximumMaximumTransferUnit) {
 					this.maximumTransferUnit = connectionResponseTwo.maximumTransferUnit;
-					log.warn("Server responded with higher maximum transfer unit than agreed upon earlier");
+					LOG.warn("Server responded with higher maximum transfer unit than agreed upon earlier");
 				}
 				this.connectionType = connectionResponseTwo.connectionType;
-				log.debug(loggerName + " applied maximum transfer unit from " + MessageIdentifier.getName(packetId)
+				LOG.debug(loggerName + " applied maximum transfer unit from " + MessageIdentifier.getName(packetId)
 						+ " packet");
 			}
 		} else if (packetId == ID_ALREADY_CONNECTED) {
@@ -180,27 +180,24 @@ public class SessionPreparation {
 	}
 
 	/**
-	 * @return <code>true</code> if the session has enough data to be created
+	 * Returns whether or not the session has enough data to be created.
+	 * 
+	 * @return <code>true</code> if the session has enough data to be created,
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean readyForSession() {
-		// It was cancelled, why are we finishing?
 		if (cancelReason != null) {
-			return false;
+			return false; // Session prepration cancelled
+		} else if (this.guid == -1 || this.maximumTransferUnit == -1 || this.address == null) {
+			return false; // Not enough data set
 		}
 
-		// Not all of the data has been set
-		if (this.guid == -1 || this.maximumTransferUnit == -1 || this.address == null) {
-			return false;
-		}
-
-		// Not all of the packets needed to connect have been handled
+		// Makes sure all needed packets have been handled
 		for (boolean handled : loginPackets) {
 			if (handled == false) {
-				return false;
+				return false; // Not all of the needed packets have been handled
 			}
 		}
-
-		// Nothing returned false, everything is ready
 		return true;
 	}
 
@@ -213,9 +210,9 @@ public class SessionPreparation {
 	 */
 	public RakNetServerSession createSession(Channel channel) {
 		if (!this.readyForSession()) {
-			return null;
+			return null; // Session not ready
 		}
-		log.info(loggerName + " created server session using globally unique ID " + Long.toHexString(guid).toUpperCase()
+		LOG.info(loggerName + " created server session using globally unique ID " + Long.toHexString(guid).toUpperCase()
 				+ " and maximum transfer unit with size of " + maximumTransferUnit + " bytes ("
 				+ (maximumTransferUnit * 8) + " bits) for server address " + address);
 		return new RakNetServerSession(this.client, this.connectionType, this.guid, this.maximumTransferUnit, channel,

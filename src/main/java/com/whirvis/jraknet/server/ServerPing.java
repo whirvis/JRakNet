@@ -48,7 +48,7 @@ public class ServerPing {
 	private final ConnectionType connectionType;
 
 	/**
-	 * Constructs a <code>ServerPing</code> with the specified address and
+	 * Constructs a <code>ServerPing</code> with the address and
 	 * <code>Identifier</code>.
 	 * 
 	 * @param sender
@@ -65,6 +65,8 @@ public class ServerPing {
 	}
 
 	/**
+	 * Returns the address of the pings ender.
+	 * 
 	 * @return the address of the ping sender.
 	 */
 	public InetSocketAddress getSender() {
@@ -72,6 +74,8 @@ public class ServerPing {
 	}
 
 	/**
+	 * Returns the <code>Identifier</code> being sent back to the sender.
+	 * 
 	 * @return the <code>Identifier</code> being sent back to the sender.
 	 */
 	public Identifier getIdentifier() {
@@ -79,6 +83,8 @@ public class ServerPing {
 	}
 
 	/**
+	 * Returns the connection type of the ping sender.
+	 * 
 	 * @return the connection type of the ping sender.
 	 */
 	public final ConnectionType getConnectionType() {

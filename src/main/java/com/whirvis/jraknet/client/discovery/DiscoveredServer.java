@@ -52,7 +52,7 @@ public class DiscoveredServer {
 	private Identifier identifier;
 
 	/**
-	 * Constructs a <code>DiscoveredServer</code> with the specified address,
+	 * Constructs a <code>DiscoveredServer</code> with the address,
 	 * discovery timestamp, and identifier.
 	 * 
 	 * @param address
@@ -69,6 +69,8 @@ public class DiscoveredServer {
 	}
 
 	/**
+	 * Returns the address of the discovered server.
+	 * 
 	 * @return the address of the discovered server.
 	 */
 	public InetSocketAddress getAddress() {
@@ -76,7 +78,9 @@ public class DiscoveredServer {
 	}
 
 	/**
-	 * @return the last time the server sent a response back.
+	 * Returns the last time the server sent back a reponse.
+	 * 
+	 * @return the last time the server sent back a response.
 	 */
 	public long getDiscoveryTimestamp() {
 		return this.discoveryTimestamp;
@@ -93,7 +97,9 @@ public class DiscoveredServer {
 	}
 
 	/**
-	 * @return the last identifier received by the server.
+	 * Returns the last identifier sent by the server.
+	 * 
+	 * @return the last identifier sent by the server.
 	 */
 	public Identifier getIdentifier() {
 		return this.identifier;

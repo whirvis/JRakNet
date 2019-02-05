@@ -44,7 +44,7 @@ public class NettyHandlerException extends RakNetClientException {
 	private final Throwable cause;
 
 	/**
-	 * Constructs a <code>NettyHandlerException</code> with the specified
+	 * Constructs a <code>NettyHandlerException</code> with the
 	 * <code>RakNetClient</code>, <code>RakNetClientHandler</code>, and
 	 * <code>Throwable</code> that caused this exception to be thrown.
 	 * 
@@ -63,13 +63,17 @@ public class NettyHandlerException extends RakNetClientException {
 	}
 
 	/**
-	 * @return the <code>RakNetHandler</code> the client is using.
+	 * Returns the <code>RakNetClientHandler</code> the client is using.
+	 * 
+	 * @return the <code>RakNetClientHandler</code> the client is using.
 	 */
 	public RakNetClientHandler getHandler() {
 		return this.handler;
 	}
 
 	/**
+	 * Returns the <code>Throwable</code> that was caught by the handler.
+	 * 
 	 * @return the <code>Throwable</code> that was caught by the handler.
 	 */
 	public Throwable getThrowableCause() {

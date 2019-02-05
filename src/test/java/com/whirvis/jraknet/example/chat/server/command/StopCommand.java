@@ -42,9 +42,8 @@ import com.whirvis.jraknet.example.chat.server.ChatServer;
  */
 public class StopCommand extends Command {
 
-	private static final Logger log = LogManager.getLogger(StopCommand.class);
+	private static final Logger LOG = LogManager.getLogger(StopCommand.class);
 
-	// Command data
 	private final ChatServer server;
 
 	public StopCommand(ChatServer server) {
@@ -54,7 +53,7 @@ public class StopCommand extends Command {
 
 	@Override
 	public boolean handleCommand(String[] args) {
-		log.info("Stopping the server...");
+		LOG.info("Stopping the server...");
 		server.stop();
 		return true;
 	}

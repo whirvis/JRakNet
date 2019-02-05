@@ -55,12 +55,12 @@ import com.whirvis.jraknet.windows.UniversalWindowsProgram;
  */
 public class RakNetServerTest {
 
-	private static final Logger log = LogManager.getLogger(RakNetServerTest.class);
+	private static final Logger LOG = LogManager.getLogger(RakNetServerTest.class);
 
 	public static void main(String[] args) {
 		// Add loopback exemption for Minecraft
 		if (!UniversalWindowsProgram.MINECRAFT.addLoopbackExempt()) {
-			log.warn("Failed to" + " add loopback exemption for Minecraft");
+			LOG.warn("Failed to" + " add loopback exemption for Minecraft");
 		}
 
 		// Create server and add listener
@@ -69,30 +69,30 @@ public class RakNetServerTest {
 
 			@Override
 			public void onClientPreConnect(InetSocketAddress address) {
-				log.info("Client from " + address + " has instantiated the connection, waiting for "
+				LOG.info("Client from " + address + " has instantiated the connection, waiting for "
 						+ NewIncomingConnection.class.getSimpleName() + " packet");
 			}
 
 			@Override
 			public void onClientPreDisconnect(InetSocketAddress address, String reason) {
-				log.info("Client from " + address + " has failed to login for \"" + reason + "\"");
+				LOG.info("Client from " + address + " has failed to login for \"" + reason + "\"");
 			}
 
 			@Override
 			public void onClientConnect(RakNetClientSession session) {
-				log.info(session.getConnectionType().getName() + " client from address " + session.getAddress()
+				LOG.info(session.getConnectionType().getName() + " client from address " + session.getAddress()
 						+ " has connected to the server");
 			}
 
 			@Override
 			public void onClientDisconnect(RakNetClientSession session, String reason) {
-				log.info(session.getConnectionType().getName() + " client from address " + session.getAddress()
+				LOG.info(session.getConnectionType().getName() + " client from address " + session.getAddress()
 						+ " has been disconnected for \"" + reason + "\"");
 			}
 
 			@Override
 			public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
-				log.info("Received packet from " + session.getConnectionType().getName() + " client with address "
+				LOG.info("Received packet from " + session.getConnectionType().getName() + " client with address "
 						+ session.getAddress() + " with packet ID " + RakNet.toHexStringId(packet) + " on channel "
 						+ channel);
 			}
@@ -107,32 +107,32 @@ public class RakNetServerTest {
 
 			@Override
 			public void onAcknowledge(RakNetClientSession session, Record record, EncapsulatedPacket packet) {
-				log.info(session.getConnectionType().getName() + " client with address " + session.getAddress()
+				LOG.info(session.getConnectionType().getName() + " client with address " + session.getAddress()
 						+ " has received packet with ID: "
 						+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
 
 			@Override
 			public void onNotAcknowledge(RakNetClientSession session, Record record, EncapsulatedPacket packet) {
-				log.info(session.getConnectionType().getName() + " client with address " + session.getAddress()
+				LOG.info(session.getConnectionType().getName() + " client with address " + session.getAddress()
 						+ " has lost packet with ID: " + MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
 
 			@Override
 			public void onHandlerException(InetSocketAddress address, Throwable cause) {
-				log.error("Exception caused by " + address);
+				LOG.error("Exception caused by " + address);
 				cause.printStackTrace();
 			}
 
 			@Override
 			public void onAddressBlocked(InetAddress address, String reason, long time) {
-				log.info(
+				LOG.info(
 						"Blocked address " + address + " due to \"" + reason + "\" for " + (time / 1000L) + " seconds");
 			}
 
 			@Override
 			public void onAddressUnblocked(InetAddress address) {
-				log.info("Unblocked address " + address);
+				LOG.info("Unblocked address " + address);
 			}
 
 		});

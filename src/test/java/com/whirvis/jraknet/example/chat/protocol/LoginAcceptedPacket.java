@@ -28,49 +28,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.client;
+package com.whirvis.jraknet.example.chat.protocol;
 
-import com.whirvis.jraknet.RakNet;
-import com.whirvis.jraknet.RakNetPacket;
+import java.util.UUID;
 
-/**
- * Signals that a packet critical to the <code>RakNetClient</code> failed to
- * encode or decode correctly.
- *
- * @author Whirvis T. Wheatley
- */
-public class PacketBufferException extends RakNetClientException {
+import com.whirvis.jraknet.Packet;
+import com.whirvis.jraknet.example.chat.ChatMessageIdentifier;
+import com.whirvis.jraknet.example.chat.ServerChannel;
 
-	private static final long serialVersionUID = -3730545025991834599L;
+public class LoginAcceptedPacket extends ChatPacket {
 
-	private final RakNetPacket packet;
+	public UUID userId;
+	public String serverName;
+	public String serverMotd;
+	public ServerChannel[] channels;
 
-	/**
-	 * Constructs a <code>PacketBufferException</code> with the
-	 * <code>RakNetClient</code> and <code>RakNetPacket</code>.
-	 * 
-	 * @param client
-	 *            the <code>RakNetClient</code> that threw the exception.
-	 * @param packet
-	 *            the <code>RakNetPacket</code> that failed to encode/decode.
-	 */
-	public PacketBufferException(RakNetClient client, RakNetPacket packet) {
-		super(client, "Packet with ID " + RakNet.toHexStringId(packet) + " failed to encode/decode");
-		this.packet = packet;
+	public LoginAcceptedPacket() {
+		super(ChatMessageIdentifier.ID_LOGIN_ACCEPTED);
 	}
 
-	/**
-	 * Returns the packet that failed to encode/decode.
-	 * 
-	 * @return the packet that failed to encode/decode.
-	 */
-	public RakNetPacket getPacket() {
-		return this.packet;
+	public LoginAcceptedPacket(Packet packet) {
+		super(packet);
 	}
 
 	@Override
-	public String getLocalizedMessage() {
-		return "Packet failed to encode/decode";
+	public void encode() {
+		this.writeUUID(userId);
+		this.writeString(serverName);
+		this.writeString(serverMotd);
+		this.writeInt(channels.length);
+		for (int i = 0; i < channels.length; i++) {
+			this.writeUnsignedByte(channels[i].getChannel());
+			this.writeString(channels[i].getName());
+		}
+	}
+
+	@Override
+	public void decode() {
+		this.userId = this.readUUID();
+		this.serverName = this.readString();
+		this.serverMotd = this.readString();
+		this.channels = new ServerChannel[this.readInt()];
+		for (int i = 0; i < channels.length; i++) {
+			short channel = this.readUnsignedByte();
+			String channelName = this.readString();
+			channels[i] = new ServerChannel(channel, channelName);
+		}
 	}
 
 }

@@ -121,7 +121,7 @@ public class Record {
 	/**
 	 * @param records
 	 *            the records to convert to an <code>int</code> array.
-	 * @return the specified records as an <code>int</code> array.
+	 * @return the records as an <code>int</code> array.
 	 */
 	public static final int[] toArray(Record... records) {
 		// Store all integers into ArrayList as boxed integers
@@ -152,7 +152,7 @@ public class Record {
 	/**
 	 * @param records
 	 *            the records to convert to an int array.
-	 * @return the specified records as an int array.
+	 * @return the records as an int array.
 	 */
 	public static final int[] toArray(List<Record> records) {
 		return Record.toArray(records.toArray(new Record[records.size()]));

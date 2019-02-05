@@ -41,7 +41,7 @@ public class LoginFailureException extends RakNetClientException {
 	private static final long serialVersionUID = -5025319984358819345L;
 
 	/**
-	 * Constructs a <code>LoginFailureException</code> with the specified
+	 * Constructs a <code>LoginFailureException</code> with the
 	 * <code>RakNetClient</code> and reason as to why the login failed.
 	 * 
 	 * @param client

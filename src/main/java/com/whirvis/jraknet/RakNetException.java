@@ -40,7 +40,7 @@ public class RakNetException extends Exception {
 	private static final long serialVersionUID = -685945306592443928L;
 
 	/**
-	 * Constructs a <code>RakNetException</code> with the specified error.
+	 * Constructs a <code>RakNetException</code> with the error.
 	 * 
 	 * @param error
 	 *            the reason the exception was thrown.
@@ -50,7 +50,7 @@ public class RakNetException extends Exception {
 	}
 
 	/**
-	 * Constructs a <code>RakNetException</code> with the specified
+	 * Constructs a <code>RakNetException</code> with the
 	 * <code>Throwable</code>.
 	 * 
 	 * @param cause

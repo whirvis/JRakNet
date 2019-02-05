@@ -58,16 +58,7 @@ public class RakNetServerSession extends RakNetSession {
 	private long timestamp;
 
 	/**
-	 * Called by the client when the connection is closed.
-	 */
-	public void closeConnection() {
-		sendQueue.clear(); // Make sure disconnect packet is first in-line
-		this.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
-		this.update(); // Make sure the packet is sent out
-	}
-
-	/**
-	 * Constructs a <code>RakNetClientSession</code> with the specified
+	 * Constructs a <code>RakNetClientSession</code> with the
 	 * <code>RakNetClient</code>, globally unique ID, maximum transfer unit,
 	 * <code>Channel</code>, and address.
 	 * 
@@ -157,6 +148,15 @@ public class RakNetServerSession extends RakNetSession {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Called by the client when the connection is closed.
+	 */
+	public void closeConnection() {
+		sendQueue.clear(); // Make sure disconnect packet is first in-line
+		this.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
+		this.update(); // Make sure the packet is sent out
 	}
 
 }

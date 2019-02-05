@@ -42,8 +42,8 @@ import java.util.Map.Entry;
 import java.util.UUID;
 
 import com.whirvis.jraknet.protocol.ConnectionType;
-import com.whirvis.jraknet.stream.PacketDataInput;
-import com.whirvis.jraknet.stream.PacketDataOutput;
+import com.whirvis.jraknet.stream.PacketDataInputStream;
+import com.whirvis.jraknet.stream.PacketDataOutputStream;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.EmptyByteBuf;
@@ -57,21 +57,19 @@ import io.netty.channel.socket.DatagramPacket;
  */
 public class Packet {
 
-	// Packet address data
 	public static final int ADDRESS_VERSION_IPV4 = 0x04;
 	public static final int ADDRESS_VERSION_IPV6 = 0x06;
 	public static final int ADDRESS_VERSION_IPV4_LENGTH = 0x04;
 	public static final int ADDRESS_VERSION_IPV6_LENGTH = 0x10;
 	public static final int ADDRESS_VERSION_IPV6_MYSTERY_LENGTH = 0x0A;
 
-	// Packet data
 	private ByteBuf buffer;
-	private PacketDataInput input;
-	private PacketDataOutput output;
+	private PacketDataInputStream input;
+	private PacketDataOutputStream output;
 
 	/**
 	 * Constructs a <code>Packet</code> that reads from and writes to the
-	 * specified <code>ByteBuf</code>.
+	 * <code>ByteBuf</code>.
 	 * 
 	 * @param buffer
 	 *            the <code>ByteBuf</code> to read from and write to.
@@ -83,13 +81,13 @@ public class Packet {
 			throw new IllegalArgumentException("No content");
 		}
 		this.buffer = buffer;
-		this.input = new PacketDataInput(this);
-		this.output = new PacketDataOutput(this);
+		this.input = new PacketDataInputStream(this);
+		this.output = new PacketDataOutputStream(this);
 	}
 
 	/**
 	 * Constructs a <code>Packet</code> that reads from and writes to the
-	 * specified <code>DatagramPacket</code>
+	 * <code>DatagramPacket</code>
 	 * 
 	 * @param datagram
 	 *            the <code>DatagramPacket</code> to read from and write to.
@@ -100,7 +98,7 @@ public class Packet {
 
 	/**
 	 * Constructs a <code>Packet</code> that reads from and writes to the
-	 * specified byte array.
+	 * byte array.
 	 * 
 	 * @param data
 	 *            the byte[] to read from and write to.
@@ -111,7 +109,7 @@ public class Packet {
 
 	/**
 	 * Constructs a <code>Packet</code> that reads from and writes to the
-	 * specified <code>Packet</code>.
+	 * <code>Packet</code>.
 	 * 
 	 * @param packet
 	 *            the <code>Packet</code> to read from and write to.
@@ -129,7 +127,7 @@ public class Packet {
 	}
 
 	/**
-	 * Reads data into the specified byte array.
+	 * Reads data into the byte array.
 	 * 
 	 * @param dest
 	 *            the bytes to read the data into.
@@ -143,11 +141,11 @@ public class Packet {
 	}
 
 	/**
-	 * Returns a byte array of the read data with the specified size.
+	 * Returns a byte array of the read data with the size.
 	 * 
 	 * @param length
 	 *            the amount of bytes to read.
-	 * @return a byte array of the read data with the specified size.
+	 * @return a byte array of the read data with the size.
 	 */
 	public byte[] read(int length) {
 		byte[] data = new byte[length];
@@ -191,7 +189,7 @@ public class Packet {
 	 * @param length
 	 *            the amount of bytes to read.
 	 * @return a byte array of the read flipped unsigned byte's casted back to a
-	 *         byte with the specified size.
+	 *         byte with the size.
 	 */
 	private byte[] readCFU(int length) {
 		byte[] data = new byte[length];
@@ -459,7 +457,7 @@ public class Packet {
 	}
 
 	/**
-	 * Writes the specified byte array to the packet.
+	 * Writes the byte array to the packet.
 	 * 
 	 * @param data
 	 *            the data to write.
@@ -473,7 +471,7 @@ public class Packet {
 	}
 
 	/**
-	 * Writes the specified amount of null (0x00) bytes to the packet.
+	 * Writes the amount of null (0x00) bytes to the packet.
 	 * 
 	 * @param length
 	 *            the amount of bytes to write.
@@ -523,7 +521,7 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a byte array of the specified flipped unsigned byte's casted back
+	 * Writes a byte array of the flipped unsigned byte's casted back
 	 * to a byte to the packet.
 	 * 
 	 * @param data
@@ -927,7 +925,9 @@ public class Packet {
 	}
 
 	/**
-	 * @return the packet as a byte array.
+	 * Returns the packet as a <code>byte[]</code>.
+	 * 
+	 * @return the packet as a <code>byte[]</code>.
 	 */
 	public byte[] array() {
 		if (buffer.isDirect()) {
@@ -937,6 +937,8 @@ public class Packet {
 	}
 
 	/**
+	 * Returns the size of the packet in bytes.
+	 * 
 	 * @return the size of the packet in bytes.
 	 */
 	public int size() {
@@ -944,27 +946,35 @@ public class Packet {
 	}
 
 	/**
-	 * @return the packet's buffer.
+	 * Returns the packet buffer.
+	 * 
+	 * @return the packet buffer.
 	 */
 	public ByteBuf buffer() {
 		return this.buffer.retain();
 	}
 
 	/**
+	 * Returns the packet's input.
+	 * 
 	 * @return the packet's input.
 	 */
-	public PacketDataInput getDataInput() {
+	public PacketDataInputStream getDataInput() {
 		return this.input;
 	}
 
 	/**
+	 * Returns the packet's output.
+	 * 
 	 * @return the packet's output.
 	 */
-	public PacketDataOutput getDataOutput() {
+	public PacketDataOutputStream getDataOutput() {
 		return this.output;
 	}
 
 	/**
+	 * Returns how many bytes are left in the packet's buffer.
+	 * 
 	 * @return how many bytes are left in the packet's buffer.
 	 */
 	public int remaining() {

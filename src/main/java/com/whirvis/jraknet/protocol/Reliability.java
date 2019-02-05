@@ -76,33 +76,12 @@ public enum Reliability {
 	UNRELIABLE_WITH_ACK_RECEIPT(5, false, false, false, true),
 
 	/**
-	 * Same as <code>UNRELIABLE_SEQUENCED</code>, however you will be notified
-	 * whether the packet was lost or received through
-	 * <code>onAcknowledge()</code> and <code>onNotAcknowledge()</code> methods
-	 * through the <code>RakNetServerListener</code> and
-	 * <code>RakNetClientListener</code> classes.
-	 */
-	/*
-	 * UNRELIABLE_SEQUENCED_WITH_ACK_RECEIPT(-1, false, false, true, true),
-	 */
-
-	/**
 	 * Same as <code>RELIABLE</code>, however you will be notified when the
 	 * packet was received through the <code>onAcknowledge()</code> method
 	 * through the <code>RakNetServerListener</code> and
 	 * <code>RakNetClientListener</code> classes.
 	 */
 	RELIABLE_WITH_ACK_RECEIPT(6, true, false, false, true),
-
-	/**
-	 * Same as <code>RELIABLE_SEQUENCED</code>, however you will be notified
-	 * when the packet was received through the <code>onAcknowledge()</code>
-	 * method through the <code>RakNetServerListener</code> and
-	 * <code>RakNetClientListener</code> classes.
-	 */
-	/*
-	 * RELIABLE_SEQUENCED_WITH_ACK_RECEIPT(-1, true, false, true, true),
-	 */
 
 	/**
 	 * Same as <code>RELIABLE_ORDERED</code>, however you will be notified when
@@ -119,7 +98,7 @@ public enum Reliability {
 	private final boolean requiresAck;
 
 	/**
-	 * Constructs a <code>Reliability</code> with the specified ID and whether
+	 * Constructs a <code>Reliability</code> with the ID and whether
 	 * or not it is reliable, ordered, sequenced, or requires an acknowledge
 	 * receipt.
 	 * 
@@ -148,41 +127,57 @@ public enum Reliability {
 	}
 
 	/**
-	 * @return the ID of the reliability as a byte.
+	 * Returns the ID of the reliability.
+	 * 
+	 * @return the ID of the reliability.
 	 */
 	public byte getId() {
 		return this.id;
 	}
 
 	/**
-	 * @return <code>true</code> if the reliability is reliable.
+	 * Returns whether or not the reliability is reliable.
+	 * 
+	 * @return <code>true</code> if the reliability is reliable,
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean isReliable() {
 		return this.reliable;
 	}
 
 	/**
-	 * @return <code>true</code> if the reliability is ordered.
+	 * Returns whether or not the reliability is ordered.
+	 * 
+	 * @return <code>true</code> if the reliability is ordered,
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean isOrdered() {
 		return this.ordered;
 	}
 
 	/**
-	 * @return <code>true</code> if the reliability is sequenced.
+	 * Returns whether not the reliability is sequenced.
+	 * 
+	 * @return <code>true</code> if the reliability is sequenced,
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean isSequenced() {
 		return this.sequenced;
 	}
 
 	/**
-	 * @return <code>true</code> if the reliability requires acknowledgement.
+	 * Returns whether or not the reliability requires acknowledgement.
+	 * 
+	 * @return <code>true</code> if the reliability requires acknowledgement,
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean requiresAck() {
 		return this.requiresAck;
 	}
 
 	/**
+	 * Returns the reliability based on its ID.
+	 * 
 	 * @param reliability
 	 *            the ID of the reliability to lookup.
 	 * @return the reliability based on its ID.

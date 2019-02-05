@@ -46,7 +46,7 @@ import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
 public interface UnumRakNetPeer {
 
 	/**
-	 * Sends a message with the specified reliability on the specified channel
+	 * Sends a message with the reliability on the channel
 	 * and returns a copy of the generated encapsulated packet that will be used
 	 * when it is actually sent.
 	 * 
@@ -63,8 +63,8 @@ public interface UnumRakNetPeer {
 	public EncapsulatedPacket sendMessage(Reliability reliability, int channel, Packet packet);
 
 	/**
-	 * Sends the specified messages with the specified reliability on the
-	 * specified channel and returns copies of the generated encapsulated
+	 * Sends the messages with the reliability on the
+	 * channel and returns copies of the generated encapsulated
 	 * packets that will be used when it is actually sent.
 	 * 
 	 * @param reliability
@@ -87,7 +87,7 @@ public interface UnumRakNetPeer {
 	}
 
 	/**
-	 * Sends a message with the specified reliability on the default channel and
+	 * Sends a message with the reliability on the default channel and
 	 * returns a copy of the generated encapsulated packet that will be used
 	 * when it is actually sent.
 	 * 
@@ -105,7 +105,7 @@ public interface UnumRakNetPeer {
 	}
 
 	/**
-	 * Sends the specified messages with the specified reliability on the
+	 * Sends the messages with the reliability on the
 	 * default channel and returns copies of the generated encapsulated packets
 	 * that will be used when it is actually sent.
 	 * 
@@ -127,8 +127,8 @@ public interface UnumRakNetPeer {
 	}
 
 	/**
-	 * Sends a message identifier with the specified reliability on the
-	 * specified channel and returns a copy of the generated encapsulated packet
+	 * Sends a message identifier with the reliability on the
+	 * channel and returns a copy of the generated encapsulated packet
 	 * that will be used when it is actually sent.
 	 * 
 	 * @param reliability
@@ -146,8 +146,8 @@ public interface UnumRakNetPeer {
 	}
 
 	/**
-	 * Sends the specified message identifiers with the specified reliability on
-	 * the specified channel and returns copies of the generated encapsulated
+	 * Sends the message identifiers with the reliability on
+	 * the channel and returns copies of the generated encapsulated
 	 * packets that will be used when it is actually sent.
 	 * 
 	 * @param reliability
@@ -169,7 +169,7 @@ public interface UnumRakNetPeer {
 	}
 
 	/**
-	 * Sends a message identifier with the specified reliability on the default
+	 * Sends a message identifier with the reliability on the default
 	 * channel and returns a copy of the generated encapsulated packet that will
 	 * be used when it is actually sent.
 	 * 
@@ -186,7 +186,7 @@ public interface UnumRakNetPeer {
 	}
 
 	/**
-	 * Sends the specified message identifiers with the specified reliability on
+	 * Sends the message identifiers with the reliability on
 	 * the default channel and returns copies of the generated encapsulated
 	 * packets that will be used when it is actually sent.
 	 * 

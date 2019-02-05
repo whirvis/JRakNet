@@ -41,7 +41,7 @@ public class AlreadyConnectedException extends RakNetClientException {
 	private static final long serialVersionUID = -482118372058339060L;
 
 	/**
-	 * Constructs an <code>AlreadyConnectedException</code> with the specified
+	 * Constructs an <code>AlreadyConnectedException</code> with the
 	 * <code>RakNetClient</code>.
 	 * 
 	 * @param client

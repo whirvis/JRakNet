@@ -46,7 +46,7 @@ import com.whirvis.jraknet.map.ShortMap;
  */
 public final class MessageIdentifier {
 
-	private static final Logger log = LogManager.getLogger(MessageIdentifier.class);
+	private static final Logger LOG = LogManager.getLogger(MessageIdentifier.class);
 
 	private MessageIdentifier() {
 		// Static class
@@ -235,11 +235,11 @@ public final class MessageIdentifier {
 					String currentName = packetNames.get(packetId);
 					if (currentName != null) {
 						if (!currentName.equals(packetName)) {
-							log.warn("Found duplicate ID " + RakNet.toHexStringId(packetId) + " for \"" + packetName
+							LOG.warn("Found duplicate ID " + RakNet.toHexStringId(packetId) + " for \"" + packetName
 									+ "\" and \"" + currentName + "\", overriding name and ID");
 						}
 					} else {
-						log.debug("Assigned packet ID " + RakNet.toHexStringId(packetId) + " to " + packetName);
+						LOG.debug("Assigned packet ID " + RakNet.toHexStringId(packetId) + " to " + packetName);
 					}
 					packetNames.put(packetId, packetName);
 					packetIds.put(packetName, packetId);
@@ -288,7 +288,7 @@ public final class MessageIdentifier {
 	/**
 	 * @param id
 	 *            the ID of the packet to check for.
-	 * @return whether or not a packet with the specified ID exists.
+	 * @return whether or not a packet with the ID exists.
 	 */
 	public static boolean hasPacket(int id) {
 		return packetNames.containsKey((short) id);
@@ -297,7 +297,7 @@ public final class MessageIdentifier {
 	/**
 	 * @param name
 	 *            the name of the packet to check for.
-	 * @return whether or not a packet with the specified name exists.
+	 * @return whether or not a packet with the name exists.
 	 */
 	public static boolean hasPacket(String name) {
 		return packetIds.containsKey(name);

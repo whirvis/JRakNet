@@ -43,9 +43,8 @@ import com.whirvis.jraknet.example.chat.server.ChatServer;
  */
 public class ChannelCommand extends Command {
 
-	private static final Logger log = LogManager.getLogger(ChannelCommand.class);
-
-	// Command data
+	private static final Logger LOG = LogManager.getLogger(ChannelCommand.class);
+	
 	private final ChatServer server;
 
 	public ChannelCommand(ChatServer server) {
@@ -68,14 +67,14 @@ public class ChannelCommand extends Command {
 					while (!server.hasChannel(channelId)) {
 						channelId++;
 						if (channelId >= RakNet.MAX_CHANNELS) {
-							log.error("Unable to add channel, either remove some or assign an ID manually!");
+							LOG.error("Unable to add channel, either remove some or assign an ID manually!");
 							return true;
 						}
 					}
 				} else {
 					// Channel was preset but there is no name!
 					if (args.length < 3) {
-						log.error("Failed to add channel with ID " + channelId + ", no name was provided!");
+						LOG.error("Failed to add channel with ID " + channelId + ", no name was provided!");
 						return true;
 					}
 				}
@@ -83,34 +82,34 @@ public class ChannelCommand extends Command {
 				// Add the channel and notify the server
 				String channelName = remainingArguments((hadId ? 2 : 1), args);
 				server.addChannel(channelId, channelName);
-				log.info("Added channel \"" + channelName + "\" with ID " + channelId);
+				LOG.info("Added channel \"" + channelName + "\" with ID " + channelId);
 				return true;
 			} else if (args[0].equalsIgnoreCase("rename")) {
 				if (args.length >= 3) {
 					// Does the channel exist yet?
 					if (!server.hasChannel(channelId)) {
-						log.error("Channel with ID " + channelId + " has not yet been created!");
+						LOG.error("Channel with ID " + channelId + " has not yet been created!");
 						return true;
 					}
 
 					// Rename the channel and notify the server
 					String channelName = server.getChannelName(channelId);
 					server.renameChannel(channelId, remainingArguments(2, args));
-					log.info("Renamed channel with ID " + channelId + " from \"" + channelName + "\" to \""
+					LOG.info("Renamed channel with ID " + channelId + " from \"" + channelName + "\" to \""
 							+ server.getChannelName(channelId) + "\"");
 					return true;
 				}
 			} else if (args[0].equalsIgnoreCase("remove")) {
 				// Does the channel exist yet?
 				if (!server.hasChannel(channelId)) {
-					log.error("Channel was ID " + channelId + " has not yet been created!");
+					LOG.error("Channel was ID " + channelId + " has not yet been created!");
 					return true;
 				}
 
 				// Remove the channel and notify the server
 				String channelName = server.getChannelName(channelId);
 				server.removeChannel(channelId);
-				log.info("Removed channel \"" + channelName + "\"");
+				LOG.info("Removed channel \"" + channelName + "\"");
 				return true;
 			}
 		}

@@ -38,13 +38,13 @@ package com.whirvis.jraknet.server;
  */
 public class BlockedAddress {
 
-	public static final int PERMANENT_BLOCK = -1;
+	public static final long PERMANENT_BLOCK = -1L;
 
 	private final long startTime;
 	private final long time;
 
 	/**
-	 * Constructs a <code>BlockedClient</code> with the specified start time and
+	 * Constructs a <code>BlockedClient</code> with the start time and
 	 * the amount of time that the client is blocked.
 	 * 
 	 * @param startTime
@@ -58,6 +58,8 @@ public class BlockedAddress {
 	}
 
 	/**
+	 * Returns the time the address was first blocked.
+	 * 
 	 * @return the time the address was first blocked.
 	 */
 	public long getStartTime() {
@@ -65,6 +67,8 @@ public class BlockedAddress {
 	}
 
 	/**
+	 * Returns how long until the address is unblocked.
+	 * 
 	 * @return how long until the address is unblocked.
 	 */
 	public long getTime() {
