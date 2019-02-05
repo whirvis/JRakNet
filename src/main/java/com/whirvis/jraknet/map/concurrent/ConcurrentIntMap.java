@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent Summerlin
+ * Copyright (c) 2016-2019 Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,12 +46,12 @@ public class ConcurrentIntMap<T> extends ConcurrentHashMap<Integer, T> implement
 	private static final long serialVersionUID = 4324132003573381634L;
 
 	/**
-	 * Returns <tt>true</tt> if this map contains a mapping for the specified
+	 * Returns <tt>true</tt> if this map contains a mapping for the
 	 * key.
 	 *
 	 * @param key
 	 *            The key whose presence in this map is to be tested
-	 * @return <tt>true</tt> if this map contains a mapping for the specified
+	 * @return <tt>true</tt> if this map contains a mapping for the
 	 *         key.
 	 */
 	public boolean containsKey(int key) {
@@ -59,12 +59,12 @@ public class ConcurrentIntMap<T> extends ConcurrentHashMap<Integer, T> implement
 	}
 
 	/**
-	 * Returns <tt>true</tt> if this map maps one or more keys to the specified
+	 * Returns <tt>true</tt> if this map maps one or more keys to the
 	 * value.
 	 *
 	 * @param value
 	 *            value whose presence in this map is to be tested
-	 * @return <tt>true</tt> if this map maps one or more keys to the specified
+	 * @return <tt>true</tt> if this map maps one or more keys to the
 	 *         value
 	 */
 	public boolean containsValue(Object value) {
@@ -72,7 +72,7 @@ public class ConcurrentIntMap<T> extends ConcurrentHashMap<Integer, T> implement
 	}
 
 	/**
-	 * Returns the value to which the specified key is mapped, or {@code null}
+	 * Returns the value to which the key is mapped, or {@code null}
 	 * if this map contains no mapping for the key.
 	 *
 	 * <p>
@@ -90,21 +90,21 @@ public class ConcurrentIntMap<T> extends ConcurrentHashMap<Integer, T> implement
 	 * @see #put(int, Object)
 	 * @param key
 	 *            they key the value is mapped to.
-	 * @return the value to which the specified key is mapped.
+	 * @return the value to which the key is mapped.
 	 */
 	public T get(int key) {
 		return super.get(key);
 	}
 
 	/**
-	 * Associates the specified value with the specified key in this map. If the
+	 * Associates the value with the key in this map. If the
 	 * map previously contained a mapping for the key, the old value is
 	 * replaced.
 	 *
 	 * @param key
-	 *            key with which the specified value is to be associated
+	 *            key with which the value is to be associated
 	 * @param value
-	 *            value to be associated with the specified key
+	 *            value to be associated with the key
 	 * @return the previous value associated with <tt>key</tt>, or <tt>null</tt>
 	 *         if there was no mapping for <tt>key</tt>. (A <tt>null</tt> return
 	 *         can also indicate that the map previously associated
@@ -115,7 +115,7 @@ public class ConcurrentIntMap<T> extends ConcurrentHashMap<Integer, T> implement
 	}
 
 	/**
-	 * Removes the mapping for the specified key from this map if present.
+	 * Removes the mapping for the key from this map if present.
 	 *
 	 * @param key
 	 *            key whose mapping is to be removed from the map

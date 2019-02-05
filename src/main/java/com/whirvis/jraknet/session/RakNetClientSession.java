@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent Summerlin
+ * Copyright (c) 2016-2019 Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -60,7 +60,7 @@ public class RakNetClientSession extends RakNetSession {
 	private long timestamp;
 
 	/**
-	 * Constructs a <code>RakNetClientSession</code> with the specified
+	 * Constructs a <code>RakNetClientSession</code> with the
 	 * <code>RakNetServer</code>, the time the server was created, globally
 	 * unique ID, maximum transfer unit, <code>Channel</code>, and address.
 	 * 
@@ -87,6 +87,8 @@ public class RakNetClientSession extends RakNetSession {
 	}
 
 	/**
+	 * Returns the server this session is connected to.
+	 * 
 	 * @return the server this session is connected to.
 	 */
 	public RakNetServer getServer() {
@@ -94,6 +96,8 @@ public class RakNetClientSession extends RakNetSession {
 	}
 
 	/**
+	 * Returns the time this session wsa created.
+	 * 
 	 * @return the time this session was created.
 	 */
 	public long getTimeCreated() {

@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent Summerlin
+ * Copyright (c) 2016-2019 Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -168,6 +168,8 @@ public class ChatFrame extends JFrame {
 	}
 
 	/**
+	 * Returns the text in the username box.
+	 * 
 	 * @return the text in the username box.
 	 */
 	public String getUsername() {
@@ -285,7 +287,7 @@ public class ChatFrame extends JFrame {
 	}
 
 	/**
-	 * Displays an error with the specified title and message.
+	 * Displays an error with the title and message.
 	 * 
 	 * @param title
 	 *            the title of the error.
@@ -297,7 +299,7 @@ public class ChatFrame extends JFrame {
 	}
 
 	/**
-	 * Displays an error using the specified exception.
+	 * Displays an error using the exception.
 	 * 
 	 * @param throwable
 	 *            the caught exception.

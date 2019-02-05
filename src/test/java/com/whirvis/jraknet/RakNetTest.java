@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent Summerlin
+ * Copyright (c) 2016-2019 Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,8 +32,8 @@ package com.whirvis.jraknet;
 
 import java.net.InetSocketAddress;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.identifier.MinecraftIdentifier;
 
@@ -44,9 +44,8 @@ import com.whirvis.jraknet.identifier.MinecraftIdentifier;
  */
 public class RakNetTest {
 
-	private static final Logger log = LoggerFactory.getLogger(RakNetTest.class);
+	private static final Logger LOG = LogManager.getLogger(RakNetTest.class);
 
-	// Test data
 	private static final String ADDRESS_TEST_VALID = "255.255.255.255:65535";
 	private static final String ADDRESS_TEST_INVALID = "275.3.6.28:83245";
 	private static final char UNICODE_MINECRAFT_COLOR_SYMBOL = '\u00A7';
@@ -58,35 +57,35 @@ public class RakNetTest {
 			MINECRAFT_DEFAULT_PORT);
 
 	public static void main(String[] args) throws RakNetException {
-		log.info("Parsing valid address " + ADDRESS_TEST_VALID + " ?= "
+		LOG.info("Parsing valid address " + ADDRESS_TEST_VALID + " ?= "
 				+ RakNet.parseAddressPassive(ADDRESS_TEST_VALID));
-		log.info("Parsing invalid address " + ADDRESS_TEST_INVALID + " ?= "
+		LOG.info("Parsing invalid address " + ADDRESS_TEST_INVALID + " ?= "
 				+ RakNet.parseAddressPassive(ADDRESS_TEST_INVALID));
 
 		// Tell the user the sever we are pinging
-		log.info("Server address: " + LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
-		log.info("Maximum Transfer Unit: " + RakNet.getMaximumTransferUnit());
+		LOG.info("Server address: " + LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
+		LOG.info("Maximum Transfer Unit: " + RakNet.getMaximumTransferUnit());
 
 		// Check if the server is online
-		log.info("Pinging server... ");
+		LOG.info("Pinging server... ");
 		if (RakNet.isServerOnline(LIFEBOAT_SURVIVAL_GAMES_ADDRESS)) {
-			log.info("Success!");
+			LOG.info("Success!");
 		} else {
 			throw new RakNetException("Failed to ping server, unable to proceed with testing!");
 		}
 
-		log.info("Checking compatibility... ");
+		LOG.info("Checking compatibility... ");
 		if (RakNet.isServerCompatible(LIFEBOAT_SURVIVAL_GAMES_ADDRESS)) {
-			log.info("Success!");
+			LOG.info("Success!");
 		} else {
 			throw new RakNetException("Invalid protocol, we are unable to continue with testing!");
 		}
 
 		// Get the server identifier
-		log.info("Getting server identifier...");
+		LOG.info("Getting server identifier...");
 		MinecraftIdentifier identifier = new MinecraftIdentifier(
 				RakNet.getServerIdentifier(LIFEBOAT_SURVIVAL_GAMES_ADDRESS));
-		log.info("Success!: " + formatMCPEIdentifier(identifier));
+		LOG.info("Success!: " + formatMCPEIdentifier(identifier));
 	}
 
 	/**

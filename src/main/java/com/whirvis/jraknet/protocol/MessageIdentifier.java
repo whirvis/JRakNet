@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent Summerlin
+ * Copyright (c) 2016-2019 Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,8 +33,8 @@ package com.whirvis.jraknet.protocol;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.map.ShortMap;
@@ -44,9 +44,13 @@ import com.whirvis.jraknet.map.ShortMap;
  *
  * @author Trent Summerlin
  */
-public class MessageIdentifier {
+public final class MessageIdentifier {
 
-	private static final Logger log = LoggerFactory.getLogger(MessageIdentifier.class);
+	private static final Logger LOG = LogManager.getLogger(MessageIdentifier.class);
+
+	private MessageIdentifier() {
+		// Static class
+	}
 
 	// Magic identifier
 	public final static byte[] MAGIC = new byte[] { (byte) 0x00, (byte) 0xFF, (byte) 0xFF, 0x00, (byte) 0xFE,
@@ -231,11 +235,11 @@ public class MessageIdentifier {
 					String currentName = packetNames.get(packetId);
 					if (currentName != null) {
 						if (!currentName.equals(packetName)) {
-							log.warn("Found duplicate ID " + RakNet.toHexStringId(packetId) + " for \"" + packetName
+							LOG.warn("Found duplicate ID " + RakNet.toHexStringId(packetId) + " for \"" + packetName
 									+ "\" and \"" + currentName + "\", overriding name and ID");
 						}
 					} else {
-						log.debug("Assigned packet ID " + RakNet.toHexStringId(packetId) + " to " + packetName);
+						LOG.debug("Assigned packet ID " + RakNet.toHexStringId(packetId) + " to " + packetName);
 					}
 					packetNames.put(packetId, packetName);
 					packetIds.put(packetName, packetId);
@@ -284,7 +288,7 @@ public class MessageIdentifier {
 	/**
 	 * @param id
 	 *            the ID of the packet to check for.
-	 * @return whether or not a packet with the specified ID exists.
+	 * @return whether or not a packet with the ID exists.
 	 */
 	public static boolean hasPacket(int id) {
 		return packetNames.containsKey((short) id);
@@ -293,7 +297,7 @@ public class MessageIdentifier {
 	/**
 	 * @param name
 	 *            the name of the packet to check for.
-	 * @return whether or not a packet with the specified name exists.
+	 * @return whether or not a packet with the name exists.
 	 */
 	public static boolean hasPacket(String name) {
 		return packetIds.containsKey(name);

@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent Summerlin
+ * Copyright (c) 2016-2019 Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -65,14 +65,18 @@ public class Identifier {
 	}
 
 	/**
-	 * @return the identifier as a String.
+	 * Returns the identifier as a <code>String</code>.
+	 * 
+	 * @return the identifier as a <code>String</code>.
 	 */
 	public String build() {
 		return this.identifier;
 	}
 
 	/**
-	 * @return the connection type of the identifier's sender.
+	 * Returns the connection type of the sender of the identifier.
+	 * 
+	 * @return the connection type of the sender of the identifier.
 	 */
 	public final ConnectionType getConnectionType() {
 		return this.connectionType;
@@ -87,6 +91,9 @@ public class Identifier {
 	public boolean equals(Object object) {
 		if (object instanceof Identifier) {
 			Identifier identifier = (Identifier) object;
+			if (this.build() == null && identifier.build() == null) {
+				return true; // We must check this first
+			}
 			return this.build().equals(identifier.build());
 		}
 		return false;

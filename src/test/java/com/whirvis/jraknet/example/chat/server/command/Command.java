@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent Summerlin
+ * Copyright (c) 2016-2019 Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,17 +40,17 @@ import java.util.HashMap;
  */
 public abstract class Command {
 
-	// Pre-registered commands
-	private static final HashMap<String, Command> commands = new HashMap<String, Command>();
+	private static final HashMap<String, Command> COMMANDS = new HashMap<String, Command>();
 
 	/**
+	 * Returns the pre-registered commands.
+	 * 
 	 * @return the pre-registered commands.
 	 */
 	public static final Command[] getRegisteredCommands() {
-		return commands.values().toArray(new Command[commands.size()]);
+		return COMMANDS.values().toArray(new Command[COMMANDS.size()]);
 	}
 
-	// Command data
 	private final boolean overridable;
 	private final String label;
 	private final String usage;
@@ -58,7 +58,7 @@ public abstract class Command {
 
 	/**
 	 * Constructs a <code>Command</code> with whether or not it is overridable
-	 * along the specified label and usage.
+	 * along the label and usage.
 	 * 
 	 * @param overridable
 	 *            whether or not the command is overridable.
@@ -77,16 +77,16 @@ public abstract class Command {
 		this.description = description;
 
 		// Add ourself to the command list
-		if (commands.containsKey(label)) {
-			if (!commands.get(label).isOverridable()) {
+		if (COMMANDS.containsKey(label)) {
+			if (!COMMANDS.get(label).isOverridable()) {
 				throw new IllegalArgumentException("Command with label \"" + label + "\" cannot be overriden");
 			}
 		}
-		commands.put(label, this);
+		COMMANDS.put(label, this);
 	}
 
 	/**
-	 * Constructs a <code>Command</code> with the specified label and usage.
+	 * Constructs a <code>Command</code> with the label and usage.
 	 * 
 	 * @param label
 	 *            the command label.
@@ -100,7 +100,7 @@ public abstract class Command {
 	}
 
 	/**
-	 * Constructs a <code>Command</code> with the specified label.
+	 * Constructs a <code>Command</code> with the label.
 	 * 
 	 * @param label
 	 *            the command label.
@@ -112,14 +112,18 @@ public abstract class Command {
 	}
 
 	/**
-	 * @return <code>true</code> if this command by overridden by another
-	 *         command.
+	 * Returns whether or not this command can be overriden by another command.
+	 * 
+	 * @return <code>true</code> if this command can be overridden by another
+	 *         command, <code>false</code> otherwise.
 	 */
 	protected final boolean isOverridable() {
 		return this.overridable;
 	}
 
 	/**
+	 * Returns the label of the command.
+	 * 
 	 * @return the label of the command.
 	 */
 	public final String getLabel() {
@@ -127,6 +131,8 @@ public abstract class Command {
 	}
 
 	/**
+	 * Returns the usage of the command.
+	 * 
 	 * @return the usage of the command.
 	 */
 	public final String getUsage() {
@@ -134,6 +140,8 @@ public abstract class Command {
 	}
 
 	/**
+	 * Returns the description of the command.
+	 * 
 	 * @return the description of the command.
 	 */
 	public final String getDescription() {
@@ -158,7 +166,7 @@ public abstract class Command {
 	}
 
 	/**
-	 * Handles the command with the specified arguments.
+	 * Handles the command with the arguments.
 	 * 
 	 * @param args
 	 *            the command arguments.

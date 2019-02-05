@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent Summerlin
+ * Copyright (c) 2016-2019 Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -60,7 +60,7 @@ public class RakNetState {
 	private final int order;
 
 	/**
-	 * Constructs a <code>RakNetState</code> with the specified order.
+	 * Constructs a <code>RakNetState</code> with the order.
 	 * 
 	 * @param order
 	 *            the order of the <code>RakNetState</code>.
@@ -71,7 +71,9 @@ public class RakNetState {
 	}
 
 	/**
-	 * @return the order the state is in as an int value.
+	 * Returns the order the state is in.
+	 * 
+	 * @return the order the state is in.
 	 */
 	public int getOrder() {
 		return this.order;
@@ -87,12 +89,19 @@ public class RakNetState {
 	}
 
 	/**
+	 * Returns the state based on its order.
+	 * 
 	 * @param order
 	 *            the order of the state.
 	 * @return the state based on its order.
 	 */
 	public static RakNetState getState(int order) {
 		return registeredStates.get(order);
+	}
+
+	@Override
+	public String toString() {
+		return "RakNetState [order=" + order + "]";
 	}
 
 }

@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent Summerlin
+ * Copyright (c) 2016-2019 Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,8 +40,8 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.identifier.Identifier;
 import com.whirvis.jraknet.protocol.MessageIdentifier;
@@ -66,7 +66,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
  *
  * @author Trent Summerlin
  */
-public class RakNet {
+public final class RakNet {
 
 	/**
 	 * Used by <code>createBootstrapAndSend()</code> to wait for the packet and
@@ -92,6 +92,10 @@ public class RakNet {
 
 	}
 
+	private RakNet() {
+		// Static class
+	}
+
 	/**
 	 * Quick note about RakNet protocol versions: If the RakNet protocol version
 	 * for Minecraft is ever bumped, please let me know immediately. I would add
@@ -101,7 +105,7 @@ public class RakNet {
 	 * bump the versions.
 	 */
 
-	private static final Logger log = LoggerFactory.getLogger(RakNet.class);
+	private static final Logger LOG = LogManager.getLogger(RakNet.class);
 
 	// Network protocol data
 	public static final int SERVER_NETWORK_PROTOCOL = 9;
@@ -209,14 +213,14 @@ public class RakNet {
 					return -1;
 				}
 			}
-			log.debug("Device maximum transfer unit determiened to be " + DEVICE_MTU_SIZE);
+			LOG.debug("Device maximum transfer unit determiened to be " + DEVICE_MTU_SIZE);
 		}
 		return DEVICE_MTU_SIZE;
 	}
 
 	/**
-	 * Sends a raw message to the specified address for the specified amount of
-	 * times in the specified interval until the packet is received or there is
+	 * Sends a raw message to the address for the amount of
+	 * times in the interval until the packet is received or there is
 	 * a timeout.
 	 * 
 	 * @param address
@@ -271,9 +275,12 @@ public class RakNet {
 	}
 
 	/**
+	 * Returns whether or not the server is online.
+	 * 
 	 * @param address
 	 *            the address of the server.
-	 * @return <code>true</code> if the server is online.
+	 * @return <code>true</code> if the server is online, <code>false</code>
+	 *         otherwise.
 	 */
 	public static boolean isServerOnline(InetSocketAddress address) {
 		// Create connection packet
@@ -297,34 +304,43 @@ public class RakNet {
 	}
 
 	/**
+	 * Return whether or not the server is online.
+	 * 
 	 * @param address
 	 *            the address of the server.
 	 * @param port
 	 *            the port of the server.
-	 * @return <code>true</code> if the server is online.
+	 * @return <code>true</code> if the server is online, <code>false</code>
+	 *         otherwise.
 	 */
 	public static boolean isServerOnline(InetAddress address, int port) {
 		return isServerOnline(new InetSocketAddress(address, port));
 	}
 
 	/**
+	 * Returns whether or not the server is online.
+	 * 
 	 * @param address
 	 *            the address of the server.
 	 * @param port
 	 *            the port of the server.
-	 * @return <code>true</code> if the server is online.
+	 * @return <code>true</code> if the server is online, <code>false</code>
+	 *         otherwise.
 	 * @throws UnknownHostException
-	 *             if the specified address is an unknown host.
+	 *             if the address is an unknown host.
 	 */
 	public static boolean isServerOnline(String address, int port) throws UnknownHostException {
 		return isServerOnline(InetAddress.getByName(address), port);
 	}
 
 	/**
+	 * Returns whether or not the server is compatible with the current client
+	 * protocol.
+	 * 
 	 * @param address
 	 *            the address of the server.
-	 * @return <code>true</code> if the server is compatible to the current
-	 *         client protocol.
+	 * @return <code>true</code> if the server is compatible with the current
+	 *         client protocol, <code>false</code> otherwise.
 	 */
 	public static boolean isServerCompatible(InetSocketAddress address) {
 		// Create connection packet
@@ -353,35 +369,43 @@ public class RakNet {
 	}
 
 	/**
+	 * Returns whether or not the server is compatible with the current client
+	 * protocol.
+	 * 
 	 * @param address
 	 *            the address of the server.
 	 * @param port
 	 *            the port of the server.
-	 * @return <code>true</code> if the server is compatible to the current
-	 *         client protocol.
+	 * @return <code>true</code> if the server is compatible with the current
+	 *         client protocol, <code>false</code> otherwise.
 	 */
 	public static boolean isServerCompatible(InetAddress address, int port) {
 		return isServerCompatible(new InetSocketAddress(address, port));
 	}
 
 	/**
+	 * Returns whether or not the server is comptaible with the current client
+	 * protocol.
+	 * 
 	 * @param address
 	 *            the address of the server.
 	 * @param port
 	 *            the port of the server.
-	 * @return <code>true</code> if the server is compatible to the current
-	 *         client protocol.
+	 * @return <code>true</code> if the server is compatible with the current
+	 *         client protocol, <code>false</code> otherwise.
 	 * @throws UnknownHostException
-	 *             if the specified address is an unknown host.
+	 *             if the address is an unknown host.
 	 */
 	public static boolean isServerCompatible(String address, int port) throws UnknownHostException {
 		return isServerCompatible(InetAddress.getByName(address), port);
 	}
 
 	/**
+	 * Returns the server <code>Identifier</code>.
+	 * 
 	 * @param address
 	 *            the address of the server.
-	 * @return the specified server's <code>Identifier</code>.
+	 * @return the server <code>Identifier</code>.
 	 */
 	public static Identifier getServerIdentifier(InetSocketAddress address) {
 		// Create ping packet
@@ -390,7 +414,7 @@ public class RakNet {
 		ping.pingId = PING_ID;
 		ping.encode();
 		if (ping.failed()) {
-			log.error(UnconnectedPing.class.getSimpleName() + " failed to encode");
+			LOG.error(UnconnectedPing.class.getSimpleName() + " failed to encode");
 			return null;
 		}
 
@@ -409,30 +433,36 @@ public class RakNet {
 	}
 
 	/**
+	 * Returns the server <code>Identifier</code>.
+	 * 
 	 * @param address
 	 *            the address of the server.
 	 * @param port
 	 *            the port of the server.
-	 * @return the specified server's <code>Identifier</code>.
+	 * @return the server <code>Identifier</code>.
 	 */
 	public static Identifier getServerIdentifier(InetAddress address, int port) {
 		return getServerIdentifier(new InetSocketAddress(address, port));
 	}
 
 	/**
+	 * Returns the server <code>Identifier</code>.
+	 * 
 	 * @param address
 	 *            the address of the server.
 	 * @param port
 	 *            the port of the server.
-	 * @return the specified server's <code>Identifier</code>.
+	 * @return the server <code>Identifier</code>.
 	 * @throws UnknownHostException
-	 *             if the specified address is an unknown host.
+	 *             if the address is an unknown host.
 	 */
 	public static Identifier getServerIdentifier(String address, int port) throws UnknownHostException {
 		return getServerIdentifier(InetAddress.getByName(address), port);
 	}
 
 	/**
+	 * Returns whether or not the address is a local address.
+	 * 
 	 * @param address
 	 *            the address to check.
 	 * @return <code>true</code> if the address is a local address,
@@ -442,11 +472,13 @@ public class RakNet {
 		try {
 			return address.isSiteLocalAddress() || address.equals(InetAddress.getByName("127.0.0.1"));
 		} catch (UnknownHostException e) {
-			return false;
+			return false; // Unknown host
 		}
 	}
 
 	/**
+	 * Returns whether or not the address is a local address.
+	 * 
 	 * @param address
 	 *            the address to check.
 	 * @return <code>true</code> if the address is a local address,
@@ -463,7 +495,7 @@ public class RakNet {
 	 * @param address
 	 *            the address to convert.
 	 * @param defaultPort
-	 *            the default port to use if one is not specified.
+	 *            the default port to use if one is not.
 	 * @return the parsed <code>InetSocketAddress</code>.
 	 * @throws UnknownHostException
 	 *             if the address is in an invalid format or if the host cannot
@@ -506,14 +538,14 @@ public class RakNet {
 	 * @param address
 	 *            the address to convert.
 	 * @param defaultPort
-	 *            the default port to use if one is not specified.
+	 *            the default port to use if one is not.
 	 * @return the parsed <code>InetSocketAddress</code>.
 	 */
 	public static InetSocketAddress parseAddressPassive(String address, int defaultPort) {
 		try {
 			return parseAddress(address, defaultPort);
 		} catch (UnknownHostException e) {
-			return null;
+			return null; // Unknown host
 		}
 	}
 
@@ -530,7 +562,7 @@ public class RakNet {
 	}
 
 	/**
-	 * Parses a String as a long and returns -1 in the case of a
+	 * Parses a String as a long and returns <code>-1</code> in the case of a
 	 * <code>NumberFormatException</code>.
 	 * 
 	 * @param longStr
@@ -541,7 +573,7 @@ public class RakNet {
 		try {
 			return Long.parseLong(longStr);
 		} catch (NumberFormatException e) {
-			return -1;
+			return -1; // Failed to parse
 		}
 	}
 
@@ -582,7 +614,7 @@ public class RakNet {
 	}
 
 	/**
-	 * Converts the given ID to a hex string.
+	 * Converts the ID to a hex string.
 	 * 
 	 * @param id
 	 *            the ID to convert to a hex string.
@@ -593,7 +625,7 @@ public class RakNet {
 	}
 
 	/**
-	 * Converts the ID of the given <code>RakNetPacket</code> to a hex string.
+	 * Converts the ID of the <code>RakNetPacket</code> to a hex string.
 	 * 
 	 * @param packet
 	 *            the packet to get the ID from.
@@ -604,26 +636,7 @@ public class RakNet {
 	}
 
 	/**
-	 * Convert the specified list of objects to a String. This method is used
-	 * primarily by JRakNet objects if they are ever expected to be converted to
-	 * a String.
-	 * 
-	 * @param obj
-	 *            the objects to convert.
-	 * @return a converted string.
-	 */
-	public static final String toObjString(Object... obj) {
-		StringBuilder str = new StringBuilder();
-		str.append("[");
-		for (int i = 0; i < obj.length; i++) {
-			str.append((obj[i] instanceof Number ? ((Number) obj[i]).longValue() : obj[i].toString())
-					+ (i + 1 < obj.length ? ", " : "]"));
-		}
-		return str.toString();
-	}
-
-	/**
-	 * Splits an array into more chunks with the specified maximum size for each
+	 * Splits an array into more chunks with the maximum size for each
 	 * array chunk.
 	 * 
 	 * @param src

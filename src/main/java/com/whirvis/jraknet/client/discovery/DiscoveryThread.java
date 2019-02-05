@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent Summerlin
+ * Copyright (c) 2016-2019 Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,8 +32,8 @@ package com.whirvis.jraknet.client.discovery;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.client.RakNetClient;
 
@@ -46,9 +46,8 @@ import com.whirvis.jraknet.client.RakNetClient;
  */
 public class DiscoveryThread extends Thread {
 
-	private static final Logger log = LoggerFactory.getLogger(DiscoveryThread.class);
+	private static final Logger LOG = LogManager.getLogger(DiscoveryThread.class);
 
-	// Discovery data
 	private ConcurrentLinkedQueue<RakNetClient> clients;
 	private volatile boolean running;
 
@@ -61,6 +60,8 @@ public class DiscoveryThread extends Thread {
 	}
 
 	/**
+	 * Returns the clients that are currently using the discovery system.
+	 * 
 	 * @return the clients that are currently using the discovery system.
 	 */
 	public RakNetClient[] getClients() {
@@ -76,12 +77,12 @@ public class DiscoveryThread extends Thread {
 	 */
 	public void addClient(RakNetClient client) {
 		if (clients.contains(client)) {
-			log.warn("Client #" + client.getGloballyUniqueId()
+			LOG.warn("Client #" + client.getGloballyUniqueId()
 					+ " attempted to add itself to the discovery thread even though it is already in the thread.");
 			return;
 		}
 		clients.add(client);
-		log.debug("Added client #" + client.getGloballyUniqueId() + " to the discovery thread");
+		LOG.debug("Added client #" + client.getGloballyUniqueId() + " to the discovery thread");
 	}
 
 	/**
@@ -94,16 +95,19 @@ public class DiscoveryThread extends Thread {
 	 */
 	public void removeClient(RakNetClient client) {
 		if (!clients.contains(client)) {
-			log.warn("Client #" + client.getGloballyUniqueId()
+			LOG.warn("Client #" + client.getGloballyUniqueId()
 					+ " attempted to remove itself from the discovery thread even though it is not in the thread");
 			return;
 		}
 		clients.remove(client);
-		log.debug("Removed client #" + client.getGloballyUniqueId() + " from the discovery thread");
+		LOG.debug("Removed client #" + client.getGloballyUniqueId() + " from the discovery thread");
 	}
 
 	/**
-	 * @return <code>true</code> if the thread has been started.
+	 * Returns whether or not the thread has been started.
+	 * 
+	 * @return <code>true</code> if the thread has been started,
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean isRunning() {
 		return this.running;
@@ -114,13 +118,13 @@ public class DiscoveryThread extends Thread {
 	 */
 	public void shutdown() {
 		this.running = false;
-		log.info("Shutdown discovery thread");
+		LOG.info("Shutdown discovery thread");
 	}
 
 	@Override
 	public void run() {
 		this.running = true;
-		log.info("Started discovery thread");
+		LOG.info("Started discovery thread");
 		while (this.running) {
 			try {
 				Thread.sleep(1000); // Lower CPU usage and prevent spamming
@@ -130,11 +134,11 @@ public class DiscoveryThread extends Thread {
 				for (RakNetClient client : this.clients) {
 					client.updateDiscoveryData();
 				}
-				log.debug(
+				LOG.debug(
 						"Sent discovery info out for " + clients.size() + " client" + (clients.size() == 1 ? "" : "s"));
 			} catch (InterruptedException e) {
 				e.printStackTrace();
-				log.error("Discovery thread has crashed");
+				LOG.error("Discovery thread has crashed");
 			}
 		}
 	}

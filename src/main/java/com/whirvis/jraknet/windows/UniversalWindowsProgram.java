@@ -8,7 +8,7 @@
  *                                                  
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent Summerlin
+ * Copyright (c) 2016-2019 Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,10 +45,14 @@ package com.whirvis.jraknet.windows;
  */
 public class UniversalWindowsProgram {
 
+	// Universal Windows Programs
 	public static final UniversalWindowsProgram MINECRAFT = new UniversalWindowsProgram(
 			"Microsoft.MinecraftUWP_8wekyb3d8bbwe");
 
 	/**
+	 * Returns whether or not the machine is currently running on the Windows 10
+	 * operating system.
+	 * 
 	 * @return <code>true</code> if the machine is currently running on the
 	 *         Windows 10 operating system, <code>false</code> otherwise.
 	 */
@@ -65,14 +69,15 @@ public class UniversalWindowsProgram {
 	private static final PowerShellCommand CHECKNETISOLATION_LOOPBACKEXEMPT_SHOW = new PowerShellCommand(
 			"CheckNetIsolation LoopbackExempt -s");
 
-	// Program data
 	private final String application;
 
-	private UniversalWindowsProgram(String application) {
+	public UniversalWindowsProgram(String application) {
 		this.application = application;
 	}
 
 	/**
+	 * Returns the application.
+	 * 
 	 * @return the application.
 	 */
 	public String getApplication() {
@@ -80,6 +85,8 @@ public class UniversalWindowsProgram {
 	}
 
 	/**
+	 * Returns whether or not the application is loopback exempt.
+	 * 
 	 * @return <code>true</code> if the application is loopback exempt,
 	 *         <code>false</code> otherwise.
 	 */
@@ -125,6 +132,11 @@ public class UniversalWindowsProgram {
 		} else {
 			return false; // Cannot be unexempted on non-Windows 10 machine
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "UniversalWindowsProgram [application=" + application + "]";
 	}
 
 }

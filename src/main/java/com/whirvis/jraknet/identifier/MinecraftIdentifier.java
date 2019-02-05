@@ -8,7 +8,7 @@
  *                                                  
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent Summerlin
+ * Copyright (c) 2016-2019 Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,37 +47,39 @@ public class MinecraftIdentifier extends Identifier {
 	private static final int DATA_COUNT = 9;
 
 	/**
+	 * Returns whether or not the version tag is valid.
+	 * 
 	 * @param versionTag
 	 *            the version tag to validate.
-	 * @return <code>true</code> if the version tag is valid.
+	 * @return <code>true</code> if the version tag is valid, <code>false</code>
+	 *         otherwise.
 	 */
 	private static boolean verifyVersionTag(String versionTag) {
 		if (versionTag == null) {
 			return false;
 		}
-
 		for (char vtc : versionTag.toCharArray()) {
 			boolean valid = false;
-
 			for (char vtac : VERSION_TAG_ALPHABET) {
 				if (vtac == vtc) {
 					valid = true;
-					break;
+					break; // Valid character
 				}
 			}
-
 			if (valid == false) {
-				return false;
+				return false; // Invalid version tag
 			}
 		}
 		return true;
 	}
 
 	/**
+	 * Returns whether or not the the identifier is a Minecraft identifier.
+	 * 
 	 * @param identifier
 	 *            the identifier to check.
-	 * @return <code>true</code> if the specified identifier is a Minecraft
-	 *         identifier.
+	 * @return <code>true</code> if the identifier is a Minecraft identifier,
+	 *         <code>false</code> otherwise.
 	 */
 	public static boolean isMinecraftIdentifier(Identifier identifier) {
 		return identifier.build().startsWith(HEADER);
@@ -94,7 +96,7 @@ public class MinecraftIdentifier extends Identifier {
 	private boolean legacy;
 
 	/**
-	 * Constructs an <code>MinecraftIdentifier</code> with the specified server
+	 * Constructs an <code>MinecraftIdentifier</code> with the server
 	 * name, server protocol, version tag, online player count, max player
 	 * count, globally unique ID, world name, and gamemode.
 	 * 
@@ -135,7 +137,7 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Constructs a <code>MinecraftIdentifer</code> by parsing the specified
+	 * Constructs a <code>MinecraftIdentifer</code> by parsing the
 	 * <code>Identifier</code>.
 	 * 
 	 * @param identifier
@@ -177,7 +179,7 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Constructs a <code>MinecraftIdentifer</code> by parsing the specified
+	 * Constructs a <code>MinecraftIdentifer</code> by parsing the
 	 * String identifier.
 	 * 
 	 * @param identifier
@@ -195,6 +197,8 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
+	 * Returns the server name.
+	 * 
 	 * @return the server name.
 	 */
 	public String getServerName() {
@@ -202,6 +206,8 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
+	 * Returns the server protocol.
+	 * 
 	 * @return the server protocol.
 	 */
 	public int getServerProtocol() {
@@ -209,6 +215,8 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
+	 * Returns the version tag.
+	 * 
 	 * @return the version tag.
 	 */
 	public String getVersionTag() {
@@ -216,6 +224,8 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
+	 * Returns the online player count.
+	 * 
 	 * @return the online player count.
 	 */
 	public int getOnlinePlayerCount() {
@@ -223,6 +233,8 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
+	 * Returns the max player count.
+	 * 
 	 * @return the max player count.
 	 */
 	public int getMaxPlayerCount() {
@@ -230,6 +242,8 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
+	 * Returns the globally unique ID.
+	 * 
 	 * @return the globally unique ID.
 	 */
 	public long getGloballyUniqueId() {
@@ -237,6 +251,8 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
+	 * Returns the world name.
+	 * 
 	 * @return the world name.
 	 */
 	public String getWorldName() {
@@ -244,6 +260,8 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
+	 * Returns the gamemode.
+	 * 
 	 * @return the gamemode.
 	 */
 	public String getGamemode() {
@@ -346,7 +364,8 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * @return <code>true</code> if the identifier is in legacy mode.
+	 * @return <code>true</code> if the identifier is in legacy mode,
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean isLegacyMode() {
 		return this.legacy;

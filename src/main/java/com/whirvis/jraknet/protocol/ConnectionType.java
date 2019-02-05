@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent Summerlin
+ * Copyright (c) 2016-2019 Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +47,7 @@ public class ConnectionType {
 	public static final int MAX_METADATA_VALUES = 0xFF;
 
 	/**
-	 * Converts the specified metadata keys and values to a
+	 * Converts the metadata keys and values to a
 	 * <code>HashMap</code>.
 	 * 
 	 * @param metadata
@@ -79,7 +79,7 @@ public class ConnectionType {
 	 * A JRakNet connection.
 	 */
 	public static final ConnectionType JRAKNET = new ConnectionType(
-			UUID.fromString("504da9b2-a31c-4db6-bcc3-18e5fe2fb178"), "JRakNet", "Java", "2.10.7-SNAPSHOT");
+			UUID.fromString("504da9b2-a31c-4db6-bcc3-18e5fe2fb178"), "JRakNet", "Java", "2.10.8-SNAPSHOT");
 
 	// Connection type header magic
 	public static final byte[] MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B, 0x43,
@@ -145,7 +145,7 @@ public class ConnectionType {
 	/**
 	 * @param key
 	 *            the key of the value to retrieve.
-	 * @return the value associated with the specified key.
+	 * @return the value associated with the key.
 	 */
 	public String getMetaData(String key) {
 		return metadata.get(key);
@@ -178,6 +178,12 @@ public class ConnectionType {
 			}
 		}
 		return false;
+	}
+
+	@Override
+	public String toString() {
+		return "ConnectionType [uuid=" + uuid + ", name=" + name + ", language=" + language + ", version=" + version
+				+ ", metadata=" + metadata + ", vanilla=" + vanilla + "]";
 	}
 
 }

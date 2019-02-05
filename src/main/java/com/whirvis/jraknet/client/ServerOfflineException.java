@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent Summerlin
+ * Copyright (c) 2016-2019 Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,7 +45,7 @@ public class ServerOfflineException extends RakNetClientException {
 	private final InetSocketAddress address;
 
 	/**
-	 * Constructs a <code>ServerOfflineException</code> with the specified
+	 * Constructs a <code>ServerOfflineException</code> with the
 	 * <code>RakNetClient</code> and address.
 	 * 
 	 * @param client
@@ -59,6 +59,8 @@ public class ServerOfflineException extends RakNetClientException {
 	}
 
 	/**
+	 * Returns the address of the offline server.
+	 * 
 	 * @return the address of the offline server.
 	 */
 	public InetSocketAddress getAddress() {

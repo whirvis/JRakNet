@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent Summerlin
+ * Copyright (c) 2016-2019 Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,8 +30,8 @@
  */
 package com.whirvis.jraknet.example.chat.server.command;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.example.chat.server.ChatServer;
 
@@ -42,9 +42,8 @@ import com.whirvis.jraknet.example.chat.server.ChatServer;
  */
 public class KickCommand extends Command {
 
-	private static final Logger log = LoggerFactory.getLogger(KickCommand.class);
+	private static final Logger LOG = LogManager.getLogger(KickCommand.class);
 
-	// Command data
 	private final ChatServer server;
 
 	public KickCommand(ChatServer server) {
@@ -58,9 +57,9 @@ public class KickCommand extends Command {
 			String reason = (args.length >= 2 ? remainingArguments(1, args) : "Kicked from server");
 			if (server.hasClient(args[0])) {
 				server.kickClient(server.getClient(args[0]), reason);
-				log.info("Kicked client \"" + args[0] + "\" with reason \"" + reason + "\"");
+				LOG.info("Kicked client \"" + args[0] + "\" with reason \"" + reason + "\"");
 			} else {
-				log.info("Client \"" + args[0] + "\" is not online!");
+				LOG.info("Client \"" + args[0] + "\" is not online!");
 			}
 			return true;
 		}

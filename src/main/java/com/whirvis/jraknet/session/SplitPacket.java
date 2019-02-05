@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent Summerlin
+ * Copyright (c) 2016-2019 Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,11 +48,10 @@ public class SplitPacket {
 	private final int splitId;
 	private final int splitCount;
 	private final Reliability reliability;
-
 	private final IntMap<Packet> payloads;
 
 	/**
-	 * Constructs a <code>SplitPacket</code> with the specified split ID, split
+	 * Constructs a <code>SplitPacket</code> with the split ID, split
 	 * count, and <code>Reliability</code>.
 	 * 
 	 * @param splitId
@@ -74,6 +73,8 @@ public class SplitPacket {
 	}
 
 	/**
+	 * Returns the split ID of the split packet.
+	 * 
 	 * @return the split ID of the split packet.
 	 */
 	public int getSplitId() {
@@ -81,6 +82,8 @@ public class SplitPacket {
 	}
 
 	/**
+	 * Returns the amount of packets needed to complete the split packet.
+	 * 
 	 * @return the amount of packets needed to complete the split packet.
 	 */
 	public int getSplitCount() {
@@ -88,6 +91,8 @@ public class SplitPacket {
 	}
 
 	/**
+	 * Returns the reliability of the split packet.
+	 * 
 	 * @return the reliability of the split packet.
 	 */
 	public Reliability getReliability() {
@@ -96,7 +101,7 @@ public class SplitPacket {
 
 	/**
 	 * Updates the data for the split packet while also verifying that the
-	 * specified <code>EncapsulatedPacket</code> belongs to this split packet.
+	 * <code>EncapsulatedPacket</code> belongs to this split packet.
 	 * 
 	 * @param encapsulated
 	 *            the <code>EncapsulatedPacket</code> being used to update the
@@ -125,13 +130,16 @@ public class SplitPacket {
 	}
 
 	/**
+	 * Returns whether or not the packet needs to be split.
+	 * 
 	 * @param reliability
 	 *            the reliability of the packet.
 	 * @param packet
 	 *            the packet.
 	 * @param maximumTransferUnit
 	 *            the maximum transfer unit of the session.
-	 * @return true the packet needs to be split.
+	 * @return <code>true</code> if the packet needs to be split,
+	 *         <code>false</code> otherwise.
 	 */
 	public static boolean needsSplit(Reliability reliability, Packet packet, int maximumTransferUnit) {
 		return (CustomPacket.calculateDummy()
@@ -139,7 +147,7 @@ public class SplitPacket {
 	}
 
 	/**
-	 * Splits the specified <code>EncapsulatedPacket</code> using the specified
+	 * Splits the <code>EncapsulatedPacket</code> using the
 	 * maximumTransferUnit
 	 * 
 	 * @param session
@@ -178,6 +186,11 @@ public class SplitPacket {
 		}
 
 		return splitPackets;
+	}
+
+	@Override
+	public String toString() {
+		return "SplitPacket [splitId=" + splitId + ", splitCount=" + splitCount + ", reliability=" + reliability + "]";
 	}
 
 }

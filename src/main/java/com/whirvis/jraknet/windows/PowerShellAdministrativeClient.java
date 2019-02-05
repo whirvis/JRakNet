@@ -8,7 +8,7 @@
  *                                                  
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent Summerlin
+ * Copyright (c) 2016-2019 Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,12 +49,11 @@ import java.net.Socket;
  */
 public class PowerShellAdministrativeClient {
 
-	// PowerShell administrative server data
 	private static final char END_OF_TEXT = (char) 0x03;
 	private static final int POWERSHELL_ADMINISTRATIVE_TIMEOUT = 10000;
 
 	/**
-	 * Converts the specified <code>InputStream</code> to a <code>String</code>.
+	 * Converts the <code>InputStream</code> to a <code>String</code>.
 	 * This will result in the closing of the stream, as all available data will
 	 * be read from it during conversion.
 	 * 
