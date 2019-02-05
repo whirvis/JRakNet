@@ -122,6 +122,7 @@ public class ChatServer implements RakNetServerListener {
 	private void denyLogin(RakNetClientSession session, String reason) {
 		LoginFailure loginFailure = new LoginFailure();
 		loginFailure.reason = reason;
+		loginFailure.encode();
 		session.sendMessage(Reliability.UNRELIABLE, loginFailure);
 	}
 
