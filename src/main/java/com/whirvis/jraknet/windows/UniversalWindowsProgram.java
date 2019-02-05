@@ -65,10 +65,9 @@ public class UniversalWindowsProgram {
 	private static final PowerShellCommand CHECKNETISOLATION_LOOPBACKEXEMPT_SHOW = new PowerShellCommand(
 			"CheckNetIsolation LoopbackExempt -s");
 
-	// Program data
 	private final String application;
 
-	private UniversalWindowsProgram(String application) {
+	public UniversalWindowsProgram(String application) {
 		this.application = application;
 	}
 
@@ -125,6 +124,11 @@ public class UniversalWindowsProgram {
 		} else {
 			return false; // Cannot be unexempted on non-Windows 10 machine
 		}
+	}
+
+	@Override
+	public String toString() {
+		return "UniversalWindowsProgram [application=" + application + "]";
 	}
 
 }

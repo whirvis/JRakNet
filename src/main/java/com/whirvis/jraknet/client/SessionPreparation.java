@@ -222,4 +222,12 @@ public class SessionPreparation {
 				this.address);
 	}
 
+	@Override
+	public String toString() {
+		return "SessionPreparation [initialMaximumTransferUnit=" + initialMaximumTransferUnit
+				+ ", maximumMaximumTransferUnit=" + maximumMaximumTransferUnit + ", cancelReason=" + cancelReason
+				+ ", guid=" + guid + ", maximumTransferUnit=" + maximumTransferUnit + ", connectionType="
+				+ connectionType + ", address=" + address + "]";
+	}
+
 }

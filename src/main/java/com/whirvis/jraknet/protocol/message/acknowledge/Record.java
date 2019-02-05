@@ -178,11 +178,7 @@ public class Record {
 
 	@Override
 	public String toString() {
-		if (this.isRanged() == true) {
-			return (this.getIndex() + ":" + this.getEndIndex());
-		} else {
-			return Integer.toString(this.getIndex());
-		}
+		return "Record [index=" + index + ", endIndex=" + endIndex + "]";
 	}
 
 }

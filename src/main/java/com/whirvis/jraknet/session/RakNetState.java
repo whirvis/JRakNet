@@ -95,4 +95,9 @@ public class RakNetState {
 		return registeredStates.get(order);
 	}
 
+	@Override
+	public String toString() {
+		return "RakNetState [order=" + order + "]";
+	}
+
 }

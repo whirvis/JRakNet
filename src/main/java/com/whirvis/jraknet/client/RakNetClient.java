@@ -1197,4 +1197,10 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		log.debug("Finalized and collected by garbage heap");
 	}
 
+	@Override
+	public String toString() {
+		return "RakNetClient [guid=" + guid + ", pingId=" + pingId + ", timestamp=" + timestamp + ", discoveryMode="
+				+ discoveryMode + "]";
+	}
+
 }

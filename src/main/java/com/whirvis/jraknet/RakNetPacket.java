@@ -164,4 +164,9 @@ public class RakNetPacket extends Packet {
 		return this;
 	}
 
+	@Override
+	public String toString() {
+		return "RakNetPacket [id=" + id + ", size()=" + size() + ", remaining()=" + remaining() + "]";
+	}
+
 }

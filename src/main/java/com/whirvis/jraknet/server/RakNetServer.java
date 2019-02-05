@@ -911,4 +911,12 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		this.shutdown("Server shutdown");
 	}
 
+	@Override
+	public String toString() {
+		return "RakNetServer [guid=" + guid + ", pongId=" + pongId + ", timestamp=" + timestamp + ", port=" + port
+				+ ", maxConnections=" + maxConnections + ", maximumTransferUnit=" + maximumTransferUnit
+				+ ", broadcastingEnabled=" + broadcastingEnabled + ", identifier=" + identifier + ", running=" + running
+				+ "]";
+	}
+
 }

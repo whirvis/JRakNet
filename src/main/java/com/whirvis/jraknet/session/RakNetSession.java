@@ -927,4 +927,19 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 */
 	public abstract void handleMessage(RakNetPacket packet, int channel);
 
+	@Override
+	public String toString() {
+		return "RakNetSession [connectionType=" + connectionType + ", guid=" + guid + ", maximumTransferUnit="
+				+ maximumTransferUnit + ", address=" + address + ", state=" + state + ", packetsSentThisSecond="
+				+ packetsSentThisSecond + ", packetsReceivedThisSecond=" + packetsReceivedThisSecond
+				+ ", lastPacketCounterResetTime=" + lastPacketCounterResetTime + ", lastPacketSendTime="
+				+ lastPacketSendTime + ", lastPacketReceiveTime=" + lastPacketReceiveTime + ", lastRecoverySendTime="
+				+ lastRecoverySendTime + ", lastKeepAliveSendTime=" + lastKeepAliveSendTime + ", lastPingSendTime="
+				+ lastPingSendTime + ", messageIndex=" + messageIndex + ", splitId=" + splitId + ", sendSequenceNumber="
+				+ sendSequenceNumber + ", receiveSequenceNumber=" + receiveSequenceNumber + ", latencyEnabled="
+				+ latencyEnabled + ", pongsReceived=" + pongsReceived + ", totalLatency=" + totalLatency + ", latency="
+				+ latency + ", lastLatency=" + lastLatency + ", lowestLatency=" + lowestLatency + ", highestLatency="
+				+ highestLatency + "]";
+	}
+
 }

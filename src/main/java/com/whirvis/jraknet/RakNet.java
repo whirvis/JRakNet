@@ -66,7 +66,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
  *
  * @author Trent "Whirvis" Summerlin
  */
-public class RakNet {
+public final class RakNet {
 
 	/**
 	 * Used by <code>createBootstrapAndSend()</code> to wait for the packet and
@@ -90,6 +90,10 @@ public class RakNet {
 			ctx.flush();
 		}
 
+	}
+	
+	private RakNet() {
+		// Static class
 	}
 
 	/**
@@ -601,25 +605,6 @@ public class RakNet {
 	 */
 	public static String toHexStringId(RakNetPacket packet) {
 		return toHexStringId(packet.getId());
-	}
-
-	/**
-	 * Convert the specified list of objects to a String. This method is used
-	 * primarily by JRakNet objects if they are ever expected to be converted to
-	 * a String.
-	 * 
-	 * @param obj
-	 *            the objects to convert.
-	 * @return a converted string.
-	 */
-	public static final String toObjString(Object... obj) {
-		StringBuilder str = new StringBuilder();
-		str.append("[");
-		for (int i = 0; i < obj.length; i++) {
-			str.append((obj[i] instanceof Number ? ((Number) obj[i]).longValue() : obj[i].toString())
-					+ (i + 1 < obj.length ? ", " : "]"));
-		}
-		return str.toString();
 	}
 
 	/**

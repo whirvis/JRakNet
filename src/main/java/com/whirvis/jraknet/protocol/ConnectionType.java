@@ -180,4 +180,10 @@ public class ConnectionType {
 		return false;
 	}
 
+	@Override
+	public String toString() {
+		return "ConnectionType [uuid=" + uuid + ", name=" + name + ", language=" + language + ", version=" + version
+				+ ", metadata=" + metadata + ", vanilla=" + vanilla + "]";
+	}
+
 }
