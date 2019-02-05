@@ -34,8 +34,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Used by the server to register and handle commands easily.
@@ -44,8 +44,9 @@ import org.slf4j.LoggerFactory;
  */
 public class CommandHandler {
 
-	private static final Logger log = LoggerFactory.getLogger(CommandHandler.class);
+	private static final Logger log = LogManager.getLogger(CommandHandler.class);
 
+	// Command handler data
 	private HashMap<String, Command> commands;
 
 	public CommandHandler() {

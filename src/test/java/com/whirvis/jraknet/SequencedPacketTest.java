@@ -35,8 +35,8 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.client.RakNetClientListener;
@@ -62,9 +62,10 @@ import com.whirvis.jraknet.session.RakNetServerSession;
  *
  * @author Trent Summerlin
  */
+
 public class SequencedPacketTest {
 
-	private static final Logger log = LoggerFactory.getLogger(SequencedPacketTest.class);
+	private static final Logger log = LogManager.getLogger(SequencedPacketTest.class);
 
 	// Test data
 	private static final short SEQUENCE_START_ID = 0xFE;

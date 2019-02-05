@@ -30,8 +30,8 @@
  */
 package com.whirvis.jraknet.example.chat.server.command;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Displays all of the commands that can be used on the server.
@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HelpCommand extends Command {
 
-	private static final Logger log = LoggerFactory.getLogger(HelpCommand.class);
+	private static final Logger log = LogManager.getLogger(HelpCommand.class);
 
 	public HelpCommand() {
 		super("help", "Displays all the commands that can be used");

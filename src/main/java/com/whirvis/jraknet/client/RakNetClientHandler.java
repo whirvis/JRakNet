@@ -32,8 +32,8 @@ package com.whirvis.jraknet.client;
 
 import java.net.InetSocketAddress;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.RakNetPacket;
 
@@ -49,7 +49,7 @@ import io.netty.channel.socket.DatagramPacket;
  */
 public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 
-	private static final Logger log = LoggerFactory.getLogger(RakNetClientHandler.class);
+	private static final Logger log = LogManager.getLogger(RakNetClientHandler.class);
 	// Logger name
 	private final String loggerName;
 

@@ -32,8 +32,8 @@ package com.whirvis.jraknet.client.discovery;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.client.RakNetClient;
 
@@ -46,7 +46,7 @@ import com.whirvis.jraknet.client.RakNetClient;
  */
 public class DiscoveryThread extends Thread {
 
-	private static final Logger log = LoggerFactory.getLogger(DiscoveryThread.class);
+	private static final Logger log = LogManager.getLogger(DiscoveryThread.class);
 
 	// Discovery data
 	private ConcurrentLinkedQueue<RakNetClient> clients;

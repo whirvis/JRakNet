@@ -34,8 +34,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.RakNetPacket;
 
@@ -51,7 +51,7 @@ import io.netty.channel.socket.DatagramPacket;
  */
 public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 
-	private static final Logger log = LoggerFactory.getLogger(RakNetServerHandler.class);
+	private static final Logger log = LogManager.getLogger(RakNetServerHandler.class);
 
 	// Handler data
 	private final String loggerName;
