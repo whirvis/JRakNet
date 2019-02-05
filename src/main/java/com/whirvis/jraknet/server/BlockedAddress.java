@@ -71,4 +71,9 @@ public class BlockedAddress {
 		return this.time;
 	}
 
+	@Override
+	public String toString() {
+		return "BlockedAddress [startTime=" + startTime + ", time=" + time + "]";
+	}
+
 }

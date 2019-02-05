@@ -32,7 +32,6 @@ package com.whirvis.jraknet.client.discovery;
 
 import java.net.InetSocketAddress;
 
-import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.identifier.Identifier;
 
 /**
@@ -123,7 +122,8 @@ public class DiscoveredServer {
 
 	@Override
 	public String toString() {
-		return RakNet.toObjString(this.address, this.discoveryTimestamp, this.identifier);
+		return "DiscoveredServer [address=" + address + ", discoveryTimestamp=" + discoveryTimestamp + ", identifier="
+				+ identifier + "]";
 	}
 
 }

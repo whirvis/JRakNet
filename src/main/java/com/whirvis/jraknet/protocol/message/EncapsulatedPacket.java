@@ -238,4 +238,12 @@ public class EncapsulatedPacket implements Sizable, Cloneable {
 		return EncapsulatedPacket.calculateDummy(reliability, split, new Packet());
 	}
 
+	@Override
+	public String toString() {
+		return "EncapsulatedPacket [isClone=" + isClone + ", ackRecord=" + ackRecord + ", reliability=" + reliability
+				+ ", split=" + split + ", messageIndex=" + messageIndex + ", orderIndex=" + orderIndex
+				+ ", orderChannel=" + orderChannel + ", splitCount=" + splitCount + ", splitId=" + splitId
+				+ ", splitIndex=" + splitIndex + ", calculateSize()=" + calculateSize() + "]";
+	}
+
 }

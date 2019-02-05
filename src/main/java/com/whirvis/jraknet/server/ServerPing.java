@@ -95,4 +95,10 @@ public class ServerPing {
 		this.identifier = identifier;
 	}
 
+	@Override
+	public String toString() {
+		return "ServerPing [sender=" + sender + ", identifier=" + identifier + ", connectionType=" + connectionType
+				+ "]";
+	}
+
 }
