@@ -28,27 +28,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.client;
+package com.whirvis.jraknet.example.chat.protocol;
 
-/**
- * Signals that a <code>RakNetClient</code>'s connection is banned from the
- * server.
- *
- * @author Trent Summerlin
- */
-public class ConnectionBannedException extends RakNetClientException {
+import com.whirvis.jraknet.Packet;
+import com.whirvis.jraknet.example.chat.ChatMessageIdentifier;
 
-	private static final long serialVersionUID = 8440218445920818619L;
+public class RenameChannelPacket extends ChatPacket {
 
-	/**
-	 * Constructs a <code>ConnectedionBannedException</code> with the
-	 * <code>RakNetClient</code>.
-	 * 
-	 * @param client
-	 *            the <code>RakNetClient</code> that threw the exception.
-	 */
-	public ConnectionBannedException(RakNetClient client) {
-		super(client, "Banned from server");
+	public int channel;
+	public String newChannelName;
+
+	public RenameChannelPacket(Packet packet) {
+		super(packet);
+	}
+
+	public RenameChannelPacket() {
+		super(ChatMessageIdentifier.ID_RENAME_CHANNEL);
+	}
+
+	@Override
+	public void encode() {
+		this.writeUnsignedByte(channel);
+		this.writeString(newChannelName);
+	}
+
+	@Override
+	public void decode() {
+		this.channel = this.readUnsignedByte();
+		this.newChannelName = this.readString();
 	}
 
 }

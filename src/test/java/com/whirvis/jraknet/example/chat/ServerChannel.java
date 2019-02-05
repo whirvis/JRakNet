@@ -46,7 +46,7 @@ public class ServerChannel {
 	private final StringBuilder channelText;
 
 	/**
-	 * Constructs a <code>ServerChannel</code> with the specified channel and
+	 * Constructs a <code>ServerChannel</code> with the channel and
 	 * name.
 	 * 
 	 * @param channel
@@ -67,6 +67,8 @@ public class ServerChannel {
 	}
 
 	/**
+	 * Returns the ID of the channel.
+	 * 
 	 * @return the ID of the channel.
 	 */
 	public int getChannel() {
@@ -74,6 +76,8 @@ public class ServerChannel {
 	}
 
 	/**
+	 * Returns the name of the channel.
+	 * 
 	 * @return the name of the channel.
 	 */
 	public String getName() {
@@ -101,6 +105,8 @@ public class ServerChannel {
 	}
 
 	/**
+	 * Returns the text displayed on the channel.
+	 * 
 	 * @return the text displayed on the channel.
 	 */
 	public String getChannelText() {

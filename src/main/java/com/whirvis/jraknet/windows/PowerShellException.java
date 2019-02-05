@@ -40,6 +40,12 @@ public class PowerShellException extends RuntimeException {
 
 	private static final long serialVersionUID = 1662306011110232452L;
 
+	/**
+	 * Constructs a <code>PowerShellException</code>.
+	 * 
+	 * @param message
+	 *            the message.
+	 */
 	public PowerShellException(String message) {
 		super(message);
 	}

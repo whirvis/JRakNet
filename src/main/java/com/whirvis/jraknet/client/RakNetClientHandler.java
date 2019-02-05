@@ -49,16 +49,14 @@ import io.netty.channel.socket.DatagramPacket;
  */
 public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 
-	private static final Logger log = LogManager.getLogger(RakNetClientHandler.class);
-	// Logger name
-	private final String loggerName;
+	private static final Logger LOG = LogManager.getLogger(RakNetClientHandler.class);
 
-	// Handler data
+	private final String loggerName;
 	private final RakNetClient client;
 	private InetSocketAddress causeAddress;
 
 	/**
-	 * Constructs a <code>RakNetClientHandler</code> with the specified
+	 * Constructs a <code>RakNetClientHandler</code> with the
 	 * <code>RakNetClient</code>.
 	 * 
 	 * @param client
@@ -83,12 +81,12 @@ public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 			// Handle the packet and release the buffer
 			client.handleMessage(packet, sender);
 			datagram.content().readerIndex(0); // Reset position
-			log.debug(loggerName + " Sent packet to client and reset Datagram buffer read position");
+			LOG.debug(loggerName + " Sent packet to client and reset Datagram buffer read position");
 			for (RakNetClientListener listener : client.getListeners()) {
 				listener.handleNettyMessage(datagram.content(), sender);
 			}
 			datagram.content().release(); // No longer needed
-			log.debug(loggerName + " Sent Datagram buffer to client and released it");
+			LOG.debug(loggerName + " Sent Datagram buffer to client and released it");
 
 			// No exceptions occurred, release the suspect
 			this.causeAddress = null;

@@ -44,15 +44,15 @@ import com.whirvis.jraknet.client.RakNetClientListener;
 import com.whirvis.jraknet.example.chat.ChatMessageIdentifier;
 import com.whirvis.jraknet.example.chat.ServerChannel;
 import com.whirvis.jraknet.example.chat.client.frame.ChatFrame;
-import com.whirvis.jraknet.example.chat.protocol.AddChannel;
-import com.whirvis.jraknet.example.chat.protocol.ChatMessage;
-import com.whirvis.jraknet.example.chat.protocol.Kick;
-import com.whirvis.jraknet.example.chat.protocol.LoginAccepted;
-import com.whirvis.jraknet.example.chat.protocol.LoginFailure;
-import com.whirvis.jraknet.example.chat.protocol.LoginRequest;
-import com.whirvis.jraknet.example.chat.protocol.RemoveChannel;
-import com.whirvis.jraknet.example.chat.protocol.RenameChannel;
-import com.whirvis.jraknet.example.chat.protocol.UpdateUsername;
+import com.whirvis.jraknet.example.chat.protocol.AddChannelPacket;
+import com.whirvis.jraknet.example.chat.protocol.ChatMessagePacket;
+import com.whirvis.jraknet.example.chat.protocol.KickPacket;
+import com.whirvis.jraknet.example.chat.protocol.LoginAcceptedPacket;
+import com.whirvis.jraknet.example.chat.protocol.LoginFailurePacket;
+import com.whirvis.jraknet.example.chat.protocol.LoginRequestPacket;
+import com.whirvis.jraknet.example.chat.protocol.RemoveChannelPacket;
+import com.whirvis.jraknet.example.chat.protocol.RenameChannelPacket;
+import com.whirvis.jraknet.example.chat.protocol.UpdateUsernamePacket;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.session.InvalidChannelException;
 import com.whirvis.jraknet.session.RakNetServerSession;
@@ -91,6 +91,8 @@ public class ChatClient implements RakNetClientListener {
 	}
 
 	/**
+	 * Returns the current user ID.
+	 * 
 	 * @return the current user ID.
 	 */
 	public UUID getUserId() {
@@ -98,14 +100,16 @@ public class ChatClient implements RakNetClientListener {
 	}
 
 	/**
-	 * @return the user's current username.
+	 * Returns the current username.
+	 * 
+	 * @return the current username.
 	 */
 	public String getUsername() {
 		return this.username;
 	}
 
 	/**
-	 * Sends a chat message to the specified channel.
+	 * Sends a chat message to the channel.
 	 * 
 	 * @param message
 	 *            the message to send.
@@ -119,7 +123,7 @@ public class ChatClient implements RakNetClientListener {
 			throw new InvalidChannelException();
 		}
 
-		ChatMessage messagePacket = new ChatMessage();
+		ChatMessagePacket messagePacket = new ChatMessagePacket();
 		messagePacket.message = message;
 		messagePacket.encode();
 		session.sendMessage(Reliability.RELIABLE_ORDERED, channel, messagePacket);
@@ -145,7 +149,7 @@ public class ChatClient implements RakNetClientListener {
 		this.newUsername = newUsername;
 
 		// Send the request
-		UpdateUsername request = new UpdateUsername();
+		UpdateUsernamePacket request = new UpdateUsernamePacket();
 		request.newUsername = newUsername;
 		request.encode();
 		session.sendMessage(Reliability.RELIABLE_ORDERED, request);
@@ -220,7 +224,7 @@ public class ChatClient implements RakNetClientListener {
 	}
 
 	/**
-	 * Connects to a chat server at the specified address.
+	 * Connects to a chat server at the address.
 	 * 
 	 * @param address
 	 *            the address of the server.
@@ -239,7 +243,7 @@ public class ChatClient implements RakNetClientListener {
 	}
 
 	/**
-	 * Disconnects from the server with the specified reason.
+	 * Disconnects from the server with the reason.
 	 * 
 	 * @param reason
 	 *            the reason the client disconnected from the server.
@@ -255,7 +259,7 @@ public class ChatClient implements RakNetClientListener {
 		this.session = session;
 
 		// Send login request
-		LoginRequest request = new LoginRequest();
+		LoginRequestPacket request = new LoginRequestPacket();
 		request.username = this.username;
 		request.encode();
 		session.sendMessage(Reliability.RELIABLE_ORDERED, request);
@@ -269,7 +273,7 @@ public class ChatClient implements RakNetClientListener {
 		short packetId = packet.getId();
 
 		if (packetId == ChatMessageIdentifier.ID_LOGIN_ACCEPTED) {
-			LoginAccepted accepted = new LoginAccepted(packet);
+			LoginAcceptedPacket accepted = new LoginAcceptedPacket(packet);
 			accepted.decode();
 
 			// Set client and server on screen data
@@ -285,7 +289,7 @@ public class ChatClient implements RakNetClientListener {
 			frame.setInstructions(CHAT_INSTRUCTIONS_LOGGED_IN);
 			frame.toggleServerInteraction(true);
 		} else if (packetId == ChatMessageIdentifier.ID_LOGIN_FAILURE) {
-			LoginFailure failure = new LoginFailure(packet);
+			LoginFailurePacket failure = new LoginFailurePacket(packet);
 			failure.decode();
 
 			// Show the error and disable server interaction
@@ -293,7 +297,7 @@ public class ChatClient implements RakNetClientListener {
 			frame.toggleServerInteraction(false);
 			this.disconnect(failure.reason);
 		} else if (packetId == ChatMessageIdentifier.ID_CHAT_MESSAGE) {
-			ChatMessage chat = new ChatMessage(packet);
+			ChatMessagePacket chat = new ChatMessagePacket(packet);
 			chat.decode();
 
 			// Update channel text if the channel is valid
@@ -321,24 +325,24 @@ public class ChatClient implements RakNetClientListener {
 			}
 		} else if (packetId == ChatMessageIdentifier.ID_ADD_CHANNEL) {
 			// Add the channel
-			AddChannel addChannel = new AddChannel(packet);
+			AddChannelPacket addChannel = new AddChannelPacket(packet);
 			addChannel.decode();
 			this.addChannel(new ServerChannel(addChannel.channel, addChannel.channelName));
 		} else if (packetId == ChatMessageIdentifier.ID_RENAME_CHANNEL) {
 			// Does this channel exist?
-			RenameChannel renameChannel = new RenameChannel(packet);
+			RenameChannelPacket renameChannel = new RenameChannelPacket(packet);
 			renameChannel.decode();
 			if (channels[renameChannel.channel] != null) {
 				channels[renameChannel.channel].setName(renameChannel.newChannelName);
 			}
 		} else if (packetId == ChatMessageIdentifier.ID_REMOVE_CHANNEL) {
 			// Remove the channel
-			RemoveChannel removeChannel = new RemoveChannel(packet);
+			RemoveChannelPacket removeChannel = new RemoveChannelPacket(packet);
 			removeChannel.decode();
 			this.removeChannel(removeChannel.channel);
 		} else if (packetId == ChatMessageIdentifier.ID_KICK) {
 			// We were kicked from the server, disconnect
-			Kick kick = new Kick(packet);
+			KickPacket kick = new KickPacket(packet);
 			kick.decode();
 			frame.displayError("Kicked from server", kick.reason);
 			this.disconnect(kick.reason);

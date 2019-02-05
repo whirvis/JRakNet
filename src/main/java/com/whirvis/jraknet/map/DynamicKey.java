@@ -38,7 +38,7 @@ package com.whirvis.jraknet.map;
 public interface DynamicKey<T> {
 
 	/**
-	 * Renames the specified key and changes it to the specified one.
+	 * Renames the key and changes it to the one.
 	 * 
 	 * @param oldKey
 	 *            the old key.

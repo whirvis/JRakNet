@@ -28,27 +28,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.client;
+package com.whirvis.jraknet.example.chat.protocol;
 
-/**
- * Signals that a <code>RakNetClient</code>'s connection is banned from the
- * server.
- *
- * @author Trent Summerlin
- */
-public class ConnectionBannedException extends RakNetClientException {
+import java.util.UUID;
 
-	private static final long serialVersionUID = 8440218445920818619L;
+import com.whirvis.jraknet.Packet;
+import com.whirvis.jraknet.example.chat.ChatMessageIdentifier;
+import com.whirvis.jraknet.example.chat.ServerChannel;
 
-	/**
-	 * Constructs a <code>ConnectedionBannedException</code> with the
-	 * <code>RakNetClient</code>.
-	 * 
-	 * @param client
-	 *            the <code>RakNetClient</code> that threw the exception.
-	 */
-	public ConnectionBannedException(RakNetClient client) {
-		super(client, "Banned from server");
+public class LoginAcceptedPacket extends ChatPacket {
+
+	public UUID userId;
+	public String serverName;
+	public String serverMotd;
+	public ServerChannel[] channels;
+
+	public LoginAcceptedPacket() {
+		super(ChatMessageIdentifier.ID_LOGIN_ACCEPTED);
+	}
+
+	public LoginAcceptedPacket(Packet packet) {
+		super(packet);
+	}
+
+	@Override
+	public void encode() {
+		this.writeUUID(userId);
+		this.writeString(serverName);
+		this.writeString(serverMotd);
+		this.writeInt(channels.length);
+		for (int i = 0; i < channels.length; i++) {
+			this.writeUnsignedByte(channels[i].getChannel());
+			this.writeString(channels[i].getName());
+		}
+	}
+
+	@Override
+	public void decode() {
+		this.userId = this.readUUID();
+		this.serverName = this.readString();
+		this.serverMotd = this.readString();
+		this.channels = new ServerChannel[this.readInt()];
+		for (int i = 0; i < channels.length; i++) {
+			short channel = this.readUnsignedByte();
+			String channelName = this.readString();
+			channels[i] = new ServerChannel(channel, channelName);
+		}
 	}
 
 }

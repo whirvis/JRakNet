@@ -47,7 +47,7 @@ public class ConnectionType {
 	public static final int MAX_METADATA_VALUES = 0xFF;
 
 	/**
-	 * Converts the specified metadata keys and values to a
+	 * Converts the metadata keys and values to a
 	 * <code>HashMap</code>.
 	 * 
 	 * @param metadata
@@ -145,7 +145,7 @@ public class ConnectionType {
 	/**
 	 * @param key
 	 *            the key of the value to retrieve.
-	 * @return the value associated with the specified key.
+	 * @return the value associated with the key.
 	 */
 	public String getMetaData(String key) {
 		return metadata.get(key);

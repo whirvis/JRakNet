@@ -68,7 +68,7 @@ import io.netty.channel.socket.DatagramPacket;
  */
 public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer {
 
-	private static final Logger log = LogManager.getLogger(RakNetSession.class);
+	private static final Logger LOG = LogManager.getLogger(RakNetSession.class);
 
 	// Session data
 	private String loggerName;
@@ -122,7 +122,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	private final ArrayList<Long> latencyTimestamps;
 
 	/**
-	 * Constructs a <code>RakNetSession</code> with the specified globally
+	 * Constructs a <code>RakNetSession</code> with the globally
 	 * unique ID, maximum transfer unit, <code>Channel</code>, and address.
 	 * 
 	 * @param connectionType
@@ -239,7 +239,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 */
 	public void setState(RakNetState state) {
 		this.state = state;
-		log.debug(loggerName + "set state to " + state);
+		LOG.debug(loggerName + "set state to " + state);
 	}
 
 	/**
@@ -278,7 +278,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 * @return the new message index.
 	 */
 	protected int bumpMessageIndex() {
-		log.debug(loggerName + "Bumped message index from " + messageIndex + " to " + (messageIndex + 1));
+		LOG.debug(loggerName + "Bumped message index from " + messageIndex + " to " + (messageIndex + 1));
 		return this.messageIndex++;
 	}
 
@@ -296,7 +296,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		this.latency = (enabled ? this.latency : -1);
 		this.pongsReceived = (enabled ? this.pongsReceived : 0);
 		if (wasEnabled != enabled) {
-			log.info(loggerName + (enabled ? "Enabled" : "Disabled") + " latency detection.");
+			LOG.info(loggerName + (enabled ? "Enabled" : "Disabled") + " latency detection.");
 		}
 	}
 
@@ -354,7 +354,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		if (reliability.isOrdered() || reliability.isSequenced()) {
 			encapsulated.orderIndex = (reliability.isOrdered() ? this.orderSendIndex[channel]++
 					: this.sequenceSendIndex[channel]++);
-			log.debug(loggerName + "Bumped " + (reliability.isOrdered() ? "order" : "sequence") + " index from "
+			LOG.debug(loggerName + "Bumped " + (reliability.isOrdered() ? "order" : "sequence") + " index from "
 					+ ((reliability.isOrdered() ? this.orderSendIndex[channel] : this.sequenceSendIndex[channel]) - 1)
 					+ " to "
 					+ (reliability.isOrdered() ? this.orderSendIndex[channel] : this.sequenceSendIndex[channel])
@@ -367,13 +367,13 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 			for (EncapsulatedPacket split : SplitPacket.splitPacket(this, encapsulated)) {
 				sendQueue.add(split);
 			}
-			log.debug(loggerName + "Split encapsulated packet " + encapsulated.splitId
+			LOG.debug(loggerName + "Split encapsulated packet " + encapsulated.splitId
 					+ " and added it to the send queue");
 		} else {
 			sendQueue.add(encapsulated);
-			log.debug(loggerName + "Added encapsulated packet to the send queue");
+			LOG.debug(loggerName + "Added encapsulated packet to the send queue");
 		}
-		log.debug(loggerName + "Sent packet with size of " + packet.size() + " bytes (" + (packet.size() * 8)
+		LOG.debug(loggerName + "Sent packet with size of " + packet.size() + " bytes (" + (packet.size() * 8)
 				+ " bits) with reliability " + reliability + " on channel " + channel);
 
 		/*
@@ -420,7 +420,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 */
 	public final void sendRawMessage(Packet packet) {
 		channel.writeAndFlush(new DatagramPacket(packet.buffer(), this.address));
-		log.debug(loggerName + "Sent raw packet with size of " + packet.size() + " bytes (" + (packet.size() * 8)
+		LOG.debug(loggerName + "Sent raw packet with size of " + packet.size() + " bytes (" + (packet.size() * 8)
 				+ " bits)");
 	}
 
@@ -432,12 +432,12 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 */
 	public final void sendRawMessage(ByteBuf buf) {
 		channel.writeAndFlush(new DatagramPacket(buf, this.address));
-		log.debug(loggerName + "Sent raw buffer with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8)
+		LOG.debug(loggerName + "Sent raw buffer with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8)
 				+ " bits)");
 	}
 
 	/**
-	 * Sends a <code>CustomPacket</code> with the specified
+	 * Sends a <code>CustomPacket</code> with the
 	 * <code>EncapsulatedPacket</code>'s.
 	 * 
 	 * @param encapsulated
@@ -472,12 +472,12 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		// Update packet data
 		this.packetsSentThisSecond++;
 		this.lastPacketSendTime = System.currentTimeMillis();
-		log.debug(loggerName + "Sent custom packet with sequence number " + custom.sequenceNumber);
+		LOG.debug(loggerName + "Sent custom packet with sequence number " + custom.sequenceNumber);
 		return custom.sequenceNumber;
 	}
 
 	/**
-	 * Sends a <code>CustomPacket</code> with the specified
+	 * Sends a <code>CustomPacket</code> with the
 	 * <code>EncapsulatedPacket</code>'s
 	 * 
 	 * @param encapsulated
@@ -497,7 +497,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	}
 
 	/**
-	 * Sends an <code>Acknowledge</code> packet with the specified type and
+	 * Sends an <code>Acknowledge</code> packet with the type and
 	 * <code>Record</code>s.
 	 * 
 	 * @param type
@@ -516,7 +516,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 		// Update packet data
 		this.lastPacketSendTime = System.currentTimeMillis();
-		log.debug(loggerName + "Sent " + acknowledge.records.size() + " records in "
+		LOG.debug(loggerName + "Sent " + acknowledge.records.size() + " records in "
 				+ (type == AcknowledgeType.ACKNOWLEDGED ? "ACK" : "NACK") + " packet");
 	}
 
@@ -578,7 +578,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 		// Send ACK
 		this.sendAcknowledge(AcknowledgeType.ACKNOWLEDGED, new Record(custom.sequenceNumber));
-		log.debug(loggerName + "Handled custom packet with sequence number " + custom.sequenceNumber);
+		LOG.debug(loggerName + "Handled custom packet with sequence number " + custom.sequenceNumber);
 	}
 
 	/**
@@ -658,7 +658,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 		// Update packet data
 		this.lastPacketReceiveTime = System.currentTimeMillis();
-		log.debug(loggerName + "Handled " + (acknowledge.getType() == AcknowledgeType.ACKNOWLEDGED ? "ACK" : "NACK")
+		LOG.debug(loggerName + "Handled " + (acknowledge.getType() == AcknowledgeType.ACKNOWLEDGED ? "ACK" : "NACK")
 				+ " packet with " + acknowledge.records.size() + " records");
 	}
 
@@ -742,7 +742,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 				this.handleMessage0(encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
 			}
 		}
-		log.debug(loggerName + "Handled encapsulated packet with " + encapsulated.reliability + " reliability");
+		LOG.debug(loggerName + "Handled encapsulated packet with " + encapsulated.reliability + " reliability");
 	}
 
 	/**
@@ -809,10 +809,10 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		}
 
 		if (MessageIdentifier.hasPacket(packet.getId())) {
-			log.debug(loggerName + "Handled internal packet with ID " + MessageIdentifier.getName(packet.getId()) + " ("
+			LOG.debug(loggerName + "Handled internal packet with ID " + MessageIdentifier.getName(packet.getId()) + " ("
 					+ packet.getId() + ")");
 		} else {
-			log.debug(loggerName + "Sent packet with ID " + packet.getId() + " to session handler");
+			LOG.debug(loggerName + "Sent packet with ID " + packet.getId() + " to session handler");
 		}
 	}
 
@@ -869,7 +869,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 			this.sendMessage(Reliability.UNRELIABLE, ping);
 			this.lastPingSendTime = currentTime;
 			latencyTimestamps.add(Long.valueOf(ping.timestamp));
-			log.debug(loggerName + "Sent ping to session with timestamp " + ping.timestamp);
+			LOG.debug(loggerName + "Sent ping to session with timestamp " + ping.timestamp);
 		}
 
 		// Make sure the client is still connected
@@ -878,7 +878,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 				&& state.equals(RakNetState.CONNECTED)) {
 			this.sendMessage(Reliability.UNRELIABLE, ID_DETECT_LOST_CONNECTIONS);
 			this.lastKeepAliveSendTime = currentTime;
-			log.debug(loggerName + "Sent " + MessageIdentifier.getName(ID_DETECT_LOST_CONNECTIONS)
+			LOG.debug(loggerName + "Sent " + MessageIdentifier.getName(ID_DETECT_LOST_CONNECTIONS)
 					+ " packet to session");
 		}
 

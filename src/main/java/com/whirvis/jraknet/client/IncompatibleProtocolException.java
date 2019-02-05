@@ -45,7 +45,7 @@ public class IncompatibleProtocolException extends RakNetClientException {
 
 	/**
 	 * Constructs an <code>IncompatibleProtocolException</code> with the
-	 * specified <code>RakNetClient</code>, client protocol, and server
+	 * <code>RakNetClient</code>, client protocol, and server
 	 * protocol.
 	 * 
 	 * @param client
@@ -62,14 +62,18 @@ public class IncompatibleProtocolException extends RakNetClientException {
 	}
 
 	/**
-	 * @return the protocol the client is on.
+	 * Returns the protocol the client is running on.
+	 * 
+	 * @return the protocol the client is running on.
 	 */
 	public int getClientProtocol() {
 		return this.clientProtocol;
 	}
 
 	/**
-	 * @return the protocol the server is on.
+	 * Returns the protocol the server is running on.
+	 * 
+	 * @return the protocol the server is running on.
 	 */
 	public int getServerProtocol() {
 		return this.serverProtocol;

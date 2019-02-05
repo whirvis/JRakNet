@@ -46,7 +46,7 @@ public class PacketBufferException extends RakNetClientException {
 	private final RakNetPacket packet;
 
 	/**
-	 * Constructs a <code>PacketBufferException</code> with the specified
+	 * Constructs a <code>PacketBufferException</code> with the
 	 * <code>RakNetClient</code> and <code>RakNetPacket</code>.
 	 * 
 	 * @param client
@@ -60,6 +60,8 @@ public class PacketBufferException extends RakNetClientException {
 	}
 
 	/**
+	 * Returns the packet that failed to encode/decode.
+	 * 
 	 * @return the packet that failed to encode/decode.
 	 */
 	public RakNetPacket getPacket() {
