@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Whirvis T. Wheatley
+ * Copyright (c) 2016-2019 Whirvis T. Wheatley
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +32,6 @@ package com.whirvis.jraknet.client.discovery;
 
 import java.net.InetSocketAddress;
 
-import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.identifier.Identifier;
 
 /**
@@ -53,7 +52,7 @@ public class DiscoveredServer {
 	private Identifier identifier;
 
 	/**
-	 * Constructs a <code>DiscoveredServer</code> with the specified address,
+	 * Constructs a <code>DiscoveredServer</code> with the address,
 	 * discovery timestamp, and identifier.
 	 * 
 	 * @param address
@@ -70,6 +69,8 @@ public class DiscoveredServer {
 	}
 
 	/**
+	 * Returns the address of the discovered server.
+	 * 
 	 * @return the address of the discovered server.
 	 */
 	public InetSocketAddress getAddress() {
@@ -77,7 +78,9 @@ public class DiscoveredServer {
 	}
 
 	/**
-	 * @return the last time the server sent a response back.
+	 * Returns the last time the server sent back a reponse.
+	 * 
+	 * @return the last time the server sent back a response.
 	 */
 	public long getDiscoveryTimestamp() {
 		return this.discoveryTimestamp;
@@ -94,7 +97,9 @@ public class DiscoveredServer {
 	}
 
 	/**
-	 * @return the last identifier received by the server.
+	 * Returns the last identifier sent by the server.
+	 * 
+	 * @return the last identifier sent by the server.
 	 */
 	public Identifier getIdentifier() {
 		return this.identifier;
@@ -123,7 +128,8 @@ public class DiscoveredServer {
 
 	@Override
 	public String toString() {
-		return RakNet.toObjString(this.address, this.discoveryTimestamp, this.identifier);
+		return "DiscoveredServer [address=" + address + ", discoveryTimestamp=" + discoveryTimestamp + ", identifier="
+				+ identifier + "]";
 	}
 
 }

@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Whirvis T. Wheatley
+ * Copyright (c) 2016-2019 Whirvis T. Wheatley
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,8 +32,8 @@ package com.whirvis.jraknet.client;
 
 import java.net.InetSocketAddress;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.RakNetPacket;
 
@@ -49,16 +49,14 @@ import io.netty.channel.socket.DatagramPacket;
  */
 public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 
-	private static final Logger log = LoggerFactory.getLogger(RakNetClientHandler.class);
-	// Logger name
-	private final String loggerName;
+	private static final Logger LOG = LogManager.getLogger(RakNetClientHandler.class);
 
-	// Handler data
+	private final String loggerName;
 	private final RakNetClient client;
 	private InetSocketAddress causeAddress;
 
 	/**
-	 * Constructs a <code>RakNetClientHandler</code> with the specified
+	 * Constructs a <code>RakNetClientHandler</code> with the
 	 * <code>RakNetClient</code>.
 	 * 
 	 * @param client
@@ -83,12 +81,12 @@ public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 			// Handle the packet and release the buffer
 			client.handleMessage(packet, sender);
 			datagram.content().readerIndex(0); // Reset position
-			log.debug(loggerName + " Sent packet to client and reset Datagram buffer read position");
+			LOG.debug(loggerName + " Sent packet to client and reset Datagram buffer read position");
 			for (RakNetClientListener listener : client.getListeners()) {
 				listener.handleNettyMessage(datagram.content(), sender);
 			}
 			datagram.content().release(); // No longer needed
-			log.debug(loggerName + " Sent Datagram buffer to client and released it");
+			LOG.debug(loggerName + " Sent Datagram buffer to client and released it");
 
 			// No exceptions occurred, release the suspect
 			this.causeAddress = null;

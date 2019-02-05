@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Whirvis T. Wheatley
+ * Copyright (c) 2016-2019 Whirvis T. Wheatley
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,7 +41,7 @@ public class AlreadyConnectedException extends RakNetClientException {
 	private static final long serialVersionUID = -482118372058339060L;
 
 	/**
-	 * Constructs an <code>AlreadyConnectedException</code> with the specified
+	 * Constructs an <code>AlreadyConnectedException</code> with the
 	 * <code>RakNetClient</code>.
 	 * 
 	 * @param client

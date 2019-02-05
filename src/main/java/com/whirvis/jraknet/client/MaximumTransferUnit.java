@@ -8,7 +8,7 @@
  *                                                  
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Whirvis T. Wheatley
+ * Copyright (c) 2016-2019 Whirvis T. Wheatley
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,8 +37,8 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.map.IntMap;
 
@@ -50,15 +50,14 @@ import com.whirvis.jraknet.map.IntMap;
  */
 public class MaximumTransferUnit {
 
-	private static final Logger log = LoggerFactory.getLogger(MaximumTransferUnit.class);
+	private static final Logger LOG = LogManager.getLogger(MaximumTransferUnit.class);
 
-	// Unit data
 	private final int size;
 	private final int retries;
 	private int retriesLeft;
 
 	/**
-	 * Constructs a <code>MaximumTransferUnit</code> with the specified maximum
+	 * Constructs a <code>MaximumTransferUnit</code> with the maximum
 	 * transfer unit and amount of retries before it should stop being used.
 	 * 
 	 * @param size
@@ -73,6 +72,8 @@ public class MaximumTransferUnit {
 	}
 
 	/**
+	 * Returns the size of the maximum transfer unit.
+	 * 
 	 * @return the size of the maximum transfer unit.
 	 */
 	public int getSize() {
@@ -80,16 +81,22 @@ public class MaximumTransferUnit {
 	}
 
 	/**
+	 * Returns the default amount of retries before the client stops using this
+	 * <code>MaximumTransferUnit</code> and uses the next lowest one.
+	 * 
 	 * @return the default amount of retries before the client stops using this
-	 *         <code>MaximumTransferUnit</code> and lowers it.
+	 *         <code>MaximumTransferUnit</code> and uses the next lowest one.
 	 */
 	public int getRetries() {
 		return this.retries;
 	}
 
 	/**
+	 * Returns the amount of times <code>retry()</code> can be called before
+	 * yielding zero or lower without calling <code>reset()</code>
+	 * 
 	 * @return how many times <code>retry()</code> can be called before yielding
-	 *         0 or lower without calling <code>reset()</code>.
+	 *         zero or lower without calling <code>reset()</code>.
 	 */
 	public int getRetriesLeft() {
 		return this.retriesLeft;
@@ -101,7 +108,7 @@ public class MaximumTransferUnit {
 	 * @return the amount of retries left.
 	 */
 	public int retry() {
-		log.debug("Retried transfer unit with size of " + size + " bytes (" + (size * 8) + " bits)");
+		LOG.debug("Retried transfer unit with size of " + size + " bytes (" + (size * 8) + " bits)");
 		return this.retriesLeft--;
 	}
 
@@ -109,7 +116,7 @@ public class MaximumTransferUnit {
 	 * Sets the amount of retries left back to the default.
 	 */
 	public void reset() {
-		log.debug("Reset transfer unit with size of " + size + " bytes (" + (size * 8) + " bits)");
+		LOG.debug("Reset transfer unit with size of " + size + " bytes (" + (size * 8) + " bits)");
 		this.retriesLeft = this.retries;
 	}
 
@@ -147,6 +154,11 @@ public class MaximumTransferUnit {
 		}
 
 		return unitList.toArray(new MaximumTransferUnit[unitList.size()]);
+	}
+
+	@Override
+	public String toString() {
+		return "MaximumTransferUnit [size=" + size + ", retries=" + retries + ", retriesLeft=" + retriesLeft + "]";
 	}
 
 }

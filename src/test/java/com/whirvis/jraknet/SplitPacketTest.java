@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Whirvis T. Wheatley
+ * Copyright (c) 2016-2019 Whirvis T. Wheatley
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,8 +34,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.client.RakNetClientListener;
@@ -57,7 +57,7 @@ import com.whirvis.jraknet.session.RakNetServerSession;
  */
 public class SplitPacketTest {
 
-	private static final Logger log = LoggerFactory.getLogger(SplitPacketTest.class);
+	private static final Logger LOG = LogManager.getLogger(SplitPacketTest.class);
 
 	// Test data
 	private static final short SPLIT_START_ID = 0xFE;
@@ -65,14 +65,13 @@ public class SplitPacketTest {
 	private static long startSend = -1;
 
 	public static void main(String[] args) throws RakNetException, InterruptedException, UnknownHostException {
-
-		log.info("Creating server...");
+		LOG.info("Creating server...");
 		createServer();
 
-		log.info("Sleeping 3000MS");
+		LOG.info("Sleeping 3000MS");
 		Thread.sleep(3000L);
 
-		log.info("Creating client...");
+		LOG.info("Creating client...");
 		createClient();
 	}
 
@@ -100,35 +99,35 @@ public class SplitPacketTest {
 					e.printStackTrace();
 				}
 
-				log.info("Server: Client connected from " + session.getAddress() + "!");
+				LOG.info("Server: Client connected from " + session.getAddress() + "!");
 			}
 
 			@Override
 			public void onClientDisconnect(RakNetClientSession session, String reason) {
-				log.info("Server: Client from " + session.getAddress() + " disconnected! (" + reason + ")");
+				LOG.info("Server: Client from " + session.getAddress() + " disconnected! (" + reason + ")");
 				System.exit(1);
 			}
 
 			@Override
 			public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
-				log.info("Server: Received packet of " + packet.size() + " bytes from " + session.getAddress()
+				LOG.info("Server: Received packet of " + packet.size() + " bytes from " + session.getAddress()
 						+ ", checking data...");
 
 				// Check packet ID
-				log.info("Server: Checking header byte...");
+				LOG.info("Server: Checking header byte...");
 				if (packet.getId() != SPLIT_START_ID) {
-					log.error("Server: Packet header is " + packet.getId() + " when it should be " + SPLIT_START_ID
+					LOG.error("Server: Packet header is " + packet.getId() + " when it should be " + SPLIT_START_ID
 							+ "!");
 					System.exit(1);
 				}
 
 				// Check shorts
-				log.info("Server: Checking if data is sequenced correctly...");
+				LOG.info("Server: Checking if data is sequenced correctly...");
 				long lastInt = -1;
 				while (packet.remaining() >= 4) {
 					long currentInt = packet.readUnsignedInt();
 					if (currentInt - lastInt != 1) {
-						log.error("Server: Short data was not split correctly!");
+						LOG.error("Server: Short data was not split correctly!");
 						System.exit(1);
 					} else {
 						lastInt = currentInt;
@@ -136,14 +135,14 @@ public class SplitPacketTest {
 				}
 
 				// Check packet footer
-				log.info("Server: Checking footer byte...");
+				LOG.info("Server: Checking footer byte...");
 				if (packet.readUnsignedByte() != SPLIT_END_ID) {
-					log.error("Server: Packet footer is " + packet.getId() + " when it should be " + SPLIT_START_ID
+					LOG.error("Server: Packet footer is " + packet.getId() + " when it should be " + SPLIT_START_ID
 							+ "!");
 					System.exit(1);
 				}
 
-				log.info("Server: Split packet test passed! (Took " + (System.currentTimeMillis() - startSend) + "MS)");
+				LOG.info("Server: Split packet test passed! (Took " + (System.currentTimeMillis() - startSend) + "MS)");
 				System.exit(0);
 			}
 
@@ -177,7 +176,7 @@ public class SplitPacketTest {
 
 			@Override
 			public void onConnect(RakNetServerSession session) {
-				log.info("Client: Connected to server with MTU " + session.getMaximumTransferUnit());
+				LOG.info("Client: Connected to server with MTU " + session.getMaximumTransferUnit());
 
 				// Calculate maximum packet size
 				this.packet = new RakNetPacket(SPLIT_START_ID);
@@ -194,14 +193,14 @@ public class SplitPacketTest {
 				packet.writeUnsignedByte(SPLIT_END_ID);
 
 				// Send packet
-				log.info("Client: Sending giant packet... (" + packet.size() + " bytes, " + integersWritten + " ints)");
+				LOG.info("Client: Sending giant packet... (" + packet.size() + " bytes, " + integersWritten + " ints)");
 				startSend = System.currentTimeMillis();
 				session.sendMessage(Reliability.RELIABLE_ORDERED, packet);
 			}
 
 			@Override
 			public void onDisconnect(RakNetServerSession session, String reason) {
-				log.error("Client: Lost connection to server! (" + reason + ")");
+				LOG.error("Client: Lost connection to server! (" + reason + ")");
 				System.exit(1);
 			}
 

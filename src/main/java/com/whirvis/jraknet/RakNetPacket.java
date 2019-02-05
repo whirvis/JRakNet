@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Whirvis T. Wheatley
+ * Copyright (c) 2016-2019 Whirvis T. Wheatley
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,11 +42,10 @@ import io.netty.channel.socket.DatagramPacket;
  */
 public class RakNetPacket extends Packet {
 
-	// RakNet packet data
 	private short id;
 
 	/**
-	 * Constructs a <code>RakNetPacket</code> with the specified ID that will be
+	 * Constructs a <code>RakNetPacket</code> with the ID that will be
 	 * written to it.
 	 * 
 	 * @param id
@@ -62,7 +61,7 @@ public class RakNetPacket extends Packet {
 
 	/**
 	 * Constructs a <code>RakNetPacket</code> that reads from and writes to the
-	 * specified <code>ByteBuf</code>. On instantiation, the first byte of the
+	 * <code>ByteBuf</code>. On instantiation, the first byte of the
 	 * buffer will be read and set as the ID.
 	 * 
 	 * @param buffer
@@ -78,7 +77,7 @@ public class RakNetPacket extends Packet {
 
 	/**
 	 * Constructs a <code>RakNetPacket</code> that reads from and writes to the
-	 * specified <code>DatagramPacket</code>. On instantiation, the first byte
+	 * <code>DatagramPacket</code>. On instantiation, the first byte
 	 * of the datagram will be read and set as the ID.
 	 * 
 	 * @param datagram
@@ -90,7 +89,7 @@ public class RakNetPacket extends Packet {
 
 	/**
 	 * Constructs a <code>RakNetPacket</code> that reads from and writes to the
-	 * specified byte array. On instantiation, the first byte of the byte array
+	 * byte array. On instantiation, the first byte of the byte array
 	 * will be read and set as the ID.
 	 * 
 	 * @param data
@@ -102,8 +101,8 @@ public class RakNetPacket extends Packet {
 
 	/**
 	 * Constructs a <code>RakNetPacket</code> that reads from and writes to the
-	 * specified <code>Packet</code>. On instantiation, the first byte of the
-	 * buffer will be read and set as the ID unless the specified packet is a
+	 * <code>Packet</code>. On instantiation, the first byte of the
+	 * buffer will be read and set as the ID unless the packet is a
 	 * subclass of <code>RakNetPacket</code>.
 	 * 
 	 * @param packet
@@ -124,6 +123,8 @@ public class RakNetPacket extends Packet {
 	}
 
 	/**
+	 * Returns the ID of the packet.
+	 * 
 	 * @return the ID of the packet.
 	 */
 	public final short getId() {
@@ -143,7 +144,7 @@ public class RakNetPacket extends Packet {
 	}
 
 	/**
-	 * Sets the buffer and updates the ID if specified.
+	 * Sets the buffer and updates the ID if.
 	 * 
 	 * @param buffer
 	 *            the new buffer.
@@ -162,6 +163,11 @@ public class RakNetPacket extends Packet {
 		super.flip();
 		this.id = this.readUnsignedByte();
 		return this;
+	}
+
+	@Override
+	public String toString() {
+		return "RakNetPacket [id=" + id + ", size()=" + size() + ", remaining()=" + remaining() + "]";
 	}
 
 }

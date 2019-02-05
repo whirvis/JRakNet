@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Whirvis T. Wheatley
+ * Copyright (c) 2016-2019 Whirvis T. Wheatley
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,8 +34,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Used by the server to register and handle commands easily.
@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
  */
 public class CommandHandler {
 
-	private static final Logger log = LoggerFactory.getLogger(CommandHandler.class);
+	private static final Logger LOG = LogManager.getLogger(CommandHandler.class);
 
 	private HashMap<String, Command> commands;
 
@@ -112,10 +112,10 @@ public class CommandHandler {
 		if (commands.containsKey(label)) {
 			Command command = commands.get(label);
 			if (command.handleCommand(arguments) == false) {
-				log.error("Usage: " + command.getUsage());
+				LOG.error("Usage: " + command.getUsage());
 			}
 		} else {
-			log.error("Unknown command!");
+			LOG.error("Unknown command!");
 		}
 	}
 

@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Whirvis T. Wheatley
+ * Copyright (c) 2016-2019 Whirvis T. Wheatley
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -58,16 +58,7 @@ public class RakNetServerSession extends RakNetSession {
 	private long timestamp;
 
 	/**
-	 * Called by the client when the connection is closed.
-	 */
-	public void closeConnection() {
-		sendQueue.clear(); // Make sure disconnect packet is first in-line
-		this.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
-		this.update(); // Make sure the packet is sent out
-	}
-
-	/**
-	 * Constructs a <code>RakNetClientSession</code> with the specified
+	 * Constructs a <code>RakNetClientSession</code> with the
 	 * <code>RakNetClient</code>, globally unique ID, maximum transfer unit,
 	 * <code>Channel</code>, and address.
 	 * 
@@ -157,6 +148,15 @@ public class RakNetServerSession extends RakNetSession {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Called by the client when the connection is closed.
+	 */
+	public void closeConnection() {
+		sendQueue.clear(); // Make sure disconnect packet is first in-line
+		this.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
+		this.update(); // Make sure the packet is sent out
 	}
 
 }

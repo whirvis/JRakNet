@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Whirvis T. Wheatley
+ * Copyright (c) 2016-2019 Whirvis T. Wheatley
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,7 @@ public class ServerPing {
 	private final ConnectionType connectionType;
 
 	/**
-	 * Constructs a <code>ServerPing</code> with the specified address and
+	 * Constructs a <code>ServerPing</code> with the address and
 	 * <code>Identifier</code>.
 	 * 
 	 * @param sender
@@ -65,6 +65,8 @@ public class ServerPing {
 	}
 
 	/**
+	 * Returns the address of the pings ender.
+	 * 
 	 * @return the address of the ping sender.
 	 */
 	public InetSocketAddress getSender() {
@@ -72,6 +74,8 @@ public class ServerPing {
 	}
 
 	/**
+	 * Returns the <code>Identifier</code> being sent back to the sender.
+	 * 
 	 * @return the <code>Identifier</code> being sent back to the sender.
 	 */
 	public Identifier getIdentifier() {
@@ -79,6 +83,8 @@ public class ServerPing {
 	}
 
 	/**
+	 * Returns the connection type of the ping sender.
+	 * 
 	 * @return the connection type of the ping sender.
 	 */
 	public final ConnectionType getConnectionType() {
@@ -93,6 +99,12 @@ public class ServerPing {
 	 */
 	public void setIdentifier(Identifier identifier) {
 		this.identifier = identifier;
+	}
+
+	@Override
+	public String toString() {
+		return "ServerPing [sender=" + sender + ", identifier=" + identifier + ", connectionType=" + connectionType
+				+ "]";
 	}
 
 }

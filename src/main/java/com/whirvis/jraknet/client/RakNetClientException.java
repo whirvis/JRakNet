@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Whirvis T. Wheatley
+ * Copyright (c) 2016-2019 Whirvis T. Wheatley
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,7 @@ public class RakNetClientException extends RakNetException {
 	private final RakNetClient client;
 
 	/**
-	 * Constructs a <code>RakNetClientException</code> with the specified
+	 * Constructs a <code>RakNetClientException</code> with the
 	 * <code>RakNetClient</code> and error.
 	 * 
 	 * @param client
@@ -58,6 +58,8 @@ public class RakNetClientException extends RakNetException {
 	}
 
 	/**
+	 * Returns the client that threw the exception.
+	 * 
 	 * @return the client that threw the exception.
 	 */
 	public final RakNetClient getClient() {

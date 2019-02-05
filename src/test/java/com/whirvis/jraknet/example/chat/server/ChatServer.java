@@ -8,7 +8,7 @@
  *                                                  
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Whirvis T. Wheatley
+ * Copyright (c) 2016-2019 Whirvis T. Wheatley
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,16 +36,16 @@ import java.util.HashMap;
 import java.util.Scanner;
 import java.util.UUID;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.RakNetTest;
 import com.whirvis.jraknet.example.chat.ChatMessageIdentifier;
 import com.whirvis.jraknet.example.chat.ServerChannel;
-import com.whirvis.jraknet.example.chat.protocol.LoginFailure;
-import com.whirvis.jraknet.example.chat.protocol.UpdateUsername;
+import com.whirvis.jraknet.example.chat.protocol.LoginFailurePacket;
+import com.whirvis.jraknet.example.chat.protocol.UpdateUsernamePacket;
 import com.whirvis.jraknet.example.chat.server.command.BroadcastCommand;
 import com.whirvis.jraknet.example.chat.server.command.ChannelCommand;
 import com.whirvis.jraknet.example.chat.server.command.CommandHandler;
@@ -65,9 +65,8 @@ import com.whirvis.jraknet.session.RakNetClientSession;
  */
 public class ChatServer implements RakNetServerListener {
 
-	private static final Logger log = LoggerFactory.getLogger(ChatServer.class);
+	private static final Logger LOG = LogManager.getLogger(ChatServer.class);
 
-	// Server data
 	private final String name;
 	private final String motd;
 	private final RakNetServer server;
@@ -75,7 +74,7 @@ public class ChatServer implements RakNetServerListener {
 	private final HashMap<InetSocketAddress, ConnectedClient> connected;
 
 	/**
-	 * Constructs a <code>ChatServer</code> with the specified name, message of
+	 * Constructs a <code>ChatServer</code> with the name, message of
 	 * the day, port, and maximum amount of connections.
 	 * 
 	 * @param name
@@ -112,7 +111,7 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Denies a login to the specified client with the specified reason.
+	 * Denies a login to the client with the reason.
 	 * 
 	 * @param session
 	 *            the session to deny the login to.
@@ -120,16 +119,20 @@ public class ChatServer implements RakNetServerListener {
 	 *            the reason the login was denied.
 	 */
 	private void denyLogin(RakNetClientSession session, String reason) {
-		LoginFailure loginFailure = new LoginFailure();
+		LoginFailurePacket loginFailure = new LoginFailurePacket();
 		loginFailure.reason = reason;
+		loginFailure.encode();
 		session.sendMessage(Reliability.UNRELIABLE, loginFailure);
 	}
 
 	/**
+	 * Returns whether or not the server has a client with the
+	 * username.
+	 * 
 	 * @param username
 	 *            the username to check.
-	 * @return <code>true</code> if the server has a client with the specified
-	 *         username.
+	 * @return <code>true</code> if the server has a client with the
+	 *         username, <code>false</code> otherwise.
 	 */
 	private boolean hasUsername(String username) {
 		for (ConnectedClient client : connected.values()) {
@@ -141,7 +144,7 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Adds a channel to the server with the specified ID and name.
+	 * Adds a channel to the server with the ID and name.
 	 * 
 	 * @param channel
 	 *            the channel ID.
@@ -161,7 +164,7 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Renames the channel with the specified ID a new name.
+	 * Renames the channel.
 	 * 
 	 * @param channel
 	 *            the channel ID.
@@ -181,7 +184,7 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Removes the channel with the specified ID.
+	 * Removes the channel.
 	 * 
 	 * @param channel
 	 *            the channel ID.
@@ -199,10 +202,12 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	/**
+	 * Returns whether or not the server has the channel.
+	 * 
 	 * @param channel
 	 *            the channel ID.
-	 * @return <code>true</code> if the server has a channel with the specified
-	 *         ID.
+	 * @return <code>true</code> if the server has the channel,
+	 *         <code>false</code> otherwise.
 	 * @throws InvalidChannelException
 	 *             if the channel exceeds the limit.
 	 */
@@ -214,9 +219,11 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	/**
+	 * Returns the name of the channel.
+	 * 
 	 * @param channel
 	 *            the channel ID.
-	 * @return the channel's name.
+	 * @return the name of the channel.
 	 * @throws InvalidChannelException
 	 *             if the channel exceeds the limit.
 	 */
@@ -228,20 +235,23 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	/**
-	 * @return All (non-null) channels on the server.
+	 * Returns all channels on the server that are not <code>null</code>.
+	 * 
+	 * @return all channels on the server that are not <code>null</code>.
 	 */
 	public ServerChannel[] getChannels() {
 		ArrayList<ServerChannel> channels = new ArrayList<ServerChannel>();
 		for (ServerChannel channel : this.serverChannels) {
-			if (channel != null) {
-				channels.add(channel);
+			if (channel == null) {
+				continue; // Invalid channel
 			}
+			channels.add(channel);
 		}
 		return channels.toArray(new ServerChannel[channels.size()]);
 	}
 
 	/**
-	 * Broadcasts the specified message to the specified channel and prints it
+	 * Broadcasts the message to the channel and prints it
 	 * out to the console if needed.
 	 * 
 	 * @param message
@@ -261,12 +271,12 @@ public class ChatServer implements RakNetServerListener {
 			client.sendChatMessage(message, channel);
 		}
 		if (print == true) {
-			log.info(message + " [" + serverChannels[channel].getName() + "]");
+			LOG.info(message + " [" + serverChannels[channel].getName() + "]");
 		}
 	}
 
 	/**
-	 * Broadcasts the specified message on the specified channel.
+	 * Broadcasts the message on the channel.
 	 * 
 	 * @param message
 	 *            the message to send.
@@ -278,7 +288,7 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Broadcasts the specified message on every channel possible.
+	 * Broadcasts the message on every channel possible.
 	 * 
 	 * @param message
 	 *            the message to send.
@@ -287,13 +297,15 @@ public class ChatServer implements RakNetServerListener {
 		for (ServerChannel channel : getChannels()) {
 			this.broadcastMessage(message + " [Global]", channel.getChannel(), false);
 		}
-		log.info(message + " [Global]");
+		LOG.info(message + " [Global]");
 	}
 
 	/**
+	 * Returns the client with the username.
+	 * 
 	 * @param username
-	 *            the client's username.
-	 * @return the client based on its username.
+	 *            the username of the client.
+	 * @return the client with the username.
 	 */
 	public ConnectedClient getClient(String username) {
 		for (ConnectedClient client : connected.values()) {
@@ -305,17 +317,20 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	/**
+	 * Returns whether or not the server has a client with the
+	 * username.
+	 * 
 	 * @param username
 	 *            the username to check.
-	 * @return <code>true</code> if the server has a client with the specified
-	 *         username.
+	 * @return <code>true</code> if the server has a client with the
+	 *         username, <code>false</code> otherwise.
 	 */
 	public boolean hasClient(String username) {
 		return (getClient(username) != null);
 	}
 
 	/**
-	 * Kicks a client from the server with the specified reason.
+	 * Kicks a client from the server with the reason.
 	 * 
 	 * @param client
 	 *            the client to kick.
@@ -366,7 +381,7 @@ public class ChatServer implements RakNetServerListener {
 		} else if (packetId == ChatMessageIdentifier.ID_UPDATE_USERNAME_REQUEST) {
 			if (connected.containsKey(sender)) {
 				ConnectedClient client = connected.get(sender);
-				UpdateUsername request = new UpdateUsername(packet);
+				UpdateUsernamePacket request = new UpdateUsernamePacket(packet);
 				request.decode();
 
 				// Do any other clients have the same name already?
@@ -393,7 +408,7 @@ public class ChatServer implements RakNetServerListener {
 		ChatServer server = new ChatServer("JRakNet Server Example", "This is a test server made for JRakNet",
 				RakNetTest.WHIRVIS_DEVELOPMENT_PORT, 10);
 		server.start();
-		log.info("Started server!");
+		LOG.info("Started server!");
 
 		// Register commands
 		CommandHandler commandHandler = new CommandHandler();
@@ -415,7 +430,7 @@ public class ChatServer implements RakNetServerListener {
 			try {
 				Thread.sleep(0, 1); // Lower CPU usage
 			} catch (InterruptedException e) {
-				log.warn("Chat server sleep interrupted");
+				LOG.warn("Chat server sleep interrupted");
 			}
 		}
 	}
