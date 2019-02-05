@@ -45,10 +45,14 @@ package com.whirvis.jraknet.windows;
  */
 public class UniversalWindowsProgram {
 
+	// Universal Windows Programs
 	public static final UniversalWindowsProgram MINECRAFT = new UniversalWindowsProgram(
 			"Microsoft.MinecraftUWP_8wekyb3d8bbwe");
 
 	/**
+	 * Returns whether or not the machine is currently running on the Windows 10
+	 * operating system.
+	 * 
 	 * @return <code>true</code> if the machine is currently running on the
 	 *         Windows 10 operating system, <code>false</code> otherwise.
 	 */
@@ -72,6 +76,8 @@ public class UniversalWindowsProgram {
 	}
 
 	/**
+	 * Returns the application.
+	 * 
 	 * @return the application.
 	 */
 	public String getApplication() {
@@ -79,6 +85,8 @@ public class UniversalWindowsProgram {
 	}
 
 	/**
+	 * Returns whether or not the application is loopback exempt.
+	 * 
 	 * @return <code>true</code> if the application is loopback exempt,
 	 *         <code>false</code> otherwise.
 	 */

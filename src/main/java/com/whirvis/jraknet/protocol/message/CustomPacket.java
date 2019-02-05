@@ -43,7 +43,7 @@ import com.whirvis.jraknet.session.RakNetSession;
 
 public class CustomPacket extends RakNetPacket implements Sizable {
 
-	private static final Logger log = LogManager.getLogger(CustomPacket.class);
+	private static final Logger LOG = LogManager.getLogger(CustomPacket.class);
 
 	public static final int SEQUENCE_NUMBER_LENGTH = 0x03;
 
@@ -95,7 +95,7 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 			if (session != null) {
 				session.setAckReceiptPackets(ackMessages.toArray(new EncapsulatedPacket[ackMessages.size()]));
 			} else {
-				log.error("No session specified for " + ackMessages.size()
+				LOG.error("No session for " + ackMessages.size()
 						+ " encapsulated packets that require ACK receipts");
 			}
 		}

@@ -47,7 +47,7 @@ import io.netty.buffer.Unpooled;
  */
 public class EncapsulatedPacket implements Sizable, Cloneable {
 
-	private static final Logger log = LogManager.getLogger(EncapsulatedPacket.class);
+	private static final Logger LOG = LogManager.getLogger(EncapsulatedPacket.class);
 
 	// Length constants
 	public static final int MINIMUM_BUFFER_LENGTH = 3;
@@ -114,7 +114,7 @@ public class EncapsulatedPacket implements Sizable, Cloneable {
 		buffer.writeUnsignedShort(payload.size() * 8); // Size is in bits
 
 		if (reliability.requiresAck() && ackRecord == null) {
-			log.error("No ACK record ID set for encapsulated packet with reliability " + reliability);
+			LOG.error("No ACK record ID set for encapsulated packet with reliability " + reliability);
 		}
 
 		if (reliability.isReliable()) {
@@ -212,8 +212,8 @@ public class EncapsulatedPacket implements Sizable, Cloneable {
 	 * @param payload
 	 *            the payload of the packet
 	 * @return the size of an <code>EncapsulatedPacket</code> based on the
-	 *         specified reliability, whether or not it is split, and the size
-	 *         of the specified payload without any extra data written to it.
+	 *         reliability, whether or not it is split, and the size
+	 *         of the payload without any extra data written to it.
 	 */
 	public static int calculateDummy(Reliability reliability, boolean split, Packet payload) {
 		EncapsulatedPacket dummy = new EncapsulatedPacket();
@@ -231,7 +231,7 @@ public class EncapsulatedPacket implements Sizable, Cloneable {
 	 * @param split
 	 *            whether or not the packet is split.
 	 * @return the size of an <code>EncapsulatedPacket</code> based on the
-	 *         specified reliability and whether or not it is split without any
+	 *         reliability and whether or not it is split without any
 	 *         extra data written to it.
 	 */
 	public static int calculateDummy(Reliability reliability, boolean split) {

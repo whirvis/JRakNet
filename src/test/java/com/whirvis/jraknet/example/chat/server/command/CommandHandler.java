@@ -44,9 +44,8 @@ import org.apache.logging.log4j.Logger;
  */
 public class CommandHandler {
 
-	private static final Logger log = LogManager.getLogger(CommandHandler.class);
+	private static final Logger LOG = LogManager.getLogger(CommandHandler.class);
 
-	// Command handler data
 	private HashMap<String, Command> commands;
 
 	public CommandHandler() {
@@ -113,10 +112,10 @@ public class CommandHandler {
 		if (commands.containsKey(label)) {
 			Command command = commands.get(label);
 			if (command.handleCommand(arguments) == false) {
-				log.error("Usage: " + command.getUsage());
+				LOG.error("Usage: " + command.getUsage());
 			}
 		} else {
-			log.error("Unknown command!");
+			LOG.error("Unknown command!");
 		}
 	}
 

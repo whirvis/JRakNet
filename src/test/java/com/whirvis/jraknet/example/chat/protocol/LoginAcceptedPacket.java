@@ -28,34 +28,52 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.example.chat.server.command;
+package com.whirvis.jraknet.example.chat.protocol;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.UUID;
 
-/**
- * Displays all of the commands that can be used on the server.
- * 
- * @author Trent "Whirvis" Summerlin
- */
-public class HelpCommand extends Command {
+import com.whirvis.jraknet.Packet;
+import com.whirvis.jraknet.example.chat.ChatMessageIdentifier;
+import com.whirvis.jraknet.example.chat.ServerChannel;
 
-	private static final Logger LOG = LogManager.getLogger(HelpCommand.class);
+public class LoginAcceptedPacket extends ChatPacket {
 
-	public HelpCommand() {
-		super("help", "Displays all the commands that can be used");
+	public UUID userId;
+	public String serverName;
+	public String serverMotd;
+	public ServerChannel[] channels;
+
+	public LoginAcceptedPacket() {
+		super(ChatMessageIdentifier.ID_LOGIN_ACCEPTED);
+	}
+
+	public LoginAcceptedPacket(Packet packet) {
+		super(packet);
 	}
 
 	@Override
-	public boolean handleCommand(String[] args) {
-		StringBuilder helpMessage = new StringBuilder();
-		helpMessage.append("Showing all " + Command.getRegisteredCommands().length + " commands:\n");
-		for (Command command : Command.getRegisteredCommands()) {
-			helpMessage.append("\t\t");
-			helpMessage.append(command.getUsage() + ": " + command.getDescription() + "\n");
+	public void encode() {
+		this.writeUUID(userId);
+		this.writeString(serverName);
+		this.writeString(serverMotd);
+		this.writeInt(channels.length);
+		for (int i = 0; i < channels.length; i++) {
+			this.writeUnsignedByte(channels[i].getChannel());
+			this.writeString(channels[i].getName());
 		}
-		LOG.info(helpMessage.toString());
-		return true;
+	}
+
+	@Override
+	public void decode() {
+		this.userId = this.readUUID();
+		this.serverName = this.readString();
+		this.serverMotd = this.readString();
+		this.channels = new ServerChannel[this.readInt()];
+		for (int i = 0; i < channels.length; i++) {
+			short channel = this.readUnsignedByte();
+			String channelName = this.readString();
+			channels[i] = new ServerChannel(channel, channelName);
+		}
 	}
 
 }

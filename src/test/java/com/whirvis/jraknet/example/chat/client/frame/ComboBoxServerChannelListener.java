@@ -55,9 +55,8 @@ public class ComboBoxServerChannelListener implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		ServerChannel serverChannel = (ServerChannel) frame.cmbServerChannels.getSelectedItem();
-
 		try {
+			ServerChannel serverChannel = (ServerChannel) frame.cmbServerChannels.getSelectedItem();
 			client.setChannel(serverChannel.getChannel());
 		} catch (ChatException e1) {
 			frame.displayError(e1);

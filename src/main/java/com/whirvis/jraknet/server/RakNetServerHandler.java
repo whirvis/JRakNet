@@ -51,16 +51,15 @@ import io.netty.channel.socket.DatagramPacket;
  */
 public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 
-	private static final Logger log = LogManager.getLogger(RakNetServerHandler.class);
+	private static final Logger LOG = LogManager.getLogger(RakNetServerHandler.class);
 
-	// Handler data
 	private final String loggerName;
 	private final RakNetServer server;
 	private final ConcurrentHashMap<InetAddress, BlockedAddress> blocked;
 	private InetSocketAddress causeAddress;
 
 	/**
-	 * Constructs a <code>RakNetClientServer</code> with the specified
+	 * Constructs a <code>RakNetClientServer</code> with the
 	 * <code>RakNetClient</code>.
 	 * 
 	 * @param server
@@ -73,7 +72,7 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	}
 
 	/**
-	 * Blocks the specified address with the specified reason for the specified
+	 * Blocks the address with the reason for the
 	 * amount time.
 	 * 
 	 * @param address
@@ -88,12 +87,12 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 		for (RakNetServerListener listener : server.getListeners()) {
 			listener.onAddressBlocked(address, reason, time);
 		}
-		log.info(
+		LOG.info(
 				loggerName + "Blocked address " + address + " due to \"" + reason + "\" for " + time + " milliseconds");
 	}
 
 	/**
-	 * Unblocks the specified address.
+	 * Unblocks the address.
 	 * 
 	 * @param address
 	 *            the address to unblock.
@@ -103,13 +102,16 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 		for (RakNetServerListener listener : server.getListeners()) {
 			listener.onAddressUnblocked(address);
 		}
-		log.info(loggerName + "Unblocked address " + address);
+		LOG.info(loggerName + "Unblocked address " + address);
 	}
 
 	/**
+	 * Returns whether or not the address is blocked.
+	 * 
 	 * @param address
 	 *            the address to check.
-	 * @return whether or not the specified address is blocked.
+	 * @return <code>true</code> if the address is blocked, <code>false</code>
+	 *         otherwise.
 	 */
 	public boolean addressBlocked(InetAddress address) {
 		return blocked.containsKey(address);
@@ -143,12 +145,12 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			// Handle the packet and release the buffer
 			server.handleMessage(packet, sender);
 			datagram.content().readerIndex(0); // Reset position
-			log.debug(loggerName + "Sent packet to server and reset Datagram buffer read position");
+			LOG.debug(loggerName + "Sent packet to server and reset Datagram buffer read position");
 			for (RakNetServerListener listener : server.getListeners()) {
 				listener.handleNettyMessage(datagram.content(), sender);
 			}
 			datagram.content().release(); // No longer needed
-			log.debug(loggerName + "Sent Datagram buffer to server and released it");
+			LOG.debug(loggerName + "Sent Datagram buffer to server and released it");
 
 			// No exceptions occurred, release the suspect
 			this.causeAddress = null;

@@ -28,34 +28,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.example.chat.server.command;
+package com.whirvis.jraknet.example.chat.protocol;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.whirvis.jraknet.Packet;
+import com.whirvis.jraknet.example.chat.ChatMessageIdentifier;
 
-/**
- * Displays all of the commands that can be used on the server.
- * 
- * @author Trent "Whirvis" Summerlin
- */
-public class HelpCommand extends Command {
+public class ChatMessagePacket extends ChatPacket {
 
-	private static final Logger LOG = LogManager.getLogger(HelpCommand.class);
+	public String message;
 
-	public HelpCommand() {
-		super("help", "Displays all the commands that can be used");
+	public ChatMessagePacket() {
+		super(ChatMessageIdentifier.ID_CHAT_MESSAGE);
+	}
+
+	public ChatMessagePacket(Packet packet) {
+		super(packet);
 	}
 
 	@Override
-	public boolean handleCommand(String[] args) {
-		StringBuilder helpMessage = new StringBuilder();
-		helpMessage.append("Showing all " + Command.getRegisteredCommands().length + " commands:\n");
-		for (Command command : Command.getRegisteredCommands()) {
-			helpMessage.append("\t\t");
-			helpMessage.append(command.getUsage() + ": " + command.getDescription() + "\n");
-		}
-		LOG.info(helpMessage.toString());
-		return true;
+	public void encode() {
+		this.writeString(message);
+	}
+
+	@Override
+	public void decode() {
+		this.message = this.readString();
 	}
 
 }

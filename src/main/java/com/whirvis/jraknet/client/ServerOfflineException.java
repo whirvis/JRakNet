@@ -45,7 +45,7 @@ public class ServerOfflineException extends RakNetClientException {
 	private final InetSocketAddress address;
 
 	/**
-	 * Constructs a <code>ServerOfflineException</code> with the specified
+	 * Constructs a <code>ServerOfflineException</code> with the
 	 * <code>RakNetClient</code> and address.
 	 * 
 	 * @param client
@@ -59,6 +59,8 @@ public class ServerOfflineException extends RakNetClientException {
 	}
 
 	/**
+	 * Returns the address of the offline server.
+	 * 
 	 * @return the address of the offline server.
 	 */
 	public InetSocketAddress getAddress() {

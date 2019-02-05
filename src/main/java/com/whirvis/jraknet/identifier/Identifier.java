@@ -65,14 +65,18 @@ public class Identifier {
 	}
 
 	/**
-	 * @return the identifier as a String.
+	 * Returns the identifier as a <code>String</code>.
+	 * 
+	 * @return the identifier as a <code>String</code>.
 	 */
 	public String build() {
 		return this.identifier;
 	}
 
 	/**
-	 * @return the connection type of the identifier's sender.
+	 * Returns the connection type of the sender of the identifier.
+	 * 
+	 * @return the connection type of the sender of the identifier.
 	 */
 	public final ConnectionType getConnectionType() {
 		return this.connectionType;

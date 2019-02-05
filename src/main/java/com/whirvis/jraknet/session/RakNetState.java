@@ -60,7 +60,7 @@ public class RakNetState {
 	private final int order;
 
 	/**
-	 * Constructs a <code>RakNetState</code> with the specified order.
+	 * Constructs a <code>RakNetState</code> with the order.
 	 * 
 	 * @param order
 	 *            the order of the <code>RakNetState</code>.
@@ -71,7 +71,9 @@ public class RakNetState {
 	}
 
 	/**
-	 * @return the order the state is in as an int value.
+	 * Returns the order the state is in.
+	 * 
+	 * @return the order the state is in.
 	 */
 	public int getOrder() {
 		return this.order;
@@ -87,6 +89,8 @@ public class RakNetState {
 	}
 
 	/**
+	 * Returns the state based on its order.
+	 * 
 	 * @param order
 	 *            the order of the state.
 	 * @return the state based on its order.

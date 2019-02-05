@@ -42,7 +42,7 @@ public class NoFreeIncomingConnectionsException extends RakNetClientException {
 
 	/**
 	 * Constructs a <code>NoFreeIncomingConnectionsException</code> with the
-	 * specified <code>RakNetClient</code>.
+	 * <code>RakNetClient</code>.
 	 * 
 	 * @param client
 	 *            the <code>RakNetClient</code> that threw the exception.
