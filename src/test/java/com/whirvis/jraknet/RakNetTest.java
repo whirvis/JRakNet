@@ -32,8 +32,8 @@ package com.whirvis.jraknet;
 
 import java.net.InetSocketAddress;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.identifier.MinecraftIdentifier;
 
@@ -44,7 +44,7 @@ import com.whirvis.jraknet.identifier.MinecraftIdentifier;
  */
 public class RakNetTest {
 
-	private static final Logger log = LoggerFactory.getLogger(RakNetTest.class);
+	private static final Logger log = LogManager.getLogger(RakNetTest.class);
 
 	// Test data
 	private static final String ADDRESS_TEST_VALID = "255.255.255.255:65535";

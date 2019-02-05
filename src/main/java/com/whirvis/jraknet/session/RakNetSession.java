@@ -39,8 +39,8 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNet;
@@ -68,7 +68,7 @@ import io.netty.channel.socket.DatagramPacket;
  */
 public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer {
 
-	private static final Logger log = LoggerFactory.getLogger(RakNetSession.class);
+	private static final Logger log = LogManager.getLogger(RakNetSession.class);
 
 	// Session data
 	private String loggerName;

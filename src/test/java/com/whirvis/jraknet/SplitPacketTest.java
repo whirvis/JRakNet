@@ -34,8 +34,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.client.RakNetClientListener;
@@ -57,7 +57,7 @@ import com.whirvis.jraknet.session.RakNetServerSession;
  */
 public class SplitPacketTest {
 
-	private static final Logger log = LoggerFactory.getLogger(SplitPacketTest.class);
+	private static final Logger log = LogManager.getLogger(SplitPacketTest.class);
 
 	// Test data
 	private static final short SPLIT_START_ID = 0xFE;

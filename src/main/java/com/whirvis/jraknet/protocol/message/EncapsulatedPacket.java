@@ -30,8 +30,8 @@
  */
 package com.whirvis.jraknet.protocol.message;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.protocol.Reliability;
@@ -47,7 +47,7 @@ import io.netty.buffer.Unpooled;
  */
 public class EncapsulatedPacket implements Sizable, Cloneable {
 
-	private static final Logger log = LoggerFactory.getLogger(EncapsulatedPacket.class);
+	private static final Logger log = LogManager.getLogger(EncapsulatedPacket.class);
 
 	// Length constants
 	public static final int MINIMUM_BUFFER_LENGTH = 3;

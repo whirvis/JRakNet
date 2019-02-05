@@ -33,8 +33,8 @@ package com.whirvis.jraknet;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.identifier.MinecraftIdentifier;
 import com.whirvis.jraknet.protocol.MessageIdentifier;
@@ -55,12 +55,12 @@ import com.whirvis.jraknet.windows.UniversalWindowsProgram;
  */
 public class RakNetServerTest {
 
-	private static final Logger log = LoggerFactory.getLogger(RakNetServerTest.class);
+	private static final Logger log = LogManager.getLogger(RakNetServerTest.class);
 
 	public static void main(String[] args) {
 		// Add loopback exemption for Minecraft
 		if (!UniversalWindowsProgram.MINECRAFT.addLoopbackExempt()) {
-			log.warn("Failed to add loopback exemption for Minecraft");
+			log.warn("Failed to" + " add loopback exemption for Minecraft");
 		}
 
 		// Create server and add listener

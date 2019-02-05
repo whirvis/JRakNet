@@ -37,8 +37,8 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.map.IntMap;
 
@@ -50,7 +50,7 @@ import com.whirvis.jraknet.map.IntMap;
  */
 public class MaximumTransferUnit {
 
-	private static final Logger log = LoggerFactory.getLogger(MaximumTransferUnit.class);
+	private static final Logger log = LogManager.getLogger(MaximumTransferUnit.class);
 
 	// Unit data
 	private final int size;

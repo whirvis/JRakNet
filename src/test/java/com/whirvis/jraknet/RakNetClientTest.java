@@ -32,8 +32,8 @@ package com.whirvis.jraknet;
 
 import java.net.InetSocketAddress;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.client.RakNetClientListener;
@@ -51,7 +51,7 @@ import com.whirvis.jraknet.session.RakNetServerSession;
  */
 public class RakNetClientTest {
 
-	private static final Logger log = LoggerFactory.getLogger(RakNetClientTest.class);
+	private static final Logger log = LogManager.getLogger(RakNetClientTest.class);
 
 	public static void main(String[] args) {
 		// Create client and add listener

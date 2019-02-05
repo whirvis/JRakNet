@@ -34,8 +34,8 @@ import static com.whirvis.jraknet.protocol.MessageIdentifier.*;
 
 import java.net.InetSocketAddress;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetException;
@@ -58,7 +58,7 @@ import io.netty.channel.Channel;
  */
 public class SessionPreparation {
 
-	private static final Logger log = LoggerFactory.getLogger(SessionPreparation.class);
+	private static final Logger log = LogManager.getLogger(SessionPreparation.class);
 
 	// Preparation data
 	private final String loggerName;
