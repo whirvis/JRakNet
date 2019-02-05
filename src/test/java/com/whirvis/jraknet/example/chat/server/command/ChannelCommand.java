@@ -30,8 +30,8 @@
  */
 package com.whirvis.jraknet.example.chat.server.command;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.example.chat.server.ChatServer;
@@ -43,7 +43,7 @@ import com.whirvis.jraknet.example.chat.server.ChatServer;
  */
 public class ChannelCommand extends Command {
 
-	private static final Logger log = LoggerFactory.getLogger(ChannelCommand.class);
+	private static final Logger log = LogManager.getLogger(ChannelCommand.class);
 
 	// Command data
 	private final ChatServer server;

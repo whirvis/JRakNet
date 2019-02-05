@@ -33,8 +33,8 @@ package com.whirvis.jraknet.protocol;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.map.ShortMap;
@@ -46,8 +46,8 @@ import com.whirvis.jraknet.map.ShortMap;
  */
 public final class MessageIdentifier {
 
-	private static final Logger log = LoggerFactory.getLogger(MessageIdentifier.class);
-	
+	private static final Logger log = LogManager.getLogger(MessageIdentifier.class);
+
 	private MessageIdentifier() {
 		// Static class
 	}

@@ -32,8 +32,8 @@ package com.whirvis.jraknet.protocol.message;
 
 import java.util.ArrayList;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetPacket;
@@ -43,7 +43,7 @@ import com.whirvis.jraknet.session.RakNetSession;
 
 public class CustomPacket extends RakNetPacket implements Sizable {
 
-	private static final Logger log = LoggerFactory.getLogger(CustomPacket.class);
+	private static final Logger log = LogManager.getLogger(CustomPacket.class);
 
 	public static final int SEQUENCE_NUMBER_LENGTH = 0x03;
 
