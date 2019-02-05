@@ -8,7 +8,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent "Whirvis" Summerlin
+ * Copyright (c) 2016-2019 Trent "Whirvis" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,7 +41,7 @@ import java.io.DataOutput;
  *                                                  
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2018 Trent "Whirvis" Summerlin
+ * Copyright (c) 2016-2019 Trent "Whirvis" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
