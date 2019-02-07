@@ -35,25 +35,28 @@ import java.net.InetSocketAddress;
 import com.whirvis.jraknet.identifier.Identifier;
 
 /**
- * This class represents a server that has been discovered by the
- * <code>RakNetClient</code> and also stores the discovered server's address and
- * <code>Identifier</code> which are both crucial to making use of this class.
+ * Represents a server that has been discovered by the
+ * {@link com.whirvis.jraknet.client.RakNetClient RakNetClient}.
  *
  * @author Trent Summerlin
+ * @since JRakNet v2.0
+ * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
+ * @see com.whirvis.jraknet.client.discovery.DiscoveryThread DiscoveryThread
  */
 public class DiscoveredServer {
 
-	public static final long SERVER_TIMEOUT_MILLI = 5000L;
-	public static final String IS_JRAKNET_FIELD = "isJraknet";
+	/**
+	 * The maximum time the server can not respond to a client ping before it is
+	 * dropped from the list of the client's discovered servers.
+	 */
+	public static final long SERVER_TIMEOUT_MILLIS = 5000L;
 
-	// Server data
 	private final InetSocketAddress address;
 	private long discoveryTimestamp;
 	private Identifier identifier;
 
 	/**
-	 * Constructs a <code>DiscoveredServer</code> with the address,
-	 * discovery timestamp, and identifier.
+	 * Constructs a <code>DiscoveredServer</code>.
 	 * 
 	 * @param address
 	 *            the discovered server's address.
@@ -61,6 +64,7 @@ public class DiscoveredServer {
 	 *            the time the server was initially discovered.
 	 * @param identifier
 	 *            the server's identifier.
+	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public DiscoveredServer(InetSocketAddress address, long discoveryTimestamp, Identifier identifier) {
 		this.address = address;
@@ -78,7 +82,7 @@ public class DiscoveredServer {
 	}
 
 	/**
-	 * Returns the last time the server sent back a reponse.
+	 * Returns the last time the server sent back a response.
 	 * 
 	 * @return the last time the server sent back a response.
 	 */
@@ -100,6 +104,7 @@ public class DiscoveredServer {
 	 * Returns the last identifier sent by the server.
 	 * 
 	 * @return the last identifier sent by the server.
+	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public Identifier getIdentifier() {
 		return this.identifier;
@@ -110,6 +115,7 @@ public class DiscoveredServer {
 	 * 
 	 * @param identifier
 	 *            the new identifier.
+	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public void setIdentifier(Identifier identifier) {
 		this.identifier = identifier;

@@ -41,8 +41,7 @@ public class ConnectionBannedException extends RakNetClientException {
 	private static final long serialVersionUID = 8440218445920818619L;
 
 	/**
-	 * Constructs a <code>ConnectedionBannedException</code> with the
-	 * <code>RakNetClient</code>.
+	 * Constructs a <code>ConnectedionBannedException</code>.
 	 * 
 	 * @param client
 	 *            the <code>RakNetClient</code> that threw the exception.

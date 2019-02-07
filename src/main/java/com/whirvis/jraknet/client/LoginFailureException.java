@@ -31,8 +31,8 @@
 package com.whirvis.jraknet.client;
 
 /**
- * Signals that the <code>RakNetClient</code> experienced an error during the
- * login process.
+ * Signals that the <code>RakNetClient</code> has experienced an error during
+ * the login process.
  *
  * @author Trent Summerlin
  */
@@ -41,8 +41,7 @@ public class LoginFailureException extends RakNetClientException {
 	private static final long serialVersionUID = -5025319984358819345L;
 
 	/**
-	 * Constructs a <code>LoginFailureException</code> with the
-	 * <code>RakNetClient</code> and reason as to why the login failed.
+	 * Constructs a <code>LoginFailureException</code>.
 	 * 
 	 * @param client
 	 *            the <code>RakNetClient</code> that threw the exception.
