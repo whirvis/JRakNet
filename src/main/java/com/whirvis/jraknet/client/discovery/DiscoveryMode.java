@@ -31,26 +31,27 @@
 package com.whirvis.jraknet.client.discovery;
 
 /**
- * Used by the <code>RakNetClient</code> to determine how it will discover
- * servers.
+ * Determines how discovery will be handled by the
+ * {@link com.whirvis.jraknet.client.RakNetClient RakNetClient}.
  *
  * @author Whirvis T. Wheatley
+ * @since JRakNet v2.0
+ * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
  */
 public enum DiscoveryMode {
 
 	/**
-	 * the client will not attempt to discover servers on the local network.
+	 * The client will not attempt to discover servers.
 	 */
-	NONE,
+	DISABLED,
 
 	/**
-	 * any servers found on the local network will appear.
+	 * Any servers found will appear.
 	 */
 	ALL_CONNECTIONS,
 
 	/**
-	 * any servers found on the local network will appear as long as they have
-	 * open connections.
+	 * Any servers found will appear as long as they have open connections.
 	 */
 	OPEN_CONNECTIONS;
 

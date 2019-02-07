@@ -46,8 +46,7 @@ public class PacketBufferException extends RakNetClientException {
 	private final RakNetPacket packet;
 
 	/**
-	 * Constructs a <code>PacketBufferException</code> with the
-	 * <code>RakNetClient</code> and <code>RakNetPacket</code>.
+	 * Constructs a <code>PacketBufferException</code>.
 	 * 
 	 * @param client
 	 *            the <code>RakNetClient</code> that threw the exception.

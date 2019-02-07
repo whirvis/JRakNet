@@ -36,6 +36,8 @@ import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
 
+import io.netty.buffer.ByteBuf;
+
 /**
  * This interface represents a client connection to a server, this is used
  * mainly to keep message sending easier and consistent between the lower and
@@ -46,9 +48,9 @@ import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
 public interface UnumRakNetPeer {
 
 	/**
-	 * Sends a message with the reliability on the channel
-	 * and returns a copy of the generated encapsulated packet that will be used
-	 * when it is actually sent.
+	 * Sends a message with the reliability on the channel and returns a copy of
+	 * the generated encapsulated packet that will be used when it is actually
+	 * sent.
 	 * 
 	 * @param reliability
 	 *            the reliability of the packet.
@@ -63,9 +65,9 @@ public interface UnumRakNetPeer {
 	public EncapsulatedPacket sendMessage(Reliability reliability, int channel, Packet packet);
 
 	/**
-	 * Sends the messages with the reliability on the
-	 * channel and returns copies of the generated encapsulated
-	 * packets that will be used when it is actually sent.
+	 * Sends the messages with the reliability on the channel and returns copies
+	 * of the generated encapsulated packets that will be used when it is
+	 * actually sent.
 	 * 
 	 * @param reliability
 	 *            the reliability of the packet.
@@ -87,9 +89,9 @@ public interface UnumRakNetPeer {
 	}
 
 	/**
-	 * Sends a message with the reliability on the default channel and
-	 * returns a copy of the generated encapsulated packet that will be used
-	 * when it is actually sent.
+	 * Sends a message with the reliability on the default channel and returns a
+	 * copy of the generated encapsulated packet that will be used when it is
+	 * actually sent.
 	 * 
 	 * @param reliability
 	 *            the reliability of the packet.
@@ -105,9 +107,85 @@ public interface UnumRakNetPeer {
 	}
 
 	/**
-	 * Sends the messages with the reliability on the
-	 * default channel and returns copies of the generated encapsulated packets
-	 * that will be used when it is actually sent.
+	 * Sends a message with the reliability on the channel and returns a copy of
+	 * the generated encapsulated packet that will be used when it is actually
+	 * sent.
+	 * 
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param channel
+	 *            the channel to send the packet on.
+	 * @param buf
+	 *            the buffer to send.
+	 * @return the generated encapsulated packet.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than the maximum.
+	 */
+	public default EncapsulatedPacket sendMessage(Reliability reliability, int channel, ByteBuf buf) {
+		return this.sendMessage(reliability, channel, new Packet(buf));
+	}
+
+	/**
+	 * Sends a message with the reliability on the channel and returns a copy of
+	 * the generated encapsulated packet that will be used when it is actually
+	 * sent.
+	 * 
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param channel
+	 *            the channel to send the packet on.
+	 * @param bufs
+	 *            the buffers to send.
+	 * @return the generated encapsulated packet.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than the maximum.
+	 */
+	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int channel, ByteBuf... bufs) {
+		EncapsulatedPacket[] encapsulated = new EncapsulatedPacket[bufs.length];
+		for (int i = 0; i < encapsulated.length; i++) {
+			encapsulated[i] = this.sendMessage(reliability, channel, bufs[i]);
+		}
+		return encapsulated;
+	}
+
+	/**
+	 * Sends a message with the reliability on the channel and returns a copy of
+	 * the generated encapsulated packet that will be used when it is actually
+	 * sent.
+	 * 
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param buf
+	 *            the buffer to send.
+	 * @return the generated encapsulated packet.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than the maximum.
+	 */
+	public default EncapsulatedPacket sendMessage(Reliability reliability, ByteBuf buf) {
+		return this.sendMessage(reliability, RakNet.DEFAULT_CHANNEL, buf);
+	}
+
+	/**
+	 * Sends a message with the reliability on the channel and returns a copy of
+	 * the generated encapsulated packet that will be used when it is actually
+	 * sent.
+	 * 
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param bufs
+	 *            the buffers to send.
+	 * @return the generated encapsulated packet.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than the maximum.
+	 */
+	public default EncapsulatedPacket[] sendMessage(Reliability reliability, ByteBuf... bufs) {
+		return this.sendMessage(reliability, RakNet.DEFAULT_CHANNEL, bufs);
+	}
+
+	/**
+	 * Sends the messages with the reliability on the default channel and
+	 * returns copies of the generated encapsulated packets that will be used
+	 * when it is actually sent.
 	 * 
 	 * @param reliability
 	 *            the reliability of the packet.
@@ -127,9 +205,9 @@ public interface UnumRakNetPeer {
 	}
 
 	/**
-	 * Sends a message identifier with the reliability on the
-	 * channel and returns a copy of the generated encapsulated packet
-	 * that will be used when it is actually sent.
+	 * Sends a message identifier with the reliability on the channel and
+	 * returns a copy of the generated encapsulated packet that will be used
+	 * when it is actually sent.
 	 * 
 	 * @param reliability
 	 *            the reliability of the packet.
@@ -146,9 +224,9 @@ public interface UnumRakNetPeer {
 	}
 
 	/**
-	 * Sends the message identifiers with the reliability on
-	 * the channel and returns copies of the generated encapsulated
-	 * packets that will be used when it is actually sent.
+	 * Sends the message identifiers with the reliability on the channel and
+	 * returns copies of the generated encapsulated packets that will be used
+	 * when it is actually sent.
 	 * 
 	 * @param reliability
 	 *            the reliability of the packet.
@@ -169,9 +247,9 @@ public interface UnumRakNetPeer {
 	}
 
 	/**
-	 * Sends a message identifier with the reliability on the default
-	 * channel and returns a copy of the generated encapsulated packet that will
-	 * be used when it is actually sent.
+	 * Sends a message identifier with the reliability on the default channel
+	 * and returns a copy of the generated encapsulated packet that will be used
+	 * when it is actually sent.
 	 * 
 	 * @param reliability
 	 *            the reliability of the packet.
@@ -186,9 +264,9 @@ public interface UnumRakNetPeer {
 	}
 
 	/**
-	 * Sends the message identifiers with the reliability on
-	 * the default channel and returns copies of the generated encapsulated
-	 * packets that will be used when it is actually sent.
+	 * Sends the message identifiers with the reliability on the default channel
+	 * and returns copies of the generated encapsulated packets that will be
+	 * used when it is actually sent.
 	 * 
 	 * @param reliability
 	 *            the reliability of the packet.

@@ -44,9 +44,7 @@ public class IncompatibleProtocolException extends RakNetClientException {
 	private final int serverProtocol;
 
 	/**
-	 * Constructs an <code>IncompatibleProtocolException</code> with the
-	 * <code>RakNetClient</code>, client protocol, and server
-	 * protocol.
+	 * Constructs an <code>IncompatibleProtocolException</code>. protocol.
 	 * 
 	 * @param client
 	 *            the <code>RakNetClient</code> that threw the exception.

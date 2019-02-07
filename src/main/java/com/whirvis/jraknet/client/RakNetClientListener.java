@@ -71,8 +71,11 @@ public interface RakNetClientListener {
 
 	/**
 	 * Called when the client has been shutdown.
+	 * 
+	 * @param reason
+	 *            the reason for shutdown.
 	 */
-	public default void onClientShutdown() {
+	public default void onClientShutdown(String reason) {
 	}
 
 	/**

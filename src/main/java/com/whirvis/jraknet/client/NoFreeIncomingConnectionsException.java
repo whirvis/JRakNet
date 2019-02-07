@@ -41,8 +41,7 @@ public class NoFreeIncomingConnectionsException extends RakNetClientException {
 	private static final long serialVersionUID = 5863972657532782029L;
 
 	/**
-	 * Constructs a <code>NoFreeIncomingConnectionsException</code> with the
-	 * <code>RakNetClient</code>.
+	 * Constructs a <code>NoFreeIncomingConnectionsException</code>.
 	 * 
 	 * @param client
 	 *            the <code>RakNetClient</code> that threw the exception.

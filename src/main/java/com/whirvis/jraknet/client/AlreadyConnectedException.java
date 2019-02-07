@@ -35,14 +35,14 @@ package com.whirvis.jraknet.client;
  * that it is already connected to.
  *
  * @author Whirvis T. Wheatley
+ * @since JRakNet v2.0
  */
 public class AlreadyConnectedException extends RakNetClientException {
 
 	private static final long serialVersionUID = -482118372058339060L;
 
 	/**
-	 * Constructs an <code>AlreadyConnectedException</code> with the
-	 * <code>RakNetClient</code>.
+	 * Constructs an <code>AlreadyConnectedException</code>.
 	 * 
 	 * @param client
 	 *            the <code>RakNetClient</code> that threw the exception.

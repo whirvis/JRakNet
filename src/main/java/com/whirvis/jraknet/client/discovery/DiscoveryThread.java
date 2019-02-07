@@ -38,11 +38,21 @@ import org.apache.logging.log4j.Logger;
 import com.whirvis.jraknet.client.RakNetClient;
 
 /**
- * This <code>Thread</code> is used by the <code>RakNetClient</code> to discover
- * servers, allowing the client to discover servers without being started and
- * without having to take up multiple threads.
+ * This thread is used by a {@link com.whirvis.jraknet.client.RakNetClient
+ * RakNetClient} to discover servers without needing to be explicitly started.
+ * <p>
+ * Only one instance of this class can exist at a time. When a client is
+ * created, it will automatically check if a discovery system is already
+ * running. If none exists, one will be created and started automatically. Once
+ * the last client using the discovery system has shutdown, it will shut down
+ * the discovery system and nullify the reference. If another client is created
+ * after this, the process will repeat.
  *
  * @author Whirvis T. Wheatley
+ * @since JRakNet v2.0
+ * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
+ * @see com.whirvis.jraknet.client.RakNetClientListener RakNetClientListener
+ * @see com.whirvis.jraknet.client.discovery.DiscoveredServer DiscoveredServer
  */
 public class DiscoveryThread extends Thread {
 
@@ -52,7 +62,7 @@ public class DiscoveryThread extends Thread {
 	private volatile boolean running;
 
 	/**
-	 * Constructs a <code>DiscoveryThread</code>.
+	 * Creates a discovery system.
 	 */
 	public DiscoveryThread() {
 		this.clients = new ConcurrentLinkedQueue<RakNetClient>();
@@ -63,17 +73,19 @@ public class DiscoveryThread extends Thread {
 	 * Returns the clients that are currently using the discovery system.
 	 * 
 	 * @return the clients that are currently using the discovery system.
+	 * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
 	 */
 	public RakNetClient[] getClients() {
 		return clients.toArray(new RakNetClient[clients.size()]);
 	}
 
 	/**
-	 * Adds a <code>RakNetClient</code> to the discovery system so it can
-	 * discover servers.
+	 * Adds the client to the discovery system so it can discover servers. This
+	 * is the equivalent of the client enabling its discovery system.
 	 * 
 	 * @param client
-	 *            the <code>RakNetClient</code> enabling its discovery system.
+	 *            the client enabling its discovery system.
+	 * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
 	 */
 	public void addClient(RakNetClient client) {
 		if (clients.contains(client)) {
@@ -86,12 +98,13 @@ public class DiscoveryThread extends Thread {
 	}
 
 	/**
-	 * Removes a <code>RakNetClient</code> from the discovery system, this
-	 * method is also called automatically by the client when it is garbage
-	 * collected.
+	 * Removes the client from the discovery system. This is the equivalent of
+	 * the client disabling its discovery system. This method is also called
+	 * automatically by the client when it is shutdown.
 	 * 
 	 * @param client
-	 *            the <code>RakNetClient</code> disabling its discovery system.
+	 *            the client disabling its discovery system.
+	 * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
 	 */
 	public void removeClient(RakNetClient client) {
 		if (!clients.contains(client)) {
@@ -104,19 +117,26 @@ public class DiscoveryThread extends Thread {
 	}
 
 	/**
-	 * Returns whether or not the thread has been started.
+	 * Returns whether or not the thread is running
 	 * 
-	 * @return <code>true</code> if the thread has been started,
-	 *         <code>false</code> otherwise.
+	 * @return <code>true</code> if the thread is running, <code>false</code>
+	 *         otherwise.
 	 */
 	public boolean isRunning() {
 		return this.running;
 	}
 
 	/**
-	 * Shuts down the discovery system.
+	 * Shuts down the discovery system. This method should only ever be called
+	 * by the last remaining client once it has been shutdown.
+	 * 
+	 * @throws IllegalStateException
+	 *             if any clients are still using the discovery system.
 	 */
 	public void shutdown() {
+		if (clients.size() > 0) {
+			throw new IllegalStateException(clients.size() + " are still using the discovery system");
+		}
 		this.running = false;
 		LOG.info("Shutdown discovery thread");
 	}
@@ -125,21 +145,25 @@ public class DiscoveryThread extends Thread {
 	public void run() {
 		this.running = true;
 		LOG.info("Started discovery thread");
-		while (this.running) {
-			try {
-				Thread.sleep(1000); // Lower CPU usage and prevent spamming
+		try {
+			while (running == true) {
+				// Lower CPU usage and prevent ping spamming
+				Thread.sleep(1000);
 				if (clients.size() <= 0) {
-					continue; // Do not loop through non-existent clients
+					continue;
 				}
+
+				// Update discovery data for clients
 				for (RakNetClient client : this.clients) {
 					client.updateDiscoveryData();
 				}
 				LOG.debug(
 						"Sent discovery info out for " + clients.size() + " client" + (clients.size() == 1 ? "" : "s"));
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				LOG.error("Discovery thread has crashed");
 			}
+		} catch (InterruptedException e) {
+			this.running = false;
+			e.printStackTrace();
+			LOG.error("Discovery thread has crashed");
 		}
 	}
 

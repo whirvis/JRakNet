@@ -44,9 +44,7 @@ public class NettyHandlerException extends RakNetClientException {
 	private final Throwable cause;
 
 	/**
-	 * Constructs a <code>NettyHandlerException</code> with the
-	 * <code>RakNetClient</code>, <code>RakNetClientHandler</code>, and
-	 * <code>Throwable</code> that caused this exception to be thrown.
+	 * Constructs a <code>NettyHandlerException</code>.
 	 * 
 	 * @param client
 	 *            the <code>RakNetClient</code> that threw the exception.

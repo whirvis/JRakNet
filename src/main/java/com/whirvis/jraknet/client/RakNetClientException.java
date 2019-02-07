@@ -33,9 +33,10 @@ package com.whirvis.jraknet.client;
 import com.whirvis.jraknet.RakNetException;
 
 /**
- * Represents an exception specific to the <code>RakNetClient</code>
+ * Signals that an error has occurred in the <code>RakNetClient</code>.
  *
  * @author Whirvis T. Wheatley
+ * @see com.whirvis.jraknet.RakNetException RakNetException
  */
 public class RakNetClientException extends RakNetException {
 
@@ -44,8 +45,7 @@ public class RakNetClientException extends RakNetException {
 	private final RakNetClient client;
 
 	/**
-	 * Constructs a <code>RakNetClientException</code> with the
-	 * <code>RakNetClient</code> and error.
+	 * Constructs a <code>RakNetClientException</code>.
 	 * 
 	 * @param client
 	 *            the <code>RakNetClient</code> that threw the exception.

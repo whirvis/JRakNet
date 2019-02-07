@@ -133,7 +133,7 @@ public class BroadcastFrame extends JFrame {
 			} else if (index == 1) {
 				client.setDiscoveryMode(DiscoveryMode.OPEN_CONNECTIONS);
 			} else {
-				client.setDiscoveryMode(DiscoveryMode.NONE);
+				client.setDiscoveryMode(DiscoveryMode.DISABLED);
 			}
 		}
 
