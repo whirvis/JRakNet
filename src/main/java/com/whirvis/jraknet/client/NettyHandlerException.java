@@ -30,51 +30,72 @@
  */
 package com.whirvis.jraknet.client;
 
+import java.net.InetSocketAddress;
+
 /**
  * Signals that a <code>Throwable</code> was caught by the
- * <code>RakNetClientHandler</code>.
+ * {@link com.whirvis.jraknet.client.RakNetClientHandler RakNetClientHandler}.
  *
  * @author Whirvis T. Wheatley
+ * @since JRakNet v2.0
+ * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
+ * @see com.whirvis.jraknet.client.RakNetClientException RakNetClientException
  */
 public class NettyHandlerException extends RakNetClientException {
 
 	private static final long serialVersionUID = -7405227886962804185L;
 
 	private final RakNetClientHandler handler;
+	private final InetSocketAddress address;
 	private final Throwable cause;
 
 	/**
 	 * Constructs a <code>NettyHandlerException</code>.
 	 * 
 	 * @param client
-	 *            the <code>RakNetClient</code> that threw the exception.
+	 *            the client that threw the exception.
 	 * @param handler
-	 *            the <code>RakNetClientHandler</code> that caught the
-	 *            exception.
+	 *            the handler that caught the exception.
+	 * @param address
+	 *            the address of the sender that caused the exception.
 	 * @param cause
-	 *            the <code>Throwable</code> that was caught by the handler.
+	 *            the cause.
+	 * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
+	 * @see com.whirvis.jraknet.client.RakNetClientHandler RakNetClientHandler
 	 */
-	public NettyHandlerException(RakNetClient client, RakNetClientHandler handler, Throwable cause) {
+	public NettyHandlerException(RakNetClient client, RakNetClientHandler handler, InetSocketAddress address,
+			Throwable cause) {
 		super(client, "Exception in handler \"" + cause.getMessage() + "\"");
 		this.handler = handler;
+		this.address = address;
 		this.cause = cause;
 	}
 
 	/**
-	 * Returns the <code>RakNetClientHandler</code> the client is using.
+	 * Returns the handler the client is using.
 	 * 
-	 * @return the <code>RakNetClientHandler</code> the client is using.
+	 * @return the handler the client is using.
+	 * @see com.whirvis.jraknet.client.RakNetClientHandler RakNetClientHandler
 	 */
 	public RakNetClientHandler getHandler() {
 		return this.handler;
 	}
 
 	/**
-	 * Returns the <code>Throwable</code> that was caught by the handler.
+	 * Returns the address of the sender that caused the exception.
 	 * 
-	 * @return the <code>Throwable</code> that was caught by the handler.
+	 * @return the address of the sender that caused the exception.
 	 */
-	public Throwable getThrowableCause() {
+	public InetSocketAddress getAddress() {
+		return this.address;
+	}
+
+	/**
+	 * Returns the cause of the exception being thrown.
+	 * 
+	 * @return the cause of the exception being thrown.
+	 */
+	public Throwable getCause() {
 		return this.cause;
 	}
 

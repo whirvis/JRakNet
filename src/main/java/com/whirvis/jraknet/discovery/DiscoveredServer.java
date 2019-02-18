@@ -28,7 +28,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.client.discovery;
+package com.whirvis.jraknet.discovery;
 
 import java.net.InetSocketAddress;
 
@@ -40,35 +40,49 @@ import com.whirvis.jraknet.identifier.Identifier;
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v2.0
- * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
- * @see com.whirvis.jraknet.client.discovery.DiscoveryThread DiscoveryThread
+ * @see com.whirvis.jraknet.discovery.Discovery Discovery
+ * @see com.whirvis.jrkanet.discovery.DiscoveryListener DiscoveryListener
  */
 public class DiscoveredServer {
 
 	/**
 	 * The maximum time the server can not respond to a client ping before it is
-	 * dropped from the list of the client's discovered servers.
+	 * forgotten by the client.
 	 */
 	public static final long SERVER_TIMEOUT_MILLIS = 5000L;
 
 	private final InetSocketAddress address;
-	private long discoveryTimestamp;
+	private final boolean external;
+	private long timestamp;
 	private Identifier identifier;
 
 	/**
-	 * Constructs a <code>DiscoveredServer</code>.
+	 * Creates a discovered server.
 	 * 
 	 * @param address
 	 *            the discovered server's address.
-	 * @param discoveryTimestamp
-	 *            the time the server was initially discovered.
+	 * @param external
+	 *            <code>true</code> if the server is an external server,
+	 *            <code>false</code> otherwise.
 	 * @param identifier
 	 *            the server's identifier.
+	 * @throws NullPointerException
+	 *             if the address, IP address, or identifier are
+	 *             <code>null</code>.
 	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
-	public DiscoveredServer(InetSocketAddress address, long discoveryTimestamp, Identifier identifier) {
+	public DiscoveredServer(InetSocketAddress address, boolean external, Identifier identifier)
+			throws NullPointerException, IllegalArgumentException {
+		if (address == null) {
+			throw new NullPointerException("Address cannot be null");
+		} else if (address.getAddress() == null) {
+			throw new NullPointerException("IP address cannot be null");
+		} else if (identifier == null) {
+			throw new NullPointerException("Identifier cannot be null");
+		}
 		this.address = address;
-		this.discoveryTimestamp = discoveryTimestamp;
+		this.external = external;
+		this.timestamp = System.currentTimeMillis();
 		this.identifier = identifier;
 	}
 
@@ -82,12 +96,26 @@ public class DiscoveredServer {
 	}
 
 	/**
-	 * Returns the last time the server sent back a response.
+	 * Returns whether or not the server is an external server or was discovered
+	 * on the local network.
 	 * 
-	 * @return the last time the server sent back a response.
+	 * @return <code>true</code> if the server is an external server,
+	 *         <code>false</code> if the server was discovered on the local
+	 *         network.
 	 */
-	public long getDiscoveryTimestamp() {
-		return this.discoveryTimestamp;
+	public boolean isExternal() {
+		return this.external;
+	}
+
+	/**
+	 * Returns how much time has passed since the server last sent back a
+	 * response in milliseconds.
+	 * 
+	 * @return how much time has passed since the server last sent back a
+	 *         response in milliseconds.
+	 */
+	public long getTimestamp() {
+		return System.currentTimeMillis() - timestamp;
 	}
 
 	/**
@@ -95,9 +123,26 @@ public class DiscoveredServer {
 	 * 
 	 * @param discoveryTimestamp
 	 *            the new discovery timestamp.
+	 * @throws IllegalArgumentException
+	 *             if the discovery timestamp is less than than the current
+	 *             discovery timestamp.
 	 */
-	public void setDiscoveryTimestamp(long discoveryTimestamp) {
-		this.discoveryTimestamp = discoveryTimestamp;
+	public void setTimestamp(long timestamp) throws IllegalArgumentException {
+		if (timestamp < this.timestamp) {
+			throw new IllegalArgumentException("Discovery timestamp cannot be lower than the one before it");
+		}
+		this.timestamp = timestamp;
+	}
+
+	/**
+	 * Returns whether or not the server has timed out, and should thus be
+	 * forgotten.
+	 * 
+	 * @return <code>true</code> if the server has timed out, <code>false</code>
+	 *         otherwise.
+	 */
+	public boolean hasTimedOut() {
+		return this.getTimestamp() >= SERVER_TIMEOUT_MILLIS;
 	}
 
 	/**
@@ -115,27 +160,21 @@ public class DiscoveredServer {
 	 * 
 	 * @param identifier
 	 *            the new identifier.
+	 * @throws NullPointerException
+	 *             if the identifier is <code>null</code>.
 	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
-	public void setIdentifier(Identifier identifier) {
+	public void setIdentifier(Identifier identifier) throws NullPointerException {
+		if (identifier == null) {
+			throw new NullPointerException("Identifier cannot be null");
+		}
 		this.identifier = identifier;
 	}
 
 	@Override
-	public boolean equals(Object object) {
-		if (object instanceof DiscoveredServer) {
-			DiscoveredServer discoveredServer = (DiscoveredServer) object;
-			return (discoveredServer.getAddress().equals(this.getAddress())
-					&& discoveredServer.getDiscoveryTimestamp() == this.getDiscoveryTimestamp()
-					&& discoveredServer.getIdentifier().equals(this.getIdentifier()));
-		}
-		return false;
-	}
-
-	@Override
 	public String toString() {
-		return "DiscoveredServer [address=" + address + ", discoveryTimestamp=" + discoveryTimestamp + ", identifier="
-				+ identifier + "]";
+		return "DiscoveredServer [address=" + address + ", external=" + external + ", timestamp=" + timestamp
+				+ ", identifier=" + identifier + ", getTimestamp()=" + getTimestamp() + "]";
 	}
 
 }

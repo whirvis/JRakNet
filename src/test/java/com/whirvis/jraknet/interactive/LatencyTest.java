@@ -75,7 +75,7 @@ public class LatencyTest {
 		frame.setVisible(true);
 		while (true) {
 			Thread.sleep(500); // Lower CPU usage and give window time to update
-			frame.updatePaneText(server.getSessions());
+			frame.updatePaneText(server.getClients());
 		}
 	}
 

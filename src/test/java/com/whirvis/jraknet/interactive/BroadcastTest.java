@@ -40,7 +40,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import com.whirvis.jraknet.RakNetTest;
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.client.RakNetClientListener;
-import com.whirvis.jraknet.client.discovery.DiscoveryMode;
+import com.whirvis.jraknet.discovery.DiscoveryMode;
 import com.whirvis.jraknet.identifier.Identifier;
 import com.whirvis.jraknet.identifier.MinecraftIdentifier;
 

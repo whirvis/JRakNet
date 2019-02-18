@@ -28,7 +28,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.client.discovery;
+package com.whirvis.jraknet.discovery;
 
 /**
  * Determines how discovery will be handled by the

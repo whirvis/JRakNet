@@ -30,33 +30,53 @@
  */
 package com.whirvis.jraknet.client;
 
+import java.net.InetSocketAddress;
+
 /**
- * Signals that a <code>RakNetClient</code> does not share the same protocol as
- * the server it is attempting to connect to.
+ * Signals that a RakNet client is attempting to connect to a server with an
+ * incompatible protocol.
  *
  * @author Whirvis T. Wheatley
+ * @since JRakNet v2.0
+ * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
+ * @see com.whirvis.jraknet.client.RakNetClientException RakNetClientException
  */
 public class IncompatibleProtocolException extends RakNetClientException {
 
 	private static final long serialVersionUID = -3390229698349252537L;
 
+	private final InetSocketAddress address;
 	private final int clientProtocol;
 	private final int serverProtocol;
 
 	/**
-	 * Constructs an <code>IncompatibleProtocolException</code>. protocol.
+	 * Constructs an <code>IncompatibleProtocolException</code>.
 	 * 
 	 * @param client
-	 *            the <code>RakNetClient</code> that threw the exception.
+	 *            the client that threw the exception.
+	 * @param address
+	 *            the address of the server with the incompatible protocol.
 	 * @param clientProtocol
-	 *            the client's protocol
+	 *            the client protocol
 	 * @param serverProtocol
-	 *            the server's protocol
+	 *            the server protocol
+	 * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
 	 */
-	public IncompatibleProtocolException(RakNetClient client, int clientProtocol, int serverProtocol) {
+	public IncompatibleProtocolException(RakNetClient client, InetSocketAddress address, int clientProtocol,
+			int serverProtocol) {
 		super(client, (clientProtocol < serverProtocol ? "Outdated client" : "Outdated server"));
+		this.address = address;
 		this.clientProtocol = clientProtocol;
 		this.serverProtocol = serverProtocol;
+	}
+
+	/**
+	 * Returns the address of the server with the incompatible protocol.
+	 * 
+	 * @return the address of the server with the incompatible protocol.
+	 */
+	public InetSocketAddress getAddress() {
+		return this.address;
 	}
 
 	/**

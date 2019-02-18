@@ -34,21 +34,57 @@ import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.protocol.MessageIdentifier;
 
+/**
+ * An
+ * {@link com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_REQUEST
+ * ID_CONNECTION_REQUEST} packet. This is the first packet sent by the client
+ * after initial connection is finished and it is time for login.
+ * 
+ * @author Whirvis T. Wheatley
+ * @since JRakNet v1.0.0
+ * @see com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_REQUEST
+ *      ID_CONNECTION_REQUEST
+ */
 public class ConnectionRequest extends RakNetPacket {
 
+	/**
+	 * The client's globally unique ID.
+	 */
 	public long clientGuid;
+
+	/**
+	 * The client's timestamp.
+	 */
 	public long timestamp;
 
-	/*
-	 * JRakNet does not support RakNet's built in security function, it is
-	 * poorly documented
+	/**
+	 * Whether or not security should be used. JRakNet does not have this
+	 * feature implemented, so the value of the variable defaults to
+	 * <code>false</code>.
 	 */
 	public boolean useSecurity = false;
 
+	/**
+	 * Creates an
+	 * {@link com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_REQUEST
+	 * ID_CONNECTION_REQUEST} packet to be encoded.
+	 * 
+	 * @see #encode()
+	 */
 	public ConnectionRequest() {
 		super(MessageIdentifier.ID_CONNECTION_REQUEST);
 	}
 
+	/**
+	 * Creates an
+	 * {@link com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_REQUEST
+	 * ID_CONNECTION_REQUEST} packet to be decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
+	 * @see #decode()
+	 */
 	public ConnectionRequest(Packet packet) {
 		super(packet);
 	}

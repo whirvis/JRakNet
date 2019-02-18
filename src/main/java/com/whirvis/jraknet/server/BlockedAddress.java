@@ -31,48 +31,70 @@
 package com.whirvis.jraknet.server;
 
 /**
- * Represents an address that the server has blocked and stores how much time
- * until they are unblocked.
+ * An address that the server has blocked.
  *
  * @author Whirvis T. Wheatley
+ * @see com.whirvis.jraknet.server.RakNetServerHandler RakNetServerHandler
+ * @see com.whirvis.jrkanet.server.RakNetServer RakNetServer
  */
 public class BlockedAddress {
 
+	/**
+	 * The address is blocked permanently.
+	 */
 	public static final long PERMANENT_BLOCK = -1L;
 
 	private final long startTime;
 	private final long time;
 
 	/**
-	 * Constructs a <code>BlockedClient</code> with the start time and
-	 * the amount of time that the client is blocked.
+	 * Creates a blocked address.
 	 * 
-	 * @param startTime
-	 *            the time the address was first blocked.
 	 * @param time
-	 *            the amount of time until the client is unblocked.
+	 *            the amount of time until the client is unblocked in
+	 *            milliseconds.
 	 */
-	public BlockedAddress(long startTime, long time) {
-		this.startTime = startTime;
+	public BlockedAddress(long time) {
+		if (time <= 0 && time != PERMANENT_BLOCK) {
+			throw new IllegalArgumentException(
+					"Block time must be greater than zero or equal to negative one (for infinite executions)");
+		}
+		this.startTime = System.currentTimeMillis();
 		this.time = time;
 	}
 
 	/**
-	 * Returns the time the address was first blocked.
+	 * Returns the time the address was first blocked. This value is the time
+	 * that the original blocked address object was created, according to
+	 * {@link System#currentTimeMillis() System.currentTimeMillis()}.
 	 * 
 	 * @return the time the address was first blocked.
+	 * @see System#currentTimeMillis()
 	 */
 	public long getStartTime() {
 		return this.startTime;
 	}
 
 	/**
-	 * Returns how long until the address is unblocked.
+	 * Returns the amount of time the address has been blocked.
 	 * 
-	 * @return how long until the address is unblocked.
+	 * @return the amount of time the address has been blocked.
 	 */
 	public long getTime() {
 		return this.time;
+	}
+
+	/**
+	 * Returns whether or not the blocked address should be unblocked.
+	 * 
+	 * @return <code>true</code> if the address should be unblocked,
+	 *         <code>false</code> otherwise.
+	 */
+	public boolean shouldUnblock() {
+		if (time == PERMANENT_BLOCK) {
+			return false; // The address has been permanently blocked
+		}
+		return System.currentTimeMillis() - startTime >= time;
 	}
 
 	@Override
