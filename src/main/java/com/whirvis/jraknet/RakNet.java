@@ -30,7 +30,9 @@
  */
 package com.whirvis.jraknet;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
@@ -162,6 +164,14 @@ public final class RakNet {
 	 */
 	public static void setMaxPacketsPerSecondUnlimited() {
 		MAX_PACKETS_PER_SECOND = Long.MAX_VALUE;
+	}
+	
+	
+	public static String getStackTrace(Throwable throwable) {
+		ByteArrayOutputStream stackTraceOut = new ByteArrayOutputStream();
+		PrintStream stackTracePrint = new PrintStream(stackTraceOut);
+		throwable.printStackTrace(stackTracePrint);
+		return new String(stackTraceOut.toByteArray());
 	}
 
 	/**

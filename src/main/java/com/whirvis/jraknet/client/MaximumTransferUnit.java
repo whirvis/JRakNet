@@ -43,101 +43,42 @@ import org.apache.logging.log4j.Logger;
 import com.whirvis.jraknet.map.IntMap;
 
 /**
- * Used by the <code>RakNetClient</code> during login to track how and when it
- * should modify its maximum transfer unit in the login process.
+ * Used by the {@link com.whirvis.jraknet.client.RakNetClient RakNetClient}
+ * during login to track how and when it should modify its maximum transfer unit
+ * in the login process.
  *
  * @author Trent Summerlin
+ * @since JRakNet v2.0
+ * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
  */
 public class MaximumTransferUnit {
 
 	private static final Logger LOG = LogManager.getLogger(MaximumTransferUnit.class);
 
-	private final int size;
-	private final int retries;
-	private int retriesLeft;
-
 	/**
-	 * Constructs a <code>MaximumTransferUnit</code> with the maximum
-	 * transfer unit and amount of retries before it should stop being used.
-	 * 
-	 * @param size
-	 *            the size of the maximum transfer unit in bytes.
-	 * @param retries
-	 *            the amount of retries before it should stop being used.
-	 */
-	public MaximumTransferUnit(int size, int retries) {
-		this.size = size;
-		this.retries = retries;
-		this.retriesLeft = retries;
-	}
-
-	/**
-	 * Returns the size of the maximum transfer unit.
-	 * 
-	 * @return the size of the maximum transfer unit.
-	 */
-	public int getSize() {
-		return this.size;
-	}
-
-	/**
-	 * Returns the default amount of retries before the client stops using this
-	 * <code>MaximumTransferUnit</code> and uses the next lowest one.
-	 * 
-	 * @return the default amount of retries before the client stops using this
-	 *         <code>MaximumTransferUnit</code> and uses the next lowest one.
-	 */
-	public int getRetries() {
-		return this.retries;
-	}
-
-	/**
-	 * Returns the amount of times <code>retry()</code> can be called before
-	 * yielding zero or lower without calling <code>reset()</code>
-	 * 
-	 * @return how many times <code>retry()</code> can be called before yielding
-	 *         zero or lower without calling <code>reset()</code>.
-	 */
-	public int getRetriesLeft() {
-		return this.retriesLeft;
-	}
-
-	/**
-	 * Lowers the amount of retries left.
-	 * 
-	 * @return the amount of retries left.
-	 */
-	public int retry() {
-		LOG.debug("Retried transfer unit with size of " + size + " bytes (" + (size * 8) + " bits)");
-		return this.retriesLeft--;
-	}
-
-	/**
-	 * Sets the amount of retries left back to the default.
-	 */
-	public void reset() {
-		LOG.debug("Reset transfer unit with size of " + size + " bytes (" + (size * 8) + " bits)");
-		this.retriesLeft = this.retries;
-	}
-
-	/**
-	 * Sorts an array of <code>MaximumTransferUnit</code>'s from highest to
-	 * lowest maximum transfer units.
+	 * Sorts an array of maximum transfer units from the highest to lowest
+	 * maximum transfer units based on their maximum transfer unit size.
 	 * 
 	 * @param units
-	 *            the <code>MaximumTransferUnit</code>s to sort.
-	 * @return the sorted <code>MaximumTransferUnit</code>s.
+	 *            the maximum transfer units to sort.
+	 * @return the sorted maximum transfer units.
+	 * @throws NullPointerException
+	 *             if the maximum transfer units to sort are <code>null</code>
+	 *             or if any of the maximum transfer units in the array of
+	 *             maximum transfer units are <code>null</code>.
 	 */
-	public static MaximumTransferUnit[] sort(MaximumTransferUnit[] units) {
+	public static MaximumTransferUnit[] sort(MaximumTransferUnit... units) throws NullPointerException {
 		if (units == null) {
-			return new MaximumTransferUnit[0];
+			throw new NullPointerException("Units cannot be null");
+		} else if (units.length <= 0) {
+			return units; // Nothing to sort
 		}
 
 		// Convert array to IntMap
 		IntMap<MaximumTransferUnit> unitMap = new IntMap<MaximumTransferUnit>();
 		for (MaximumTransferUnit unit : units) {
 			if (unit == null) {
-				throw new NullPointerException("Invalid maximum transfer unit");
+				throw new NullPointerException("Maximum transfer unit cannot be null");
 			}
 			unitMap.put(unit.getSize(), unit);
 		}
@@ -152,8 +93,99 @@ public class MaximumTransferUnit {
 			Entry<Integer, MaximumTransferUnit> unitEntry = unitI.next();
 			unitList.add(unitEntry.getValue());
 		}
-
 		return unitList.toArray(new MaximumTransferUnit[unitList.size()]);
+	}
+
+	private final int size;
+	private final int retries;
+	private int retriesLeft;
+
+	/**
+	 * Creates a maximum transfer unit.
+	 * 
+	 * @param size
+	 *            the size of the maximum transfer unit in bytes.
+	 * @param retries
+	 *            the amount of time the client should try to use it before
+	 *            going to the next lowest maximum transfer unit size.
+	 * @throws IllegalArgumentException
+	 *             if the size is less than or equal to zero, the size odd (not
+	 *             divisible by two), or the retry count is less than or equal
+	 *             to zero.
+	 */
+	public MaximumTransferUnit(int size, int retries) throws IllegalArgumentException {
+		if (size <= 0) {
+			throw new IllegalArgumentException("Size must be greater than zero");
+		} else if (size % 2 != 0) {
+			throw new IllegalArgumentException("Size cannot be odd");
+		} else if (retries <= 0) {
+			throw new IllegalArgumentException("Retry count must be greater than zero");
+		}
+		this.size = size;
+		this.retries = retries;
+		this.retriesLeft = retries;
+	}
+
+	/**
+	 * Returns the size of the maximum transfer unit in bytes.
+	 * 
+	 * @return the size of the maximum transfer unit in bytes.
+	 */
+	public int getSize() {
+		return this.size;
+	}
+
+	/**
+	 * Returns the default amount of retries before the client stops using this
+	 * maximum transfer unit size and uses the next lowest one.
+	 * 
+	 * @return the default amount of retries before the client stops using this
+	 *         maximum transfer unit size and uses the next lowest one.
+	 */
+	public int getRetries() {
+		return this.retries;
+	}
+
+	/**
+	 * Returns the amount of times {@link #retry()} can be called before
+	 * {@link #reset()} needs to be called.
+	 * 
+	 * @return the amount of times {@link #retry()} can be called before
+	 *         {@link #reset()} needs to be called.
+	 * @see #retry()
+	 * @see #reset()
+	 */
+	public int getRetriesLeft() {
+		return this.retriesLeft;
+	}
+
+	/**
+	 * Lowers the amount of retries left.
+	 * 
+	 * @return the amount of retries left.
+	 * @throws IllegalStateException
+	 *             if the amount of retries left is zero.
+	 * @see #reset()
+	 */
+	public int retry() {
+		if (retriesLeft < 0) {
+			throw new IllegalStateException(
+					"No more retries left, use reset() in order to reuse a maximum transfer unit");
+		}
+		LOG.debug("Retried maximum transfer unit with size of " + size + " bytes (" + (size * 8) + " bits)");
+		return this.retriesLeft--;
+	}
+
+	/**
+	 * Sets the amount of retries left back to the default. This is necessary in
+	 * order to be able to reuse a maximum transfer unit once it has been
+	 * depleted of its retries left.
+	 * 
+	 * @see #retry()
+	 */
+	public void reset() {
+		LOG.debug("Reset maximum transfer unit with size of " + size + " bytes (" + (size * 8) + " bits)");
+		this.retriesLeft = this.retries;
 	}
 
 	@Override

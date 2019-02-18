@@ -30,24 +30,44 @@
  */
 package com.whirvis.jraknet.client;
 
+import java.net.InetSocketAddress;
+
 /**
- * Signals that a <code>RakNetClient</code>'s connection is banned from the
- * server.
+ * Signals that a RakNet client is attempting to connect to a server that has
+ * banned its connection.
  *
  * @author Trent Summerlin
+ * @since JRakNet v2.0
+ * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
+ * @see com.whirvis.jraknet.client.RakNetClientException RakNetClientException
  */
 public class ConnectionBannedException extends RakNetClientException {
 
 	private static final long serialVersionUID = 8440218445920818619L;
 
+	private final InetSocketAddress address;
+
 	/**
 	 * Constructs a <code>ConnectedionBannedException</code>.
 	 * 
 	 * @param client
-	 *            the <code>RakNetClient</code> that threw the exception.
+	 *            the client that threw the exception.
+	 * @param address
+	 *            the address of the server that banned the client's connection.
+	 * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
 	 */
-	public ConnectionBannedException(RakNetClient client) {
-		super(client, "Banned from server");
+	public ConnectionBannedException(RakNetClient client, InetSocketAddress address) {
+		super(client, "Connection banned");
+		this.address = address;
+	}
+
+	/**
+	 * Returns the address of the server that banned the client's connection.
+	 * 
+	 * @return the address of the server that banned the client's connection.
+	 */
+	public InetSocketAddress getAddress() {
+		return this.address;
 	}
 
 }

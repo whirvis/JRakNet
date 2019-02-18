@@ -36,7 +36,6 @@ import java.net.InetSocketAddress;
 
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.client.RakNetClient;
-import com.whirvis.jraknet.client.RakNetClientListener;
 import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.login.ConnectionRequestAccepted;
@@ -89,16 +88,12 @@ public class RakNetServerSession extends RakNetSession {
 
 	@Override
 	public void onAcknowledge(Record record, EncapsulatedPacket packet) {
-		for (RakNetClientListener listener : client.getListeners()) {
-			listener.onAcknowledge(this, record, packet);
-		}
+		client.callEvent(listener -> listener.onAcknowledge(client, this, record, packet));
 	}
 
 	@Override
 	public void onNotAcknowledge(Record record, EncapsulatedPacket packet) {
-		for (RakNetClientListener listener : client.getListeners()) {
-			listener.onNotAcknowledge(this, record, packet);
-		}
+		client.callEvent(listener -> listener.onNotAcknowledge(client, this, record, packet));
 	}
 
 	@Override
@@ -120,9 +115,7 @@ public class RakNetServerSession extends RakNetSession {
 					this.sendMessage(Reliability.RELIABLE, clientHandshake);
 					this.timestamp = System.currentTimeMillis();
 					this.setState(RakNetState.CONNECTED);
-					for (RakNetClientListener listener : client.getListeners()) {
-						listener.onConnect(this);
-					}
+					client.callEvent(listener -> listener.onConnect(client, this));
 				} else {
 					client.disconnect("Failed to login");
 				}
@@ -139,13 +132,9 @@ public class RakNetServerSession extends RakNetSession {
 			 * handleUnknownMessage().
 			 */
 			if (packetId >= ID_USER_PACKET_ENUM) {
-				for (RakNetClientListener listener : client.getListeners()) {
-					listener.handleMessage(this, packet, channel);
-				}
+				client.callEvent(listener -> listener.handleMessage(client, this, packet, channel));
 			} else {
-				for (RakNetClientListener listener : client.getListeners()) {
-					listener.handleUnknownMessage(this, packet, channel);
-				}
+				client.callEvent(listener -> listener.handleUnknownMessage(client, this, packet, channel));
 			}
 		}
 	}

@@ -31,6 +31,7 @@
 package com.whirvis.jraknet;
 
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,32 +54,50 @@ public class RakNetClientTest {
 
 	private static final Logger LOG = LogManager.getLogger(RakNetClientTest.class);
 
-	public static void main(String[] args) {
+	static boolean s = false;
+	
+	public static void main(String[] args) throws IllegalStateException, RakNetException, UnknownHostException {
 		// Create client and add listener
+		
+		
 		RakNetClient client = new RakNetClient();
 		client.addListener(new RakNetClientListener() {
 
 			@Override
-			public void onConnect(RakNetServerSession session) {
+			public void onConnect(RakNetClient client, RakNetServerSession session) {
 				LOG.info("Connected to " + session.getConnectionType().getName() + " server with address "
 						+ session.getAddress() + "!");
-				client.disconnectAndShutdown();
+				client.disconnect();
+				if(s == false) {
+					try {
+						client.connect(RakNetTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
+					} catch (IllegalStateException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (RakNetException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					s = true;
+				}
 			}
 
 			@Override
-			public void onAcknowledge(RakNetServerSession session, Record record, EncapsulatedPacket packet) {
+			public void onAcknowledge(RakNetClient client, RakNetServerSession session, Record record,
+					EncapsulatedPacket packet) {
 				LOG.info(session.getConnectionType().getName() + " server has acknowledged packet with ID: "
 						+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
 
 			@Override
-			public void onNotAcknowledge(RakNetServerSession session, Record record, EncapsulatedPacket packet) {
+			public void onNotAcknowledge(RakNetClient client, RakNetServerSession session, Record record,
+					EncapsulatedPacket packet) {
 				LOG.info(session.getConnectionType().getName() + " server has not acknowledged packet with ID: "
 						+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
 			}
 
 			@Override
-			public void onHandlerException(InetSocketAddress address, Throwable cause) {
+			public void onHandlerException(RakNetClient client, InetSocketAddress address, Throwable cause) {
 				LOG.error("Exception caused by " + address);
 				cause.printStackTrace();
 			}
@@ -87,12 +106,7 @@ public class RakNetClientTest {
 		LOG.info("Created client, connecting to " + RakNetTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
 
 		// Connect to server
-		try {
-			client.connect(RakNetTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
-		} catch (RakNetException e) {
-			e.printStackTrace();
-			client.disconnectAndShutdown(e.getClass().getName() + ": " + e.getMessage());
-		}
+		client.connect(RakNetTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
 	}
 
 }

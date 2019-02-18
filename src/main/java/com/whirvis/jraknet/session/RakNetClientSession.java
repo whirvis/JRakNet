@@ -143,7 +143,7 @@ public class RakNetClientSession extends RakNetSession {
 					this.sendMessage(Reliability.RELIABLE_ORDERED, requestAccepted);
 					this.setState(RakNetState.HANDSHAKING);
 				} else {
-					server.removeSession(this, "Login failed, " + ConnectionRequestAccepted.class.getSimpleName()
+					server.disconnectClient(this, "Login failed, " + ConnectionRequestAccepted.class.getSimpleName()
 							+ " packet failed to encode");
 				}
 			} else {
@@ -155,7 +155,7 @@ public class RakNetClientSession extends RakNetSession {
 				}
 				this.sendMessage(Reliability.RELIABLE, ID_CONNECTION_ATTEMPT_FAILED);
 				this.setState(RakNetState.DISCONNECTED);
-				server.removeSession(this, "Login failed, " + reason);
+				server.disconnectClient(this, "Login failed, " + reason);
 			}
 		} else if (packetId == ID_NEW_INCOMING_CONNECTION && this.getState() == RakNetState.HANDSHAKING) {
 			NewIncomingConnection clientHandshake = new NewIncomingConnection(packet);
@@ -168,11 +168,11 @@ public class RakNetClientSession extends RakNetSession {
 					listener.onClientConnect(this);
 				}
 			} else {
-				server.removeSession(this,
+				server.disconnectClient(this,
 						"Login failed, " + NewIncomingConnection.class.getSimpleName() + " packet failed to decode");
 			}
 		} else if (packetId == ID_DISCONNECTION_NOTIFICATION) {
-			server.removeSession(this, "Disconnected");
+			server.disconnectClient(this, "Disconnected");
 		} else {
 			/*
 			 * If the packet is a user packet, we use handleMessage(). If the ID

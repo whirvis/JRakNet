@@ -37,11 +37,9 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
@@ -51,9 +49,7 @@ import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.client.discovery.DiscoveredServer;
-import com.whirvis.jraknet.client.discovery.DiscoveryMode;
-import com.whirvis.jraknet.client.discovery.DiscoveryThread;
+import com.whirvis.jraknet.discovery.DiscoveredServer;
 import com.whirvis.jraknet.protocol.MessageIdentifier;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.login.ConnectionRequest;
@@ -62,9 +58,7 @@ import com.whirvis.jraknet.protocol.login.OpenConnectionRequestTwo;
 import com.whirvis.jraknet.protocol.message.CustomPacket;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
 import com.whirvis.jraknet.protocol.message.acknowledge.Acknowledge;
-import com.whirvis.jraknet.protocol.status.UnconnectedPing;
-import com.whirvis.jraknet.protocol.status.UnconnectedPingOpenConnections;
-import com.whirvis.jraknet.protocol.status.UnconnectedPong;
+import com.whirvis.jraknet.scheduler.Scheduler;
 import com.whirvis.jraknet.session.RakNetServerSession;
 import com.whirvis.jraknet.session.RakNetState;
 import com.whirvis.jraknet.session.UnumRakNetPeer;
@@ -87,32 +81,36 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
  */
 public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 
-	private static final Logger LOG = LogManager.getLogger(RakNetClient.class);
-	private static final int[] DEFAULT_TRANSFER_UNITS = new int[] { 1492, 1200, 576, RakNet.MINIMUM_MTU_SIZE };
-	private static final long PING_BROADCAST_WAIT_MILLIS = 1000L;
-	private static DiscoveryThread discoverySystem = new DiscoveryThread();
+	/**
+	 * The default maximum transfer unit sizes used by the client. These were
+	 * chosen due to the maximum transfer unit sizes used by the Minecraft
+	 * client during connection.
+	 */
+	public static final int[] DEFAULT_TRANSFER_UNIT_SIZES = new int[] { 1492, 1200, 576, RakNet.MINIMUM_MTU_SIZE };
+
+	/**
+	 * The amount of time to wait before the client broadcasts another ping to
+	 * the local network and all added external servers. This was also
+	 * determined based on Minecraft's frequency of broadcasting pings to
+	 * servers.
+	 */
+	public static final long PING_BROADCAST_WAIT_MILLIS = 1000L;
 
 	private final long guid;
+	private final Logger log;
 	private final long pingId;
 	private final long timestamp;
 	private final ConcurrentLinkedQueue<RakNetClientListener> listeners;
-	private HashSet<Integer> discoveryPorts;
-	private DiscoveryMode discoveryMode;
-	/** Synchronize this first! (<code>externalServers</code> goes second!) */
-	private final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> discovered;
-	/** Synchronize this second! (<code>discovered</code> goes first!) */
-	private final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> externalServers;
-	private long lastPingBroadcast;
-	private final Bootstrap bootstrap;
-	private final EventLoopGroup group;
-	private final RakNetClientHandler handler;
-	private final Channel channel;
-	private final InetSocketAddress bindAddress;
+	private Bootstrap bootstrap;
+	private RakNetClientHandler handler;
+	private EventLoopGroup group;
+	private Channel channel;
+	private InetSocketAddress bindAddress;
 	private MaximumTransferUnit[] maximumTransferUnits;
 	private int maximumMaximumTransferUnitSize;
-	private SessionPreparation preparation;
+	private SessionPlanner preparation;
 	private volatile RakNetServerSession session;
-	private Thread clientThread;
+	private Thread sessionThread;
 
 	/**
 	 * Creates a RakNet client.
@@ -122,77 +120,17 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            <code>null</code> address will have the client bind to the
 	 *            wildcard address along with the client giving Netty the
 	 *            responsibility of choosing which port to bind to.
-	 * @param discoveryMode
-	 *            the discovery mode which will determine how server discovery
-	 *            is handled.
-	 * @param discoveryPorts
-	 *            the ports on which to discover servers. A <code>null</code>
-	 *            discovery mode means the discovery ports will determine the
-	 *            discovery mode. If the amount of discovery ports is greater
-	 *            than zero, then the discovery mode will be set to
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#ALL_CONNECTIONS
-	 *            ALL_CONNECTIONS},
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#DISABLED
-	 *            DISABLED} otherwise.
 	 * @throws RakNetException
 	 *             if a RakNet error occurs.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
 	 */
-	public RakNetClient(InetSocketAddress bindAddress, DiscoveryMode discoveryMode, int... discoveryPorts)
-			throws RakNetException {
-		// Generate client information
+	public RakNetClient(InetSocketAddress bindAddress) throws RakNetException {
 		UUID uuid = UUID.randomUUID();
 		this.guid = uuid.getMostSignificantBits();
+		this.log = LogManager.getLogger("jraknet-client-" + Long.toHexString(guid).toLowerCase());
 		this.pingId = uuid.getLeastSignificantBits();
 		this.timestamp = System.currentTimeMillis();
 		this.listeners = new ConcurrentLinkedQueue<RakNetClientListener>();
-
-		// Prepare discovery system
-		this.discoveryPorts = new HashSet<Integer>();
-		this.discoveryMode = discoveryMode != null ? discoveryMode
-				: (discoveryPorts.length > 0 ? DiscoveryMode.ALL_CONNECTIONS : DiscoveryMode.DISABLED);
-		this.discovered = new ConcurrentHashMap<InetSocketAddress, DiscoveredServer>();
-		this.externalServers = new ConcurrentHashMap<InetSocketAddress, DiscoveredServer>();
-		this.setDiscoveryPorts(discoveryPorts);
-
-		// Initiate networking
-		try {
-			this.bootstrap = new Bootstrap();
-			this.group = new NioEventLoopGroup();
-			this.handler = new RakNetClientHandler(this);
-			bootstrap.channel(NioDatagramChannel.class).group(group).handler(handler);
-			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false);
-			this.channel = (bindAddress != null ? bootstrap.bind(bindAddress) : bootstrap.bind(0)).sync().channel();
-			this.bindAddress = (InetSocketAddress) channel.localAddress();
-			this.setMaximumTransferUnitSizes(DEFAULT_TRANSFER_UNITS);
-			LOG.debug("Created and bound bootstrap");
-		} catch (InterruptedException e) {
-			throw new RakNetException(e);
-		}
-	}
-
-	/**
-	 * Creates a RakNet client.
-	 * 
-	 * @param bindAddress
-	 *            the address the client will bind to during creation. A
-	 *            <code>null</code> address will have the client bind to the
-	 *            wildcard address along with the client giving Netty the
-	 *            responsibility of choosing which port to bind to.
-	 * @param discoveryPorts
-	 *            the ports on which to discover servers. If the amount of
-	 *            discovery ports is greater than zero, then the discovery mode
-	 *            will be set to
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#ALL_CONNECTIONS
-	 *            ALL_CONNECTIONS},
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#DISABLED
-	 *            DISABLED} otherwise.
-	 * @throws RakNetException
-	 *             if a RakNet error occurs.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
-	 */
-	public RakNetClient(InetSocketAddress bindAddress, int... discoveryPorts) throws RakNetException {
-		this(bindAddress, null, discoveryPorts);
+		this.bindAddress = bindAddress;
 	}
 
 	/**
@@ -206,25 +144,11 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            the port the client will bind to during creation. A port of
 	 *            <code>zero</code> will have the client give Netty the
 	 *            respsonsibility of choosing the port to bind to.
-	 * @param discoveryMode
-	 *            the discovery mode which will determine how server discovery
-	 *            is handled.
-	 * @param discoveryPorts
-	 *            the ports on which to discover servers. A <code>null</code>
-	 *            discovery mode means the discovery ports will determine the
-	 *            discovery mode. If the amount of discovery ports is greater
-	 *            than zero, then the discovery mode will be set to
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#ALL_CONNECTIONS
-	 *            ALL_CONNECTIONS},
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#DISABLED
-	 *            DISABLED} otherwise.
 	 * @throws RakNetException
 	 *             if a RakNet error occurs.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
 	 */
-	public RakNetClient(InetAddress bindAddress, int bindPort, DiscoveryMode discoveryMode, int... discoveryPorts)
-			throws RakNetException {
-		this(new InetSocketAddress(bindAddress, bindPort), discoveryMode, discoveryPorts);
+	public RakNetClient(InetAddress bindAddress, int bindPort) throws RakNetException {
+		this(new InetSocketAddress(bindAddress, bindPort));
 	}
 
 	/**
@@ -234,25 +158,11 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            the IP address the client will bind to during creation. A
 	 *            <code>null</code> address will have the client bind to the
 	 *            wildcard address.
-	 * @param discoveryMode
-	 *            the discovery mode which will determine how server discovery
-	 *            is handled.
-	 * @param discoveryPorts
-	 *            the ports on which to discover servers. A <code>null</code>
-	 *            discovery mode means the discovery ports will determine the
-	 *            discovery mode. If the amount of discovery ports is greater
-	 *            than zero, then the discovery mode will be set to
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#ALL_CONNECTIONS
-	 *            ALL_CONNECTIONS},
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#DISABLED
-	 *            DISABLED} otherwise.
 	 * @throws RakNetException
 	 *             if a RakNet error occurs.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
 	 */
-	public RakNetClient(InetAddress bindAddress, DiscoveryMode discoveryMode, int... discoveryPorts)
-			throws RakNetException {
-		this(new InetSocketAddress(bindAddress, 0), discoveryMode, discoveryPorts);
+	public RakNetClient(InetAddress bindAddress) throws RakNetException {
+		this(new InetSocketAddress(bindAddress, 0));
 	}
 
 	/**
@@ -266,75 +176,16 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            the port the client will bind to during creation. A port of
 	 *            <code>zero</code> will have the client give Netty the
 	 *            respsonsibility of choosing the port to bind to.
-	 * @param discoveryPorts
-	 *            the ports on which to discover servers. If the amount of
-	 *            discovery ports is greater than zero, then the discovery mode
-	 *            will be set to
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#ALL_CONNECTIONS
-	 *            ALL_CONNECTIONS},
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#DISABLED
-	 *            DISABLED} otherwise.
-	 * @throws RakNetException
-	 *             if a RakNet error occurs.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
-	 */
-	public RakNetClient(InetAddress bindAddress, int bindPort, int... discoveryPorts) throws RakNetException {
-		this(bindAddress, bindPort, null, discoveryPorts);
-	}
-
-	/**
-	 * Creates a RakNet client.
-	 * 
-	 * @param bindAddress
-	 *            the IP address the client will bind to during creation. A
-	 *            <code>null</code> address will have the client bind to the
-	 *            wildcard address.
-	 * @param discoveryPorts
-	 *            the ports on which to discover servers. If the amount of
-	 *            discovery ports is greater than zero, then the discovery mode
-	 *            will be set to
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#ALL_CONNECTIONS
-	 *            ALL_CONNECTIONS},
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#DISABLED
-	 *            DISABLED} otherwise.
-	 * @throws RakNetException
-	 *             if a RakNet error occurs.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
-	 */
-	public RakNetClient(InetAddress bindAddress, int... discoveryPorts) throws RakNetException {
-		this(bindAddress, 0, null, discoveryPorts);
-	}
-
-	/**
-	 * Creates a RakNet client.
-	 * 
-	 * @param bindAddress
-	 *            the IP address the client will bind to during creation. A
-	 *            <code>null</code> address will have the client bind to the
-	 *            wildcard address.
-	 * @param discoveryMode
-	 *            the discovery mode which will determine how server discovery
-	 *            is handled.
-	 * @param discoveryPorts
-	 *            the ports on which to discover servers. A <code>null</code>
-	 *            discovery mode means the discovery ports will determine the
-	 *            discovery mode. If the amount of discovery ports is greater
-	 *            than zero, then the discovery mode will be set to
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#ALL_CONNECTIONS
-	 *            ALL_CONNECTIONS},
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#DISABLED
-	 *            DISABLED} otherwise.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>bindAddress</code> could be
 	 *             found, or if a scope_id was specified for a global IPv6
 	 *             address.
 	 * @throws RakNetException
 	 *             if a RakNet error occurs.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
+	 * @see com.whirvis.jraknet.discovery.DiscoveryMode DiscoveryMode
 	 */
-	public RakNetClient(String bindAddress, int bindPort, DiscoveryMode discoveryMode, int... discoveryPorts)
-			throws UnknownHostException, RakNetException {
-		this(InetAddress.getByName(bindAddress), bindPort, discoveryMode, discoveryPorts);
+	public RakNetClient(String bindAddress, int bindPort) throws UnknownHostException, RakNetException {
+		this(InetAddress.getByName(bindAddress), bindPort);
 	}
 
 	/**
@@ -344,88 +195,16 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            the IP address the client will bind to during creation. A
 	 *            <code>null</code> address will have the client bind to the
 	 *            wildcard address.
-	 * @param discoveryMode
-	 *            the discovery mode which will determine how server discovery
-	 *            is handled.
-	 * @param discoveryPorts
-	 *            the ports on which to discover servers. A <code>null</code>
-	 *            discovery mode means the discovery ports will determine the
-	 *            discovery mode. If the amount of discovery ports is greater
-	 *            than zero, then the discovery mode will be set to
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#ALL_CONNECTIONS
-	 *            ALL_CONNECTIONS},
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#DISABLED
-	 *            DISABLED} otherwise.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>bindAddress</code> could be
 	 *             found, or if a scope_id was specified for a global IPv6
 	 *             address.
 	 * @throws RakNetException
 	 *             if a RakNet error occurs.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
+	 * @see com.whirvis.jraknet.discovery.DiscoveryMode DiscoveryMode
 	 */
-	public RakNetClient(String bindAddress, DiscoveryMode discoveryMode, int... discoveryPorts)
-			throws UnknownHostException, RakNetException {
-		this(bindAddress, 0, discoveryMode, discoveryPorts);
-	}
-
-	/**
-	 * Creates a RakNet client.
-	 * 
-	 * @param bindAddress
-	 *            the IP address the client will bind to during creation. A
-	 *            <code>null</code> address will have the client bind to the
-	 *            wildcard address.
-	 * @param bindPort
-	 *            the port the client will bind to during creation. A port of
-	 *            <code>zero</code> will have the client give Netty the
-	 *            respsonsibility of choosing the port to bind to.
-	 * @param discoveryPorts
-	 *            the ports on which to discover servers. If the amount of
-	 *            discovery ports is greater than zero, then the discovery mode
-	 *            will be set to
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#ALL_CONNECTIONS
-	 *            ALL_CONNECTIONS},
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#DISABLED
-	 *            DISABLED} otherwise.
-	 * @throws UnknownHostException
-	 *             if no IP address for the <code>bindAddress</code> could be
-	 *             found, or if a scope_id was specified for a global IPv6
-	 *             address.
-	 * @throws RakNetException
-	 *             if a RakNet error occurs.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
-	 */
-	public RakNetClient(String bindAddress, int bindPort, int... discoveryPorts)
-			throws UnknownHostException, RakNetException {
-		this(bindAddress, bindPort, null, discoveryPorts);
-	}
-
-	/**
-	 * Creates a RakNet client.
-	 * 
-	 * @param bindAddress
-	 *            the IP address the client will bind to during creation. A
-	 *            <code>null</code> address will have the client bind to the
-	 *            wildcard address.
-	 * @param discoveryPorts
-	 *            the ports on which to discover servers. If the amount of
-	 *            discovery ports is greater than zero, then the discovery mode
-	 *            will be set to
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#ALL_CONNECTIONS
-	 *            ALL_CONNECTIONS},
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#DISABLED
-	 *            DISABLED} otherwise.
-	 * @throws UnknownHostException
-	 *             if no IP address for the <code>bindAddress</code> could be
-	 *             found, or if a scope_id was specified for a global IPv6
-	 *             address.
-	 * @throws RakNetException
-	 *             if a RakNet error occurs.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
-	 */
-	public RakNetClient(String bindAddress, int... discoveryPorts) throws UnknownHostException, RakNetException {
-		this(bindAddress, 0, null, discoveryPorts);
+	public RakNetClient(String bindAddress) throws UnknownHostException, RakNetException {
+		this(bindAddress, 0);
 	}
 
 	/**
@@ -435,90 +214,23 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *            the port the client will bind to during creation. A port of
 	 *            <code>zero</code> will have the client give Netty the
 	 *            respsonsibility of choosing the port to bind to.
-	 * @param discoveryMode
-	 *            the discovery mode which will determine how server discovery
-	 *            is handled.
-	 * @param discoveryPorts
-	 *            the ports on which to discover servers. A <code>null</code>
-	 *            discovery mode means the discovery ports will determine the
-	 *            discovery mode. If the amount of discovery ports is greater
-	 *            than zero, then the discovery mode will be set to
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#ALL_CONNECTIONS
-	 *            ALL_CONNECTIONS},
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#DISABLED
-	 *            DISABLED} otherwise.
 	 * @throws RakNetException
 	 *             if a RakNet error occurs.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
+	 * @see com.whirvis.jraknet.discovery.DiscoveryMode DiscoveryMode
 	 */
-	public RakNetClient(int bindPort, DiscoveryMode discoveryMode, int... discoveryPorts) throws RakNetException {
-		this(new InetSocketAddress(bindPort), discoveryMode, discoveryPorts);
+	public RakNetClient(int bindPort) throws RakNetException {
+		this(new InetSocketAddress(bindPort));
 	}
 
 	/**
 	 * Creates a RakNet client.
 	 * 
-	 * @param bindPort
-	 *            the port the client will bind to during creation. A port of
-	 *            <code>zero</code> will have the client give Netty the
-	 *            respsonsibility of choosing the port to bind to.
-	 * @param discoveryPorts
-	 *            the ports on which to discover servers. A <code>null</code>
-	 *            discovery mode means the discovery ports will determine the
-	 *            discovery mode. If the amount of discovery ports is greater
-	 *            than zero, then the discovery mode will be set to
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#ALL_CONNECTIONS
-	 *            ALL_CONNECTIONS},
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#DISABLED
-	 *            DISABLED} otherwise.
 	 * @throws RakNetException
 	 *             if a RakNet error occurs.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
+	 * @see com.whirvis.jraknet.discovery.DiscoveryMode DiscoveryMode
 	 */
-	public RakNetClient(int bindPort, int... discoveryPorts) throws RakNetException {
-		this(bindPort, null, discoveryPorts);
-	}
-
-	/**
-	 * Creates a RakNet client.
-	 * 
-	 * @param discoveryMode
-	 *            the discovery mode which will determine how server discovery
-	 *            is handled.
-	 * @param discoveryPorts
-	 *            the ports on which to discover servers. A <code>null</code>
-	 *            discovery mode means the discovery ports will determine the
-	 *            discovery mode. If the amount of discovery ports is greater
-	 *            than zero, then the discovery mode will be set to
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#ALL_CONNECTIONS
-	 *            ALL_CONNECTIONS},
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#DISABLED
-	 *            DISABLED} otherwise.
-	 * @throws RakNetException
-	 *             if a RakNet error occurs.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
-	 */
-	public RakNetClient(DiscoveryMode discoveryMode, int... discoveryPorts) throws RakNetException {
-		this((InetSocketAddress) null, discoveryMode, discoveryPorts);
-	}
-
-	/**
-	 * Creates a RakNet client.
-	 * 
-	 * @param discoveryPorts
-	 *            the ports on which to discover servers. If the amount of
-	 *            discovery ports is greater than zero, then the discovery mode
-	 *            will be set to
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#ALL_CONNECTIONS
-	 *            ALL_CONNECTIONS},
-	 *            {@link com.whirvis.jraknet.client.discovery.DiscoveryMode#DISABLED
-	 *            DISABLED} otherwise.
-	 * @throws RakNetException
-	 *             if a RakNet error occurs.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
-	 */
-	public RakNetClient(int... discoveryPorts) throws RakNetException {
-		this((DiscoveryMode) null, discoveryPorts);
+	public RakNetClient() throws RakNetException {
+		this((InetSocketAddress) /* Solves ambiguity */ null);
 	}
 
 	/**
@@ -540,6 +252,15 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
+	 * Returns the client's logger.
+	 * 
+	 * @return the client's logger.
+	 */
+	protected final Logger getLogger() {
+		return this.log;
+	}
+
+	/**
 	 * Returns the client's ping ID.
 	 * 
 	 * @return the client's ping ID.
@@ -555,16 +276,6 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	public final long getTimestamp() {
 		return (System.currentTimeMillis() - this.timestamp);
-	}
-
-	/**
-	 * Returns the client's listeners.
-	 * 
-	 * @return the client's listeners.
-	 * @see com.whirvis.jraknet.client.RakNetClientListener RakNetClientListener
-	 */
-	public final RakNetClientListener[] getListeners() {
-		return listeners.toArray(new RakNetClientListener[listeners.size()]);
 	}
 
 	/**
@@ -584,38 +295,32 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	public final RakNetClient addListener(RakNetClientListener listener)
 			throws NullPointerException, IllegalArgumentException {
-		// Validate listener
 		if (listener == null) {
-			throw new NullPointerException("Listener must not be null");
+			throw new NullPointerException("Listener cannot be null");
+		} else if (listener instanceof RakNetClient && !this.equals(listener)) {
+			throw new IllegalArgumentException("A client cannot be used as a listener except for itself");
 		} else if (listeners.contains(listener)) {
 			return this; // Prevent duplicates
-		} else if (listener instanceof RakNetClient && !listener.equals(this)) {
-			throw new IllegalArgumentException("A client cannot be used as a listener except for itself");
 		}
-
-		// Add listener
 		listeners.add(listener);
-		LOG.info("Added listener " + listener.getClass().getName());
-
-		// Initiate discovery system if it is not yet started
-		if (discoverySystem.isRunning() == false) {
-			discoverySystem.start();
+		if (listener != this) {
+			log.debug("Added listener of class " + listener.getClass().getName());
+		} else {
+			log.debug("Added self listener");
 		}
-		discoverySystem.addClient(this);
 		return this;
 	}
 
 	/**
 	 * Adds the client to its own set of listeners, used when extending the
-	 * <code>RakNetClient</code> directly.
+	 * {@link RakNetClient} directly.
 	 * 
 	 * @return the client.
 	 * @see #addListener(RakNetClientListener)
 	 * @see com.whirvis.jraknet.client.RakNetClientListener RakNetClientListener
 	 */
 	public final RakNetClient addSelfListener() {
-		this.addListener(this);
-		return this;
+		return this.addListener(this);
 	}
 
 	/**
@@ -628,278 +333,41 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	public final RakNetClient removeListener(RakNetClientListener listener) {
 		if (listeners.remove(listener)) {
-			LOG.info("Removed listener " + listener.getClass().getName());
-		} else {
-			LOG.warn("Attempted to removed unregistered listener " + listener.getClass().getName());
+			if (listener != this) {
+				log.debug("Removed listener of class " + listener.getClass().getName());
+			} else {
+				log.debug("Removed self listener");
+			}
 		}
 		return this;
 	}
 
 	/**
 	 * Removes the client from its own set of listeners, used when extending the
-	 * <code>RakNetClient</code> directly.
+	 * {@link RakNetClient} directly.
 	 * 
 	 * @return the client.
 	 * @see #removeListener(RakNetClientListener)
 	 * @see com.whirvis.jraknet.client.RakNetClientListener RakNetClientListener
 	 */
 	public final RakNetClient removeSelfListener() {
-		this.removeListener(this);
-		return this;
+		return this.removeListener(this);
 	}
 
 	/**
-	 * Calls the event.
+	 * Calls an event.
 	 * 
 	 * @param event
 	 *            the event to call.
 	 * @see com.whirvis.jraknet.client.RakNetClientListener RakNetClientListener
 	 */
-	private final void callEvent(Consumer<? super RakNetClientListener> event) {
-		listeners.forEach(event);
-	}
-
-	/**
-	 * Returns the client's discovery ports.
-	 * 
-	 * @return the client's discovery ports.
-	 */
-	public final int[] getDiscoveryPorts() {
-		return discoveryPorts.stream().mapToInt(Integer::intValue).toArray();
-	}
-
-	/**
-	 * Sets the client's discovery ports.
-	 * 
-	 * @param discoveryPorts
-	 *            the new discovery ports.
-	 * @throws IllegalArgumentException
-	 *             if one of the discovery ports is not within the range of
-	 *             <code>0-65535</code>.
-	 */
-	public final void setDiscoveryPorts(int... discoveryPorts) throws IllegalArgumentException {
-		// Make a new set to prevent duplicates
-		HashSet<Integer> discoverySet = new HashSet<Integer>();
-		for (int discoveryPort : discoveryPorts) {
-			if (discoveryPort < 0 || discoveryPort > 65535) {
-				throw new IllegalArgumentException("Invalid port range for discovery port");
-			}
-			discoverySet.add(discoveryPort);
-		}
-
-		// Set discovery ports
-		this.discoveryPorts = discoverySet;
-		String discoveryString = Arrays.toString(discoveryPorts);
-		LOG.debug("Set discovery ports to "
-				+ (discoverySet.size() > 0 ? discoveryString.substring(1, discoveryString.length() - 1) : "nothing"));
-	}
-
-	/**
-	 * Adds a discovery port to start broadcasting to.
-	 * 
-	 * @param discoveryPort
-	 *            the discovery port to start broadcasting to.
-	 */
-	public final void addDiscoveryPort(int discoveryPort) {
-		discoveryPorts.add(discoveryPort);
-		LOG.debug("Added discovery port " + discoveryPort);
-	}
-
-	/**
-	 * Removes a discovery port to stop broadcasting to.
-	 * 
-	 * @param discoveryPort
-	 *            the discovery part to stop broadcasting to.
-	 */
-	public final void removeDiscoveryPort(int discoveryPort) {
-		discoveryPorts.remove(discoveryPort);
-		LOG.debug("Removed discovery port " + discoveryPort);
-	}
-
-	/**
-	 * Returns the client's discovery mode.
-	 * 
-	 * @return the client's discovery mode.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
-	 */
-	public final DiscoveryMode getDiscoveryMode() {
-		return this.discoveryMode;
-	}
-
-	/**
-	 * Sets the client's discovery mode.
-	 * 
-	 * @param mode
-	 *            the new discovery mode.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
-	 */
-	public final void setDiscoveryMode(DiscoveryMode mode) {
-		if (listeners.size() <= 0) {
-			LOG.warn("Client has no listeners");
-		}
-		this.discoveryMode = (mode != null ? mode : DiscoveryMode.DISABLED);
-		if (this.discoveryMode == DiscoveryMode.DISABLED) {
-			for (InetSocketAddress address : discovered.keySet()) {
-				this.callEvent(listener -> listener.onServerForgotten(address));
-			}
-			discovered.clear(); // We are not discovering servers anymore!
-			LOG.debug("Cleared discovered servers due to discovery mode being set to " + DiscoveryMode.DISABLED);
-		}
-		LOG.debug("Set discovery mode to " + mode);
-	}
-
-	/**
-	 * Returns the locally discovered servers.
-	 * 
-	 * @return the locally discovered servers.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
-	 */
-	public final DiscoveredServer[] getLocalServers() {
-		return discovered.values().toArray(new DiscoveredServer[discovered.size()]);
-	}
-
-	/**
-	 * Returns the externally discovered servers.
-	 * 
-	 * @return the externally discovered servers.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
-	 */
-	public final DiscoveredServer[] getExternalServers() {
-		return externalServers.values().toArray(new DiscoveredServer[externalServers.size()]);
-	}
-
-	/**
-	 * Adds a server to the client's external server discovery list. This allows
-	 * for the discovery of servers on external networks.
-	 * 
-	 * @param address
-	 *            the server address.
-	 */
-	public final void addExternalServer(InetSocketAddress address) {
-		if (!externalServers.containsKey(address)) {
-			externalServers.put(address, new DiscoveredServer(address, -1L, null));
-			LOG.debug("Added external server with address " + address);
-			this.callEvent(listener -> listener.onExternalServerAdded(address));
-		}
-	}
-
-	/**
-	 * Adds a server to the client's external server discovery list. This allows
-	 * for the discovery of servers on external networks.
-	 * 
-	 * @param address
-	 *            the server address.
-	 * @param port
-	 *            the server port.
-	 */
-	public final void addExternalServer(InetAddress address, int port) {
-		this.addExternalServer(new InetSocketAddress(address, port));
-	}
-
-	/**
-	 * Adds a server to the client's external server discovery list. This allows
-	 * for the discovery of servers on external networks.
-	 * 
-	 * @param address
-	 *            the server address.
-	 * @param port
-	 *            the server port.
-	 * @throws UnknownHostException
-	 *             if the address is an unknown host.
-	 */
-	public final void addExternalServer(String address, int port) throws UnknownHostException {
-		this.addExternalServer(InetAddress.getByName(address), port);
-	}
-
-	/**
-	 * Removes an external server from the client's external server discovery
-	 * list.
-	 * 
-	 * @param address
-	 *            the server address.
-	 */
-	public final void removeExternalServer(InetSocketAddress address) {
-		if (externalServers.containsKey(address)) {
-			externalServers.remove(address);
-			LOG.debug("Removed external server with address " + address);
-			this.callEvent(listener -> listener.onExternalServerRemoved(address));
-		}
-	}
-
-	/**
-	 * Removes an external server from the client's external server discovery
-	 * list.
-	 * 
-	 * @param address
-	 *            the server address.
-	 * @param port
-	 *            the server port.
-	 */
-	public final void removeExternalServer(InetAddress address, int port) {
-		this.removeExternalServer(new InetSocketAddress(address, port));
-	}
-
-	/**
-	 * Removes an external server from the client's external server discovery
-	 * list.
-	 * 
-	 * @param address
-	 *            the server address.
-	 * @param port
-	 *            the server port.
-	 * @throws UnknownHostException
-	 *             if the address is an unknown host.
-	 */
-	public final void removeExternalServer(String address, int port) throws UnknownHostException {
-		this.removeExternalServer(InetAddress.getByName(address), port);
-	}
-
-	/**
-	 * Removes an external server from the client's external server discovery
-	 * list.
-	 * 
-	 * @param server
-	 *            the discovered server.
-	 * @throws IllegalArgumentException
-	 *             if the discovered server is was not discovered by the client.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryMode DiscoveryMode
-	 */
-	public final void removeExternalServer(DiscoveredServer server) throws IllegalArgumentException {
-		if (!externalServers.contains(server)) {
-			throw new IllegalArgumentException("Externally discovered server does not belong to client");
-		}
-		this.removeExternalServer(server.getAddress());
-	}
-
-	/**
-	 * Removes all external servers from the client's external server discovery
-	 * list.
-	 * 
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveredServer
-	 *      DiscoveredServer
-	 */
-	public final void clearExternalServers() {
-		externalServers.clear();
-	}
-
-	/**
-	 * Returns the discovered servers, both local and external.
-	 * 
-	 * @return the discovered servers, both local and external.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveredServer
-	 *      DiscoveredServer
-	 */
-	public final DiscoveredServer[] getServers() {
-		ArrayList<DiscoveredServer> servers = new ArrayList<DiscoveredServer>();
-		servers.addAll(discovered.values());
-		servers.addAll(externalServers.values());
-		return servers.toArray(new DiscoveredServer[servers.size()]);
+	public final void callEvent(Consumer<? super RakNetClientListener> event) {
+		listeners.forEach(listener -> Scheduler.scheduleSync(listener, event));
 	}
 
 	/**
 	 * Returns whether or not the client is currently running. If it is running,
-	 * this means that it can still be used to connect to servers. If it has
-	 * been shutdown, this will not be the case.
+	 * this means that it is currently connected to or connecting to a server.
 	 * 
 	 * @return <code>true</code> if the client is running, <code>false</code>
 	 *         otherwise.
@@ -913,7 +381,11 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Returns the address the client is bound to.
+	 * Returns the address the client is bound to. This will be the value
+	 * supplied during client creation until the client has connected to a
+	 * server. Once the client has connected a server, the bind address will be
+	 * changed to the address returned from the channel's
+	 * {@link io.netty.channel.Channel#localAddress() localAddress()} method.
 	 * 
 	 * @return the address the client is bound to.
 	 */
@@ -922,7 +394,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Returns the IP address the client is bound to.
+	 * Returns the IP address the client is bound to based on the address
+	 * returned from {@link #getAddress()}.
 	 * 
 	 * @return the IP address the client is bound to.
 	 */
@@ -931,7 +404,8 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Returns the port the client is bound to.
+	 * Returns the port the client is bound to based on the address returned
+	 * from {@link #getAddress()}.
 	 * 
 	 * @return the port the client is bound to.
 	 */
@@ -967,6 +441,12 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	public final void setMaximumTransferUnitSizes(int... maximumTransferUnitSizes)
 			throws IllegalArgumentException, RuntimeException {
+		if (maximumTransferUnitSizes == null) {
+			throw new NullPointerException("Maximum transfer unit sizes cannot be null");
+		} else if (maximumTransferUnitSizes.length <= 0) {
+			throw new IllegalArgumentException("At least one maximum transfer unit size must be specified");
+		}
+
 		// Determine valid maximum transfer units
 		boolean foundTransferUnit = false;
 		ArrayList<MaximumTransferUnit> maximumTransferUnits = new ArrayList<MaximumTransferUnit>();
@@ -981,7 +461,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 						(i * 2) + (i + 1 < maximumTransferUnitSizes.length ? 2 : 1)));
 				foundTransferUnit = true;
 			} else {
-				LOG.warn("Valid maximum transfer unit " + maximumTransferUnitSize
+				log.warn("Valid maximum transfer unit " + maximumTransferUnitSize
 						+ " failed to register due to network card limitations");
 			}
 		}
@@ -998,6 +478,13 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		if (foundTransferUnit == false) {
 			throw new RuntimeException("No compatible maximum transfer unit found for machine network cards");
 		}
+		int[] registeredMaximumTransferUnitSizes = new int[maximumTransferUnits.size()];
+		for (int i = 0; i < registeredMaximumTransferUnitSizes.length; i++) {
+			registeredMaximumTransferUnitSizes[i] = this.maximumTransferUnits[i].getSize();
+		}
+		String registeredMaximumTransferUnitSizesStr = Arrays.toString(registeredMaximumTransferUnitSizes);
+		log.debug("Set maximum transfer unit sizes to " + registeredMaximumTransferUnitSizesStr.substring(1,
+				registeredMaximumTransferUnitSizesStr.length() - 1));
 	}
 
 	/**
@@ -1025,122 +512,6 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	}
 
 	/**
-	 * Returns the thread the client is running on.
-	 * 
-	 * @return the thread the server is running on, <code>null</code> if it was
-	 *         not started using one of the
-	 *         {@link #connectThreaded(InetSocketAddress) connectThreaded()}
-	 *         methods.
-	 */
-	public final Thread getThread() {
-		return this.clientThread;
-	}
-
-	/**
-	 * Called by the {@link com.whirvis.jraknet.client.discovery.DiscoveryThread
-	 * DiscoveryThread} to update client discovery data. Calling this is
-	 * unnecessary and unrecommended except by the discovery system.
-	 * 
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveryThread DicoveryThread
-	 */
-	public final void updateDiscoveryData() {
-		// Remove all servers that have timed out
-		ArrayList<InetSocketAddress> forgottenServers = new ArrayList<InetSocketAddress>();
-		for (InetSocketAddress discoveredServerAddress : discovered.keySet()) {
-			DiscoveredServer discoveredServer = discovered.get(discoveredServerAddress);
-			if (System.currentTimeMillis()
-					- discoveredServer.getDiscoveryTimestamp() >= DiscoveredServer.SERVER_TIMEOUT_MILLIS) {
-				forgottenServers.add(discoveredServerAddress);
-				this.callEvent(listener -> listener.onServerForgotten(discoveredServerAddress));
-			}
-		}
-		discovered.keySet().removeAll(forgottenServers);
-		if (forgottenServers.size() > 0) {
-			LOG.debug("Forgot " + forgottenServers.size() + " server" + (forgottenServers.size() == 1 ? "" : "s"));
-		}
-
-		long currentTime = System.currentTimeMillis();
-		if (currentTime - lastPingBroadcast >= PING_BROADCAST_WAIT_MILLIS) {
-			// Broadcast ping to local network
-			if (discoveryMode != DiscoveryMode.DISABLED) {
-				Iterator<Integer> discoveryIterator = discoveryPorts.iterator();
-				while (discoveryIterator.hasNext()) {
-					int discoveryPort = discoveryIterator.next().intValue();
-					UnconnectedPing ping = new UnconnectedPing();
-					if (discoveryMode == DiscoveryMode.OPEN_CONNECTIONS) {
-						ping = new UnconnectedPingOpenConnections();
-					}
-					ping.timestamp = this.getTimestamp();
-					ping.pingId = this.pingId;
-					ping.encode();
-
-					if (!ping.failed()) {
-						this.sendNettyMessage(ping, new InetSocketAddress("255.255.255.255", discoveryPort));
-						LOG.debug("Broadcasted unconnected ping to port " + discoveryPort);
-					} else {
-						LOG.error(UnconnectedPing.class.getSimpleName()
-								+ " failed to encode, unable to broadcast ping to local servers");
-					}
-				}
-			}
-
-			// Send ping to external servers
-			if (!externalServers.isEmpty()) {
-				UnconnectedPing ping = new UnconnectedPing();
-				ping.timestamp = this.getTimestamp();
-				ping.pingId = this.pingId;
-				ping.encode();
-				if (!ping.failed()) {
-					for (InetSocketAddress externalAddress : externalServers.keySet()) {
-						this.sendNettyMessage(ping, externalAddress);
-						LOG.debug("Broadcasting ping to server with address " + externalAddress);
-					}
-				} else {
-					LOG.error(UnconnectedPing.class.getSimpleName()
-							+ " failed to encode, unable to broadcast ping to external servers");
-				}
-			}
-			this.lastPingBroadcast = currentTime;
-		}
-	}
-
-	/**
-	 * Handles the unconnected pong and updates discovery data accordingly.
-	 * 
-	 * @param sender
-	 *            the sender of the unconnected pong.
-	 * @param pong
-	 *            the unconnected pong.
-	 * @see com.whirvis.jraknet.protocol.status.UnconnectedPong UnconnectedPong
-	 */
-	private final void updateDiscoveryData(InetSocketAddress sender, UnconnectedPong pong) {
-		if (RakNet.isLocalAddress(sender) && !externalServers.containsKey(sender)) {
-			if (!discovered.containsKey(sender)) { // Newly discovered server
-				discovered.put(sender, new DiscoveredServer(sender, System.currentTimeMillis(), pong.identifier));
-				LOG.info("Discovered local server with address " + sender);
-				this.callEvent(listener -> listener.onServerDiscovered(sender, pong.identifier));
-			} else { // Server data was changed
-				DiscoveredServer server = discovered.get(sender);
-				server.setDiscoveryTimestamp(System.currentTimeMillis());
-				if (!pong.identifier.equals(server.getIdentifier())) {
-					server.setIdentifier(pong.identifier);
-					LOG.debug("Updated local server with address " + sender + " identifier to \"" + pong.identifier
-							+ "\"");
-					this.callEvent(listener -> listener.onServerIdentifierUpdate(sender, pong.identifier));
-				}
-			}
-		} else if (externalServers.containsKey(sender)) {
-			DiscoveredServer server = externalServers.get(sender);
-			server.setDiscoveryTimestamp(System.currentTimeMillis());
-			if (!pong.identifier.equals(server.getIdentifier())) {
-				server.setIdentifier(pong.identifier);
-				LOG.debug("Updated local server with address " + sender + " identifier to \"" + pong.identifier + "\"");
-				this.callEvent(listener -> listener.onExternalServerIdentifierUpdate(sender, pong.identifier));
-			}
-		}
-	}
-
-	/**
 	 * Sends a Netty message over the channel raw. This should be used
 	 * sparingly, as if it is used incorrectly it could break server sessions
 	 * entirely. In order to send a message to a session, use one of the
@@ -1156,7 +527,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(buf, address));
-		LOG.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to "
+		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to "
 				+ address);
 	}
 
@@ -1210,13 +581,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 */
 	protected final void handleMessage(RakNetPacket packet, InetSocketAddress sender) {
 		short packetId = packet.getId();
-		if (packetId == ID_UNCONNECTED_PONG) {
-			UnconnectedPong pong = new UnconnectedPong(packet);
-			pong.decode();
-			if (pong.identifier != null) {
-				this.updateDiscoveryData(sender, pong);
-			}
-		} else if (preparation != null) {
+		if (preparation != null) {
 			if (sender.equals(preparation.address)) {
 				preparation.handleMessage(packet);
 			}
@@ -1225,21 +590,19 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 				if (packetId >= ID_CUSTOM_0 && packetId <= ID_CUSTOM_F) {
 					CustomPacket custom = new CustomPacket(packet);
 					custom.decode();
-
 					session.handleCustom(custom);
 				} else if (packetId == Acknowledge.ACKNOWLEDGED || packetId == Acknowledge.NOT_ACKNOWLEDGED) {
 					Acknowledge acknowledge = new Acknowledge(packet);
 					acknowledge.decode();
-
 					session.handleAcknowledge(acknowledge);
 				}
 			}
 		}
 		if (MessageIdentifier.hasPacket(packet.getId())) {
-			LOG.debug("Handled internal packet with ID " + MessageIdentifier.getName(packet.getId()) + " ("
+			log.debug("Handled internal packet with ID " + MessageIdentifier.getName(packet.getId()) + " ("
 					+ packet.getId() + ")");
 		} else {
-			LOG.debug("Sent packet with ID " + packet.getId() + " to session handler");
+			log.debug("Sent packet with ID " + packet.getId() + " to session handler");
 		}
 	}
 
@@ -1256,13 +619,13 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	protected final void handleHandlerException(InetSocketAddress address, Throwable cause) {
 		if (address.equals(preparation.address)) {
 			if (preparation != null) {
-				preparation.cancelReason = new NettyHandlerException(this, handler, cause);
+				preparation.cancelReason = new NettyHandlerException(this, handler, address, cause);
 			} else if (session != null) {
-				this.disconnect(cause.getClass().getName() + ": " + cause.getLocalizedMessage());
+				this.disconnect(cause);
 			}
 		}
-		LOG.warn("Handled exception " + cause.getClass().getName() + " caused by address " + address);
-		this.callEvent(listener -> listener.onHandlerException(address, cause));
+		log.debug("Handled exception " + cause.getClass().getName() + " caused by address " + address);
+		this.callEvent(listener -> listener.onHandlerException(this, address, cause));
 	}
 
 	/**
@@ -1271,18 +634,30 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param address
 	 *            the address of the server to connect to.
 	 * @throws IllegalStateException
-	 *             if the client has been shutdown or is currently connected to
-	 *             a server.
+	 *             if the client is currently connected to a server.
 	 * @throws RakNetException
 	 *             if an error occurs during connection or login.
 	 */
 	public final void connect(InetSocketAddress address) throws IllegalStateException, RakNetException {
-		if (listeners.size() <= 0) {
-			LOG.warn("Client has no listeners");
-		} else if (!this.isRunning()) {
-			throw new IllegalStateException("Client is not running");
-		} else if (this.isConnected()) {
+		if (this.isConnected()) {
 			throw new IllegalStateException("Client is currently connected to a server");
+		} else if (listeners.size() <= 0) {
+			log.warn("Client has no listeners");
+		}
+
+		// Initiate networking
+		try {
+			this.bootstrap = new Bootstrap();
+			this.group = new NioEventLoopGroup();
+			this.handler = new RakNetClientHandler(this);
+			bootstrap.channel(NioDatagramChannel.class).group(group).handler(handler);
+			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false);
+			this.channel = (bindAddress != null ? bootstrap.bind(bindAddress) : bootstrap.bind(0)).sync().channel();
+			this.bindAddress = (InetSocketAddress) channel.localAddress();
+			this.setMaximumTransferUnitSizes(DEFAULT_TRANSFER_UNIT_SIZES);
+			log.debug("Initialized networking");
+		} catch (InterruptedException e) {
+			throw new RakNetException(e);
 		}
 
 		// Prepare connection
@@ -1290,8 +665,9 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		for (MaximumTransferUnit unit : maximumTransferUnits) {
 			unit.reset();
 		}
-		this.preparation = new SessionPreparation(this, units[0].getSize(), maximumMaximumTransferUnitSize);
+		this.preparation = new SessionPlanner(this, units[0].getSize(), maximumMaximumTransferUnitSize);
 		preparation.address = address;
+		log.debug("Reset maximum transfer units and created session preparation");
 
 		// Send open connection request one with a decreasing MTU
 		int retriesLeft = 0;
@@ -1304,6 +680,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 					connectionRequestOne.protocolVersion = this.getProtocolVersion();
 					connectionRequestOne.encode();
 					this.sendNettyMessage(connectionRequestOne, address);
+					log.debug("Attemped connection request one with maximum transfer unit size " + unit.getSize());
 					Thread.sleep(500);
 				}
 			}
@@ -1324,9 +701,9 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 				connectionRequestTwo.address = preparation.address;
 				connectionRequestTwo.maximumTransferUnit = preparation.maximumTransferUnit;
 				connectionRequestTwo.encode();
-
 				if (!connectionRequestTwo.failed()) {
 					this.sendNettyMessage(connectionRequestTwo, address);
+					log.debug("Attempted connection request two");
 					Thread.sleep(500);
 				} else {
 					preparation.cancelReason = new PacketBufferException(this, connectionRequestTwo);
@@ -1341,11 +718,11 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			preparation.cancelReason = new ServerOfflineException(this, preparation.address);
 		}
 
-		// If the session was set we are connected
+		// Finish connection
 		if (preparation.readyForSession()) {
-			// Set session and delete preparation data
 			this.session = preparation.createSession(channel);
 			this.preparation = null;
+			log.debug("Created session from session preparataion");
 
 			// Send connection packet
 			ConnectionRequest connectionRequest = new ConnectionRequest();
@@ -1353,17 +730,37 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			connectionRequest.timestamp = (System.currentTimeMillis() - this.timestamp);
 			connectionRequest.encode();
 			session.sendMessage(Reliability.RELIABLE_ORDERED, connectionRequest);
-			LOG.debug("Sent connection packet to server");
+			log.debug("Sent connection request to server");
 
-			// Initiate connection loop required for the session to function
-			this.initConnection();
+			// Create and start session update thread
+			RakNetClient client = this;
+			this.sessionThread = new Thread("jraknet-sesion-thread-" + Long.toHexString(guid).toLowerCase()) {
+
+				@Override
+				public void run() {
+					try {
+						while (session != null && !this.isInterrupted()) {
+							session.update();
+							Thread.sleep(0, 1); // Lower CPU usage
+						}
+					} catch (InterruptedException e) {
+						this.interrupt(); // Interrupted during sleep
+					} catch (Throwable throwable) {
+						client.callEvent(listener -> listener.onSessionException(client, throwable));
+						client.disconnect(throwable);
+					}
+				}
+
+			};
+			sessionThread.start();
+			log.debug("Created session update thread");
 		} else {
-			// Reset the connection data, it failed
 			RakNetException cancelReason = preparation.cancelReason;
 			this.preparation = null;
 			this.session = null;
 			throw cancelReason;
 		}
+		log.info("Connected to server with address " + address);
 	}
 
 	/**
@@ -1374,8 +771,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param port
 	 *            the port of the server to connect to.
 	 * @throws IllegalStateException
-	 *             if the client has been shutdown or is currently connected to
-	 *             a server.
+	 *             if the client is currently connected to a server.
 	 * @throws RakNetException
 	 *             if an error occurs during connection or login.
 	 */
@@ -1395,8 +791,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *             found, or if a scope_id was specified for a global IPv6
 	 *             address.
 	 * @throws IllegalStateException
-	 *             if the client has been shutdown or is currently connected to
-	 *             a server.
+	 *             if the client is currently connected to a server.
 	 * @throws RakNetException
 	 *             if an error occurs during connection or login.
 	 */
@@ -1411,151 +806,13 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * @param server
 	 *            the discovered server to connect to.
 	 * @throws IllegalStateException
-	 *             if the client has been shutdown or is currently connected to
-	 *             a server.
+	 *             if the client is currently connected to a server.
 	 * @throws RakNetException
 	 *             if an error occurs during connection or login.
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveredServer
-	 *      DiscoveredServer
+	 * @see com.whirvis.jraknet.discovery.DiscoveredServer DiscoveredServer
 	 */
 	public final void connect(DiscoveredServer server) throws IllegalStateException, RakNetException {
 		this.connect(server.getAddress());
-	}
-
-	/**
-	 * Connects the client to a server with the address on its own
-	 * <code>Thread</code>. Since the client is running on another thread, all
-	 * throwables will be sent there. In order to catch these throwables, use
-	 * the
-	 * {@link com.whirvis.jraknet.client.RakNetClientListener#onThreadException(Throwable)
-	 * onThreadException(Throwable)} method in
-	 * {@link com.whirvis.jraknet.client.RakNetClientListener
-	 * RakNetClientListener}.
-	 * 
-	 * @param address
-	 *            the address of the server to connect to.
-	 * @return the <code>Thread</code> the client is running on.
-	 * @see com.whirvis.jraknet.client.RakNetClientListener#onThreadException(Throwable)
-	 *      onThreadException(Throwable)
-	 * @see com.whirvis.jraknet.client.RakNetClientListener RakNetClientListener
-	 */
-	public final Thread connectThreaded(InetSocketAddress address) {
-		Thread thread = new Thread() {
-			@Override
-			public void run() {
-				try {
-					connect(address);
-				} catch (Throwable throwable) {
-					callEvent(listener -> listener.onThreadException(throwable));
-					if (getListeners().length < 0) {
-						throwable.printStackTrace();
-					}
-				}
-			}
-		};
-		thread.setName("jraknet-client-" + Long.toHexString(this.getGloballyUniqueId()).toLowerCase());
-		thread.start();
-		this.clientThread = thread;
-		LOG.info("Started on thread with name \"" + thread.getName() + "\"");
-		return thread;
-	}
-
-	/**
-	 * Connects the client to a server with the address on its own
-	 * <code>Thread</code>. Since the client is running on another thread, all
-	 * throwables will be sent there. In order to catch these throwables, use
-	 * the
-	 * {@link com.whirvis.jraknet.client.RakNetClientListener#onThreadException(Throwable)
-	 * onThreadException(Throwable)} in the
-	 * {@link com.whirvis.jraknet.client.RakNetClientListener
-	 * RakNetClientListener}.
-	 * 
-	 * @param address
-	 *            the IP address of the server to connect to.
-	 * @param port
-	 *            the port of the server to connect to.
-	 * @return the <code>Thread</code> the client is running on.
-	 * @see com.whirvis.jraknet.client.RakNetClientListener#onThreadException(Throwable)
-	 *      onThreadException(Throwable)
-	 * @see com.whirvis.jraknet.client.RakNetClientListener RakNetClientListener
-	 */
-	public final Thread connectThreaded(InetAddress address, int port) {
-		return this.connectThreaded(new InetSocketAddress(address, port));
-	}
-
-	/**
-	 * Connects the client to a server with the address on its own
-	 * <code>Thread</code>. Since the client is running on another thread, all
-	 * throwables will be sent there. In order to catch these throwables, use
-	 * the
-	 * {@link com.whirvis.jraknet.client.RakNetClientListener#onThreadException(Throwable)
-	 * onThreadException(Throwable)} in the
-	 * {@link com.whirvis.jraknet.client.RakNetClientListener
-	 * RakNetClientListener}.
-	 * 
-	 * @param address
-	 *            the IP address of the server to connect to.
-	 * @param port
-	 *            the port of the server to connect to.
-	 * @throws UnknownHostException
-	 *             if the address is an unknown host.
-	 * @return the <code>Thread</code> the client is running on.
-	 * @see com.whirvis.jraknet.client.RakNetClientListener#onThreadException(Throwable)
-	 *      onThreadException(Throwable)
-	 * @see com.whirvis.jraknet.client.RakNetClientListener RakNetClientListener
-	 */
-	public final Thread connectThreaded(String address, int port) throws UnknownHostException {
-		return this.connectThreaded(InetAddress.getByName(address), port);
-	}
-
-	/**
-	 * Connects the client to a server with the address on its own
-	 * <code>Thread</code>. Since the client is running on another thread, all
-	 * throwables will be sent there. In order to catch these throwables, use
-	 * the
-	 * {@link com.whirvis.jraknet.client.RakNetClientListener#onThreadException(Throwable)
-	 * onThreadException(Throwable)} in the
-	 * {@link com.whirvis.jraknet.client.RakNetClientListener
-	 * RakNetClientListener}.
-	 * 
-	 * @param server
-	 *            the discovered server to connect to.
-	 * @throws UnknownHostException
-	 *             if the address is an unknown host.
-	 * @return the <code>Thread</code> the client is running on.
-	 * @see com.whirvis.jraknet.client.RakNetClientListener#onThreadException(Throwable)
-	 *      onThreadException(Throwable)
-	 * @see com.whirvis.jraknet.client.RakNetClientListener RakNetClientListener
-	 * @see com.whirvis.jraknet.client.discovery.DiscoveredServer
-	 *      DiscoveredServer
-	 */
-	public final Thread connectThreaded(DiscoveredServer server) {
-		return this.connectThreaded(server.getAddress());
-	}
-
-	/**
-	 * Starts the loop needed for the client to stay connected to the server.
-	 * 
-	 * @throws IllegalStateException
-	 *             if the client is not running or is not connected to a server.
-	 * @throws RakNetException
-	 *             if a RakNet error occurs.
-	 */
-	private final void initConnection() throws IllegalStateException, RakNetException {
-		if (!this.isRunning()) {
-			throw new IllegalStateException("Client is not running");
-		} else if (session == null) {
-			throw new RakNetClientException(this, "Attempted to initiate connection without session");
-		}
-		LOG.debug("Initiated connected with server");
-		try {
-			while (session != null) {
-				session.update();
-				Thread.sleep(0, 1); // Lower CPU usage
-			}
-		} catch (InterruptedException e) {
-			throw new RakNetException(e);
-		}
 	}
 
 	/**
@@ -1588,17 +845,39 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 			throw new IllegalStateException("Client is not connected to a server");
 		}
 
-		// Close session and interrupt client thread
+		// Close session and interrupt thread
 		session.closeConnection();
-		if (this.clientThread != null) {
-			clientThread.interrupt();
-		}
+		sessionThread.interrupt();
 
 		// Destroy session
-		LOG.info("Disconnected from server with address " + session.getAddress() + " with reason \""
+		log.info("Disconnected from server with address " + session.getAddress() + " with reason \""
 				+ (reason == null ? "Disconnected" : reason) + "\"");
-		this.callEvent(listener -> listener.onDisconnect(session, reason == null ? "Disconnected" : reason));
+		this.callEvent(listener -> listener.onDisconnect(this, session, reason == null ? "Disconnected" : reason));
 		this.session = null;
+		this.sessionThread = null;
+
+		// Shutdown networking
+		channel.close();
+		group.shutdownGracefully(0L, 1000L, TimeUnit.MILLISECONDS);
+		this.channel = null;
+		this.handler = null;
+		this.group = null;
+		this.bootstrap = null;
+		log.debug("Shutdown networking");
+	}
+
+	/**
+	 * Disconnects the client from the server.
+	 * 
+	 * @param reason
+	 *            the reason for disconnection. A <code>null</code> reason will
+	 *            have <code>"Disconnected"</code> be used as the reason
+	 *            instead.
+	 * @throws IllegalStateException
+	 *             if the client is not connected to a server.
+	 */
+	public final void disconnect(Throwable reason) throws IllegalStateException {
+		this.disconnect(reason != null ? RakNet.getStackTrace(reason) : null);
 	}
 
 	/**
@@ -1608,59 +887,13 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 *             if the client is not connected to a server.
 	 */
 	public final void disconnect() throws IllegalStateException {
-		this.disconnect(null);
-	}
-
-	/**
-	 * Shuts down the client. Once this is called, the client will no longer be
-	 * able to connect to servers. If the client is connected to a server when
-	 * this is called, it will also disconnect from the server using the reason
-	 * here.
-	 * 
-	 * @param reason
-	 *            the reason for shutdown. A <code>null</code> reason will have
-	 *            </code>"Shutdown"</code> be used as the reason instead.
-	 * @throws IllegalStateException
-	 *             if the client is not running.
-	 */
-	public final void shutdown(String reason) throws IllegalStateException {
-		if (!this.isRunning()) {
-			throw new IllegalStateException("Client is not running");
-		}
-
-		// Disconnect from server and shutdown Netty
-		if (this.isConnected()) {
-			this.disconnect(reason == null ? "Shutdown" : reason);
-		}
-		channel.close();
-		group.shutdownGracefully();
-
-		// Shutdown discovery system if needed
-		discoverySystem.removeClient(this);
-		if (discoverySystem.getClients().length <= 0) {
-			discoverySystem.shutdown();
-			discoverySystem = new DiscoveryThread();
-		}
-
-		LOG.info("Shutdown client");
-		this.callEvent(listener -> listener.onClientShutdown(reason == null ? "Shutdown" : reason));
-	}
-
-	/**
-	 * Shuts down the client. Once this is called, the client will no longer be
-	 * able to connect to servers.
-	 * 
-	 * @throws IllegalStateException
-	 *             if the client is not running.
-	 */
-	public final void shutdown() throws IllegalStateException {
-		this.shutdown(null);
+		this.disconnect((String) null);
 	}
 
 	@Override
 	public String toString() {
-		return "RakNetClient [guid=" + guid + ", pingId=" + pingId + ", timestamp=" + timestamp + ", discoveryMode="
-				+ discoveryMode + "]";
+		return "RakNetClient [guid=" + guid + ", pingId=" + pingId + ", timestamp=" + timestamp + ", bindAddress="
+				+ bindAddress + ", maximumMaximumTransferUnitSize=" + maximumMaximumTransferUnitSize + "]";
 	}
 
 }

@@ -35,34 +35,45 @@ import java.util.UUID;
 
 /**
  * Used to signify which implementation of the RakNet protocol is being used by
- * a connection. Keep in mind that this functionality has <i>no</i> guarantees
- * to function completely, as it is completely dependent on the implementation
- * to implement this feature.
+ * a connection. This functionality has <i>no</i> guarantee of functioning
+ * complete, as it is dependent on the implementation to implement this feature
+ * themselves.
+ * <p>
+ * As of January 1st, 2019, the only known implementations using this connection
+ * type protocol are:
+ * <ul>
+ * <li>JRakNet by Trent Summerlin</li>
+ * <li>RakLib by PocketMine-MP (code written, not yet merged to master
+ * branch)</li>
+ * </ul>
  * 
  * @author Trent Summerlin
+ * @since JRakNet v2.0
+ * @see com.whirvis.jraknet.identifier.Identifier Identifier
  */
 public class ConnectionType {
 
-	// Maximum value of unsigned byte
 	public static final int MAX_METADATA_VALUES = 0xFF;
+	public static final byte[] MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B, 0x43,
+			(byte) 0x54, (byte) 0x49 };
 
 	/**
-	 * Converts the metadata keys and values to a
-	 * <code>HashMap</code>.
+	 * Converts the metadata keys and values to a {@link java.util.HashMap
+	 * HashMap}.
 	 * 
 	 * @param metadata
 	 *            the metadata keys and values.
-	 * @return the metadata as a <code>HashMap</code>.
+	 * @return the metadata as a {@link java.util.HashMap HashMap}.
+	 * @throws IllegalArgumentException
+	 *             if there is a key without a value or if there are more than
+	 *             {@value #MAX_METADATA_VALUES} metadata values.
 	 */
 	public static HashMap<String, String> createMetaData(String... metadata) {
-		// Validate input
 		if (metadata.length % 2 != 0) {
 			throw new IllegalArgumentException("There must be a value for every key");
 		} else if (metadata.length / 2 > MAX_METADATA_VALUES) {
 			throw new IllegalArgumentException("Too many metadata values");
 		}
-
-		// Generate HashMap
 		HashMap<String, String> metadataMap = new HashMap<String, String>();
 		for (int i = 0; i < metadata.length; i += 2) {
 			metadataMap.put(metadata[i], metadata[i + 1]);
@@ -81,11 +92,6 @@ public class ConnectionType {
 	public static final ConnectionType JRAKNET = new ConnectionType(
 			UUID.fromString("504da9b2-a31c-4db6-bcc3-18e5fe2fb178"), "JRakNet", "Java", "2.10.8-SNAPSHOT");
 
-	// Connection type header magic
-	public static final byte[] MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B, 0x43,
-			(byte) 0x54, (byte) 0x49 };
-
-	// Connection type data
 	private final UUID uuid;
 	private final String name;
 	private final String language;
@@ -93,6 +99,27 @@ public class ConnectionType {
 	private final HashMap<String, String> metadata;
 	private final boolean vanilla;
 
+	/**
+	 * Creates a connection type implementation descriptor.
+	 * 
+	 * @param uuid
+	 *            the universally unique ID of the implementation
+	 * @param name
+	 *            the name of the implementation.
+	 * @param language
+	 *            the name of the programming language the implementation was
+	 *            programmed in.
+	 * @param version
+	 *            the version of the implementation.
+	 * @param metadata
+	 *            the metadata of the implementation. Metadata for an
+	 *            implementation can be created using the
+	 *            {@link #createMetaData(String...)} method.
+	 * @param vanilla
+	 *            <code>true</code> if the implementation is a vanilla
+	 *            implementation, <code>false</code> otherwise.
+	 * @see #createMetaData(String...)
+	 */
 	private ConnectionType(UUID uuid, String name, String language, String version, HashMap<String, String> metadata,
 			boolean vanilla) {
 		this.uuid = uuid;
@@ -106,15 +133,47 @@ public class ConnectionType {
 		this.vanilla = vanilla;
 	}
 
+	/**
+	 * Creates a connection type implementation descriptor.
+	 * 
+	 * @param uuid
+	 *            the universally unique ID of the implementation
+	 * @param name
+	 *            the name of the implementation.
+	 * @param language
+	 *            the name of the programming language the implementation was
+	 *            programmed in.
+	 * @param version
+	 *            the version of the implementation.
+	 * @param metadata
+	 *            the metadata of the implementation. Metadata for an
+	 *            implementation can be created using the
+	 *            {@link #createMetaData(String...)} method.
+	 * @see #createMetaData(String...)
+	 */
 	public ConnectionType(UUID uuid, String name, String language, String version, HashMap<String, String> metadata) {
 		this(uuid, name, language, version, metadata, false);
 	}
 
+	/**
+	 * Creates a connection type implementation descriptor.
+	 * 
+	 * @param uuid
+	 *            the universally unique ID of the implementation
+	 * @param name
+	 *            the name of the implementation.
+	 * @param language
+	 *            the programming language the implementation.
+	 * @param version
+	 *            the version of the implementation.
+	 */
 	public ConnectionType(UUID uuid, String name, String language, String version) {
 		this(uuid, name, language, version, new HashMap<String, String>());
 	}
 
 	/**
+	 * Returns the universally unique ID of the implementation.
+	 * 
 	 * @return the universally unique ID of the implementation.
 	 */
 	public UUID getUUID() {
@@ -122,6 +181,8 @@ public class ConnectionType {
 	}
 
 	/**
+	 * Returns the name of the implementation.
+	 * 
 	 * @return the name of the implementation.
 	 */
 	public String getName() {
@@ -129,6 +190,8 @@ public class ConnectionType {
 	}
 
 	/**
+	 * Returns the programming language of the implementation.
+	 * 
 	 * @return the programming language of the implementation.
 	 */
 	public String getLanguage() {
@@ -136,6 +199,8 @@ public class ConnectionType {
 	}
 
 	/**
+	 * Returns the version of the implementation.
+	 * 
 	 * @return the version of the implementation.
 	 */
 	public String getVersion() {
@@ -143,41 +208,36 @@ public class ConnectionType {
 	}
 
 	/**
+	 * Returns the value of the metadata with the specified key.
+	 * 
 	 * @param key
 	 *            the key of the value to retrieve.
-	 * @return the value associated with the key.
+	 * @return the value associated with the key, <code>null</code> if there is
+	 *         none.
 	 */
 	public String getMetaData(String key) {
 		return metadata.get(key);
 	}
 
 	/**
-	 * @return a copy of the metadata HashMap of the connection type.
+	 * Returns a cloned copy of the metadata.
+	 * 
+	 * @return a cloned copy of the metadata.
 	 */
-	@SuppressWarnings("unchecked") // We know what type the clone is
+	@SuppressWarnings("unchecked") // Clone type is known
 	public HashMap<String, String> getMetaData() {
 		return (HashMap<String, String>) metadata.clone();
 	}
 
 	/**
-	 * @return whether or not the connection type is of the <code>VANILLA</code>
-	 *         implementation.
+	 * Returns whether or not the connection type is a {@link #VANILLA}
+	 * implementation.
+	 * 
+	 * @return <code>true</code> if the connection type is a {@link #VANILLA}
+	 *         implementation, <code>false</code> otherwise.
 	 */
 	public boolean isVanilla() {
 		return this.vanilla;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof ConnectionType) {
-			ConnectionType connectionType = (ConnectionType) obj;
-			if (connectionType.getUUID() != null) {
-				if (connectionType.getUUID().equals(uuid)) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	@Override

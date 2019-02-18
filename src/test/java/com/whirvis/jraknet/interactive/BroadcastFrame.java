@@ -44,7 +44,7 @@ import javax.swing.UIManager;
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetTest;
 import com.whirvis.jraknet.client.RakNetClient;
-import com.whirvis.jraknet.client.discovery.DiscoveryMode;
+import com.whirvis.jraknet.discovery.DiscoveryMode;
 import com.whirvis.jraknet.identifier.MinecraftIdentifier;
 
 /**

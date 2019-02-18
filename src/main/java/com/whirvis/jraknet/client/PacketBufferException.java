@@ -38,6 +38,9 @@ import com.whirvis.jraknet.RakNetPacket;
  * encode or decode correctly.
  *
  * @author Trent Summerlin
+ * @since JRakNet v2.0
+ * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
+ * @see com.whirvis.jraknet.client.RakNetClientException RakNetClientException
  */
 public class PacketBufferException extends RakNetClientException {
 
@@ -49,9 +52,11 @@ public class PacketBufferException extends RakNetClientException {
 	 * Constructs a <code>PacketBufferException</code>.
 	 * 
 	 * @param client
-	 *            the <code>RakNetClient</code> that threw the exception.
+	 *            the client that threw the exception.
 	 * @param packet
-	 *            the <code>RakNetPacket</code> that failed to encode/decode.
+	 *            the packet that failed to encode/decode.
+	 * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
+	 * @see com.whirvis.jraknet.RakNetPacket RakNetPacket
 	 */
 	public PacketBufferException(RakNetClient client, RakNetPacket packet) {
 		super(client, "Packet with ID " + RakNet.toHexStringId(packet) + " failed to encode/decode");
@@ -62,6 +67,7 @@ public class PacketBufferException extends RakNetClientException {
 	 * Returns the packet that failed to encode/decode.
 	 * 
 	 * @return the packet that failed to encode/decode.
+	 * @see com.whirvis.jraknet.RakNetPacket RakNetPacket
 	 */
 	public RakNetPacket getPacket() {
 		return this.packet;

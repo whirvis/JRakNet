@@ -30,24 +30,44 @@
  */
 package com.whirvis.jraknet.client;
 
+import java.net.InetSocketAddress;
+
 /**
- * Signals that the server the <code>RakNetClient</code> is attempting to
- * connect to is full.
+ * Signals that a RakNet is attempting to connect to a server that has no free
+ * incoming connections.
  *
  * @author Trent Summerlin
+ * @since JRakNet v2.0
+ * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
+ * @see com.whirvis.jraknet.client.RakNetClientException RakNetClientException
  */
 public class NoFreeIncomingConnectionsException extends RakNetClientException {
 
 	private static final long serialVersionUID = 5863972657532782029L;
 
+	private final InetSocketAddress address;
+
 	/**
 	 * Constructs a <code>NoFreeIncomingConnectionsException</code>.
 	 * 
 	 * @param client
-	 *            the <code>RakNetClient</code> that threw the exception.
+	 *            the client that threw the exception.
+	 * @param address
+	 *            the address of the server with no free incoming connections.
+	 * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
 	 */
-	public NoFreeIncomingConnectionsException(RakNetClient client) {
+	public NoFreeIncomingConnectionsException(RakNetClient client, InetSocketAddress address) {
 		super(client, "Server has no free incoming connections");
+		this.address = address;
+	}
+
+	/**
+	 * Returns the address of the server that has no free incoming connections.
+	 * 
+	 * @return the address of the server that has no free incoming connections.
+	 */
+	public InetSocketAddress getAddress() {
+		return this.address;
 	}
 
 }

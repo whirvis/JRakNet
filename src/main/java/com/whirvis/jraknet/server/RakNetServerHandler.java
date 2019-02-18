@@ -38,82 +38,101 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.RakNetPacket;
+import com.whirvis.jraknet.session.RakNetClientSession;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.DatagramPacket;
 
 /**
- * Used by the <code>RakNetServer</code> with the sole purpose of sending
- * received packets to the server so they can be handled.
+ * Used by the {@link com.whirvis.jraknet.server.RakNetServer RakNetServer} with
+ * the sole purpose of sending received packets to the server so they can be
+ * handled. Any errors that occurs will also be sent to the server to be dealt
+ * with.
  *
  * @author Trent Summerlin
+ * @since JRakNet v1.0
+ * @see com.whirvis.jraknet.client.RakNetServer RakNetServer
  */
 public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 
-	private static final Logger LOG = LogManager.getLogger(RakNetServerHandler.class);
-
-	private final String loggerName;
+	private final Logger log;
 	private final RakNetServer server;
 	private final ConcurrentHashMap<InetAddress, BlockedAddress> blocked;
 	private InetSocketAddress causeAddress;
 
 	/**
-	 * Constructs a <code>RakNetClientServer</code> with the
-	 * <code>RakNetClient</code>.
+	 * Creates a RakNet server Netty handler.
 	 * 
 	 * @param server
-	 *            the <code>RakNetServer</code> to send received packets to.
+	 *            the server to send received packets to.
+	 * @see com.whirvis.jraknet.RakNetServer RakNetServer
 	 */
 	public RakNetServerHandler(RakNetServer server) {
-		this.loggerName = "server handler #" + server.getGloballyUniqueId();
+		this.log = LogManager
+				.getLogger("RakNet server handler #" + Long.toHexString(server.getGloballyUniqueId()).toUpperCase());
 		this.server = server;
 		this.blocked = new ConcurrentHashMap<InetAddress, BlockedAddress>();
 	}
 
 	/**
-	 * Blocks the address with the reason for the
-	 * amount time.
+	 * Blocks the IP address. All currently connected clients with the IP
+	 * address (regardless of port) will be disconnected with the same reason
+	 * that the IP address was blocked.
 	 * 
 	 * @param address
-	 *            the address to block.
+	 *            the IP address to block.
 	 * @param reason
-	 *            the reason the address was blocked.
+	 *            the reason the address was blocked. A <code>null</code> reason
+	 *            will have <code>"Address blocked"</code> be used as the reason
+	 *            instead.
 	 * @param time
-	 *            how long the address will be blocked in milliseconds.
+	 *            how long the address will blocked in milliseconds.
+	 * @throws NullPointerException
+	 *             if <code>address</code> is <code>null</code>.
 	 */
-	public void blockAddress(InetAddress address, String reason, long time) {
-		blocked.put(address, new BlockedAddress(System.currentTimeMillis(), time));
-		for (RakNetServerListener listener : server.getListeners()) {
-			listener.onAddressBlocked(address, reason, time);
+	protected void blockAddress(InetAddress address, String reason, long time) {
+		if (address == null) {
+			throw new NullPointerException("Address cannot be null");
 		}
-		LOG.info(
-				loggerName + "Blocked address " + address + " due to \"" + reason + "\" for " + time + " milliseconds");
+		blocked.put(address, new BlockedAddress(time));
+		for (RakNetClientSession client : server.getClients()) {
+			if (!client.getAddress().getAddress().equals(address)) {
+				continue; // Client is not blocked
+			}
+			server.disconnectClient(client, reason == null ? "Address blocked" : reason);
+		}
+		server.callEvent(listener -> listener.onAddressBlocked(address, reason, time));
+		log.info("Blocked address " + address + " due to \"" + reason + "\" for " + time + " milliseconds");
 	}
 
 	/**
-	 * Unblocks the address.
+	 * Unblocks the IP address.
 	 * 
 	 * @param address
-	 *            the address to unblock.
+	 *            the IP address to unblock.
+	 * @throws NullPointerException
+	 *             if <code>address</code> is <code>null</code>.
 	 */
-	public void unblockAddress(InetAddress address) {
-		blocked.remove(address);
-		for (RakNetServerListener listener : server.getListeners()) {
-			listener.onAddressUnblocked(address);
+	protected void unblockAddress(InetAddress address) {
+		if (address == null) {
+			throw new NullPointerException("Address cannot be null");
+		} else if (blocked.remove(address) == null) {
+			return; // No address was unblocked
 		}
-		LOG.info(loggerName + "Unblocked address " + address);
+		server.callEvent(listener -> listener.onAddressUnblocked(address));
+		log.info("Unblocked address " + address);
 	}
 
 	/**
-	 * Returns whether or not the address is blocked.
+	 * Returns whether or not the IP address is blocked.
 	 * 
 	 * @param address
-	 *            the address to check.
-	 * @return <code>true</code> if the address is blocked, <code>false</code>
-	 *         otherwise.
+	 *            the IP address to check.
+	 * @return <code>true</code> if the IP address is blocked,
+	 *         <code>false</code> otherwise.
 	 */
-	public boolean addressBlocked(InetAddress address) {
+	public boolean isAddressBlocked(InetAddress address) {
 		return blocked.containsKey(address);
 	}
 
@@ -128,16 +147,12 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			// If an exception happens it's because of this address
 			this.causeAddress = sender;
 
-			// Is the sender blocked?
-			if (this.addressBlocked(sender.getAddress())) {
+			// Check if address is blocked
+			if (this.isAddressBlocked(sender.getAddress())) {
 				BlockedAddress status = blocked.get(sender.getAddress());
-				if (status.getTime() <= BlockedAddress.PERMANENT_BLOCK) {
+				if (!status.shouldUnblock()) {
 					datagram.content().release(); // No longer needed
-					return; // Permanently blocked
-				}
-				if (System.currentTimeMillis() - status.getStartTime() < status.getTime()) {
-					datagram.content().release(); // No longer needed
-					return; // Time hasn't expired
+					return; // Address still blocked
 				}
 				this.unblockAddress(sender.getAddress());
 			}
@@ -145,12 +160,10 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			// Handle the packet and release the buffer
 			server.handleMessage(packet, sender);
 			datagram.content().readerIndex(0); // Reset position
-			LOG.debug(loggerName + "Sent packet to server and reset Datagram buffer read position");
-			for (RakNetServerListener listener : server.getListeners()) {
-				listener.handleNettyMessage(datagram.content(), sender);
-			}
+			log.debug("Sent packet to server and reset datagram buffer read position");
+			server.callEvent(listener -> listener.handleNettyMessage(datagram.content(), sender));
 			datagram.content().release(); // No longer needed
-			LOG.debug(loggerName + "Sent Datagram buffer to server and released it");
+			log.debug("Sent datagram buffer to server and released it");
 
 			// No exceptions occurred, release the suspect
 			this.causeAddress = null;

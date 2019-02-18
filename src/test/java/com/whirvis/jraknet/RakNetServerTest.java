@@ -100,7 +100,7 @@ public class RakNetServerTest {
 			@Override
 			public void handlePing(ServerPing ping) {
 				MinecraftIdentifier identifier = new MinecraftIdentifier("A JRakNet server test",
-						RakNetTest.MINECRAFT_PROTOCOL_NUMBER, RakNetTest.MINECRAFT_VERSION, server.getSessionCount(),
+						RakNetTest.MINECRAFT_PROTOCOL_NUMBER, RakNetTest.MINECRAFT_VERSION, server.getClientCount(),
 						server.getMaxConnections(), server.getGloballyUniqueId(), "New World", "Survival");
 				ping.setIdentifier(identifier);
 			}

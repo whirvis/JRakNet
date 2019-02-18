@@ -38,11 +38,34 @@ import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.protocol.Failable;
 import com.whirvis.jraknet.protocol.MessageIdentifier;
 
+/**
+ * An
+ * {@link com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_REQUEST_ACCEPTED
+ * ID_CONNECTION_REQUEST_ACCEPTED} packet. This is sent by the server during
+ * login to signal to the client that its login request has been accepted.
+ * 
+ * @author Trent Summerlin
+ * @since JRakNet v1.0.0
+ * @see com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_BANNED
+ *      ID_CONNECTION_BANNED
+ */
 public class ConnectionRequestAccepted extends RakNetPacket implements Failable {
 
+	/**
+	 * The address of the client that sent the connection request.
+	 */
 	public InetSocketAddress clientAddress;
+
+	/**
+	 * The client timestamp.
+	 */
 	public long clientTimestamp;
+
+	/**
+	 * The server timestamp.
+	 */
 	public long serverTimestamp;
+
 	private boolean failed;
 
 	public ConnectionRequestAccepted() {

@@ -33,32 +33,65 @@ package com.whirvis.jraknet.identifier;
 import com.whirvis.jraknet.protocol.ConnectionType;
 
 /**
- * Represents an identifier sent from a server on the local network, any class
- * extending this only has to override the <code>build()</code> method in order
- * to have their identifier be dynamic.
+ * Represents an identifier sent from a server in response to a client ping. Any
+ * classes that extends this class must override the {@link #build()} method in
+ * order to make use of the identifier capabilities.
  *
  * @author Trent Summerlin
+ * @since JRakNet v1.0
+ * @see #build()
  */
-public class Identifier {
+public class Identifier implements Cloneable {
 
 	private final String identifier;
 	private final ConnectionType connectionType;
 
+	/**
+	 * Creates an identifier.
+	 * 
+	 * @param identifier
+	 *            the identifier text.
+	 * @param connectionType
+	 *            the protocol implementation that sent the identifier.
+	 * @see com.whirvis.jraknet.protocol.ConnectionType ConnectionType
+	 */
 	public Identifier(String identifier, ConnectionType connectionType) {
 		this.identifier = identifier;
 		this.connectionType = connectionType;
 	}
 
+	/**
+	 * Creates an identifier with the connection type defaulting to the
+	 * {@link com.whirvis.jraknet.protocol.ConnectionType#JRAKNET JRAKNET}
+	 * connection type.
+	 * 
+	 * @param identifier
+	 *            the identifier text.
+	 */
 	public Identifier(String identifier) {
 		this.identifier = identifier;
 		this.connectionType = ConnectionType.JRAKNET;
 	}
 
+	/**
+	 * Creates an identifier with the connection type defaulting to the
+	 * {@link com.whirvis.jraknet.protocol.ConnectionType#JRAKNET JRAKNET}
+	 * connection type.
+	 * 
+	 * @param identifier
+	 *            the identifier to grab the information from.
+	 */
 	public Identifier(Identifier identifier) {
 		this.identifier = identifier.identifier;
 		this.connectionType = identifier.connectionType;
 	}
 
+	/**
+	 * Creates an identifier with the identifier text being set to
+	 * <code>null</code> and the connection type defaulting to the
+	 * {@link com.whirvis.jraknet.protocol.ConnectionType#JRAKNET JRAKNET}
+	 * connection type.
+	 */
 	public Identifier() {
 		this.identifier = null;
 		this.connectionType = ConnectionType.JRAKNET;
@@ -77,6 +110,7 @@ public class Identifier {
 	 * Returns the connection type of the sender of the identifier.
 	 * 
 	 * @return the connection type of the sender of the identifier.
+	 * @see com.whirvis.jraknet.protocol.ConnectionType ConnectionType
 	 */
 	public final ConnectionType getConnectionType() {
 		return this.connectionType;
@@ -88,15 +122,8 @@ public class Identifier {
 	}
 
 	@Override
-	public boolean equals(Object object) {
-		if (object instanceof Identifier) {
-			Identifier identifier = (Identifier) object;
-			if (this.build() == null && identifier.build() == null) {
-				return true; // We must check this first
-			}
-			return this.build().equals(identifier.build());
-		}
-		return false;
+	public Object clone() {
+		return new Identifier(identifier, connectionType);
 	}
 
 }

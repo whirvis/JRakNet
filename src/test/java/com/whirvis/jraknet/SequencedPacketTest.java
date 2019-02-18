@@ -139,7 +139,7 @@ public class SequencedPacketTest {
 				// Only accept the packet if it's from the same device
 				try {
 					if (!InetAddress.getLocalHost().equals(session.getAddress().getAddress())) {
-						server.removeSession(session, "Session is not from local address");
+						server.disconnectClient(session, "Session is not from local address");
 						server.blockAddress(session.getInetAddress(), BlockedAddress.PERMANENT_BLOCK);
 						return; // The sender is not from our address!
 					}

@@ -61,7 +61,7 @@ public class PacketDataInputStream extends InputStream implements DataInput {
 	@Override
 	public int read() throws IOException {
 		if (packet.remaining() <= 0) {
-			return -1;
+			return -1; // No data remaining
 		} else {
 			return packet.readUnsignedByte();
 		}

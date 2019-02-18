@@ -33,9 +33,10 @@ package com.whirvis.jraknet.identifier;
 import com.whirvis.jraknet.RakNet;
 
 /**
- * Represents an identifier from a Minecraft server.
+ * Represents a Minecraft identifier.
  *
  * @author Trent Summerlin
+ * @since JRakNet v1.0
  */
 public class MinecraftIdentifier extends Identifier {
 
@@ -56,7 +57,7 @@ public class MinecraftIdentifier extends Identifier {
 	 */
 	private static boolean verifyVersionTag(String versionTag) {
 		if (versionTag == null) {
-			return false;
+			return false; // No version tag to check
 		}
 		for (char vtc : versionTag.toCharArray()) {
 			boolean valid = false;
@@ -80,6 +81,7 @@ public class MinecraftIdentifier extends Identifier {
 	 *            the identifier to check.
 	 * @return <code>true</code> if the identifier is a Minecraft identifier,
 	 *         <code>false</code> otherwise.
+	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public static boolean isMinecraftIdentifier(Identifier identifier) {
 		return identifier.build().startsWith(HEADER);
@@ -96,9 +98,7 @@ public class MinecraftIdentifier extends Identifier {
 	private boolean legacy;
 
 	/**
-	 * Constructs an <code>MinecraftIdentifier</code> with the server
-	 * name, server protocol, version tag, online player count, max player
-	 * count, globally unique ID, world name, and gamemode.
+	 * Creates a Minecraft identifier.
 	 * 
 	 * @param serverName
 	 *            the server name.
@@ -137,27 +137,25 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Constructs a <code>MinecraftIdentifer</code> by parsing the
-	 * <code>Identifier</code>.
+	 * Creates a Minecraft identifier from an existing identifier.
 	 * 
 	 * @param identifier
-	 *            the <code>Identifier</code> to parse.
+	 *            the identifier whose text to parse.
 	 */
 	public MinecraftIdentifier(Identifier identifier) {
 		super(identifier);
 		String[] data = identifier.build().split(SEPARATOR);
-		if (data.length >= DATA_COUNT_LEGACY) {
-			// Validate header
-			if (data[0].equals(HEADER) == false) {
-				throw new IllegalArgumentException("Invalid header");
-			}
+		if (data.length <= 0) {
+			throw new IllegalArgumentException("Invalid header");
+		} else if (data[0].equals(HEADER) == false) {
+			throw new IllegalArgumentException("Invalid header");
+		}
 
-			// Convert empty data strings to null
-			for (int i = 0; i < data.length; i++) {
-				data[i] = (data[i].length() > 0 ? data[i] : null);
-			}
-
-			// Parse data
+		// Parse data
+		for (int i = 0; i < data.length; i++) {
+			data[i] = (data[i].length() > 0 ? data[i] : null);
+		}
+		if (data.length > DATA_COUNT_LEGACY) {
 			this.serverName = data[1];
 			this.serverProtocol = RakNet.parseIntPassive(data[2]);
 			this.versionTag = data[3];
@@ -175,25 +173,26 @@ public class MinecraftIdentifier extends Identifier {
 			if (verifyVersionTag(this.versionTag) == false) {
 				throw new IllegalArgumentException("Invalid version tag");
 			}
+		} else {
+			throw new IllegalArgumentException("Identifier too short");
 		}
 	}
 
 	/**
-	 * Constructs a <code>MinecraftIdentifer</code> by parsing the
-	 * String identifier.
+	 * Creates a Minecraft identifier from an existing identifier.
 	 * 
 	 * @param identifier
-	 *            the identifier to parse.
+	 *            the identifier whose text to parse.
 	 */
 	public MinecraftIdentifier(String identifier) {
 		this(new Identifier(identifier));
 	}
 
 	/**
-	 * Constructs a blank <code>MinecraftIdentifier</code>.
+	 * Creates a blank Minecraft identifier.
 	 */
 	public MinecraftIdentifier() {
-		this("", -1, "", -1, -1, -1, "", "");
+		this(null, -1, null, -1, -1, -1, null, null);
 	}
 
 	/**
@@ -364,6 +363,8 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
+	 * Returns whether or not the identifier is in legacy mode.
+	 * 
 	 * @return <code>true</code> if the identifier is in legacy mode,
 	 *         <code>false</code> otherwise.
 	 */
@@ -371,16 +372,30 @@ public class MinecraftIdentifier extends Identifier {
 		return this.legacy;
 	}
 
+	/**
+	 * Converts the values to a Minecraft identifier string.
+	 * 
+	 * @param values
+	 *            the values to write to the identifier.
+	 * @return the built identifier as a <code>String</code>.
+	 */
+	private String createBuildString(Object... values) {
+		StringBuilder identifierBuilder = new StringBuilder();
+		identifierBuilder.append(HEADER + SEPARATOR);
+		for (int i = 0; i < values.length; i++) {
+			identifierBuilder.append(values[i] != null ? values[i] : "");
+			identifierBuilder.append(i + 1 < values.length ? SEPARATOR : "");
+		}
+		return identifierBuilder.toString();
+	}
+
 	@Override
 	public String build() {
-		if (this.legacy == true) {
-			return (HEADER + SEPARATOR + serverName + SEPARATOR + serverProtocol + SEPARATOR + versionTag + SEPARATOR
-					+ onlinePlayerCount + SEPARATOR + maxPlayerCount);
-		} else {
-			return (HEADER + SEPARATOR + serverName + SEPARATOR + serverProtocol + SEPARATOR + versionTag + SEPARATOR
-					+ onlinePlayerCount + SEPARATOR + maxPlayerCount + SEPARATOR + guid + SEPARATOR + worldName
-					+ SEPARATOR + gamemode);
+		if (legacy == true) {
+			return this.createBuildString(serverName, serverProtocol, versionTag, onlinePlayerCount, maxPlayerCount);
 		}
+		return this.createBuildString(serverName, serverProtocol, versionTag, onlinePlayerCount, maxPlayerCount, guid,
+				worldName, gamemode);
 	}
 
 }

@@ -34,14 +34,44 @@ import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.protocol.MessageIdentifier;
 
+/**
+ * An {@link com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_BANNED
+ * ID_CONNECTION_BANNED} packet. This is sent by the server during client login
+ * if the client has been banned from connecting to the server.
+ * 
+ * @author Trent Summerlin
+ * @since JRakNet v1.0.0
+ * @see com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_BANNED
+ *      ID_CONNECTION_BANNED
+ */
 public class ConnectionBanned extends RakNetPacket {
 
+	/**
+	 * The server's globally unique identifier.
+	 */
 	public long serverGuid;
 
+	/**
+	 * Creates an
+	 * {@link com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_BANNED
+	 * ID_CONNECTION_BANNED} packet to be encoded.
+	 * 
+	 * @see #encode()
+	 */
 	public ConnectionBanned() {
 		super(MessageIdentifier.ID_CONNECTION_BANNED);
 	}
 
+	/**
+	 * Creates an
+	 * {@link com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_BANNED
+	 * ID_CONNECTION_BANNED} packet to be decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
+	 * @see #decode()
+	 */
 	public ConnectionBanned(Packet packet) {
 		super(packet);
 	}
