@@ -32,17 +32,44 @@ package com.whirvis.jraknet.protocol.status;
 
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
 
+/**
+ * A <code>CONNECTED_PONG</code> packet.
+ * <p>
+ * This packet is sent in response of a {@link ConnectedPing CONNECTED_PING}
+ * packet ensuring the sender that the connection is still active.
+ * 
+ * @author Trent Summerlin
+ * @since JRakNet v1.0.0
+ */
 public class ConnectedPong extends RakNetPacket {
 
+	/**
+	 * The timestamp of the sender of the ping.
+	 */
 	public long timestamp;
+
+	/**
+	 * The timestamp of the sender of the pong.
+	 */
 	public long timestampPong;
 
+	/**
+	 * Creates a <code>CONNECTED_PONG</code> packet to be encoded.
+	 * 
+	 * @see #encode()
+	 */
 	public ConnectedPong() {
-		super(MessageIdentifier.ID_CONNECTED_PONG);
+		super(ID_CONNECTED_PONG);
 	}
 
+	/**
+	 * Creates a <code>CONNECTED_PONG</code> packet to be decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
+	 */
 	public ConnectedPong(Packet packet) {
 		super(packet);
 	}
@@ -59,7 +86,7 @@ public class ConnectedPong extends RakNetPacket {
 		if (this.remaining() >= Long.BYTES) {
 			this.timestampPong = this.readLong();
 		} else {
-			this.timestampPong = -1L; // We didn't get a pong timestamp
+			this.timestampPong = -1L;
 		}
 	}
 

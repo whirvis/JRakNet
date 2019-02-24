@@ -32,11 +32,11 @@ package com.whirvis.jraknet.discovery;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.protocol.status.UnconnectedPing;
 import com.whirvis.jraknet.protocol.status.UnconnectedPingOpenConnections;
 
@@ -48,15 +48,22 @@ import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 
 /**
- * Used by the {@link com.whirvis.jraknet.discovery.Discovery Discovery} to
- * server pings in the background.
+ * Used by the {@link Discovery} system to server pings in the background.
+ * <p>
+ * Only one instance of this class can exist at a time. When a discovery
+ * listener is added, if discovery is enabled and there is at least one
+ * discovery address to broadcast pings to then the discovery system will check
+ * if one of these threads is already running. If none exist, one will be
+ * created and started automatically. When there are no listeners, no discovery
+ * addresses, or discovery is disabled, the discovery thread will shutdown and
+ * nullify its own reference in the discovery system. If another listener is
+ * added, the discovery system is enabled, and there is at least one discovery
+ * address, the process will repeat.
  * 
  * @author Trent Summerlin
  * @since JRakNet v2.11.0
- * @see com.whirvis.jraknet.discovery.Discovery Discovery
- * @see com.whirvis.jraknet.discovery.DiscoveredSerer DiscoveredServer
  */
-public class DiscoveryThread extends Thread {
+public final class DiscoveryThread extends Thread {
 
 	private final Logger log;
 	private final Bootstrap bootstrap;
@@ -67,9 +74,6 @@ public class DiscoveryThread extends Thread {
 
 	/**
 	 * Allocates a discovery thread.
-	 * 
-	 * @throws InterruptedException
-	 *             if channel binding is interrupted.
 	 */
 	protected DiscoveryThread() {
 		this.log = LogManager.getLogger("jraknet-discovery-thread");
@@ -81,34 +85,32 @@ public class DiscoveryThread extends Thread {
 		try {
 			this.channel = bootstrap.bind(0).sync().channel();
 		} catch (InterruptedException e) {
-			this.interrupt(); // How unfortunate
+			this.interrupt(); // Cause thread to immediately break out of loop
+			Discovery.setDiscoveryMode(DiscoveryMode.DISABLED);
+			log.error("Failed to bind channel necessary for broadcasting pings, disabled discovery system");
 		}
 		this.setName(log.getName());
-	}
-
-	/**
-	 * Sends a Netty message over the channel raw.
-	 * 
-	 * @param packet
-	 *            the packet to send.
-	 * @param address
-	 *            the address to send the packet to.
-	 */
-	public final void sendNettyMessage(Packet packet, InetSocketAddress address) {
-		channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
-		log.debug("Sent netty message with size of " + packet.size() + " bytes (" + (packet.size() * 8) + " bits) to "
-				+ address);
 	}
 
 	@Override
 	public void run() {
 		log.debug("Started discovery thread");
-		while (Discovery.LISTENERS.size() > 0 && Discovery.getDiscoveryMode() != DiscoveryMode.DISABLED
-				&& Discovery.getDiscoveryAddresses().length > 0 && Discovery.thread == this && !this.isInterrupted()) {
+		while (!Discovery.LISTENERS.isEmpty() && !Discovery.DISCOVERY_ADDRESSES.isEmpty()
+				&& Discovery.discoveryMode != DiscoveryMode.DISABLED && !this.isInterrupted()) {
+			if (Discovery.thread != this) {
+				/*
+				 * Normally we would just break the thread here, but if two of
+				 * these are running it indicates a synchronization problem in
+				 * the code.
+				 */
+				throw new IllegalStateException(
+						"Discovery thread must be this while running, are there multiple discovery threads running?");
+			}
 			try {
 				Thread.sleep(0, 1); // Save CPU usage
 			} catch (InterruptedException e) {
 				this.interrupt(); // Interrupted during sleep
+				continue;
 			}
 			long currentTime = System.currentTimeMillis();
 
@@ -118,11 +120,11 @@ public class DiscoveryThread extends Thread {
 				DiscoveredServer discovered = Discovery.DISCOVERED.get(address);
 				if (discovered.hasTimedOut()) {
 					forgottenServers.add(address);
-					Discovery.callEvent(listener -> listener.onServerForgotten(address, discovered.isExternal()));
+					Discovery.callEvent(listener -> listener.onServerForgotten(discovered));
 				}
 			}
 			Discovery.DISCOVERED.keySet().removeAll(forgottenServers);
-			if (forgottenServers.size() > 0) {
+			if (!forgottenServers.isEmpty()) {
 				log.debug("Forgot " + forgottenServers.size() + " server" + (forgottenServers.size() == 1 ? "" : "s"));
 			}
 
@@ -131,23 +133,31 @@ public class DiscoveryThread extends Thread {
 				UnconnectedPing ping = Discovery.getDiscoveryMode() == DiscoveryMode.OPEN_CONNECTIONS
 						? new UnconnectedPingOpenConnections() : new UnconnectedPing();
 				ping.timestamp = Discovery.getTimestamp();
-				ping.pingId = Discovery.PING_ID;
+				ping.pingId = Discovery.getPingId();
 				ping.encode();
 				if (ping.failed()) {
 					Discovery.setDiscoveryMode(DiscoveryMode.DISABLED);
 					log.error("Failed to encode unconnected ping, disabled discovery system");
 				}
-				for (InetSocketAddress discoveryAddress : Discovery.getDiscoveryAddresses()) {
-					this.sendNettyMessage(ping, discoveryAddress);
-				}
+				Discovery.DISCOVERY_ADDRESSES.keySet().stream()
+						.forEach(address -> channel.writeAndFlush(new DatagramPacket(ping.buffer(), address)));
+
+				log.debug("Sent unconnected ping to " + Discovery.DISCOVERY_ADDRESSES.size() + " server"
+						+ (Discovery.DISCOVERY_ADDRESSES.size() == 1 ? "" : "s"));
 				this.lastPingBroadcast = currentTime;
 			}
-
 		}
-		
+
 		/**
-		 * TODO
+		 * If there are no listeners, no discovery addresses, or discovery is
+		 * simply disabled, we will destroy this thread by nullifying the
+		 * scheduler's reference after the loop has been broken out of. If any
+		 * of these conditions changes, then a new discovery thread will be
+		 * created automatically.
 		 */
+		channel.close();
+		group.shutdownGracefully(0L, 1000L, TimeUnit.MILLISECONDS);
+		this.channel = null;
 		if (Discovery.thread == this) {
 			Discovery.thread = null;
 			log.debug("Terminated discovery thread");

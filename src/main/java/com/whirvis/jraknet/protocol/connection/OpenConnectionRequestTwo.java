@@ -28,7 +28,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.protocol.login;
+package com.whirvis.jraknet.protocol.connection;
 
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -38,41 +38,82 @@ import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.protocol.Failable;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
 
-public class OpenConnectionResponseTwo extends RakNetPacket implements Failable {
+/**
+ * An <code>OPEN_CONNECTION_REQUEST_2</code> packet.
+ * <p>
+ * This packet is sent by the client to the server after receiving a
+ * {@link OpenConnectionResponseOne OPEN_CONNECTION_RESPONSE_1} packet.
+ * 
+ * @author Trent Summerlin
+ * @since JRakNet v1.0.0
+ */
+public class OpenConnectionRequestTwo extends RakNetPacket implements Failable {
 
+	/**
+	 * Whether or not the magic bytes read in the packet are valid.
+	 */
 	public boolean magic;
-	public long serverGuid;
-	public InetSocketAddress clientAddress;
+
+	/**
+	 * The address of the server that the client wishes to connect to.
+	 */
+	public InetSocketAddress address;
+
+	/**
+	 * The maximum transfer unit size the client and the server have agreed
+	 * upon.
+	 */
 	public int maximumTransferUnit;
-	public boolean encryptionEnabled;
+
+	/**
+	 * The client's globally unique ID.
+	 */
+	public long clientGuid;
+
+	/**
+	 * The client connection type.
+	 */
 	public ConnectionType connectionType;
+
+	/**
+	 * Whether or not the packet failed to encode/decode.
+	 */
 	private boolean failed;
 
-	public OpenConnectionResponseTwo(Packet packet) {
-		super(packet);
+	/**
+	 * Creates an <code>OPEN_CONNECTION_REQUEST_2</code> packet to be encoded.
+	 * 
+	 * @see #encode()
+	 */
+	public OpenConnectionRequestTwo() {
+		super(ID_OPEN_CONNECTION_REQUEST_2);
 	}
 
-	public OpenConnectionResponseTwo() {
-		super(MessageIdentifier.ID_OPEN_CONNECTION_REPLY_2);
+	/**
+	 * Creates an <code>OPEN_CONNECTION_REQUEST_2</code> packet to be decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
+	 */
+	public OpenConnectionRequestTwo(Packet packet) {
+		super(packet);
 	}
 
 	@Override
 	public void encode() {
 		try {
 			this.writeMagic();
-			this.writeLong(serverGuid);
-			this.writeAddress(clientAddress);
+			this.writeAddress(address);
 			this.writeUnsignedShort(maximumTransferUnit);
-			this.writeBoolean(encryptionEnabled);
+			this.writeLong(clientGuid);
 			this.writeConnectionType(connectionType);
 		} catch (UnknownHostException | RakNetException e) {
 			this.magic = false;
-			this.serverGuid = 0;
-			this.clientAddress = null;
+			this.address = null;
 			this.maximumTransferUnit = 0;
-			this.encryptionEnabled = false;
+			this.clientGuid = 0;
 			this.connectionType = null;
 			this.clear();
 			this.failed = true;
@@ -83,17 +124,15 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 	public void decode() {
 		try {
 			this.magic = this.checkMagic();
-			this.serverGuid = this.readLong();
-			this.clientAddress = this.readAddress();
+			this.address = this.readAddress();
 			this.maximumTransferUnit = this.readUnsignedShort();
-			this.encryptionEnabled = this.readBoolean();
+			this.clientGuid = this.readLong();
 			this.connectionType = this.readConnectionType();
 		} catch (UnknownHostException | RakNetException e) {
 			this.magic = false;
-			this.serverGuid = 0;
-			this.clientAddress = null;
+			this.address = null;
 			this.maximumTransferUnit = 0;
-			this.encryptionEnabled = false;
+			this.clientGuid = 0;
 			this.connectionType = null;
 			this.clear();
 			this.failed = true;

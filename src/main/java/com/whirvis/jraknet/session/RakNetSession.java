@@ -51,8 +51,8 @@ import com.whirvis.jraknet.protocol.MessageIdentifier;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.message.CustomPacket;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
-import com.whirvis.jraknet.protocol.message.acknowledge.Acknowledge;
-import com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgeType;
+import com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgedPacket;
+import com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgedPacket;
 import com.whirvis.jraknet.protocol.message.acknowledge.Record;
 import com.whirvis.jraknet.protocol.status.ConnectedPing;
 import com.whirvis.jraknet.protocol.status.ConnectedPong;
@@ -211,7 +211,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	/**
 	 * @return the session's port.
 	 */
-	public final int getInetPort() {
+	public final int getPort() {
 		return address.getPort();
 	}
 
@@ -458,7 +458,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		if (updateRecoveryQueue == true) {
 			// Make sure unreliable data is discarded
 			custom.removeUnreliables();
-			if (custom.messages.size() > 0) {
+			if (!custom.messages.isEmpty()) {
 				recoveryQueue.put(custom.sequenceNumber,
 						custom.messages.toArray(new EncapsulatedPacket[custom.messages.size()]));
 			}
@@ -502,7 +502,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 */
 	private final void sendAcknowledge(AcknowledgeType type, Record... records) {
 		// Create Acknowledge packet
-		Acknowledge acknowledge = new Acknowledge(type);
+		AcknowledgedPacket acknowledge = new AcknowledgedPacket(type);
 		for (Record record : records) {
 			acknowledge.records.add(record);
 		}
@@ -511,8 +511,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 
 		// Update packet data
 		this.lastPacketSendTime = System.currentTimeMillis();
-		log.debug("Sent " + acknowledge.records.size() + " records in "
-				+ (type == AcknowledgeType.ACKNOWLEDGED ? "ACK" : "NACK") + " packet");
+		log.debug("Sent " + acknowledge.records.size() + " record" + (acknowledge.records.size() == 1 ? "" : "s")
+				+ " in " + (type == AcknowledgeType.ACKNOWLEDGED ? "ACK" : "NACK") + " packet");
 	}
 
 	/**
@@ -582,7 +582,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 * @param acknowledge
 	 *            the <code>Acknowledge</code> packet to handle.
 	 */
-	public final void handleAcknowledge(Acknowledge acknowledge) {
+	public final void handleAcknowledge(AcknowledgedPacket acknowledge) {
 		if (acknowledge.getType().equals(AcknowledgeType.ACKNOWLEDGED)) {
 			for (Record record : acknowledge.records) {
 				// Get record data
@@ -842,7 +842,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 			}
 
 			// Send packet
-			if (send.size() > 0) {
+			if (!send.isEmpty()) {
 				this.sendCustomPacket(send, true);
 			}
 		}

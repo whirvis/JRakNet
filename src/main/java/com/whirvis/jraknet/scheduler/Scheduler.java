@@ -33,6 +33,9 @@ package com.whirvis.jraknet.scheduler;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.whirvis.jraknet.map.concurrent.ConcurrentLongMap;
 
 /**
@@ -45,8 +48,9 @@ import com.whirvis.jraknet.map.concurrent.ConcurrentLongMap;
  */
 public class Scheduler extends Thread {
 
+	private static final Logger LOG = LogManager.getLogger("jraknet-scheduler");
 	protected static final ConcurrentLongMap<ScheduledTask<?>> TASKS = new ConcurrentLongMap<ScheduledTask<?>>();
-	protected static SchedulerThread thread;
+	protected static SchedulerThread thread = null;
 
 	private Scheduler() {
 		// Static class
@@ -64,25 +68,35 @@ public class Scheduler extends Thread {
 	 * @param operation
 	 *            the consumer operation to execute.
 	 * @param wait
-	 *            how long to wait before initially executing the task, and how
-	 *            long to wait before executing the task again if it executes
-	 *            more than once.
+	 *            how long to wait before initially executing the task in
+	 *            milliseconds, and how long to wait before executing the task
+	 *            again if it executes more than once. To have the task be
+	 *            executed immediately, use
+	 *            {@link com.whirvis.jraknet.scheduler.ScheduledTask#INSTANTANEOUS
+	 *            INSTANTANEOUS}.
 	 * @param count
 	 *            the amount of times the task should be executed. To have the
 	 *            task be executed indefinitely, use
 	 *            {@link com.whirvis.jraknet.scheduler.ScheduledTask#INFINITE
-	 *            SchedulerTask.INFINITE}.
+	 *            INFINITE}.
 	 * @param <T>
 	 *            the type of the input to the operation.
+	 * @throws NullPointerException
+	 *             if the command is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the execution count is less than zero and not equal to
+	 *             {@value com.whirvis.jraknet.scheduler.ScheduledTask#INFINITE}.
 	 * @return the task ID.
 	 */
-	private static <T> long schedule(boolean sync, T obj, Consumer<T> operation, long wait, int count) {
+	private static synchronized <T> long schedule(boolean sync, T obj, Consumer<T> operation, long wait, int count)
+			throws NullPointerException, IllegalArgumentException {
 		long taskId = UUID.randomUUID().getMostSignificantBits();
 		TASKS.put(taskId, new ScheduledTask<T>(sync, obj, operation, wait, count));
 		if (thread == null) {
 			thread = new SchedulerThread();
 			thread.start();
 		}
+		LOG.debug("Scheduled " + (sync ? "synchronous" : "asynchronous") + " task with ID " + Long.toHexString(taskId));
 		return taskId;
 	}
 
@@ -99,18 +113,26 @@ public class Scheduler extends Thread {
 	 * @param wait
 	 *            how long to wait before initially executing the task, and how
 	 *            long to wait before executing the task again if it executes
-	 *            more than once.
+	 *            more than once. To have the task be executed immediately, use
+	 *            {@link com.whirvis.jraknet.scheduler.ScheduledTask#INSTANTANEOUS
+	 *            INSTANTANEOUS}.
 	 * @param count
 	 *            the amount of times the task should be executed. To have the
 	 *            task be executed indefinitely, use
 	 *            {@link com.whirvis.jraknet.scheduler.ScheduledTask#INFINITE
-	 *            SchedulerTask.INFINITE}.
+	 *            INFINITE}.
 	 * @param <T>
 	 *            the type of the input to the operation.
 	 * @return the task ID.
+	 * @throws NullPointerException
+	 *             if the operation is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the execution count is less than zero and not equal to
+	 *             {@value com.whirvis.jraknet.scheduler.ScheduledTask#INFINITE}.
 	 * @see #scheduleAsync(Object, Consumer, long, int)
 	 */
-	public static <T> long scheduleSync(T obj, Consumer<T> operation, long wait, int count) {
+	public static <T> long scheduleSync(T obj, Consumer<T> operation, long wait, int count)
+			throws NullPointerException, IllegalArgumentException {
 		return schedule(true, obj, operation, wait, count);
 	}
 
@@ -127,16 +149,21 @@ public class Scheduler extends Thread {
 	 * @param wait
 	 *            how long to wait before initially executing the task, and how
 	 *            long to wait before executing the task again if it executes
-	 *            more than once.
+	 *            more than once. To have the task be executed immediately, use
+	 *            {@link com.whirvis.jraknet.scheduler.ScheduledTask#INSTANTANEOUS
+	 *            INSTANTANEOUS}.
 	 * @param repeat
 	 *            <code>true</code> if the task should indefinitely repeat,
 	 *            <code>false</code> otherwise.
 	 * @param <T>
 	 *            the type of the input to the operation.
 	 * @return the task ID.
+	 * @throws NullPointerException
+	 *             if the operation is <code>null</code>.
 	 * @see #schduleAsync(Object, Consumer, long, boolean)
 	 */
-	public static <T> long scheduleSync(T obj, Consumer<T> operation, long wait, boolean repeat) {
+	public static <T> long scheduleSync(T obj, Consumer<T> operation, long wait, boolean repeat)
+			throws NullPointerException {
 		return scheduleSync(obj, operation, wait, repeat ? ScheduledTask.INFINITE : 1);
 	}
 
@@ -153,13 +180,17 @@ public class Scheduler extends Thread {
 	 * @param wait
 	 *            how long to wait before initially executing the task, and how
 	 *            long to wait before executing the task again if it executes
-	 *            more than once.
+	 *            more than once. To have the task be executed immediately, use
+	 *            {@link com.whirvis.jraknet.scheduler.ScheduledTask#INSTANTANEOUS
+	 *            INSTANTANEOUS}.
 	 * @param <T>
 	 *            the type of the input to the operation.
 	 * @return the task ID.
+	 * @throws NullPointerException
+	 *             if the operation is <code>null</code>.
 	 * @see #scheduleAsync(Object, Consumer, long)
 	 */
-	public static <T> long scheduleSync(T obj, Consumer<T> operation, long wait) {
+	public static <T> long scheduleSync(T obj, Consumer<T> operation, long wait) throws NullPointerException {
 		return scheduleSync(obj, operation, wait, 1);
 	}
 
@@ -177,13 +208,19 @@ public class Scheduler extends Thread {
 	 *            the amount of times the task should be executed. To have the
 	 *            task be executed indefinitely, use
 	 *            {@link com.whirvis.jraknet.scheduler.ScheduledTask#INFINITE
-	 *            SchedulerTask.INFINITE}.
+	 *            INFINITE}.
 	 * @param <T>
 	 *            the type of the input to the operation.
 	 * @return the task ID.
+	 * @throws NullPointerException
+	 *             if the operation is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the execution count is less than zero and not equal to
+	 *             {@value com.whirvis.jraknet.scheduler.ScheduledTask#INFINITE}.
 	 * @see #scheduleAsync(Object, Consumer, int)
 	 */
-	public static <T> long scheduleSync(T obj, Consumer<T> operation, int count) {
+	public static <T> long scheduleSync(T obj, Consumer<T> operation, int count)
+			throws NullPointerException, IllegalArgumentException {
 		return scheduleSync(obj, operation, ScheduledTask.INSTANTANEOUS, count);
 	}
 
@@ -200,16 +237,20 @@ public class Scheduler extends Thread {
 	 * @param wait
 	 *            how long to wait before initially executing the task, and how
 	 *            long to wait before executing the task again if it executes
-	 *            more than once.
+	 *            more than once. To have the task be executed immediately, use
+	 *            {@link com.whirvis.jraknet.scheduler.ScheduledTask#INSTANTANEOUS
+	 *            INSTANTANEOUS}.
 	 * @param repeat
 	 *            <code>true</code> if the task should indefinitely repeat,
 	 *            <code>false</code> otherwise.
 	 * @param <T>
 	 *            the type of the input to the operation.
 	 * @return the task ID.
+	 * @throws NullPointerException
+	 *             if the operation is <code>null</code>.
 	 * @see #scheduleAsync(Object, Consumer, boolean)
 	 */
-	public static <T> long scheduleSync(T obj, Consumer<T> operation, boolean repeat) {
+	public static <T> long scheduleSync(T obj, Consumer<T> operation, boolean repeat) throws NullPointerException {
 		return scheduleSync(obj, operation, ScheduledTask.INSTANTANEOUS, repeat ? ScheduledTask.INFINITE : 1);
 	}
 
@@ -226,9 +267,11 @@ public class Scheduler extends Thread {
 	 * @param <T>
 	 *            the type of the input to the operation.
 	 * @return the task ID.
+	 * @throws NullPointerException
+	 *             if the operation is <code>null</code>.
 	 * @see #scheduleAsync(Object, Consumer)
 	 */
-	public static <T> long scheduleSync(T obj, Consumer<T> operation) {
+	public static <T> long scheduleSync(T obj, Consumer<T> operation) throws NullPointerException {
 		return scheduleSync(obj, operation, ScheduledTask.INSTANTANEOUS, 1);
 	}
 
@@ -245,18 +288,26 @@ public class Scheduler extends Thread {
 	 * @param wait
 	 *            how long to wait before initially executing the task, and how
 	 *            long to wait before executing the task again if it executes
-	 *            more than once.
+	 *            more than once. To have the task be executed immediately, use
+	 *            {@link com.whirvis.jraknet.scheduler.ScheduledTask#INSTANTANEOUS
+	 *            INSTANTANEOUS}.
 	 * @param count
 	 *            the amount of times the task should be executed. To have the
 	 *            task be executed indefinitely, use
 	 *            {@link com.whirvis.jraknet.scheduler.ScheduledTask#INFINITE
-	 *            SchedulerTask.INFINITE}.
+	 *            INFINITE}.
 	 * @param <T>
 	 *            the type of the input to the operation.
 	 * @return the task ID.
+	 * @throws NullPointerException
+	 *             if the operation is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the execution count is less than zero and not equal to
+	 *             {@value com.whirvis.jraknet.scheduler.ScheduledTask#INFINITE}.
 	 * @see #scheduleSync(Object, Consumer, long, int)
 	 */
-	public static <T> long scheduleAsync(T obj, Consumer<T> operation, long wait, int count) {
+	public static <T> long scheduleAsync(T obj, Consumer<T> operation, long wait, int count)
+			throws NullPointerException, IllegalArgumentException {
 		return schedule(false, obj, operation, wait, count);
 	}
 
@@ -273,16 +324,21 @@ public class Scheduler extends Thread {
 	 * @param wait
 	 *            how long to wait before initially executing the task, and how
 	 *            long to wait before executing the task again if it executes
-	 *            more than once.
+	 *            more than once. To have the task be executed immediately, use
+	 *            {@link com.whirvis.jraknet.scheduler.ScheduledTask#INSTANTANEOUS
+	 *            INSTANTANEOUS}.
 	 * @param repeat
 	 *            <code>true</code> if the task should indefinitely repeat,
 	 *            <code>false</code> otherwise.
 	 * @param <T>
 	 *            the type of the input to the operation.
 	 * @return the task ID.
+	 * @throws NullPointerException
+	 *             if the operation is <code>null</code>.
 	 * @see #scheduleSync(Object, Consumer, long, boolean)
 	 */
-	public static <T> long scheduleAsync(T obj, Consumer<T> operation, long wait, boolean repeat) {
+	public static <T> long scheduleAsync(T obj, Consumer<T> operation, long wait, boolean repeat)
+			throws NullPointerException {
 		return scheduleAsync(obj, operation, wait, repeat ? ScheduledTask.INFINITE : 1);
 	}
 
@@ -303,9 +359,11 @@ public class Scheduler extends Thread {
 	 * @param <T>
 	 *            the type of the input to the operation.
 	 * @return the task ID.
+	 * @throws NullPointerException
+	 *             if the operation is <code>null</code>.
 	 * @see #scheduleSync(Object, Consumer, long)
 	 */
-	public static <T> long scheduleAsync(T obj, Consumer<T> operation, long wait) {
+	public static <T> long scheduleAsync(T obj, Consumer<T> operation, long wait) throws NullPointerException {
 		return scheduleAsync(obj, operation, wait, 1);
 	}
 
@@ -323,13 +381,19 @@ public class Scheduler extends Thread {
 	 *            the amount of times the task should be executed. To have the
 	 *            task be executed indefinitely, use
 	 *            {@link com.whirvis.jraknet.scheduler.ScheduledTask#INFINITE
-	 *            SchedulerTask.INFINITE}.
+	 *            INFINITE}.
 	 * @param <T>
 	 *            the type of the input to the operation.
 	 * @return the task ID.
+	 * @throws NullPointerException
+	 *             if the operation is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the execution count is less than zero and not equal to
+	 *             {@value com.whirvis.jraknet.scheduler.ScheduledTask#INFINITE}.
 	 * @see #scheduleSync(Object, Consumer, int)
 	 */
-	public static <T> long scheduleAsync(T obj, Consumer<T> operation, int count) {
+	public static <T> long scheduleAsync(T obj, Consumer<T> operation, int count)
+			throws NullPointerException, IllegalArgumentException {
 		return scheduleAsync(obj, operation, ScheduledTask.INSTANTANEOUS, count);
 	}
 
@@ -353,9 +417,11 @@ public class Scheduler extends Thread {
 	 * @param <T>
 	 *            the type of the input to the operation.
 	 * @return the task ID.
+	 * @throws NullPointerException
+	 *             if the operation is <code>null</code>.
 	 * @see #scheuleSync(Object, Consumer, boolean)
 	 */
-	public static <T> long scheduleAsync(T obj, Consumer<T> operation, boolean repeat) {
+	public static <T> long scheduleAsync(T obj, Consumer<T> operation, boolean repeat) throws NullPointerException {
 		return scheduleAsync(obj, operation, ScheduledTask.INSTANTANEOUS, repeat ? ScheduledTask.INFINITE : 1);
 	}
 
@@ -372,9 +438,11 @@ public class Scheduler extends Thread {
 	 * @param <T>
 	 *            the type of the input to the operation.
 	 * @return the task ID.
+	 * @throws NullPointerException
+	 *             if the operation is <code>null</code>.
 	 * @see #scheduleSync(Object, Consumer)
 	 */
-	public static <T> long scheduleAsync(T obj, Consumer<T> operation) {
+	public static <T> long scheduleAsync(T obj, Consumer<T> operation) throws NullPointerException {
 		return scheduleAsync(obj, operation, ScheduledTask.INSTANTANEOUS, 1);
 	}
 
@@ -389,7 +457,11 @@ public class Scheduler extends Thread {
 	 *         <code>false</code> otherwise.
 	 */
 	public static boolean cancelTask(long taskId) {
-		return TASKS.remove(taskId) != null;
+		if (TASKS.remove(taskId) != null) {
+			LOG.debug("Cancelled task with ID " + Long.toHexString(taskId));
+			return true;
+		}
+		return false;
 	}
 
 }

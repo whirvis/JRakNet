@@ -28,57 +28,72 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.protocol.login;
+package com.whirvis.jraknet.protocol.connection;
 
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
 
-public class OpenConnectionResponseOne extends RakNetPacket {
+/**
+ * An <code>INCOMPATIBLE_PROTOCOL_VERSION</code> packet.
+ * <p>
+ * This packet is sent by the server to the client after receiving a
+ * {@link ConnectionRequestOne CONNECTION_REQUEST_1} packet to indicate that the
+ * client is unable to connect due to unmatching protocols versions.
+ * 
+ * @author Trent Summerlin
+ * @since JRakNet v1.0.0
+ */
+public class IncompatibleProtocolVersion extends RakNetPacket {
 
-	public static final byte USE_SECURITY_BIT = 0x01;
-
-	public boolean magic;
-	public long serverGuid;
-	public int maximumTransferUnit;
-
-	/*
-	 * JRakNet does not support RakNet's built in security function, it is
-	 * poorly documented
+	/**
+	 * The network protocol the server is using.
 	 */
-	public boolean useSecurity = false;
+	public int networkProtocol;
 
-	public OpenConnectionResponseOne(Packet packet) {
-		super(packet);
+	/**
+	 * Returns whether or not the magic is valid.
+	 */
+	public boolean magic;
+
+	/**
+	 * The server's globally unique ID.
+	 */
+	public long serverGuid;
+
+	/**
+	 * Creates an <code>INCOMPATIBLE_PROTOCOL_VERSION</code> packet to be
+	 * encoded.
+	 * 
+	 * @see #encode()
+	 */
+	public IncompatibleProtocolVersion() {
+		super(ID_INCOMPATIBLE_PROTOCOL_VERSION);
 	}
 
-	public OpenConnectionResponseOne() {
-		super(MessageIdentifier.ID_OPEN_CONNECTION_REPLY_1);
+	/**
+	 * Creates an <code>INCOMPATIBLE_PROTOCOL_VERSION</code> packet to be
+	 * decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
+	 */
+	public IncompatibleProtocolVersion(Packet packet) {
+		super(packet);
 	}
 
 	@Override
 	public void encode() {
+		this.writeUnsignedByte(networkProtocol);
 		this.writeMagic();
 		this.writeLong(serverGuid);
-
-		// Set security flags
-		byte securityFlags = 0x00;
-		securityFlags |= (useSecurity ? USE_SECURITY_BIT : 0x00);
-		this.writeUnsignedByte(securityFlags);
-		this.writeUnsignedShort(maximumTransferUnit);
 	}
 
 	@Override
 	public void decode() {
+		this.networkProtocol = this.readUnsignedByte();
 		this.magic = this.checkMagic();
 		this.serverGuid = this.readLong();
-
-		byte securityFlags = 0x00;
-		securityFlags |= this.readUnsignedByte(); // Use security
-		if ((securityFlags & USE_SECURITY_BIT) == USE_SECURITY_BIT) {
-			this.useSecurity = true;
-		}
-		this.maximumTransferUnit = this.readUnsignedShort();
 	}
 
 }

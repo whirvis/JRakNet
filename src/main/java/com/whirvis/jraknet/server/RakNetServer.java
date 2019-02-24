@@ -34,10 +34,14 @@ import static com.whirvis.jraknet.protocol.MessageIdentifier.*;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.IntFunction;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,15 +54,15 @@ import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.identifier.Identifier;
 import com.whirvis.jraknet.protocol.MessageIdentifier;
 import com.whirvis.jraknet.protocol.Reliability;
-import com.whirvis.jraknet.protocol.login.ConnectionBanned;
-import com.whirvis.jraknet.protocol.login.IncompatibleProtocol;
-import com.whirvis.jraknet.protocol.login.OpenConnectionRequestOne;
-import com.whirvis.jraknet.protocol.login.OpenConnectionRequestTwo;
-import com.whirvis.jraknet.protocol.login.OpenConnectionResponseOne;
-import com.whirvis.jraknet.protocol.login.OpenConnectionResponseTwo;
+import com.whirvis.jraknet.protocol.connection.ConnectionBanned;
+import com.whirvis.jraknet.protocol.connection.IncompatibleProtocolVersion;
+import com.whirvis.jraknet.protocol.connection.OpenConnectionRequestOne;
+import com.whirvis.jraknet.protocol.connection.OpenConnectionRequestTwo;
+import com.whirvis.jraknet.protocol.connection.OpenConnectionResponseOne;
+import com.whirvis.jraknet.protocol.connection.OpenConnectionResponseTwo;
 import com.whirvis.jraknet.protocol.message.CustomPacket;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
-import com.whirvis.jraknet.protocol.message.acknowledge.Acknowledge;
+import com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgedPacket;
 import com.whirvis.jraknet.protocol.status.UnconnectedPing;
 import com.whirvis.jraknet.protocol.status.UnconnectedPong;
 import com.whirvis.jraknet.scheduler.Scheduler;
@@ -81,6 +85,21 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
  * @author Trent Summerlin
  */
 public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
+	
+	// TODO: PREVENT MULTIPLE CLIENT WITH THE SAME GUID
+
+	/**
+	 * Used to convert a {@link java.util.stream.Stream Stream} to a
+	 * <code>RakNetClientSession[]</code>.
+	 */
+	private static final IntFunction<RakNetClientSession[]> RAKNET_CLIENT_SESSION_FUNCTION = new IntFunction<RakNetClientSession[]>() {
+
+		@Override
+		public RakNetClientSession[] apply(int value) {
+			return new RakNetClientSession[value];
+		}
+
+	};
 
 	/**
 	 * Allows for infinite connections to the server.
@@ -91,29 +110,27 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	private final Logger log;
 	private final long pongId;
 	private final long timestamp;
-	private final int port;
-	private final int maxConnections;
+	private final InetSocketAddress bindAddress;
 	private final int maximumTransferUnit;
+	private int maxConnections;
 	private boolean broadcastingEnabled;
 	private Identifier identifier;
 	private final ConcurrentLinkedQueue<RakNetServerListener> listeners;
-	private Thread serverThread;
-	private final Bootstrap bootstrap;
-	private final EventLoopGroup group;
-	private final RakNetServerHandler handler;
-	private Channel channel;
-	private volatile boolean running;
 	private final ConcurrentHashMap<InetSocketAddress, RakNetClientSession> clients;
+	private Bootstrap bootstrap;
+	private EventLoopGroup group;
+	private RakNetServerHandler handler;
+	private Channel channel;
+	private Thread sessionThread;
+	private volatile boolean running;
 
 	/**
 	 * Creates a RakNet server.
 	 * 
-	 * @param port
-	 *            the server port.
-	 * @param maxConnections
-	 *            the maximum number of connections, A value of
-	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
-	 *            number of connections.
+	 * @param address
+	 *            the address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
 	 * @param maximumTransferUnit
 	 *            the highest maximum transfer unit a client can use. The
 	 *            maximum transfer unit is the maximum number of bytes that can
@@ -122,42 +139,305 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            connection (this is handled automatically by
 	 *            {@link com.whirvis.jrkanet.session.RakNetSession
 	 *            RakNetSession}).
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
 	 * @param identifier
 	 *            the identifier that will be sent in response to server pings
 	 *            if server broadcasting is enabled. A <code>null</code>
 	 *            identifier means nothing will be sent in response to server
 	 *            pings, even if server broadcasting is enabled.
 	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
 	 * @throws IllegalArgumentException
-	 *             if the <code>maximumTransferUnit</code> size is less than
+	 *             if the maximum connections is less than zero and not equal to
+	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
+	 *             size is less than
 	 *             {@value com.whirvis.jraknet.RakNet#MINIMUM_MTU_SIZE}
 	 */
-	public RakNetServer(int port, int maxConnections, int maximumTransferUnit, Identifier identifier) {
-		if (maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE) {
+	public RakNetServer(InetSocketAddress address, int maximumTransferUnit, int maxConnections, Identifier identifier)
+			throws NullPointerException, IllegalArgumentException {
+		if (address == null) {
+			throw new NullPointerException("Address cannot be null");
+		} else if (maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE) {
 			throw new IllegalArgumentException(
 					"Maximum transfer unit can be no smaller than " + RakNet.MINIMUM_MTU_SIZE);
+		} else if (maxConnections < 0 && maxConnections != INFINITE_CONNECTIONS) {
+			throw new IllegalArgumentException(
+					"Maximum connections must be greater than or equal to zero or negative one (for infinite connections)");
 		}
-
-		// Generate server information
 		UUID uuid = UUID.randomUUID();
 		this.guid = uuid.getMostSignificantBits();
-		this.log = LogManager.getLogger("RakNet server #" + Long.toHexString(guid).toUpperCase());
+		this.log = LogManager.getLogger("jraknet-server-" + Long.toHexString(guid));
 		this.pongId = uuid.getLeastSignificantBits();
 		this.timestamp = System.currentTimeMillis();
-		this.port = port;
+		this.bindAddress = address;
 		this.maxConnections = maxConnections;
 		this.maximumTransferUnit = maximumTransferUnit;
 		this.broadcastingEnabled = true;
 		this.identifier = identifier;
 		this.listeners = new ConcurrentLinkedQueue<RakNetServerListener>();
-
-		// Initiate networking
-		this.bootstrap = new Bootstrap();
-		this.group = new NioEventLoopGroup();
-		this.handler = new RakNetServerHandler(this);
-		bootstrap.handler(handler);
 		this.clients = new ConcurrentHashMap<InetSocketAddress, RakNetClientSession>();
+	}
 
+	/**
+	 * Creates a RakNet server.
+	 * 
+	 * @param address
+	 *            the address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param maximumTransferUnit
+	 *            the highest maximum transfer unit a client can use. The
+	 *            maximum transfer unit is the maximum number of bytes that can
+	 *            be sent in one packet. If a packet exceeds this size, it is
+	 *            automatically split up so that it can still be sent over the
+	 *            connection (this is handled automatically by
+	 *            {@link com.whirvis.jrkanet.session.RakNetSession
+	 *            RakNetSession}).
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than zero and not equal to
+	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
+	 *             size is less than
+	 *             {@value com.whirvis.jraknet.RakNet#MINIMUM_MTU_SIZE}
+	 */
+	public RakNetServer(InetSocketAddress address, int maximumTransferUnit, int maxConnections)
+			throws NullPointerException, IllegalArgumentException {
+		this(address, maximumTransferUnit, maxConnections, null);
+	}
+
+	/**
+	 * Creates a RakNet server.
+	 * 
+	 * @param address
+	 *            the IP address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maximumTransferUnit
+	 *            the highest maximum transfer unit a client can use. The
+	 *            maximum transfer unit is the maximum number of bytes that can
+	 *            be sent in one packet. If a packet exceeds this size, it is
+	 *            automatically split up so that it can still be sent over the
+	 *            connection (this is handled automatically by
+	 *            {@link com.whirvis.jrkanet.session.RakNetSession
+	 *            RakNetSession}).
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @param identifier
+	 *            the identifier that will be sent in response to server pings
+	 *            if server broadcasting is enabled. A <code>null</code>
+	 *            identifier means nothing will be sent in response to server
+	 *            pings, even if server broadcasting is enabled.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than zero and not equal to
+	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
+	 *             size is less than
+	 *             {@value com.whirvis.jraknet.RakNet#MINIMUM_MTU_SIZE}
+	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
+	 */
+	public RakNetServer(InetAddress address, int port, int maximumTransferUnit, int maxConnections,
+			Identifier identifier) throws NullPointerException, IllegalArgumentException {
+		this(new InetSocketAddress(address, port), maximumTransferUnit, maxConnections, identifier);
+	}
+
+	/**
+	 * Creates a RakNet server.
+	 * 
+	 * @param address
+	 *            the IP address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maximumTransferUnit
+	 *            the highest maximum transfer unit a client can use. The
+	 *            maximum transfer unit is the maximum number of bytes that can
+	 *            be sent in one packet. If a packet exceeds this size, it is
+	 *            automatically split up so that it can still be sent over the
+	 *            connection (this is handled automatically by
+	 *            {@link com.whirvis.jrkanet.session.RakNetSession
+	 *            RakNetSession}).
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than zero and not equal to
+	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
+	 *             size is less than
+	 *             {@value com.whirvis.jraknet.RakNet#MINIMUM_MTU_SIZE}
+	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
+	 */
+	public RakNetServer(InetAddress address, int port, int maximumTransferUnit, int maxConnections)
+			throws NullPointerException, IllegalArgumentException {
+		this(address, port, maximumTransferUnit, maxConnections, null);
+	}
+
+	/**
+	 * Creates a RakNet server.
+	 * 
+	 * @param address
+	 *            the IP address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maximumTransferUnit
+	 *            the highest maximum transfer unit a client can use. The
+	 *            maximum transfer unit is the maximum number of bytes that can
+	 *            be sent in one packet. If a packet exceeds this size, it is
+	 *            automatically split up so that it can still be sent over the
+	 *            connection (this is handled automatically by
+	 *            {@link com.whirvis.jrkanet.session.RakNetSession
+	 *            RakNetSession}).
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @param identifier
+	 *            the identifier that will be sent in response to server pings
+	 *            if server broadcasting is enabled. A <code>null</code>
+	 *            identifier means nothing will be sent in response to server
+	 *            pings, even if server broadcasting is enabled.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>bindAddress</code> could be
+	 *             found, or if a scope_id was specified for a global IPv6
+	 *             address.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than zero and not equal to
+	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
+	 *             size is less than
+	 *             {@value com.whirvis.jraknet.RakNet#MINIMUM_MTU_SIZE}
+	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
+	 */
+	public RakNetServer(String address, int port, int maximumTransferUnit, int maxConnections, Identifier identifier)
+			throws UnknownHostException, NullPointerException, IllegalArgumentException {
+		this(InetAddress.getByName(address), port, maximumTransferUnit, maxConnections, identifier);
+	}
+
+	/**
+	 * Creates a RakNet server.
+	 * 
+	 * @param address
+	 *            the IP address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maximumTransferUnit
+	 *            the highest maximum transfer unit a client can use. The
+	 *            maximum transfer unit is the maximum number of bytes that can
+	 *            be sent in one packet. If a packet exceeds this size, it is
+	 *            automatically split up so that it can still be sent over the
+	 *            connection (this is handled automatically by
+	 *            {@link com.whirvis.jrkanet.session.RakNetSession
+	 *            RakNetSession}).
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>bindAddress</code> could be
+	 *             found, or if a scope_id was specified for a global IPv6
+	 *             address.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than zero and not equal to
+	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
+	 *             size is less than
+	 *             {@value com.whirvis.jraknet.RakNet#MINIMUM_MTU_SIZE}
+	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
+	 */
+	public RakNetServer(String address, int port, int maximumTransferUnit, int maxConnections)
+			throws UnknownHostException, NullPointerException, IllegalArgumentException {
+		this(address, port, maximumTransferUnit, maxConnections, null);
+	}
+
+	/**
+	 * Creates a RakNet server.
+	 * 
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maximumTransferUnit
+	 *            the highest maximum transfer unit a client can use. The
+	 *            maximum transfer unit is the maximum number of bytes that can
+	 *            be sent in one packet. If a packet exceeds this size, it is
+	 *            automatically split up so that it can still be sent over the
+	 *            connection (this is handled automatically by
+	 *            {@link com.whirvis.jrkanet.session.RakNetSession
+	 *            RakNetSession}).
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @param identifier
+	 *            the identifier that will be sent in response to server pings
+	 *            if server broadcasting is enabled. A <code>null</code>
+	 *            identifier means nothing will be sent in response to server
+	 *            pings, even if server broadcasting is enabled.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than zero and not equal to
+	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
+	 *             size is less than
+	 *             {@value com.whirvis.jraknet.RakNet#MINIMUM_MTU_SIZE}
+	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
+	 */
+	public RakNetServer(int port, int maximumTransferUnit, int maxConnections, Identifier identifier)
+			throws NullPointerException, IllegalArgumentException {
+		this(new InetSocketAddress((InetAddress) null, port), maximumTransferUnit, maxConnections, identifier);
+	}
+
+	/**
+	 * Creates a RakNet server.
+	 * 
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maximumTransferUnit
+	 *            the highest maximum transfer unit a client can use. The
+	 *            maximum transfer unit is the maximum number of bytes that can
+	 *            be sent in one packet. If a packet exceeds this size, it is
+	 *            automatically split up so that it can still be sent over the
+	 *            connection (this is handled automatically by
+	 *            {@link com.whirvis.jrkanet.session.RakNetSession
+	 *            RakNetSession}).
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than zero and not equal to
+	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
+	 *             size is less than
+	 *             {@value com.whirvis.jraknet.RakNet#MINIMUM_MTU_SIZE}
+	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
+	 */
+	public RakNetServer(int port, int maximumTransferUnit, int maxConnections)
+			throws NullPointerException, IllegalArgumentException {
+		this(port, maximumTransferUnit, maxConnections, null);
 	}
 
 	/**
@@ -188,12 +468,39 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
+	 * Returns the address the server is bound to.
+	 * 
+	 * @return the address the server is bound to.
+	 */
+	public final InetSocketAddress getAddress() {
+		return this.bindAddress;
+	}
+
+	/**
+	 * Returns the IP address the server is bound to.
+	 * 
+	 * @return the IP address the server is bound to.
+	 */
+	public final InetAddress getInetAddress() {
+		return bindAddress.getAddress();
+	}
+
+	/**
 	 * Returns the port the server is bound to.
 	 * 
 	 * @return the port the server is bound to.
 	 */
 	public final int getPort() {
-		return this.port;
+		return bindAddress.getPort();
+	}
+
+	/**
+	 * Returns the maximum transfer unit.
+	 * 
+	 * @return the maximum transfer unit.
+	 */
+	public final int getMaximumTransferUnit() {
+		return this.maximumTransferUnit;
 	}
 
 	/**
@@ -208,12 +515,19 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns the maximum transfer unit.
+	 * Sets the maximum amount of connections allowed at once.
 	 * 
-	 * @return the maximum transfer unit.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
 	 */
-	public final int getMaximumTransferUnit() {
-		return this.maximumTransferUnit;
+	public final void setMaxConnections(int maxConnections) {
+		if (maxConnections < 0 && maxConnections != INFINITE_CONNECTIONS) {
+			throw new IllegalArgumentException(
+					"Maximum connections must be greater than or equal to zero or negative one (for infinite connections)");
+		}
+		this.maxConnections = maxConnections;
 	}
 
 	/**
@@ -260,7 +574,11 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 */
 	public final void setIdentifier(Identifier identifier) {
 		this.identifier = identifier;
-		log.info("Set identifier to \"" + identifier.build() + "\"");
+		if (identifier != null) {
+			log.info("Set identifier to \"" + identifier.build() + "\"");
+		} else {
+			log.info("Removed identifier");
+		}
 	}
 
 	/**
@@ -313,8 +631,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	public final RakNetServer removeListener(RakNetServerListener listener) {
 		if (listeners.remove(listener)) {
 			log.info("Removed listener of class " + listener.getClass().getName());
-		} else {
-			log.warn("Attempted to removed unregistered listener of class " + listener);
 		}
 		return this;
 	}
@@ -337,9 +653,14 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * 
 	 * @param event
 	 *            the event to call.
+	 * @throws NullPointerException
+	 *             if the event is <code>null</code>.
 	 * @see com.whirvis.jraknet.server.RakNetServerListener RakNetServerListener
 	 */
 	protected final void callEvent(Consumer<? super RakNetServerListener> event) {
+		if (event == null) {
+			throw new NullPointerException("Event cannot be null");
+		}
 		listeners.forEach(listener -> Scheduler.scheduleSync(listener, event));
 	}
 
@@ -362,27 +683,123 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns whether or not the client with the address is currently connected
+	 * Returns whether or not a client with the address is currently connected
 	 * to the server.
 	 * 
 	 * @param address
-	 *            the address to check.
+	 *            the address.
 	 * @return <code>true</code> if a client with the address is connected to
 	 *         the server, <code>false</code> otherwise.
 	 */
 	public final boolean hasClient(InetSocketAddress address) {
+		if (address == null) {
+			return false; // No address
+		} else if (address.getAddress() == null) {
+			return false; // No IP address
+		}
 		return clients.containsKey(address);
 	}
 
-	// TODO: InetAddress address, int port
-	// TODO: String address, int port
+	/**
+	 * Returns whether or not a client with the address is currently connected
+	 * to the server.
+	 * 
+	 * @param address
+	 *            the IP address.
+	 * @param port
+	 *            the port.
+	 * @return <code>true</code> if a client with the address is connected to
+	 *         the server, <code>false</code> otherwise.
+	 */
+	public final boolean hasClient(InetAddress address, int port) {
+		if (port < 0x0000 || port > 0xFFFF) {
+			return false; // Invalid port range
+		}
+		return this.hasClient(new InetSocketAddress(address, port));
+	}
+
+	/**
+	 * Returns whether or not a client with the address is currently connected
+	 * to the server.
+	 * 
+	 * @param address
+	 *            the IP address.
+	 * @param port
+	 *            the port.
+	 * @return <code>true</code> if a client with the address is connected to
+	 *         the server, <code>false</code> otherwise.
+	 * @throws UnknownHostException
+	 *             if no IP address for the host could be found, or if a
+	 *             scope_id was specified for a global IPv6 address.
+	 */
+	public final boolean hasClient(String address, int port) throws UnknownHostException {
+		return this.hasClient(InetAddress.getByName(address), port);
+	}
+
+	/**
+	 * Returns whether or not a client with the IP address is currently
+	 * connected to the server.
+	 * 
+	 * @param address
+	 *            the IP address.
+	 * @return <code>true</code> if a client with the IP address is connected to
+	 *         the server, <code>false</code> otherwise.
+	 */
+	public final boolean hasClient(InetAddress address) {
+		if (address == null) {
+			return false; // No IP address
+		}
+		for (InetSocketAddress clientAddress : clients.keySet()) {
+			if (clientAddress.equals(address)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns whether or not a client with the IP address is currently
+	 * connected to the server.
+	 * 
+	 * @param address
+	 *            the IP address.
+	 * @return <code>true</code> if a client with the IP address is connected to
+	 *         the server, <code>false</code> otherwise.
+	 * @throws UnknownHostException
+	 *             if no IP address for the host could be found, or if a
+	 *             scope_id was specified for a global IPv6 address.
+	 */
+	public final boolean hasClient(String address) throws UnknownHostException {
+		return this.hasClient(InetAddress.getByName(address));
+	}
+
+	/**
+	 * Returns whether or not a client with the port is currently connected to
+	 * the server.
+	 * 
+	 * @param port
+	 *            the port.
+	 * @return <code>true</code> if a client with the port is connected to the
+	 *         server, <code>false</code> otherwise.
+	 */
+	public final boolean hasClient(int port) {
+		if (port < 0x0000 || port > 0xFFFF) {
+			return false; // Invalid port range
+		}
+		for (InetSocketAddress clientAddress : clients.keySet()) {
+			if (clientAddress.getPort() == port) {
+				return true;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Returns whether or not the client with the globally unique ID is
 	 * currently connected to the server.
 	 * 
 	 * @param guid
-	 *            the globally unique ID to check.
+	 *            the globally unique ID.
 	 * @return <code>true</code> if a client with the globally unique ID is
 	 *         connected to the server, <code>false</code> otherwise.
 	 */
@@ -399,7 +816,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * Returns the client with the address.
 	 * 
 	 * @param address
-	 *            the address of the client.
+	 *            the address.
 	 * @return the client with the address, <code>null</code> if there is none.
 	 * @see com.whirvis.jraknet.session.RakNetClientSession RakNetClientSession
 	 */
@@ -407,8 +824,80 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		return clients.get(address);
 	}
 
-	// TODO: InetAddress address, int port
-	// TODO: String address, int port
+	/**
+	 * Returns the client with the address.
+	 * 
+	 * @param address
+	 *            the IP address.
+	 * @param port
+	 *            the port.
+	 * @return the client with the address, <code>null</code> if there is none.
+	 * @see com.whirvis.jraknet.session.RakNetClientSession RakNetClientSession
+	 */
+	public final RakNetClientSession getClient(InetAddress address, int port) {
+		if (address == null) {
+			return null; // No address
+		} else if (port < 0x0000 || port > 0xFFFF) {
+			return null; // Invalid port range
+		}
+		return this.getClient(new InetSocketAddress(address, port));
+	}
+
+	/**
+	 * Returns the client with the address.
+	 * 
+	 * @param address
+	 *            the IP address.
+	 * @param port
+	 *            the port.
+	 * @return the client with the address, <code>null</code> if there is none.
+	 * @throws UnknownHostException
+	 *             if no IP address for the host could be found, or if a
+	 *             scope_id was specified for a global IPv6 address.
+	 * @see com.whirvis.jraknet.session.RakNetClientSession RakNetClientSession
+	 */
+	public final RakNetClientSession getClient(String address, int port) throws UnknownHostException {
+		if (address == null) {
+			return null; // No address
+		}
+		return this.getClient(InetAddress.getByName(address), port);
+	}
+
+	/**
+	 * Returns all clients with the IP address.
+	 * 
+	 * @param address
+	 *            the IP address.
+	 * @return the clients with the IP address.
+	 * @throws UnknownHostException
+	 *             if no IP address for the host could be found, or if a
+	 *             scope_id was specified for a global IPv6 address.
+	 * @see com.whirvis.jraknet.session.RakNetClientSession RakNetClientSession
+	 */
+	public final RakNetClientSession[] getClient(String address) throws UnknownHostException {
+		if (address == null) {
+			return new RakNetClientSession[0]; // No address
+		}
+		InetAddress inetAddress = InetAddress.getByName(address);
+		return clients.values().stream().filter(session -> session.getAddress().equals(inetAddress))
+				.toArray(RAKNET_CLIENT_SESSION_FUNCTION);
+	}
+
+	/**
+	 * Returns all clients with the port.
+	 * 
+	 * @param address
+	 *            the port.
+	 * @return the clients with the port.
+	 * @see com.whirvis.jraknet.session.RakNetClientSession RakNetClientSession
+	 */
+	public final RakNetClientSession[] getClient(int port) {
+		if (port < 0x0000 || port > 0xFFFF) {
+			return new RakNetClientSession[0]; // Invalid port range
+		}
+		return clients.values().stream().filter(session -> session.getPort() == port)
+				.toArray(RAKNET_CLIENT_SESSION_FUNCTION);
+	}
 
 	/**
 	 * Returns the client with the globally unique ID.
@@ -440,7 +929,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * Disconnects a client from the server.
 	 * 
 	 * @param address
-	 *            the address of the client.
+	 *            the address.
 	 * @param reason
 	 *            the reason for client disconnection. A <code>null</code>
 	 *            reason will have <code>"Disconnected"</code> be used as the
@@ -449,11 +938,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *          <code>false</code> otherwise.
 	 */
 	public final boolean disconnectClient(InetSocketAddress address, String reason) {
-		if (!clients.containsKey(address)) {
+		RakNetClientSession session = clients.remove(address);
+		if (session == null) {
 			return false; // No client to disconnect
 		}
-
-		RakNetClientSession session = clients.remove(address);
 		session.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
 		log.debug("Disconnected client with address " + address + " for \"" + (reason == null ? "Disconnected" : reason)
 				+ "\"");
@@ -470,12 +958,188 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * Disconnects a client from the server.
 	 * 
 	 * @param address
-	 *            the address of the client.
+	 *            the address.
 	 * @returns <code>true</code> if a client was disconnected,
 	 *          <code>false</code> otherwise.
 	 */
 	public final boolean disconnectClient(InetSocketAddress address) {
 		return this.disconnectClient(address, null);
+	}
+
+	/**
+	 * Disconnects a client from the server.
+	 * 
+	 * @param address
+	 *            the IP address.
+	 * @param port
+	 *            the port.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
+	 * @return <code>true</code> if a client was disconnect, <code>false</code>
+	 *         otherwise.
+	 */
+	public final boolean disconnectClient(InetAddress address, int port, String reason) {
+		if (port < 0x0000 || port > 0xFFFF) {
+			return false; // Invalid port range
+		}
+		return this.disconnectClient(new InetSocketAddress(address, port), reason);
+	}
+
+	/**
+	 * Disconnects a client from the server.
+	 * 
+	 * @param address
+	 *            the IP address.
+	 * @param port
+	 *            the port.
+	 * @return <code>true</code> if a client was disconnect, <code>false</code>
+	 *         otherwise.
+	 */
+	public final boolean disconnectClient(InetAddress address, int port) {
+		return this.disconnectClient(address, port, null);
+	}
+
+	/**
+	 * Disconnects a client from the server.
+	 * 
+	 * @param address
+	 *            the IP address.
+	 * @param port
+	 *            the port.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
+	 * @return <code>true</code> if a client was disconnect, <code>false</code>
+	 *         otherwise.
+	 * @throws UnknownHostException
+	 *             if no IP address for the host could be found, or if a
+	 *             scope_id was specified for a global IPv6 address.
+	 */
+	public final boolean disconnectClient(String address, int port, String reason) throws UnknownHostException {
+		if (address == null) {
+			return false; // No address
+		}
+		return this.disconnectClient(InetAddress.getByName(address), port, reason);
+	}
+
+	/**
+	 * Disconnects a client from the server.
+	 * 
+	 * @param address
+	 *            the IP address.
+	 * @param port
+	 *            the port.
+	 * @return <code>true</code> if a client was disconnect, <code>false</code>
+	 *         otherwise.
+	 * @throws UnknownHostException
+	 *             if no IP address for the host could be found, or if a
+	 *             scope_id was specified for a global IPv6 address.
+	 */
+	public final boolean disconnectClient(String address, int port) throws UnknownHostException {
+		return this.disconnectClient(address, port, null);
+	}
+
+	/**
+	 * Disconnects all clients from the server with the address.
+	 * 
+	 * @param address
+	 *            the IP address.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
+	 * @return <code>true</code> if a client was disconnect, <code>false</code>
+	 *         otherwise.
+	 */
+	public final boolean disconnectClients(InetAddress address, String reason) {
+		AtomicBoolean disconnected = new AtomicBoolean(false);
+		clients.keySet().stream().filter(sessionAddress -> sessionAddress.equals(address)).forEach(sessionAddress -> {
+			this.disconnectClient(sessionAddress, reason);
+			disconnected.set(true);
+		});
+		return disconnected.get();
+	}
+
+	/**
+	 * Disconnects all clients from the server with the IP address.
+	 * 
+	 * @param address
+	 *            the IP address.
+	 * @return <code>true</code> if a client was disconnect, <code>false</code>
+	 *         otherwise.
+	 */
+	public final boolean disconnectClients(InetAddress address) {
+		return this.disconnectClients(address, null);
+	}
+
+	/**
+	 * Disconnects all clients from the server with the IP address.
+	 * 
+	 * @param address
+	 *            the IP address.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
+	 * @return <code>true</code> if a client was disconnect, <code>false</code>
+	 *         otherwise.
+	 * @throws UnknownHostException
+	 *             if no IP address for the host could be found, or if a
+	 *             scope_id was specified for a global IPv6 address.
+	 */
+	public final boolean disconnectClients(String address, String reason) throws UnknownHostException {
+		return this.disconnectClients(InetAddress.getByName(address), reason);
+	}
+
+	/**
+	 * Disconnects all clients from the server with the IP address.
+	 * 
+	 * @param address
+	 *            the IP address.
+	 * @return <code>true</code> if a client was disconnect, <code>false</code>
+	 *         otherwise.
+	 * @throws UnknownHostException
+	 *             if no IP address for the host could be found, or if a
+	 *             scope_id was specified for a global IPv6 address.
+	 */
+	public final boolean disconnectClients(String address) throws UnknownHostException {
+		return this.disconnectClients(address, null);
+	}
+
+	/**
+	 * Disconnects all clients from the server with the port.
+	 * 
+	 * @param port
+	 *            the port.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
+	 * @return <code>true</code> if a client was disconnect, <code>false</code>
+	 *         otherwise.
+	 */
+	public final boolean disconnectClients(int port, String reason) {
+		AtomicBoolean disconnected = new AtomicBoolean(false);
+		clients.keySet().stream().filter(sessionAddress -> sessionAddress.getPort() == port).forEach(sessionAddress -> {
+			this.disconnectClient(sessionAddress, reason);
+			disconnected.set(true);
+		});
+		return disconnected.get();
+	}
+
+	/**
+	 * Disconnects all clients from the server with the port.
+	 * 
+	 * @param port
+	 *            the port.
+	 * @return <code>true</code> if a client was disconnect, <code>false</code>
+	 *         otherwise.
+	 */
+	public final boolean disconnectClients(int port) {
+		return this.disconnectClients(port, null);
 	}
 
 	/**
@@ -497,15 +1161,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 */
 	public final void disconnectClient(RakNetClientSession session, String reason) {
 		if (!clients.containsValue(session)) {
-			throw new IllegalArgumentException("Session must be of the server"); // TODO
-																					// Fix
-																					// message
+			throw new IllegalArgumentException("Session must belong to the server");
 		}
 		this.disconnectClient(session.getAddress(), reason);
 	}
-
-	// TODO: Add disconnectClients(InetAddress, String)
-	// TODO: Add disconnectClients(InetAddress)
 
 	/**
 	 * Disconnects a client from the server.
@@ -597,8 +1256,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 */
 	protected final void handleHandlerException(InetSocketAddress address, Throwable cause) {
 		if (this.hasClient(address)) {
-			// TODO: use printed stack trace
-			this.disconnectClient(address, cause.getClass().getName());
+			this.disconnectClient(address, RakNet.getStackTrace(cause));
 		}
 		log.warn("Handled exception " + cause.getClass().getName() + " caused by address " + address);
 		this.callEvent(listener -> listener.onHandlerException(address, cause));
@@ -617,7 +1275,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @see com.whirvis.jrkanet.RakNetClientHandler RakNetClientHandler
 	 */
 	protected final void handleMessage(RakNetPacket packet, InetSocketAddress sender) {
-		// TODO: Redocument this
 		short packetId = packet.getId();
 		if (packetId == ID_UNCONNECTED_PING || packetId == ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
 			UnconnectedPing ping = new UnconnectedPing(packet);
@@ -626,10 +1283,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				return;
 			}
 			if ((packetId == ID_UNCONNECTED_PING || (clients.size() < this.maxConnections || this.maxConnections < 0))
-					&& this.broadcastingEnabled == true) {
-				ServerPing pingEvent = new ServerPing(sender, identifier, ping.connectionType);
+					&& this.broadcastingEnabled == true && ping.magic == true) {
+				ServerPing pingEvent = new ServerPing(sender, ping.connectionType, identifier);
 				this.callEvent(listener -> listener.handlePing(pingEvent));
-				if (ping.magic == true && pingEvent.getIdentifier() != null) {
+				if (pingEvent.getIdentifier() != null) {
 					UnconnectedPong pong = new UnconnectedPong();
 					pong.timestamp = ping.timestamp;
 					pong.pongId = this.pongId;
@@ -647,23 +1304,23 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			connectionRequestOne.decode();
 			if (clients.containsKey(sender)) {
 				if (clients.get(sender).getState().equals(RakNetState.CONNECTED)) {
-					this.disconnectClient(sender, "Client re-instantiated connection");
+					this.disconnectClient(sender, "Client reinstantiated connection");
 				}
 			}
 			if (connectionRequestOne.magic == true) {
 				RakNetPacket errorPacket = this.validateSender(sender);
 				if (errorPacket == null) {
-					if (connectionRequestOne.protocolVersion != this.getProtocolVersion()) {
-						IncompatibleProtocol incompatibleProtocol = new IncompatibleProtocol();
+					if (connectionRequestOne.networkProtocol != this.getProtocolVersion()) {
+						IncompatibleProtocolVersion incompatibleProtocol = new IncompatibleProtocolVersion();
 						incompatibleProtocol.networkProtocol = this.getProtocolVersion();
-						incompatibleProtocol.serverGuid = this.guid;
+						incompatibleProtocol.serverGuid = guid;
 						incompatibleProtocol.encode();
 						this.sendNettyMessage(incompatibleProtocol, sender);
 					} else {
-						if (connectionRequestOne.maximumTransferUnit <= this.maximumTransferUnit) {
+						if (connectionRequestOne.maximumTransferUnit <= maximumTransferUnit) {
 							OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne();
-							connectionResponseOne.serverGuid = this.guid;
-							connectionResponseOne.maximumTransferUnit = this.maximumTransferUnit;
+							connectionResponseOne.serverGuid = guid;
+							connectionResponseOne.maximumTransferUnit = maximumTransferUnit;
 							connectionResponseOne.encode();
 							this.sendNettyMessage(connectionResponseOne, sender);
 						}
@@ -678,25 +1335,20 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			if (!connectionRequestTwo.failed() && connectionRequestTwo.magic == true) {
 				RakNetPacket errorPacket = this.validateSender(sender);
 				if (errorPacket == null) {
-					if (this.hasClient(connectionRequestTwo.clientGuid)) {
-						this.sendNettyMessage(ID_ALREADY_CONNECTED, sender);
-					} else {
-						if (connectionRequestTwo.maximumTransferUnit <= this.maximumTransferUnit) {
-							OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo();
-							connectionResponseTwo.serverGuid = this.guid;
-							connectionResponseTwo.clientAddress = sender;
-							connectionResponseTwo.maximumTransferUnit = connectionRequestTwo.maximumTransferUnit;
-							connectionResponseTwo.encryptionEnabled = false;
-							connectionResponseTwo.encode();
-							if (!connectionResponseTwo.failed()) {
-								this.callEvent(listener -> listener.onClientPreConnect(sender));
-								RakNetClientSession clientSession = new RakNetClientSession(this,
-										System.currentTimeMillis(), connectionRequestTwo.connectionType,
-										connectionRequestTwo.clientGuid, connectionRequestTwo.maximumTransferUnit,
-										channel, sender);
-								clients.put(sender, clientSession);
-								this.sendNettyMessage(connectionResponseTwo, sender);
-							}
+					if (connectionRequestTwo.maximumTransferUnit <= this.maximumTransferUnit) {
+						OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo();
+						connectionResponseTwo.serverGuid = this.guid;
+						connectionResponseTwo.clientAddress = sender;
+						connectionResponseTwo.maximumTransferUnit = connectionRequestTwo.maximumTransferUnit;
+						connectionResponseTwo.encode();
+						if (!connectionResponseTwo.failed()) {
+							this.callEvent(listener -> listener.onClientPreConnect(sender));
+							RakNetClientSession clientSession = new RakNetClientSession(this,
+									System.currentTimeMillis(), connectionRequestTwo.connectionType,
+									connectionRequestTwo.clientGuid, connectionRequestTwo.maximumTransferUnit, channel,
+									sender);
+							clients.put(sender, clientSession);
+							this.sendNettyMessage(connectionResponseTwo, sender);
 						}
 					}
 				} else {
@@ -710,9 +1362,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				RakNetClientSession session = clients.get(sender);
 				session.handleCustom(custom);
 			}
-		} else if (packetId == Acknowledge.ACKNOWLEDGED || packetId == Acknowledge.NOT_ACKNOWLEDGED) {
+		} else if (packetId == AcknowledgedPacket.ACKNOWLEDGED || packetId == AcknowledgedPacket.NOT_ACKNOWLEDGED) {
 			if (clients.containsKey(sender)) {
-				Acknowledge acknowledge = new Acknowledge(packet);
+				AcknowledgedPacket acknowledge = new AcknowledgedPacket(packet);
 				acknowledge.decode();
 				RakNetClientSession session = clients.get(sender);
 				session.handleAcknowledge(acknowledge);
@@ -732,7 +1384,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * 
 	 * @param sender
 	 *            the address of the packet sender.
-	 * @return the packet to respond with if there was an error.
+	 * @return the packet to respond with if there was an error,
+	 *         <code>null</code> if there are no issues.
 	 * @see com.whirvis.jraknet.RakNetPacket RakNetPacket
 	 */
 	private final RakNetPacket validateSender(InetSocketAddress sender) {
@@ -742,25 +1395,26 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			return new RakNetPacket(ID_NO_FREE_INCOMING_CONNECTIONS);
 		} else if (this.isAddressBlocked(sender.getAddress())) {
 			ConnectionBanned connectionBanned = new ConnectionBanned();
-			connectionBanned.serverGuid = this.guid;
+			connectionBanned.serverGuid = guid;
 			connectionBanned.encode();
 			return connectionBanned;
 		}
-		return null; // No issues
+		return null;
 	}
 
 	/**
-	 * Sends a raw message to the address. Be careful when using this method,
-	 * because if it is used incorrectly it could break server sessions
-	 * entirely! If you are wanting to send a message to a session, you are
-	 * probably looking for the
-	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, com.whirvis.jraknet.Packet)
-	 * sendMessage} method.
+	 * Sends a Netty message over the channel raw. This should be used
+	 * sparingly, as if it is used incorrectly it could break client sessions
+	 * entirely. In order to send a message to a session, use one of the
+	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, io.netty.buffer.ByteBuf)
+	 * sendMessage()} methods.
 	 * 
 	 * @param buf
 	 *            the buffer to send.
 	 * @param address
 	 *            the address to send the buffer to.
+	 * @see {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(Reliability, ByteBuf)
+	 *      sendMessage(Reliability, ByteBuf)}
 	 */
 	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(buf, address));
@@ -769,34 +1423,36 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Sends a raw message to the address. Be careful when using this method,
-	 * because if it is used incorrectly it could break server sessions
-	 * entirely! If you are wanting to send a message to a session, you are
-	 * probably looking for the
-	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, com.whirvis.jraknet.Packet)
-	 * sendMessage} method.
+	 * Sends a Netty message over the channel raw. This should be used
+	 * sparingly, as if it is used incorrectly it could break client sessions
+	 * entirely. In order to send a message to a session, use one of the
+	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(Reliability, Packet)
+	 * sendMessage()} methods.
 	 * 
 	 * @param packet
-	 *            the buffer to send.
+	 *            the packet to send.
 	 * @param address
-	 *            the address to send the buffer to.
+	 *            the address to send the packet to.
+	 * @see {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(Reliability, Packet)
+	 *      sendMessage(Reliability, Packet)}
 	 */
 	public final void sendNettyMessage(Packet packet, InetSocketAddress address) {
 		this.sendNettyMessage(packet.buffer(), address);
 	}
 
 	/**
-	 * Sends a raw message to the address. Be careful when using this method,
-	 * because if it is used incorrectly it could break server sessions
-	 * entirely! If you are wanting to send a message to a session, you are
-	 * probably looking for the
+	 * Sends a Netty message over the channel raw. This should be used
+	 * sparingly, as if it is used incorrectly it could break client sessions
+	 * entirely. In order to send a message to a session, use one of the
 	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, int)
-	 * sendMessage} method.
+	 * sendMessage()} methods.
 	 * 
-	 * @param packetId
-	 *            the ID of the packet to send.
+	 * @param packet
+	 *            the packet ID to send.
 	 * @param address
 	 *            the address to send the packet to.
+	 * @see {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, int)
+	 *      sendMessage(Reliability, int)}
 	 */
 	public final void sendNettyMessage(int packetId, InetSocketAddress address) {
 		this.sendNettyMessage(new RakNetPacket(packetId), address);
@@ -809,88 +1465,63 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *             if an error occurs during startup.
 	 */
 	public final void start() throws RakNetException {
-		if (listeners.size() <= 0) {
+		if (running == true) {
+			throw new IllegalStateException("Server is already running");
+		} else if (listeners.isEmpty()) {
 			log.warn("Server has no listeners");
 		}
 
 		try {
+			this.bootstrap = new Bootstrap();
+			this.group = new NioEventLoopGroup();
+			this.handler = new RakNetServerHandler(this);
+			bootstrap.handler(handler);
+
 			// Create bootstrap and bind channel
 			bootstrap.channel(NioDatagramChannel.class).group(group);
 			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false);
-			this.channel = bootstrap.bind(port).sync().channel();
+			this.channel = (bindAddress != null ? bootstrap.bind(bindAddress) : bootstrap.bind(0)).sync().channel();
 			this.running = true;
 			log.debug("Created and bound bootstrap");
 
-			// Start server
-			this.callEvent(listener -> listener.onServerStart());
-			log.info("Started server");
+			// Create and start session update thread
+			RakNetServer server = this;
+			this.sessionThread = new Thread("jraknet-session-thread-" + Long.toHexString(guid)) {
 
-			// Update system
-			while (this.running == true) {
-				/*
-				 * The order here is important, as the sleep could fail to
-				 * execute (thus increasing the CPU usage dramatically) if we
-				 * sleep before we execute the code in the for loop.
-				 */
-				try {
-					Thread.sleep(0, 1); // Lower CPU usage
-				} catch (InterruptedException e) {
-					// Ignore this, it does not matter
-				}
-
-				for (RakNetClientSession session : clients.values()) {
+				@Override
+				public void run() {
 					try {
-						// Update session and make sure it isn't DOSing us
-						session.update();
-						if (session.getPacketsReceivedThisSecond() >= RakNet.getMaxPacketsPerSecond()) {
-							this.blockAddress(session.getInetAddress(), "Too many packets",
-									RakNet.MAX_PACKETS_PER_SECOND_BLOCK);
+						while (server.running == true && !this.isInterrupted()) {
+							Thread.sleep(0, 1); // Lower CPU usage
+							for (RakNetClientSession session : clients.values()) {
+								try {
+									session.update();
+									if (session.getPacketsReceivedThisSecond() >= RakNet.getMaxPacketsPerSecond()) {
+										server.blockAddress(session.getInetAddress(), "Too many packets",
+												RakNet.MAX_PACKETS_PER_SECOND_BLOCK);
+									}
+								} catch (Throwable throwable) {
+									for (RakNetServerListener listener : listeners) {
+										listener.onSessionException(session, throwable);
+									}
+									server.disconnectClient(session, throwable.getMessage());
+								}
+							}
 						}
-					} catch (Throwable throwable) {
-						// An error related to the session occurred
-						for (RakNetServerListener listener : listeners) {
-							listener.onSessionException(session, throwable);
-						}
-						this.disconnectClient(session, throwable.getMessage());
+					} catch (InterruptedException e) {
+						this.interrupt(); // Interrupted during sleep
 					}
 				}
-			}
 
-			// Shutdown netty
-			group.shutdownGracefully().sync();
+			};
+			sessionThread.start();
+			log.debug("Created and started session update thread");
+			this.callEvent(listener -> listener.onServerStart());
 		} catch (InterruptedException e) {
 			this.running = false;
 			throw new RakNetException(e);
 		}
-	}
-
-	/**
-	 * Starts the server on its own <code>Thread</code>.
-	 * 
-	 * @return the <code>Thread</code> the server is running on.
-	 */
-	public final Thread startThreaded() {
-		// Give the thread a reference
-		RakNetServer server = this;
-
-		// Create thread and start it
-		Thread thread = new Thread() {
-			@Override
-			public void run() {
-				try {
-					server.start();
-				} catch (Throwable throwable) {
-					server.callEvent(listener -> listener.onThreadException(throwable));
-				}
-			}
-		};
-		thread.setName("JRAKNET_SERVER_" + Long.toHexString(server.getGloballyUniqueId()).toUpperCase());
-		thread.start();
-		this.serverThread = thread;
-		log.info("Started on thread with name " + thread.getName());
-
-		// Return the thread so it can be modified
-		return thread;
+		log.info("Started server");
 	}
 
 	/**
@@ -902,6 +1533,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            </code>"Server shutdown"</code> be used as the reason instead.
 	 */
 	public final void shutdown(String reason) {
+		if (running == false) {
+			throw new IllegalStateException("Server is not running");
+		}
+
 		// Disconnect clients
 		clients.values().stream()
 				.forEach(session -> this.disconnectClient(session, reason == null ? "Server shutdown" : reason));
@@ -909,26 +1544,33 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 		// Stop server
 		this.running = false;
-		if (this.serverThread != null) {
-			serverThread.interrupt();
-		}
+		sessionThread.interrupt();
 		log.info("Shutdown server");
+
+		// Shutdown networking
+		channel.close();
+		group.shutdownGracefully(0L, 1000L, TimeUnit.MILLISECONDS);
+		this.channel = null;
+		this.handler = null;
+		this.group = null;
+		this.bootstrap = null;
+		log.debug("Shutdown networking");
 		this.callEvent(listener -> listener.onServerShutdown());
 	}
 
 	/**
-	 * Stops the server. All cu
+	 * Stops the server.
 	 */
 	public final void shutdown() {
-		this.shutdown("Server shutdown");
+		this.shutdown(null);
 	}
 
 	@Override
 	public String toString() {
-		return "RakNetServer [guid=" + guid + ", pongId=" + pongId + ", timestamp=" + timestamp + ", port=" + port
-				+ ", maxConnections=" + maxConnections + ", maximumTransferUnit=" + maximumTransferUnit
-				+ ", broadcastingEnabled=" + broadcastingEnabled + ", identifier=" + identifier + ", running=" + running
-				+ "]";
+		return "RakNetServer [guid=" + guid + ", log=" + log + ", pongId=" + pongId + ", timestamp=" + timestamp
+				+ ", bindAddress=" + bindAddress + ", maximumTransferUnit=" + maximumTransferUnit + ", maxConnections="
+				+ maxConnections + ", broadcastingEnabled=" + broadcastingEnabled + ", identifier=" + identifier
+				+ ", listeners=" + listeners + ", running=" + running + ", getClientCount()=" + getClientCount() + "]";
 	}
 
 }

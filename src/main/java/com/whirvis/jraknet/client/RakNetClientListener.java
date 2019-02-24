@@ -40,19 +40,12 @@ import com.whirvis.jraknet.session.RakNetServerSession;
 import io.netty.buffer.ByteBuf;
 
 /**
- * Used to listen for events that occur in the
- * {@link com.whirvis.jraknet.client.RakNetClient RakNetClient}. In order to
+ * Used to listen for events that occur in the {@link akNetClient}. In order to
  * listen for events, one must use the
- * {@link com.whirvis.jraknet.client.RakNetClient#addListener(RakNetClientListener)
- * addListener(RakNetClientListener)} method.
+ * {@link RakNetClient#addListener(RakNetClientListener)} method.
  *
  * @author Trent Summerlin
  * @since JRakNet v2.0
- * @see com.whirvis.jraknet.client.RakNetClient#addListener(RakNetClientListener)
- *      addListener(RakNetClientListener)
- * @see com.whirvis.jraknet.client.RakNetClient#addListener(RakNetClientListener)
- *      removeListener(RakNetClientListener)
- * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
  */
 public interface RakNetClientListener {
 

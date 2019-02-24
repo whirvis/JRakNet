@@ -32,18 +32,15 @@ package com.whirvis.jraknet.protocol.login;
 
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
 
 /**
- * An
- * {@link com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_REQUEST
- * ID_CONNECTION_REQUEST} packet. This is the first packet sent by the client
- * after initial connection is finished and it is time for login.
+ * A <code>CONNECTION_REQUEST</code> packet.
+ * <p>
+ * This is the first packet sent by the client during login after initial
+ * connection has succeeded.
  * 
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
- * @see com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_REQUEST
- *      ID_CONNECTION_REQUEST
  */
 public class ConnectionRequest extends RakNetPacket {
 
@@ -58,32 +55,28 @@ public class ConnectionRequest extends RakNetPacket {
 	public long timestamp;
 
 	/**
-	 * Whether or not security should be used. JRakNet does not have this
-	 * feature implemented, so the value of the variable defaults to
-	 * <code>false</code>.
+	 * Whether or not security should be used. Since JRakNet does not have this
+	 * feature implemented, <code>false</code> will always be the value used
+	 * when sending this value. However, this value can be <code>true</code> if
+	 * it is being set through decoding.
 	 */
-	public boolean useSecurity = false;
+	public boolean useSecurity;
 
 	/**
-	 * Creates an
-	 * {@link com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_REQUEST
-	 * ID_CONNECTION_REQUEST} packet to be encoded.
+	 * Creates a <code>CONNECTION_REQUEST</code> packet to be encoded.
 	 * 
 	 * @see #encode()
 	 */
 	public ConnectionRequest() {
-		super(MessageIdentifier.ID_CONNECTION_REQUEST);
+		super(ID_CONNECTION_REQUEST);
 	}
 
 	/**
-	 * Creates an
-	 * {@link com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_REQUEST
-	 * ID_CONNECTION_REQUEST} packet to be decoded.
+	 * Creates a <code>CONNECTION_REQUEST</code> packet to be decoded.
 	 * 
 	 * @param packet
 	 *            the original packet whose data will be read from in the
 	 *            {@link #decode()} method.
-	 * @see #decode()
 	 */
 	public ConnectionRequest(Packet packet) {
 		super(packet);
@@ -91,9 +84,10 @@ public class ConnectionRequest extends RakNetPacket {
 
 	@Override
 	public void encode() {
+		this.useSecurity = false; // TODO: Not supported
 		this.writeLong(clientGuid);
 		this.writeLong(timestamp);
-		this.writeBoolean(this.useSecurity);
+		this.writeBoolean(useSecurity);
 	}
 
 	@Override

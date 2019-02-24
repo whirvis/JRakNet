@@ -31,17 +31,16 @@
 package com.whirvis.jraknet.discovery;
 
 /**
- * Determines how discovery will be handled by the
- * {@link com.whirvis.jraknet.client.RakNetClient RakNetClient}.
+ * Determines how discovery will be handled by the {@link Discovery} system.
  *
  * @author Trent Summerlin
  * @since JRakNet v2.0
- * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
  */
 public enum DiscoveryMode {
 
 	/**
-	 * The client will not attempt to discover servers.
+	 * The discovery system will be disabled, and all currently known servers
+	 * will be forgotten.
 	 */
 	DISABLED,
 

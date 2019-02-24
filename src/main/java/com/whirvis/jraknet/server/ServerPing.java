@@ -36,36 +36,39 @@ import com.whirvis.jraknet.identifier.Identifier;
 import com.whirvis.jraknet.protocol.ConnectionType;
 
 /**
- * Used primarily to box an identifier sent in the response of a server to a
- * ping sent by a client so it can be modified by the user.
- *
+ * Contains information about a server ping such as who sent the ping and what
+ * the server will respond bcak with.
+ * 
  * @author Trent Summerlin
+ * @see com.whirvis.jraknet.identifier.Identifier Identifier
+ * @see com.whirvis.jraknet.protocol.ConnectionType ConnectionType
  */
 public class ServerPing {
 
 	private final InetSocketAddress sender;
-	private Identifier identifier;
 	private final ConnectionType connectionType;
+	private Identifier identifier;
 
 	/**
-	 * Constructs a <code>ServerPing</code> with the address and
-	 * <code>Identifier</code>.
+	 * Creates a server ping.
 	 * 
 	 * @param sender
 	 *            the address of the ping sender.
-	 * @param identifier
-	 *            the <code>Identifier</code> to respond with.
 	 * @param connectionType
 	 *            the connection type of the ping sender.
+	 * @param identifier
+	 *            the identifier to respond with.
+	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
+	 * @see com.whirvis.jraknet.protocol.ConnectionType ConnectionType
 	 */
-	public ServerPing(InetSocketAddress sender, Identifier identifier, ConnectionType connectionType) {
+	public ServerPing(InetSocketAddress sender, ConnectionType connectionType, Identifier identifier) {
 		this.sender = sender;
-		this.identifier = identifier;
 		this.connectionType = connectionType;
+		this.identifier = identifier;
 	}
 
 	/**
-	 * Returns the address of the pings ender.
+	 * Returns the address of the ping sender.
 	 * 
 	 * @return the address of the ping sender.
 	 */
@@ -74,28 +77,31 @@ public class ServerPing {
 	}
 
 	/**
-	 * Returns the <code>Identifier</code> being sent back to the sender.
+	 * Returns the connection type of the ping sender.
 	 * 
-	 * @return the <code>Identifier</code> being sent back to the sender.
+	 * @return the connection type of the ping sender.
+	 * @see com.whirvis.jraknet.protocol.ConnectionType ConnectionType
+	 */
+	public ConnectionType getConnectionType() {
+		return this.connectionType;
+	}
+
+	/**
+	 * Returns the identifier being sent back to the sender.
+	 * 
+	 * @return the identifier being sent back to the sender.
+	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public Identifier getIdentifier() {
 		return this.identifier;
 	}
 
 	/**
-	 * Returns the connection type of the ping sender.
-	 * 
-	 * @return the connection type of the ping sender.
-	 */
-	public final ConnectionType getConnectionType() {
-		return this.connectionType;
-	}
-
-	/**
-	 * Sets the <code>Identifier</code> being sent back to the sender.
+	 * Sets the identifier being sent back to the sender.
 	 * 
 	 * @param identifier
-	 *            the new <code>Identifier</code>.
+	 *            the new identifier.
+	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public void setIdentifier(Identifier identifier) {
 		this.identifier = identifier;

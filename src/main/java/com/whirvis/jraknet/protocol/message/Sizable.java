@@ -32,14 +32,17 @@ package com.whirvis.jraknet.protocol.message;
 
 /**
  * Represents a packet class whose size in bytes can be calculated before being
- * encoded.
+ * encoded using the {@link #calculateSize()} method.
  * 
  * @author Trent Summerlin
+ * @since JRakNet vUNKNOWN
  */
 public interface Sizable {
 
 	/**
-	 * @return the size of the packet would be if it had been encoded.
+	 * Returns the size the packet would be if it had been encoded.
+	 * 
+	 * @return the size the packet would be if it had been encoded.
 	 */
 	public int calculateSize();
 

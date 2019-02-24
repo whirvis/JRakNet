@@ -36,21 +36,66 @@ import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.identifier.Identifier;
 import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.protocol.Failable;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
 
+/**
+ * An <code>UNCONNECTED_PONG</code> packet.
+ * <p>
+ * This packet is sent in response to {@link UnconnectedPing UNCONNECTED_PING}
+ * and {@link UnconnectedPingOpenConnections UNCONNECTED_PING_OPEN_CONNECTIONS}
+ * packets in order to give the client server information and show that it is
+ * online.
+ * 
+ * @author Trent Summerlin
+ * @since JRakNet 1.0.0
+ */
 public class UnconnectedPong extends RakNetPacket implements Failable {
 
+	/**
+	 * The timestamp sent in the ping packet.
+	 */
 	public long timestamp;
+
+	/**
+	 * The server's pong ID.
+	 */
 	public long pongId;
+
+	/**
+	 * Whether or not the magic bytes read in the packet are valid.
+	 */
 	public boolean magic;
+
+	/**
+	 * The server's identifier.
+	 */
 	public Identifier identifier;
+
+	/**
+	 * The server's connection type.
+	 */
 	public ConnectionType connectionType;
+
+	/**
+	 * Whether or not the packet failed to encode/decode.
+	 */
 	private boolean failed;
 
+	/**
+	 * Creates an <code>UNCONNECTED_PONG</code> packet to be encoded.
+	 * 
+	 * @see #encode()
+	 */
 	public UnconnectedPong() {
-		super(MessageIdentifier.ID_UNCONNECTED_PONG);
+		super(ID_UNCONNECTED_PONG);
 	}
 
+	/**
+	 * Creates an <code>UNCONNECTED_PONG</code> packet to be decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
+	 */
 	public UnconnectedPong(Packet packet) {
 		super(packet);
 	}

@@ -36,19 +36,18 @@ import java.util.UUID;
 /**
  * Used to signify which implementation of the RakNet protocol is being used by
  * a connection. This functionality has <i>no</i> guarantee of functioning
- * complete, as it is dependent on the implementation to implement this feature
- * themselves.
+ * completely, as it is dependent on the implementation to implement this
+ * feature themselves.
  * <p>
- * As of January 1st, 2019, the only known implementations using this connection
+ * As of March 1st, 2019, the only known implementations using this connection
  * type protocol are:
  * <ul>
  * <li>JRakNet by Trent Summerlin</li>
- * <li>RakLib by PocketMine-MP (code written, not yet merged to master
- * branch)</li>
+ * <li>RakLib by PocketMine-MP</li>
  * </ul>
  * 
  * @author Trent Summerlin
- * @since JRakNet v2.0
+ * @since JRakNet vUNKNOWN
  * @see com.whirvis.jraknet.identifier.Identifier Identifier
  */
 public class ConnectionType {
@@ -58,12 +57,11 @@ public class ConnectionType {
 			(byte) 0x54, (byte) 0x49 };
 
 	/**
-	 * Converts the metadata keys and values to a {@link java.util.HashMap
-	 * HashMap}.
+	 * Converts the metadata keys and values to a {@link HashMap}.
 	 * 
 	 * @param metadata
 	 *            the metadata keys and values.
-	 * @return the metadata as a {@link java.util.HashMap HashMap}.
+	 * @return the metadata as a {@link HashMap}.
 	 * @throws IllegalArgumentException
 	 *             if there is a key without a value or if there are more than
 	 *             {@value #MAX_METADATA_VALUES} metadata values.
@@ -90,7 +88,13 @@ public class ConnectionType {
 	 * A JRakNet connection.
 	 */
 	public static final ConnectionType JRAKNET = new ConnectionType(
-			UUID.fromString("504da9b2-a31c-4db6-bcc3-18e5fe2fb178"), "JRakNet", "Java", "2.10.8-SNAPSHOT");
+			UUID.fromString("504da9b2-a31c-4db6-bcc3-18e5fe2fb178"), "JRakNet", "Java", "2.11.0-SNAPSHOT");
+
+	/**
+	 * A RakLib connection.
+	 */
+	public static final ConnectionType RAKLIB = new ConnectionType(
+			UUID.fromString("41fd1c2f-de79-4434-8fbc-82f3f71214c6"), "RakLib", "PHP", "0.12.3");
 
 	private final UUID uuid;
 	private final String name;
@@ -118,7 +122,6 @@ public class ConnectionType {
 	 * @param vanilla
 	 *            <code>true</code> if the implementation is a vanilla
 	 *            implementation, <code>false</code> otherwise.
-	 * @see #createMetaData(String...)
 	 */
 	private ConnectionType(UUID uuid, String name, String language, String version, HashMap<String, String> metadata,
 			boolean vanilla) {
@@ -149,7 +152,6 @@ public class ConnectionType {
 	 *            the metadata of the implementation. Metadata for an
 	 *            implementation can be created using the
 	 *            {@link #createMetaData(String...)} method.
-	 * @see #createMetaData(String...)
 	 */
 	public ConnectionType(UUID uuid, String name, String language, String version, HashMap<String, String> metadata) {
 		this(uuid, name, language, version, metadata, false);
@@ -238,6 +240,29 @@ public class ConnectionType {
 	 */
 	public boolean isVanilla() {
 		return this.vanilla;
+	}
+
+	/**
+	 * Returns whether or not this implementation and the specified
+	 * implementation are the same implementation based on the UUID.
+	 * <p>
+	 * If the UUID of both implementations are <code>null</code> then
+	 * <code>false</code> will be returned since we have no logical way of
+	 * telling if the two implementations are actually the same as there are no
+	 * UUIDs to compare.
+	 * 
+	 * @param connectionType
+	 *            the connection type.
+	 * @return <code>true</code> if both implementations are the same,
+	 *         <code>false</code> otherwise.
+	 */
+	public boolean is(ConnectionType connectionType) {
+		if (connectionType == null) {
+			return false; // No implementation
+		} else if (connectionType.uuid == null || uuid == null) {
+			return false; // No UUID
+		}
+		return uuid.equals(connectionType.uuid);
 	}
 
 	@Override

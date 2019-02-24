@@ -36,21 +36,58 @@ import java.net.UnknownHostException;
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.protocol.Failable;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
 
+/**
+ * A <code>NEW_INCOMING_CONNECTION</code> packet.
+ * <p>
+ * This is sent by the client after receiving the
+ * {@link ConnectionRequestAccepted CONNECTION_REQUEST_ACCEPTED} packet.
+ * 
+ * @author Trent Summerlin
+ * @since JRakNet v1.0.0
+ */
 public class NewIncomingConnection extends RakNetPacket implements Failable {
 
+	// TODO: Figure out what the unknown addresses are used for
+
+	/**
+	 * The server address.
+	 */
 	public InetSocketAddress serverAddress;
+
+	/**
+	 * The server timestamp.
+	 */
 	public long serverTimestamp;
+
+	/**
+	 * The client timestamp.
+	 */
 	public long clientTimestamp;
+
+	/**
+	 * Whether or not the packet failed to encode/decode.
+	 */
 	private boolean failed;
 
-	public NewIncomingConnection(Packet packet) {
-		super(packet);
+	/**
+	 * Creates a <code>NEW_INCOMING_CONNECTION</code> packet to be encoded.
+	 * 
+	 * @see #encode()
+	 */
+	public NewIncomingConnection() {
+		super(ID_NEW_INCOMING_CONNECTION);
 	}
 
-	public NewIncomingConnection() {
-		super(MessageIdentifier.ID_NEW_INCOMING_CONNECTION);
+	/**
+	 * Creates a <code>NEW_INCOMING_CONNECTION</code> packet to be decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
+	 */
+	public NewIncomingConnection(Packet packet) {
+		super(packet);
 	}
 
 	@Override

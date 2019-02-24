@@ -36,20 +36,20 @@ import java.net.UnknownHostException;
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.protocol.Failable;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
 
 /**
- * An
- * {@link com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_REQUEST_ACCEPTED
- * ID_CONNECTION_REQUEST_ACCEPTED} packet. This is sent by the server during
- * login to signal to the client that its login request has been accepted.
+ * A <code>CONNECTION_REQUEST_ACCEPTED</code> packet.
+ * <p>
+ * This packet is sent by the server during login after the
+ * {@link ConnectionRequest CONNECTION_REQUEST} packet to indicate that a
+ * client's connection has been accepted.
  * 
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
- * @see com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_BANNED
- *      ID_CONNECTION_BANNED
  */
 public class ConnectionRequestAccepted extends RakNetPacket implements Failable {
+
+	// TODO: Figure out what the unknown addresses are used for
 
 	/**
 	 * The address of the client that sent the connection request.
@@ -66,12 +66,27 @@ public class ConnectionRequestAccepted extends RakNetPacket implements Failable 
 	 */
 	public long serverTimestamp;
 
+	/**
+	 * Whether or not the packet failed to encode/decode.
+	 */
 	private boolean failed;
 
+	/**
+	 * Creates a <code>CONNECTION_REQUEST_ACCEPTED</code> packet to be encoded.
+	 * 
+	 * @see #encode()
+	 */
 	public ConnectionRequestAccepted() {
-		super(MessageIdentifier.ID_CONNECTION_REQUEST_ACCEPTED);
+		super(ID_CONNECTION_REQUEST_ACCEPTED);
 	}
 
+	/**
+	 * Creates a <code>CONNECTION_REQUEST_ACCEPTED</code> packet to be decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
+	 */
 	public ConnectionRequestAccepted(Packet packet) {
 		super(packet);
 	}

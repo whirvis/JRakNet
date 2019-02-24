@@ -35,27 +35,75 @@ import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.protocol.Failable;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
 
+/**
+ * An <code>UNCONNECTED_PING</code> packet.
+ * <p>
+ * This packet is sent by clients either by broadcasting to the local network or
+ * sending directly to servers in order to get their status and descriptor, also
+ * known as an {@link com.whirvis.jraknet.identifier.Identifier Identifier}.
+ * 
+ * @author Trent Summerlin
+ * @since JRakNet v1.0.0
+ */
 public class UnconnectedPing extends RakNetPacket implements Failable {
 
+	/**
+	 * The timestamp of the sender.
+	 */
 	public long timestamp;
+
+	/**
+	 * Whether or not the magic bytes read in the packet are valid.
+	 */
 	public boolean magic;
+
+	/**
+	 * The client's ping ID.
+	 */
 	public long pingId;
+
+	/**
+	 * The client's connection type.
+	 */
 	public ConnectionType connectionType;
+
+	/**
+	 * Whether or not the packet failed to encode/decode.
+	 */
 	private boolean failed;
 
+	/**
+	 * Creates an <code>UNCONNECTED_PING</code> packet to be encoded.
+	 * 
+	 * @param requiresOpenConnections
+	 *            <code>true</code> if the server should only respond if it has
+	 *            open connections available, <code>false</code> if the server
+	 *            should unconditionally respond.
+	 * @see #encode()
+	 */
 	protected UnconnectedPing(boolean requiresOpenConnections) {
-		super((requiresOpenConnections ? MessageIdentifier.ID_UNCONNECTED_PING_OPEN_CONNECTIONS
-				: MessageIdentifier.ID_UNCONNECTED_PING));
+		super((requiresOpenConnections ? ID_UNCONNECTED_PING_OPEN_CONNECTIONS : ID_UNCONNECTED_PING));
 	}
 
-	public UnconnectedPing(Packet packet) {
-		super(packet);
-	}
-
+	/**
+	 * Creates an <code>UNCONNECTED_PING</code> packet to be encoded.
+	 * 
+	 * @see #encode()
+	 */
 	public UnconnectedPing() {
 		this(false);
+	}
+
+	/**
+	 * Creates an <code>UNCONNECTED_PING</code> packet to be decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
+	 */
+	public UnconnectedPing(Packet packet) {
+		super(packet);
 	}
 
 	@Override

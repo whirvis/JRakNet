@@ -38,9 +38,9 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import com.whirvis.jraknet.RakNetTest;
-import com.whirvis.jraknet.client.RakNetClient;
-import com.whirvis.jraknet.client.RakNetClientListener;
-import com.whirvis.jraknet.discovery.DiscoveryMode;
+import com.whirvis.jraknet.discovery.DiscoveredServer;
+import com.whirvis.jraknet.discovery.Discovery;
+import com.whirvis.jraknet.discovery.DiscoveryListener;
 import com.whirvis.jraknet.identifier.Identifier;
 import com.whirvis.jraknet.identifier.MinecraftIdentifier;
 
@@ -51,14 +51,13 @@ import com.whirvis.jraknet.identifier.MinecraftIdentifier;
  */
 public class BroadcastTest {
 
-	private final RakNetClient client;
 	private final HashMap<InetSocketAddress, MinecraftIdentifier> discovered;
 	private final BroadcastFrame frame;
 
 	public BroadcastTest() {
-		this.client = new RakNetClient(DiscoveryMode.ALL_CONNECTIONS, RakNetTest.MINECRAFT_DEFAULT_PORT);
+		Discovery.addPort(RakNetTest.MINECRAFT_DEFAULT_PORT);
 		this.discovered = new HashMap<InetSocketAddress, MinecraftIdentifier>();
-		this.frame = new BroadcastFrame(client);
+		this.frame = new BroadcastFrame();
 	}
 
 	/**
@@ -66,27 +65,29 @@ public class BroadcastTest {
 	 *
 	 * @author Trent Summerlin
 	 */
-	private class ServerDiscoveryListener implements RakNetClientListener {
+	private class ServerDiscoveryListener implements DiscoveryListener {
 
 		@Override
-		public void onServerDiscovered(InetSocketAddress address, Identifier identifier) {
-			if (MinecraftIdentifier.isMinecraftIdentifier(identifier)) {
-				discovered.put(address, new MinecraftIdentifier(identifier));
+		public void onServerDiscovered(DiscoveredServer server) {
+			if (MinecraftIdentifier.isMinecraftIdentifier(server.getIdentifier())) {
+				discovered.put(server.getAddress(), new MinecraftIdentifier(server.getIdentifier()));
 			}
 			frame.updatePaneText(discovered.values().toArray(new MinecraftIdentifier[discovered.size()]));
 		}
 
 		@Override
-		public void onServerIdentifierUpdate(InetSocketAddress address, Identifier identifier) {
-			if (MinecraftIdentifier.isMinecraftIdentifier(identifier)) {
-				discovered.put(address, new MinecraftIdentifier(identifier));
+		public void onServerIdentifierUpdate(DiscoveredServer server, Identifier oldIdentifier) {
+			if (MinecraftIdentifier.isMinecraftIdentifier(server.getIdentifier())) {
+				discovered.put(server.getAddress(), new MinecraftIdentifier(server.getIdentifier()));
+				frame.updatePaneText(discovered.values().toArray(new MinecraftIdentifier[discovered.size()]));
+			} else {
+				discovered.remove(server.getAddress());
 			}
-			frame.updatePaneText(discovered.values().toArray(new MinecraftIdentifier[discovered.size()]));
 		}
 
 		@Override
-		public void onServerForgotten(InetSocketAddress address) {
-			discovered.remove(address);
+		public void onServerForgotten(DiscoveredServer server) {
+			discovered.remove(server.getAddress());
 			frame.updatePaneText(discovered.values().toArray(new MinecraftIdentifier[discovered.size()]));
 		}
 
@@ -96,11 +97,7 @@ public class BroadcastTest {
 	 * Starts the test.
 	 */
 	public void start() {
-
-		// Set client options
-		client.addListener(new ServerDiscoveryListener());
-
-		// Create window
+		Discovery.addListener(new ServerDiscoveryListener());
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 	}

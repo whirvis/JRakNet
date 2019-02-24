@@ -106,7 +106,7 @@ public class RakNetServerSession extends RakNetSession {
 
 			if (!serverHandshake.failed()) {
 				NewIncomingConnection clientHandshake = new NewIncomingConnection();
-				clientHandshake.serverAddress = client.getSession().getAddress();
+				clientHandshake.serverAddress = client.getServer().getAddress();
 				clientHandshake.clientTimestamp = serverHandshake.clientTimestamp;
 				clientHandshake.serverTimestamp = serverHandshake.serverTimestamp;
 				clientHandshake.encode();

@@ -64,7 +64,8 @@ public class RakNetServerTest {
 		}
 
 		// Create server and add listener
-		RakNetServer server = new RakNetServer(RakNetTest.MINECRAFT_DEFAULT_PORT, 10);
+		RakNetServer server = new RakNetServer(RakNetTest.MINECRAFT_DEFAULT_PORT, RakNet.getMaximumTransferUnit(), 10,
+				new MinecraftIdentifier("TEST", 0, "0.11.0", 0, 0, 0, "TEST", "TEST"));
 		server.addListener(new RakNetServerListener() {
 
 			@Override

@@ -35,13 +35,11 @@ import java.net.InetSocketAddress;
 import com.whirvis.jraknet.identifier.Identifier;
 
 /**
- * Represents a server that has been discovered by the
- * {@link com.whirvis.jraknet.client.RakNetClient RakNetClient}.
+ * Represents a server that has been discovered by the {@link Discovery} system.
  *
  * @author Trent Summerlin
  * @since JRakNet v2.0
- * @see com.whirvis.jraknet.discovery.Discovery Discovery
- * @see com.whirvis.jrkanet.discovery.DiscoveryListener DiscoveryListener
+ * @see DiscoveryListener
  */
 public class DiscoveredServer {
 
@@ -69,7 +67,6 @@ public class DiscoveredServer {
 	 * @throws NullPointerException
 	 *             if the address, IP address, or identifier are
 	 *             <code>null</code>.
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public DiscoveredServer(InetSocketAddress address, boolean external, Identifier identifier)
 			throws NullPointerException, IllegalArgumentException {
@@ -124,8 +121,8 @@ public class DiscoveredServer {
 	 * @param discoveryTimestamp
 	 *            the new discovery timestamp.
 	 * @throws IllegalArgumentException
-	 *             if the discovery timestamp is less than than the current
-	 *             discovery timestamp.
+	 *             if the <code>discoveryTimestamp</code> is less than than the
+	 *             current discovery timestamp.
 	 */
 	public void setTimestamp(long timestamp) throws IllegalArgumentException {
 		if (timestamp < this.timestamp) {
@@ -149,7 +146,6 @@ public class DiscoveredServer {
 	 * Returns the last identifier sent by the server.
 	 * 
 	 * @return the last identifier sent by the server.
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public Identifier getIdentifier() {
 		return this.identifier;
@@ -161,8 +157,7 @@ public class DiscoveredServer {
 	 * @param identifier
 	 *            the new identifier.
 	 * @throws NullPointerException
-	 *             if the identifier is <code>null</code>.
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
+	 *             if the <code>identifier</code> is <code>null</code>.
 	 */
 	public void setIdentifier(Identifier identifier) throws NullPointerException {
 		if (identifier == null) {

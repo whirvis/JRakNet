@@ -37,7 +37,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
 import com.whirvis.jraknet.protocol.message.acknowledge.Record;
 import com.whirvis.jraknet.session.RakNetSession;
 
@@ -56,7 +55,7 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 	private final ArrayList<EncapsulatedPacket> ackMessages;
 
 	public CustomPacket() {
-		super(MessageIdentifier.ID_CUSTOM_4);
+		super(ID_CUSTOM_4);
 		this.messages = new ArrayList<EncapsulatedPacket>();
 		this.ackMessages = new ArrayList<EncapsulatedPacket>();
 	}
@@ -91,12 +90,13 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 		}
 
 		// Tell session we have packets that require an ACK receipt
-		if (ackMessages.size() > 0) {
+		if (!ackMessages.isEmpty()) {
 			if (session != null) {
 				session.setAckReceiptPackets(ackMessages.toArray(new EncapsulatedPacket[ackMessages.size()]));
 			} else {
-				LOG.error("No session for " + ackMessages.size()
-						+ " encapsulated packets that require ACK receipts");
+				LOG.error("No session for " + ackMessages.size() + " encapsulated packet "
+						+ (ackMessages.size() == 1 ? "" : "s") + " that require" + (ackMessages.size() == 1 ? "s" : "")
+						+ " ACK receipts");
 			}
 		}
 	}
@@ -145,7 +145,7 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 	 * @return <code>true</code> if the packet contains any unreliable messages.
 	 */
 	public boolean containsUnreliables() {
-		if (messages.size() <= 0) {
+		if (messages.isEmpty()) {
 			return false; // Nothing to check
 		}
 
@@ -161,7 +161,7 @@ public class CustomPacket extends RakNetPacket implements Sizable {
 	 * Removes all the unreliable messages from the packet.
 	 */
 	public void removeUnreliables() {
-		if (messages.size() <= 0) {
+		if (messages.isEmpty()) {
 			return; // Nothing to remove
 		}
 

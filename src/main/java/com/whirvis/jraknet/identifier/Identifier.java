@@ -39,7 +39,6 @@ import com.whirvis.jraknet.protocol.ConnectionType;
  *
  * @author Trent Summerlin
  * @since JRakNet v1.0
- * @see #build()
  */
 public class Identifier implements Cloneable {
 
@@ -53,7 +52,6 @@ public class Identifier implements Cloneable {
 	 *            the identifier text.
 	 * @param connectionType
 	 *            the protocol implementation that sent the identifier.
-	 * @see com.whirvis.jraknet.protocol.ConnectionType ConnectionType
 	 */
 	public Identifier(String identifier, ConnectionType connectionType) {
 		this.identifier = identifier;
@@ -62,8 +60,8 @@ public class Identifier implements Cloneable {
 
 	/**
 	 * Creates an identifier with the connection type defaulting to the
-	 * {@link com.whirvis.jraknet.protocol.ConnectionType#JRAKNET JRAKNET}
-	 * connection type.
+	 * {@link com.whirvis.jraknet.protocol.ConnectionType#JRAKNET
+	 * ConnectionType.JRAKNET} connection type.
 	 * 
 	 * @param identifier
 	 *            the identifier text.
@@ -74,9 +72,7 @@ public class Identifier implements Cloneable {
 	}
 
 	/**
-	 * Creates an identifier with the connection type defaulting to the
-	 * {@link com.whirvis.jraknet.protocol.ConnectionType#JRAKNET JRAKNET}
-	 * connection type.
+	 * Creates an identifier from another identifier.
 	 * 
 	 * @param identifier
 	 *            the identifier to grab the information from.
@@ -89,8 +85,8 @@ public class Identifier implements Cloneable {
 	/**
 	 * Creates an identifier with the identifier text being set to
 	 * <code>null</code> and the connection type defaulting to the
-	 * {@link com.whirvis.jraknet.protocol.ConnectionType#JRAKNET JRAKNET}
-	 * connection type.
+	 * {@link com.whirvis.jraknet.protocol.ConnectionType#JRAKNET
+	 * ConnectionType.JRAKNET} connection type.
 	 */
 	public Identifier() {
 		this.identifier = null;
@@ -110,7 +106,6 @@ public class Identifier implements Cloneable {
 	 * Returns the connection type of the sender of the identifier.
 	 * 
 	 * @return the connection type of the sender of the identifier.
-	 * @see com.whirvis.jraknet.protocol.ConnectionType ConnectionType
 	 */
 	public final ConnectionType getConnectionType() {
 		return this.connectionType;

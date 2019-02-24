@@ -33,12 +33,11 @@ package com.whirvis.jraknet.client;
 import java.net.InetSocketAddress;
 
 /**
- * Signals that a RakNet client is attempting to connect to an offline server.
+ * Signals that a {@link RakNetClient} attempted to to connect to an offline
+ * server.
  *
  * @author Trent Summerlin
  * @since JRakNet v2.0
- * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
- * @see com.whirvis.jraknet.client.RakNetClientException RakNetClientException
  */
 public class ServerOfflineException extends RakNetClientException {
 
@@ -50,10 +49,9 @@ public class ServerOfflineException extends RakNetClientException {
 	 * Constructs a <code>ServerOfflineException</code>.
 	 * 
 	 * @param client
-	 *            the client that threw the exception.
+	 *            the client that attempted to the offline server.
 	 * @param address
 	 *            the address of the offline server.
-	 * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
 	 */
 	public ServerOfflineException(RakNetClient client, InetSocketAddress address) {
 		super(client, "Server at address " + address.toString() + " is offline");

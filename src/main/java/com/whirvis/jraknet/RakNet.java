@@ -36,6 +36,7 @@ import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,10 +47,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.identifier.Identifier;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
-import com.whirvis.jraknet.protocol.login.IncompatibleProtocol;
-import com.whirvis.jraknet.protocol.login.OpenConnectionRequestOne;
-import com.whirvis.jraknet.protocol.login.OpenConnectionResponseOne;
+import com.whirvis.jraknet.protocol.connection.IncompatibleProtocolVersion;
+import com.whirvis.jraknet.protocol.connection.OpenConnectionRequestOne;
+import com.whirvis.jraknet.protocol.connection.OpenConnectionResponseOne;
 import com.whirvis.jraknet.protocol.status.UnconnectedPing;
 import com.whirvis.jraknet.protocol.status.UnconnectedPong;
 
@@ -165,13 +165,23 @@ public final class RakNet {
 	public static void setMaxPacketsPerSecondUnlimited() {
 		MAX_PACKETS_PER_SECOND = Long.MAX_VALUE;
 	}
-	
-	
+
 	public static String getStackTrace(Throwable throwable) {
 		ByteArrayOutputStream stackTraceOut = new ByteArrayOutputStream();
 		PrintStream stackTracePrint = new PrintStream(stackTraceOut);
 		throwable.printStackTrace(stackTracePrint);
 		return new String(stackTraceOut.toByteArray());
+	}
+
+	public static int getMaximumTransferUnit(InetAddress address) {
+		try {
+			if (address == null) {
+				return getMaximumTransferUnit();
+			}
+			return NetworkInterface.getByInetAddress(address).getMTU();
+		} catch (SocketException e) {
+			return -1; // No MTU
+		}
 	}
 
 	/**
@@ -229,9 +239,8 @@ public final class RakNet {
 	}
 
 	/**
-	 * Sends a raw message to the address for the amount of
-	 * times in the interval until the packet is received or there is
-	 * a timeout.
+	 * Sends a raw message to the address for the amount of times in the
+	 * interval until the packet is received or there is a timeout.
 	 * 
 	 * @param address
 	 *            the address to send the packet to.
@@ -296,13 +305,13 @@ public final class RakNet {
 		// Create connection packet
 		OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne();
 		connectionRequestOne.maximumTransferUnit = MINIMUM_MTU_SIZE;
-		connectionRequestOne.protocolVersion = CLIENT_NETWORK_PROTOCOL;
+		connectionRequestOne.networkProtocol = CLIENT_NETWORK_PROTOCOL;
 		connectionRequestOne.encode();
 
 		// Wait for response to come in
 		RakNetPacket packet = createBootstrapAndSend(address, connectionRequestOne, 1000, PING_RETRIES);
 		if (packet != null) {
-			if (packet.getId() == MessageIdentifier.ID_OPEN_CONNECTION_REPLY_1) {
+			if (packet.getId() == RakNetPacket.ID_OPEN_CONNECTION_REPLY_1) {
 				OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne(packet);
 				connectionResponseOne.decode();
 				if (connectionResponseOne.magic == true) {
@@ -356,20 +365,20 @@ public final class RakNet {
 		// Create connection packet
 		OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne();
 		connectionRequestOne.maximumTransferUnit = MINIMUM_MTU_SIZE;
-		connectionRequestOne.protocolVersion = CLIENT_NETWORK_PROTOCOL;
+		connectionRequestOne.networkProtocol = CLIENT_NETWORK_PROTOCOL;
 		connectionRequestOne.encode();
 
 		// Wait for response to come in
 		RakNetPacket packet = createBootstrapAndSend(address, connectionRequestOne, 1000, PING_RETRIES);
 		if (packet != null) {
-			if (packet.getId() == MessageIdentifier.ID_OPEN_CONNECTION_REPLY_1) {
+			if (packet.getId() == RakNetPacket.ID_OPEN_CONNECTION_REPLY_1) {
 				OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne(packet);
 				connectionResponseOne.decode();
 				if (connectionResponseOne.magic == true) {
 					return true;
 				}
-			} else if (packet.getId() == MessageIdentifier.ID_INCOMPATIBLE_PROTOCOL_VERSION) {
-				IncompatibleProtocol incompatibleProtocol = new IncompatibleProtocol(packet);
+			} else if (packet.getId() == RakNetPacket.ID_INCOMPATIBLE_PROTOCOL_VERSION) {
+				IncompatibleProtocolVersion incompatibleProtocol = new IncompatibleProtocolVersion(packet);
 				incompatibleProtocol.decode();
 
 				return false;
@@ -431,7 +440,7 @@ public final class RakNet {
 		// Wait for response to come in
 		RakNetPacket packet = createBootstrapAndSend(address, ping, 1000, IDENTIFIER_RETRIES);
 		if (packet != null) {
-			if (packet.getId() == MessageIdentifier.ID_UNCONNECTED_PONG) {
+			if (packet.getId() == RakNetPacket.ID_UNCONNECTED_PONG) {
 				UnconnectedPong pong = new UnconnectedPong(packet);
 				pong.decode();
 				if (!pong.failed() && pong.magic == true) {
@@ -646,8 +655,8 @@ public final class RakNet {
 	}
 
 	/**
-	 * Splits an array into more chunks with the maximum size for each
-	 * array chunk.
+	 * Splits an array into more chunks with the maximum size for each array
+	 * chunk.
 	 * 
 	 * @param src
 	 *            the original array.

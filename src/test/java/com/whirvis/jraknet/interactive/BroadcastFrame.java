@@ -43,7 +43,7 @@ import javax.swing.UIManager;
 
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetTest;
-import com.whirvis.jraknet.client.RakNetClient;
+import com.whirvis.jraknet.discovery.Discovery;
 import com.whirvis.jraknet.discovery.DiscoveryMode;
 import com.whirvis.jraknet.identifier.MinecraftIdentifier;
 
@@ -62,7 +62,7 @@ public class BroadcastFrame extends JFrame {
 
 	private final JTextPane txtPnDiscoveredMcpeServerList;
 
-	public BroadcastFrame(RakNetClient client) {
+	public BroadcastFrame() {
 		// Frame settings
 		setResizable(false);
 		setSize(FRAME_WIDTH, FRAME_HEIGHT);
@@ -85,18 +85,18 @@ public class BroadcastFrame extends JFrame {
 				"Changing this will update how the client will discover servers, by default it will look for any possible connection on the network");
 		comboBoxDiscoveryType.setModel(new DefaultComboBoxModel<String>(discoveryModeOptions));
 		comboBoxDiscoveryType.setBounds(370, 10, 115, 20);
-		comboBoxDiscoveryType.addActionListener(new RakNetBroadcastDiscoveryTypeListener(client));
+		comboBoxDiscoveryType.addActionListener(new RakNetBroadcastDiscoveryTypeListener());
 		getContentPane().add(comboBoxDiscoveryType);
 
 		// Used to update the discovery port
 		JTextField textFieldDiscoveryPort = new JTextField();
 		textFieldDiscoveryPort.setBounds(370, 45, 115, 20);
-		textFieldDiscoveryPort.setText(Integer.toString(client.getDiscoveryPorts()[0]));
+		textFieldDiscoveryPort.setText(Integer.toString(Discovery.getPorts()[0]));
 		getContentPane().add(textFieldDiscoveryPort);
 		textFieldDiscoveryPort.setColumns(10);
 		JButton btnUpdatePort = new JButton("Update Port");
 		btnUpdatePort.setBounds(370, 76, 114, 23);
-		btnUpdatePort.addActionListener(new RakNetBroadcastUpdatePortListener(client, textFieldDiscoveryPort));
+		btnUpdatePort.addActionListener(new RakNetBroadcastUpdatePortListener(textFieldDiscoveryPort));
 		getContentPane().add(btnUpdatePort);
 
 		// The text containing the discovered MCPE servers
@@ -116,24 +116,20 @@ public class BroadcastFrame extends JFrame {
 	 */
 	private class RakNetBroadcastDiscoveryTypeListener implements ActionListener {
 
-		private final RakNetClient client;
-
-		public RakNetBroadcastDiscoveryTypeListener(RakNetClient client) {
-			this.client = client;
-		}
-
 		@SuppressWarnings("unchecked")
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			// 0 is all connections, 1 is open connections, anything else is
-			// none
+			/*
+			 * 0 is all connections, 1 is open connections, anything else is no
+			 * connections.
+			 */
 			int index = ((JComboBox<String>) e.getSource()).getSelectedIndex();
 			if (index == 0) {
-				client.setDiscoveryMode(DiscoveryMode.ALL_CONNECTIONS);
+				Discovery.setDiscoveryMode(DiscoveryMode.ALL_CONNECTIONS);
 			} else if (index == 1) {
-				client.setDiscoveryMode(DiscoveryMode.OPEN_CONNECTIONS);
+				Discovery.setDiscoveryMode(DiscoveryMode.OPEN_CONNECTIONS);
 			} else {
-				client.setDiscoveryMode(DiscoveryMode.DISABLED);
+				Discovery.setDiscoveryMode(DiscoveryMode.DISABLED);
 			}
 		}
 
@@ -147,11 +143,9 @@ public class BroadcastFrame extends JFrame {
 	 */
 	private class RakNetBroadcastUpdatePortListener implements ActionListener {
 
-		private final RakNetClient client;
 		private final JTextField textFieldDiscoveryPort;
 
-		public RakNetBroadcastUpdatePortListener(RakNetClient client, JTextField textFieldDiscoveryPort) {
-			this.client = client;
+		public RakNetBroadcastUpdatePortListener(JTextField textFieldDiscoveryPort) {
 			this.textFieldDiscoveryPort = textFieldDiscoveryPort;
 		}
 
@@ -159,9 +153,10 @@ public class BroadcastFrame extends JFrame {
 		public void actionPerformed(ActionEvent e) {
 			int newDiscoveryPort = RakNet.parseIntPassive(textFieldDiscoveryPort.getText());
 			if (newDiscoveryPort > -1) {
-				client.setDiscoveryPorts(newDiscoveryPort);
+				Discovery.clearPorts();
+				Discovery.addPort(newDiscoveryPort);
 			} else {
-				textFieldDiscoveryPort.setText(Integer.toString(client.getDiscoveryPorts()[0]));
+				textFieldDiscoveryPort.setText(Integer.toString(Discovery.getPorts()[0]));
 			}
 		}
 

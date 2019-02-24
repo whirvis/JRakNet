@@ -33,13 +33,11 @@ package com.whirvis.jraknet.client;
 import java.net.InetSocketAddress;
 
 /**
- * Signals that a RakNet is attempting to connect to a server that has no free
- * incoming connections.
+ * Signals that a {@link RakNetClient} attempted to connect to a server that has
+ * no free incoming connections.
  *
  * @author Trent Summerlin
  * @since JRakNet v2.0
- * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
- * @see com.whirvis.jraknet.client.RakNetClientException RakNetClientException
  */
 public class NoFreeIncomingConnectionsException extends RakNetClientException {
 
@@ -51,10 +49,10 @@ public class NoFreeIncomingConnectionsException extends RakNetClientException {
 	 * Constructs a <code>NoFreeIncomingConnectionsException</code>.
 	 * 
 	 * @param client
-	 *            the client that threw the exception.
+	 *            the client that attempted to a server with no free incoming
+	 *            connections.
 	 * @param address
 	 *            the address of the server with no free incoming connections.
-	 * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
 	 */
 	public NoFreeIncomingConnectionsException(RakNetClient client, InetSocketAddress address) {
 		super(client, "Server has no free incoming connections");

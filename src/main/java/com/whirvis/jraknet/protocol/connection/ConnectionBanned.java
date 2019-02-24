@@ -28,43 +28,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.protocol.message.acknowledge;
+package com.whirvis.jraknet.protocol.connection;
+
+import com.whirvis.jraknet.Packet;
+import com.whirvis.jraknet.RakNetPacket;
 
 /**
- * Used by <code>Acknowledge</code> to show what type a set of
- * <code>Record</code>s is.
- *
+ * A <code>CONNECTION_BANNED</code> packet.
+ * <p>
+ * This packet is sent by the server to the client if it has been banned either
+ * during connection or while it is connected to the server.
+ * 
  * @author Trent Summerlin
+ * @since JRakNet v1.0.0
  */
-public enum AcknowledgeType {
+public class ConnectionBanned extends RakNetPacket {
 
-	ACKNOWLEDGED(Acknowledge.ACKNOWLEDGED), NOT_ACKNOWLEDGED(Acknowledge.NOT_ACKNOWLEDGED);
+	/**
+	 * The server's globally unique identifier.
+	 */
+	public long serverGuid;
 
-	public short id;
-
-	private AcknowledgeType(short id) {
-		this.id = id;
+	/**
+	 * Creates a <code>CONNECTION_BANNED</code> packet to be encoded.
+	 * 
+	 * @see #encode()
+	 */
+	public ConnectionBanned() {
+		super(ID_CONNECTION_BANNED);
 	}
 
 	/**
-	 * @return the ID of the acknowledge type.
+	 * Creates a <code>CONNECTION_BANNED</code> packet to be decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
 	 */
-	public short getId() {
-		return this.id;
+	public ConnectionBanned(Packet packet) {
+		super(packet);
 	}
 
-	/**
-	 * @param id
-	 *            the ID of the acknowledge receipt type to lookup.
-	 * @return an <code>AcknowledgeType</code> based on the ID.
-	 */
-	public static AcknowledgeType lookup(short id) {
-		for (AcknowledgeType type : AcknowledgeType.values()) {
-			if (type.getId() == id) {
-				return type;
-			}
-		}
-		return null;
+	@Override
+	public void encode() {
+		this.writeLong(serverGuid);
+	}
+
+	@Override
+	public void decode() {
+		this.serverGuid = this.readLong();
 	}
 
 }

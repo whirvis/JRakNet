@@ -31,14 +31,20 @@
 package com.whirvis.jraknet.protocol;
 
 /**
- * Represents a packet that has a risk of failing to encode or decode data.
+ * Packets that extend this class indicate that they have a possibility of
+ * failing to encode or decode. This is normally only used by packets that are
+ * crucial to the success of a connection.
  *
  * @author Trent Summerlin
+ * @since JRakNet vUNKNOWN
  */
 public interface Failable {
 
 	/**
-	 * @return <code>true</code> if the packet failed to encode.
+	 * Returns whether or not the packet failed to encode/decode.
+	 * 
+	 * @return <code>true</code> if the packet failed to encode/decode,
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean failed();
 

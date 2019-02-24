@@ -33,13 +33,11 @@ package com.whirvis.jraknet.client;
 import java.net.InetSocketAddress;
 
 /**
- * Signals that a RakNet client is attempting to connect to a server with an
- * incompatible protocol.
+ * Signals that a {@link RakNetClient} has attempted to connect to a server with
+ * an incompatible protocol.
  *
  * @author Trent Summerlin
  * @since JRakNet v2.0
- * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
- * @see com.whirvis.jraknet.client.RakNetClientException RakNetClientException
  */
 public class IncompatibleProtocolException extends RakNetClientException {
 
@@ -53,14 +51,14 @@ public class IncompatibleProtocolException extends RakNetClientException {
 	 * Constructs an <code>IncompatibleProtocolException</code>.
 	 * 
 	 * @param client
-	 *            the client that threw the exception.
+	 *            the client that attempted to connect to an incompatible
+	 *            server.
 	 * @param address
 	 *            the address of the server with the incompatible protocol.
 	 * @param clientProtocol
 	 *            the client protocol
 	 * @param serverProtocol
 	 *            the server protocol
-	 * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
 	 */
 	public IncompatibleProtocolException(RakNetClient client, InetSocketAddress address, int clientProtocol,
 			int serverProtocol) {

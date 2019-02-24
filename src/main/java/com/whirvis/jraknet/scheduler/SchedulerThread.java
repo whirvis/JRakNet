@@ -41,7 +41,7 @@ import org.apache.logging.log4j.Logger;
  * <p>
  * Only one instance of this class can exist at a time. When a task is
  * scheduled, the scheduler will automatically check if a scheduler thread is
- * already running. If none exists, one will be created and started
+ * already running. If none exist, one will be created and started
  * automatically. Once the last scheduled task has finished executing, the
  * scheduler thread will shutdown and nullify its own reference in the
  * scheduler. If another task is scheduled after this, the process will repeat.
@@ -59,18 +59,28 @@ public class SchedulerThread extends Thread {
 	 * Allocates a scheduler thread.
 	 */
 	protected SchedulerThread() {
-		this.log = LogManager.getLogger("jraknet-scheduler");
+		this.log = LogManager.getLogger("jraknet-scheduler-thread");
 		this.setName(log.getName());
 	}
 
 	@Override
 	public void run() {
 		log.debug("Started scheduler thread");
-		while (Scheduler.TASKS.size() > 0 && Scheduler.thread == this && !this.isInterrupted()) {
+		while (!Scheduler.TASKS.isEmpty() && !this.isInterrupted()) {
+			if (Scheduler.thread != this) {
+				/*
+				 * Normally we would just break the thread here, but if two of
+				 * these are running it indicates a synchronization problem in
+				 * the code.
+				 */
+				throw new IllegalStateException(
+						"Scheduler thread must be this while running, are there multiple scheduler threads running?");
+			}
 			try {
 				Thread.sleep(0, 1); // Save CPU usage
 			} catch (InterruptedException e) {
 				this.interrupt(); // Interrupted during sleep
+				continue;
 			}
 
 			// Execute tasks
@@ -80,7 +90,7 @@ public class SchedulerThread extends Thread {
 				long taskId = taskIds.next();
 				ScheduledTask<?> task = Scheduler.TASKS.get(taskId);
 				if (task.isFinished()) {
-					log.debug("Scheduler task " + Long.toHexString(taskId).toLowerCase() + " has finished executing");
+					log.debug("Scheduler task " + Long.toHexString(taskId) + " has finished executing");
 					taskIds.remove();
 					continue; // Task is finished executing
 				} else if (!task.shouldExecute()) {
@@ -88,7 +98,7 @@ public class SchedulerThread extends Thread {
 				}
 
 				// Execute task
-				Thread schedulerTask = new Thread("scheduler-task-" + Long.toHexString(taskId).toLowerCase()) {
+				Thread schedulerTask = new Thread("scheduler-task-" + Long.toHexString(taskId)) {
 					@Override
 					public void run() {
 						task.execute();
@@ -102,8 +112,8 @@ public class SchedulerThread extends Thread {
 		/*
 		 * If there are no tasks left we will destroy this thread by nullifying
 		 * the scheduler's reference after the loop has been broken out of. If
-		 * there are more tasks that must be run, then a new scheduler thread
-		 * will be created automatically.
+		 * this condition changes, then a new scheduler thread will be created
+		 * automatically.
 		 */
 		if (Scheduler.thread == this) {
 			Scheduler.thread = null;

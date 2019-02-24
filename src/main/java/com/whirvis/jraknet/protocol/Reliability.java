@@ -31,21 +31,23 @@
 package com.whirvis.jraknet.protocol;
 
 /**
- * Contains all the reliability types for RakNet.
+ * Represents a RakNet reliability. Reliabilities determine how packets are
+ * handled when they are being sent or received.
  * 
  * @author Trent Summerlin
+ * @since JRakNet v1.0.0
  */
 public enum Reliability {
 
 	/**
-	 * The packet packet will be sent, but it is not guaranteed that it will be
+	 * The packet will be sent, but it is not guaranteed that it will be
 	 * received.
 	 */
 	UNRELIABLE(0, false, false, false, false),
 
 	/**
-	 * Same as <code>UNRELIABLE</code>, however it will not be handled if a
-	 * newer sequenced packet on the channel has already arrived.
+	 * Same as {@link #UNRELIABLE}, however it will not be handled if a newer
+	 * sequenced packet on the channel has already arrived.
 	 */
 	UNRELIABLE_SEQUENCED(1, false, false, true, false),
 
@@ -55,39 +57,48 @@ public enum Reliability {
 	RELIABLE(2, true, false, false, false),
 
 	/**
-	 * Same as <code>RELIABLE</code>, however it will not be handled until all
+	 * Same as {@link #RELIABLE}, however it will not be handled until all
 	 * packets sent before it are also received.
 	 */
 	RELIABLE_ORDERED(3, true, true, false, false),
 
 	/**
-	 * Same as <code>RELIABLE</code>, however it will not be handled if a newer
+	 * Same as {@link RELIABLE}, however it will not be handled if a newer
 	 * sequenced packet on the channel has already arrived.
 	 */
 	RELIABLE_SEQUENCED(4, true, false, true, false),
 
 	/**
-	 * Same as <code>UNRELIABLE</code>, however you will be notified whether the
+	 * Same as {@link #UNRELIABLE}, however you will be notified whether the
 	 * packet was lost or received through <code>onAcknowledge()</code> and
-	 * <code>onNotAcknowledge()</code> methods through the
+	 * <code>onNotAcknowledge()</code> methods found inside the
 	 * <code>RakNetServerListener</code> and <code>RakNetClientListener</code>
 	 * classes.
+	 * 
+	 * @see com.whirvis.jraknet.server.RakNetServerListener RakNetServerListener
+	 * @see com.whirvis.jraknet.client.RakNetClientListener RakNetClientListener
 	 */
 	UNRELIABLE_WITH_ACK_RECEIPT(5, false, false, false, true),
 
 	/**
-	 * Same as <code>RELIABLE</code>, however you will be notified when the
-	 * packet was received through the <code>onAcknowledge()</code> method
-	 * through the <code>RakNetServerListener</code> and
-	 * <code>RakNetClientListener</code> classes.
+	 * Same as {@link #RELIABLE}, however you will be notified when the packet
+	 * was received through the <code>onAcknowledge()</code> method through the
+	 * <code>RakNetServerListener</code> and <code>RakNetClientListener</code>
+	 * classes.
+	 * 
+	 * @see com.whirvis.jraknet.server.RakNetServerListener RakNetServerListener
+	 * @see com.whirvis.jraknet.client.RakNetClientListener RakNetClientListener
 	 */
 	RELIABLE_WITH_ACK_RECEIPT(6, true, false, false, true),
 
 	/**
-	 * Same as <code>RELIABLE_ORDERED</code>, however you will be notified when
-	 * the packet was received through the <code>onAcknowledge()</code> method
+	 * Same as {@link #RELIABLE_ORDERED}, however you will be notified when the
+	 * packet was received through the <code>onAcknowledge()</code> method
 	 * through the <code>RakNetServerListener</code> and
 	 * <code>RakNetClientListener</code> classes.
+	 * 
+	 * @see com.whirvis.jraknet.server.RakNetServerListener RakNetServerListener
+	 * @see com.whirvis.jraknet.client.RakNetClientListener RakNetClientListener
 	 */
 	RELIABLE_ORDERED_WITH_ACK_RECEIPT(7, true, true, false, true);
 
@@ -98,29 +109,33 @@ public enum Reliability {
 	private final boolean requiresAck;
 
 	/**
-	 * Constructs a <code>Reliability</code> with the ID and whether
-	 * or not it is reliable, ordered, sequenced, or requires an acknowledge
-	 * receipt.
+	 * Creates a reliability.
 	 * 
 	 * @param id
 	 *            the ID of the reliability.
 	 * @param reliable
-	 *            whether or not it is reliable.
+	 *            <code>true</code> if it is reliable, <code>false</code>
+	 *            otherwise.
 	 * @param ordered
-	 *            whether or not it is ordered.
+	 *            <code>true</code> if it is ordered, <code>false</code>
+	 *            otherwise.
 	 * @param sequenced
-	 *            whether or not it is sequenced.
+	 *            <code>true</code> if it is sequenced, <code>false</code>
+	 *            otherwise.
 	 * @param requiresAck
-	 *            whether or not it requires an acknowledge receipt.
+	 *            <code>true</code> if it requires an acknowledge receipt,
+	 *            <code>false</code> otherwise.
+	 * @throws IllegalArgumentException
+	 *             if both <code>ordered</code> and <code>sequenced</code> are
+	 *             <code>true</code>.
 	 */
-	private Reliability(int id, boolean reliable, boolean ordered, boolean sequenced, boolean requiresAck) {
+	private Reliability(int id, boolean reliable, boolean ordered, boolean sequenced, boolean requiresAck)
+			throws IllegalArgumentException {
 		this.id = (byte) id;
 		this.reliable = reliable;
 		this.ordered = ordered;
 		this.sequenced = sequenced;
 		this.requiresAck = requiresAck;
-
-		// This would cause a logical contradiction
 		if (ordered == true && sequenced == true) {
 			throw new IllegalArgumentException("A reliability cannot be both ordered and sequenced");
 		}
@@ -178,15 +193,14 @@ public enum Reliability {
 	/**
 	 * Returns the reliability based on its ID.
 	 * 
-	 * @param reliability
-	 *            the ID of the reliability to lookup.
-	 * @return the reliability based on its ID.
+	 * @param id
+	 *            the ID of the reliability.
+	 * @return the reliability with the specified ID.
 	 */
-	public static Reliability lookup(int reliability) {
-		Reliability[] reliabilities = Reliability.values();
-		for (Reliability sReliability : reliabilities) {
-			if (sReliability.getId() == reliability) {
-				return sReliability;
+	public static Reliability lookup(int id) {
+		for (Reliability reliability : Reliability.values()) {
+			if (reliability.getId() == id) {
+				return reliability;
 			}
 		}
 		return null;

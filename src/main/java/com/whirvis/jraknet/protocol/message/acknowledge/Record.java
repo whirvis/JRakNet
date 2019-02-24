@@ -31,29 +31,107 @@
 package com.whirvis.jraknet.protocol.message.acknowledge;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
- * Used for easy record manipulation for packets that use them.
- *
+ * Represents a packet record which is used in acknowledgement packets to
+ * indicate a packet was either acknowledged (received) or not acknowledged
+ * (lost in transmission).
+ * 
  * @author Trent Summerlin
+ * @since JRakNet v1.0.0
  */
 public class Record {
 
+	/**
+	 * The record is not ranged.
+	 */
+	public static final int NOT_RANGED = -1;
+
+	/**
+	 * Returns the sequence IDs contained within the specified records.
+	 * 
+	 * @param records
+	 *            the records to get the sequence IDs from.
+	 * @return the sequence IDs contained within the specified records.
+	 */
+	public static final int[] getSequenceIds(Record... records) {
+		ArrayList<Integer> boxedRecordIds = new ArrayList<Integer>();
+		for (Record record : records) {
+			for (int recordId : record.getSequenceIds()) {
+				if (!boxedRecordIds.contains(recordId)) {
+					boxedRecordIds.add(recordId);
+				}
+			}
+		}
+		return boxedRecordIds.stream().mapToInt(Integer::intValue).toArray();
+	}
+	
+	/**
+	 * Returns the sequence IDs contained within the specified records.
+	 * 
+	 * @param records
+	 *            the records to get the sequence IDs from.
+	 * @return the sequence IDs contained within the specified records.
+	 */
+	public static final int[] getSequenceIds(List<Record> records) {
+		return getSequenceIds(records.toArray(new Record[records.size()]));
+	}
+
 	private int index;
 	private int endIndex;
+	private int[] sequenceIds;
 
-	public Record(int index, int endIndex) {
+	/**
+	 * Creates a ranged record.
+	 * 
+	 * @param index
+	 *            the starting index.
+	 * @param endIndex
+	 *            the ending index.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the <code>index</code> is less than <code>0</code>.
+	 */
+	public Record(int index, int endIndex) throws IllegalArgumentException {
+		if (index < 0) {
+			throw new IllegalArgumentException("Index must be greater than or equal to 0");
+		}
 		this.index = index;
 		this.endIndex = endIndex;
 	}
 
-	public Record(int index) {
-		this(index, -1);
+	/**
+	 * Creates a single record.
+	 * 
+	 * @param id
+	 *            the sequence ID.
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the <code>ID</code> is less than <code>0</code>.
+	 */
+	public Record(int id) throws IllegalArgumentException {
+		this(id, NOT_RANGED);
 	}
 
 	/**
+	 * Updates the sequence IDs within the record.
+	 */
+	private void updateSequenceIds() {
+		if (!this.isRanged()) {
+			this.sequenceIds = new int[] { this.getIndex() };
+		} else {
+			int[] ranged = new int[this.getEndIndex() - this.getIndex() + 1];
+			for (int i = 0; i < ranged.length; i++) {
+				ranged[i] = i + this.getIndex();
+			}
+			this.sequenceIds = ranged;
+		}
+	}
+
+	/**
+	 * Returns the starting index of the record.
+	 * 
 	 * @return the starting index of the record.
 	 */
 	public int getIndex() {
@@ -64,116 +142,81 @@ public class Record {
 	 * Sets the starting index of the record.
 	 * 
 	 * @param index
-	 *            the new starting index.
+	 *            the starting index.
+	 * @throws IllegalArgumentException
+	 *             if the <code>index</code> is less than <code>0</code>.
 	 */
-	public void setIndex(int index) {
+	public void setIndex(int index) throws IllegalArgumentException {
+		if (index < 0) {
+			throw new IllegalArgumentException("Index must be greater than or equal to 0");
+		}
 		this.index = index;
+		this.updateSequenceIds();
 	}
 
 	/**
-	 * @return the ending index of the record or <code>-1</code> if the record
-	 *         is not ranged.
+	 * Returns the ending index of the record.
+	 * 
+	 * @return the ending index of the record, {@value #NOT_RANGED} if the
+	 *         record is not ranged.
+	 * @see #isRanged()
 	 */
 	public int getEndIndex() {
 		return this.endIndex;
 	}
 
 	/**
-	 * Sets the ending index of the record. If the ending index is set to
-	 * <code>-1</code> or lower (It will be set to <code>-1</code> automatically
-	 * if the new end index is lower than the starting index), it is assumed
-	 * that the record is a single record and not a ranged one.
+	 * Sets the ending index of the record.
 	 * 
 	 * @param endIndex
-	 *            the new ending index.
+	 *            the ending index, a value of {@value #NOT_RANGED} or lower or
+	 *            to the value of the index itself indicates that the record is
+	 *            not ranged.
 	 */
 	public void setEndIndex(int endIndex) {
-		if (endIndex < this.index) {
-			endIndex = -1;
+		if (endIndex <= this.index) {
+			endIndex = NOT_RANGED;
 		}
 		this.endIndex = endIndex;
+		this.updateSequenceIds();
 	}
 
 	/**
-	 * @return <code>true</code> if the record is ranged.
+	 * Returns whether or not the record is ranged.
+	 * 
+	 * @return <code>true</code> if the record is ranged, <code>false</code>
+	 *         otherwise.
 	 */
 	public boolean isRanged() {
-		return (this.endIndex > -1);
+		return endIndex > NOT_RANGED;
 	}
 
 	/**
-	 * @return the record as an <code>int</code> array.
+	 * Returns the sequence ID contained within this record. This is the
+	 * equivalent of calling {@link #getIndex()}, however an error will be
+	 * thrown if the record is ranged.
+	 * 
+	 * @return the sequence ID contained within this record.
+	 * @throws ArrayStoreException
+	 *             if the record is ranged according to the {@link #isRanged()}
+	 *             method.
+	 * @see #getSequenceIds()
 	 */
-	public int[] toArray() {
-		if (this.isRanged() == false) {
-			return new int[] { this.getIndex() };
-		} else {
-			int[] ranged = new int[this.getEndIndex() - this.getIndex() + 1];
-			ranged[0] = this.getIndex();
-			for (int i = 1; i < ranged.length - 1; i++) {
-				ranged[i] = i + this.getIndex();
-			}
-			ranged[ranged.length - 1] = this.getEndIndex();
-			return ranged;
+	public int getSequenceId() throws ArrayStoreException {
+		if (this.isRanged()) {
+			throw new ArrayStoreException("Record is ranged, there are multiple IDs");
 		}
+		return this.getIndex();
 	}
 
 	/**
-	 * @param records
-	 *            the records to convert to an <code>int</code> array.
-	 * @return the records as an <code>int</code> array.
+	 * Returns the sequence IDs contained within this record.
+	 * 
+	 * @return the sequence IDs contained within this record.
+	 * @see #getSequenceId()
 	 */
-	public static final int[] toArray(Record... records) {
-		// Store all integers into ArrayList as boxed integers
-		ArrayList<Integer> boxedPacketsOld = new ArrayList<Integer>();
-		for (Record record : records) {
-			for (int recordNum : record.toArray()) {
-				boxedPacketsOld.add(recordNum);
-			}
-		}
-
-		// Do so again but remove duplicates
-		ArrayList<Integer> boxedPackets = new ArrayList<Integer>();
-		for (Integer boxedPacket : boxedPacketsOld) {
-			if (!boxedPackets.contains(boxedPacket)) {
-				boxedPackets.add(boxedPacket);
-			}
-		}
-
-		// Convert boxed integers to native integers
-		int[] nativePackets = new int[boxedPackets.size()];
-		for (int i = 0; i < nativePackets.length; i++) {
-			nativePackets[i] = boxedPackets.get(i).intValue();
-		}
-		Arrays.sort(nativePackets);
-		return nativePackets;
-	}
-
-	/**
-	 * @param records
-	 *            the records to convert to an int array.
-	 * @return the records as an int array.
-	 */
-	public static final int[] toArray(List<Record> records) {
-		return Record.toArray(records.toArray(new Record[records.size()]));
-	}
-
-	@Override
-	public boolean equals(Object object) {
-		if (object instanceof Record) {
-			Record compare = (Record) object;
-			if (this.isRanged() == true) {
-				return this.getIndex() == compare.getIndex() && this.getEndIndex() == compare.getEndIndex();
-			} else {
-				return this.getIndex() == compare.getIndex();
-			}
-		} else if (object instanceof Number) {
-			if (this.isRanged() == false) {
-				Number compare = (Number) object;
-				return (this.getIndex() == compare.longValue());
-			}
-		}
-		return false;
+	public int[] getSequenceIds() {
+		return this.sequenceIds;
 	}
 
 	@Override

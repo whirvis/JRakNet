@@ -1,11 +1,11 @@
 /*
- *       _   _____            _      _   _          _
- *      | | |  __ \          | |    | \ | |        | |
- *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_
+ *       _   _____            _      _   _          _   
+ *      | | |  __ \          | |    | \ | |        | |  
+ *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_ 
  *  _   | | |  _  /   / _` | | |/ / | . ` |  / _ \ | __|
- * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_
+ * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
- *
+ *                                                  
  * the MIT License (MIT)
  *
  * Copyright (c) 2016-2019 Trent Summerlin
@@ -26,47 +26,44 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * SOFTWARE.  
  */
-package com.whirvis.jraknet.protocol.login;
+package com.whirvis.jraknet.protocol.message.acknowledge;
 
 import com.whirvis.jraknet.Packet;
-import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
 
-public class OpenConnectionRequestOne extends RakNetPacket {
+/**
+ * A <code>NACK</code> packet.
+ * <p>
+ * This packet is sent when a packet having a sequence ID that is higher by more
+ * than one than the last is received. This enables for servers and clients to
+ * know when the other side has lost their message in transmission, which can be
+ * crucial during the login process.
+ * 
+ * @author Trent Summerlin
+ * @since JRakNet v1.0.0
+ * @see Record
+ */
+public class NotAcknowledgedPacket extends AcknowledgedPacket {
 
-	/*
-	 * 1 byte for the ID, 1 byte for the protocol version, and 16 bytes for the
-	 * magic sequence.
+	/**
+	 * Creates a <code>NACK</code> packet to be encoded.
+	 * 
+	 * @see #encode()
 	 */
-	public static final int MTU_PADDING = 18;
+	public NotAcknowledgedPacket() {
+		super(false);
+	}
 
-	public boolean magic;
-	public int protocolVersion;
-	public int maximumTransferUnit;
-
-	public OpenConnectionRequestOne(Packet packet) {
+	/**
+	 * Creates a <code>NACK</code> packet to be decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
+	 */
+	public NotAcknowledgedPacket(Packet packet) {
 		super(packet);
-	}
-
-	public OpenConnectionRequestOne() {
-		super(MessageIdentifier.ID_OPEN_CONNECTION_REQUEST_1);
-	}
-
-	@Override
-	public void encode() {
-		this.writeMagic();
-		this.writeUnsignedByte(protocolVersion);
-		this.pad(maximumTransferUnit - MTU_PADDING);
-	}
-
-	@Override
-	public void decode() {
-		this.magic = this.checkMagic();
-		this.protocolVersion = this.readUnsignedByte();
-		this.maximumTransferUnit = (this.remaining() + MTU_PADDING);
-		this.read(this.remaining()); // Go ahead and get rid of those bytes
 	}
 
 }
