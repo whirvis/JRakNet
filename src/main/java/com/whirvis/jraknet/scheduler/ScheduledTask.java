@@ -59,22 +59,53 @@ public class ScheduledTask<T> {
 
 	private final boolean sync;
 	private final T obj;
-	private final Consumer<T> command;
+	private final Consumer<T> operation;
 	private final long wait;
 	private int count;
 	private long lastExecute;
 	private boolean executing;
 
-	protected ScheduledTask(boolean sync, T obj, Consumer<T> command, long wait, int count) {
-		if (command == null) {
-			throw new NullPointerException("Consumer command cannot be null");
+	/**
+	 * Creates scheduled task.
+	 * 
+	 * @param sync
+	 *            <code>true</code> if each task execution must finish before
+	 *            the next execution can begin, <code>false</code> otherwise.
+	 * @param obj
+	 *            the object to execute the operation on.
+	 * @param operation
+	 *            the consumer operation to execute.
+	 * @param wait
+	 *            how long to wait before initially executing the task in
+	 *            milliseconds, and how long to wait before executing the task
+	 *            again if it executes more than once. To have the task be
+	 *            executed immediately, use
+	 *            {@link com.whirvis.jraknet.scheduler.ScheduledTask#INSTANTANEOUS
+	 *            INSTANTANEOUS}.
+	 * @param count
+	 *            the amount of times the task should be executed. To have the
+	 *            task be executed indefinitely, use
+	 *            {@link com.whirvis.jraknet.scheduler.ScheduledTask#INFINITE
+	 *            INFINITE}.
+	 * @param <T>
+	 *            the type of the input to the operation.
+	 * @throws NullPointerException
+	 *             if the operation is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the execution count is less than zero and not equal to
+	 *             {@value #INFINITE}.
+	 */
+	protected ScheduledTask(boolean sync, T obj, Consumer<T> operation, long wait, int count)
+			throws NullPointerException, IllegalArgumentException {
+		if (operation == null) {
+			throw new NullPointerException("Consumer operation cannot be null");
 		} else if (count <= 0 && count != INFINITE) {
 			throw new IllegalArgumentException(
 					"Execution count must be greater than zero or equal to negative one (for infinite executions)");
 		}
 		this.sync = sync;
 		this.obj = obj;
-		this.command = command;
+		this.operation = operation;
 		this.wait = wait;
 		this.count = count;
 		this.lastExecute = System.currentTimeMillis();
@@ -112,9 +143,12 @@ public class ScheduledTask<T> {
 	/**
 	 * Executes the task.
 	 * 
+	 * @throws IllegalStateException
+	 *             if the state cannot be executed according to
+	 *             {@link #shouldExecute()}.
 	 * @see #shouldExecute()
 	 */
-	protected void execute() {
+	protected void execute() throws IllegalStateException {
 		if (!this.shouldExecute()) {
 			throw new IllegalStateException("Task cannot be executed");
 		}
@@ -127,7 +161,7 @@ public class ScheduledTask<T> {
 
 		// Execute command
 		this.executing = true;
-		command.accept(obj);
+		operation.accept(obj);
 		this.executing = false;
 	}
 

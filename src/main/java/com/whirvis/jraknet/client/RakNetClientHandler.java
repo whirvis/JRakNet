@@ -42,14 +42,12 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.DatagramPacket;
 
 /**
- * Used by the {@link com.whirvis.jraknet.client.RakNetClient RakNetClient} with
- * the sole purpose of sending received packets to the client so they can be
- * handled. Any errors that occurs will also be sent to the client to be dealt
- * with.
+ * Used by the {@link RakNetClient} with the sole purpose of sending received
+ * packets to the client so they can be handled. Any errors that occurs will
+ * also be sent to the client to be dealt with.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0
- * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
  */
 public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 
@@ -62,11 +60,9 @@ public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 	 * 
 	 * @param client
 	 *            the client to send received packets to.
-	 * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
 	 */
 	protected RakNetClientHandler(RakNetClient client) {
-		this.log = LogManager
-				.getLogger("RakNet client handler #" + Long.toHexString(client.getGloballyUniqueId()).toUpperCase());
+		this.log = LogManager.getLogger("jraknet-client-handler-" + Long.toHexString(client.getGloballyUniqueId()));
 		this.client = client;
 	}
 
@@ -82,7 +78,7 @@ public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 			this.causeAddress = sender;
 
 			// Handle the packet and release the buffer
-			client.handleMessage(packet, sender);
+			client.handleMessage(sender, packet);
 			datagram.content().readerIndex(0); // Reset position
 			log.debug("Sent packet to client and reset datagram buffer read position");
 			client.callEvent(listener -> listener.handleNettyMessage(client, datagram.content(), sender));

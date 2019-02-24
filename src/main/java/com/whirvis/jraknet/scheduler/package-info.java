@@ -5,6 +5,5 @@
  * @author Whirvis T. Wheatley
  * @since JRakNet v2.11.0
  * @see com.whirvis.jraknet.scheduler.Scheduler Scheduler
- * @see java.lang.Thread Thread
  */
 package com.whirvis.jraknet.scheduler;

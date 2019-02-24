@@ -28,7 +28,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.protocol.login;
+package com.whirvis.jraknet.protocol.connection;
 
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -38,29 +38,81 @@ import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.protocol.Failable;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
 
+/**
+ * An <code>OPEN_CONNECTION_REQUEST_2</code> packet.
+ * <p>
+ * This is sent by the server to the client after receiving a
+ * {@link OpenConnectionRequestTwo OPEN_CONNECTION_REQUEST_2} packet.
+ * 
+ * @author Whirvis T. Wheatley
+ * @since JRakNet v1.0.0
+ */
 public class OpenConnectionResponseTwo extends RakNetPacket implements Failable {
 
+	/**
+	 * Whether or not the magic bytes read in the packet are valid.
+	 */
 	public boolean magic;
+
+	/**
+	 * The server's globally unique ID.
+	 */
 	public long serverGuid;
+
+	/**
+	 * The address of the client.
+	 */
 	public InetSocketAddress clientAddress;
+
+	/**
+	 * The maximum transfer unit size the server and the client have agreed
+	 * upon.
+	 */
 	public int maximumTransferUnit;
+
+	/**
+	 * Whether or not encryption is enabled. Since JRakNet does not have this
+	 * feature implemented, <code>false</code> will always be the value used
+	 * when sending this value. However, this value can be <code>true</code> if
+	 * it is being set through decoding.
+	 */
 	public boolean encryptionEnabled;
+
+	/**
+	 * The server connection type.
+	 */
 	public ConnectionType connectionType;
+
+	/**
+	 * Whether or not the packet failed to encode/decode.
+	 */
 	private boolean failed;
 
-	public OpenConnectionResponseTwo(Packet packet) {
-		super(packet);
+	/**
+	 * Creates an <code>OPEN_CONNECTION_RESPONSE_2</code> packet to be encoded.
+	 * 
+	 * @see #encode()
+	 */
+	public OpenConnectionResponseTwo() {
+		super(ID_OPEN_CONNECTION_REPLY_2);
 	}
 
-	public OpenConnectionResponseTwo() {
-		super(MessageIdentifier.ID_OPEN_CONNECTION_REPLY_2);
+	/**
+	 * Creates an <code>OPEN_CONNECTION_RESPONSE_2</code> packet to be decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
+	 */
+	public OpenConnectionResponseTwo(Packet packet) {
+		super(packet);
 	}
 
 	@Override
 	public void encode() {
 		try {
+			this.encryptionEnabled = false; // TODO: Not supported
 			this.writeMagic();
 			this.writeLong(serverGuid);
 			this.writeAddress(clientAddress);

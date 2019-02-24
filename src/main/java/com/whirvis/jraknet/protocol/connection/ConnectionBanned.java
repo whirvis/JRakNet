@@ -28,57 +28,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.protocol.login;
+package com.whirvis.jraknet.protocol.connection;
 
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
 
-public class OpenConnectionResponseOne extends RakNetPacket {
+/**
+ * A <code>CONNECTION_BANNED</code> packet.
+ * <p>
+ * This packet is sent by the server to the client if it has been banned either
+ * during connection or while it is connected to the server.
+ * 
+ * @author Whirvis T. Wheatley
+ * @since JRakNet v1.0.0
+ */
+public class ConnectionBanned extends RakNetPacket {
 
-	public static final byte USE_SECURITY_BIT = 0x01;
-
-	public boolean magic;
-	public long serverGuid;
-	public int maximumTransferUnit;
-
-	/*
-	 * JRakNet does not support RakNet's built in security function, it is
-	 * poorly documented
+	/**
+	 * The server's globally unique identifier.
 	 */
-	public boolean useSecurity = false;
+	public long serverGuid;
 
-	public OpenConnectionResponseOne(Packet packet) {
-		super(packet);
+	/**
+	 * Creates a <code>CONNECTION_BANNED</code> packet to be encoded.
+	 * 
+	 * @see #encode()
+	 */
+	public ConnectionBanned() {
+		super(ID_CONNECTION_BANNED);
 	}
 
-	public OpenConnectionResponseOne() {
-		super(MessageIdentifier.ID_OPEN_CONNECTION_REPLY_1);
+	/**
+	 * Creates a <code>CONNECTION_BANNED</code> packet to be decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
+	 */
+	public ConnectionBanned(Packet packet) {
+		super(packet);
 	}
 
 	@Override
 	public void encode() {
-		this.writeMagic();
 		this.writeLong(serverGuid);
-
-		// Set security flags
-		byte securityFlags = 0x00;
-		securityFlags |= (useSecurity ? USE_SECURITY_BIT : 0x00);
-		this.writeUnsignedByte(securityFlags);
-		this.writeUnsignedShort(maximumTransferUnit);
 	}
 
 	@Override
 	public void decode() {
-		this.magic = this.checkMagic();
 		this.serverGuid = this.readLong();
-
-		byte securityFlags = 0x00;
-		securityFlags |= this.readUnsignedByte(); // Use security
-		if ((securityFlags & USE_SECURITY_BIT) == USE_SECURITY_BIT) {
-			this.useSecurity = true;
-		}
-		this.maximumTransferUnit = this.readUnsignedShort();
 	}
 
 }

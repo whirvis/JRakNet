@@ -34,12 +34,10 @@ import java.net.InetSocketAddress;
 
 /**
  * Signals that a <code>Throwable</code> was caught by the
- * {@link com.whirvis.jraknet.client.RakNetClientHandler RakNetClientHandler}.
+ * {@link RakNetClientHandler}.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v2.0
- * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
- * @see com.whirvis.jraknet.client.RakNetClientException RakNetClientException
  */
 public class NettyHandlerException extends RakNetClientException {
 
@@ -60,8 +58,6 @@ public class NettyHandlerException extends RakNetClientException {
 	 *            the address of the sender that caused the exception.
 	 * @param cause
 	 *            the cause.
-	 * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
-	 * @see com.whirvis.jraknet.client.RakNetClientHandler RakNetClientHandler
 	 */
 	public NettyHandlerException(RakNetClient client, RakNetClientHandler handler, InetSocketAddress address,
 			Throwable cause) {
@@ -75,7 +71,6 @@ public class NettyHandlerException extends RakNetClientException {
 	 * Returns the handler the client is using.
 	 * 
 	 * @return the handler the client is using.
-	 * @see com.whirvis.jraknet.client.RakNetClientHandler RakNetClientHandler
 	 */
 	public RakNetClientHandler getHandler() {
 		return this.handler;

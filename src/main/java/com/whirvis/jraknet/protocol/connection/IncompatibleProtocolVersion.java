@@ -28,76 +28,72 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.protocol.login;
-
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
+package com.whirvis.jraknet.protocol.connection;
 
 import com.whirvis.jraknet.Packet;
-import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.protocol.ConnectionType;
-import com.whirvis.jraknet.protocol.Failable;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
 
-public class OpenConnectionRequestTwo extends RakNetPacket implements Failable {
+/**
+ * An <code>INCOMPATIBLE_PROTOCOL_VERSION</code> packet.
+ * <p>
+ * This packet is sent by the server to the client after receiving a
+ * {@link ConnectionRequestOne CONNECTION_REQUEST_1} packet to indicate that the
+ * client is unable to connect due to unmatching protocols versions.
+ * 
+ * @author Whirvis T. Wheatley
+ * @since JRakNet v1.0.0
+ */
+public class IncompatibleProtocolVersion extends RakNetPacket {
 
+	/**
+	 * The network protocol the server is using.
+	 */
+	public int networkProtocol;
+
+	/**
+	 * Returns whether or not the magic is valid.
+	 */
 	public boolean magic;
-	public InetSocketAddress address;
-	public int maximumTransferUnit;
-	public long clientGuid;
-	public ConnectionType connectionType;
-	private boolean failed;
 
-	public OpenConnectionRequestTwo(Packet packet) {
-		super(packet);
+	/**
+	 * The server's globally unique ID.
+	 */
+	public long serverGuid;
+
+	/**
+	 * Creates an <code>INCOMPATIBLE_PROTOCOL_VERSION</code> packet to be
+	 * encoded.
+	 * 
+	 * @see #encode()
+	 */
+	public IncompatibleProtocolVersion() {
+		super(ID_INCOMPATIBLE_PROTOCOL_VERSION);
 	}
 
-	public OpenConnectionRequestTwo() {
-		super(MessageIdentifier.ID_OPEN_CONNECTION_REQUEST_2);
+	/**
+	 * Creates an <code>INCOMPATIBLE_PROTOCOL_VERSION</code> packet to be
+	 * decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
+	 */
+	public IncompatibleProtocolVersion(Packet packet) {
+		super(packet);
 	}
 
 	@Override
 	public void encode() {
-		try {
-			this.writeMagic();
-			this.writeAddress(address);
-			this.writeUnsignedShort(maximumTransferUnit);
-			this.writeLong(clientGuid);
-			this.writeConnectionType(connectionType);
-		} catch (UnknownHostException | RakNetException e) {
-			this.magic = false;
-			this.address = null;
-			this.maximumTransferUnit = 0;
-			this.clientGuid = 0;
-			this.connectionType = null;
-			this.clear();
-			this.failed = true;
-		}
+		this.writeUnsignedByte(networkProtocol);
+		this.writeMagic();
+		this.writeLong(serverGuid);
 	}
 
 	@Override
 	public void decode() {
-		try {
-			this.magic = this.checkMagic();
-			this.address = this.readAddress();
-			this.maximumTransferUnit = this.readUnsignedShort();
-			this.clientGuid = this.readLong();
-			this.connectionType = this.readConnectionType();
-		} catch (UnknownHostException | RakNetException e) {
-			this.magic = false;
-			this.address = null;
-			this.maximumTransferUnit = 0;
-			this.clientGuid = 0;
-			this.connectionType = null;
-			this.clear();
-			this.failed = true;
-		}
-	}
-
-	@Override
-	public boolean failed() {
-		return this.failed;
+		this.networkProtocol = this.readUnsignedByte();
+		this.magic = this.checkMagic();
+		this.serverGuid = this.readLong();
 	}
 
 }

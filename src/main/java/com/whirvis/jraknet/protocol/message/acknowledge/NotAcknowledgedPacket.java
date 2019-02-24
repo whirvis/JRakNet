@@ -1,11 +1,11 @@
 /*
- *       _   _____            _      _   _          _
- *      | | |  __ \          | |    | \ | |        | |
- *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_
+ *       _   _____            _      _   _          _   
+ *      | | |  __ \          | |    | \ | |        | |  
+ *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_ 
  *  _   | | |  _  /   / _` | | |/ / | . ` |  / _ \ | __|
- * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_
+ * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
- *
+ *                                                  
  * the MIT License (MIT)
  *
  * Copyright (c) 2016-2019 Whirvis T. Wheatley
@@ -26,45 +26,44 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * SOFTWARE.  
  */
 package com.whirvis.jraknet.protocol.message.acknowledge;
 
+import com.whirvis.jraknet.Packet;
+
 /**
- * Used by <code>Acknowledge</code> to show what type a set of
- * <code>Record</code>s is.
- *
+ * A <code>NACK</code> packet.
+ * <p>
+ * This packet is sent when a packet having a sequence ID that is higher by more
+ * than one than the last is received. This enables for servers and clients to
+ * know when the other side has lost their message in transmission, which can be
+ * crucial during the login process.
+ * 
  * @author Whirvis T. Wheatley
+ * @since JRakNet v1.0.0
+ * @see Record
  */
-public enum AcknowledgeType {
+public class NotAcknowledgedPacket extends AcknowledgedPacket {
 
-	ACKNOWLEDGED(Acknowledge.ACKNOWLEDGED), NOT_ACKNOWLEDGED(Acknowledge.NOT_ACKNOWLEDGED);
-
-	public short id;
-
-	private AcknowledgeType(short id) {
-		this.id = id;
+	/**
+	 * Creates a <code>NACK</code> packet to be encoded.
+	 * 
+	 * @see #encode()
+	 */
+	public NotAcknowledgedPacket() {
+		super(false);
 	}
 
 	/**
-	 * @return the ID of the acknowledge type.
+	 * Creates a <code>NACK</code> packet to be decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
 	 */
-	public short getId() {
-		return this.id;
-	}
-
-	/**
-	 * @param id
-	 *            the ID of the acknowledge receipt type to lookup.
-	 * @return an <code>AcknowledgeType</code> based on the ID.
-	 */
-	public static AcknowledgeType lookup(short id) {
-		for (AcknowledgeType type : AcknowledgeType.values()) {
-			if (type.getId() == id) {
-				return type;
-			}
-		}
-		return null;
+	public NotAcknowledgedPacket(Packet packet) {
+		super(packet);
 	}
 
 }

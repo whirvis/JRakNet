@@ -32,12 +32,36 @@ package com.whirvis.jraknet.protocol.status;
 
 import com.whirvis.jraknet.Packet;
 
+/**
+ * An <code>UNCONNECTED_PING_OPEN_CONNECTIONS</code> packet.
+ * <p>
+ * This packet is the exact same as {@link UnconnectedPing UNCONNECTED_PING}
+ * with the exception that the server will only respond if it has open
+ * connections available.
+ * 
+ * @author Whirvis T. Wheatley
+ * @since JRakNet v1.0.0
+ */
 public class UnconnectedPingOpenConnections extends UnconnectedPing {
 
+	/**
+	 * Creates an <code>UNCONNECTED_PING_OPEN_CONNECTIONS</code> packet to be
+	 * encoded.
+	 * 
+	 * @see #encode()
+	 */
 	public UnconnectedPingOpenConnections() {
 		super(true);
 	}
 
+	/**
+	 * Creates an <code>UNCONNECTED_PING_OPEN_CONNECTIONS</code> packet to be
+	 * decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
+	 */
 	public UnconnectedPingOpenConnections(Packet packet) {
 		super(packet);
 	}

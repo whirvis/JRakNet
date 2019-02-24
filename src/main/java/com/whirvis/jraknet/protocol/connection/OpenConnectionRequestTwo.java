@@ -28,37 +28,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.protocol.status;
+package com.whirvis.jraknet.protocol.connection;
+
+import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.identifier.Identifier;
 import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.protocol.Failable;
 
 /**
- * An <code>UNCONNECTED_PONG</code> packet.
+ * An <code>OPEN_CONNECTION_REQUEST_2</code> packet.
  * <p>
- * This packet is sent in response to {@link UnconnectedPing UNCONNECTED_PING}
- * and {@link UnconnectedPingOpenConnections UNCONNECTED_PING_OPEN_CONNECTIONS}
- * packets in order to give the client server information and show that it is
- * online.
+ * This packet is sent by the client to the server after receiving a
+ * {@link OpenConnectionResponseOne OPEN_CONNECTION_RESPONSE_1} packet.
  * 
  * @author Whirvis T. Wheatley
- * @since JRakNet 1.0.0
+ * @since JRakNet v1.0.0
  */
-public class UnconnectedPong extends RakNetPacket implements Failable {
-
-	/**
-	 * The timestamp sent in the ping packet.
-	 */
-	public long timestamp;
-
-	/**
-	 * The server's pong ID.
-	 */
-	public long pongId;
+public class OpenConnectionRequestTwo extends RakNetPacket implements Failable {
 
 	/**
 	 * Whether or not the magic bytes read in the packet are valid.
@@ -66,12 +56,23 @@ public class UnconnectedPong extends RakNetPacket implements Failable {
 	public boolean magic;
 
 	/**
-	 * The server's identifier.
+	 * The address of the server that the client wishes to connect to.
 	 */
-	public Identifier identifier;
+	public InetSocketAddress address;
 
 	/**
-	 * The server's connection type.
+	 * The maximum transfer unit size the client and the server have agreed
+	 * upon.
+	 */
+	public int maximumTransferUnit;
+
+	/**
+	 * The client's globally unique ID.
+	 */
+	public long clientGuid;
+
+	/**
+	 * The client connection type.
 	 */
 	public ConnectionType connectionType;
 
@@ -81,38 +82,38 @@ public class UnconnectedPong extends RakNetPacket implements Failable {
 	private boolean failed;
 
 	/**
-	 * Creates an <code>UNCONNECTED_PONG</code> packet to be encoded.
+	 * Creates an <code>OPEN_CONNECTION_REQUEST_2</code> packet to be encoded.
 	 * 
 	 * @see #encode()
 	 */
-	public UnconnectedPong() {
-		super(ID_UNCONNECTED_PONG);
+	public OpenConnectionRequestTwo() {
+		super(ID_OPEN_CONNECTION_REQUEST_2);
 	}
 
 	/**
-	 * Creates an <code>UNCONNECTED_PONG</code> packet to be decoded.
+	 * Creates an <code>OPEN_CONNECTION_REQUEST_2</code> packet to be decoded.
 	 * 
 	 * @param packet
 	 *            the original packet whose data will be read from in the
 	 *            {@link #decode()} method.
 	 */
-	public UnconnectedPong(Packet packet) {
+	public OpenConnectionRequestTwo(Packet packet) {
 		super(packet);
 	}
 
 	@Override
 	public void encode() {
 		try {
-			this.writeLong(timestamp);
-			this.writeLong(pongId);
 			this.writeMagic();
-			this.writeString(identifier.build());
+			this.writeAddress(address);
+			this.writeUnsignedShort(maximumTransferUnit);
+			this.writeLong(clientGuid);
 			this.writeConnectionType(connectionType);
-		} catch (RakNetException e) {
-			this.timestamp = 0;
-			this.pongId = 0;
+		} catch (UnknownHostException | RakNetException e) {
 			this.magic = false;
-			this.identifier = null;
+			this.address = null;
+			this.maximumTransferUnit = 0;
+			this.clientGuid = 0;
 			this.connectionType = null;
 			this.clear();
 			this.failed = true;
@@ -122,15 +123,16 @@ public class UnconnectedPong extends RakNetPacket implements Failable {
 	@Override
 	public void decode() {
 		try {
-			this.timestamp = this.readLong();
-			this.pongId = this.readLong();
 			this.magic = this.checkMagic();
-			this.identifier = new Identifier(this.readString(), this.connectionType = this.readConnectionType());
-		} catch (RakNetException e) {
-			this.timestamp = 0;
-			this.pongId = 0;
+			this.address = this.readAddress();
+			this.maximumTransferUnit = this.readUnsignedShort();
+			this.clientGuid = this.readLong();
+			this.connectionType = this.readConnectionType();
+		} catch (UnknownHostException | RakNetException e) {
 			this.magic = false;
-			this.identifier = null;
+			this.address = null;
+			this.maximumTransferUnit = 0;
+			this.clientGuid = 0;
 			this.connectionType = null;
 			this.clear();
 			this.failed = true;

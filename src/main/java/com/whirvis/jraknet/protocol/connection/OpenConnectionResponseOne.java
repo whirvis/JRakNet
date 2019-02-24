@@ -28,45 +28,80 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.protocol.login;
+package com.whirvis.jraknet.protocol.connection;
 
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
 
-public class OpenConnectionRequestOne extends RakNetPacket {
+/**
+ * An <code>OPEN_CONNECTION_RESPONSE_1</code> packet.
+ * <p>
+ * This packet is sent by the server to the client after receiving an
+ * {@link OpenConnectionRequestOne OPEN_CONNECTION_REQUEST_1} packet.
+ * 
+ * @author Whirvis T. Wheatley
+ * @since JRakNet v1.0.0
+ */
+public class OpenConnectionResponseOne extends RakNetPacket {
 
-	/*
-	 * 1 byte for the ID, 1 byte for the protocol version, and 16 bytes for the
-	 * magic sequence.
+	/**
+	 * Whether or not the magic bytes read in the packet are valid.
 	 */
-	public static final int MTU_PADDING = 18;
-
 	public boolean magic;
-	public int protocolVersion;
+
+	/**
+	 * The server's globally unique ID.
+	 */
+	public long serverGuid;
+
+	/**
+	 * The server's maximum transfer unit size.
+	 */
 	public int maximumTransferUnit;
 
-	public OpenConnectionRequestOne(Packet packet) {
-		super(packet);
+	/**
+	 * Whether or not security should be used. Since JRakNet does not have this
+	 * feature implemented, <code>false</code> will always be the value used
+	 * when sending this value. However, this value can be <code>true</code> if
+	 * it is being set through decoding.
+	 */
+	public boolean useSecurity;
+
+	/**
+	 * Creates a <code>OPEN_CONNECTION_RESPONSE_1</code> packet to be encoded.
+	 * 
+	 * @see #encode()
+	 */
+	public OpenConnectionResponseOne() {
+		super(ID_OPEN_CONNECTION_REPLY_1);
 	}
 
-	public OpenConnectionRequestOne() {
-		super(MessageIdentifier.ID_OPEN_CONNECTION_REQUEST_1);
+	/**
+	 * Creates a <code>OPEN_CONNECTION_RESPONSE_1</code> packet to be decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
+	 */
+	public OpenConnectionResponseOne(Packet packet) {
+		super(packet);
 	}
 
 	@Override
 	public void encode() {
+		this.useSecurity = false; // TODO: Not supported
 		this.writeMagic();
-		this.writeUnsignedByte(protocolVersion);
-		this.pad(maximumTransferUnit - MTU_PADDING);
+		this.writeLong(serverGuid);
+		this.writeBoolean(useSecurity);
+		this.writeUnsignedShort(maximumTransferUnit);
 	}
 
 	@Override
 	public void decode() {
 		this.magic = this.checkMagic();
-		this.protocolVersion = this.readUnsignedByte();
-		this.maximumTransferUnit = (this.remaining() + MTU_PADDING);
-		this.read(this.remaining()); // Go ahead and get rid of those bytes
+		this.serverGuid = this.readLong();
+		this.useSecurity = this.readBoolean();
+		this.maximumTransferUnit = this.readUnsignedShort();
 	}
 
 }

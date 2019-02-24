@@ -30,68 +30,47 @@
  */
 package com.whirvis.jraknet.discovery;
 
-import java.net.InetSocketAddress;
-
 import com.whirvis.jraknet.identifier.Identifier;
 
 /**
- * Used to listen for events that occur in the
- * {@link com.whirvis.jraknet.discovery.Discovery Discovery}. In order to listen
- * for events, one must use the
- * {@link com.whirvis.jraknet.discovery.Discovery#addListener(DiscoveryListener)
- * addListener(DiscoveryListener)} method.
+ * Used to listen for events that occur in the {@link Discovery} system. In
+ * order to listen for events, one must use the
+ * {@link Discovery#addListener(DiscoveryListener)} method.
  *
  * @author Whirvis T. Wheatley
- * @since JRakNet v2.0
- * @see com.whirvis.jraknet.discovery.Discovery#addListener(DiscoveryListener)
- *      addListener(DiscoveryListener)
- * @see com.whirvis.jraknet.discovery.Discovery#removeListener(DiscoveryListener)
- *      removeListener(DiscoveryListener)
- * @see com.whirvis.jraknet.discovery.Discovery Discovery
+ * @since JRakNet v2.11,0
+ * @see DiscoveredServer
+ * @see Identifier
  */
 public interface DiscoveryListener {
 
 	/**
 	 * Called when a server is discovered on the local network.
 	 * 
-	 * @param address
-	 *            the address of the server.
-	 * @param external
-	 *            <code>true</code> if the server is an external server,
-	 *            <code>false</code> otherwise.
-	 * @param identifier
-	 *            the <code>Identifier</code> of the server.
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
+	 * @param server
+	 *            the newly discovered server.
 	 */
-	public default void onServerDiscovered(InetSocketAddress address, boolean external, Identifier identifier) {
+	public default void onServerDiscovered(DiscoveredServer server) {
 	}
 
 	/**
-	 * Called when the <code>Identifier</code> of an already discovered server
-	 * changes.
+	 * Called when the identifier of an already discovered server changes.
 	 * 
-	 * @param address
-	 *            the address of the server.
-	 * @param external
-	 *            <code>true</code> if the server is an external server,
-	 *            <code>false</code> otherwise.
-	 * @param identifier
-	 *            the new <code>Identifier</code>.
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
+	 * @param server
+	 *            the server whose identifier has updated.
+	 * @param oldIdentifier
+	 *            the old identifier.
 	 */
-	public default void onServerIdentifierUpdate(InetSocketAddress address, boolean external, Identifier identifier) {
+	public default void onServerIdentifierUpdate(DiscoveredServer server, Identifier oldIdentifier) {
 	}
 
 	/**
 	 * Called when a previously discovered server has been forgotten.
 	 * 
-	 * @param address
-	 *            the address of the server.
-	 * @param external
-	 *            <code>true</code> if the server is an external server,
-	 *            <code>false</code> otherwise.
+	 * @param server
+	 *            the server that was forgotten.
 	 */
-	public default void onServerForgotten(InetSocketAddress address, boolean external) {
+	public default void onServerForgotten(DiscoveredServer server) {
 	}
 
 }

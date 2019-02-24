@@ -30,33 +30,35 @@
  */
 package com.whirvis.jraknet.client;
 
-import static com.whirvis.jraknet.protocol.MessageIdentifier.*;
+import static com.whirvis.jraknet.RakNetPacket.*;
 
 import java.net.InetSocketAddress;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.protocol.ConnectionType;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
-import com.whirvis.jraknet.protocol.login.ConnectionBanned;
-import com.whirvis.jraknet.protocol.login.IncompatibleProtocol;
-import com.whirvis.jraknet.protocol.login.OpenConnectionResponseOne;
-import com.whirvis.jraknet.protocol.login.OpenConnectionResponseTwo;
+import com.whirvis.jraknet.protocol.connection.ConnectionBanned;
+import com.whirvis.jraknet.protocol.connection.IncompatibleProtocolVersion;
+import com.whirvis.jraknet.protocol.connection.OpenConnectionResponseOne;
+import com.whirvis.jraknet.protocol.connection.OpenConnectionResponseTwo;
 import com.whirvis.jraknet.session.RakNetServerSession;
 
 import io.netty.channel.Channel;
 
 /**
- * Used by the {@link com.whirvis.jraknet.client.RakNetClient RakNetClient} to
- * better handle server connection and login.
+ * Used by the {@link RakNetClient} to better handle server connection and
+ * login.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v2.0
- * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
  */
 public class SessionPlanner {
 
+	private final Logger log;
 	private final RakNetClient client;
 	private final int initialMaximumTransferUnit;
 	private final int maximumMaximumTransferUnit;
@@ -76,9 +78,10 @@ public class SessionPlanner {
 	 *            the initial maximum transfer unit size.
 	 * @param maximumMaximumTransferUnit
 	 *            the maximum transfer unit with the highest size.
-	 * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
 	 */
 	public SessionPlanner(RakNetClient client, int initialMaximumTransferUnit, int maximumMaximumTransferUnit) {
+		this.log = LogManager
+				.getLogger("jraknet-client-session-planner-" + Long.toHexString(client.getGloballyUniqueId()));
 		this.client = client;
 		this.initialMaximumTransferUnit = initialMaximumTransferUnit;
 		this.maximumMaximumTransferUnit = maximumMaximumTransferUnit;
@@ -89,7 +92,6 @@ public class SessionPlanner {
 	 * 
 	 * @param packet
 	 *            the packet to handle.
-	 * @see com.whirvis.jraknet.RakNetPacket RakNetPacket
 	 */
 	public void handleMessage(RakNetPacket packet) {
 		short packetId = packet.getId();
@@ -117,9 +119,8 @@ public class SessionPlanner {
 				} else {
 					this.guid = connectionResponseOne.serverGuid;
 					this.loginPackets[0] = true;
-					client.getLogger()
-							.debug("Applied maximum transfer unit " + maximumTransferUnit + " and globally unique ID "
-									+ guid + " from " + MessageIdentifier.getName(packetId) + " packet");
+					log.debug("Applied maximum transfer unit " + maximumTransferUnit + " and globally unique ID " + guid
+							+ " from " + getName(packetId) + " packet");
 				}
 			}
 		} else if (packetId == ID_OPEN_CONNECTION_REPLY_2) {
@@ -140,16 +141,13 @@ public class SessionPlanner {
 				this.loginPackets[1] = true;
 				if (connectionResponseTwo.maximumTransferUnit < this.maximumTransferUnit) {
 					this.maximumTransferUnit = connectionResponseTwo.maximumTransferUnit;
-					client.getLogger()
-							.warn("Server responded with lower maximum transfer unit than agreed upon earlier");
+					log.warn("Server responded with lower maximum transfer unit than agreed upon earlier");
 				} else if (connectionResponseTwo.maximumTransferUnit > this.maximumMaximumTransferUnit) {
 					this.maximumTransferUnit = connectionResponseTwo.maximumTransferUnit;
-					client.getLogger()
-							.warn("Server responded with higher maximum transfer unit than agreed upon earlier");
+					log.warn("Server responded with higher maximum transfer unit than agreed upon earlier");
 				}
 				this.connectionType = connectionResponseTwo.connectionType;
-				client.getLogger()
-						.debug("Applied maximum transfer unit from " + MessageIdentifier.getName(packetId) + " packet");
+				log.debug("Applied maximum transfer unit from " + getName(packetId) + " packet");
 			}
 		} else if (packetId == ID_ALREADY_CONNECTED) {
 			this.cancelReason = new AlreadyConnectedException(client, address);
@@ -163,7 +161,7 @@ public class SessionPlanner {
 				this.cancelReason = new ConnectionBannedException(client, address);
 			}
 		} else if (packetId == ID_INCOMPATIBLE_PROTOCOL_VERSION) {
-			IncompatibleProtocol incompatibleProtocol = new IncompatibleProtocol(packet);
+			IncompatibleProtocolVersion incompatibleProtocol = new IncompatibleProtocolVersion(packet);
 			incompatibleProtocol.decode();
 
 			if (incompatibleProtocol.serverGuid == this.guid) {
@@ -202,16 +200,14 @@ public class SessionPlanner {
 	 * @throws IllegalStateException
 	 *             if a session cannot yet be created with the current
 	 *             information that the planner has.
-	 * @see com.whirvis.jraknet.session.RakNetServerSession RakNetServerSession
 	 */
 	public RakNetServerSession createSession(Channel channel) {
 		if (!this.readyForSession()) {
 			throw new IllegalStateException("Session cannot yet be created");
 		}
-		client.getLogger()
-				.info("Created server session using globally unique ID " + Long.toHexString(guid).toUpperCase()
-						+ " and maximum transfer unit with size of " + maximumTransferUnit + " bytes ("
-						+ (maximumTransferUnit * 8) + " bits) for server address " + address);
+		log.debug("Created server session using globally unique ID " + Long.toHexString(guid).toUpperCase()
+				+ " and maximum transfer unit with size of " + maximumTransferUnit + " bytes ("
+				+ (maximumTransferUnit * 8) + " bits) for server address " + address);
 		return new RakNetServerSession(client, connectionType, guid, maximumTransferUnit, channel, address);
 	}
 

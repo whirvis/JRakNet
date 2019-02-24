@@ -33,13 +33,11 @@ package com.whirvis.jraknet.client;
 import java.net.InetSocketAddress;
 
 /**
- * Signals that a RakNet client is attempting to connect to a server that it is
- * already connected to.
+ * Signals that a {@link RakNetClient} has attempted to connect to a server that
+ * it is already connected to.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v2.0
- * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
- * @see com.whirvis.jraknet.client.RakNetClientException RakNetClientException
  */
 public class AlreadyConnectedException extends RakNetClientException {
 
@@ -51,11 +49,10 @@ public class AlreadyConnectedException extends RakNetClientException {
 	 * Constructs an <code>AlreadyConnectedException</code>.
 	 * 
 	 * @param client
-	 *            the client that threw the exception.
+	 *            the client that is already connected to the server.
 	 * @param address
 	 *            the address of the server that the client is already connected
 	 *            to.
-	 * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
 	 */
 	public AlreadyConnectedException(RakNetClient client, InetSocketAddress address) {
 		super(client, "Already connected to server");

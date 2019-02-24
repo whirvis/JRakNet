@@ -32,16 +32,39 @@ package com.whirvis.jraknet.protocol.status;
 
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
 
+/**
+ * A <code>CONNECTED_PING</code> packet.
+ * <p>
+ * This packet is sent by either the client or server in order to get a response
+ * to determine if the connection is still active.
+ * 
+ * @author Whirvis T. Wheatley
+ * @since JRakNet v1.0.0
+ */
 public class ConnectedPing extends RakNetPacket {
 
+	/**
+	 * The timestamp of the sender.
+	 */
 	public long timestamp;
 
+	/**
+	 * Creates a <code>CONNECTED_PING</code> packet to be encoded.
+	 * 
+	 * @see #encode()
+	 */
 	public ConnectedPing() {
-		super(MessageIdentifier.ID_CONNECTED_PING);
+		super(ID_CONNECTED_PING);
 	}
 
+	/**
+	 * Creates a <code>CONNECTED_PING</code> packet to be decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
+	 */
 	public ConnectedPing(Packet packet) {
 		super(packet);
 	}

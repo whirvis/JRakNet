@@ -28,62 +28,84 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.protocol.login;
+package com.whirvis.jraknet.protocol.connection;
 
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
 
 /**
- * An {@link com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_BANNED
- * ID_CONNECTION_BANNED} packet. This is sent by the server during client login
- * if the client has been banned from connecting to the server.
+ * An <code>OPEN_CONNECTION_REQUEST_1</code> packet.
+ * <p>
+ * This is the first packet sent by the client to the server during connection.
  * 
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
- * @see com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_BANNED
- *      ID_CONNECTION_BANNED
  */
-public class ConnectionBanned extends RakNetPacket {
+public class OpenConnectionRequestOne extends RakNetPacket {
 
 	/**
-	 * The server's globally unique identifier.
+	 * At the end of this packet in particular, the client pads the packet with
+	 * the remaining data left according the <code>maximumTransferUnit</code>.
+	 * To prevent an overflow, this is subtracted when encoding as its value is
+	 * the size of all the fields put together. This is added when decoding in
+	 * order to correctly determine the maximum transfer unit.
+	 * <p>
+	 * <ul>
+	 * <li>One <code>byte</code> for the packet ID</li>
+	 * <li>Sixteen <code>byte</code>s for the MAGIC identifier</li>
+	 * <li>One <code>byte</code> for the network protocol version</li>
+	 * </ul>
 	 */
-	public long serverGuid;
+	private static final int MTU_PADDING = Byte.BYTES + MAGIC.length + Byte.BYTES;
 
 	/**
-	 * Creates an
-	 * {@link com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_BANNED
-	 * ID_CONNECTION_BANNED} packet to be encoded.
+	 * Whether or not the magic bytes read in the packet are valid.
+	 */
+	public boolean magic;
+
+	/**
+	 * The client's network protocol version.
+	 */
+	public int networkProtocol;
+
+	/**
+	 * The client's maximum transfer unit size.
+	 */
+	public int maximumTransferUnit;
+
+	/**
+	 * Creates an <code>OPEN_CONNECTION_REQUEST_1</code> packet to be encoded.
 	 * 
 	 * @see #encode()
 	 */
-	public ConnectionBanned() {
-		super(MessageIdentifier.ID_CONNECTION_BANNED);
+	public OpenConnectionRequestOne() {
+		super(ID_OPEN_CONNECTION_REQUEST_1);
 	}
 
 	/**
-	 * Creates an
-	 * {@link com.whirvis.jraknet.protocol.MessageIdentifier#ID_CONNECTION_BANNED
-	 * ID_CONNECTION_BANNED} packet to be decoded.
+	 * Creates an <code>OPEN_CONNECTION_REQUEST_1</code> packet to be decoded.
 	 * 
 	 * @param packet
 	 *            the original packet whose data will be read from in the
 	 *            {@link #decode()} method.
-	 * @see #decode()
 	 */
-	public ConnectionBanned(Packet packet) {
+	public OpenConnectionRequestOne(Packet packet) {
 		super(packet);
 	}
 
 	@Override
 	public void encode() {
-		this.writeLong(serverGuid);
+		this.writeMagic();
+		this.writeUnsignedByte(networkProtocol);
+		this.pad(maximumTransferUnit - MTU_PADDING);
 	}
 
 	@Override
 	public void decode() {
-		this.serverGuid = this.readLong();
+		this.magic = this.checkMagic();
+		this.networkProtocol = this.readUnsignedByte();
+		this.maximumTransferUnit = (this.remaining() + MTU_PADDING);
+		this.skip(this.remaining());
 	}
 
 }

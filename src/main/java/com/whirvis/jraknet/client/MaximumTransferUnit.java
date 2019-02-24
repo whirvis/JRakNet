@@ -43,13 +43,11 @@ import org.apache.logging.log4j.Logger;
 import com.whirvis.jraknet.map.IntMap;
 
 /**
- * Used by the {@link com.whirvis.jraknet.client.RakNetClient RakNetClient}
- * during login to track how and when it should modify its maximum transfer unit
- * in the login process.
+ * Used by the {@link RakNetClient} during connection to track how and when it
+ * should modify its maximum transfer unit.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v2.0
- * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
  */
 public class MaximumTransferUnit {
 
@@ -148,12 +146,12 @@ public class MaximumTransferUnit {
 
 	/**
 	 * Returns the amount of times {@link #retry()} can be called before
-	 * {@link #reset()} needs to be called.
+	 * {@link #reset()} needs to be called. If this is <code>0</code>, then
+	 * calling the {@link #retry()} method will yield a
+	 * <code>IllegalStateException</code>.
 	 * 
 	 * @return the amount of times {@link #retry()} can be called before
 	 *         {@link #reset()} needs to be called.
-	 * @see #retry()
-	 * @see #reset()
 	 */
 	public int getRetriesLeft() {
 		return this.retriesLeft;
@@ -184,8 +182,11 @@ public class MaximumTransferUnit {
 	 * @see #retry()
 	 */
 	public void reset() {
+		if (this.retriesLeft == retries) {
+			return; // Nothing to reset
+		}
 		LOG.debug("Reset maximum transfer unit with size of " + size + " bytes (" + (size * 8) + " bits)");
-		this.retriesLeft = this.retries;
+		this.retriesLeft = retries;
 	}
 
 	@Override

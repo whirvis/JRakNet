@@ -30,8 +30,6 @@
  */
 package com.whirvis.jraknet;
 
-import static com.whirvis.jraknet.protocol.MessageIdentifier.*;
-
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -97,8 +95,8 @@ public class Packet {
 	}
 
 	/**
-	 * Constructs a <code>Packet</code> that reads from and writes to the
-	 * byte array.
+	 * Constructs a <code>Packet</code> that reads from and writes to the byte
+	 * array.
 	 * 
 	 * @param data
 	 *            the byte[] to read from and write to.
@@ -153,6 +151,16 @@ public class Packet {
 			data[i] = buffer.readByte();
 		}
 		return data;
+	}
+
+	/**
+	 * Skips the specified amount of bytes.
+	 * 
+	 * @param length
+	 *            the amount of bytes to skip.
+	 */
+	public void skip(int length) {
+		buffer.skipBytes(length);
 	}
 
 	/**
@@ -355,8 +363,8 @@ public class Packet {
 	 * @return whether or not the magic array was valid.
 	 */
 	public boolean checkMagic() {
-		byte[] magicCheck = this.read(MAGIC.length);
-		return Arrays.equals(MAGIC, magicCheck);
+		byte[] magicCheck = this.read(RakNetPacket.MAGIC.length);
+		return Arrays.equals(RakNetPacket.MAGIC, magicCheck);
 	}
 
 	/**
@@ -521,8 +529,8 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a byte array of the flipped unsigned byte's casted back
-	 * to a byte to the packet.
+	 * Writes a byte array of the flipped unsigned byte's casted back to a byte
+	 * to the packet.
 	 * 
 	 * @param data
 	 *            the data to write.
@@ -768,6 +776,8 @@ public class Packet {
 		buffer.writeDouble(d);
 		return this;
 	}
+	
+	// TODO: Move the magic functions to RakNet packet? They seem like they belong there.
 
 	/**
 	 * Writes the magic sequence to the packet.
@@ -775,7 +785,7 @@ public class Packet {
 	 * @return the packet.
 	 */
 	public Packet writeMagic() {
-		this.write(MAGIC);
+		this.write(RakNetPacket.MAGIC);
 		return this;
 	}
 

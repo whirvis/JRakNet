@@ -52,7 +52,6 @@ import io.netty.channel.socket.DatagramPacket;
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0
- * @see com.whirvis.jraknet.client.RakNetServer RakNetServer
  */
 public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 
@@ -66,7 +65,6 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	 * 
 	 * @param server
 	 *            the server to send received packets to.
-	 * @see com.whirvis.jraknet.RakNetServer RakNetServer
 	 */
 	public RakNetServerHandler(RakNetServer server) {
 		this.log = LogManager
@@ -77,8 +75,8 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 
 	/**
 	 * Blocks the IP address. All currently connected clients with the IP
-	 * address (regardless of port) will be disconnected with the same reason
-	 * that the IP address was blocked.
+	 * address will be disconnected with the same reason that the IP address was
+	 * blocked.
 	 * 
 	 * @param address
 	 *            the IP address to block.

@@ -33,13 +33,11 @@ package com.whirvis.jraknet.client;
 import java.net.InetSocketAddress;
 
 /**
- * Signals that a RakNet client is attempting to connect to a server that has
- * banned its connection.
+ * Signals that a {@link RakNetClient} has attempted to connect to a server that
+ * has banned its connection.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v2.0
- * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
- * @see com.whirvis.jraknet.client.RakNetClientException RakNetClientException
  */
 public class ConnectionBannedException extends RakNetClientException {
 
@@ -51,10 +49,9 @@ public class ConnectionBannedException extends RakNetClientException {
 	 * Constructs a <code>ConnectedionBannedException</code>.
 	 * 
 	 * @param client
-	 *            the client that threw the exception.
+	 *            the client that is banned.
 	 * @param address
 	 *            the address of the server that banned the client's connection.
-	 * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
 	 */
 	public ConnectionBannedException(RakNetClient client, InetSocketAddress address) {
 		super(client, "Connection banned");

@@ -33,57 +33,52 @@ package com.whirvis.jraknet.identifier;
 import com.whirvis.jraknet.RakNet;
 
 /**
- * Represents a Minecraft identifier.
+ * Represents a Minecraft™ identifier.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0
  */
 public class MinecraftIdentifier extends Identifier {
 
-	private static final char[] VERSION_TAG_ALPHABET = new char[] { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-			'.' };
 	private static final String HEADER = "MCPE";
 	private static final String SEPARATOR = ";";
 	private static final int DATA_COUNT_LEGACY = 6;
 	private static final int DATA_COUNT = 9;
 
 	/**
-	 * Returns whether or not the version tag is valid.
+	 * Returns whether or not the version tag is valid. In order for a version
+	 * tag to be valid, it can only have numbers or periods. A <code>null</code>
+	 * value is also valid, seeing as when the identifier is being built no
+	 * version will be placed inside the identifier string.
 	 * 
 	 * @param versionTag
-	 *            the version tag to validate.
+	 *            the version tag.
 	 * @return <code>true</code> if the version tag is valid, <code>false</code>
 	 *         otherwise.
 	 */
 	private static boolean verifyVersionTag(String versionTag) {
-		if (versionTag == null) {
-			return false; // No version tag to check
-		}
-		for (char vtc : versionTag.toCharArray()) {
-			boolean valid = false;
-			for (char vtac : VERSION_TAG_ALPHABET) {
-				if (vtac == vtc) {
-					valid = true;
-					break; // Valid character
+		if (versionTag != null) {
+			for (char c : versionTag.toCharArray()) {
+				if ((c < '0' || c > '9') && c != '.') {
+					return false;
 				}
-			}
-			if (valid == false) {
-				return false; // Invalid version tag
 			}
 		}
 		return true;
 	}
 
 	/**
-	 * Returns whether or not the the identifier is a Minecraft identifier.
+	 * Returns whether or not the the identifier is a Minecraft™ identifier.
 	 * 
 	 * @param identifier
 	 *            the identifier to check.
-	 * @return <code>true</code> if the identifier is a Minecraft identifier,
+	 * @return <code>true</code> if the identifier is a Minecraft™ identifier,
 	 *         <code>false</code> otherwise.
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public static boolean isMinecraftIdentifier(Identifier identifier) {
+		if (identifier == null) {
+			return false; // No identifier
+		}
 		return identifier.build().startsWith(HEADER);
 	}
 
@@ -98,7 +93,7 @@ public class MinecraftIdentifier extends Identifier {
 	private boolean legacy;
 
 	/**
-	 * Creates a Minecraft identifier.
+	 * Creates a Minecraft™ identifier.
 	 * 
 	 * @param serverName
 	 *            the server name.
@@ -118,7 +113,7 @@ public class MinecraftIdentifier extends Identifier {
 	 *            the gamemode.
 	 */
 	public MinecraftIdentifier(String serverName, int serverProtocol, String versionTag, int onlinePlayerCount,
-			int maxPlayerCount, long guid, String worldName, String gamemode) {
+			int maxPlayerCount, long guid, String worldName, String gamemode) throws IllegalArgumentException {
 		this.serverName = serverName;
 		this.serverProtocol = serverProtocol;
 		this.versionTag = versionTag;
@@ -128,71 +123,71 @@ public class MinecraftIdentifier extends Identifier {
 		this.worldName = worldName;
 		this.gamemode = gamemode;
 		this.legacy = false;
-
-		if (this.versionTag != null) {
-			if (verifyVersionTag(this.versionTag) == false) {
-				throw new IllegalArgumentException("Invalid version tag");
-			}
-		}
 	}
 
 	/**
-	 * Creates a Minecraft identifier from an existing identifier.
+	 * Creates a Minecraft™ identifier from an existing identifier.
 	 * 
 	 * @param identifier
-	 *            the identifier whose text to parse.
+	 *            the identifier.
+	 * @throws NullPointerException
+	 *             if the <code>identifier</code> or its contents are
+	 *             <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>identifier</code> is not a Minecraft™ identifier
+	 *             or there is not enough data present.
 	 */
-	public MinecraftIdentifier(Identifier identifier) {
+	public MinecraftIdentifier(Identifier identifier) throws NullPointerException, IllegalArgumentException {
 		super(identifier);
-		String[] data = identifier.build().split(SEPARATOR);
-		if (data.length <= 0) {
-			throw new IllegalArgumentException("Invalid header");
-		} else if (data[0].equals(HEADER) == false) {
-			throw new IllegalArgumentException("Invalid header");
+		if (identifier == null) {
+			throw new NullPointerException("Identifier cannot be null");
+		} else if (identifier.build() == null) {
+			throw new NullPointerException("Identifier contents cannot be null");
+		} else if (!isMinecraftIdentifier(identifier)) {
+			throw new IllegalArgumentException("Not a Minecraft identifier");
 		}
-
-		// Parse data
+		String[] data = identifier.build().split(SEPARATOR);
+		if (data.length < DATA_COUNT_LEGACY) {
+			throw new IllegalArgumentException("Not enough data");
+		}
 		for (int i = 0; i < data.length; i++) {
 			data[i] = (data[i].length() > 0 ? data[i] : null);
 		}
-		if (data.length > DATA_COUNT_LEGACY) {
-			this.serverName = data[1];
-			this.serverProtocol = RakNet.parseIntPassive(data[2]);
-			this.versionTag = data[3];
-			this.onlinePlayerCount = RakNet.parseIntPassive(data[4]);
-			this.maxPlayerCount = RakNet.parseIntPassive(data[5]);
-			this.legacy = true;
-			if (data.length >= DATA_COUNT) {
-				this.guid = RakNet.parseLongPassive(data[6]);
-				this.worldName = data[7];
-				this.gamemode = data[8];
-				this.legacy = false;
-			}
-
-			// Validate version tag
-			if (verifyVersionTag(this.versionTag) == false) {
-				throw new IllegalArgumentException("Invalid version tag");
-			}
-		} else {
-			throw new IllegalArgumentException("Identifier too short");
+		this.serverName = data[1];
+		this.serverProtocol = RakNet.parseIntPassive(data[2]);
+		this.versionTag = data[3];
+		this.onlinePlayerCount = RakNet.parseIntPassive(data[4]);
+		this.maxPlayerCount = RakNet.parseIntPassive(data[5]);
+		this.legacy = true;
+		if (data.length >= DATA_COUNT) {
+			this.guid = RakNet.parseLongPassive(data[6]);
+			this.worldName = data[7];
+			this.gamemode = data[8];
+			this.legacy = false;
 		}
 	}
 
 	/**
-	 * Creates a Minecraft identifier from an existing identifier.
+	 * Creates a Minecraft™ identifier from another identifier.
 	 * 
 	 * @param identifier
-	 *            the identifier whose text to parse.
+	 *            the identifier.
+	 * @throws NullPointerException
+	 *             if the <code>identifier</code> or its contents are
+	 *             <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>identifier</code> is not a Minecraft identifier
+	 *             or there is not enough data present.
 	 */
-	public MinecraftIdentifier(String identifier) {
+	public MinecraftIdentifier(String identifier) throws NullPointerException, IllegalArgumentException {
 		this(new Identifier(identifier));
 	}
 
 	/**
-	 * Creates a blank Minecraft identifier.
+	 * Creates a blank Minecraft™ identifier.
 	 */
 	public MinecraftIdentifier() {
-		this(null, -1, null, -1, -1, -1, null, null);
+		this(null, 0, null, 0, 0, 0, null, null);
 	}
 
 	/**
@@ -292,14 +287,14 @@ public class MinecraftIdentifier extends Identifier {
 	 * 
 	 * @param versionTag
 	 *            the new version tag.
-	 * @return <code>true</code> if the version tag was set
+	 * @throws IllegalArgumentException
+	 *             if the version tag is invalid.
 	 */
-	public boolean setVersionTag(String versionTag) {
-		if (verifyVersionTag(versionTag)) {
-			this.versionTag = versionTag;
-			return true;
+	public void setVersionTag(String versionTag) throws IllegalArgumentException {
+		if (!verifyVersionTag(versionTag)) {
+			throw new IllegalArgumentException("Invalid version tag");
 		}
-		return false;
+		this.versionTag = versionTag;
 	}
 
 	/**
@@ -363,9 +358,9 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Returns whether or not the identifier is in legacy mode.
+	 * Returns whether or not the identifier is using the legacy builder.
 	 * 
-	 * @return <code>true</code> if the identifier is in legacy mode,
+	 * @return <code>true</code> if the identifier is using the legacy builder,
 	 *         <code>false</code> otherwise.
 	 */
 	public boolean isLegacyMode() {
@@ -373,13 +368,18 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Converts the values to a Minecraft identifier string.
+	 * Converts the values to a Minecraft™ identifier string.
 	 * 
 	 * @param values
 	 *            the values to write to the identifier.
 	 * @return the built identifier as a <code>String</code>.
+	 * @throws NullPointerException
+	 *             if <code>values</code> is <code>null</code>.
 	 */
-	private String createBuildString(Object... values) {
+	private String createBuildString(Object... values) throws NullPointerException {
+		if (values == null) {
+			throw new NullPointerException("Values cannot be null");
+		}
 		StringBuilder identifierBuilder = new StringBuilder();
 		identifierBuilder.append(HEADER + SEPARATOR);
 		for (int i = 0; i < values.length; i++) {
@@ -389,9 +389,17 @@ public class MinecraftIdentifier extends Identifier {
 		return identifierBuilder.toString();
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @throws IllegalArgumentException
+	 *             if the version tag is invalid.
+	 */
 	@Override
 	public String build() {
-		if (legacy == true) {
+		if (!verifyVersionTag(versionTag)) {
+			throw new IllegalArgumentException("Invalid version tag");
+		} else if (legacy == true) {
 			return this.createBuildString(serverName, serverProtocol, versionTag, onlinePlayerCount, maxPlayerCount);
 		}
 		return this.createBuildString(serverName, serverProtocol, versionTag, onlinePlayerCount, maxPlayerCount, guid,

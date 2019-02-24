@@ -58,8 +58,6 @@ public class RakNetClientTest {
 	
 	public static void main(String[] args) throws IllegalStateException, RakNetException, UnknownHostException {
 		// Create client and add listener
-		
-		
 		RakNetClient client = new RakNetClient();
 		client.addListener(new RakNetClientListener() {
 

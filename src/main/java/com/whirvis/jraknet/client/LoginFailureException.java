@@ -31,13 +31,11 @@
 package com.whirvis.jraknet.client;
 
 /**
- * Signals that a RakNet client has experienced an error during the login
+ * Signals that a {@link RakNetClient} has experienced an error during the login
  * process.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v2.0
- * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
- * @see com.whirvis.jraknet.client.RakNetClientException RakNetClientException
  */
 public class LoginFailureException extends RakNetClientException {
 
@@ -50,7 +48,6 @@ public class LoginFailureException extends RakNetClientException {
 	 *            the client that threw the exception.
 	 * @param error
 	 *            the reason login failed.
-	 * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
 	 */
 	public LoginFailureException(RakNetClient client, String error) {
 		super(client, error);

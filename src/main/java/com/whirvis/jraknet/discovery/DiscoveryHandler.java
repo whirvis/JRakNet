@@ -36,7 +36,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
 import com.whirvis.jraknet.protocol.status.UnconnectedPong;
 
 import io.netty.channel.ChannelHandlerContext;
@@ -44,21 +43,19 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.DatagramPacket;
 
 /**
- * Used by the {@link com.whirvis.jraknet.discovery.Discovery Discovery} with
- * the sole purpose of sending received packets to the discovery system so they
- * can be handled. If any errors occur while handling a packet, it will be
- * ignored.
+ * Used by the {@link Discovery} system with the sole purpose of sending
+ * received packets to the discovery system so they can be handled. If any
+ * errors occur while handling a packet, it will be ignored.
  *
  * @author Whirvis T. Wheatley
- * @since JRakNet v1.0
- * @see com.whirvis.jraknet.client.RakNetClient RakNetClient
+ * @since JRakNet v2.11.0
  */
 public class DiscoveryHandler extends ChannelInboundHandlerAdapter {
 
 	private final Logger log;
 
 	/**
-	 * Creates a RakNet client Netty handler.
+	 * Creates a discovery system Netty handler.
 	 */
 	protected DiscoveryHandler() {
 		this.log = LogManager.getLogger("jraknet-discovery-handler");
@@ -73,7 +70,7 @@ public class DiscoveryHandler extends ChannelInboundHandlerAdapter {
 			RakNetPacket packet = new RakNetPacket(datagram);
 
 			// Handle the packet and release the buffer
-			if (packet.getId() == MessageIdentifier.ID_UNCONNECTED_PONG) {
+			if (packet.getId() == RakNetPacket.ID_UNCONNECTED_PONG) {
 				UnconnectedPong pong = new UnconnectedPong(packet);
 				pong.decode();
 				if (!pong.failed()) {

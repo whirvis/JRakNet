@@ -30,91 +30,27 @@
  */
 package com.whirvis.jraknet.session;
 
-import com.whirvis.jraknet.map.IntMap;
-
 /**
  * Represents the current status of a connection in a
  * <code>RakNetSession</code>.
  *
  * @author Whirvis T. Wheatley
  */
-public class RakNetState {
-
-	private static final IntMap<RakNetState> registeredStates = new IntMap<RakNetState>();
+public enum RakNetState {
 
 	/**
 	 * The session is disconnected.
 	 */
-	public static final RakNetState DISCONNECTED = new RakNetState("DISCONNECTED", 0);
-
+	DISCONNECTED,
+	
 	/**
 	 * The session is handshaking.
 	 */
-	public static final RakNetState HANDSHAKING = new RakNetState("HANDSHAKING", 1);
-
+	HANDSHAKING,
+	
 	/**
 	 * The session is connected.
 	 */
-	public static final RakNetState CONNECTED = new RakNetState("CONNECTED", 2);
-
-	private final String name;
-	private final int order;
-
-	/**
-	 * Constructs a <code>RakNetState</code> with the order.
-	 * 
-	 * @param name
-	 *            the name of the <code>RakNetSetate</code>.
-	 * @param order
-	 *            the order of the <code>RakNetState</code>.
-	 */
-	private RakNetState(String name, int order) {
-		this.name = name;
-		this.order = order;
-		registeredStates.put(order, this);
-	}
-	
-	/**
-	 * Returns the name of the state.
-	 * 
-	 * @return the name of the state.
-	 */
-	public String getName() {
-		return this.name;
-	}
-
-	/**
-	 * Returns the order the state is in.
-	 * 
-	 * @return the order the state is in.
-	 */
-	public int getOrder() {
-		return this.order;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof RakNetState) {
-			RakNetState stateObj = (RakNetState) obj;
-			return this.getOrder() >= stateObj.getOrder();
-		}
-		return false;
-	}
-
-	/**
-	 * Returns the state based on its order.
-	 * 
-	 * @param order
-	 *            the order of the state.
-	 * @return the state based on its order.
-	 */
-	public static RakNetState getState(int order) {
-		return registeredStates.get(order);
-	}
-
-	@Override
-	public String toString() {
-		return "RakNetState [order=" + order + "]";
-	}
+	CONNECTED;
 
 }
