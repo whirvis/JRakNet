@@ -32,156 +32,112 @@ package com.whirvis.jraknet.protocol.message;
 
 import java.util.ArrayList;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.protocol.message.acknowledge.Record;
-import com.whirvis.jraknet.session.RakNetSession;
 
-public class CustomPacket extends RakNetPacket implements Sizable {
+/**
+ * A <code>CUSTOM_0</code>, <code>CUSTOM_1</code>, <code>CUSTOM_2</code>,
+ * <code>CUSTOM_3</code>, <code>CUSTOM_4</code>, <code>CUSTOM_5</code>,
+ * <code>CUSTOM_6</code>, <code>CUSTOM_7</code>, <code>CUSTOM_8</code>,
+ * <code>CUSTOM_9</code>, <code>CUSTOM_A</code>, <code>CUSTOM_B</code>,
+ * <code>CUSTOM_C</code>, <code>CUSTOM_D</code>, <code>CUSTOM_E</code>, or
+ * <code>CUSTOM_F</code> packet.
+ * <p>
+ * This packet is used to send {@link EncapsulatedPacket encapsulated packets}
+ * that are in the send queue. This is where {@link EncapsulatedPacket
+ * encapsulated packets} get their name from, as they are encapsulated within
+ * another container packet. The way this works is by storing as many packets in
+ * the send queue as possible into one packet before sending them off all at
+ * once.
+ * 
+ * @author Whirvis T. Wheatley
+ * @since JRakNet v1.0.0
+ */
+public class CustomPacket extends RakNetPacket {
 
-	private static final Logger LOG = LogManager.getLogger(CustomPacket.class);
+	/**
+	 * The sequence ID of the packet.
+	 */
+	public int sequenceId;
 
-	public static final int SEQUENCE_NUMBER_LENGTH = 0x03;
+	/**
+	 * If encoding, these are the packets that will be encoded into the packet.
+	 * If decoding, these were the packets decoded from the packet.
+	 */
+	public EncapsulatedPacket[] messages;
 
-	// Custom packet data
-	public int sequenceNumber;
-	public ArrayList<EncapsulatedPacket> messages;
+	/**
+	 * The encapsulated packets that require acknowledgement.
+	 */
+	public final ArrayList<EncapsulatedPacket> ackMessages;
 
-	// Session ACK data
-	public RakNetSession session;
-	private final ArrayList<EncapsulatedPacket> ackMessages;
-
-	public CustomPacket() {
-		super(ID_CUSTOM_4);
-		this.messages = new ArrayList<EncapsulatedPacket>();
+	/**
+	 * Creates a custom packet to be encoded.
+	 * 
+	 * @param type
+	 *            the type of custom packet being in between
+	 *            <code>ID_CUSTOM_0</code> and <code>ID_CUSTOM_F</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>type</code> is not in between code
+	 *             <code>ID_CUSTOM_0</code> and <code>ID_CUSTOM_F</code>.
+	 * @see #encode()
+	 */
+	protected CustomPacket(int type) throws IllegalArgumentException {
+		super(type);
+		if (type < ID_CUSTOM_0 || type > ID_CUSTOM_F) {
+			throw new IllegalArgumentException("Custom packet ID must be in between ID_CUSTOM_0 and ID_CUSTOM_f");
+		}
 		this.ackMessages = new ArrayList<EncapsulatedPacket>();
 	}
 
+	/**
+	 * Creates a <code>CUSTOM</code> packet to be decoded.
+	 * 
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
+	 */
 	public CustomPacket(Packet packet) {
 		super(packet);
-		this.messages = new ArrayList<EncapsulatedPacket>();
 		this.ackMessages = new ArrayList<EncapsulatedPacket>();
 	}
 
 	@Override
 	public void encode() {
-		this.writeTriadLE(sequenceNumber);
-		for (EncapsulatedPacket packet : messages) {
-			/*
-			 * We have to use wrap our buffer around a packet otherwise data
-			 * will be written incorrectly due to how Netty's ByteBufs work.
-			 */
-			packet.buffer = new Packet(this.buffer());
-
-			// Set ACK record if the reliability requires an ACK receipt
-			if (packet.reliability.requiresAck()) {
-				packet.ackRecord = new Record(sequenceNumber);
-				ackMessages.add(packet);
-			}
-
-			// Encode packet
-			packet.encode();
-
-			// Nullify buffer so it cannot be abused
-			packet.buffer = null;
-		}
-
-		// Tell session we have packets that require an ACK receipt
-		if (!ackMessages.isEmpty()) {
-			if (session != null) {
-				session.setAckReceiptPackets(ackMessages.toArray(new EncapsulatedPacket[ackMessages.size()]));
-			} else {
-				LOG.error("No session for " + ackMessages.size() + " encapsulated packet "
-						+ (ackMessages.size() == 1 ? "" : "s") + " that require" + (ackMessages.size() == 1 ? "s" : "")
-						+ " ACK receipts");
+		this.writeTriadLE(sequenceId);
+		if (messages != null) {
+			for (EncapsulatedPacket packet : messages) {
+				packet.buffer = this; // TODO: According to comments this
+										// apparently
+										// broke stuff
+				if (packet.reliability.requiresAck()) {
+					packet.ackRecord = new Record(sequenceId);
+					ackMessages.add(packet);
+				}
+				packet.encode();
+				packet.buffer = null; // Prevent illegal reuse
 			}
 		}
 	}
 
 	@Override
 	public void decode() {
-		this.sequenceNumber = this.readTriadLE();
-		while (this.remaining() >= EncapsulatedPacket.MINIMUM_BUFFER_LENGTH) {
-			// Create encapsulated packet so it can be decoded later
+		this.sequenceId = this.readTriadLE();
+		ArrayList<EncapsulatedPacket> messages = new ArrayList<EncapsulatedPacket>();
+		while (this.remaining() >= EncapsulatedPacket.MINIMUM_SIZE) {
 			EncapsulatedPacket packet = new EncapsulatedPacket();
-
-			/*
-			 * We have to use wrap our buffer around a packet otherwise data
-			 * will be read incorrectly due to how Netty's ByteBufs work.
-			 */
-			packet.buffer = new Packet(this.buffer());
-
-			// Decode packet
+			packet.buffer = this; // TODO: According to comments this apparently
+									// broke stuff
 			packet.decode();
-
-			// Set ACK record if the reliability requires an ACK receipt
 			if (packet.reliability.requiresAck()) {
-				packet.ackRecord = new Record(sequenceNumber);
+				packet.ackRecord = new Record(sequenceId);
 				ackMessages.add(packet);
 			}
-
-			// Nullify buffer so it can not be abused
-			packet.buffer = null;
-
-			// Add packet to list
+			packet.buffer = null; // Prevent illegal reuse
 			messages.add(packet);
 		}
-	}
-
-	@Override
-	public int calculateSize() {
-		int packetSize = 1; // Packet ID
-		packetSize += SEQUENCE_NUMBER_LENGTH;
-		for (EncapsulatedPacket message : this.messages) {
-			packetSize += message.calculateSize();
-		}
-		return packetSize;
-	}
-
-	/**
-	 * @return <code>true</code> if the packet contains any unreliable messages.
-	 */
-	public boolean containsUnreliables() {
-		if (messages.isEmpty()) {
-			return false; // Nothing to check
-		}
-
-		for (EncapsulatedPacket encapsulated : this.messages) {
-			if (!encapsulated.reliability.isReliable()) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Removes all the unreliable messages from the packet.
-	 */
-	public void removeUnreliables() {
-		if (messages.isEmpty()) {
-			return; // Nothing to remove
-		}
-
-		ArrayList<EncapsulatedPacket> unreliables = new ArrayList<EncapsulatedPacket>();
-		for (EncapsulatedPacket encapsulated : this.messages) {
-			if (!encapsulated.reliability.isReliable()) {
-				unreliables.add(encapsulated);
-			}
-		}
-		messages.removeAll(unreliables);
-	}
-
-	/**
-	 * @return the size of a <code>CustomPacket</code> without any extra data
-	 *         written to it.
-	 */
-	public static int calculateDummy() {
-		CustomPacket custom = new CustomPacket();
-		custom.encode();
-		return custom.size();
+		this.messages = messages.toArray(new EncapsulatedPacket[messages.size()]);
 	}
 
 }

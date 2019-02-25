@@ -66,7 +66,7 @@ public class Record {
 		}
 		return boxedRecordIds.stream().mapToInt(Integer::intValue).toArray();
 	}
-	
+
 	/**
 	 * Returns the sequence IDs contained within the specified records.
 	 * 
@@ -108,7 +108,7 @@ public class Record {
 	 *            the sequence ID.
 	 * 
 	 * @throws IllegalArgumentException
-	 *             if the <code>ID</code> is less than <code>0</code>.
+	 *             if the <code>id</code> is less than <code>0</code>.
 	 */
 	public Record(int id) throws IllegalArgumentException {
 		this(id, NOT_RANGED);

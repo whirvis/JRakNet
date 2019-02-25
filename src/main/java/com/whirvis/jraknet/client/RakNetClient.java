@@ -546,7 +546,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(Reliability, int)
 	 * sendMessage()} methods.
 	 * 
-	 * @param packet
+	 * @param buffer
 	 *            the packet ID to send.
 	 * @param address
 	 *            the address to send the packet to.

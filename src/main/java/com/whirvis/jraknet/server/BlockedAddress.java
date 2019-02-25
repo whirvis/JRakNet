@@ -34,8 +34,7 @@ package com.whirvis.jraknet.server;
  * An address that the server has blocked.
  *
  * @author Whirvis T. Wheatley
- * @see com.whirvis.jraknet.server.RakNetServerHandler RakNetServerHandler
- * @see com.whirvis.jrkanet.server.RakNetServer RakNetServer
+ * @since JRakNet v1.0.0
  */
 public class BlockedAddress {
 
@@ -69,7 +68,6 @@ public class BlockedAddress {
 	 * {@link System#currentTimeMillis() System.currentTimeMillis()}.
 	 * 
 	 * @return the time the address was first blocked.
-	 * @see System#currentTimeMillis()
 	 */
 	public long getStartTime() {
 		return this.startTime;

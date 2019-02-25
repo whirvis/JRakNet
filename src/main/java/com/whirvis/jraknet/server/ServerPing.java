@@ -37,7 +37,7 @@ import com.whirvis.jraknet.protocol.ConnectionType;
 
 /**
  * Contains information about a server ping such as who sent the ping and what
- * the server will respond bcak with.
+ * the server will respond back with.
  * 
  * @author Whirvis T. Wheatley
  * @see com.whirvis.jraknet.identifier.Identifier Identifier
