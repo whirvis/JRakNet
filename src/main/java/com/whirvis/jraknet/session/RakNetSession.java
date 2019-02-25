@@ -49,9 +49,9 @@ import com.whirvis.jraknet.map.concurrent.ConcurrentIntMap;
 import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.protocol.MessageIdentifier;
 import com.whirvis.jraknet.protocol.Reliability;
+import com.whirvis.jraknet.protocol.message.Custom4Packet;
 import com.whirvis.jraknet.protocol.message.CustomPacket;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
-import com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgedPacket;
 import com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgedPacket;
 import com.whirvis.jraknet.protocol.message.acknowledge.Record;
 import com.whirvis.jraknet.protocol.status.ConnectedPing;
@@ -378,7 +378,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		 * variable is modified in the encapsulated packet before it is sent,
 		 * the whole API could break.
 		 */
-		return encapsulated.clone();
+		return encapsulated.getClone();
 	}
 
 	@Override
@@ -445,11 +445,14 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 	 */
 	private final int sendCustomPacket(ArrayList<EncapsulatedPacket> encapsulated, boolean updateRecoveryQueue) {
 		// Create CustomPacket
-		CustomPacket custom = new CustomPacket();
-		custom.sequenceNumber = this.sendSequenceNumber++;
+		Custom4Packet custom = new Custom4Packet();
+		custom.sequenceId = this.sendSequenceNumber++;
 		custom.messages = encapsulated;
-		custom.session = this;
 		custom.encode();
+
+		if (!ackMessages.isEmpty()) {
+			session.setAckReceiptPackets(ackMessages.toArray(new EncapsulatedPacket[ackMessages.size()]));
+		}
 
 		// Send packet
 		this.sendRawMessage(custom);
@@ -457,9 +460,15 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		// Do we need to store it for recovery?
 		if (updateRecoveryQueue == true) {
 			// Make sure unreliable data is discarded
-			custom.removeUnreliables();
+			Iterator<EncapsulatedPacket> encapsulatedI = custom.messages.iterator();
+			while (encapsulatedI.hasNext()) {
+				if (!encapsulatedI.next().reliability.isReliable()) {
+					encapsulatedI.remove();
+				}
+			}
+
 			if (!custom.messages.isEmpty()) {
-				recoveryQueue.put(custom.sequenceNumber,
+				recoveryQueue.put(custom.sequenceId,
 						custom.messages.toArray(new EncapsulatedPacket[custom.messages.size()]));
 			}
 		}
@@ -467,8 +476,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		// Update packet data
 		this.packetsSentThisSecond++;
 		this.lastPacketSendTime = System.currentTimeMillis();
-		log.debug("Sent custom packet with sequence number " + custom.sequenceNumber);
-		return custom.sequenceNumber;
+		log.debug("Sent custom packet with sequence number " + custom.sequenceId);
+		return custom.sequenceId;
 	}
 
 	/**
@@ -550,19 +559,19 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		 */
 
 		// Generate NACK queue if needed
-		int difference = custom.sequenceNumber - this.receiveSequenceNumber - 1;
+		int difference = custom.sequenceId - this.receiveSequenceNumber - 1;
 		if (difference > 0) {
 			if (difference > 1) {
 				this.sendAcknowledge(AcknowledgeType.NOT_ACKNOWLEDGED,
-						new Record(this.receiveSequenceNumber + 1, custom.sequenceNumber - 1));
+						new Record(this.receiveSequenceNumber + 1, custom.sequenceId - 1));
 			} else {
-				this.sendAcknowledge(AcknowledgeType.NOT_ACKNOWLEDGED, new Record(custom.sequenceNumber - 1));
+				this.sendAcknowledge(AcknowledgeType.NOT_ACKNOWLEDGED, new Record(custom.sequenceId - 1));
 			}
 		}
 
 		// Only handle if it is a newer packet
-		if (custom.sequenceNumber > this.receiveSequenceNumber - 1) {
-			this.receiveSequenceNumber = custom.sequenceNumber;
+		if (custom.sequenceId > this.receiveSequenceNumber - 1) {
+			this.receiveSequenceNumber = custom.sequenceId;
 			for (EncapsulatedPacket encapsulated : custom.messages) {
 				this.handleEncapsulated(encapsulated);
 			}
@@ -572,8 +581,8 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 		}
 
 		// Send ACK
-		this.sendAcknowledge(AcknowledgeType.ACKNOWLEDGED, new Record(custom.sequenceNumber));
-		log.debug("Handled custom packet with sequence number " + custom.sequenceNumber);
+		this.sendAcknowledge(AcknowledgeType.ACKNOWLEDGED, new Record(custom.sequenceId));
+		log.debug("Handled custom packet with sequence number " + custom.sequenceId);
 	}
 
 	/**
@@ -831,7 +840,7 @@ public abstract class RakNetSession implements UnumRakNetPeer, GeminusRakNetPeer
 					sendQueueI.remove();
 					continue;
 				}
-				sendLength += encapsulated.calculateSize();
+				sendLength += encapsulated.size();
 				if (sendLength > this.maximumTransferUnit) {
 					break;
 				}

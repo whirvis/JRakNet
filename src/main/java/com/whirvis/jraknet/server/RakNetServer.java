@@ -30,8 +30,6 @@
  */
 package com.whirvis.jraknet.server;
 
-import static com.whirvis.jraknet.protocol.MessageIdentifier.*;
-
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -52,7 +50,6 @@ import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.identifier.Identifier;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.connection.ConnectionBanned;
 import com.whirvis.jraknet.protocol.connection.IncompatibleProtocolVersion;
@@ -85,7 +82,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
  * @author Trent Summerlin
  */
 public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
-	
+
 	// TODO: PREVENT MULTIPLE CLIENT WITH THE SAME GUID
 
 	/**
@@ -942,7 +939,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		if (session == null) {
 			return false; // No client to disconnect
 		}
-		session.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
+		session.sendMessage(Reliability.UNRELIABLE, RakNetPacket.ID_DISCONNECTION_NOTIFICATION);
 		log.debug("Disconnected client with address " + address + " for \"" + (reason == null ? "Disconnected" : reason)
 				+ "\"");
 		if (session.getState() == RakNetState.CONNECTED) {
@@ -1276,13 +1273,15 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 */
 	protected final void handleMessage(RakNetPacket packet, InetSocketAddress sender) {
 		short packetId = packet.getId();
-		if (packetId == ID_UNCONNECTED_PING || packetId == ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
+		if (packetId == RakNetPacket.ID_UNCONNECTED_PING
+				|| packetId == RakNetPacket.ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
 			UnconnectedPing ping = new UnconnectedPing(packet);
 			ping.decode();
 			if (ping.failed()) {
 				return;
 			}
-			if ((packetId == ID_UNCONNECTED_PING || (clients.size() < this.maxConnections || this.maxConnections < 0))
+			if ((packetId == RakNetPacket.ID_UNCONNECTED_PING
+					|| (clients.size() < this.maxConnections || this.maxConnections < 0))
 					&& this.broadcastingEnabled == true && ping.magic == true) {
 				ServerPing pingEvent = new ServerPing(sender, ping.connectionType, identifier);
 				this.callEvent(listener -> listener.handlePing(pingEvent));
@@ -1299,7 +1298,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 					}
 				}
 			}
-		} else if (packetId == ID_OPEN_CONNECTION_REQUEST_1) {
+		} else if (packetId == RakNetPacket.ID_OPEN_CONNECTION_REQUEST_1) {
 			OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne(packet);
 			connectionRequestOne.decode();
 			if (clients.containsKey(sender)) {
@@ -1329,7 +1328,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 					this.sendNettyMessage(errorPacket, sender);
 				}
 			}
-		} else if (packetId == ID_OPEN_CONNECTION_REQUEST_2) {
+		} else if (packetId == RakNetPacket.ID_OPEN_CONNECTION_REQUEST_2) {
 			OpenConnectionRequestTwo connectionRequestTwo = new OpenConnectionRequestTwo(packet);
 			connectionRequestTwo.decode();
 			if (!connectionRequestTwo.failed() && connectionRequestTwo.magic == true) {
@@ -1355,14 +1354,14 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 					this.sendNettyMessage(errorPacket, sender);
 				}
 			}
-		} else if (packetId >= ID_CUSTOM_0 && packetId <= ID_CUSTOM_F) {
+		} else if (packetId >= RakNetPacket.ID_CUSTOM_0 && packetId <= RakNetPacket.ID_CUSTOM_F) {
 			if (clients.containsKey(sender)) {
 				CustomPacket custom = new CustomPacket(packet);
 				custom.decode();
 				RakNetClientSession session = clients.get(sender);
 				session.handleCustom(custom);
 			}
-		} else if (packetId == AcknowledgedPacket.ACKNOWLEDGED || packetId == AcknowledgedPacket.NOT_ACKNOWLEDGED) {
+		} else if (packetId == RakNetPacket.ID_ACK || packetId == RakNetPacket.ID_NACK) {
 			if (clients.containsKey(sender)) {
 				AcknowledgedPacket acknowledge = new AcknowledgedPacket(packet);
 				acknowledge.decode();
@@ -1370,12 +1369,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				session.handleAcknowledge(acknowledge);
 			}
 		}
-		if (MessageIdentifier.hasPacket(packet.getId())) {
-			log.debug("Handled internal packet with ID " + MessageIdentifier.getName(packet.getId()) + " ("
-					+ packet.getId() + ")");
-		} else {
-			log.debug("Sent packet with ID " + packet.getId() + " to session handler");
-		}
+		log.debug("Handled" + (RakNetPacket.hasPacket(packet.getId()) ? RakNetPacket.getName(packet.getId()) + " packet"
+				: "packet with ID " + RakNet.toHexStringId(packet))); // TODO: Have get name returned hex string ID by default?
 	}
 
 	/**
@@ -1390,9 +1385,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 */
 	private final RakNetPacket validateSender(InetSocketAddress sender) {
 		if (this.hasClient(sender)) {
-			return new RakNetPacket(ID_ALREADY_CONNECTED);
+			return new RakNetPacket(RakNetPacket.ID_ALREADY_CONNECTED);
 		} else if (this.getClientCount() >= this.maxConnections && this.maxConnections >= 0) {
-			return new RakNetPacket(ID_NO_FREE_INCOMING_CONNECTIONS);
+			return new RakNetPacket(RakNetPacket.ID_NO_FREE_INCOMING_CONNECTIONS);
 		} else if (this.isAddressBlocked(sender.getAddress())) {
 			ConnectionBanned connectionBanned = new ConnectionBanned();
 			connectionBanned.serverGuid = guid;
@@ -1447,7 +1442,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, int)
 	 * sendMessage()} methods.
 	 * 
-	 * @param packet
+	 * @param buffer
 	 *            the packet ID to send.
 	 * @param address
 	 *            the address to send the packet to.

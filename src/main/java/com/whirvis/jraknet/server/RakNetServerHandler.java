@@ -45,13 +45,12 @@ import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.socket.DatagramPacket;
 
 /**
- * Used by the {@link com.whirvis.jraknet.server.RakNetServer RakNetServer} with
- * the sole purpose of sending received packets to the server so they can be
- * handled. Any errors that occurs will also be sent to the server to be dealt
- * with.
+ * Used by the {@link RakNetServer} with the sole purpose of sending received
+ * packets to the server so they can be handled. Any errors that occurs will
+ * also be sent to the server to be dealt with.
  *
  * @author Trent Summerlin
- * @since JRakNet v1.0
+ * @since JRakNet v1.0.0
  */
 public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 

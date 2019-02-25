@@ -83,10 +83,9 @@ public class ConnectedPong extends RakNetPacket {
 	@Override
 	public void decode() {
 		this.timestamp = this.readLong();
+		this.timestampPong = -1L;
 		if (this.remaining() >= Long.BYTES) {
 			this.timestampPong = this.readLong();
-		} else {
-			this.timestampPong = -1L;
 		}
 	}
 
