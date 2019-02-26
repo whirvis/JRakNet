@@ -88,7 +88,7 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	 * @throws NullPointerException
 	 *             if <code>address</code> is <code>null</code>.
 	 */
-	protected void blockAddress(InetAddress address, String reason, long time) {
+	protected void blockAddress(InetAddress address, String reason, long time) throws NullPointerException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
 		}
@@ -111,7 +111,7 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	 * @throws NullPointerException
 	 *             if <code>address</code> is <code>null</code>.
 	 */
-	protected void unblockAddress(InetAddress address) {
+	protected void unblockAddress(InetAddress address) throws NullPointerException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
 		} else if (blocked.remove(address) == null) {
@@ -125,7 +125,7 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	 * Returns whether or not the IP address is blocked.
 	 * 
 	 * @param address
-	 *            the IP address to check.
+	 *            the IP address.
 	 * @return <code>true</code> if the IP address is blocked,
 	 *         <code>false</code> otherwise.
 	 */

@@ -658,7 +658,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		if (event == null) {
 			throw new NullPointerException("Event cannot be null");
 		}
-		listeners.forEach(listener -> Scheduler.scheduleSync(listener, event));
+		for (RakNetServerListener listener : listeners) {
+			Scheduler.scheduleSync(listener, event);
+		}
 	}
 
 	/**
@@ -1370,7 +1372,15 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			}
 		}
 		log.debug("Handled" + (RakNetPacket.hasPacket(packet.getId()) ? RakNetPacket.getName(packet.getId()) + " packet"
-				: "packet with ID " + RakNet.toHexStringId(packet))); // TODO: Have get name returned hex string ID by default?
+				: "packet with ID " + RakNet.toHexStringId(packet))); // TODO:
+																		// Have
+																		// get
+																		// name
+																		// returned
+																		// hex
+																		// string
+																		// ID by
+																		// default?
 	}
 
 	/**

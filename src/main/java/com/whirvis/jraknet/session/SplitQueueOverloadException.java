@@ -34,6 +34,7 @@ package com.whirvis.jraknet.session;
  * Signals that there are too many split packets in the queue at once.
  *
  * @author Whirvis T. Wheatley
+ * @since JRakNet v1.0.0
  */
 public class SplitQueueOverloadException extends RuntimeException {
 

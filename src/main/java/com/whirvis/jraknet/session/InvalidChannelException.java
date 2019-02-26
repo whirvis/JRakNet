@@ -34,9 +34,10 @@ import com.whirvis.jraknet.RakNet;
 
 /**
  * Signals that a packet channel in a sent or received packet is higher than the
- * limit.
+ * limit of {@value RakNet#MAX_CHANNELS}.
  *
  * @author Whirvis T. Wheatley
+ * @since JRakNet v1.0.0
  */
 public class InvalidChannelException extends IllegalArgumentException {
 

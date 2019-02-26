@@ -31,10 +31,10 @@
 package com.whirvis.jraknet.session;
 
 /**
- * Represents the current status of a connection in a
- * <code>RakNetSession</code>.
+ * Represents the current status of a connection in a {@link RakNetSession}.
  *
  * @author Whirvis T. Wheatley
+ * @since JRakNet v1.0.0
  */
 public enum RakNetState {
 
@@ -42,12 +42,12 @@ public enum RakNetState {
 	 * The session is disconnected.
 	 */
 	DISCONNECTED,
-	
+
 	/**
 	 * The session is handshaking.
 	 */
 	HANDSHAKING,
-	
+
 	/**
 	 * The session is connected.
 	 */

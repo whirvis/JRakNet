@@ -338,7 +338,9 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		if (event == null) {
 			throw new NullPointerException("Event cannot be null");
 		}
-		listeners.forEach(listener -> Scheduler.scheduleSync(listener, event));
+		for (RakNetClientListener listener : listeners) {
+			Scheduler.scheduleSync(listener, event);
+		}
 	}
 
 	/**

@@ -55,7 +55,6 @@ import com.whirvis.jraknet.session.RakNetServerSession;
  * 
  * @author Whirvis T. Wheatley
  */
-
 public class SequencedPacketTest {
 
 	private static final Logger LOG = LogManager.getLogger(SequencedPacketTest.class);
