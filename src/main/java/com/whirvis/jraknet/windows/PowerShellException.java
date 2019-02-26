@@ -31,10 +31,11 @@
 package com.whirvis.jraknet.windows;
 
 /**
- * Signals that an error occurred when executing a Windows PowerShell command
- * (other than that Windows PowerShell is not installed.)
+ * Signals that an error has occurred when executing a Windows PowerShell
+ * command.
  * 
  * @author Trent Summerlin
+ * @since JRakNet v2.10.0
  */
 public class PowerShellException extends RuntimeException {
 
@@ -44,7 +45,7 @@ public class PowerShellException extends RuntimeException {
 	 * Constructs a <code>PowerShellException</code>.
 	 * 
 	 * @param message
-	 *            the message.
+	 *            the detail message.
 	 */
 	public PowerShellException(String message) {
 		super(message);

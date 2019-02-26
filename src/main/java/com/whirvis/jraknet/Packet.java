@@ -52,6 +52,7 @@ import io.netty.channel.socket.DatagramPacket;
  * Used to read and write data with ease.
  *
  * @author Trent Summerlin
+ * @since JRakNet v1.0.0
  */
 public class Packet {
 

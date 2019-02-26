@@ -40,8 +40,6 @@ import com.whirvis.jraknet.protocol.ConnectionType;
  * the server will respond back with.
  * 
  * @author Trent Summerlin
- * @see com.whirvis.jraknet.identifier.Identifier Identifier
- * @see com.whirvis.jraknet.protocol.ConnectionType ConnectionType
  */
 public class ServerPing {
 
@@ -58,8 +56,6 @@ public class ServerPing {
 	 *            the connection type of the ping sender.
 	 * @param identifier
 	 *            the identifier to respond with.
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
-	 * @see com.whirvis.jraknet.protocol.ConnectionType ConnectionType
 	 */
 	public ServerPing(InetSocketAddress sender, ConnectionType connectionType, Identifier identifier) {
 		this.sender = sender;
@@ -80,7 +76,6 @@ public class ServerPing {
 	 * Returns the connection type of the ping sender.
 	 * 
 	 * @return the connection type of the ping sender.
-	 * @see com.whirvis.jraknet.protocol.ConnectionType ConnectionType
 	 */
 	public ConnectionType getConnectionType() {
 		return this.connectionType;
@@ -90,7 +85,6 @@ public class ServerPing {
 	 * Returns the identifier being sent back to the sender.
 	 * 
 	 * @return the identifier being sent back to the sender.
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public Identifier getIdentifier() {
 		return this.identifier;
@@ -101,7 +95,6 @@ public class ServerPing {
 	 * 
 	 * @param identifier
 	 *            the new identifier.
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public void setIdentifier(Identifier identifier) {
 		this.identifier = identifier;

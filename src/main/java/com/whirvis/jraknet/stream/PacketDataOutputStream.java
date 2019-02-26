@@ -67,22 +67,23 @@ import java.io.OutputStream;
 import com.whirvis.jraknet.Packet;
 
 /**
- * Used to write data to a <code>Packet</code> with ease, to retrieve a
- * <code>Packet</code>'s <code>DataOutput</code> simply use
- * <code>getDataOutput()</code>.
+ * Used as a way for a {@link Packet} to be used where an {@link OutputStream}
+ * is required.
  *
  * @author Trent Summerlin
+ * @since JRakNet vUNKNOWN
+ * @see Packet#getDataOutput()
  */
 public class PacketDataOutputStream extends OutputStream implements DataOutput {
 
 	private final Packet packet;
 
 	/**
-	 * Constructs a <code>PacketDataOutput</code> with the
-	 * <code>Packet</code>.
+	 * Creates a new packet output stream to write data to the specified
+	 * underlying packet.
 	 * 
 	 * @param packet
-	 *            The <code>Packet</code> to write data to.
+	 *            the underlying packet.
 	 */
 	public PacketDataOutputStream(Packet packet) {
 		this.packet = packet;

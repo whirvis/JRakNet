@@ -31,6 +31,7 @@
 package com.whirvis.jraknet.windows;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +40,7 @@ import java.net.Socket;
 
 /**
  * Used to execute commands with administrative privileges on Windows machines.
+ * <p>
  * This is only ever needed if a command that requires administrative privileges
  * needs to be executed. Here, we must take special care not to use anything
  * that is not in the default Java library, as the way this class is called
@@ -46,16 +48,18 @@ import java.net.Socket;
  * JRakNet.
  * 
  * @author Trent Summerlin
+ * @since JRakNet v2.10.0
  */
 public class PowerShellAdministrativeClient {
 
 	private static final char END_OF_TEXT = (char) 0x03;
 	private static final int POWERSHELL_ADMINISTRATIVE_TIMEOUT = 10000;
+	private static final int AUTHENTICATION_SUCCESS = 0x01;
 
 	/**
-	 * Converts the <code>InputStream</code> to a <code>String</code>.
-	 * This will result in the closing of the stream, as all available data will
-	 * be read from it during conversion.
+	 * Converts the <code>InputStream</code> to a <code>String</code>. This will
+	 * result in the closing of the stream, as all available data will be read
+	 * from it during conversion.
 	 * 
 	 * @param in
 	 *            the stream to convert.
@@ -64,7 +68,6 @@ public class PowerShellAdministrativeClient {
 	 *             if an I/O error occurs.
 	 */
 	private static String ioStr(InputStream in) throws IOException {
-		// Read input
 		String str = new String();
 		String next = null;
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
@@ -72,8 +75,6 @@ public class PowerShellAdministrativeClient {
 			str += next + "\n";
 		}
 		in.close();
-
-		// Convert result accordingly
 		if (str.length() > 1) {
 			return str.substring(0, str.length() - 1);
 		}
@@ -81,70 +82,85 @@ public class PowerShellAdministrativeClient {
 	}
 
 	/**
-	 * This is the main method for the administrative PowerShell process. This
-	 * must act as a main method since it is called through the JVM as a normal
-	 * process.
+	 * The main method for the administrative PowerShell process. This must act
+	 * as a main method since it is called through the JVM as a normal process.
 	 * 
 	 * @param args
 	 *            the arguments. The first should be the port the PowerShell
-	 *            server is listening on, the second is the password, and the
-	 *            final argument is the command itself terminated by a ETX
-	 *            (<code>0x03</code>) character.
+	 *            server is listening on, with the second being the password,
+	 *            and the final being the command itself terminated by an
+	 *            <code>ETX 0x03</code> character.
 	 * @throws IOException
 	 *             if an I/O error occurs.
 	 */
 	public static void main(String[] args) throws IOException {
-		Socket administrativePowerShellClientSocket = null;
+		Socket client = null;
 		try {
-			// Get arguments
-			System.out.println("Parsing arguments for administrative PowerShell communication");
-			int port = Integer.parseInt(args[0]);
-			long password = Long.parseLong(args[1]);
-			String command = new String();
-			for (int i = 2; i < args.length; i++) {
-				for (char c : args[i].toCharArray()) {
-					if (c == END_OF_TEXT) {
-						break;
+			// Parse arguments
+			System.out.println("Parsing arguments...");
+			int i = 0;
+			int port = Integer.parseInt(args[i++]);
+			long password = Long.parseLong(args[i++]);
+			StringBuilder commandBuilder = new StringBuilder();
+			commandLoop: for (/* Already declared */; i < args.length; i++) {
+				for (int j = 0; j < args[i].length(); j++) {
+					if (args[i].charAt(j) == END_OF_TEXT) {
+						break commandLoop;
 					}
-					command += c;
+					commandBuilder.append(args[i].charAt(j));
 				}
-				command += (i + 1 < args.length ? " " : "");
+				commandBuilder.append(i + 1 < args.length ? " " : "");
 			}
+			System.out.println("Parsed arguments!");
 
 			// Connect to server
-			System.out.println("Connecting to server on port " + port);
-			administrativePowerShellClientSocket = new Socket("127.0.0.1", port);
-			administrativePowerShellClientSocket.setSoTimeout(POWERSHELL_ADMINISTRATIVE_TIMEOUT);
-			DataOutputStream administrativePowerShellDataOut = new DataOutputStream(
-					administrativePowerShellClientSocket.getOutputStream());
+			System.out.println("Connecting to server on port " + port + "...");
+			client = new Socket("127.0.0.1", port);
+			client.setSoTimeout(POWERSHELL_ADMINISTRATIVE_TIMEOUT);
+			DataInputStream clientIn = new DataInputStream(client.getInputStream());
+			DataOutputStream clientOut = new DataOutputStream(client.getOutputStream());
+			System.out.println("Connected to server");
 
 			// Authorize connection
-			System.out.println("Authenticating with password " + password);
-			administrativePowerShellDataOut.writeLong(password);
-			administrativePowerShellDataOut.flush();
+			System.out.println("Authenticating with password " + password + "...");
+			clientOut.writeLong(password);
+			clientOut.flush();
+			int authenticationResult = clientIn.readInt();
+			if (authenticationResult == AUTHENTICATION_SUCCESS) {
+				System.out.println("Authenticated with server");
+			} else {
+				System.err.println("Failed to authenticate with server");
+				clientIn.close();
+				clientOut.close();
+				client.close();
+				return;
+			}
 
 			// Execute command
 			System.out.println("Executing administrative PowerShell command");
-			Process administrativePowerShell = Runtime.getRuntime().exec(command);
-			administrativePowerShell.getOutputStream().close();
-			administrativePowerShell.waitFor();
-			administrativePowerShell.destroyForcibly();
+			Process powerShell = Runtime.getRuntime().exec(commandBuilder.toString());
+			powerShell.getOutputStream().close();
+			powerShell.waitFor();
+			powerShell.destroyForcibly();
+			System.out.println("Executed administrative PowerShell command");
 
 			// Send command output
-			System.out.println("Sending PowerShell command output");
-			administrativePowerShellDataOut.writeUTF(ioStr(administrativePowerShell.getErrorStream()).trim());
-			administrativePowerShellDataOut.flush();
-			administrativePowerShellDataOut.writeUTF(ioStr(administrativePowerShell.getInputStream()).trim());
-			administrativePowerShellDataOut.flush();
+			System.out.println("Sending PowerShell command output...");
+			clientOut.writeUTF(ioStr(powerShell.getErrorStream()).trim());
+			clientOut.flush();
+			clientOut.writeUTF(ioStr(powerShell.getInputStream()).trim());
+			clientOut.flush();
+			System.out.println("Sent PowerShell command output");
 
 			// Shutdown client
 			System.out.println("Shutting down client...");
-			administrativePowerShellDataOut.close();
-			administrativePowerShellClientSocket.close();
-		} catch (IOException | InterruptedException e) {
+			clientOut.close();
+			client.close();
+			System.out.println("Shutdown client");
+		} catch (Exception e) {
 			e.printStackTrace();
-			if (administrativePowerShellClientSocket != null) {
-				administrativePowerShellClientSocket.close();
+			if (client != null) {
+				client.close();
 			}
 			System.exit(1);
 		}

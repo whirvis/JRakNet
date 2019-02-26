@@ -33,10 +33,11 @@ package com.whirvis.jraknet.session;
 import com.whirvis.jraknet.RakNet;
 
 /**
- * Signals that a <code>RakNetSession</code> has attempted to send too many
- * packets at once.
+ * Signals that a {@link RakNetSession} has attempted to send too many packets
+ * at once.
  *
  * @author Trent Summerlin
+ * @since JRakNet v1.0.0
  */
 public class PacketOverloadException extends RuntimeException {
 

@@ -47,6 +47,7 @@ import io.netty.channel.socket.DatagramPacket;
  * along with encoding and decoding.
  *
  * @author Trent Summerlin
+ * @since JRakNet v1.0.0
  */
 public class RakNetPacket extends Packet {
 	

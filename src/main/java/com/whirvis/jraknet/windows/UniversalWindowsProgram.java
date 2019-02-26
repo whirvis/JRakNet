@@ -31,23 +31,34 @@
 package com.whirvis.jraknet.windows;
 
 /**
- * Represents a universal Windows program. This is mainly meant to be used to
- * give universal Windows programs loopback exemption so users can connect to
- * JRakNet servers on the same machine. This class can safely be used on other
- * machines that are not running on the Windows 10 operating system (and is
- * actually encouraged if the game exists as a universal Windows program on
- * Windows, such as Minecraft) without risking crashes due to incompatibilities.
+ * A universal Windows program.
+ * <p>
+ * This is mainly meant to be used to give universal Windows programs loopback
+ * exemption so users can connect to JRakNet servers on the same machine. This
+ * class can safely be used on other machines that are not running on the
+ * Windows 10 operating system without risking crashes due to incompatibilities.
  * However, if the machine is not running Windows 10 then this class is
- * guaranteed to behave differently (code intentionally not running,
- * intentionally giving different results, etc.)
+ * guaranteed to behave differently with code intentionally not running or
+ * giving different results.
  * 
  * @author Trent Summerlin
+ * @since JRakNet v2.10.0
  */
 public class UniversalWindowsProgram {
 
-	// Universal Windows Programs
+	/**
+	 * The Minecraft™ Universal Windows Program.
+	 */
 	public static final UniversalWindowsProgram MINECRAFT = new UniversalWindowsProgram(
 			"Microsoft.MinecraftUWP_8wekyb3d8bbwe");
+
+	private static final String APPLICATION_ARGUMENT = PowerShellCommand.ARGUMENT_PREFIX + "application";
+	private static final PowerShellCommand CHECKNETISOLATION_LOOPBACKEXEMPT_ADD = new PowerShellCommand(
+			"CheckNetIsolation LoopbackExempt -a -n=\"" + APPLICATION_ARGUMENT + "\"");
+	private static final PowerShellCommand CHECKNETISOLATION_LOOPBACKEXEMPT_DELETE = new PowerShellCommand(
+			"CheckNetIsolation LoopbackExempt -d -n=\"" + APPLICATION_ARGUMENT + "\"");
+	private static final PowerShellCommand CHECKNETISOLATION_LOOPBACKEXEMPT_SHOW = new PowerShellCommand(
+			"CheckNetIsolation LoopbackExempt -s");
 
 	/**
 	 * Returns whether or not the machine is currently running on the Windows 10
@@ -60,83 +71,83 @@ public class UniversalWindowsProgram {
 		return System.getProperty("os.name").equalsIgnoreCase("Windows 10");
 	}
 
-	// PowerShell commands
-	private static final String APPLICATION_ARGUMENT = PowerShellCommand.ARGUMENT_PREFIX + "application";
-	private static final PowerShellCommand CHECKNETISOLATION_LOOPBACKEXEMPT_ADD = new PowerShellCommand(
-			"CheckNetIsolation LoopbackExempt -a -n=\"" + APPLICATION_ARGUMENT + "\"");
-	private static final PowerShellCommand CHECKNETISOLATION_LOOPBACKEXEMPT_DELETE = new PowerShellCommand(
-			"CheckNetIsolation LoopbackExempt -d -n=\"" + APPLICATION_ARGUMENT + "\"");
-	private static final PowerShellCommand CHECKNETISOLATION_LOOPBACKEXEMPT_SHOW = new PowerShellCommand(
-			"CheckNetIsolation LoopbackExempt -s");
+	private final String applicationId;
 
-	private final String application;
-
-	public UniversalWindowsProgram(String application) {
-		this.application = application;
+	/**
+	 * Creates a Universal Windows Program.
+	 * 
+	 * @param applicationId
+	 *            the application ID.
+	 */
+	public UniversalWindowsProgram(String applicationId) {
+		this.applicationId = applicationId;
 	}
 
 	/**
-	 * Returns the application.
+	 * Returns the application ID.
 	 * 
-	 * @return the application.
+	 * @return the application ID.
 	 */
-	public String getApplication() {
-		return this.application;
+	public String getApplicationId() {
+		return this.applicationId;
 	}
 
 	/**
 	 * Returns whether or not the application is loopback exempt.
+	 * <p>
+	 * The term "loopback exempt" means that an application is exempt from the
+	 * rule that it cannot connect to a server running on the same machine as it
+	 * is.
 	 * 
 	 * @return <code>true</code> if the application is loopback exempt,
 	 *         <code>false</code> otherwise.
+	 * @throws PowerShellException
+	 *             if a PowerShell error occurs.
 	 */
-	public boolean isLoopbackExempt() {
-		if (isWindows10()) {
-			String exemptedAppContainers = CHECKNETISOLATION_LOOPBACKEXEMPT_SHOW.execute();
-			return exemptedAppContainers.toLowerCase().contains(this.getApplication().toLowerCase());
-		} else {
+	public boolean isLoopbackExempt() throws PowerShellException {
+		if (!isWindows10()) {
 			return true; // Already exempted on non-Windows 10 machine
 		}
+		return CHECKNETISOLATION_LOOPBACKEXEMPT_SHOW.execute().toLowerCase()
+				.contains(this.getApplicationId().toLowerCase());
 	}
 
 	/**
-	 * Makes the application loopback exempt, allowing it to connect with
-	 * applications on the same machine.
+	 * Sets whether or not the application is loopback exempt.
+	 * <p>
+	 * The term "loopback exempt" means that an application is exempt from the
+	 * rule that it cannot connect to a server running on the same machine as it
+	 * is.
 	 * 
-	 * @return <code>true</code> if the application was successfully made
-	 *         exempt, <code>false</code> otherwise.
+	 * @param exempt
+	 *            <code>true</code> if the application is loopback exempt,
+	 *            <code>false</code> otherwise.
+	 * @return <code>true</code> if making the application loopback exempt was
+	 *         successful, <code>false</code> otherwise. A success means that
+	 *         the machine is not running on Windows 10 (no code needed to be
+	 *         executed), the exemption status was successfully changed, or that
+	 *         the <code>exempt</code> value is already what is now.
+	 * @throws PowerShellException
+	 *             if a PowerShell error occurs.
 	 */
-	public boolean addLoopbackExempt() {
-		if (isWindows10() && !isLoopbackExempt()) {
-			return CHECKNETISOLATION_LOOPBACKEXEMPT_ADD.setArgument(APPLICATION_ARGUMENT, this.getApplication())
-					.execute(true).equals(PowerShellCommand.RESULT_OK);
-		} else {
-			return true; // Already exempted on non-Windows 10 machine
+	public boolean setLoopbackExempt(boolean exempt) throws PowerShellException {
+		if (!isWindows10()) {
+			return true; // Not running on Windows 10
 		}
-	}
-
-	/**
-	 * Makes the application loopback unexempt, preventing it from connecting
-	 * with applications on the same machine.
-	 * 
-	 * @return <code>true</code> if the application was successfully made
-	 *         unexempt, <code>false</code> otherwise.
-	 */
-	public boolean deleteLoopbackExempt() {
-		if (isWindows10()) {
-			if (!isLoopbackExempt()) {
-				return true; // Already unexempted
-			}
-			return CHECKNETISOLATION_LOOPBACKEXEMPT_DELETE.setArgument(APPLICATION_ARGUMENT, this.getApplication())
+		boolean exempted = isLoopbackExempt();
+		if (exempt == true && exempted == false) {
+			return CHECKNETISOLATION_LOOPBACKEXEMPT_ADD.setArgument(APPLICATION_ARGUMENT, this.getApplicationId())
 					.execute(true).equals(PowerShellCommand.RESULT_OK);
-		} else {
-			return false; // Cannot be unexempted on non-Windows 10 machine
+		} else if (exempt == false && exempted == true) {
+			return CHECKNETISOLATION_LOOPBACKEXEMPT_DELETE.setArgument(APPLICATION_ARGUMENT, this.getApplicationId())
+					.execute(true).equals(PowerShellCommand.RESULT_OK);
 		}
+		return true; // No operation executed
 	}
 
 	@Override
 	public String toString() {
-		return "UniversalWindowsProgram [application=" + application + "]";
+		return "UniversalWindowsProgram [applicationId=" + applicationId + "]";
 	}
 
 }

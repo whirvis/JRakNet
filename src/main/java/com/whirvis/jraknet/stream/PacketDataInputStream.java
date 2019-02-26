@@ -37,22 +37,23 @@ import java.io.InputStream;
 import com.whirvis.jraknet.Packet;
 
 /**
- * Used to read data from a <code>Packet</code> with ease, to retrieve a
- * <code>Packet</code>'s <code>DataInput</code> simply use
- * <code>getDataInput()</code>.
+ * Used as a way for a {@link Packet} to be used where an {@link InputStream} is
+ * required.
  *
  * @author Trent Summerlin
+ * @since JRakNet vUNKNOWN
+ * @see Packet#getDataInput()
  */
 public class PacketDataInputStream extends InputStream implements DataInput {
 
 	private final Packet packet;
 
 	/**
-	 * Constructs a <code>PacketDataInput</code> with the
-	 * <code>Packet</code>.
+	 * Creates a packet input stream to read data from the specified underlying
+	 * packet.
 	 * 
 	 * @param packet
-	 *            the <code>Packet</code> to read data from.
+	 *            the underlying packet.
 	 */
 	public PacketDataInputStream(Packet packet) {
 		this.packet = packet;
@@ -143,9 +144,9 @@ public class PacketDataInputStream extends InputStream implements DataInput {
 
 	@Override
 	public String readLine() throws IOException {
-		throw new RuntimeException("This method is not supported by " + this.getClass().getSimpleName());
+		return packet.readString();
 	}
-
+	
 	@Override
 	public String readUTF() throws IOException {
 		return packet.readString();

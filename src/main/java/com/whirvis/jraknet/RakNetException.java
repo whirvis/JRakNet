@@ -34,23 +34,25 @@ package com.whirvis.jraknet;
  * Signals an exception related to RakNet.
  *
  * @author Trent Summerlin
+ * @since JRakNet v1.0.0
  */
 public class RakNetException extends Exception {
 
 	private static final long serialVersionUID = -685945306592443928L;
 
 	/**
-	 * Constructs a <code>RakNetException</code> with the error.
+	 * Constructs a <code>RakNetException</code> with the specified detail
+	 * message.
 	 * 
-	 * @param error
-	 *            the reason the exception was thrown.
+	 * @param message
+	 *            the detail message.
 	 */
-	public RakNetException(String error) {
-		super(error);
+	public RakNetException(String message) {
+		super(message);
 	}
 
 	/**
-	 * Constructs a <code>RakNetException</code> with the
+	 * Constructs a <code>RakNetException</code> with the specified
 	 * <code>Throwable</code>.
 	 * 
 	 * @param cause

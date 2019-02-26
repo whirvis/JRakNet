@@ -31,9 +31,10 @@
 package com.whirvis.jraknet.session;
 
 /**
- * Signals that a <code>RakNetSession</code> has timed out.
+ * Signals that a {@link RakNetSession} has timed out.
  *
  * @author Trent Summerlin
+ * @since JRakNet v1.0.0
  */
 public class TimeoutException extends RuntimeException {
 
