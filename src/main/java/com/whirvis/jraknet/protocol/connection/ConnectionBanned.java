@@ -43,6 +43,11 @@ import com.whirvis.jraknet.RakNetPacket;
  * @since JRakNet v1.0.0
  */
 public class ConnectionBanned extends RakNetPacket {
+	
+	/**
+	 * Whether or not the magic is valid.
+	 */
+	public boolean magic;
 
 	/**
 	 * The server's globally unique identifier.
@@ -71,11 +76,13 @@ public class ConnectionBanned extends RakNetPacket {
 
 	@Override
 	public void encode() {
+		this.writeMagic();
 		this.writeLong(serverGuid);
 	}
 
 	@Override
 	public void decode() {
+		this.magic = this.readMagic();
 		this.serverGuid = this.readLong();
 	}
 

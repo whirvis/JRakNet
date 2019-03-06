@@ -53,9 +53,9 @@ import com.whirvis.jraknet.example.chat.protocol.LoginRequestPacket;
 import com.whirvis.jraknet.example.chat.protocol.RemoveChannelPacket;
 import com.whirvis.jraknet.example.chat.protocol.RenameChannelPacket;
 import com.whirvis.jraknet.example.chat.protocol.UpdateUsernamePacket;
+import com.whirvis.jraknet.peer.InvalidChannelException;
+import com.whirvis.jraknet.peer.RakNetServerSession;
 import com.whirvis.jraknet.protocol.Reliability;
-import com.whirvis.jraknet.session.InvalidChannelException;
-import com.whirvis.jraknet.session.RakNetServerSession;
 
 /**
  * A simple chat client built using JRakNet and a <code>JFrame</code>.

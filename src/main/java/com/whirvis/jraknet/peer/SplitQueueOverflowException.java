@@ -28,26 +28,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.session;
-
-import com.whirvis.jraknet.RakNet;
+package com.whirvis.jraknet.peer;
 
 /**
- * Signals that a packet channel in a sent or received packet is higher than the
- * limit of {@value RakNet#MAX_CHANNELS}.
+ * Signals that there are too many split packets in the queue at once.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
  */
-public class InvalidChannelException extends IllegalArgumentException {
+public class SplitQueueOverflowException extends RuntimeException {
 
-	private static final long serialVersionUID = -8690545139286694469L;
+	private static final long serialVersionUID = 969985052588965615L;
 
 	/**
-	 * Constructs an <code>InvalidChannelException</code>.
+	 * Constructs a <code>SplitQueueOverloadException</code>.
 	 */
-	public InvalidChannelException() {
-		super("Channel must be lower than " + RakNet.MAX_CHANNELS);
+	public SplitQueueOverflowException() {
+		super("Too many split packets in a single queue");
 	}
 
 }

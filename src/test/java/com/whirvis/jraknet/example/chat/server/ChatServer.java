@@ -52,11 +52,11 @@ import com.whirvis.jraknet.example.chat.server.command.CommandHandler;
 import com.whirvis.jraknet.example.chat.server.command.HelpCommand;
 import com.whirvis.jraknet.example.chat.server.command.KickCommand;
 import com.whirvis.jraknet.example.chat.server.command.StopCommand;
+import com.whirvis.jraknet.peer.InvalidChannelException;
+import com.whirvis.jraknet.peer.RakNetClientSession;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.server.RakNetServer;
 import com.whirvis.jraknet.server.RakNetServerListener;
-import com.whirvis.jraknet.session.InvalidChannelException;
-import com.whirvis.jraknet.session.RakNetClientSession;
 
 /**
  * A simple chat server built using JRakNet.

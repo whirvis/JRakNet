@@ -40,12 +40,12 @@ import org.apache.logging.log4j.Logger;
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
+import com.whirvis.jraknet.peer.RakNetServerSession;
 import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.protocol.connection.ConnectionBanned;
 import com.whirvis.jraknet.protocol.connection.IncompatibleProtocolVersion;
 import com.whirvis.jraknet.protocol.connection.OpenConnectionResponseOne;
 import com.whirvis.jraknet.protocol.connection.OpenConnectionResponseTwo;
-import com.whirvis.jraknet.session.RakNetServerSession;
 
 import io.netty.channel.Channel;
 
@@ -54,7 +54,7 @@ import io.netty.channel.Channel;
  * login.
  *
  * @author Whirvis T. Wheatley
- * @since JRakNet v2.0
+ * @since JRakNet v2.0.0
  */
 public class SessionPlanner {
 
@@ -98,7 +98,6 @@ public class SessionPlanner {
 		if (packetId == ID_OPEN_CONNECTION_REPLY_1) {
 			OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne(packet);
 			connectionResponseOne.decode();
-
 			if (connectionResponseOne.magic != true) {
 				this.cancelReason = new LoginFailureException(client, "MAGIC failed to validate");
 			} else if (connectionResponseOne.maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE) {
@@ -113,7 +112,7 @@ public class SessionPlanner {
 							? connectionResponseOne.maximumTransferUnit : this.initialMaximumTransferUnit;
 				}
 
-				// Validate maximum transfer unit and proceed
+				// Validate maximum transfer unit
 				if (this.maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE) {
 					this.cancelReason = new LoginFailureException(client, "Invalid maximum transfer unit size");
 				} else {
@@ -126,7 +125,6 @@ public class SessionPlanner {
 		} else if (packetId == ID_OPEN_CONNECTION_REPLY_2) {
 			OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo(packet);
 			connectionResponseTwo.decode();
-
 			if (connectionResponseTwo.failed()) {
 				this.cancelReason = new LoginFailureException(client,
 						connectionResponseTwo.getClass().getSimpleName() + " packet failed to decode");
@@ -156,14 +154,14 @@ public class SessionPlanner {
 		} else if (packetId == ID_CONNECTION_BANNED) {
 			ConnectionBanned connectionBanned = new ConnectionBanned(packet);
 			connectionBanned.decode();
-
-			if (connectionBanned.serverGuid == this.guid) {
+			if (connectionBanned.magic != true) {
+				this.cancelReason = new LoginFailureException(client, "MAGIC failed to validate");
+			} else if (connectionBanned.serverGuid == this.guid) {
 				this.cancelReason = new ConnectionBannedException(client, address);
 			}
 		} else if (packetId == ID_INCOMPATIBLE_PROTOCOL_VERSION) {
 			IncompatibleProtocolVersion incompatibleProtocol = new IncompatibleProtocolVersion(packet);
 			incompatibleProtocol.decode();
-
 			if (incompatibleProtocol.serverGuid == this.guid) {
 				this.cancelReason = new IncompatibleProtocolException(client, address, RakNet.CLIENT_NETWORK_PROTOCOL,
 						incompatibleProtocol.networkProtocol);

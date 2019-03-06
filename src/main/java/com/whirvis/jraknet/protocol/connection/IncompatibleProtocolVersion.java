@@ -37,8 +37,8 @@ import com.whirvis.jraknet.RakNetPacket;
  * An <code>INCOMPATIBLE_PROTOCOL_VERSION</code> packet.
  * <p>
  * This packet is sent by the server to the client after receiving a
- * {@link ConnectionRequestOne CONNECTION_REQUEST_1} packet to indicate that the
- * client is unable to connect due to unmatching protocols versions.
+ * {@link OpenConnectionRequestOne OPEN_CONNECTION_REQUEST_1} packet to indicate
+ * that the client is unable to connect due to unmatching protocols versions.
  * 
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
@@ -51,7 +51,7 @@ public class IncompatibleProtocolVersion extends RakNetPacket {
 	public int networkProtocol;
 
 	/**
-	 * Returns whether or not the magic is valid.
+	 * Whether or not the magic is valid.
 	 */
 	public boolean magic;
 
@@ -92,7 +92,7 @@ public class IncompatibleProtocolVersion extends RakNetPacket {
 	@Override
 	public void decode() {
 		this.networkProtocol = this.readUnsignedByte();
-		this.magic = this.checkMagic();
+		this.magic = this.readMagic();
 		this.serverGuid = this.readLong();
 	}
 

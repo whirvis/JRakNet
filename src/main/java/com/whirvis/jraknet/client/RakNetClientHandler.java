@@ -81,7 +81,7 @@ public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 			client.handleMessage(sender, packet);
 			datagram.content().readerIndex(0); // Reset position
 			log.debug("Sent packet to client and reset datagram buffer read position");
-			client.callEvent(listener -> listener.handleNettyMessage(client, datagram.content(), sender));
+			client.callEvent(listener -> listener.handleNettyMessage(client, sender, datagram.content()));
 			datagram.content().release(); // No longer needed
 			log.debug("Sent datagram buffer to client and released it");
 

@@ -123,7 +123,7 @@ public class OpenConnectionRequestTwo extends RakNetPacket implements Failable {
 	@Override
 	public void decode() {
 		try {
-			this.magic = this.checkMagic();
+			this.magic = this.readMagic();
 			this.address = this.readAddress();
 			this.maximumTransferUnit = this.readUnsignedShort();
 			this.clientGuid = this.readLong();

@@ -40,12 +40,12 @@ import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.client.RakNetClientListener;
+import com.whirvis.jraknet.peer.RakNetClientSession;
+import com.whirvis.jraknet.peer.RakNetServerSession;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.server.BlockedAddress;
 import com.whirvis.jraknet.server.RakNetServer;
 import com.whirvis.jraknet.server.RakNetServerListener;
-import com.whirvis.jraknet.session.RakNetClientSession;
-import com.whirvis.jraknet.session.RakNetServerSession;
 
 /**
  * Used to test the sequenced packet feature of <code>RakNetSession</code>

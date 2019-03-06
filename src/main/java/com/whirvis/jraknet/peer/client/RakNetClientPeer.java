@@ -28,13 +28,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.session;
-
-import static com.whirvis.jraknet.protocol.MessageIdentifier.*;
+package com.whirvis.jraknet.peer.client;
 
 import java.net.InetSocketAddress;
 
+import static com.whirvis.jraknet.RakNetPacket.*;
+
+import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetPacket;
+import com.whirvis.jraknet.peer.InvalidChannelException;
+import com.whirvis.jraknet.peer.RakNetPeer;
+import com.whirvis.jraknet.peer.RakNetState;
 import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.login.ConnectionRequest;
@@ -48,15 +52,14 @@ import com.whirvis.jraknet.server.RakNetServerListener;
 import io.netty.channel.Channel;
 
 /**
- * This class represents a client connection and handles the login sequence
- * packets.
+ * A client connection that handles login and other client related protocols.
  *
  * @author Whirvis T. Wheatley
+ * @since JRakNet v1.0.0
  */
-public class RakNetClientSession extends RakNetSession {
+public class RakNetClientPeer extends RakNetPeer {
 
 	private final RakNetServer server;
-	private final long timeCreated;
 	private long timestamp;
 
 	/**
@@ -65,25 +68,23 @@ public class RakNetClientSession extends RakNetSession {
 	 * unique ID, maximum transfer unit, <code>Channel</code>, and address.
 	 * 
 	 * @param server
-	 *            the <code>RakNetServer</code>.
-	 * @param timeCreated
-	 *            the time the server was created.
-	 * @param connectionType
-	 *            the connection type of the session.
-	 * @param guid
-	 *            the globally unique ID.
-	 * @param maximumTransferUnit
-	 *            the maximum transfer unit
-	 * @param channel
-	 *            the <code>Channel</code>.
+	 *            the server that is hosting the connection to the client.
 	 * @param address
-	 *            the address.
+	 *            the address of the peer.
+	 * @param guid
+	 *            the globally unique ID of the peer.
+	 * @param maximumTransferUnit
+	 *            the maximum transfer unit of the peer.
+	 * @param connectionType
+	 *            the connection type of the peer.
+	 * @param channel
+	 *            the channel to communicate to the peer with.
 	 */
-	public RakNetClientSession(RakNetServer server, long timeCreated, ConnectionType connectionType, long guid,
-			int maximumTransferUnit, Channel channel, InetSocketAddress address) {
-		super(connectionType, guid, maximumTransferUnit, channel, address);
+	public RakNetClientPeer(RakNetServer server, ConnectionType connectionType, long guid, int maximumTransferUnit,
+			Channel channel, InetSocketAddress address) {
+		super(address, guid, maximumTransferUnit, connectionType, channel);
 		this.server = server;
-		this.timeCreated = timeCreated;
+		this.timestamp = System.currentTimeMillis();
 	}
 
 	/**
@@ -95,49 +96,33 @@ public class RakNetClientSession extends RakNetSession {
 		return this.server;
 	}
 
-	/**
-	 * Returns the time this session wsa created.
-	 * 
-	 * @return the time this session was created.
-	 */
-	public long getTimeCreated() {
-		return this.timeCreated;
-	}
-
 	@Override
 	public long getTimestamp() {
 		return System.currentTimeMillis() - this.timestamp;
 	}
-
+	
 	@Override
-	public void onAcknowledge(Record record, EncapsulatedPacket packet) {
-		for (RakNetServerListener listener : server.getListeners()) {
-			listener.onAcknowledge(this, record, packet);
+	public long getGuid(RakNetClientPeer peer) throws NullPointerException, IllegalArgumentException {
+		if (peer == null) {
+			throw new NullPointerException("Peer cannot be null");
+		} else if (peer != this) {
+			throw new IllegalArgumentException("Peer must be this");
 		}
-	}
-
-	@Override
-	public void onNotAcknowledge(Record record, EncapsulatedPacket packet) {
-		for (RakNetServerListener listener : server.getListeners()) {
-			listener.onNotAcknowledge(this, record, packet);
-		}
+		return this.getGloballyUniqueId();
 	}
 
 	@Override
 	public void handleMessage(RakNetPacket packet, int channel) {
 		short packetId = packet.getId();
-
 		if (packetId == ID_CONNECTION_REQUEST && this.getState() == RakNetState.DISCONNECTED) {
 			ConnectionRequest request = new ConnectionRequest(packet);
 			request.decode();
-
 			if (request.clientGuid == this.getGloballyUniqueId() && request.useSecurity != true) {
 				ConnectionRequestAccepted requestAccepted = new ConnectionRequestAccepted();
 				requestAccepted.clientAddress = this.getAddress();
 				requestAccepted.clientTimestamp = request.timestamp;
 				requestAccepted.serverTimestamp = server.getTimestamp();
 				requestAccepted.encode();
-
 				if (!requestAccepted.failed()) {
 					this.timestamp = (System.currentTimeMillis() - request.timestamp);
 					this.sendMessage(Reliability.RELIABLE_ORDERED, requestAccepted);
@@ -163,7 +148,7 @@ public class RakNetClientSession extends RakNetSession {
 
 			if (!clientHandshake.failed()) {
 				this.timestamp = (System.currentTimeMillis() - clientHandshake.clientTimestamp);
-				this.setState(RakNetState.CONNECTED);
+				this.setState(RakNetState.LOGGED_IN);
 				for (RakNetServerListener listener : server.getListeners()) {
 					listener.onClientConnect(this);
 				}
@@ -189,6 +174,16 @@ public class RakNetClientSession extends RakNetSession {
 				}
 			}
 		}
+	}
+	
+	@Override
+	public void onAcknowledge(Record record, EncapsulatedPacket packet) {
+		server.callEvent(listener -> listener.onAcknowledge(this, record, packet));
+	}
+
+	@Override
+	public void onNotAcknowledge(Record record, EncapsulatedPacket packet) {
+		server.callEvent(listener -> listener.onNotAcknowledge(this, record, packet));
 	}
 
 }

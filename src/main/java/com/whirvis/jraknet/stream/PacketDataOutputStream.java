@@ -72,7 +72,7 @@ import com.whirvis.jraknet.Packet;
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet vUNKNOWN
- * @see Packet#getDataOutput()
+ * @see Packet#getOutputStream()
  */
 public class PacketDataOutputStream extends OutputStream implements DataOutput {
 

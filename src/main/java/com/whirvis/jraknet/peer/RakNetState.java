@@ -28,23 +28,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.session;
+package com.whirvis.jraknet.peer;
 
 /**
- * Signals that a {@link RakNetSession} has timed out.
+ * Represents the current status of a connection in a {@link RakNetSession}.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
  */
-public class TimeoutException extends RuntimeException {
-
-	private static final long serialVersionUID = 4216977972114486611L;
+public enum RakNetState {
 
 	/**
-	 * Constructs a <code>TimeoutException</code>.
+	 * The session is disconnected.
 	 */
-	public TimeoutException() {
-		super("Session timeout");
-	}
+	DISCONNECTED,
+
+	/**
+	 * The session is handshaking.
+	 */
+	HANDSHAKING,
+
+	/**
+	 * The session is logged in.
+	 */
+	LOGGED_IN;
 
 }

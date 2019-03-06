@@ -28,26 +28,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.session;
+package com.whirvis.jraknet.peer;
 
 import com.whirvis.jraknet.RakNet;
 
 /**
- * Signals that a {@link RakNetSession} has attempted to send too many packets
- * at once.
+ * Signals that a packet channel in a sent or received packet is higher than the
+ * limit of {@value RakNet#MAX_CHANNELS}.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
  */
-public class PacketOverloadException extends RuntimeException {
+public class InvalidChannelException extends IllegalArgumentException {
 
-	private static final long serialVersionUID = 8544922469731039197L;
+	private static final long serialVersionUID = -8690545139286694469L;
 
 	/**
-	 * Constructs a <code>PacketOverloadException</code>.
+	 * Constructs an <code>InvalidChannelException</code>.
 	 */
-	public PacketOverloadException() {
-		super("Too many packets (More than " + RakNet.getMaxPacketsPerSecond() + ") were sent within a second");
+	public InvalidChannelException() {
+		super("Channel must be lower than " + RakNet.MAX_CHANNELS);
 	}
 
 }

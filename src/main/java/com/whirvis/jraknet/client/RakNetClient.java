@@ -48,6 +48,9 @@ import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.discovery.DiscoveredServer;
+import com.whirvis.jraknet.peer.RakNetServerSession;
+import com.whirvis.jraknet.peer.RakNetState;
+import com.whirvis.jraknet.peer.server.RakNetPeerMessenger;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.connection.OpenConnectionRequestOne;
 import com.whirvis.jraknet.protocol.connection.OpenConnectionRequestTwo;
@@ -56,9 +59,6 @@ import com.whirvis.jraknet.protocol.message.CustomPacket;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
 import com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgedPacket;
 import com.whirvis.jraknet.scheduler.Scheduler;
-import com.whirvis.jraknet.session.RakNetServerSession;
-import com.whirvis.jraknet.session.RakNetState;
-import com.whirvis.jraknet.session.UnumRakNetPeer;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -78,7 +78,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
  * @see #addListener(RakNetClientListener)
  * @see #connect(InetSocketAddress)
  */
-public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
+public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 
 	/**
 	 * The default maximum transfer unit sizes used by the client. These were
@@ -500,21 +500,21 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		if (session == null) {
 			return false; // No session
 		}
-		return session.getState() == RakNetState.CONNECTED;
+		return session.getState() == RakNetState.LOGGED_IN;
 	}
 
 	/**
 	 * Sends a Netty message over the channel raw. This should be used
 	 * sparingly, as if it is used incorrectly it could break server sessions
 	 * entirely. In order to send a message to a session, use one of the
-	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(Reliability, ByteBuf)
+	 * {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, ByteBuf)
 	 * sendMessage()} methods.
 	 * 
 	 * @param buf
 	 *            the buffer to send.
 	 * @param address
 	 *            the address to send the buffer to.
-	 * @see {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(Reliability, ByteBuf)
+	 * @see {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, ByteBuf)
 	 *      sendMessage(Reliability, ByteBuf)}
 	 */
 	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) {
@@ -527,14 +527,14 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * Sends a Netty message over the channel raw. This should be used
 	 * sparingly, as if it is used incorrectly it could break server sessions
 	 * entirely. In order to send a message to a session, use one of the
-	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(Reliability, Packet)
+	 * {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, Packet)
 	 * sendMessage()} methods.
 	 * 
 	 * @param packet
 	 *            the packet to send.
 	 * @param address
 	 *            the address to send the packet to.
-	 * @see {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(Reliability, Packet)
+	 * @see {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, Packet)
 	 *      sendMessage(Reliability, Packet)}
 	 */
 	public final void sendNettyMessage(Packet packet, InetSocketAddress address) {
@@ -545,14 +545,14 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 	 * Sends a Netty message over the channel raw. This should be used
 	 * sparingly, as if it is used incorrectly it could break server sessions
 	 * entirely. In order to send a message to a session, use one of the
-	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(Reliability, int)
+	 * {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, int)
 	 * sendMessage()} methods.
 	 * 
 	 * @param buffer
 	 *            the packet ID to send.
 	 * @param address
 	 *            the address to send the packet to.
-	 * @see {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(Reliability, int)
+	 * @see {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, int)
 	 *      sendMessage(Reliability, int)}
 	 */
 	public final void sendNettyMessage(int packetId, InetSocketAddress address) {
@@ -588,8 +588,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 				}
 			}
 		}
-		log.debug("Handled " + (RakNetPacket.hasPacket(packet.getId())
-				? RakNetPacket.getName(packet.getId()) + " packet" : "packet with ID " + RakNet.toHexStringId(packet)));
+		log.debug("Handled " + RakNetPacket.getName(packet.getId()) + " packet");
 	}
 
 	/**
@@ -711,6 +710,7 @@ public class RakNetClient implements UnumRakNetPeer, RakNetClientListener {
 		if (preparation.loginPackets[1] == false && preparation.cancelReason == null) {
 			preparation.cancelReason = new ServerOfflineException(this, preparation.address);
 		}
+		this.callEvent(listener -> listener.onConnect(this, address));
 
 		// Finish connection
 		if (preparation.readyForSession()) {

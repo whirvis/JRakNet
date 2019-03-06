@@ -102,7 +102,7 @@ public class OpenConnectionRequestOne extends RakNetPacket {
 
 	@Override
 	public void decode() {
-		this.magic = this.checkMagic();
+		this.magic = this.readMagic();
 		this.networkProtocol = this.readUnsignedByte();
 		this.maximumTransferUnit = (this.remaining() + MTU_PADDING);
 		this.skip(this.remaining());

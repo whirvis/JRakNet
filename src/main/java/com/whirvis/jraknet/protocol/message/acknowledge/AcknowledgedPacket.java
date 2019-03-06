@@ -52,7 +52,7 @@ public class AcknowledgedPacket extends RakNetPacket {
 	/**
 	 * The records containing the sequence IDs.
 	 */
-	public ArrayList<Record> records;
+	public Record[] records;
 
 	/**
 	 * Creates an <code>ACK</code> packet to be encoded.
@@ -65,7 +65,6 @@ public class AcknowledgedPacket extends RakNetPacket {
 	 */
 	protected AcknowledgedPacket(boolean acknowledge) {
 		super(acknowledge ? ID_ACK : ID_NACK);
-		this.records = new ArrayList<Record>();
 	}
 
 	/**
@@ -86,7 +85,6 @@ public class AcknowledgedPacket extends RakNetPacket {
 	 */
 	public AcknowledgedPacket(Packet packet) {
 		super(packet);
-		this.records = new ArrayList<Record>();
 	}
 
 	/**
@@ -105,7 +103,8 @@ public class AcknowledgedPacket extends RakNetPacket {
 	 * <p>
 	 * Before encoding, all records will be condensed. This means that all
 	 * records that can be converted to ranged records will be converted to
-	 * ranged records, making them use less memory.
+	 * ranged records, making them use less memory. The <code>records</code>
+	 * field will be updated with these condensed records.
 	 */
 	@Override
 	public void encode() {
@@ -115,9 +114,9 @@ public class AcknowledgedPacket extends RakNetPacket {
 		 */
 		int[] sequenceIds = Record.getSequenceIds(records);
 		Arrays.sort(sequenceIds);
-		records.clear(); // Prevent duplicates
 
 		// Condense records
+		ArrayList<Record> condensed = new ArrayList<Record>();
 		for (int i = 0; i < sequenceIds.length; i++) {
 			int startIndex = sequenceIds[i];
 			int endIndex = startIndex;
@@ -126,12 +125,13 @@ public class AcknowledgedPacket extends RakNetPacket {
 					endIndex = sequenceIds[++i]; // This value is sequential
 				}
 			}
-			records.add(new Record(startIndex, endIndex == startIndex ? -1 : endIndex));
+			condensed.add(new Record(startIndex, endIndex == startIndex ? -1 : endIndex));
 		}
+		this.records = condensed.toArray(new Record[condensed.size()]);
 
 		// Encode packet
-		this.writeUnsignedShort(records.size());
-		for (Record record : records) {
+		this.writeUnsignedShort(condensed.size());
+		for (Record record : condensed) {
 			this.writeUnsignedByte(record.isRanged() ? 0x00 : 0x01);
 			this.writeTriadLE(record.getIndex());
 			if (record.isRanged()) {
@@ -143,29 +143,32 @@ public class AcknowledgedPacket extends RakNetPacket {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * After decoding is finished, all records will be simplified. This means
-	 * that all ranged records will be converted to single records, making it
-	 * easier to cycle through them.
+	 * After decoding is finished, all records will be expanded. This means that
+	 * all ranged records will be converted to single records, making it easier
+	 * to cycle through them. The <code>records</code> field will be updated
+	 * with these expanded records.
 	 */
 	@Override
 	public void decode() {
 		// Decode packet
+		ArrayList<Record> expanded = new ArrayList<Record>();
 		int size = this.readUnsignedShort();
 		for (int i = 0; i < size; i++) {
-			boolean ranged = (this.readUnsignedByte() == 0x00);
+			boolean ranged = this.readUnsignedByte() == 0x00;
 			if (ranged == false) {
-				records.add(new Record(this.readTriadLE()));
+				expanded.add(new Record(this.readTriadLE()));
 			} else {
-				records.add(new Record(this.readTriadLE(), this.readTriadLE()));
+				expanded.add(new Record(this.readTriadLE(), this.readTriadLE()));
 			}
 		}
 
 		// Simplify records
-		int[] sequenceIds = Record.getSequenceIds(records);
-		records.clear(); // Prevent duplicates
+		int[] sequenceIds = Record.getSequenceIds(expanded);
+		expanded.clear(); // Prevent duplicates
 		for (int i = 0; i < sequenceIds.length; i++) {
-			records.add(new Record(sequenceIds[i]));
+			expanded.add(new Record(sequenceIds[i]));
 		}
+		this.records = expanded.toArray(new Record[expanded.size()]);
 	}
 
 }

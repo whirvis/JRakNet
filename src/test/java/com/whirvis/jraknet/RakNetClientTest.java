@@ -38,10 +38,10 @@ import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.client.RakNetClientListener;
+import com.whirvis.jraknet.peer.RakNetServerSession;
 import com.whirvis.jraknet.protocol.MessageIdentifier;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
 import com.whirvis.jraknet.protocol.message.acknowledge.Record;
-import com.whirvis.jraknet.session.RakNetServerSession;
 
 /**
  * Used to test <code>RakNetClient</code> by connecting to the LifeBoat Survival

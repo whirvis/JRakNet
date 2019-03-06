@@ -37,6 +37,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.identifier.MinecraftIdentifier;
+import com.whirvis.jraknet.peer.RakNetClientSession;
 import com.whirvis.jraknet.protocol.MessageIdentifier;
 import com.whirvis.jraknet.protocol.login.NewIncomingConnection;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
@@ -44,7 +45,6 @@ import com.whirvis.jraknet.protocol.message.acknowledge.Record;
 import com.whirvis.jraknet.server.RakNetServer;
 import com.whirvis.jraknet.server.RakNetServerListener;
 import com.whirvis.jraknet.server.ServerPing;
-import com.whirvis.jraknet.session.RakNetClientSession;
 import com.whirvis.jraknet.windows.UniversalWindowsProgram;
 
 /**

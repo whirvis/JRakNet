@@ -41,6 +41,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
@@ -64,17 +65,21 @@ import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 
 /**
- * Contains info for RakNet
+ * The main RakNet component class, containing protocol information and utility
+ * methods.
  *
  * @author Whirvis T. Wheatley
+ * @since JRakNet v1.0.0
  */
 public final class RakNet {
 
 	/**
-	 * Used by <code>createBootstrapAndSend()</code> to wait for the packet and
-	 * return it.
+	 * Used by the
+	 * {@link RakNet#createBootstrapAndSend(InetSocketAddress, Packet, long, int)}
+	 * method to wait for the packet and return it.
 	 *
 	 * @author Whirvis T. Wheatley
+	 * @since JRakNet v1.0.0
 	 */
 	private static class BootstrapHandler extends ChannelInboundHandlerAdapter {
 
@@ -98,41 +103,78 @@ public final class RakNet {
 		// Static class
 	}
 
-	/**
-	 * Quick note about RakNet protocol versions: If the RakNet protocol version
-	 * for Minecraft is ever bumped, please let me know immediately. I would add
-	 * a function to change the network protocol values, however I would rather
-	 * have myself change it after being notified by someone through an issue on
-	 * GitHub so I know the protocol is possibly out of date and that I need to
-	 * bump the versions.
-	 */
-
 	private static final Logger LOG = LogManager.getLogger(RakNet.class);
+	private static final HashMap<InetAddress, Integer> MAXIMUM_TRANSFER_UNIT_SIZES = new HashMap<InetAddress, Integer>();
 
-	// Network protocol data
-	public static final int SERVER_NETWORK_PROTOCOL = 9;
-	public static final int CLIENT_NETWORK_PROTOCOL = 9;
-	public static final int MINIMUM_MTU_SIZE = 400;
 	private static final int PING_RETRIES = 5;
 	private static final long PING_TIMESTAMP = System.currentTimeMillis();
 	private static final long PING_ID = UUID.randomUUID().getLeastSignificantBits();
 	private static final int IDENTIFIER_RETRIES = 3;
-	private static int DEVICE_MTU_SIZE = -1;
+
+	private static long maxPacketsPerSecond = 500;
+
+	/**
+	 * The current supported server network protocol.
+	 */
+	public static final int SERVER_NETWORK_PROTOCOL = 9;
+
+	/**
+	 * The current supported client network protocol.
+	 */
+	public static final int CLIENT_NETWORK_PROTOCOL = 9;
+
+	/**
+	 * The minimum maximum transfer unit size.
+	 */
+	public static final int MINIMUM_MTU_SIZE = 400;
 
 	// Session data
-	public static final int MAX_CHANNELS = 32;
-	public static final byte DEFAULT_CHANNEL = 0;
-	public static final int MAX_SPLIT_COUNT = 128;
-	public static final int MAX_SPLITS_PER_QUEUE = 4;
-	public static final long SEND_INTERVAL = 50L;
-	public static final long RECOVERY_SEND_INTERVAL = SEND_INTERVAL;
-	public static final long PING_SEND_INTERVAL = 2500L;
-	public static final long DETECTION_SEND_INTERVAL = PING_SEND_INTERVAL * 2;
-	public static final long SESSION_TIMEOUT = DETECTION_SEND_INTERVAL * 5;
-	public static final long MAX_PACKETS_PER_SECOND_BLOCK = (1000L * 300);
 
-	// Configurable options
-	private static long MAX_PACKETS_PER_SECOND = 500;
+	/**
+	 * The amount of available channels there are to send packets on.
+	 */
+	public static final int MAX_CHANNELS = 32;
+
+	/**
+	 * The default channel packets are sent on.
+	 */
+	public static final byte DEFAULT_CHANNEL = 0;
+
+	/**
+	 * 
+	 */
+	public static final int MAX_SPLIT_COUNT = 128;
+
+	/**
+	 * 
+	 */
+	public static final int MAX_SPLITS_PER_QUEUE = 4;
+
+	/**
+	 * The interval at which not acknowledged packets are automatically resent.
+	 */
+	public static final long RECOVERY_SEND_INTERVAL = 50L;
+
+	/**
+	 * The interval at which keep-alive pings are sent.
+	 */
+	public static final long PING_SEND_INTERVAL = 2500L;
+
+	/**
+	 * The interval at which detection packets are sent.
+	 */
+	public static final long DETECTION_SEND_INTERVAL = 5000L;
+
+	/**
+	 * The amount of time in milliseconds
+	 */
+	public static final long SESSION_TIMEOUT = DETECTION_SEND_INTERVAL * 5;
+
+	/**
+	 * The amount of time in milliseconds an address will be blocked if it sends
+	 * too many packets in one second.
+	 */
+	public static final long MAX_PACKETS_PER_SECOND_BLOCK = 300000L;
 
 	/**
 	 * Returns how many packets can be received in the span of a single second
@@ -142,7 +184,7 @@ public final class RakNet {
 	 *         before a session is blocked.
 	 */
 	public static long getMaxPacketsPerSecond() {
-		return MAX_PACKETS_PER_SECOND;
+		return maxPacketsPerSecond;
 	}
 
 	/**
@@ -154,18 +196,28 @@ public final class RakNet {
 	 *            second before a session is blocked.
 	 */
 	public static void setMaxPacketsPerSecond(long maxPacketsPerSecond) {
-		MAX_PACKETS_PER_SECOND = maxPacketsPerSecond;
+		maxPacketsPerSecond = maxPacketsPerSecond;
 	}
 
 	/**
 	 * Removes the max packets per second limit so that no matter how many
-	 * packets a session sends it will never be blocked. This is unrecommended,
-	 * as it can open your server to DOS/DDOS attacks.
+	 * packets a session sends it will never be blocked.
+	 * <p>
+	 * This is unrecommended, as it can open the server or client to DOS/DDOS
+	 * attacks.
 	 */
 	public static void setMaxPacketsPerSecondUnlimited() {
-		MAX_PACKETS_PER_SECOND = Long.MAX_VALUE;
+		maxPacketsPerSecond = Long.MAX_VALUE;
 	}
 
+	/**
+	 * Converts the stack trace of the specified <code>Throwable</code> to a
+	 * string.
+	 * 
+	 * @param throwable
+	 *            the <code>Throwable</code> to get the stack trace from.
+	 * @return the stack trace as a string.
+	 */
 	public static String getStackTrace(Throwable throwable) {
 		ByteArrayOutputStream stackTraceOut = new ByteArrayOutputStream();
 		PrintStream stackTracePrint = new PrintStream(stackTraceOut);
@@ -173,74 +225,49 @@ public final class RakNet {
 		return new String(stackTraceOut.toByteArray());
 	}
 
+	/**
+	 * Returns the maximum transfer unit of the network card with the specified
+	 * address.
+	 * 
+	 * @param address
+	 *            the address. A <code>null</code> value will have
+	 *            {@link InetAddress#getLocalHost()} be used instead.
+	 * @return the maximum transfer unit of the network card with the specified
+	 *         address, <code>-1</code> if it could not be determined.
+	 */
 	public static int getMaximumTransferUnit(InetAddress address) {
 		try {
-			if (address == null) {
-				return getMaximumTransferUnit();
+			address = address == null ? InetAddress.getLocalHost() : address;
+			if (!MAXIMUM_TRANSFER_UNIT_SIZES.containsKey(address)) {
+				try {
+					MAXIMUM_TRANSFER_UNIT_SIZES.put(address, NetworkInterface.getByInetAddress(address).getMTU());
+				} catch (SocketException e) {
+					/*
+					 * We failed to determine the maximum transfer unit here, so
+					 * its safe to assume we'll fail again.
+					 */
+					MAXIMUM_TRANSFER_UNIT_SIZES.put(address, -1);
+				}
 			}
-			return NetworkInterface.getByInetAddress(address).getMTU();
-		} catch (SocketException e) {
-			return -1; // No MTU
+			return MAXIMUM_TRANSFER_UNIT_SIZES.get(address).intValue();
+		} catch (UnknownHostException e) {
+			return -1; // Failed to determine localhost
 		}
 	}
 
 	/**
-	 * Used to determine the maximum transfer unit of the device. Normally, the
-	 * maximum transfer unit that will be used is the one of the network
-	 * interface that is bound to localhost. However, if it is not possible to
-	 * fetch the network interface with the localhost address, the lowest valid
-	 * maximum transfer unit of the device will be used instead.
+	 * Returns the maximum transfer unit of the network card with the localhost
+	 * address according to {@link InetAddress#getLocalHost()}.
 	 * 
-	 * @return the maximum transfer unit of the device.
+	 * @return the maximum transfer unit of the network card with the specified
+	 *         address, <code>-1</code> if it could not be determined.
 	 */
 	public static int getMaximumTransferUnit() {
-		if (DEVICE_MTU_SIZE < 0) {
-			try {
-				int maximumTransferUnit = NetworkInterface.getByInetAddress(InetAddress.getLocalHost()).getMTU();
-				if (maximumTransferUnit < 0) {
-					throw new RuntimeException("Invalid maximum transfer unit for localhost address");
-				}
-				DEVICE_MTU_SIZE = maximumTransferUnit;
-			} catch (Throwable throwable) {
-				try {
-					/*
-					 * We failed to get the NetworkInterface, we're going to
-					 * have to cycle through them manually and choose the lowest
-					 * one to make sure we never exceed any hardware limitations
-					 */
-					boolean foundDevice = false;
-					int lowestMaximumTransferUnit = Integer.MAX_VALUE;
-					for (Enumeration<NetworkInterface> networkInterfaces = NetworkInterface
-							.getNetworkInterfaces(); networkInterfaces.hasMoreElements();) {
-						NetworkInterface networkInterface = networkInterfaces.nextElement();
-						int maximumTransferUnit = networkInterface.getMTU();
-						if (maximumTransferUnit < lowestMaximumTransferUnit
-								&& maximumTransferUnit >= MINIMUM_MTU_SIZE) {
-							lowestMaximumTransferUnit = maximumTransferUnit;
-							foundDevice = true;
-						}
-					}
-
-					// This is a serious error and will cause startup to fail
-					if (foundDevice == false) {
-						throw new IOException(
-								"Failed to locate a network interface with an MTU higher than the minimum ("
-										+ MINIMUM_MTU_SIZE + ")");
-					}
-					DEVICE_MTU_SIZE = lowestMaximumTransferUnit;
-				} catch (Throwable throwable2) {
-					throwable2.printStackTrace();
-					return -1;
-				}
-			}
-			LOG.debug("Device maximum transfer unit determiened to be " + DEVICE_MTU_SIZE);
-		}
-		return DEVICE_MTU_SIZE;
+		return getMaximumTransferUnit(null);
 	}
 
 	/**
-	 * Sends a raw message to the address for the amount of times in the
-	 * interval until the packet is received or there is a timeout.
+	 * Sends a raw message to the address.
 	 * 
 	 * @param address
 	 *            the address to send the packet to.
@@ -250,47 +277,40 @@ public final class RakNet {
 	 *            the interval of which the packet is sent.
 	 * @param retries
 	 *            how many times the packet will be sent.
-	 * @return the received packet if it was received.
+	 * @return the received packet, <code>null</code> if no response was
+	 *         received or the thread was interrupted.
 	 */
 	private static RakNetPacket createBootstrapAndSend(InetSocketAddress address, Packet packet, long timeout,
 			int retries) {
-		RakNetPacket packetReceived = null;
-
-		// Create bootstrap and bind
+		RakNetPacket received = null;
 		EventLoopGroup group = new NioEventLoopGroup();
-
+		int maximumTransferUnit = getMaximumTransferUnit();
+		if (maximumTransferUnit < MINIMUM_MTU_SIZE) {
+			return null;
+		}
 		try {
+			// Create bootstrap
 			Bootstrap bootstrap = new Bootstrap();
 			BootstrapHandler handler = new BootstrapHandler();
 			bootstrap.group(group).channel(NioDatagramChannel.class).option(ChannelOption.SO_BROADCAST, true)
-					.option(ChannelOption.SO_RCVBUF, MINIMUM_MTU_SIZE).option(ChannelOption.SO_SNDBUF, MINIMUM_MTU_SIZE)
-					.handler(handler);
-
-			// Create channel, send packet, and close it
+					.option(ChannelOption.SO_RCVBUF, maximumTransferUnit)
+					.option(ChannelOption.SO_SNDBUF, maximumTransferUnit).handler(handler);
 			Channel channel = bootstrap.bind(0).sync().channel();
-			channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
 
-			// Wait for packet to come in, return null on timeout
-			while (retries > 0) {
+			// Wait for response
+			while (retries > 0 && received == null && !Thread.currentThread().isInterrupted()) {
 				long sendTime = System.currentTimeMillis();
-				while (System.currentTimeMillis() - sendTime < timeout) {
-					if (handler.packet != null) {
-						packetReceived = handler.packet;
-						break; // We found the packet
-					}
-				}
-				if (packetReceived != null) {
-					break; // the master loop is no longer needed
-				}
+				channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
+				while (System.currentTimeMillis() - sendTime < timeout && handler.packet == null)
+					; // Wait for either a timeout or a response
+				received = handler.packet;
 				retries--;
-			}
+			} // TODO: CLEAN!!!
 		} catch (InterruptedException e) {
-			e.printStackTrace();
+			return null;
 		}
-
-		// Shutdown bootstrap
 		group.shutdownGracefully();
-		return packetReceived;
+		return received;
 	}
 
 	/**
@@ -302,13 +322,10 @@ public final class RakNet {
 	 *         otherwise.
 	 */
 	public static boolean isServerOnline(InetSocketAddress address) {
-		// Create connection packet
 		OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne();
 		connectionRequestOne.maximumTransferUnit = MINIMUM_MTU_SIZE;
 		connectionRequestOne.networkProtocol = CLIENT_NETWORK_PROTOCOL;
 		connectionRequestOne.encode();
-
-		// Wait for response to come in
 		RakNetPacket packet = createBootstrapAndSend(address, connectionRequestOne, 1000, PING_RETRIES);
 		if (packet != null) {
 			if (packet.getId() == RakNetPacket.ID_OPEN_CONNECTION_REPLY_1) {
@@ -644,7 +661,7 @@ public final class RakNet {
 	}
 
 	/**
-	 * Converts the ID of the <code>RakNetPacket</code> to a hex string.
+	 * Converts the ID of the packet to a hex string.
 	 * 
 	 * @param packet
 	 *            the packet to get the ID from.
@@ -655,16 +672,28 @@ public final class RakNet {
 	}
 
 	/**
-	 * Splits an array into more chunks with the maximum size for each array
-	 * chunk.
+	 * Splits an array into chunks with the resulting arrays being no bigger
+	 * than the specified size.
 	 * 
+	 * @param size
+	 *            the maximum size of an array.
 	 * @param src
 	 *            the original array.
-	 * @param size
-	 *            the max size for each array that has been split.
-	 * @return the split byte array's no bigger than the maximum size.
+	 * @return the split <code>byte[]</code>s no bigger than the
+	 *         <code>size</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>size</code> is less than or equal to
+	 *             <code>0</code>.
+	 * @throws NullPointerException
+	 *             if the <code>src</code> is <code>null</code>.
 	 */
-	public static final byte[][] splitArray(byte[] src, int size) {
+	public static final byte[][] splitArray(int size, byte... src)
+			throws IllegalArgumentException, NullPointerException {
+		if (size <= 0) {
+			throw new IllegalArgumentException("Size must be greater than 0");
+		} else if (src == null) {
+			throw new NullPointerException("Source cannot be null");
+		}
 		int index = 0;
 		ArrayList<byte[]> split = new ArrayList<byte[]>();
 		while (index < src.length) {
@@ -680,7 +709,8 @@ public final class RakNet {
 	}
 
 	/**
-	 * Returns all the integers in between each other as a normal subtraction.
+	 * Returns all the <code>int</code>s in between each other as a normal
+	 * subtraction.
 	 * 
 	 * @param low
 	 *            the starting point.
@@ -688,11 +718,10 @@ public final class RakNet {
 	 *            the ending point.
 	 * @return the numbers in between high and low.
 	 */
-	public static final int[] subtractionArray(int low, int high) {
+	public static final int[] subtractArray(int low, int high) {
 		if (low > high) {
 			return new int[0];
 		}
-
 		int[] arr = new int[high - low - 1];
 		for (int i = 0; i < arr.length; i++) {
 			arr[i] = i + low + 1;

@@ -127,7 +127,7 @@ public class UnconnectedPing extends RakNetPacket implements Failable {
 	public void decode() {
 		try {
 			this.timestamp = this.readLong();
-			this.magic = this.checkMagic();
+			this.magic = this.readMagic();
 			this.pingId = this.readLong();
 			this.connectionType = this.readConnectionType();
 		} catch (RakNetException e) {

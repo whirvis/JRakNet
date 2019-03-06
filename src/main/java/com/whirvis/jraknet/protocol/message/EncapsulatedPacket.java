@@ -31,6 +31,9 @@
 package com.whirvis.jraknet.protocol.message;
 
 import com.whirvis.jraknet.Packet;
+import com.whirvis.jraknet.RakNet;
+import com.whirvis.jraknet.map.IntMap;
+import com.whirvis.jraknet.peer.RakNetPeer;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.message.acknowledge.Record;
 
@@ -44,6 +47,201 @@ import com.whirvis.jraknet.protocol.message.acknowledge.Record;
  * @since JRakNet v1.0.0
  */
 public class EncapsulatedPacket implements Cloneable {
+
+	/**
+	 * Used to easily split and reassemble {@link EncapsulatedPacket
+	 * encapsulated packets}.
+	 * 
+	 * @author Whirvis T. Wheatley
+	 * @since JRakNet v1.0.0
+	 */
+	public static final class Split {
+
+		/**
+		 * Returns whether or not the packet needs to be split.
+		 * 
+		 * @param peer
+		 *            the peer the packet is being sent to.
+		 * @param encapsulated
+		 *            the encapsulated packet.
+		 * @return <code>true</code> if the packet needs to be split,
+		 *         <code>false</code> otherwise.
+		 * @throws NullPointerException
+		 *             if the <code>peer</code> or <code>encapsulated</code> is
+		 *             <code>null</code>.
+		 * @throws IllegalArgumentException
+		 *             if the <code>encapsulated</code> is already split.
+		 */
+		public static boolean needsSplit(RakNetPeer peer, EncapsulatedPacket encapsulated)
+				throws NullPointerException, IllegalArgumentException {
+			if (peer == null) {
+				throw new NullPointerException("Peer cannot be null");
+			} else if (encapsulated == null) {
+				throw new NullPointerException("Encapsulated packet cannot be null");
+			} else if (encapsulated.split == true) {
+				throw new IllegalArgumentException("Encapsulated packet is already split");
+			}
+			return CustomPacket.MINIMUM_SIZE + encapsulated.size() > peer.getMaximumTransferUnit();
+		}
+
+		/**
+		 * Splits the packet.
+		 * 
+		 * @param peer
+		 *            the peer.
+		 * @param encapsulated
+		 *            the packet to split.
+		 * @return the split up encapsualted packet.
+		 * 
+		 * @throws NullPointerException
+		 *             if the <code>peer</code> or <code>encapsulated</code> is
+		 *             <code>null</code>.
+		 * @throws IllegalArgumentException
+		 *             if the <code>encapsulated</code> is already split or if
+		 *             the packet is too small to be split according to
+		 *             {@link #needsSplit(Reliability, EncapsulatedPacket, int)}.
+		 */
+		public static final EncapsulatedPacket[] split(RakNetPeer peer, EncapsulatedPacket encapsulated)
+				throws NullPointerException, IllegalArgumentException {
+			if (peer == null) {
+				throw new NullPointerException("Peer cannot be null");
+			} else if (encapsulated == null) {
+				throw new NullPointerException("Encapsulated packet cannot be null");
+			} else if (encapsulated.split == true) {
+				throw new NullPointerException("Encapsulated packet is already split");
+			} else if (!needsSplit(peer, encapsulated)) {
+				throw new IllegalArgumentException("Encapsulated packet is too small to be split");
+			}
+			byte[][] split = RakNet.splitArray(peer.getMaximumTransferUnit() - CustomPacket.MINIMUM_SIZE
+					- EncapsulatedPacket.size(encapsulated.reliability, true), encapsulated.payload.array());
+			EncapsulatedPacket[] splitPackets = new EncapsulatedPacket[split.length];
+			for (int i = 0; i < split.length; i++) {
+				EncapsulatedPacket encapsulatedSplit = new EncapsulatedPacket();
+				encapsulatedSplit.reliability = encapsulated.reliability;
+				encapsulatedSplit.payload = new Packet(split[i]);
+				encapsulatedSplit.messageIndex = encapsulated.reliability.isReliable() ? peer.bumpMessageIndex() : 0;
+				if (encapsulated.reliability.isOrdered() || encapsulated.reliability.isSequenced()) {
+					encapsulatedSplit.orderChannel = encapsulated.orderChannel;
+					encapsulatedSplit.orderIndex = encapsulated.orderIndex;
+				}
+				encapsulatedSplit.split = true;
+				encapsulatedSplit.splitCount = split.length;
+				encapsulatedSplit.splitId = encapsulated.splitId;
+				encapsulatedSplit.splitIndex = i;
+				splitPackets[i] = encapsulatedSplit;
+			}
+			return splitPackets;
+		}
+
+		private final int splitId;
+		private final int splitCount;
+		private final Reliability reliability;
+		private final IntMap<Packet> payloads;
+
+		/**
+		 * Creates a split packet container.
+		 * 
+		 * @param splitId
+		 *            the split ID.
+		 * @param splitCount
+		 *            the split count.
+		 * @param reliability
+		 *            the reliability.
+		 * @throws IllegalArgumentException
+		 *             if the <code>splitId</code> is less than <code>0</code>
+		 *             or if the <code>splitCount</code> is greater than
+		 *             {@value RakNet#MAX_SPLIT_COUNT}.
+		 * @throws NullPointerException
+		 *             if the <code>reliability</code> is <code>null</code>.
+		 */
+		public Split(int splitId, int splitCount, Reliability reliability) {
+			if (splitId < 0) {
+				throw new IllegalArgumentException("Split ID can be no less than 0");
+			} else if (splitCount > RakNet.MAX_SPLIT_COUNT) {
+				throw new IllegalArgumentException("Split count can be no greater than " + RakNet.MAX_SPLIT_COUNT);
+			} else if (reliability == null) {
+				throw new NullPointerException("Reliability cannot be null");
+			}
+			this.splitId = splitId;
+			this.splitCount = splitCount;
+			this.reliability = reliability;
+			this.payloads = new IntMap<Packet>();
+		}
+
+		/**
+		 * Returns the reliability of the split packet.
+		 * 
+		 * @return the reliability of the split packet.
+		 */
+		public Reliability getReliability() {
+			return this.reliability;
+		}
+
+		/**
+		 * Updates the data for the split packet while also verifying that the
+		 * <code>EncapsulatedPacket</code> belongs to this split packet.
+		 * 
+		 * @param encapsulated
+		 *            the encapsulated packet chunk.
+		 * @return the packet if finished, <code>null</code> if data is still
+		 *         missing.
+		 * @throws NullPointerException
+		 *             if the <code>encapsulated</code> is <code>null</code>.
+		 * @throws IllegalArgumentException
+		 *             if the <code>encapsulated</code> is not part of the
+		 *             bigger split packet based on whether or not it is split,
+		 *             its <code>splitId</code>, <code>splitCount</code>, or
+		 *             <code>reliability</code>, or if the
+		 *             <code>splitIndex</code> is less than <code>0</code> or
+		 *             greater than or equal to the <code>splitCount</code> of
+		 *             the <code>encapsulated</code> packet, or another
+		 *             <code>encapsulated</code> packet has been registered with
+		 *             the same <code>splitIndex</code>.
+		 */
+		public EncapsulatedPacket update(EncapsulatedPacket encapsulated)
+				throws NullPointerException, IllegalArgumentException {
+			if (encapsulated == null) {
+				throw new NullPointerException("Encapsulated packet cannot be null");
+			} else if (encapsulated.split != true || encapsulated.splitId != splitId
+					|| encapsulated.splitCount != splitCount || encapsulated.reliability != reliability) {
+				throw new IllegalArgumentException("This split packet does not belong to this one");
+			} else if (encapsulated.splitIndex < 0 || encapsulated.splitIndex >= encapsulated.splitCount) {
+				throw new IllegalArgumentException("Encapsulated packet split index out of range");
+			} else if (payloads.containsKey(encapsulated.splitIndex)) {
+				throw new IllegalArgumentException("Encapsulated packet with split index has already been registered");
+			}
+			payloads.put(encapsulated.splitIndex, encapsulated.payload);
+			if (payloads.size() >= splitCount) {
+				// Stitch payload
+				Packet payload = new Packet();
+				for (int i = 0; i < payloads.size(); i++) {
+					payload.write(payloads.get(i).array());
+				}
+				payloads.clear();
+
+				// Create stitched encapsulated packet
+				EncapsulatedPacket stitched = new EncapsulatedPacket();
+				stitched.ackRecord = null;
+				stitched.reliability = encapsulated.reliability;
+				stitched.split = false; // No longer split
+				stitched.messageIndex = encapsulated.messageIndex;
+				stitched.orderIndex = encapsulated.orderIndex;
+				stitched.orderChannel = encapsulated.orderChannel;
+				stitched.splitCount = encapsulated.splitCount;
+				stitched.splitId = encapsulated.splitId;
+				stitched.splitIndex = -1; // No longer split
+				encapsulated.payload = payload;
+				return stitched;
+			}
+			return null;
+		}
+
+		@Override
+		public String toString() {
+			return "Split [splitId=" + splitId + ", splitCount=" + splitCount + ", reliability=" + reliability + "]";
+		}
+
+	}
 
 	private static final int FLAG_RELIABILITY_INDEX = 5;
 	private static final byte FLAG_RELIABILITY = (byte) 0b11100000;
@@ -155,7 +353,7 @@ public class EncapsulatedPacket implements Cloneable {
 	 * has been received so it can be removed from its cache. It is assumed that
 	 * the receiver sent an
 	 * {@link com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgedPacket
-	 * ACK} packet in each step describing the fact that received a reliable
+	 * ACK} packet in each step describing the fact that it received a reliable
 	 * packet.
 	 */
 	public int messageIndex;
@@ -284,6 +482,44 @@ public class EncapsulatedPacket implements Cloneable {
 	}
 
 	/**
+	 * Returns whether or not the packet needs to be split.
+	 * 
+	 * @param peer
+	 *            the peer the packet is being sent to.
+	 * @return <code>true</code> if the packet needs to be split,
+	 *         <code>false</code> otherwise.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code> is <code>null</code>.
+	 */
+	public boolean needsSplit(RakNetPeer peer) throws NullPointerException {
+		return Split.needsSplit(peer, this);
+	}
+
+	/**
+	 * Splits the packet.
+	 * 
+	 * @param peer
+	 *            the peer.
+	 * @param encapsulated
+	 *            the packet to split.
+	 * @return the split up encapsualted packet.
+	 * @throws IllegalStateException
+	 *             if the <code>encapsulated</code> is already split or if the
+	 *             packet is too small to be split according to
+	 *             {@link #needsSplit(RakNetPeer)}.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code> is <code>null</code>.
+	 */
+	public EncapsulatedPacket[] split(RakNetPeer peer) throws IllegalStateException, NullPointerException {
+		if (split == true) {
+			throw new IllegalStateException("Already split");
+		} else if (!needsSplit(peer)) {
+			throw new IllegalStateException("Too small to be split");
+		}
+		return Split.split(peer, this);
+	}
+
+	/**
 	 * Returns the cloned packet. If the packet has not yet been cloned, the
 	 * {@link #clone()} method will be called automatically. This method is
 	 * recommended for use over the {@link #clone()} method as it has checks put
@@ -312,16 +548,16 @@ public class EncapsulatedPacket implements Cloneable {
 	/**
 	 * {@inheritDoc}
 	 * 
-	 * @throws CloneNotSupporteException
+	 * @throws CloneNotSupportedException
 	 *             if the packet has already been cloned or if the packet is a
 	 *             clone.
 	 * @see #getClone()
 	 */
 	@Override
 	public EncapsulatedPacket clone() throws CloneNotSupportedException {
-		if (this.clone != null) {
+		if (clone != null) {
 			throw new CloneNotSupportedException("Encapsulated packets can only be cloned once");
-		} else if (this.isClone == true) {
+		} else if (isClone == true) {
 			throw new CloneNotSupportedException("Clones of encapsulated packets cannot be cloned");
 		}
 		this.clone = (EncapsulatedPacket) super.clone();
