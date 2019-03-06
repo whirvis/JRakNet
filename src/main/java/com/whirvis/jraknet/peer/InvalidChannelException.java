@@ -28,7 +28,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.session;
+package com.whirvis.jraknet.peer;
 
 import com.whirvis.jraknet.RakNet;
 

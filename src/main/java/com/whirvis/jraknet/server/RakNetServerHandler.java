@@ -38,7 +38,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.session.RakNetClientSession;
+import com.whirvis.jraknet.peer.RakNetClientSession;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -99,7 +99,7 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			}
 			server.disconnectClient(client, reason == null ? "Address blocked" : reason);
 		}
-		server.callEvent(listener -> listener.onAddressBlocked(address, reason, time));
+		server.callEvent(listener -> listener.onBlock(server, address, reason, time));
 		log.info("Blocked address " + address + " due to \"" + reason + "\" for " + time + " milliseconds");
 	}
 
@@ -117,7 +117,7 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 		} else if (blocked.remove(address) == null) {
 			return; // No address was unblocked
 		}
-		server.callEvent(listener -> listener.onAddressUnblocked(address));
+		server.callEvent(listener -> listener.onUnblock(server, address));
 		log.info("Unblocked address " + address);
 	}
 
@@ -158,7 +158,7 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			server.handleMessage(packet, sender);
 			datagram.content().readerIndex(0); // Reset position
 			log.debug("Sent packet to server and reset datagram buffer read position");
-			server.callEvent(listener -> listener.handleNettyMessage(datagram.content(), sender));
+			server.callEvent(listener -> listener.handleNettyMessage(server, sender, datagram.content()));
 			datagram.content().release(); // No longer needed
 			log.debug("Sent datagram buffer to server and released it");
 

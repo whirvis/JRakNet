@@ -28,29 +28,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.session;
+package com.whirvis.jraknet.peer;
 
 /**
- * Represents the current status of a connection in a {@link RakNetSession}.
+ * Signals that there are too many split packets in the queue at once.
  *
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
  */
-public enum RakNetState {
+public class SplitQueueOverflowException extends RuntimeException {
+
+	private static final long serialVersionUID = 969985052588965615L;
 
 	/**
-	 * The session is disconnected.
+	 * Constructs a <code>SplitQueueOverloadException</code>.
 	 */
-	DISCONNECTED,
-
-	/**
-	 * The session is handshaking.
-	 */
-	HANDSHAKING,
-
-	/**
-	 * The session is connected.
-	 */
-	CONNECTED;
+	public SplitQueueOverflowException() {
+		super("Too many split packets in a single queue");
+	}
 
 }

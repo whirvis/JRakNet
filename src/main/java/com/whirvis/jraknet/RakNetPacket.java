@@ -31,12 +31,16 @@
 package com.whirvis.jraknet;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.UUID;
+import java.util.Map.Entry;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.map.ShortMap;
+import com.whirvis.jraknet.protocol.ConnectionType;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -48,192 +52,860 @@ import io.netty.channel.socket.DatagramPacket;
  *
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
+ * @see Packet
  */
 public class RakNetPacket extends Packet {
-	
-	private static final Logger LOG = LogManager.getLogger(RakNetPacket.class);
 
-	// Magic identifier
+	private static final Logger LOG = LogManager.getLogger(RakNetPacket.class);
+	private static final int UNSIGNED_BYTE_MIN_VALUE = 0x00;
+	private static final int UNSIGNED_BYTE_MAX_VALUE = 0xFF;
+	private static final String ENCODE_METHOD_NAME = "encode";
+	private static final String DECODE_METHOD_NAME = "decode";
+	private static final ShortMap<String> PACKET_NAMES = new ShortMap<String>();
+	private static final HashMap<String, Short> PACKET_IDS = new HashMap<String, Short>();
+	private static boolean mappedNameIds;
+
+	/**
+	 * The magic identifier.
+	 */
 	public final static byte[] MAGIC = new byte[] { (byte) 0x00, (byte) 0xFF, (byte) 0xFF, 0x00, (byte) 0xFE,
 			(byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xFD, (byte) 0xFD, (byte) 0xFD, (byte) 0xFD, (byte) 0x12,
 			(byte) 0x34, (byte) 0x56, (byte) 0x78 };
 
-	// Packet IDs
-	public static final short ID_CONNECTED_PING = 0x00;
-	public static final short ID_UNCONNECTED_PING = 0x01;
-	public static final short ID_UNCONNECTED_PING_OPEN_CONNECTIONS = 0x02;
-	public static final short ID_CONNECTED_PONG = 0x03;
-	public static final short ID_DETECT_LOST_CONNECTIONS = 0x04;
-	public static final short ID_OPEN_CONNECTION_REQUEST_1 = 0x05;
-	public static final short ID_OPEN_CONNECTION_REPLY_1 = 0x06;
-	public static final short ID_OPEN_CONNECTION_REQUEST_2 = 0x07;
-	public static final short ID_OPEN_CONNECTION_REPLY_2 = 0x08;
-	public static final short ID_CONNECTION_REQUEST = 0x09;
-	public static final short ID_REMOTE_SYSTEM_REQUIRES_PUBLIC_KEY = 0x0A;
-	public static final short ID_OUR_SYSTEM_REQUIRES_SECURITY = 0x0B;
-	public static final short ID_PUBLIC_KEY_MISMATCH = 0x0C;
-	public static final short ID_OUT_OF_BAND_INTERNAL = 0x0D;
-	public static final short ID_SND_RECEIPT_ACKED = 0x0E;
-	public static final short ID_SND_RECEIPT_LOSS = 0x0F;
-	public static final short ID_CONNECTION_REQUEST_ACCEPTED = 0x10;
-	public static final short ID_CONNECTION_ATTEMPT_FAILED = 0x11;
-	public static final short ID_ALREADY_CONNECTED = 0x12;
-	public static final short ID_NEW_INCOMING_CONNECTION = 0x13;
-	public static final short ID_NO_FREE_INCOMING_CONNECTIONS = 0x14;
-	public static final short ID_DISCONNECTION_NOTIFICATION = 0x15;
-	public static final short ID_CONNECTION_LOST = 0x16;
-	public static final short ID_CONNECTION_BANNED = 0x17;
-	public static final short ID_INVALID_PASSWORD = 0x18;
-	public static final short ID_INCOMPATIBLE_PROTOCOL_VERSION = 0x19;
-	public static final short ID_IP_RECENTLY_CONNECTED = 0x1A;
-	public static final short ID_TIMESTAMP = 0x1B;
-	public static final short ID_UNCONNECTED_PONG = 0x1C;
-	public static final short ID_ADVERTISE_SYSTEM = 0x1D;
-	public static final short ID_DOWNLOAD_PROGRESS = 0x1E;
-	public static final short ID_REMOTE_DISCONNECTION_NOTIFICATION = 0x1F;
-	public static final short ID_REMOTE_CONNECTION_LOST = 0x20;
-	public static final short ID_REMOTE_NEW_INCOMING_CONNECTION = 0x21;
-	public static final short ID_FILE_LIST_TRANSFER_HEADER = 0x22;
-	public static final short ID_FILE_LIST_TRANSFER_FILE = 0x23;
-	public static final short ID_FILE_LIST_REFERENCE_PUSH_ACK = 0x24;
-	public static final short ID_DDT_DOWNLOAD_REQUEST = 0x25;
-	public static final short ID_TRANSPORT_STRING = 0x26;
-	public static final short ID_REPLICA_MANAGER_CONSTRUCTION = 0x27;
-	public static final short ID_REPLICA_MANAGER_SCOPE_CHANGE = 0x28;
-	public static final short ID_REPLICA_MANAGER_SERIALIZE = 0x29;
-	public static final short ID_REPLICA_MANAGER_DOWNLOAD_STARTED = 0x2A;
-	public static final short ID_REPLICA_MANAGER_DOWNLOAD_COMPLETE = 0x2B;
-	public static final short ID_RAKVOICE_OPEN_CHANNEL_REQUEST = 0x2C;
-	public static final short ID_RAKVOICE_OPEN_CHANNEL_REPLY = 0x2D;
-	public static final short ID_RAKVOICE_CLOSE_CHANNEL = 0x2E;
-	public static final short ID_RAKVOICE_DATA = 0x2F;
-	public static final short ID_AUTOPATCHER_GET_CHANGELIST_SINCE_DATE = 0x30;
-	public static final short ID_AUTOPATCHER_CREATION_LIST = 0x31;
-	public static final short ID_AUTOPATCHER_DELETION_LIST = 0x32;
-	public static final short ID_AUTOPATCHER_GET_PATCH = 0x33;
-	public static final short ID_AUTOPATCHER_PATCH_LIST = 0x34;
-	public static final short ID_AUTOPATCHER_REPOSITORY_FATAL_ERROR = 0x35;
-	public static final short ID_AUTOPATCHER_CANNOT_DOWNLOAD_ORIGINAL_UNMODIFIED_FILES = 0x36;
-	public static final short ID_AUTOPATCHER_FINISHED_INTERNAL = 0x37;
-	public static final short ID_AUTOPATCHER_FINISHED = 0x38;
-	public static final short ID_AUTOPATCHER_RESTART_APPLICATION = 0x39;
-	public static final short ID_NAT_PUNCHTHROUGH_REQUEST = 0x3A;
-	public static final short ID_NAT_CONNECT_AT_TIME = 0x3B;
-	public static final short ID_NAT_GET_MOST_RECENT_PORT = 0x3C;
-	public static final short ID_NAT_CLIENT_READY = 0x3D;
-	public static final short ID_NAT_TARGET_NOT_CONNECTED = 0x3E;
-	public static final short ID_NAT_TARGET_UNRESPONSIVE = 0x3F;
-	public static final short ID_NAT_CONNECTION_TO_TARGET_LOST = 0x40;
-	public static final short ID_NAT_ALREADY_IN_PROGRESS = 0x41;
-	public static final short ID_NAT_PUNCHTHROUGH_FAILED = 0x42;
-	public static final short ID_NAT_PUNCHTHROUGH_SUCCEEDED = 0x43;
-	public static final short ID_READY_EVENT_SET = 0x44;
-	public static final short ID_READY_EVENT_UNSET = 0x45;
-	public static final short ID_READY_EVENT_ALL_SET = 0x46;
-	public static final short ID_READY_EVENT_QUERY = 0x47;
-	public static final short ID_LOBBY_GENERAL = 0x48;
-	public static final short ID_RPC_REMOTE_ERROR = 0x49;
-	public static final short ID_RPC_PLUGIN = 0x4A;
-	public static final short ID_FILE_LIST_REFERENCE_PUSH = 0x4B;
-	public static final short ID_READY_EVENT_FORCE_ALL_SET = 0x4C;
-	public static final short ID_ROOMS_EXECUTE_FUNC = 0x4D;
-	public static final short ID_ROOMS_LOGON_STATUS = 0x4E;
-	public static final short ID_ROOMS_HANDLE_CHANGE = 0x4F;
-	public static final short ID_LOBBY2_SEND_MESSAGE = 0x50;
-	public static final short ID_LOBBY2_SERVER_ERROR = 0x51;
-	public static final short ID_FCM2_NEW_HOST = 0x52;
-	public static final short ID_FCM2_REQUEST_FCMGUID = 0x53;
-	public static final short ID_FCM2_RESPOND_CONNECTION_COUNT = 0x54;
-	public static final short ID_FCM2_INFORM_FCMGUID = 0x55;
-	public static final short ID_FCM2_UPDATE_MIN_TOTAL_CONNECTION_COUNT = 0x56;
-	public static final short ID_FCM2_VERIFIED_JOIN_START = 0x57;
-	public static final short ID_FCM2_VERIFIED_JOIN_CAPABLE = 0x58;
-	public static final short ID_FCM2_VERIFIED_JOIN_FAILED = 0x59;
-	public static final short ID_FCM2_VERIFIED_JOIN_ACCEPTED = 0x5A;
-	public static final short ID_FCM2_VERIFIED_JOIN_REJECTED = 0x5B;
-	public static final short ID_UDP_PROXY_GENERAL = 0x5C;
-	public static final short ID_SQLite3_EXEC = 0x5D;
-	public static final short ID_SQLite3_UNKNOWN_DB = 0x5E;
-	public static final short ID_SQLLITE_LOGGER = 0x5F;
-	public static final short ID_NAT_TYPE_DETECTION_REQUEST = 0x60;
-	public static final short ID_NAT_TYPE_DETECTION_RESULT = 0x61;
-	public static final short ID_ROUTER_2_INTERNAL = 0x62;
-	public static final short ID_ROUTER_2_FORWARDING_NO_PATH = 0x63;
-	public static final short ID_ROUTER_2_FORWARDING_ESTABLISHED = 0x64;
-	public static final short ID_ROUTER_2_REROUTED = 0x65;
-	public static final short ID_TEAM_BALANCER_INTERNAL = 0x66;
-	public static final short ID_TEAM_BALANCER_REQUESTED_TEAM_FULL = 0x67;
-	public static final short ID_TEAM_BALANCER_REQUESTED_TEAM_LOCKED = 0x68;
-	public static final short ID_TEAM_BALANCER_TEAM_REQUESTED_CANCELLED = 0x69;
-	public static final short ID_TEAM_BALANCER_TEAM_ASSIGNED = 0x6A;
-	public static final short ID_LIGHTSPEED_INTEGRATION = 0x6B;
-	public static final short ID_XBOX_LOBBY = 0x6C;
-	public static final short ID_TWO_WAY_AUTHENTICATION_INCOMING_CHALLENGE_SUCCESS = 0x6D;
-	public static final short ID_TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_SUCCESS = 0x6E;
-	public static final short ID_TWO_WAY_AUTHENTICATION_INCOMING_CHALLENGE_FAILURE = 0x6F;
-	public static final short ID_TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_FAILURE = 0x70;
-	public static final short ID_TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_TIMEOUT = 0x71;
-	public static final short ID_TWO_WAY_AUTHENTICATION_NEGOTIATION = 0x72;
-	public static final short ID_CLOUD_POST_REQUEST = 0x73;
-	public static final short ID_CLOUD_RELEASE_REQUEST = 0x74;
-	public static final short ID_CLOUD_GET_REQUEST = 0x75;
-	public static final short ID_CLOUD_GET_RESPONSE = 0x76;
-	public static final short ID_CLOUD_UNSUBSCRIBE_REQUEST = 0x77;
-	public static final short ID_CLOUD_SERVER_TO_SERVER_COMMAND = 0x78;
-	public static final short ID_CLOUD_SUBSCRIPTION_NOTIFICATION = 0x79;
-	public static final short ID_LIB_VOICE = 0x7A;
-	public static final short ID_RELAY_PLUGIN = 0x7B;
-	public static final short ID_NAT_REQUEST_BOUND_ADDRESSES = 0x7C;
-	public static final short ID_NAT_RESPOND_BOUND_ADDRESSES = 0x7D;
-	public static final short ID_FCM2_UPDATE_USER_CONTEXT = 0x7E;
-	public static final short ID_RESERVED_3 = 0x7F;
-	public static final short ID_RESERVED_4 = 0x80;
-	public static final short ID_RESERVED_5 = 0x81;
-	public static final short ID_RESERVED_6 = 0x82;
-	public static final short ID_RESERVED_7 = 0x83;
-	public static final short ID_RESERVED_8 = 0x84;
-	public static final short ID_RESERVED_9 = 0x85;
-	public static final short ID_USER_PACKET_ENUM = 0x86;
-
-	/*
-	 * These IDs are ignored by the mapNameIds() method as they override other
-	 * packet IDs
+	/**
+	 * The ID of the {@link com.whirvis.jraknet.protocol.status.ConnectedPing
+	 * CONNECTED_PING} packet.
 	 */
-	public static final short ID_CUSTOM_0 = 0x80;
-	public static final short ID_CUSTOM_1 = 0x81;
-	public static final short ID_CUSTOM_2 = 0x82;
-	public static final short ID_CUSTOM_3 = 0x83;
-	public static final short ID_CUSTOM_4 = 0x84;
-	public static final short ID_CUSTOM_5 = 0x85;
-	public static final short ID_CUSTOM_6 = 0x86;
-	public static final short ID_CUSTOM_7 = 0x87;
-	public static final short ID_CUSTOM_8 = 0x88;
-	public static final short ID_CUSTOM_9 = 0x89;
-	public static final short ID_CUSTOM_A = 0x8A;
-	public static final short ID_CUSTOM_B = 0x8B;
-	public static final short ID_CUSTOM_C = 0x8C;
-	public static final short ID_CUSTOM_D = 0x8D;
-	public static final short ID_CUSTOM_E = 0x8E;
-	public static final short ID_CUSTOM_F = 0x8F;
-	
-	public static final short ID_ACK= 0xC0;
-	public static final short ID_NACK = 0xA0;
-
-	// Map names and IDs
-	private static final ShortMap<String> packetNames = new ShortMap<String>();
-	private static final HashMap<String, Short> packetIds = new HashMap<String, Short>();
-	private static boolean mappedNameIds = false;
+	public static final short ID_CONNECTED_PING = 0x00;
 
 	/**
-	 * Maps all of the packet IDs to their respective field name and vice-versa.
+	 * The ID of the {@link com.whirvis.jraknet.protocol.status.UnconnectedPing
+	 * UNCONNECTED_PING} packet.
 	 */
-	private static void mapNameIds() { // TODO: Fix this method
-		for (Field field : RakNet.class.getDeclaredFields()) {
+	public static final short ID_UNCONNECTED_PING = 0x01;
+
+	/**
+	 * The ID of the
+	 * {@link com.whirvis.jraknet.protocol.status.UnconnectedPingOpenConnections
+	 * UNCONNECTED_PING_OPEN_CONNECTIONS} packet.
+	 */
+	public static final short ID_UNCONNECTED_PING_OPEN_CONNECTIONS = 0x02;
+
+	/**
+	 * The ID of the {@link com.whirvis.jraknet.protocol.status.ConnectedPong
+	 * CONNECTED_PONG} packet.
+	 */
+	public static final short ID_CONNECTED_PONG = 0x03;
+
+	/**
+	 * The ID of the <code>DETECT_LOST_CONNECTIONS</code> packet.
+	 */
+	public static final short ID_DETECT_LOST_CONNECTIONS = 0x04;
+
+	/**
+	 * The ID of the
+	 * {@link com.whirvis.jraknet.protocol.connection.OpenConnectionRequestOne
+	 * OPEN_CONNECTION_REQUEST_1} packet.
+	 */
+	public static final short ID_OPEN_CONNECTION_REQUEST_1 = 0x05;
+
+	/**
+	 * The ID of the
+	 * {@link com.whirvis.jraknet.protocol.connection.OpenConnectionReplyOne
+	 * OPEN_CONNECTION_REPLY_1} packet.
+	 */
+	public static final short ID_OPEN_CONNECTION_REPLY_1 = 0x06;
+
+	/**
+	 * The ID of the
+	 * {@link com.whirvis.jraknet.protocol.connection.OpenConnectionRequestTwo
+	 * OPEN_CONNECTION_REQUEST_2} packet.
+	 */
+	public static final short ID_OPEN_CONNECTION_REQUEST_2 = 0x07;
+
+	/**
+	 * The ID of the
+	 * {@link com.whirvis.jraknet.protocol.connection.OpenConnectionReplyTwo
+	 * OPEN_CONNECTION_REPLY_2} packet.
+	 */
+	public static final short ID_OPEN_CONNECTION_REPLY_2 = 0x08;
+
+	/**
+	 * The ID of the {@link com.whirvis.jraknet.protocol.login.ConnectionRequest
+	 * CONNECTION_REQUEST} packet.
+	 */
+	public static final short ID_CONNECTION_REQUEST = 0x09;
+
+	/**
+	 * The ID of the <code>REMOVE_SYSTEM_REQUIRES_PUBLIC_KEY</code> packet.
+	 */
+	public static final short ID_REMOTE_SYSTEM_REQUIRES_PUBLIC_KEY = 0x0A;
+
+	/**
+	 * The ID of the <code>OUR_SYSTEM_REQUIRES_SECURITY</code> packet.
+	 */
+	public static final short ID_OUR_SYSTEM_REQUIRES_SECURITY = 0x0B;
+
+	/**
+	 * The ID of the <code>PUBLIC_KEY_MISMATCH</code> packet.
+	 */
+	public static final short ID_PUBLIC_KEY_MISMATCH = 0x0C;
+
+	/**
+	 * The ID of the <code>OUT_OF_BAND_INTERNAL</code> packet.
+	 */
+	public static final short ID_OUT_OF_BAND_INTERNAL = 0x0D;
+
+	/**
+	 * The ID of the <code>SND_RECEIPT_ACKED</code> packet.
+	 */
+	// TODO: Implement this packet
+	public static final short ID_SND_RECEIPT_ACKED = 0x0E;
+
+	/**
+	 * The ID of the <code>SND_RECEIPT_LOSS</code> packet.
+	 */
+	// TODO: Implement this packet
+	public static final short ID_SND_RECEIPT_LOSS = 0x0F;
+
+	/**
+	 * The ID of the
+	 * {@link com.whirvis.jraknet.protocol.login.ConnectionRequestAccepted
+	 * CONNECTION_REQUEST_ACCEPTED} packet.
+	 */
+	public static final short ID_CONNECTION_REQUEST_ACCEPTED = 0x10;
+
+	/**
+	 * The ID of the <code>CONNECTION_ATTEMPT_FAILED</code> packet.
+	 */
+	public static final short ID_CONNECTION_ATTEMPT_FAILED = 0x11;
+
+	/**
+	 * The ID of the <code>ALREADY_CONNECTED</code> packet.
+	 */
+	public static final short ID_ALREADY_CONNECTED = 0x12;
+
+	/**
+	 * The ID of the
+	 * {@link com.whirvis.jraknet.protocol.login.NewIncomingConnection
+	 * NEW_INCOMING_CONNECTION} packet.
+	 */
+	public static final short ID_NEW_INCOMING_CONNECTION = 0x13;
+
+	/**
+	 * The ID of the <code>NO_FREE_INCOMING_CONNECTIONS</code> packet.
+	 */
+	public static final short ID_NO_FREE_INCOMING_CONNECTIONS = 0x14;
+
+	/**
+	 * The ID of the <code>DISCONNECTION_NOTIFICATION</code> packet.
+	 */
+	public static final short ID_DISCONNECTION_NOTIFICATION = 0x15;
+
+	/**
+	 * The ID of the <code>CONNECTION_LOST</code> packet.
+	 */
+	public static final short ID_CONNECTION_LOST = 0x16;
+
+	/**
+	 * The ID of the
+	 * {@link com.whirvis.jraknet.protocol.connection.ConnectionBanned
+	 * CONNECTION_BANNED} packet.
+	 */
+	public static final short ID_CONNECTION_BANNED = 0x17;
+
+	/**
+	 * The ID of the <code>INVALID_PASSWORD</code> packet.
+	 */
+	public static final short ID_INVALID_PASSWORD = 0x18;
+
+	/**
+	 * The ID of the
+	 * {@link com.whirvis.jraknet.protocol.connection.IncompatibleProtocolVersion
+	 * INCOMPATIBLE_PROTOCOL_VERSION} packet.
+	 */
+	public static final short ID_INCOMPATIBLE_PROTOCOL_VERSION = 0x19;
+
+	/**
+	 * The ID of the <code>IP_RECENTLY_CONNECTED</code> packet.
+	 */
+	public static final short ID_IP_RECENTLY_CONNECTED = 0x1A;
+
+	/**
+	 * The ID of the <code>TIMESTAMP</code> packet.
+	 */
+	public static final short ID_TIMESTAMP = 0x1B;
+
+	/**
+	 * The ID of the {@link com.whirvis.jraknet.protocol.status.UnconnectedPong
+	 * UNCONNECTED_PONG} packet.
+	 */
+	public static final short ID_UNCONNECTED_PONG = 0x1C;
+
+	/**
+	 * The ID of the <code>ADVERTISE_SYSTEM</code> packet.
+	 */
+	public static final short ID_ADVERTISE_SYSTEM = 0x1D;
+
+	/**
+	 * The ID of the <code>DOWNLOAD_PROGRESS</code> packet.
+	 */
+	public static final short ID_DOWNLOAD_PROGRESS = 0x1E;
+
+	/**
+	 * The ID of the <code>REMOTE_DISCONNECTION_NOTIFICATION</code> packet.
+	 */
+	public static final short ID_REMOTE_DISCONNECTION_NOTIFICATION = 0x1F;
+
+	/**
+	 * The ID of the <code>REMOTE_CONNECTION_LOST</code> packet.
+	 */
+	public static final short ID_REMOTE_CONNECTION_LOST = 0x20;
+
+	/**
+	 * The ID of the <code>REMOTE_NEW_INCOMING_CONNECTION</code> packet.
+	 */
+	public static final short ID_REMOTE_NEW_INCOMING_CONNECTION = 0x21;
+
+	/**
+	 * The ID of the <code>FILE_LIST_TRANSFER_HEADER</code> packet.
+	 */
+	public static final short ID_FILE_LIST_TRANSFER_HEADER = 0x22;
+
+	/**
+	 * The ID of the <code>FILE_LIST_TRANSFER_FILE</code> packet.
+	 */
+	public static final short ID_FILE_LIST_TRANSFER_FILE = 0x23;
+
+	/**
+	 * The ID of the <code>FILE_LIST_REFERENCE_PUSH_ACK</code> packet.
+	 */
+	public static final short ID_FILE_LIST_REFERENCE_PUSH_ACK = 0x24;
+
+	/**
+	 * The ID of the <code>DDT_DOWNLOAD_REQUEST</code> packet.
+	 */
+	public static final short ID_DDT_DOWNLOAD_REQUEST = 0x25;
+
+	/**
+	 * The ID of the <code>TRANSPORT_STRING</code> packet.
+	 */
+	public static final short ID_TRANSPORT_STRING = 0x26;
+
+	/**
+	 * The ID of the <code>REPLICA_MANAGER_CONSTRUCTION</code> packet.
+	 */
+	public static final short ID_REPLICA_MANAGER_CONSTRUCTION = 0x27;
+
+	/**
+	 * The ID of the <code>REPLICA_MANAGER_SCOPE_CHANGE</code> packet.
+	 */
+	public static final short ID_REPLICA_MANAGER_SCOPE_CHANGE = 0x28;
+
+	/**
+	 * The ID of the <code>REPLICA_MANAGER_SERIALIZE</code> packet.
+	 */
+	public static final short ID_REPLICA_MANAGER_SERIALIZE = 0x29;
+
+	/**
+	 * The ID of the <code>REPLICA_MANAGER_DOWNLOAD_STARTED</code> packet.
+	 */
+	public static final short ID_REPLICA_MANAGER_DOWNLOAD_STARTED = 0x2A;
+
+	/**
+	 * The ID of the <code>REPLICA_MANAGER_DOWNLOAD_COMPLETE</code> packet.
+	 */
+	public static final short ID_REPLICA_MANAGER_DOWNLOAD_COMPLETE = 0x2B;
+
+	/**
+	 * The ID of the <code>RAKVOICE_OPEN_CHANNEL_REQUEST</code> packet.
+	 */
+	public static final short ID_RAKVOICE_OPEN_CHANNEL_REQUEST = 0x2C;
+
+	/**
+	 * The ID of the <code>RAKVOICE_OPEN_CHANNEL_REPLY</code> packet.
+	 */
+	public static final short ID_RAKVOICE_OPEN_CHANNEL_REPLY = 0x2D;
+
+	/**
+	 * The ID of the <code>RAKVOICE_CLOSE_CHANNEL</code> packet.
+	 */
+	public static final short ID_RAKVOICE_CLOSE_CHANNEL = 0x2E;
+
+	/**
+	 * The ID of the <code>RAKVOICE_DATA</code> packet.
+	 */
+	public static final short ID_RAKVOICE_DATA = 0x2F;
+
+	/**
+	 * The ID of the <code>AUTOPATHER_GET_CHANGELIST_SINCE_DATE</code> packet.
+	 */
+	public static final short ID_AUTOPATCHER_GET_CHANGELIST_SINCE_DATE = 0x30;
+
+	/**
+	 * The ID of the <code>AUTOPATCHER_CREATION_LIST</code> packet.
+	 */
+	public static final short ID_AUTOPATCHER_CREATION_LIST = 0x31;
+
+	/**
+	 * The ID of the <code>AUTOPATCHER_DELETION_LIST</code> packet.
+	 */
+	public static final short ID_AUTOPATCHER_DELETION_LIST = 0x32;
+
+	/**
+	 * The ID of the <code>AUTOPATCHER_GET_PATCH</code> packet.
+	 */
+	public static final short ID_AUTOPATCHER_GET_PATCH = 0x33;
+
+	/**
+	 * The ID of the <code>AUTOPATCHER_PATCH_LIST</code> packet.
+	 */
+	public static final short ID_AUTOPATCHER_PATCH_LIST = 0x34;
+
+	/**
+	 * The ID of the <code>AUTOPATHER_REPOSITORY_FATAL_ERROR</code> packet.
+	 */
+	public static final short ID_AUTOPATCHER_REPOSITORY_FATAL_ERROR = 0x35;
+
+	/**
+	 * The ID of the
+	 * <code>AUTOPATHER_CANNOT_DOWNLOAD_ORIGINAL_UNMODIFIED_FILES</code> packet.
+	 */
+	public static final short ID_AUTOPATCHER_CANNOT_DOWNLOAD_ORIGINAL_UNMODIFIED_FILES = 0x36;
+
+	/**
+	 * The ID of the <code>AUTOPATHER_FINISHED_INTERNAL</code> packet.
+	 */
+	public static final short ID_AUTOPATCHER_FINISHED_INTERNAL = 0x37;
+
+	/**
+	 * The ID of the <code>AUTOPATHER_FINISHED</code> packet.
+	 */
+	public static final short ID_AUTOPATCHER_FINISHED = 0x38;
+
+	/**
+	 * The ID of the <code>AUTOPATCHER_RESTART_APPLICATION</code> packet.
+	 */
+	public static final short ID_AUTOPATCHER_RESTART_APPLICATION = 0x39;
+
+	/**
+	 * The ID of the <code>NAT_PUNCHTHROUGH_REQUEST</code> packet.
+	 */
+	public static final short ID_NAT_PUNCHTHROUGH_REQUEST = 0x3A;
+
+	/**
+	 * The ID of the <code>NAT_CONNECT_AT_TIME</code> packet.
+	 */
+	public static final short ID_NAT_CONNECT_AT_TIME = 0x3B;
+
+	/**
+	 * The ID of the <code>NAT_GET_MOST_RECENT_PORT</code> packet.
+	 */
+	public static final short ID_NAT_GET_MOST_RECENT_PORT = 0x3C;
+
+	/**
+	 * The ID of the <code>NAT_CLIENT_READY</code> packet.
+	 */
+	public static final short ID_NAT_CLIENT_READY = 0x3D;
+
+	/**
+	 * The ID of the <code>NAT_TARGET_NOT_CONNECT</code> packet.
+	 */
+	public static final short ID_NAT_TARGET_NOT_CONNECTED = 0x3E;
+
+	/**
+	 * The ID of the <code>NAT_TARGET_UNRESPONSIVE</code> packet.
+	 */
+	public static final short ID_NAT_TARGET_UNRESPONSIVE = 0x3F;
+
+	/**
+	 * The ID of the <code>NAT_CONNECTION_TO_TARGET_LOST</code> packet.
+	 */
+	public static final short ID_NAT_CONNECTION_TO_TARGET_LOST = 0x40;
+
+	/**
+	 * The ID of the <code>NAT_ALREADY_IN_PROGRESS</code> packet.
+	 */
+	public static final short ID_NAT_ALREADY_IN_PROGRESS = 0x41;
+
+	/**
+	 * The ID of the <code>NAT_PUNCHTHROUGH_FAILED</code> packet.
+	 */
+	public static final short ID_NAT_PUNCHTHROUGH_FAILED = 0x42;
+
+	/**
+	 * The ID of the <code>NAT_PUNCHTHROUGH_SUCCEEDED</code> packet.
+	 */
+	public static final short ID_NAT_PUNCHTHROUGH_SUCCEEDED = 0x43;
+
+	/**
+	 * The ID of the <code>READY_EVENT_SET</code> packet.
+	 */
+	public static final short ID_READY_EVENT_SET = 0x44;
+
+	/**
+	 * The ID of the <code>READY_EVENT_UNSET</code> packet.
+	 */
+	public static final short ID_READY_EVENT_UNSET = 0x45;
+
+	/**
+	 * The ID of the <code>READY_EVENT_ALL_SET</code> packet.
+	 */
+	public static final short ID_READY_EVENT_ALL_SET = 0x46;
+
+	/**
+	 * The ID of the <code>READY_EVENT_QUERY</code> packet.
+	 */
+	public static final short ID_READY_EVENT_QUERY = 0x47;
+
+	/**
+	 * The ID of the <code>LOBBY_GENERAL</code> packet.
+	 */
+	public static final short ID_LOBBY_GENERAL = 0x48;
+
+	/**
+	 * The ID of the <code>RPC_REMOTE_ERROR</code> packet.
+	 */
+	public static final short ID_RPC_REMOTE_ERROR = 0x49;
+
+	/**
+	 * The ID of the <code>RPC_PLUGIN</code> packet.
+	 */
+	public static final short ID_RPC_PLUGIN = 0x4A;
+
+	/**
+	 * The ID of the <code>FILE_LIST_REFERENCE_PUSH</code> packet.
+	 */
+	public static final short ID_FILE_LIST_REFERENCE_PUSH = 0x4B;
+
+	/**
+	 * The ID of the <code>READY_EVENT_FORCE_ALL_SET</code> packet.
+	 */
+	public static final short ID_READY_EVENT_FORCE_ALL_SET = 0x4C;
+
+	/**
+	 * The ID of the <code>ROOMS_EXECUTE_FUNC</code> packet.
+	 */
+	public static final short ID_ROOMS_EXECUTE_FUNC = 0x4D;
+
+	/**
+	 * The ID of the <code>ROOMS_LOGON_STATUS</code> packet.
+	 */
+	public static final short ID_ROOMS_LOGON_STATUS = 0x4E;
+
+	/**
+	 * The ID of the <code>ROOMS_HANDLE_CHANGE</code> packet.
+	 */
+	public static final short ID_ROOMS_HANDLE_CHANGE = 0x4F;
+
+	/**
+	 * The ID of the <code>LOBBY2_SEND_MESSAGE</code> packet.
+	 */
+	public static final short ID_LOBBY2_SEND_MESSAGE = 0x50;
+
+	/**
+	 * The ID of the <code>LOBBY2_SERVER_ERROR</code> packet.
+	 */
+	public static final short ID_LOBBY2_SERVER_ERROR = 0x51;
+
+	/**
+	 * The ID of the <code>FMC2_NEW_HOST</code> packet.
+	 */
+	public static final short ID_FCM2_NEW_HOST = 0x52;
+
+	/**
+	 * The ID of the <code>FCM2_REQUEST_FCMGUID</code> packet.
+	 */
+	public static final short ID_FCM2_REQUEST_FCMGUID = 0x53;
+
+	/**
+	 * The ID of the <code>FCM2_RESPOND_CONNECTION_COUNT</code> packet.
+	 */
+	public static final short ID_FCM2_RESPOND_CONNECTION_COUNT = 0x54;
+
+	/**
+	 * The ID of the <code>FMC2_INFORM_FCMGUID</code> packet.
+	 */
+	public static final short ID_FCM2_INFORM_FCMGUID = 0x55;
+
+	/**
+	 * The ID of the <code>FCM2_UPDATE_MIN_TOTAL_CONNECTION_COUNT</code> packet.
+	 */
+	public static final short ID_FCM2_UPDATE_MIN_TOTAL_CONNECTION_COUNT = 0x56;
+
+	/**
+	 * The ID of the <code>FCM2_VERIFIED_JOIN_START</code> packet.
+	 */
+	public static final short ID_FCM2_VERIFIED_JOIN_START = 0x57;
+
+	/**
+	 * The ID of the <code>FCM2_VERIFIED_JOIN_CAPABLE</code> packet.
+	 */
+	public static final short ID_FCM2_VERIFIED_JOIN_CAPABLE = 0x58;
+
+	/**
+	 * The ID of the <code>FCM2_VERIFIED_JOIN_FAILED</code> packet.
+	 */
+	public static final short ID_FCM2_VERIFIED_JOIN_FAILED = 0x59;
+
+	/**
+	 * The ID of the <code>FCM2_VERIFIED_JOIN_ACCEPTED</code> packet.
+	 */
+	public static final short ID_FCM2_VERIFIED_JOIN_ACCEPTED = 0x5A;
+
+	/**
+	 * The ID of the <code>FCM2_VERIFIED_JOIN_REJECTED</code> packet.
+	 */
+	public static final short ID_FCM2_VERIFIED_JOIN_REJECTED = 0x5B;
+
+	/**
+	 * The ID of the <code>UDP_PROXY_GENERAL</code> packet.
+	 */
+	public static final short ID_UDP_PROXY_GENERAL = 0x5C;
+
+	/**
+	 * The ID of the <code>SQLITE3_EXEC</code> packet.
+	 */
+	public static final short ID_SQLITE3_EXEC = 0x5D;
+
+	/**
+	 * The ID of the <code>SQLITE3_UNKNOWN_DB</code> packet.
+	 */
+	public static final short ID_SQLITE3_UNKNOWN_DB = 0x5E;
+
+	/**
+	 * The ID of the <code>SQLLITE_LOGGER</code> packet.
+	 */
+	public static final short ID_SQLLITE_LOGGER = 0x5F;
+
+	/**
+	 * The ID of the <code>NAT_TYPE_DETECTION_REQUEST</code> packet.
+	 */
+	public static final short ID_NAT_TYPE_DETECTION_REQUEST = 0x60;
+
+	/**
+	 * The ID of the <code>NAT_TYPE_DETECTION_RESULT</code> packet.
+	 */
+	public static final short ID_NAT_TYPE_DETECTION_RESULT = 0x61;
+
+	/**
+	 * The ID of the <code>ROUTER_2_INTERNAL</code> packet.
+	 */
+	public static final short ID_ROUTER_2_INTERNAL = 0x62;
+
+	/**
+	 * The ID of the <code>ROUTER_2_FOWARDING_NO_PATH</code> packet.
+	 */
+	public static final short ID_ROUTER_2_FORWARDING_NO_PATH = 0x63;
+
+	/**
+	 * The ID of the <code>ROUTER_2_FORWARDING_ESTABLISHED</code> packet.
+	 */
+	public static final short ID_ROUTER_2_FORWARDING_ESTABLISHED = 0x64;
+
+	/**
+	 * The ID of the <code>ROUTER_2_REROUTED</code> packet.
+	 */
+	public static final short ID_ROUTER_2_REROUTED = 0x65;
+
+	/**
+	 * The ID of the <code>TEAM_BALANCER_INTERNAL</code> packet.
+	 */
+	public static final short ID_TEAM_BALANCER_INTERNAL = 0x66;
+
+	/**
+	 * The ID of the <code>TEAM_BALANCER_REQUESTED_TEAM_FULL</code> packet.
+	 */
+	public static final short ID_TEAM_BALANCER_REQUESTED_TEAM_FULL = 0x67;
+
+	/**
+	 * The ID of the <code>TEAM_BALANCER_REQUESTED_TEAM_LOCKED</code> packet.
+	 */
+	public static final short ID_TEAM_BALANCER_REQUESTED_TEAM_LOCKED = 0x68;
+
+	/**
+	 * The ID of the <code>TEAM_BALANCER_TEAM_REQUESTED_CANCELLED</code> packet.
+	 */
+	public static final short ID_TEAM_BALANCER_TEAM_REQUESTED_CANCELLED = 0x69;
+
+	/**
+	 * The ID of the <code>TEAM_BALANCER_TEAM_ASSIGNED</code> packet.
+	 */
+	public static final short ID_TEAM_BALANCER_TEAM_ASSIGNED = 0x6A;
+
+	/**
+	 * The ID of the <code>LIGHTSPEED_INTEGRATION</code> packet.
+	 */
+	public static final short ID_LIGHTSPEED_INTEGRATION = 0x6B;
+
+	/**
+	 * The ID of the <code>XBOX_LOBBY</code> packet.
+	 */
+	public static final short ID_XBOX_LOBBY = 0x6C;
+
+	/**
+	 * The ID of the
+	 * <code>TWO_WAY_AUTHENTICATION_INCOMING_CHALLENEGE_SUCCESS</code> packet.
+	 */
+	public static final short ID_TWO_WAY_AUTHENTICATION_INCOMING_CHALLENGE_SUCCESS = 0x6D;
+
+	/**
+	 * The ID of the
+	 * <code>TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_SUCCESS</code> packet.
+	 */
+	public static final short ID_TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_SUCCESS = 0x6E;
+
+	/**
+	 * The ID of the
+	 * <code>TWO_WAY_AUTHENTICATION_INCOMING_CHALLENGE_FAILURE</code> packet.
+	 */
+	public static final short ID_TWO_WAY_AUTHENTICATION_INCOMING_CHALLENGE_FAILURE = 0x6F;
+
+	/**
+	 * The ID of the
+	 * <code>TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_FAILURE</code> packet.
+	 */
+	public static final short ID_TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_FAILURE = 0x70;
+
+	/**
+	 * The ID of the
+	 * <code>TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_TIMEOUT</code> packet.
+	 */
+	public static final short ID_TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_TIMEOUT = 0x71;
+
+	/**
+	 * The ID of the <code>TWO_WAY_AUTHENTICATION_NEGOTIATION</code> packet.
+	 */
+	public static final short ID_TWO_WAY_AUTHENTICATION_NEGOTIATION = 0x72;
+
+	/**
+	 * The ID of the <code>CLOUD_POST_REQUEST</code> packet.
+	 */
+	public static final short ID_CLOUD_POST_REQUEST = 0x73;
+
+	/**
+	 * The ID of the <code>CLOUD_RELEASE_REQUEST</code> packet.
+	 */
+	public static final short ID_CLOUD_RELEASE_REQUEST = 0x74;
+
+	/**
+	 * The ID of the <code>CLOUD_GET_REQUEST</code> packet.
+	 */
+	public static final short ID_CLOUD_GET_REQUEST = 0x75;
+
+	/**
+	 * The ID of the <code>CLOUD_GET_RESPONSE</code> packet.
+	 */
+	public static final short ID_CLOUD_GET_RESPONSE = 0x76;
+
+	/**
+	 * The ID of the <code>CLOUD_UNSUBSCRIBE_REQUEST</code> packet.
+	 */
+	public static final short ID_CLOUD_UNSUBSCRIBE_REQUEST = 0x77;
+
+	/**
+	 * The ID of the <code>CLOUD_SERVER_TO_SERVER_COMMAND</code> packet.
+	 */
+	public static final short ID_CLOUD_SERVER_TO_SERVER_COMMAND = 0x78;
+
+	/**
+	 * The ID of the <code>CLOUD_SUBSCRIPTION_NOTIFICATION</code> packet.
+	 */
+	public static final short ID_CLOUD_SUBSCRIPTION_NOTIFICATION = 0x79;
+
+	/**
+	 * The ID of the <code>LIB_VOICE</code> packet.
+	 */
+	public static final short ID_LIB_VOICE = 0x7A;
+
+	/**
+	 * The ID of the <code>RELAY_PLUGIN</code> packet.
+	 */
+	public static final short ID_RELAY_PLUGIN = 0x7B;
+
+	/**
+	 * The ID of the <code>NAT_REQUEST_BOUND_ADDRESSES</code> packet.
+	 */
+	public static final short ID_NAT_REQUEST_BOUND_ADDRESSES = 0x7C;
+
+	/**
+	 * The ID of the <code>NAT_RESPOND_BOUND_ADDRESSES</code> packet.
+	 */
+	public static final short ID_NAT_RESPOND_BOUND_ADDRESSES = 0x7D;
+
+	/**
+	 * The ID of the <code>FCM2_UPDATE_USER_CONTENT</code> packet.
+	 */
+	public static final short ID_FCM2_UPDATE_USER_CONTEXT = 0x7E;
+
+	/**
+	 * The ID of the <code>RESERVED_3</code> packet.
+	 */
+	public static final short ID_RESERVED_3 = 0x7F;
+
+	/**
+	 * The ID of the <code>RESERVED_4</code> packet.
+	 */
+	public static final short ID_RESERVED_4 = 0x80;
+
+	/**
+	 * The ID of the <code>RESERVED_5</code> packet.
+	 */
+	public static final short ID_RESERVED_5 = 0x81;
+
+	/**
+	 * The ID of the <code>RESERVED_6</code> packet.
+	 */
+	public static final short ID_RESERVED_6 = 0x82;
+
+	/**
+	 * The ID of the <code>RESERVERD_7</code> packet.
+	 */
+	public static final short ID_RESERVED_7 = 0x83;
+
+	/**
+	 * The ID of the <code>RESERVED_8</code> packet.
+	 */
+	public static final short ID_RESERVED_8 = 0x84;
+
+	/**
+	 * The ID of the <code>RESERVED_9</code> packet.
+	 */
+	public static final short ID_RESERVED_9 = 0x85;
+
+	/**
+	 * This is the first ID that the user can for the IDs of their packets.
+	 * Since packet IDs are written using {@link #writeUnsignedByte(int)}, the
+	 * highest packet ID that can be used is <code>0xFF</code>.
+	 * <p>
+	 * If one must have more than <code>121</code> packet IDs
+	 * (<code>0xFF - ID_USER_PACKET_ENUM</code>), then one can have a singular
+	 * ID that they use for all of their user packets with another field to be
+	 * the packet ID.
+	 */
+	public static final short ID_USER_PACKET_ENUM = 0x86;
+
+	/**
+	 * The ID of the <code>CUSTOM_0</code> packet.
+	 */
+	public static final short ID_CUSTOM_0 = 0x80;
+
+	/**
+	 * The ID of the <code>CUSTOM_1</code> packet.
+	 */
+	public static final short ID_CUSTOM_1 = 0x81;
+
+	/**
+	 * The ID of the <code>CUSTOM_2</code> packet.
+	 */
+	public static final short ID_CUSTOM_2 = 0x82;
+
+	/**
+	 * The ID of the <code>CUSTOM_3</code> packet.
+	 */
+	public static final short ID_CUSTOM_3 = 0x83;
+
+	/**
+	 * The ID of the
+	 * {@link com.whirvis.jraknet.protocol.message.CustomFourPacket CUSTOM_4}
+	 * packet.
+	 */
+	public static final short ID_CUSTOM_4 = 0x84;
+
+	/**
+	 * The ID of the <code>CUSTOM_5</code> packet.
+	 */
+	public static final short ID_CUSTOM_5 = 0x85;
+
+	/**
+	 * The ID of the <code>CUSTOM_6</code> packet.
+	 */
+	public static final short ID_CUSTOM_6 = 0x86;
+
+	/**
+	 * The ID of the <code>CUSTOM_7</code> packet.
+	 */
+	public static final short ID_CUSTOM_7 = 0x87;
+
+	/**
+	 * The ID of the <code>CUSTOM_8</code> packet.
+	 */
+	public static final short ID_CUSTOM_8 = 0x88;
+
+	/**
+	 * The ID of the <code>CUSTOM_9</code> packet.
+	 */
+	public static final short ID_CUSTOM_9 = 0x89;
+
+	/**
+	 * The ID of the <code>CUSTOM_A</code> packet.
+	 */
+	public static final short ID_CUSTOM_A = 0x8A;
+
+	/**
+	 * The ID of the <code>CUSTOM_B</code> packet.
+	 */
+	public static final short ID_CUSTOM_B = 0x8B;
+
+	/**
+	 * The ID of the <code>CUSTOM_C</code> packet.
+	 */
+	public static final short ID_CUSTOM_C = 0x8C;
+
+	/**
+	 * The ID of the <code>CUSTOM_D</code> packet.
+	 */
+	public static final short ID_CUSTOM_D = 0x8D;
+
+	/**
+	 * The ID of the <code>CUSTOM_E</code> packet.
+	 */
+	public static final short ID_CUSTOM_E = 0x8E;
+
+	/**
+	 * The ID of the <code>CUSTOM_F</code> packet.
+	 */
+	public static final short ID_CUSTOM_F = 0x8F;
+
+	/**
+	 * The ID of the
+	 * {@link com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgedPacket
+	 * ACK} packet.
+	 */
+	public static final short ID_ACK = 0xC0;
+
+	/**
+	 * The ID of the
+	 * {@link com.whirvis.jraknet.protocol.message.acknowledge.NotAcknowledgedPacket
+	 * NACK} packet.
+	 */
+	public static final short ID_NACK = 0xA0;
+
+	/**
+	 * Maps all <code>public</code> packet IDs to their respecitve field names
+	 * and vice-versa.
+	 * <p>
+	 * Packet IDs {@link #ID_CUSTOM_0}, {@link #ID_CUSTOM_1},
+	 * {@link #ID_CUSTOM_2}, {@link #ID_CUSTOM_3}, {@link #ID_CUSTOM_4},
+	 * {@link #ID_CUSTOM_5}, {@link #ID_CUSTOM_6}, {@link #ID_CUSTOM_7},
+	 * {@link #ID_CUSTOM_8}, {@link #ID_CUSTOM_9}, {@link #ID_CUSTOM_A},
+	 * {@link #ID_CUSTOM_B}, {@link #ID_CUSTOM_C}, {@link #ID_CUSTOM_D},
+	 * {@link #ID_CUSTOM_E}, {@link #ID_CUSTOM_F}, {@link #ID_ACK}, and
+	 * {@link #ID_NACK} will never are ignored as they are not only internal
+	 * packets but they also override other packets with the same ID.
+	 */
+	private static void mapNameIds() {
+		for (Field field : RakNet.class.getFields()) {
 			if (field.getType().equals(short.class)) {
 				try {
 					short packetId = field.getShort(null);
+					if ((packetId >= ID_CUSTOM_0 && packetId <= ID_CUSTOM_F) || packetId == ID_ACK
+							|| packetId == ID_NACK) {
+						continue; // Ignored
+					}
 					String packetName = field.getName();
-					String currentName = packetNames.get(packetId);
+					String currentName = PACKET_NAMES.put(packetId, packetName);
+					PACKET_IDS.put(packetName, packetId);
 					if (currentName != null) {
 						if (!currentName.equals(packetName)) {
 							LOG.warn("Found duplicate ID " + RakNet.toHexStringId(packetId) + " for \"" + packetName
@@ -241,11 +913,6 @@ public class RakNetPacket extends Packet {
 						}
 					} else {
 						LOG.debug("Assigned packet ID " + RakNet.toHexStringId(packetId) + " to " + packetName);
-					}
-					packetNames.put(packetId, packetName);
-					packetIds.put(packetName, packetId);
-					if (packetId >= ID_USER_PACKET_ENUM) {
-						break; // 
 					}
 				} catch (ReflectiveOperationException e) {
 					e.printStackTrace();
@@ -256,129 +923,194 @@ public class RakNetPacket extends Packet {
 	}
 
 	/**
-	 * Return the packet's name based on its ID.
+	 * Returns whether or not a packet with the specified ID exists as a RakNet
+	 * packet.
 	 * 
 	 * @param id
 	 *            the ID of the packet.
-	 * @return the packet's name based on its ID.
+	 * @return <code>true</code> if a packet with the ID exists as a RakNet
+	 *         packet, <code>false</code>.
+	 */
+	public static boolean hasPacket(int id) {
+		return PACKET_NAMES.containsKey((short) id);
+	}
+
+	/**
+	 * Returns whether or not a packet with the specified name exists as a
+	 * RakNet packet.
+	 * 
+	 * @param name
+	 *            the name of the packet.
+	 * @return <code>true</code> if a packet with the name exists as a RakNet
+	 *         packet, <code>false</code>.
+	 */
+	public static boolean hasPacket(String name) {
+		return PACKET_IDS.containsKey(name);
+	}
+
+	/**
+	 * Return the name of the packet with the specified ID.
+	 * <p>
+	 * Packet IDs {@link #ID_CUSTOM_0}, {@link #ID_CUSTOM_1},
+	 * {@link #ID_CUSTOM_2}, {@link #ID_CUSTOM_3}, {@link #ID_CUSTOM_4},
+	 * {@link #ID_CUSTOM_5}, {@link #ID_CUSTOM_6}, {@link #ID_CUSTOM_7},
+	 * {@link #ID_CUSTOM_8}, {@link #ID_CUSTOM_9}, {@link #ID_CUSTOM_A},
+	 * {@link #ID_CUSTOM_B}, {@link #ID_CUSTOM_C}, {@link #ID_CUSTOM_D},
+	 * {@link #ID_CUSTOM_E}, {@link #ID_CUSTOM_F}, {@link #ID_ACK}, and
+	 * {@link #ID_NACK} will never be returned as they are not only internal
+	 * packets but they also override other packets with the same ID.
+	 * 
+	 * @param id
+	 *            the ID of the packet.
+	 * @return the name of the packet with the specified ID, it's Hexadecimal ID
+	 *         according to {@link RakNet#toHexStringId(int)} if it does not
+	 *         exist.
 	 */
 	public static String getName(int id) {
 		if (mappedNameIds == false) {
 			mapNameIds();
 		}
-		return packetNames.get((short) id);
+		if (!PACKET_NAMES.containsKey((short) id)) {
+			return RakNet.toHexStringId(id);
+		}
+		return PACKET_NAMES.get((short) id);
 	}
 
 	/**
+	 * Returns the ID of the packet with the specified name.
+	 * 
 	 * @param name
 	 *            the name of the packet.
-	 * @return the packet's ID based on its name.
+	 * @return the ID of the packet with the specified name, <code>-1</code> if
+	 *         it does not exist.
 	 */
 	public static int getId(String name) {
 		if (mappedNameIds == false) {
 			mapNameIds();
 		}
-		if (!packetIds.containsKey(name)) {
+		if (!PACKET_IDS.containsKey(name)) {
 			return -1;
 		}
-		return packetIds.get(name);
-	}
-
-	/**
-	 * @param id
-	 *            the ID of the packet to check for.
-	 * @return whether or not a packet with the ID exists.
-	 */
-	public static boolean hasPacket(int id) {
-		return packetNames.containsKey((short) id);
-	}
-
-	/**
-	 * @param name
-	 *            the name of the packet to check for.
-	 * @return whether or not a packet with the name exists.
-	 */
-	public static boolean hasPacket(String name) {
-		return packetIds.containsKey(name);
+		return PACKET_IDS.get(name);
 	}
 
 	private short id;
+	private final boolean supportsEncoding;
+	private final boolean supportsDecoding;
 
 	/**
-	 * Constructs a <code>RakNetPacket</code> with the ID that will be
-	 * written to it.
+	 * Creates a RakNet packet.
 	 * 
 	 * @param id
-	 *            the ID of the <code>RakNetPacket</code>.
+	 *            the ID of the packet.
+	 * @throws IllegalArgumentException
+	 *             if the <code>id</code> is not in between <code>0-255</code>.
 	 */
-	public RakNetPacket(int id) {
+	public RakNetPacket(int id) throws IllegalArgumentException {
 		super();
-		if (id < 0 || id > 255) {
-			throw new IllegalArgumentException("Invalid ID, must be in between 0-255");
+		if (id < UNSIGNED_BYTE_MIN_VALUE || id > UNSIGNED_BYTE_MAX_VALUE) {
+			throw new IllegalArgumentException(
+					"Invalid ID, must be in between " + UNSIGNED_BYTE_MIN_VALUE + " and " + UNSIGNED_BYTE_MAX_VALUE);
 		}
 		this.writeUnsignedByte(this.id = (short) id);
+		try {
+			this.supportsEncoding = !this.getClass().getMethod(ENCODE_METHOD_NAME).getDeclaringClass()
+					.equals(RakNetPacket.class);
+			this.supportsDecoding = !this.getClass().getMethod(DECODE_METHOD_NAME).getDeclaringClass()
+					.equals(RakNetPacket.class);
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
-	 * Constructs a <code>RakNetPacket</code> that reads from and writes to the
-	 * <code>ByteBuf</code>. On instantiation, the first byte of the
-	 * buffer will be read and set as the ID.
+	 * Creates a RakNet packet.
 	 * 
 	 * @param buffer
-	 *            the <code>ByteBuf</code> to read from and write to.
+	 *            the buffer to read from and write to. The buffer must have at
+	 *            least one byte to be read from for the ID.
+	 * @throws IllegalArgumentException
+	 *             if the buffer size is less than one.
+	 * @see io.netty.buffer.ByteBuf ByteBuf
 	 */
-	public RakNetPacket(ByteBuf buffer) {
+	public RakNetPacket(ByteBuf buffer) throws IllegalArgumentException {
 		super(buffer);
 		if (this.remaining() < 1) {
-			throw new IllegalArgumentException("The packet contains no data, it has no ID to be read");
+			throw new IllegalArgumentException("The buffer must have at least one byte to read the ID");
 		}
 		this.id = this.readUnsignedByte();
+		try {
+			this.supportsEncoding = !this.getClass().getMethod(ENCODE_METHOD_NAME).getDeclaringClass()
+					.equals(RakNetPacket.class);
+			this.supportsDecoding = !this.getClass().getMethod(DECODE_METHOD_NAME).getDeclaringClass()
+					.equals(RakNetPacket.class);
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
-	 * Constructs a <code>RakNetPacket</code> that reads from and writes to the
-	 * <code>DatagramPacket</code>. On instantiation, the first byte
-	 * of the datagram will be read and set as the ID.
+	 * Creates a RakNet packet.
 	 * 
 	 * @param datagram
-	 *            the <code>DatagramPacket</code> to read from and write to.
+	 *            the datagram packet to read from. The datagram must have at
+	 *            least one byte to be read from for the ID.
+	 * @throws IllegalArgumentException
+	 *             if the size of the buffer contained within the datagram is
+	 *             less than one.
+	 * @see #RakNetPacket(ByteBuf)
+	 * @see io.netty.channel.socket.DatagramPacket DatagramPacket
 	 */
-	public RakNetPacket(DatagramPacket datagram) {
+	public RakNetPacket(DatagramPacket datagram) throws IllegalArgumentException {
 		this(datagram.content());
 	}
 
 	/**
-	 * Constructs a <code>RakNetPacket</code> that reads from and writes to the
-	 * byte array. On instantiation, the first byte of the byte array
-	 * will be read and set as the ID.
+	 * Creates a RakNet packet.
 	 * 
 	 * @param data
-	 *            the byte array to read from and write to.
+	 *            the byte array to read to read from. The byte array must have
+	 *            at least one byte to be read from for the ID.
+	 * @throws IllegalArgumentException
+	 *             if the length of the byte array is less than one.
+	 * @see #RakNetPacket(ByteBuf)
 	 */
-	public RakNetPacket(byte[] data) {
+	public RakNetPacket(byte[] data) throws IllegalArgumentException {
 		this(Unpooled.copiedBuffer(data));
 	}
 
 	/**
-	 * Constructs a <code>RakNetPacket</code> that reads from and writes to the
-	 * <code>Packet</code>. On instantiation, the first byte of the
-	 * buffer will be read and set as the ID unless the packet is a
-	 * subclass of <code>RakNetPacket</code>.
+	 * Creates a RakNet packet.
 	 * 
 	 * @param packet
-	 *            the <code>Packet</code> to read from and write to.
+	 *            the packet to read from and write to. The packet must have at
+	 *            least one byte to be read from for the ID. If the packet is an
+	 *            instance of {@link com.whirvis.jraknet.RakNetPacket
+	 *            RakNetPacket}, it will be casted and have its ID retrieved via
+	 *            {@link #getId()}.
+	 * @throws IllegalArgumentException
+	 *             if the packet size is less than one and is not an instance of
+	 *             {@link com.whirvis.jraknet.RakNetPacket RakNetPacket}.
+	 * @see com.whirvis.jraknet.Packet#Packet(Packet) Packet(Packet)
+	 * @see com.whirvis.jraknet.Packet Packet
 	 */
-	public RakNetPacket(Packet packet) {
+	public RakNetPacket(Packet packet) throws IllegalArgumentException {
 		super(packet);
-
-		// Make sure this isn't an existing RakNetPacket!
 		if (packet instanceof RakNetPacket) {
 			this.id = ((RakNetPacket) packet).id;
 		} else {
 			if (this.remaining() < 1) {
-				throw new IllegalArgumentException("The packet contains no data, it has no ID to be read");
+				throw new IllegalArgumentException("The packet must have at least one byte to read the ID");
 			}
 			this.id = this.readUnsignedByte();
+		}
+		try {
+			this.supportsEncoding = !this.getClass().getMethod(ENCODE_METHOD_NAME).getDeclaringClass()
+					.equals(RakNetPacket.class);
+			this.supportsDecoding = !this.getClass().getMethod(DECODE_METHOD_NAME).getDeclaringClass()
+					.equals(RakNetPacket.class);
+		} catch (NoSuchMethodException | SecurityException e) {
+			throw new RuntimeException(e);
 		}
 	}
 
@@ -392,37 +1124,239 @@ public class RakNetPacket extends Packet {
 	}
 
 	/**
+	 * Reads a magic array and returns whether or not it is valid.
+	 * 
+	 * @return <code>true</code> if the magic array was valid,
+	 *         <code>false</code> otherwise.
+	 */
+	public final boolean readMagic() {
+		byte[] magicCheck = this.read(MAGIC.length);
+		return Arrays.equals(MAGIC, magicCheck);
+	}
+
+	/**
+	 * Reads a {@link com.whirvis.jraknet.protocol.ConnectionType
+	 * ConnectionType}.
+	 * <p>
+	 * This method will check to make sure if there is at least enough data to
+	 * read the the connection type magic before reading the data. This due to
+	 * the fact that this is meant to be used strictly at the end of packets
+	 * that can be used to signify the protocol implementation of the sender.
+	 * 
+	 * @return a {@link com.whirvis.jraknet.protocol.ConnectionType
+	 *         ConnectionType},
+	 *         {@link com.whirvis.jraknet.protocol.ConnectionType#VANILLA
+	 *         ConnectionType.VANILLA} if not enough data to read one is
+	 *         present.
+	 * @throws RakNetException
+	 *             if not enough data is present in the packet after the
+	 *             connection type magic or there are duplicate keys in the
+	 *             metadata.
+	 */
+	public final ConnectionType readConnectionType() throws RakNetException {
+		if (this.remaining() >= ConnectionType.MAGIC.length) {
+			byte[] connectionMagicCheck = this.read(ConnectionType.MAGIC.length);
+			if (Arrays.equals(ConnectionType.MAGIC, connectionMagicCheck)) {
+				UUID uuid = this.readUUID();
+				String name = this.readString();
+				String language = this.readString();
+				String version = this.readString();
+				HashMap<String, String> metadata = new HashMap<String, String>();
+				int metadataLength = this.readUnsignedByte();
+				for (int i = 0; i < metadataLength; i++) {
+					String key = this.readString();
+					String value = this.readString();
+					if (metadata.containsKey(key)) {
+						throw new RakNetException("Duplicate key \"" + key + "\"");
+					}
+					metadata.put(key, value);
+				}
+				return new ConnectionType(uuid, name, language, version, metadata);
+			}
+		}
+		return ConnectionType.VANILLA;
+	}
+
+	/**
+	 * Writes the magic sequence to the packet.
+	 * 
+	 * @return the packet.
+	 */
+	public final RakNetPacket writeMagic() {
+		this.write(MAGIC);
+		return this;
+	}
+
+	/**
+	 * Writes a {@link com.whirvis.jraknet.protocol.ConnectionType
+	 * ConnectionType} to the packet.
+	 * 
+	 * @param connectionType
+	 *            the connection type, a <code>null</code> value will have
+	 *            {@link com.whirvis.jraknet.protocol.ConnectionType#JRAKNET
+	 *            JRAKNET} connection type be used.
+	 * @return the packet.
+	 * @throws RakNetException
+	 *             if there are too many values in the metadata.
+	 */
+	public final Packet writeConnectionType(ConnectionType connectionType) throws RakNetException {
+		connectionType = (connectionType != null ? connectionType : ConnectionType.JRAKNET);
+		this.write(ConnectionType.MAGIC);
+		this.writeUUID(connectionType.getUUID());
+		this.writeString(connectionType.getName());
+		this.writeString(connectionType.getLanguage());
+		this.writeString(connectionType.getVersion());
+		if (connectionType.getMetaData().size() > ConnectionType.MAX_METADATA_VALUES) {
+			throw new RakNetException("Too many metadata values");
+		}
+		this.writeUnsignedByte(connectionType.getMetaData().size());
+		for (Entry<String, String> metadataEntry : connectionType.getMetaData().entrySet()) {
+			this.writeString(metadataEntry.getKey());
+			this.writeString(metadataEntry.getValue());
+		}
+		return this;
+	}
+
+	/**
+	 * Writes the {@link com.whirvis.jraknet.protocol.ConnectionType#JRAKNET
+	 * JRAKNET} connection type to the packet.
+	 * 
+	 * @return the packet.
+	 * @throws RakNetException
+	 *             if there are too many values in the metadata.
+	 */
+	public final Packet writeConnectionType() throws RakNetException {
+		return this.writeConnectionType(null);
+	}
+
+	/**
+	 * Returns whether or not encoding is supported. If encoding is not
+	 * supported, calling {@link #encode()} will yield an error.
+	 * 
+	 * @return <code>true</code> if encoding is supported, <code>false</code>
+	 *         otherwise.
+	 */
+	public final boolean supportsEncoding() {
+		return this.supportsEncoding;
+	}
+
+	/**
 	 * Encodes the packet.
+	 * 
+	 * @throws RuntimeException
+	 *             if encoding the packet is not supported.
 	 */
 	public void encode() {
+		throw new RuntimeException("Encoding not supported");
+	}
+
+	/**
+	 * Returns whether or not decoding is supported. If decoding is not
+	 * supported, calling {@link #decode()} will yield an error.
+	 * 
+	 * @return <code>true</code> if decoding is supported, <code>false</code>
+	 *         otherwise.
+	 */
+	public final boolean supportsDecoding() {
+		return this.supportsDecoding;
 	}
 
 	/**
 	 * Decodes the packet.
+	 * 
+	 * @throws RuntimeException
+	 *             if decoding the packet is not supported.
 	 */
 	public void decode() {
+		throw new RuntimeException("Decoding not supported");
 	}
 
 	/**
-	 * Sets the buffer and updates the ID if.
+	 * Updates the buffer.
 	 * 
 	 * @param buffer
 	 *            the new buffer.
 	 * @param updateId
-	 *            whether or not to update the ID.
+	 *            <code>true</code> if the ID should be updated,
+	 *            <code>false</code> otherwise.
+	 * @see #setBuffer(ByteBuf)
 	 */
-	public void setBuffer(byte[] buffer, boolean updateId) {
+	public final RakNetPacket setBuffer(ByteBuf buffer, boolean updateId) {
 		super.setBuffer(buffer);
 		if (updateId == true) {
 			this.id = this.readUnsignedByte();
 		}
+		return this;
 	}
 
+	/**
+	 * Updates the buffer.
+	 * 
+	 * @param datagram
+	 *            the {@link io.netty.channel.socket.DatagramPacket
+	 *            DatagramPacket} to read from.
+	 * @param updateId
+	 *            <code>true</code> if the ID should be updated,
+	 *            <code>false</code> otherwise.
+	 * @return the packet.
+	 * @see #setBuffer(DatagramPacket)
+	 */
+	public final RakNetPacket setBuffer(DatagramPacket datagram, boolean updateId) {
+		return this.setBuffer(datagram.content(), updateId);
+	}
+
+	/**
+	 * Updates the buffer.
+	 * 
+	 * @param data
+	 *            the <code>byte[]</code> to create the new buffer from.
+	 * @param updateId
+	 *            <code>true</code> if the ID should be updated,
+	 *            <code>false</code> otherwise.
+	 * @see #setBuffer(byte[])
+	 */
+	public final RakNetPacket setBuffer(byte[] data, boolean updateId) {
+		return this.setBuffer(Unpooled.copiedBuffer(data), updateId);
+	}
+
+	/**
+	 * Updates the buffer.
+	 * 
+	 * @param data
+	 *            the packet whose buffer to copy to read from and write to.
+	 * @param updateId
+	 *            <code>true</code> if the ID should be updated,
+	 *            <code>false</code> otherwise.
+	 * @see #setBuffer(Packet)
+	 */
+	public final RakNetPacket setBuffer(Packet packet, boolean updateId) {
+		return this.setBuffer(packet.copy(), updateId);
+	}
+
+	/**
+	 * Flips the packet.
+	 * 
+	 * @param updateId
+	 *            <code>true</code> if ID should be updated, <code>false</code>
+	 *            otherwise.
+	 * @return the packet.
+	 * @see #flip()
+	 */
+	public final RakNetPacket flip(boolean updateId) {
+		super.flip();
+		if (updateId == true) {
+			this.id = this.readUnsignedByte();
+		}
+		return this;
+	}
+
+	/**
+	 * {@inheritDoc} After the packet has been flipped, an unsigined
+	 * <code>byte</code> will be read to get the ID.
+	 */
 	@Override
 	public Packet flip() {
-		super.flip();
-		this.id = this.readUnsignedByte();
-		return this;
+		return this.flip(true);
 	}
 
 	@Override

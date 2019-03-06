@@ -31,7 +31,7 @@
 package com.whirvis.jraknet.example.chat;
 
 import com.whirvis.jraknet.RakNet;
-import com.whirvis.jraknet.session.InvalidChannelException;
+import com.whirvis.jraknet.peer.InvalidChannelException;
 
 /**
  * Represents a channel on a <code>ChatServer</code>, used by both the

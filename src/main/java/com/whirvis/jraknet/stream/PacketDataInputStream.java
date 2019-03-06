@@ -42,7 +42,7 @@ import com.whirvis.jraknet.Packet;
  *
  * @author Trent Summerlin
  * @since JRakNet vUNKNOWN
- * @see Packet#getDataInput()
+ * @see Packet#getInputStream()
  */
 public class PacketDataInputStream extends InputStream implements DataInput {
 

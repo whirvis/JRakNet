@@ -34,7 +34,7 @@ import javax.swing.JFrame;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
 
-import com.whirvis.jraknet.session.RakNetClientSession;
+import com.whirvis.jraknet.peer.RakNetClientSession;
 
 /**
  * The frame used to visualize the latency test.

@@ -28,26 +28,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.session;
-
-import com.whirvis.jraknet.RakNet;
+package com.whirvis.jraknet.peer;
 
 /**
- * Signals that a {@link RakNetSession} has attempted to send too many packets
- * at once.
+ * Represents the current status of a connection in a {@link RakNetSession}.
  *
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
  */
-public class PacketOverloadException extends RuntimeException {
-
-	private static final long serialVersionUID = 8544922469731039197L;
+public enum RakNetState {
 
 	/**
-	 * Constructs a <code>PacketOverloadException</code>.
+	 * The session is disconnected.
 	 */
-	public PacketOverloadException() {
-		super("Too many packets (More than " + RakNet.getMaxPacketsPerSecond() + ") were sent within a second");
-	}
+	DISCONNECTED,
+
+	/**
+	 * The session is handshaking.
+	 */
+	HANDSHAKING,
+
+	/**
+	 * The session is logged in.
+	 */
+	LOGGED_IN;
 
 }

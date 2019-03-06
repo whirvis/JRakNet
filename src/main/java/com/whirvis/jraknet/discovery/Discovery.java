@@ -165,8 +165,11 @@ public class Discovery {
 	public static synchronized void setDiscoveryMode(DiscoveryMode mode) {
 		discoveryMode = (mode == null ? DiscoveryMode.DISABLED : mode);
 		if (discoveryMode == DiscoveryMode.DISABLED) {
-			DISCOVERY_ADDRESSES.keySet().stream().filter(address -> DISCOVERED.containsKey(address))
-					.forEach(address -> callEvent(listener -> listener.onServerForgotten(DISCOVERED.get(address))));
+			for (InetSocketAddress address : DISCOVERED.keySet()) {
+				if (DISCOVERED.containsKey(address)) {
+					callEvent(listener -> listener.onServerForgotten(DISCOVERED.get(address)));
+				}
+			}
 			DISCOVERED.clear(); // Forget all servers
 		} else if (thread == null && !LISTENERS.isEmpty()) {
 			thread = new DiscoveryThread();

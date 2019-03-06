@@ -33,31 +33,42 @@ package com.whirvis.jraknet.client;
 import java.net.InetSocketAddress;
 
 import com.whirvis.jraknet.RakNetPacket;
+import com.whirvis.jraknet.peer.server.RakNetServerPeer;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
 import com.whirvis.jraknet.protocol.message.acknowledge.Record;
-import com.whirvis.jraknet.session.RakNetServerSession;
 
 import io.netty.buffer.ByteBuf;
 
 /**
- * Used to listen for events that occur in the {@link akNetClient}. In order to
+ * Used to listen for events that occur in the {@link RakNetClient}. In order to
  * listen for events, one must use the
  * {@link RakNetClient#addListener(RakNetClientListener)} method.
  *
  * @author Trent Summerlin
- * @since JRakNet v2.0
+ * @since JRakNet v1.0.0
  */
 public interface RakNetClientListener {
 
 	/**
-	 * Called when the client successfully connects to a server.
+	 * Called when the client connects to a server.
+	 * 
+	 * @param client
+	 *            the client.
+	 * @param address
+	 *            the server address.
+	 */
+	public default void onConnect(RakNetClient client, InetSocketAddress address) {
+	}
+
+	/**
+	 * Called when the client has logged in to a server.
 	 * 
 	 * @param client
 	 *            the client.
 	 * @param session
-	 *            the session assigned to the server.
+	 *            the server.
 	 */
-	public default void onConnect(RakNetClient client, RakNetServerSession session) {
+	public default void onLogin(RakNetClient client, RakNetServerPeer session) {
 	}
 
 	/**
@@ -66,53 +77,42 @@ public interface RakNetClientListener {
 	 * @param client
 	 *            the client.
 	 * @param session
-	 *            the server the client disconnected from.
+	 *            the server that the client disconnected from.
 	 * @param reason
 	 *            the reason for disconnection.
 	 */
-	public default void onDisconnect(RakNetClient client, RakNetServerSession session, String reason) {
+	public default void onDisconnect(RakNetClient client, RakNetServerPeer session, String reason) {
 	}
 
 	/**
-	 * Called when the client has been shutdown.
-	 * 
-	 * @param client
-	 *            the client.
-	 * @param reason
-	 *            the reason for shutdown.
-	 */
-	public default void onClientShutdown(RakNetClient client, String reason) {
-	}
-
-	/**
-	 * Called when a message is received by the server.
+	 * Called when a message is acknowledged by the server.
 	 * 
 	 * @param client
 	 *            the client.
 	 * @param session
-	 *            the server that received the packet.
+	 *            the server that acknowledged the packet.
 	 * @param record
-	 *            the received record.
+	 *            the acknowledged record.
 	 * @param packet
-	 *            the received packet.
+	 *            the acknowledged packet.
 	 */
-	public default void onAcknowledge(RakNetClient client, RakNetServerSession session, Record record,
+	public default void onAcknowledge(RakNetClient client, RakNetServerPeer session, Record record,
 			EncapsulatedPacket packet) {
 	}
 
 	/**
-	 * Called when a message is not received by the server.
+	 * Called when a message is not acknowledged by the server.
 	 * 
 	 * @param client
 	 *            the client.
 	 * @param session
-	 *            the server that lost the packet.
+	 *            the server that did not acknowledged the packet.
 	 * @param record
-	 *            the lost record.
+	 *            the not acknowledged record.
 	 * @param packet
-	 *            the lost packet.
+	 *            the not acknowledged packet.
 	 */
-	public default void onNotAcknowledge(RakNetClient client, RakNetServerSession session, Record record,
+	public default void onNotAcknowledge(RakNetClient client, RakNetServerPeer session, Record record,
 			EncapsulatedPacket packet) {
 	}
 
@@ -125,54 +125,51 @@ public interface RakNetClientListener {
 	 * @param session
 	 *            the server that sent the packet.
 	 * @param packet
-	 *            the packet received from the server.
+	 *            the received packet.
 	 * @param channel
 	 *            the channel the packet was sent on.
 	 */
-	public default void handleMessage(RakNetClient client, RakNetServerSession session, RakNetPacket packet,
+	public default void handleMessage(RakNetClient client, RakNetServerPeer session, RakNetPacket packet,
 			int channel) {
 	}
 
 	/**
-	 * Called when a packet with an ID below the user enumeration
-	 * (<code>ID_USER_PACKET_ENUM</code>) cannot be handled by the session
-	 * because it is not programmed to handle it. This function can be used to
-	 * add missing features from the regular RakNet protocol that are absent in
-	 * JRakNet if needed.
+	 * Called when a packet with an ID below <code>ID_USER_PACKET_ENUM</code>
+	 * cannot be handled by the session because it is not programmed to handle
+	 * it. This function can be used to add missing features from the regular
+	 * RakNet protocol that are absent in JRakNet if needed.
 	 * 
 	 * @param client
 	 *            the client.
 	 * @param session
 	 *            the server that sent the packet.
 	 * @param packet
-	 *            the packet received from the server.
+	 *            the unknown packet.
 	 * @param channel
 	 *            the channel the packet was sent on.
 	 */
-	public default void handleUnknownMessage(RakNetClient client, RakNetServerSession session, RakNetPacket packet,
+	public default void handleUnknownMessage(RakNetClient client, RakNetServerPeer session, RakNetPacket packet,
 			int channel) {
 	}
 
 	/**
 	 * Called when the handler receives a packet after the server has already
-	 * handled it, this method is useful for handling packets outside of the
-	 * RakNet protocol. However, be weary when using this as packets meant for
-	 * the server will have already been handled by the client; and it is not a
-	 * good idea to try to manipulate JRakNet's RakNet protocol implementation
-	 * using this method.
+	 * handled it. This method is useful for handling packets outside of the
+	 * RakNet protocol. All packets received here have already been handled by
+	 * the client.
 	 * 
 	 * @param client
 	 *            the client.
-	 * @param buf
-	 *            the packet buffer.
 	 * @param address
 	 *            the address of the sender.
+	 * @param buf
+	 *            the buffer of the received packet.
 	 */
-	public default void handleNettyMessage(RakNetClient client, ByteBuf buf, InetSocketAddress address) {
+	public default void handleNettyMessage(RakNetClient client, InetSocketAddress address, ByteBuf buf) {
 	}
 
 	/**
-	 * Called when a handler exception has occurred, these normally do not
+	 * Called when a handler exception has occurred. These normally do not
 	 * matter as long as it does not come from the address of the server the
 	 * client is connecting to or is connected to.
 	 * 

@@ -50,6 +50,9 @@ import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.identifier.Identifier;
+import com.whirvis.jraknet.peer.GeminusRakNetPeer;
+import com.whirvis.jraknet.peer.RakNetClientSession;
+import com.whirvis.jraknet.peer.RakNetState;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.connection.ConnectionBanned;
 import com.whirvis.jraknet.protocol.connection.IncompatibleProtocolVersion;
@@ -63,9 +66,6 @@ import com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgedPacket;
 import com.whirvis.jraknet.protocol.status.UnconnectedPing;
 import com.whirvis.jraknet.protocol.status.UnconnectedPong;
 import com.whirvis.jraknet.scheduler.Scheduler;
-import com.whirvis.jraknet.session.GeminusRakNetPeer;
-import com.whirvis.jraknet.session.RakNetClientSession;
-import com.whirvis.jraknet.session.RakNetState;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -80,23 +80,11 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
  * Used to create servers using the RakNet protocol.
  *
  * @author Trent Summerlin
+ * @since JRakNet v1.0.0
  */
 public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 	// TODO: PREVENT MULTIPLE CLIENT WITH THE SAME GUID
-
-	/**
-	 * Used to convert a {@link java.util.stream.Stream Stream} to a
-	 * <code>RakNetClientSession[]</code>.
-	 */
-	private static final IntFunction<RakNetClientSession[]> RAKNET_CLIENT_SESSION_FUNCTION = new IntFunction<RakNetClientSession[]>() {
-
-		@Override
-		public RakNetClientSession[] apply(int value) {
-			return new RakNetClientSession[value];
-		}
-
-	};
 
 	/**
 	 * Allows for infinite connections to the server.
@@ -114,6 +102,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	private Identifier identifier;
 	private final ConcurrentLinkedQueue<RakNetServerListener> listeners;
 	private final ConcurrentHashMap<InetSocketAddress, RakNetClientSession> clients;
+	private final ConcurrentLinkedQueue<InetAddress> banned;
 	private Bootstrap bootstrap;
 	private EventLoopGroup group;
 	private RakNetServerHandler handler;
@@ -145,7 +134,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            if server broadcasting is enabled. A <code>null</code>
 	 *            identifier means nothing will be sent in response to server
 	 *            pings, even if server broadcasting is enabled.
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 * @throws NullPointerException
 	 *             if the address is <code>null</code>.
 	 * @throws IllegalArgumentException
@@ -177,6 +165,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		this.identifier = identifier;
 		this.listeners = new ConcurrentLinkedQueue<RakNetServerListener>();
 		this.clients = new ConcurrentHashMap<InetSocketAddress, RakNetClientSession>();
+		this.banned = new ConcurrentLinkedQueue<InetAddress>();
 	}
 
 	/**
@@ -198,7 +187,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            the maximum number of connections, A value of
 	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
 	 *            number of connections.
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 * @throws NullPointerException
 	 *             if the address is <code>null</code>.
 	 * @throws IllegalArgumentException
@@ -245,7 +233,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
 	 *             size is less than
 	 *             {@value com.whirvis.jraknet.RakNet#MINIMUM_MTU_SIZE}
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public RakNetServer(InetAddress address, int port, int maximumTransferUnit, int maxConnections,
 			Identifier identifier) throws NullPointerException, IllegalArgumentException {
@@ -280,7 +267,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
 	 *             size is less than
 	 *             {@value com.whirvis.jraknet.RakNet#MINIMUM_MTU_SIZE}
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public RakNetServer(InetAddress address, int port, int maximumTransferUnit, int maxConnections)
 			throws NullPointerException, IllegalArgumentException {
@@ -324,7 +310,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
 	 *             size is less than
 	 *             {@value com.whirvis.jraknet.RakNet#MINIMUM_MTU_SIZE}
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public RakNetServer(String address, int port, int maximumTransferUnit, int maxConnections, Identifier identifier)
 			throws UnknownHostException, NullPointerException, IllegalArgumentException {
@@ -363,7 +348,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
 	 *             size is less than
 	 *             {@value com.whirvis.jraknet.RakNet#MINIMUM_MTU_SIZE}
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public RakNetServer(String address, int port, int maximumTransferUnit, int maxConnections)
 			throws UnknownHostException, NullPointerException, IllegalArgumentException {
@@ -399,7 +383,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
 	 *             size is less than
 	 *             {@value com.whirvis.jraknet.RakNet#MINIMUM_MTU_SIZE}
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public RakNetServer(int port, int maximumTransferUnit, int maxConnections, Identifier identifier)
 			throws NullPointerException, IllegalArgumentException {
@@ -430,7 +413,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
 	 *             size is less than
 	 *             {@value com.whirvis.jraknet.RakNet#MINIMUM_MTU_SIZE}
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public RakNetServer(int port, int maximumTransferUnit, int maxConnections)
 			throws NullPointerException, IllegalArgumentException {
@@ -492,9 +474,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns the maximum transfer unit.
+	 * Returns the server's maximum transfer unit.
 	 * 
-	 * @return the maximum transfer unit.
+	 * @return the server's maximum transfer unit.
 	 */
 	public final int getMaximumTransferUnit() {
 		return this.maximumTransferUnit;
@@ -515,7 +497,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * Sets the maximum amount of connections allowed at once.
 	 * 
 	 * @param maxConnections
-	 *            the maximum number of connections, A value of
+	 *            the maximum number of connections. A value of
 	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
 	 *            number of connections.
 	 */
@@ -556,7 +538,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * Returns the identifier sent back to clients who ping the server.
 	 * 
 	 * @return the identifier sent back to clients who ping the server.
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public final Identifier getIdentifier() {
 		return this.identifier;
@@ -567,7 +548,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * 
 	 * @param identifier
 	 *            the new identifier.
-	 * @see com.whirvis.jraknet.identifier.Identifier Identifier
 	 */
 	public final void setIdentifier(Identifier identifier) {
 		this.identifier = identifier;
@@ -592,7 +572,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *             if the listener is another server that is not the server
 	 *             itself.
 	 */
-	public final RakNetServer addListener(RakNetServerListener listener) {
+	public final RakNetServer addListener(RakNetServerListener listener)
+			throws NullPointerException, IllegalArgumentException {
 		if (listener == null) {
 			throw new NullPointerException("Listener cannot be null");
 		} else if (listener instanceof RakNetClient && !this.equals(listener)) {
@@ -611,7 +592,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * 
 	 * @return the server.
 	 * @see #addListener(RakNetServerListener)
-	 * @see com.whirvis.jraknet.server.RakNetServerListener RakNetServerListener
 	 */
 	public final RakNetServer addSelfListener() {
 		return this.addListener(this);
@@ -623,7 +603,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @param listener
 	 *            the listener to remove.
 	 * @return the server.
-	 * @see com.whirvis.jraknet.server.RakNetServerListener RakNetServerListener
 	 */
 	public final RakNetServer removeListener(RakNetServerListener listener) {
 		if (listeners.remove(listener)) {
@@ -638,7 +617,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * 
 	 * @return the server.
 	 * @see #removeListener(RakNetServerListener)
-	 * @see com.whirvis.jraknet.server.RakNetServerListener RakNetServerListener
 	 */
 	public final RakNetServer removeSelfListener() {
 		this.removeListener(this);
@@ -652,9 +630,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            the event to call.
 	 * @throws NullPointerException
 	 *             if the event is <code>null</code>.
-	 * @see com.whirvis.jraknet.server.RakNetServerListener RakNetServerListener
 	 */
-	protected final void callEvent(Consumer<? super RakNetServerListener> event) {
+	public final void callEvent(Consumer<? super RakNetServerListener> event) throws NullPointerException {
 		if (event == null) {
 			throw new NullPointerException("Event cannot be null");
 		}
@@ -682,8 +659,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns whether or not a client with the address is currently connected
-	 * to the server.
+	 * Returns whether or not a client with the specified address is currently
+	 * connected to the server.
 	 * 
 	 * @param address
 	 *            the address.
@@ -700,8 +677,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns whether or not a client with the address is currently connected
-	 * to the server.
+	 * Returns whether or not a client with the specified address is currently
+	 * connected to the server.
 	 * 
 	 * @param address
 	 *            the IP address.
@@ -718,8 +695,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns whether or not a client with the address is currently connected
-	 * to the server.
+	 * Returns whether or not a client with the specified address is currently
+	 * connected to the server.
 	 * 
 	 * @param address
 	 *            the IP address.
@@ -728,16 +705,16 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @return <code>true</code> if a client with the address is connected to
 	 *         the server, <code>false</code> otherwise.
 	 * @throws UnknownHostException
-	 *             if no IP address for the host could be found, or if a
-	 *             scope_id was specified for a global IPv6 address.
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final boolean hasClient(String address, int port) throws UnknownHostException {
 		return this.hasClient(InetAddress.getByName(address), port);
 	}
 
 	/**
-	 * Returns whether or not a client with the IP address is currently
-	 * connected to the server.
+	 * Returns whether or not a client with the specified IP address is
+	 * currently connected to the server.
 	 * 
 	 * @param address
 	 *            the IP address.
@@ -757,24 +734,24 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns whether or not a client with the IP address is currently
-	 * connected to the server.
+	 * Returns whether or not a client with the specified IP address is
+	 * currently connected to the server.
 	 * 
 	 * @param address
 	 *            the IP address.
 	 * @return <code>true</code> if a client with the IP address is connected to
 	 *         the server, <code>false</code> otherwise.
 	 * @throws UnknownHostException
-	 *             if no IP address for the host could be found, or if a
-	 *             scope_id was specified for a global IPv6 address.
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final boolean hasClient(String address) throws UnknownHostException {
 		return this.hasClient(InetAddress.getByName(address));
 	}
 
 	/**
-	 * Returns whether or not a client with the port is currently connected to
-	 * the server.
+	 * Returns whether or not a client with the specified port is currently
+	 * connected to the server.
 	 * 
 	 * @param port
 	 *            the port.
@@ -794,8 +771,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns whether or not the client with the globally unique ID is
-	 * currently connected to the server.
+	 * Returns whether or not the client with the specified globally unique ID
+	 * is currently connected to the server.
 	 * 
 	 * @param guid
 	 *            the globally unique ID.
@@ -812,26 +789,24 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns the client with the address.
+	 * Returns the client with the specified address.
 	 * 
 	 * @param address
 	 *            the address.
 	 * @return the client with the address, <code>null</code> if there is none.
-	 * @see com.whirvis.jraknet.session.RakNetClientSession RakNetClientSession
 	 */
 	public final RakNetClientSession getClient(InetSocketAddress address) {
 		return clients.get(address);
 	}
 
 	/**
-	 * Returns the client with the address.
+	 * Returns the client with the specified address.
 	 * 
 	 * @param address
 	 *            the IP address.
 	 * @param port
 	 *            the port.
 	 * @return the client with the address, <code>null</code> if there is none.
-	 * @see com.whirvis.jraknet.session.RakNetClientSession RakNetClientSession
 	 */
 	public final RakNetClientSession getClient(InetAddress address, int port) {
 		if (address == null) {
@@ -843,7 +818,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns the client with the address.
+	 * Returns the client with the specified address.
 	 * 
 	 * @param address
 	 *            the IP address.
@@ -851,9 +826,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            the port.
 	 * @return the client with the address, <code>null</code> if there is none.
 	 * @throws UnknownHostException
-	 *             if no IP address for the host could be found, or if a
-	 *             scope_id was specified for a global IPv6 address.
-	 * @see com.whirvis.jraknet.session.RakNetClientSession RakNetClientSession
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final RakNetClientSession getClient(String address, int port) throws UnknownHostException {
 		if (address == null) {
@@ -863,15 +837,14 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns all clients with the IP address.
+	 * Returns all clients with the specified IP address.
 	 * 
 	 * @param address
 	 *            the IP address.
 	 * @return the clients with the IP address.
 	 * @throws UnknownHostException
-	 *             if no IP address for the host could be found, or if a
-	 *             scope_id was specified for a global IPv6 address.
-	 * @see com.whirvis.jraknet.session.RakNetClientSession RakNetClientSession
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final RakNetClientSession[] getClient(String address) throws UnknownHostException {
 		if (address == null) {
@@ -883,12 +856,11 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns all clients with the port.
+	 * Returns all clients with the specified port.
 	 * 
 	 * @param address
 	 *            the port.
 	 * @return the clients with the port.
-	 * @see com.whirvis.jraknet.session.RakNetClientSession RakNetClientSession
 	 */
 	public final RakNetClientSession[] getClient(int port) {
 		if (port < 0x0000 || port > 0xFFFF) {
@@ -899,13 +871,12 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns the client with the globally unique ID.
+	 * Returns the client with the specified globally unique ID.
 	 * 
 	 * @param guid
 	 *            the globally unique ID of the client.
 	 * @return the client with the globally unique ID, <code>null</code> if
 	 *         there is none.
-	 * @see com.whirvis.jraknet.session.RakNetClientSession RakNetClientSession
 	 */
 	public final RakNetClientSession getClient(long guid) {
 		for (RakNetClientSession session : clients.values()) {
@@ -914,6 +885,81 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns whether or not the specified client IP address is banned.
+	 * 
+	 * @param address
+	 *            the IP address.
+	 * @return <code>true</code> if the client address is banned,
+	 *         <code>false</code> otherwise.
+	 */
+	public final boolean isClientBanned(InetAddress address) {
+		return banned.contains(address);
+	}
+
+	/**
+	 * Returns whether or not the specified client IP address is banned.
+	 * 
+	 * @param address
+	 *            the IP address.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
+	 * @return <code>true</code> if the client address is banned,
+	 *         <code>false</code> otherwise.
+	 */
+	public final boolean isClientBanned(String address) throws UnknownHostException {
+		return banned.contains(InetAddress.getByName(address));
+	}
+
+	/**
+	 * Bans the specified client IP address.
+	 * 
+	 * @param address
+	 *            the IP address to ban.
+	 */
+	public final void banClient(InetAddress address) {
+		if (!banned.contains(address)) {
+			banned.add(address);
+		}
+	}
+
+	/**
+	 * Bans the specified client IP address.
+	 * 
+	 * @param address
+	 *            the IP address to ban.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
+	 */
+	public final void banClient(String address) throws UnknownHostException {
+		this.banClient(InetAddress.getByName(address));
+	}
+
+	/**
+	 * Unbans the specified client IP address.
+	 * 
+	 * @param address
+	 *            the IP address to unban.
+	 */
+	public final void unbanClient(InetAddress address) {
+		banned.remove(address);
+	}
+
+	/**
+	 * Unbans the specified client IP address.
+	 * 
+	 * @param address
+	 *            the IP address to unban.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
+	 */
+	public final void unbanClient(String address) throws UnknownHostException {
+		this.unbanClient(InetAddress.getByName(address));
 	}
 
 	@Override
@@ -928,7 +974,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * Disconnects a client from the server.
 	 * 
 	 * @param address
-	 *            the address.
+	 *            the address of the client.
 	 * @param reason
 	 *            the reason for client disconnection. A <code>null</code>
 	 *            reason will have <code>"Disconnected"</code> be used as the
@@ -944,12 +990,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		session.sendMessage(Reliability.UNRELIABLE, RakNetPacket.ID_DISCONNECTION_NOTIFICATION);
 		log.debug("Disconnected client with address " + address + " for \"" + (reason == null ? "Disconnected" : reason)
 				+ "\"");
-		if (session.getState() == RakNetState.CONNECTED) {
-			this.callEvent(listener -> listener.onClientDisconnect(session, reason == null ? "Disconnected" : reason));
-		} else {
-			this.callEvent(
-					listener -> listener.onClientPreDisconnect(address, reason == null ? "Disconnected" : reason));
-		}
+		this.callEvent(
+				listener -> listener.onDisconnect(this, address, session, reason == null ? "Disconnected" : reason));
 		return true;
 	}
 
@@ -957,7 +999,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * Disconnects a client from the server.
 	 * 
 	 * @param address
-	 *            the address.
+	 *            the address of the client.
 	 * @returns <code>true</code> if a client was disconnected,
 	 *          <code>false</code> otherwise.
 	 */
@@ -969,7 +1011,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * Disconnects a client from the server.
 	 * 
 	 * @param address
-	 *            the IP address.
+	 *            the IP address of the client.
 	 * @param port
 	 *            the port.
 	 * @param reason
@@ -990,7 +1032,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * Disconnects a client from the server.
 	 * 
 	 * @param address
-	 *            the IP address.
+	 *            the IP address of the client.
 	 * @param port
 	 *            the port.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
@@ -1004,7 +1046,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * Disconnects a client from the server.
 	 * 
 	 * @param address
-	 *            the IP address.
+	 *            the IP address of the client.
 	 * @param port
 	 *            the port.
 	 * @param reason
@@ -1014,8 +1056,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 * @throws UnknownHostException
-	 *             if no IP address for the host could be found, or if a
-	 *             scope_id was specified for a global IPv6 address.
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final boolean disconnectClient(String address, int port, String reason) throws UnknownHostException {
 		if (address == null) {
@@ -1028,14 +1070,14 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * Disconnects a client from the server.
 	 * 
 	 * @param address
-	 *            the IP address.
+	 *            the IP address of the client.
 	 * @param port
 	 *            the port.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 * @throws UnknownHostException
-	 *             if no IP address for the host could be found, or if a
-	 *             scope_id was specified for a global IPv6 address.
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final boolean disconnectClient(String address, int port) throws UnknownHostException {
 		return this.disconnectClient(address, port, null);
@@ -1045,7 +1087,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * Disconnects all clients from the server with the address.
 	 * 
 	 * @param address
-	 *            the IP address.
+	 *            the IP address of the client.
 	 * @param reason
 	 *            the reason for client disconnection. A <code>null</code>
 	 *            reason will have <code>"Disconnected"</code> be used as the
@@ -1054,19 +1096,21 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *         otherwise.
 	 */
 	public final boolean disconnectClients(InetAddress address, String reason) {
-		AtomicBoolean disconnected = new AtomicBoolean(false);
-		clients.keySet().stream().filter(sessionAddress -> sessionAddress.equals(address)).forEach(sessionAddress -> {
-			this.disconnectClient(sessionAddress, reason);
-			disconnected.set(true);
-		});
-		return disconnected.get();
+		boolean disconnected = false;
+		for (InetSocketAddress sessionAddress : clients.keySet()) {
+			if (address.equals(sessionAddress)) {
+				this.disconnectClient(sessionAddress, reason);
+				disconnected = true;
+			}
+		}
+		return disconnected;
 	}
 
 	/**
 	 * Disconnects all clients from the server with the IP address.
 	 * 
 	 * @param address
-	 *            the IP address.
+	 *            the IP address of the client.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 */
@@ -1078,7 +1122,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * Disconnects all clients from the server with the IP address.
 	 * 
 	 * @param address
-	 *            the IP address.
+	 *            the IP address of the client.
 	 * @param reason
 	 *            the reason for client disconnection. A <code>null</code>
 	 *            reason will have <code>"Disconnected"</code> be used as the
@@ -1086,8 +1130,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 * @throws UnknownHostException
-	 *             if no IP address for the host could be found, or if a
-	 *             scope_id was specified for a global IPv6 address.
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final boolean disconnectClients(String address, String reason) throws UnknownHostException {
 		return this.disconnectClients(InetAddress.getByName(address), reason);
@@ -1097,12 +1141,12 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * Disconnects all clients from the server with the IP address.
 	 * 
 	 * @param address
-	 *            the IP address.
+	 *            the IP address of the client.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 * @throws UnknownHostException
-	 *             if no IP address for the host could be found, or if a
-	 *             scope_id was specified for a global IPv6 address.
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final boolean disconnectClients(String address) throws UnknownHostException {
 		return this.disconnectClients(address, null);
@@ -1121,12 +1165,14 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *         otherwise.
 	 */
 	public final boolean disconnectClients(int port, String reason) {
-		AtomicBoolean disconnected = new AtomicBoolean(false);
-		clients.keySet().stream().filter(sessionAddress -> sessionAddress.getPort() == port).forEach(sessionAddress -> {
-			this.disconnectClient(sessionAddress, reason);
-			disconnected.set(true);
-		});
-		return disconnected.get();
+		boolean disconnected = false;
+		for (InetSocketAddress address : clients.keySet()) {
+			if (address.getPort() == port) {
+				this.disconnectClient(address, reason == null ? "Disconnected" : reason);
+				disconnected = true;
+			}
+		}
+		return disconnected;
 	}
 
 	/**
@@ -1156,7 +1202,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *             if the given session is fabricated, meaning that the session
 	 *             is not one created by the server but rather one created
 	 *             externally.
-	 * @see com.whirvis.jraknet.session.RakNetClientSession RakNetClientSession
 	 */
 	public final void disconnectClient(RakNetClientSession session, String reason) {
 		if (!clients.containsValue(session)) {
@@ -1176,15 +1221,14 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *             if the given session is fabricated, meaning that the session
 	 *             is not one created by the server but rather one created
 	 *             externally.
-	 * @see com.whirvis.jraknet.session.RakNetClientSession RakNetClientSession
 	 */
 	public final void disconnectClient(RakNetClientSession session) {
 		this.disconnectClient(session, null);
 	}
 
 	/**
-	 * Blocks the IP address. All currently connected clients with the IP
-	 * address (regardless of port) will be disconnected with the same reason
+	 * Blocks the specified IP address. All currently connected clients with the
+	 * IP address (regardless of port) will be disconnected with the same reason
 	 * that the IP address was blocked.
 	 * 
 	 * @param address
@@ -1203,8 +1247,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Blocks the IP address. All currently connected clients with the IP
-	 * address (regardless of port) will be disconnected with the same reason
+	 * Blocks the specified IP address. All currently connected clients with the
+	 * IP address (regardless of port) will be disconnected with the same reason
 	 * that the IP address was blocked.
 	 * 
 	 * @param address
@@ -1213,14 +1257,13 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            how long the address will blocked in milliseconds.
 	 * @throws NullPointerException
 	 *             if <code>address</code> is <code>null</code>.
-	 * @see #blockAddress(InetAddress, String, long)
 	 */
 	public final void blockAddress(InetAddress address, long time) {
 		this.blockAddress(address, null, time);
 	}
 
 	/**
-	 * Unblocks the IP address.
+	 * Unblocks the specified IP address.
 	 * 
 	 * @param address
 	 *            the IP address to unblock.
@@ -1232,7 +1275,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
-	 * Returns whether or not the IP address is blocked.
+	 * Returns whether or not the specified IP address is blocked.
 	 * 
 	 * @param address
 	 *            the IP address to check.
@@ -1258,7 +1301,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			this.disconnectClient(address, RakNet.getStackTrace(cause));
 		}
 		log.warn("Handled exception " + cause.getClass().getName() + " caused by address " + address);
-		this.callEvent(listener -> listener.onHandlerException(address, cause));
+		this.callEvent(listener -> listener.onHandlerException(this, address, cause));
 	}
 
 	/**
@@ -1270,8 +1313,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            the packet to handle.
 	 * @param sender
 	 *            the address of the sender.
-	 * @see com.whirvis.jraknet.RakNetPacket RakNetPacket
-	 * @see com.whirvis.jrkanet.RakNetClientHandler RakNetClientHandler
 	 */
 	protected final void handleMessage(RakNetPacket packet, InetSocketAddress sender) {
 		short packetId = packet.getId();
@@ -1286,7 +1327,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 					|| (clients.size() < this.maxConnections || this.maxConnections < 0))
 					&& this.broadcastingEnabled == true && ping.magic == true) {
 				ServerPing pingEvent = new ServerPing(sender, ping.connectionType, identifier);
-				this.callEvent(listener -> listener.handlePing(pingEvent));
+				this.callEvent(listener -> listener.handlePing(this, pingEvent));
 				if (pingEvent.getIdentifier() != null) {
 					UnconnectedPong pong = new UnconnectedPong();
 					pong.timestamp = ping.timestamp;
@@ -1301,10 +1342,11 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				}
 			}
 		} else if (packetId == RakNetPacket.ID_OPEN_CONNECTION_REQUEST_1) {
+			// TODO: BAN PACKET
 			OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne(packet);
 			connectionRequestOne.decode();
 			if (clients.containsKey(sender)) {
-				if (clients.get(sender).getState().equals(RakNetState.CONNECTED)) {
+				if (clients.get(sender).getState().equals(RakNetState.LOGGED_IN)) {
 					this.disconnectClient(sender, "Client reinstantiated connection");
 				}
 			}
@@ -1331,6 +1373,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				}
 			}
 		} else if (packetId == RakNetPacket.ID_OPEN_CONNECTION_REQUEST_2) {
+			// TODO: BAN PACKET
 			OpenConnectionRequestTwo connectionRequestTwo = new OpenConnectionRequestTwo(packet);
 			connectionRequestTwo.decode();
 			if (!connectionRequestTwo.failed() && connectionRequestTwo.magic == true) {
@@ -1343,7 +1386,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 						connectionResponseTwo.maximumTransferUnit = connectionRequestTwo.maximumTransferUnit;
 						connectionResponseTwo.encode();
 						if (!connectionResponseTwo.failed()) {
-							this.callEvent(listener -> listener.onClientPreConnect(sender));
+							this.callEvent(listener -> listener.onConnect(this, sender));
 							RakNetClientSession clientSession = new RakNetClientSession(this,
 									System.currentTimeMillis(), connectionRequestTwo.connectionType,
 									connectionRequestTwo.clientGuid, connectionRequestTwo.maximumTransferUnit, channel,
@@ -1371,16 +1414,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				session.handleAcknowledge(acknowledge);
 			}
 		}
-		log.debug("Handled" + (RakNetPacket.hasPacket(packet.getId()) ? RakNetPacket.getName(packet.getId()) + " packet"
-				: "packet with ID " + RakNet.toHexStringId(packet))); // TODO:
-																		// Have
-																		// get
-																		// name
-																		// returned
-																		// hex
-																		// string
-																		// ID by
-																		// default?
+		log.debug("Handled" + RakNetPacket.getName(packet.getId()) + " packet");
 	}
 
 	/**
@@ -1391,14 +1425,13 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            the address of the packet sender.
 	 * @return the packet to respond with if there was an error,
 	 *         <code>null</code> if there are no issues.
-	 * @see com.whirvis.jraknet.RakNetPacket RakNetPacket
 	 */
 	private final RakNetPacket validateSender(InetSocketAddress sender) {
 		if (this.hasClient(sender)) {
 			return new RakNetPacket(RakNetPacket.ID_ALREADY_CONNECTED);
 		} else if (this.getClientCount() >= this.maxConnections && this.maxConnections >= 0) {
 			return new RakNetPacket(RakNetPacket.ID_NO_FREE_INCOMING_CONNECTIONS);
-		} else if (this.isAddressBlocked(sender.getAddress())) {
+		} else if (this.isClientBanned(sender.getAddress())) {
 			ConnectionBanned connectionBanned = new ConnectionBanned();
 			connectionBanned.serverGuid = guid;
 			connectionBanned.encode();
@@ -1411,15 +1444,13 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * Sends a Netty message over the channel raw. This should be used
 	 * sparingly, as if it is used incorrectly it could break client sessions
 	 * entirely. In order to send a message to a session, use one of the
-	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, io.netty.buffer.ByteBuf)
+	 * {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, io.netty.buffer.ByteBuf)
 	 * sendMessage()} methods.
 	 * 
 	 * @param buf
 	 *            the buffer to send.
 	 * @param address
 	 *            the address to send the buffer to.
-	 * @see {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(Reliability, ByteBuf)
-	 *      sendMessage(Reliability, ByteBuf)}
 	 */
 	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(buf, address));
@@ -1431,15 +1462,13 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * Sends a Netty message over the channel raw. This should be used
 	 * sparingly, as if it is used incorrectly it could break client sessions
 	 * entirely. In order to send a message to a session, use one of the
-	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(Reliability, Packet)
+	 * {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, Packet)
 	 * sendMessage()} methods.
 	 * 
 	 * @param packet
 	 *            the packet to send.
 	 * @param address
 	 *            the address to send the packet to.
-	 * @see {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(Reliability, Packet)
-	 *      sendMessage(Reliability, Packet)}
 	 */
 	public final void sendNettyMessage(Packet packet, InetSocketAddress address) {
 		this.sendNettyMessage(packet.buffer(), address);
@@ -1449,15 +1478,13 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * Sends a Netty message over the channel raw. This should be used
 	 * sparingly, as if it is used incorrectly it could break client sessions
 	 * entirely. In order to send a message to a session, use one of the
-	 * {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, int)
+	 * {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, int)
 	 * sendMessage()} methods.
 	 * 
 	 * @param buffer
 	 *            the packet ID to send.
 	 * @param address
 	 *            the address to send the packet to.
-	 * @see {@link com.whirvis.jraknet.session.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, int)
-	 *      sendMessage(Reliability, int)}
 	 */
 	public final void sendNettyMessage(int packetId, InetSocketAddress address) {
 		this.sendNettyMessage(new RakNetPacket(packetId), address);
@@ -1506,9 +1533,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 												RakNet.MAX_PACKETS_PER_SECOND_BLOCK);
 									}
 								} catch (Throwable throwable) {
-									for (RakNetServerListener listener : listeners) {
-										listener.onSessionException(session, throwable);
-									}
+									server.callEvent(
+											listener -> listener.onSessionException(server, session, throwable));
 									server.disconnectClient(session, throwable.getMessage());
 								}
 							}
@@ -1521,7 +1547,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			};
 			sessionThread.start();
 			log.debug("Created and started session update thread");
-			this.callEvent(listener -> listener.onServerStart());
+			this.callEvent(listener -> listener.onStart(this));
 		} catch (InterruptedException e) {
 			this.running = false;
 			throw new RakNetException(e);
@@ -1543,8 +1569,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		}
 
 		// Disconnect clients
-		clients.values().stream()
-				.forEach(session -> this.disconnectClient(session, reason == null ? "Server shutdown" : reason));
+		for (RakNetClientSession client : clients.values()) {
+			this.disconnectClient(client, reason == null ? "Server shutdown" : reason);
+		}
 		clients.clear();
 
 		// Stop server
@@ -1560,7 +1587,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		this.group = null;
 		this.bootstrap = null;
 		log.debug("Shutdown networking");
-		this.callEvent(listener -> listener.onServerShutdown());
+		this.callEvent(listener -> listener.onShutdown(this));
 	}
 
 	/**

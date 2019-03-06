@@ -98,7 +98,7 @@ public class OpenConnectionResponseOne extends RakNetPacket {
 
 	@Override
 	public void decode() {
-		this.magic = this.checkMagic();
+		this.magic = this.readMagic();
 		this.serverGuid = this.readLong();
 		this.useSecurity = this.readBoolean();
 		this.maximumTransferUnit = this.readUnsignedShort();

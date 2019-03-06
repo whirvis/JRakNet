@@ -34,7 +34,7 @@ import java.net.UnknownHostException;
 
 import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.client.RakNetClient;
-import com.whirvis.jraknet.session.RakNetServerSession;
+import com.whirvis.jraknet.peer.RakNetServerSession;
 
 /**
  * A simple <code>RakNetClient</code> that is extending

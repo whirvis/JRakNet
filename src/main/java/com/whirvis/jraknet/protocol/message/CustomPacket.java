@@ -47,14 +47,34 @@ import com.whirvis.jraknet.protocol.message.acknowledge.Record;
  * This packet is used to send {@link EncapsulatedPacket encapsulated packets}
  * that are in the send queue. This is where {@link EncapsulatedPacket
  * encapsulated packets} get their name from, as they are encapsulated within
- * another container packet. The way this works is by storing as many packets in
- * the send queue as possible into one packet before sending them off all at
- * once.
+ * another container packet. The way these are used is by storing as many
+ * packets in the send queue as possible into one packet before sending them off
+ * all at once.
  * 
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
  */
 public class CustomPacket extends RakNetPacket {
+
+	/**
+	 * The minimum size of a custom packet.
+	 */
+	public static final int MINIMUM_SIZE = size(new EncapsulatedPacket[0]);
+
+	/**
+	 * Calculates the size of the packet if it had been encoded.
+	 * 
+	 * @param packets
+	 *            the packets inside the custom packet.
+	 * @return the size of the packet if it had been encoded.
+	 */
+	public static int size(EncapsulatedPacket... packets) {
+		int size = 3;
+		for (EncapsulatedPacket packet : packets) {
+			size += packet.size();
+		}
+		return size;
+	}
 
 	/**
 	 * The sequence ID of the packet.
@@ -63,14 +83,15 @@ public class CustomPacket extends RakNetPacket {
 
 	/**
 	 * If encoding, these are the packets that will be encoded into the packet.
-	 * If decoding, these were the packets decoded from the packet.
+	 * <br>
+	 * If decoding, these are the packets decoded from the packet.
 	 */
 	public EncapsulatedPacket[] messages;
 
 	/**
 	 * The encapsulated packets that require acknowledgement.
 	 */
-	public final ArrayList<EncapsulatedPacket> ackMessages;
+	public EncapsulatedPacket[] ackMessages;
 
 	/**
 	 * Creates a custom packet to be encoded.
@@ -88,7 +109,6 @@ public class CustomPacket extends RakNetPacket {
 		if (type < ID_CUSTOM_0 || type > ID_CUSTOM_F) {
 			throw new IllegalArgumentException("Custom packet ID must be in between ID_CUSTOM_0 and ID_CUSTOM_f");
 		}
-		this.ackMessages = new ArrayList<EncapsulatedPacket>();
 	}
 
 	/**
@@ -100,7 +120,6 @@ public class CustomPacket extends RakNetPacket {
 	 */
 	public CustomPacket(Packet packet) {
 		super(packet);
-		this.ackMessages = new ArrayList<EncapsulatedPacket>();
 	}
 
 	@Override
@@ -111,10 +130,12 @@ public class CustomPacket extends RakNetPacket {
 				packet.buffer = this; // TODO: According to comments this
 										// apparently
 										// broke stuff
+				ArrayList<EncapsulatedPacket> ackMessages = new ArrayList<EncapsulatedPacket>();
 				if (packet.reliability.requiresAck()) {
 					packet.ackRecord = new Record(sequenceId);
 					ackMessages.add(packet);
 				}
+				this.ackMessages = ackMessages.toArray(new EncapsulatedPacket[ackMessages.size()]);
 				packet.encode();
 				packet.buffer = null; // Prevent illegal reuse
 			}
@@ -129,11 +150,13 @@ public class CustomPacket extends RakNetPacket {
 			EncapsulatedPacket packet = new EncapsulatedPacket();
 			packet.buffer = this; // TODO: According to comments this apparently
 									// broke stuff
+			ArrayList<EncapsulatedPacket> ackMessages = new ArrayList<EncapsulatedPacket>();
 			packet.decode();
 			if (packet.reliability.requiresAck()) {
 				packet.ackRecord = new Record(sequenceId);
 				ackMessages.add(packet);
 			}
+			this.ackMessages = ackMessages.toArray(new EncapsulatedPacket[ackMessages.size()]);
 			packet.buffer = null; // Prevent illegal reuse
 			messages.add(packet);
 		}

@@ -35,8 +35,8 @@ import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.identifier.MinecraftIdentifier;
+import com.whirvis.jraknet.peer.RakNetClientSession;
 import com.whirvis.jraknet.server.RakNetServer;
-import com.whirvis.jraknet.session.RakNetClientSession;
 
 /**
  * A simple <code>RakNetServer</code> that is extending
