@@ -1,11 +1,11 @@
 /*
- *       _   _____            _      _   _          _
- *      | | |  __ \          | |    | \ | |        | |
- *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_
+ *       _   _____            _      _   _          _   
+ *      | | |  __ \          | |    | \ | |        | |  
+ *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_ 
  *  _   | | |  _  /   / _` | | |/ / | . ` |  / _ \ | __|
- * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_
+ * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
- *
+ *                                                  
  * the MIT License (MIT)
  *
  * Copyright (c) 2016-2019 Trent Summerlin
@@ -26,13 +26,35 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * SOFTWARE.  
  */
+package com.whirvis.jraknet.client.peer;
+
+import com.whirvis.jraknet.client.RakNetClient;
+
 /**
- * The packets that are sent between the server and client during initial
- * connection.
+ * Signals that a server changed its globally unique identifier in a
+ * {@link com.whirvis.jraknet.protocol.connection.OpenConnectionRequestTwo
+ * CONNECTION_REQUEST_2} packet after sending a different globally unique
+ * identifier in a
+ * {@link com.whirvis.jraknet.protocol.connection.OpenConnectionRequestOne
+ * CONNECTION_REQUEST_1} packet.
  * 
  * @author Trent Summerlin
- * @since JRakNet v1.0.0
+ * @version JRakNet v2.11.0
  */
-package com.whirvis.jraknet.protocol.connection;
+public class InconsistentGuidException extends PeerFactoryException {
+
+	private static final long serialVersionUID = 3864822071239301945L;
+
+	/**
+	 * Constructs an <code>InconsistentGuidException</code>.
+	 * 
+	 * @param client
+	 *            the client that threw the exception.
+	 */
+	public InconsistentGuidException(RakNetClient client) {
+		super(client, "Server responded with inconsistent GUID");
+	}
+
+}

@@ -1,11 +1,11 @@
 /*
- *       _   _____            _      _   _          _
- *      | | |  __ \          | |    | \ | |        | |
- *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_
+ *       _   _____            _      _   _          _   
+ *      | | |  __ \          | |    | \ | |        | |  
+ *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_ 
  *  _   | | |  _  /   / _` | | |/ / | . ` |  / _ \ | __|
- * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_
+ * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
- *
+ *                                                  
  * the MIT License (MIT)
  *
  * Copyright (c) 2016-2019 Trent Summerlin
@@ -26,42 +26,45 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * SOFTWARE.  
  */
-package com.whirvis.jraknet.client;
+package com.whirvis.jraknet.client.peer;
 
 import java.net.InetSocketAddress;
 
+import com.whirvis.jraknet.client.RakNetClient;
+
 /**
- * Signals that a {@link RakNetClient} has attempted to connect to a server that
- * has banned its connection.
+ * Signals that a {@link RakNetClient} attempted to connect to a server that has
+ * no free incoming connections.
  *
  * @author Trent Summerlin
  * @since JRakNet v2.0
  */
-public class ConnectionBannedException extends RakNetClientException {
+public class NoFreeIncomingConnectionsException extends PeerFactoryException {
 
-	private static final long serialVersionUID = 8440218445920818619L;
+	private static final long serialVersionUID = 5863972657532782029L;
 
 	private final InetSocketAddress address;
 
 	/**
-	 * Constructs a <code>ConnectedionBannedException</code>.
+	 * Constructs a <code>NoFreeIncomingConnectionsException</code>.
 	 * 
 	 * @param client
-	 *            the client that is banned.
+	 *            the client that attempted to a server with no free incoming
+	 *            connections.
 	 * @param address
-	 *            the address of the server that banned the client's connection.
+	 *            the address of the server with no free incoming connections.
 	 */
-	public ConnectionBannedException(RakNetClient client, InetSocketAddress address) {
-		super(client, "Connection banned");
+	public NoFreeIncomingConnectionsException(RakNetClient client, InetSocketAddress address) {
+		super(client, "Server has no free incoming connections");
 		this.address = address;
 	}
 
 	/**
-	 * Returns the address of the server that banned the client's connection.
+	 * Returns the address of the server that has no free incoming connections.
 	 * 
-	 * @return the address of the server that banned the client's connection.
+	 * @return the address of the server that has no free incoming connections.
 	 */
 	public InetSocketAddress getAddress() {
 		return this.address;

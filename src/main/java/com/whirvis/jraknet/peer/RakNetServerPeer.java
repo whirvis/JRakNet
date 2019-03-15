@@ -28,7 +28,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.peer.server;
+package com.whirvis.jraknet.peer;
 
 import static com.whirvis.jraknet.RakNetPacket.*;
 
@@ -36,8 +36,6 @@ import java.net.InetSocketAddress;
 
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.client.RakNetClient;
-import com.whirvis.jraknet.peer.RakNetPeer;
-import com.whirvis.jraknet.peer.RakNetState;
 import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.login.ConnectionRequestAccepted;
@@ -86,15 +84,11 @@ public class RakNetServerPeer extends RakNetPeer implements RakNetPeerMessenger 
 		 */
 		this.setState(RakNetState.HANDSHAKING);
 	}
-
-	/**
-	 * {@inheritDoc} If login with server has not yet been completed,
-	 * <code>-1</code> will be returned.
-	 */
+	
 	@Override
 	public long getTimestamp() {
 		if (timestamp < 0) {
-			return -1; // Not yet logged in
+			return -1L; // Not yet logged in
 		}
 		return System.currentTimeMillis() - this.timestamp;
 	}

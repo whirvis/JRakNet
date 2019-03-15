@@ -28,11 +28,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package com.whirvis.jraknet.client.peer;
+
+import java.net.InetSocketAddress;
+
+import com.whirvis.jraknet.client.RakNetClient;
+
 /**
- * The packets that are sent between the server and client during initial
- * connection.
- * 
+ * Signals that a {@link RakNetClient} has attempted to connect to a server that
+ * has banned its connection.
+ *
  * @author Trent Summerlin
- * @since JRakNet v1.0.0
+ * @since JRakNet v2.0
  */
-package com.whirvis.jraknet.protocol.connection;
+public class ConnectionBannedException extends PeerFactoryException {
+
+	private static final long serialVersionUID = 8440218445920818619L;
+
+	private final InetSocketAddress address;
+
+	/**
+	 * Constructs a <code>ConnectedionBannedException</code>.
+	 * 
+	 * @param client
+	 *            the client that is banned.
+	 * @param address
+	 *            the address of the server that banned the client's connection.
+	 */
+	public ConnectionBannedException(RakNetClient client, InetSocketAddress address) {
+		super(client, "Connection banned");
+		this.address = address;
+	}
+
+	/**
+	 * Returns the address of the server that banned the client's connection.
+	 * 
+	 * @return the address of the server that banned the client's connection.
+	 */
+	public InetSocketAddress getAddress() {
+		return this.address;
+	}
+
+}

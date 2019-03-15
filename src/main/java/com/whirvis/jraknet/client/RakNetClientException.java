@@ -50,9 +50,22 @@ public class RakNetClientException extends RakNetException {
 	 * @param client
 	 *            the client that threw the exception.
 	 * @param error
-	 *            the reason the exception was thrown.
+	 *            the detail message.
 	 */
 	public RakNetClientException(RakNetClient client, String error) {
+		super(error);
+		this.client = client;
+	}
+
+	/**
+	 * Constructs a <code>RakNetClientException</code>.
+	 * 
+	 * @param client
+	 *            the client that threw the exception.
+	 * @param error
+	 *            the <code>Throwable</code> that was thrown.
+	 */
+	public RakNetClientException(RakNetClient client, Throwable error) {
 		super(error);
 		this.client = client;
 	}

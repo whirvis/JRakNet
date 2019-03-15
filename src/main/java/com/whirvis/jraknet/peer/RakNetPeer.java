@@ -1,3 +1,33 @@
+/*
+ *       _   _____            _      _   _          _   
+ *      | | |  __ \          | |    | \ | |        | |  
+ *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_ 
+ *  _   | | |  _  /   / _` | | |/ / | . ` |  / _ \ | __|
+ * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
+ *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
+ *                                                  
+ * the MIT License (MIT)
+ *
+ * Copyright (c) 2016-2019 Trent Summerlin
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * the above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.  
+ */
 package com.whirvis.jraknet.peer;
 
 import static com.whirvis.jraknet.RakNetPacket.*;
@@ -6,9 +36,8 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.Scanner;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -19,13 +48,11 @@ import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.map.concurrent.ConcurrentIntMap;
-import com.whirvis.jraknet.peer.server.RakNetPeerMessenger;
 import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.message.CustomFourPacket;
 import com.whirvis.jraknet.protocol.message.CustomPacket;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
-import com.whirvis.jraknet.protocol.message.acknowledge.Acknowledge;
 import com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgedPacket;
 import com.whirvis.jraknet.protocol.message.acknowledge.NotAcknowledgedPacket;
 import com.whirvis.jraknet.protocol.message.acknowledge.Record;
@@ -38,13 +65,60 @@ import io.netty.channel.socket.DatagramPacket;
 
 /**
  * Represents a connection to another machine, be it a server or a client.
- * <p>
- * TODO
  * 
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
  */
 public abstract class RakNetPeer implements RakNetPeerMessenger {
+
+	/**
+	 * Used to store the message index for received reliable packets in a
+	 * condensed fashion.
+	 * 
+	 * @author Trent Summerlin
+	 * @since JRakNet v2.11.0
+	 */
+	private static class ConcurrentMessageIndexList {
+
+		private List<Record> indexes;
+
+		/**
+		 * Constructs a <code>ConcurrentMesageIndexList</code>.
+		 */
+		public ConcurrentMessageIndexList() {
+			this.indexes = new ArrayList<Record>();
+		}
+
+		/**
+		 * Adds the specified message index to the list.
+		 * 
+		 * @param index
+		 *            the index to add.
+		 */
+		public synchronized void add(int index) {
+			indexes.add(new Record(index));
+			this.indexes = Arrays.asList(Record.condense(indexes));
+		}
+
+		/**
+		 * Returns whether or not the list contains the specified message index.
+		 * 
+		 * @param index
+		 *            the index.
+		 * @return <code>true</code> if the list contains the
+		 *         <code>index</code>.
+		 */
+		public synchronized boolean contains(int index) {
+			for (Record record : indexes) {
+				if ((record.isRanged() && record.getIndex() >= index && record.getIndex() <= index)
+						|| record.getIndex() == index) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+	}
 
 	private final Logger log;
 	private final InetSocketAddress address;
@@ -64,7 +138,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	private long lastPingSendTime;
 	private int messageIndex;
 	private int splitId;
-	private final ConcurrentLinkedQueue<Integer> reliablePackets;
+	private final ConcurrentMessageIndexList reliablePackets;
 	private final ConcurrentIntMap<EncapsulatedPacket.Split> splitQueue;
 	protected final ConcurrentLinkedQueue<EncapsulatedPacket> sendQueue;
 	private final ConcurrentIntMap<EncapsulatedPacket[]> recoveryQueue;
@@ -108,7 +182,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		this.connectionType = connectionType;
 		this.channel = channel;
 		this.state = RakNetState.DISCONNECTED;
-		this.reliablePackets = new ConcurrentLinkedQueue<Integer>();
+		this.reliablePackets = new ConcurrentMessageIndexList();
 		this.splitQueue = new ConcurrentIntMap<EncapsulatedPacket.Split>();
 		this.sendQueue = new ConcurrentLinkedQueue<EncapsulatedPacket>();
 		this.recoveryQueue = new ConcurrentIntMap<EncapsulatedPacket[]>();
@@ -185,7 +259,8 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	}
 
 	/**
-	 * Returns the current state of the peer.
+	 * Returns the current state of the peer, guaranteed to not be
+	 * <code>null</code>.
 	 * 
 	 * @return the current state of the peer.
 	 */
@@ -198,16 +273,23 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * 
 	 * @param state
 	 *            the state.
+	 * @throws NullPointerException
+	 *             if the <code>state</code> is <code>null</code>.
 	 */
-	public void setState(RakNetState state) {
+	public void setState(RakNetState state) throws NullPointerException {
+		if (state == null) {
+			throw new NullPointerException("State cannot be null");
+		}
 		this.state = state;
 		log.debug("Set state to " + state.name());
 	}
 
 	/**
-	 * Returns the peer's timestamp.
+	 * Returns the peer's timestamp. If login has not yet been completed,
+	 * <code>-1</code> will be returned.
 	 * 
-	 * @return the peer's timestamp.
+	 * @return the peer's timestamp, <code>-1</code> if login has not yet been
+	 *         completed.
 	 */
 	public abstract long getTimestamp();
 
@@ -348,7 +430,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 *             encapsulated packet found inside of it is split, and adding
 	 *             it to the split queue would cause it to overflow.
 	 */
-	public final void handle(RakNetPacket packet)
+	public final void handleMessage(RakNetPacket packet)
 			throws NullPointerException, InvalidChannelException, SplitQueueOverflowException {
 		if (packet == null) {
 			throw new NullPointerException("Packet cannot be null");
@@ -466,85 +548,6 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	}
 
 	/**
-	 * An extension of {@link ArrayList} that stores <code>int</code>s. This
-	 * memory of this is optimized by having ranges of numbers being stored as
-	 * two whenever possible.
-	 * 
-	 * @author Trent Summerlin
-	 */
-	@SuppressWarnings("unused")
-	private static class IndexIntegerArray extends ArrayList<Integer> {
-
-		private static final long serialVersionUID = -7487996357995101379L;
-		
-		private final ArrayList<Long> indexed;
-		private final ArrayList<Integer> unindexed;
-		
-		public IndexIntegerArray() {
-			this.indexed = new ArrayList<Long>();
-			this.unindexed = new ArrayList<Integer>();
-			
-			int a = 2;
-			
-			long l = 0x0000000000000000;
-			l |= (2 << 32);
-			System.out.println(Long.toBinaryString(l));
-		}
-		
-		private void condense() {
-			ArrayList<Integer> complete = new ArrayList<Integer>();
-			for(long l : indexed) {
-				int start = (int) (l & 0x00000000FFFFFFFF);
-				int end = (int) (l & 0xFFFFFFFF00000000L >> Integer.SIZE);
-				System.out.println(start + ", " + end);
-			}
-		}
-		
-		@Override
-		public boolean add(Integer i) {
-			condense();
-			return unindexed.add(i);
-		}
-
-	}
-	
-	public static void main(String[] args) throws Exception {
-		System.out.println(2 << 32);
-	}
-
-	public static void mainl(String[] args) throws Exception {
-		int index = -1;
-		ArrayList<Integer> b = new ArrayList<Integer>();
-		Scanner a = new Scanner(System.in);
-		while (true) {
-			if (a.hasNextLine()) {
-				try {
-					int i = Integer.parseInt(a.nextLine());
-					if (i == index + 1) {
-						index = i;
-						Iterator<Integer> c = b.iterator();
-						while (c.hasNext()) {
-							int d = c.next();
-							if (d == index + 1) {
-								index = d;
-								c.remove();
-							}
-							System.out.println(d);
-						}
-					} else if (!b.contains(i)) {
-						b.add(i);
-						Collections.sort(b);
-					}
-					System.out.println(index + " : " + Arrays.toString(b.toArray(new Integer[b.size()])));
-				} catch (NumberFormatException e) {
-					break;
-				}
-			}
-		}
-		a.close();
-	}
-
-	/**
 	 * Handles an {@link EncapsulatedPacket}.
 	 * 
 	 * @param encapsulated
@@ -599,23 +602,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				splitQueue.remove(encapsulated.splitId);
 				this.handleEncapsulated(stitched);
 			}
-		} else {
-			// Ensure the reliable message is not a duplicate
-			if (encapsulated.reliability.isReliable()) {
-				if (reliablePackets.contains(encapsulated.messageIndex)) {
-					return; // Duplicate reliable message
-				}
-				reliablePackets.add(encapsulated.messageIndex);
-			}
-			/*
-			 * TODO: Find a way to deal with this so as to not take up so much
-			 * memory!
-			 * 
-			 * Possible solution: Have a starting index set, with the array only
-			 * storing the message indexes that skip past the starting index
-			 * more than one.
-			 */
-
+		} else if (encapsulated.reliability.isReliable() && !reliablePackets.contains(encapsulated.messageIndex)) {
 			/**
 			 * Determine if the message should be handled based on its
 			 * reliability.
@@ -630,6 +617,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			 * If the message is neither ordered nor sequenced, then it is
 			 * handled regardless.
 			 */
+			reliablePackets.add(encapsulated.messageIndex);
 			if (encapsulated.reliability.isOrdered()) {
 				handleQueue.get(encapsulated.orderChannel).put(encapsulated.orderIndex, encapsulated);
 				while (handleQueue.get(encapsulated.orderChannel)
@@ -673,16 +661,16 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		} else if (packet == null) {
 			throw new NullPointerException("Packet cannot be null");
 		}
-		short packetId = packet.getId();
-		if (packetId == ID_CONNECTED_PING) {
+		if (packet.getId() == ID_CONNECTED_PING) {
 			ConnectedPing ping = new ConnectedPing(packet);
 			ping.decode();
+
 			ConnectedPong pong = new ConnectedPong();
 			pong.timestamp = ping.timestamp;
 			pong.timestampPong = this.getTimestamp();
 			pong.encode();
 			this.sendMessage(Reliability.UNRELIABLE, pong);
-		} else if (packetId == ID_CONNECTED_PONG) {
+		} else if (packet.getId() == ID_CONNECTED_PONG) {
 			ConnectedPong pong = new ConnectedPong(packet);
 			pong.decode();
 
@@ -700,7 +688,6 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 					this.highestLatency = responseTime;
 				}
 				this.totalLatency += responseTime;
-				// TODO: Make latency a float value?
 				this.latency = totalLatency / ++pongsReceived;
 			}
 
@@ -723,7 +710,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * Sends a message over the channel raw.
 	 * <p>
 	 * This will automatically update the <code>lastPacketSendTime</code> and
-	 * <code>packettSentThisSecond</code> variable.
+	 * <code>packetsSentThisSecond</code> variable.
 	 * 
 	 * @param buf
 	 *            the buffer.
@@ -742,7 +729,8 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		}
 		this.lastPacketSendTime = currentTime;
 		this.packetsSentThisSecond++;
-		log.debug(""); // TODO: Proper debug message
+		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to "
+				+ address);
 	}
 
 	/**
@@ -776,8 +764,19 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * @param encapsulated
 	 *            the packets to send.
 	 * @return the sequence number of the {@link CustomFourPacket}.
+	 * @throws NullPointerException
+	 *             if the <code>messages</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>messages</code> array is empty.
 	 */
-	private final int sendCustomPacket(boolean updateRecoveryQueue, EncapsulatedPacket... messages) {
+	private final int sendCustomPacket(boolean updateRecoveryQueue, EncapsulatedPacket... messages)
+			throws NullPointerException, IllegalArgumentException {
+		if (messages == null) {
+			throw new NullPointerException("Messages cannot be null");
+		} else if (messages.length <= 0) {
+			throw new IllegalArgumentException("There must be a message to send");
+		}
+
 		// Encode custom packet
 		CustomFourPacket custom = new CustomFourPacket();
 		custom.sequenceId = sendSequenceNumber++;
@@ -805,7 +804,8 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			}
 			recoveryQueue.put(custom.sequenceId, reliable.toArray(new EncapsulatedPacket[reliable.size()]));
 		}
-		log.debug("Sent custom packet with sequence number " + custom.sequenceId);
+		log.debug("Sent custom packet containing " + custom.messages.length
+				+ " encapsulated packets with sequence number " + custom.sequenceId);
 		return custom.sequenceId;
 	}
 
@@ -820,7 +820,13 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * @param record
 	 *            the records to send.
 	 */
-	private final void sendAcknowledge(boolean acknowledge, Record... records) {
+	private final void sendAcknowledge(boolean acknowledge, Record... records) throws NullPointerException, IllegalArgumentException {
+		if(records == null) {
+			throw new NullPointerException("Records cannot be null");
+		} else if(records.length <= 0) {
+			throw new IllegalArgumentException("There must be a record to send");
+		}
+		
 		AcknowledgedPacket acknowledged = acknowledge ? new AcknowledgedPacket() : new NotAcknowledgedPacket();
 		acknowledged.records = records;
 		acknowledged.encode();
@@ -905,11 +911,10 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				&& state.equals(RakNetState.LOGGED_IN)) {
 			ConnectedPing ping = new ConnectedPing();
 			ping.timestamp = this.getTimestamp();
-			ping.encode(); // TODO: Cleanup
+			ping.encode();
 			this.sendMessage(Reliability.UNRELIABLE, ping);
 			this.lastPingSendTime = currentTime;
 			latencyTimestamps.add(ping.timestamp);
-			log.debug("Sent ping to peer with timestamp " + ping.timestamp);
 		}
 
 		// Send next packets in the send queue
@@ -975,9 +980,6 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 *            the received packet.
 	 */
 	public abstract void onAcknowledge(Record record, EncapsulatedPacket packet);
-
-	// TODO: Event for when the peer has reportedly received the ENTIRETY of a
-	// packet?
 
 	/**
 	 * Called when a packet is received.

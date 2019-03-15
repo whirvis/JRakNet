@@ -28,43 +28,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.client;
-
-import java.net.InetSocketAddress;
-
 /**
- * Signals that a {@link RakNetClient} attempted to to connect to an offline
- * server.
- *
+ * Components used by the {@link com.whirvis.jraknet.client.RakNetClient
+ * RakNetClient} in order to more easily establish connections with servers
+ * using the {@link com.whirvis.jraknet.client.peer.PeerFactory PeerFactory}
+ * class.
+ * 
  * @author Trent Summerlin
- * @since JRakNet v2.0
+ * @since JRakNet v1.0.0
  */
-public class ServerOfflineException extends RakNetClientException {
-
-	private static final long serialVersionUID = -3916155995964791602L;
-
-	private final InetSocketAddress address;
-
-	/**
-	 * Constructs a <code>ServerOfflineException</code>.
-	 * 
-	 * @param client
-	 *            the client that attempted to the offline server.
-	 * @param address
-	 *            the address of the offline server.
-	 */
-	public ServerOfflineException(RakNetClient client, InetSocketAddress address) {
-		super(client, "Server at address " + address.toString() + " is offline");
-		this.address = address;
-	}
-
-	/**
-	 * Returns the address of the offline server.
-	 * 
-	 * @return the address of the offline server.
-	 */
-	public InetSocketAddress getAddress() {
-		return this.address;
-	}
-
-}
+package com.whirvis.jraknet.client.peer;

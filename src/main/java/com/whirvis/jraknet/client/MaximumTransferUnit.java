@@ -37,21 +37,18 @@ import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.whirvis.jraknet.map.IntMap;
 
 /**
- * Used by the {@link RakNetClient} during connection to track how and when it
- * should modify its maximum transfer unit.
+ * Used by the {@link RakNetClient} and
+ * {@link com.whirvis.jraknet.client.peer.PeerFactory PeerFactory} during
+ * connection to track how and when they should modify their maximum transfer
+ * unit.
  *
  * @author Trent Summerlin
- * @since JRakNet v2.0
+ * @since JRakNet v2.0.0
  */
 public class MaximumTransferUnit {
-
-	private static final Logger LOG = LogManager.getLogger(MaximumTransferUnit.class);
 
 	/**
 	 * Sorts an array of maximum transfer units from the highest to lowest
@@ -61,18 +58,16 @@ public class MaximumTransferUnit {
 	 *            the maximum transfer units to sort.
 	 * @return the sorted maximum transfer units.
 	 * @throws NullPointerException
-	 *             if the maximum transfer units to sort are <code>null</code>
-	 *             or if any of the maximum transfer units in the array of
-	 *             maximum transfer units are <code>null</code>.
+	 *             if the <code>units</code> are <code>null</code> or if any of
+	 *             the maximum transfer units inside of the <code>unit</code>
+	 *             are <code>null</code>.
 	 */
 	public static MaximumTransferUnit[] sort(MaximumTransferUnit... units) throws NullPointerException {
 		if (units == null) {
 			throw new NullPointerException("Units cannot be null");
 		} else if (units.length <= 0) {
-			return units; // Nothing to sort
+			return new MaximumTransferUnit[0]; // Nothing to sort
 		}
-
-		// Convert array to IntMap
 		IntMap<MaximumTransferUnit> unitMap = new IntMap<MaximumTransferUnit>();
 		for (MaximumTransferUnit unit : units) {
 			if (unit == null) {
@@ -80,8 +75,6 @@ public class MaximumTransferUnit {
 			}
 			unitMap.put(unit.getSize(), unit);
 		}
-
-		// Sort IntMap
 		ArrayList<MaximumTransferUnit> unitList = new ArrayList<MaximumTransferUnit>();
 		NavigableMap<Integer, MaximumTransferUnit> unitTreeMap = new TreeMap<Integer, MaximumTransferUnit>(unitMap)
 				.descendingMap();
@@ -107,17 +100,18 @@ public class MaximumTransferUnit {
 	 *            the amount of time the client should try to use it before
 	 *            going to the next lowest maximum transfer unit size.
 	 * @throws IllegalArgumentException
-	 *             if the size is less than or equal to zero, the size odd (not
-	 *             divisible by two), or the retry count is less than or equal
-	 *             to zero.
+	 *             if the <code>size</code> is less than or equal to
+	 *             <code>0</code>, if the <code>size</code> odd (not divisible
+	 *             by <code>2</code>), or the retry count is less than or equal
+	 *             to <code>0</code>.
 	 */
 	public MaximumTransferUnit(int size, int retries) throws IllegalArgumentException {
 		if (size <= 0) {
-			throw new IllegalArgumentException("Size must be greater than zero");
+			throw new IllegalArgumentException("Size must be greater than 0");
 		} else if (size % 2 != 0) {
 			throw new IllegalArgumentException("Size cannot be odd");
 		} else if (retries <= 0) {
-			throw new IllegalArgumentException("Retry count must be greater than zero");
+			throw new IllegalArgumentException("Retry count must be greater than 0");
 		}
 		this.size = size;
 		this.retries = retries;
@@ -162,7 +156,8 @@ public class MaximumTransferUnit {
 	 * 
 	 * @return the amount of retries left.
 	 * @throws IllegalStateException
-	 *             if the amount of retries left is zero.
+	 *             if the amount of retries left is than or equal to
+	 *             <code>0</code>.
 	 * @see #reset()
 	 */
 	public int retry() {
@@ -170,23 +165,21 @@ public class MaximumTransferUnit {
 			throw new IllegalStateException(
 					"No more retries left, use reset() in order to reuse a maximum transfer unit");
 		}
-		LOG.debug("Retried maximum transfer unit with size of " + size + " bytes (" + (size * 8) + " bits)");
 		return this.retriesLeft--;
 	}
 
 	/**
-	 * Sets the amount of retries left back to the default. This is necessary in
-	 * order to be able to reuse a maximum transfer unit once it has been
-	 * depleted of its retries left.
+	 * Sets the amount of retries left back to the default.
+	 * <p>
+	 * This is necessary in order to be able to reuse a maximum transfer unit
+	 * once it has been depleted of its retries left.
 	 * 
 	 * @see #retry()
 	 */
 	public void reset() {
-		if (this.retriesLeft == retries) {
-			return; // Nothing to reset
+		if (retriesLeft != retries) {
+			this.retriesLeft = retries;
 		}
-		LOG.debug("Reset maximum transfer unit with size of " + size + " bytes (" + (size * 8) + " bits)");
-		this.retriesLeft = retries;
 	}
 
 	@Override

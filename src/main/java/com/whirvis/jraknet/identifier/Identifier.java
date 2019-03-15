@@ -38,7 +38,7 @@ import com.whirvis.jraknet.protocol.ConnectionType;
  * order to make use of the identifier capabilities.
  *
  * @author Trent Summerlin
- * @since JRakNet v1.0
+ * @since JRakNet v1.0.0
  */
 public class Identifier implements Cloneable {
 
@@ -103,9 +103,9 @@ public class Identifier implements Cloneable {
 	}
 
 	/**
-	 * Returns the connection type of the sender of the identifier.
+	 * Returns the connection type of the sender/creator of the identifier.
 	 * 
-	 * @return the connection type of the sender of the identifier.
+	 * @return the connection type of the sender/creator of the identifier.
 	 */
 	public final ConnectionType getConnectionType() {
 		return this.connectionType;

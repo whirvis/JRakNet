@@ -28,17 +28,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.peer.client;
-
-import java.net.InetSocketAddress;
+package com.whirvis.jraknet.peer;
 
 import static com.whirvis.jraknet.RakNetPacket.*;
 
-import com.whirvis.jraknet.Packet;
+import java.net.InetSocketAddress;
+
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.peer.InvalidChannelException;
-import com.whirvis.jraknet.peer.RakNetPeer;
-import com.whirvis.jraknet.peer.RakNetState;
 import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.login.ConnectionRequest;
@@ -47,7 +43,6 @@ import com.whirvis.jraknet.protocol.login.NewIncomingConnection;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
 import com.whirvis.jraknet.protocol.message.acknowledge.Record;
 import com.whirvis.jraknet.server.RakNetServer;
-import com.whirvis.jraknet.server.RakNetServerListener;
 
 import io.netty.channel.Channel;
 
@@ -100,16 +95,6 @@ public class RakNetClientPeer extends RakNetPeer {
 	public long getTimestamp() {
 		return System.currentTimeMillis() - this.timestamp;
 	}
-	
-	@Override
-	public long getGuid(RakNetClientPeer peer) throws NullPointerException, IllegalArgumentException {
-		if (peer == null) {
-			throw new NullPointerException("Peer cannot be null");
-		} else if (peer != this) {
-			throw new IllegalArgumentException("Peer must be this");
-		}
-		return this.getGloballyUniqueId();
-	}
 
 	@Override
 	public void handleMessage(RakNetPacket packet, int channel) {
@@ -149,9 +134,7 @@ public class RakNetClientPeer extends RakNetPeer {
 			if (!clientHandshake.failed()) {
 				this.timestamp = (System.currentTimeMillis() - clientHandshake.clientTimestamp);
 				this.setState(RakNetState.LOGGED_IN);
-				for (RakNetServerListener listener : server.getListeners()) {
-					listener.onClientConnect(this);
-				}
+				server.callEvent(listener -> listener.onLogin(server, this));
 			} else {
 				server.disconnectClient(this,
 						"Login failed, " + NewIncomingConnection.class.getSimpleName() + " packet failed to decode");
@@ -165,25 +148,21 @@ public class RakNetClientPeer extends RakNetPeer {
 			 * handleUnknownMessage().
 			 */
 			if (packetId >= ID_USER_PACKET_ENUM) {
-				for (RakNetServerListener listener : server.getListeners()) {
-					listener.handleMessage(this, packet, channel);
-				}
+				server.callEvent(listener -> listener.handleMessage(server, this, packet, channel));
 			} else {
-				for (RakNetServerListener listener : server.getListeners()) {
-					listener.handleUnknownMessage(this, packet, channel);
-				}
+				server.callEvent(listener -> listener.handleUnknownMessage(server, this, packet, channel));
 			}
 		}
 	}
 	
 	@Override
 	public void onAcknowledge(Record record, EncapsulatedPacket packet) {
-		server.callEvent(listener -> listener.onAcknowledge(this, record, packet));
+		server.callEvent(listener -> listener.onAcknowledge(server, this, record, packet));
 	}
 
 	@Override
 	public void onNotAcknowledge(Record record, EncapsulatedPacket packet) {
-		server.callEvent(listener -> listener.onNotAcknowledge(this, record, packet));
+		server.callEvent(listener -> listener.onNotAcknowledge(server, this, record, packet));
 	}
 
 }

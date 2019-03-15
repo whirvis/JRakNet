@@ -31,7 +31,6 @@
 package com.whirvis.jraknet.protocol.message.acknowledge;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetPacket;
@@ -48,6 +47,16 @@ import com.whirvis.jraknet.RakNetPacket;
  * @see Record
  */
 public class AcknowledgedPacket extends RakNetPacket {
+	
+	/**
+	 * The record is unranged.
+	 */
+	public static final int RANGED = 0x00;
+	
+	/**
+	 * The record is ranged.
+	 */
+	public static final int UNRANGED = 0x01;
 
 	/**
 	 * The records containing the sequence IDs.
@@ -108,31 +117,10 @@ public class AcknowledgedPacket extends RakNetPacket {
 	 */
 	@Override
 	public void encode() {
-		/*
-		 * Get sequence IDs and sort them in ascending order. This is crucial in
-		 * order for condensing to occur.
-		 */
-		int[] sequenceIds = Record.getSequenceIds(records);
-		Arrays.sort(sequenceIds);
-
-		// Condense records
-		ArrayList<Record> condensed = new ArrayList<Record>();
-		for (int i = 0; i < sequenceIds.length; i++) {
-			int startIndex = sequenceIds[i];
-			int endIndex = startIndex;
-			if (i + 1 < sequenceIds.length) {
-				while (endIndex + 1 == sequenceIds[i + 1] && i + 1 < sequenceIds.length) {
-					endIndex = sequenceIds[++i]; // This value is sequential
-				}
-			}
-			condensed.add(new Record(startIndex, endIndex == startIndex ? -1 : endIndex));
-		}
-		this.records = condensed.toArray(new Record[condensed.size()]);
-
-		// Encode packet
-		this.writeUnsignedShort(condensed.size());
-		for (Record record : condensed) {
-			this.writeUnsignedByte(record.isRanged() ? 0x00 : 0x01);
+		this.records = Record.condense(records);
+		this.writeUnsignedShort(records.length);
+		for (Record record : records) {
+			this.writeUnsignedByte(record.isRanged() ? RANGED : UNRANGED);
 			this.writeTriadLE(record.getIndex());
 			if (record.isRanged()) {
 				this.writeTriadLE(record.getEndIndex());
@@ -150,25 +138,17 @@ public class AcknowledgedPacket extends RakNetPacket {
 	 */
 	@Override
 	public void decode() {
-		// Decode packet
-		ArrayList<Record> expanded = new ArrayList<Record>();
+		ArrayList<Record> records = new ArrayList<Record>();
 		int size = this.readUnsignedShort();
 		for (int i = 0; i < size; i++) {
 			boolean ranged = this.readUnsignedByte() == 0x00;
 			if (ranged == false) {
-				expanded.add(new Record(this.readTriadLE()));
+				records.add(new Record(this.readTriadLE()));
 			} else {
-				expanded.add(new Record(this.readTriadLE(), this.readTriadLE()));
+				records.add(new Record(this.readTriadLE(), this.readTriadLE()));
 			}
 		}
-
-		// Simplify records
-		int[] sequenceIds = Record.getSequenceIds(expanded);
-		expanded.clear(); // Prevent duplicates
-		for (int i = 0; i < sequenceIds.length; i++) {
-			expanded.add(new Record(sequenceIds[i]));
-		}
-		this.records = expanded.toArray(new Record[expanded.size()]);
+		this.records = Record.simplify(records);
 	}
 
 }

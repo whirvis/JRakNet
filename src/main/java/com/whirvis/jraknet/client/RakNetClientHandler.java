@@ -47,7 +47,7 @@ import io.netty.channel.socket.DatagramPacket;
  * also be sent to the client to be dealt with.
  *
  * @author Trent Summerlin
- * @since JRakNet v1.0
+ * @since JRakNet v1.0.0
  */
 public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 

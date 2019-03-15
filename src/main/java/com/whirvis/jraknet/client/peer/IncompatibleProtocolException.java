@@ -28,9 +28,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package com.whirvis.jraknet.client;
+package com.whirvis.jraknet.client.peer;
 
 import java.net.InetSocketAddress;
+
+import com.whirvis.jraknet.client.RakNetClient;
 
 /**
  * Signals that a {@link RakNetClient} has attempted to connect to a server with
@@ -39,7 +41,7 @@ import java.net.InetSocketAddress;
  * @author Trent Summerlin
  * @since JRakNet v2.0
  */
-public class IncompatibleProtocolException extends RakNetClientException {
+public class IncompatibleProtocolException extends PeerFactoryException {
 
 	private static final long serialVersionUID = -3390229698349252537L;
 

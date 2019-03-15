@@ -33,13 +33,12 @@ package com.whirvis.jraknet.server;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.function.IntFunction;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,8 +49,8 @@ import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.identifier.Identifier;
-import com.whirvis.jraknet.peer.GeminusRakNetPeer;
-import com.whirvis.jraknet.peer.RakNetClientSession;
+import com.whirvis.jraknet.peer.InvalidChannelException;
+import com.whirvis.jraknet.peer.RakNetClientPeer;
 import com.whirvis.jraknet.peer.RakNetState;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.connection.ConnectionBanned;
@@ -60,9 +59,7 @@ import com.whirvis.jraknet.protocol.connection.OpenConnectionRequestOne;
 import com.whirvis.jraknet.protocol.connection.OpenConnectionRequestTwo;
 import com.whirvis.jraknet.protocol.connection.OpenConnectionResponseOne;
 import com.whirvis.jraknet.protocol.connection.OpenConnectionResponseTwo;
-import com.whirvis.jraknet.protocol.message.CustomPacket;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
-import com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgedPacket;
 import com.whirvis.jraknet.protocol.status.UnconnectedPing;
 import com.whirvis.jraknet.protocol.status.UnconnectedPong;
 import com.whirvis.jraknet.scheduler.Scheduler;
@@ -82,7 +79,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
  */
-public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
+public class RakNetServer implements RakNetServerListener {
 
 	// TODO: PREVENT MULTIPLE CLIENT WITH THE SAME GUID
 
@@ -101,13 +98,13 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	private boolean broadcastingEnabled;
 	private Identifier identifier;
 	private final ConcurrentLinkedQueue<RakNetServerListener> listeners;
-	private final ConcurrentHashMap<InetSocketAddress, RakNetClientSession> clients;
+	private final ConcurrentHashMap<InetSocketAddress, RakNetClientPeer> clients;
 	private final ConcurrentLinkedQueue<InetAddress> banned;
 	private Bootstrap bootstrap;
 	private EventLoopGroup group;
 	private RakNetServerHandler handler;
 	private Channel channel;
-	private Thread sessionThread;
+	private Thread peerThread;
 	private volatile boolean running;
 
 	/**
@@ -123,8 +120,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            be sent in one packet. If a packet exceeds this size, it is
 	 *            automatically split up so that it can still be sent over the
 	 *            connection (this is handled automatically by
-	 *            {@link com.whirvis.jrkanet.session.RakNetSession
-	 *            RakNetSession}).
+	 *            {@link com.whirvis.jrkanet.peer.RakNetPeer RakNetPeer}).
 	 * @param maxConnections
 	 *            the maximum number of connections, A value of
 	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
@@ -164,7 +160,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		this.broadcastingEnabled = true;
 		this.identifier = identifier;
 		this.listeners = new ConcurrentLinkedQueue<RakNetServerListener>();
-		this.clients = new ConcurrentHashMap<InetSocketAddress, RakNetClientSession>();
+		this.clients = new ConcurrentHashMap<InetSocketAddress, RakNetClientPeer>();
 		this.banned = new ConcurrentLinkedQueue<InetAddress>();
 	}
 
@@ -181,8 +177,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            be sent in one packet. If a packet exceeds this size, it is
 	 *            automatically split up so that it can still be sent over the
 	 *            connection (this is handled automatically by
-	 *            {@link com.whirvis.jrkanet.session.RakNetSession
-	 *            RakNetSession}).
+	 *            {@link com.whirvis.jrkanet.peer.RakNetPeer RakNetPeer}).
 	 * @param maxConnections
 	 *            the maximum number of connections, A value of
 	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
@@ -215,8 +210,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            be sent in one packet. If a packet exceeds this size, it is
 	 *            automatically split up so that it can still be sent over the
 	 *            connection (this is handled automatically by
-	 *            {@link com.whirvis.jrkanet.session.RakNetSession
-	 *            RakNetSession}).
+	 *            {@link com.whirvis.jrkanet.peer.RakNetPeer RakNetPeer}).
 	 * @param maxConnections
 	 *            the maximum number of connections, A value of
 	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
@@ -254,8 +248,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            be sent in one packet. If a packet exceeds this size, it is
 	 *            automatically split up so that it can still be sent over the
 	 *            connection (this is handled automatically by
-	 *            {@link com.whirvis.jrkanet.session.RakNetSession
-	 *            RakNetSession}).
+	 *            {@link com.whirvis.jrkanet.peer.RakNetPeer RakNetPeer}).
 	 * @param maxConnections
 	 *            the maximum number of connections, A value of
 	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
@@ -288,8 +281,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            be sent in one packet. If a packet exceeds this size, it is
 	 *            automatically split up so that it can still be sent over the
 	 *            connection (this is handled automatically by
-	 *            {@link com.whirvis.jrkanet.session.RakNetSession
-	 *            RakNetSession}).
+	 *            {@link com.whirvis.jrkanet.peer.RakNetPeer RakNetPeer}).
 	 * @param maxConnections
 	 *            the maximum number of connections, A value of
 	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
@@ -331,8 +323,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            be sent in one packet. If a packet exceeds this size, it is
 	 *            automatically split up so that it can still be sent over the
 	 *            connection (this is handled automatically by
-	 *            {@link com.whirvis.jrkanet.session.RakNetSession
-	 *            RakNetSession}).
+	 *            {@link com.whirvis.jrkanet.peer.RakNetPeer RakNetPeer}).
 	 * @param maxConnections
 	 *            the maximum number of connections, A value of
 	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
@@ -365,8 +356,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            be sent in one packet. If a packet exceeds this size, it is
 	 *            automatically split up so that it can still be sent over the
 	 *            connection (this is handled automatically by
-	 *            {@link com.whirvis.jrkanet.session.RakNetSession
-	 *            RakNetSession}).
+	 *            {@link com.whirvis.jrkanet.peer.RakNetPeer RakNetPeer}).
 	 * @param maxConnections
 	 *            the maximum number of connections, A value of
 	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
@@ -400,8 +390,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            be sent in one packet. If a packet exceeds this size, it is
 	 *            automatically split up so that it can still be sent over the
 	 *            connection (this is handled automatically by
-	 *            {@link com.whirvis.jrkanet.session.RakNetSession
-	 *            RakNetSession}).
+	 *            {@link com.whirvis.jrkanet.peer.RakNetPeer RakNetPeer}).
 	 * @param maxConnections
 	 *            the maximum number of connections, A value of
 	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
@@ -443,7 +432,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @return the server's timestamp.
 	 */
 	public final long getTimestamp() {
-		return (System.currentTimeMillis() - this.timestamp);
+		return System.currentTimeMillis() - timestamp;
 	}
 
 	/**
@@ -578,11 +567,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			throw new NullPointerException("Listener cannot be null");
 		} else if (listener instanceof RakNetClient && !this.equals(listener)) {
 			throw new IllegalArgumentException("A server cannot be used as a listener except for itself");
-		} else if (listeners.contains(listener)) {
-			return this; // Prevent duplicates
+		} else if (!listeners.contains(listener)) {
+			listeners.add(listener);
+			log.info("Added listener of class " + listener.getClass().getName());
 		}
-		listeners.add(listener);
-		log.info("Added listener of class " + listener.getClass().getName());
 		return this;
 	}
 
@@ -641,12 +629,756 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	}
 
 	/**
+	 * Returns the globally unique ID of the specified peer.
+	 * 
+	 * @param peer
+	 *            the peer.
+	 * @return the globally unique ID of the specified peer, <code>-1</code> if
+	 *         it does not exist.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code> is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 */
+	public final long getGuid(RakNetClientPeer peer) throws NullPointerException, IllegalArgumentException {
+		if (peer == null) {
+			throw new NullPointerException("Peer cannot be null");
+		}
+		RakNetClientPeer clientPeer = clients.get(peer.getAddress());
+		if (clientPeer != null) {
+			if (clientPeer != peer) {
+				throw new NullPointerException("Peer must be of the server");
+			}
+			return clientPeer.getGloballyUniqueId();
+		}
+		return -1L;
+	}
+
+	/**
+	 * Sends a message to the specified peer.
+	 * 
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param channel
+	 *            the channel to send the packet on.
+	 * @param packet
+	 *            the packet to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>packet</code> are
+	 *             <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#MAX_CHANNELS}.
+	 */
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, Packet packet)
+			throws NullPointerException, IllegalArgumentException {
+		if (reliability == null) {
+			throw new NullPointerException("Reliability cannot be null");
+		} else if (packet == null) {
+			throw new NullPointerException("Packet cannot be null");
+		} else if (!this.hasClient(guid)) {
+			throw new IllegalArgumentException("No client with the specified GUID exists");
+		}
+		return this.getClient(guid).sendMessage(reliability, channel, packet);
+	}
+
+	/**
+	 * Sends a message to the specified peer.
+	 * 
+	 * @param peer
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param channel
+	 *            the channel to send the packet on.
+	 * @param packet
+	 *            the packet to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>packet</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#MAX_CHANNELS}.
+	 */
+	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
+			Packet packet) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+		return this.sendMessage(this.getGuid(peer), reliability, channel, packet);
+	}
+
+	/**
+	 * Sends messages to the specified peer.
+	 * 
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packets.
+	 * @param channel
+	 *            the channel to send the packets on.
+	 * @param packets
+	 *            the packets to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>packets</code> are
+	 *             <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#MAX_CHANNELS}.
+	 */
+	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, Packet... packets)
+			throws NullPointerException, InvalidChannelException {
+		if (packets == null) {
+			throw new NullPointerException("Packets cannot be null");
+		}
+		EncapsulatedPacket[] encapsulated = new EncapsulatedPacket[packets.length];
+		for (int i = 0; i < encapsulated.length; i++) {
+			encapsulated[i] = this.sendMessage(guid, reliability, channel, packets[i]);
+		}
+		return encapsulated;
+	}
+
+	/**
+	 * Sends messages to the specified peer.
+	 * 
+	 * @param peer
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packets.
+	 * @param channel
+	 *            the channel to send the packets on.
+	 * @param packets
+	 *            the packets to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>packets</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#MAX_CHANNELS}.
+	 */
+	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
+			Packet... packets) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+		return this.sendMessage(this.getGuid(peer), reliability, channel, packets);
+	}
+
+	/**
+	 * Sends a message to the specified peer on the default channel.
+	 * 
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param packet
+	 *            the packet to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>packet</code> are
+	 *             <code>null</code>.
+	 */
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, Packet packet)
+			throws NullPointerException {
+		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, packet);
+	}
+
+	/**
+	 * Sends a message to the specified peer on the default channel.
+	 * 
+	 * @param peer
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param packet
+	 *            the packet to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>packet</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 */
+	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, Packet packet)
+			throws NullPointerException, IllegalArgumentException {
+		return this.sendMessage(this.getGuid(peer), reliability, packet);
+	}
+
+	/**
+	 * Sends messages to the specified peer on the default channel.
+	 * 
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packets.
+	 * @param packets
+	 *            the packets to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>packets</code> are
+	 *             <code>null</code>.
+	 */
+	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, Packet... packets)
+			throws NullPointerException {
+		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, packets);
+	}
+
+	/**
+	 * Sends messages to the specified peer on the default channel.
+	 * 
+	 * @param peer
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packets.
+	 * @param packets
+	 *            the packets to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>packets</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 */
+	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, Packet... packets)
+			throws NullPointerException, IllegalArgumentException {
+		return this.sendMessage(this.getGuid(peer), reliability, packets);
+	}
+
+	/**
+	 * Sends a message to the specified peer.
+	 * 
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param channel
+	 *            the channel to send the packet on.
+	 * @param buf
+	 *            the buffer to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>buf</code> are
+	 *             <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#MAX_CHANNELS}.
+	 */
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, ByteBuf buf)
+			throws NullPointerException, InvalidChannelException {
+		return this.sendMessage(guid, reliability, channel, new Packet(buf));
+	}
+
+	/**
+	 * Sends a message to the specified peer.
+	 * 
+	 * @param peer
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param channel
+	 *            the channel to send the packet on.
+	 * @param buf
+	 *            the buffer to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>buf</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#MAX_CHANNELS}.
+	 */
+	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
+			ByteBuf buf) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+		return this.sendMessage(this.getGuid(peer), reliability, channel, buf);
+	}
+
+	/**
+	 * Sends messages to the specified peer.
+	 * 
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packets.
+	 * @param channel
+	 *            the channel to send the packets on.
+	 * @param bufs
+	 *            the buffers to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>bufs</code> are
+	 *             <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#MAX_CHANNELS}.
+	 */
+	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, ByteBuf... bufs)
+			throws NullPointerException, InvalidChannelException {
+		if (bufs == null) {
+			throw new NullPointerException("Buffers cannot be null");
+		}
+		EncapsulatedPacket[] encapsulated = new EncapsulatedPacket[bufs.length];
+		for (int i = 0; i < encapsulated.length; i++) {
+			encapsulated[i] = this.sendMessage(guid, reliability, channel, bufs[i]);
+		}
+		return encapsulated;
+	}
+
+	/**
+	 * Sends messages to the specified peer.
+	 * 
+	 * @param guid
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packets.
+	 * @param channel
+	 *            the channel to send the packets on.
+	 * @param bufs
+	 *            the buffers to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>bufs</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#MAX_CHANNELS}.
+	 */
+	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
+			ByteBuf... bufs) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+		return this.sendMessage(this.getGuid(peer), reliability, bufs);
+	}
+
+	/**
+	 * Sends messages to the specified peer on the default channel.
+	 * 
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param channel
+	 *            the channel to send the packet on.
+	 * @param packet
+	 *            the packet to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>buf</code> are
+	 *             <code>null</code>.
+	 */
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, ByteBuf buf)
+			throws NullPointerException {
+		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, buf);
+	}
+
+	/**
+	 * Sends messages to the specified peer on the default channel.
+	 * 
+	 * @param peer
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param channel
+	 *            the channel to send the packet on.
+	 * @param packet
+	 *            the packet to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>buf</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 */
+	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, ByteBuf buf)
+			throws NullPointerException, IllegalArgumentException {
+		return this.sendMessage(this.getGuid(peer), reliability, buf);
+	}
+
+	/**
+	 * Sends messages to the specified peer on the default channel.
+	 * 
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param channel
+	 *            the channel to send the packet on.
+	 * @param packet
+	 *            the packet to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>bufs</code> are
+	 *             <code>null</code>.
+	 */
+	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, ByteBuf... bufs)
+			throws NullPointerException {
+		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, bufs);
+	}
+
+	/**
+	 * Sends messages to the specified peer on the default channel.
+	 * 
+	 * @param guid
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param channel
+	 *            the channel to send the packet on.
+	 * @param packet
+	 *            the packet to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>bufs</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 */
+	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, ByteBuf... bufs)
+			throws NullPointerException, IllegalArgumentException {
+		return this.sendMessage(this.getGuid(peer), reliability, bufs);
+	}
+
+	/**
+	 * Sends a message identifier to the specified peer.
+	 * 
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the message identifier.
+	 * @param channel
+	 *            the channel to send the message identifier on.
+	 * @param packetId
+	 *            the message identifier to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> is <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#MAX_CHANNELS}.
+	 */
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, int packetId)
+			throws NullPointerException, InvalidChannelException {
+		return this.sendMessage(guid, reliability, channel, new RakNetPacket(packetId));
+	}
+
+	/**
+	 * Sends a message identifier to the specified peer.
+	 * 
+	 * @param guid
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the message identifier.
+	 * @param channel
+	 *            the channel to send the message identifier on.
+	 * @param packetId
+	 *            the message identifier to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the<code>peer</code> or <code>reliability</code> are
+	 *             <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#MAX_CHANNELS}.
+	 */
+	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
+			int packetId) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+		return this.sendMessage(this.getGuid(peer), reliability, channel, packetId);
+	}
+
+	/**
+	 * Sends message identifiers to the specified peer.
+	 * 
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the message identifiers.
+	 * @param channel
+	 *            the channel to send the message identifiers on.
+	 * @param packetId
+	 *            the message identifiers to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>packetIds</code> are
+	 *             <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#MAX_CHANNELS}.
+	 */
+	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, int... packetIds)
+			throws NullPointerException, InvalidChannelException {
+		if (packetIds == null) {
+			throw new NullPointerException("Packet IDs cannot be null");
+		}
+		EncapsulatedPacket[] encapsulated = new EncapsulatedPacket[packetIds.length];
+		for (int i = 0; i < encapsulated.length; i++) {
+			encapsulated[i] = this.sendMessage(guid, reliability, channel, packetIds[i]);
+		}
+		return encapsulated;
+	}
+
+	/**
+	 * Sends message identifiers to the specified peer.
+	 * 
+	 * @param guid
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the message identifiers.
+	 * @param channel
+	 *            the channel to send the message identifiers on.
+	 * @param packetId
+	 *            the message identifiers to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>packetIds</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#MAX_CHANNELS}.
+	 */
+	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
+			int... packetIds) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+		return this.sendMessage(this.getGuid(peer), reliability, channel, packetIds);
+	}
+
+	/**
+	 * Sends a message identifier to the specified peer on the default channel.
+	 * 
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the message identifier.
+	 * @param packetId
+	 *            the message identifier to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> is <code>null</code>.
+	 */
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int packetId)
+			throws NullPointerException {
+		return this.sendMessage(guid, reliability, new RakNetPacket(packetId));
+	}
+
+	/**
+	 * Sends a message identifier to the specified peer on the default channel.
+	 * 
+	 * @param guid
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the message identifier.
+	 * @param packetId
+	 *            the message identifier to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> is
+	 *             <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 */
+	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int packetId)
+			throws NullPointerException, IllegalArgumentException {
+		return this.sendMessage(this.getGuid(peer), reliability, packetId);
+	}
+
+	/**
+	 * Sends message identifiers to the specified peer on the default channel.
+	 * 
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the message identifiers.
+	 * @param packetId
+	 *            the message identifiers to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>packetIds</code> are
+	 *             <code>null</code>.
+	 */
+	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int... packetIds)
+			throws NullPointerException {
+		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, packetIds);
+	}
+
+	/**
+	 * Sends message identifiers to the specified peer on the default channel.
+	 * 
+	 * @param guid
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the message identifiers.
+	 * @param packetId
+	 *            the message identifiers to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
+	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
+	 *         type.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>packetIds</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 */
+	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int... packetIds)
+			throws NullPointerException, IllegalArgumentException {
+		return this.sendMessage(this.getGuid(peer), reliability, packetIds);
+	}
+
+	/**
 	 * Returns the clients connected to the server.
 	 * 
 	 * @return the clients connected to the server.
 	 */
-	public final RakNetClientSession[] getClients() {
-		return clients.values().toArray(new RakNetClientSession[clients.size()]);
+	public final RakNetClientPeer[] getClients() {
+		return clients.values().toArray(new RakNetClientPeer[clients.size()]);
 	}
 
 	/**
@@ -668,12 +1400,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *         the server, <code>false</code> otherwise.
 	 */
 	public final boolean hasClient(InetSocketAddress address) {
-		if (address == null) {
-			return false; // No address
-		} else if (address.getAddress() == null) {
-			return false; // No IP address
+		if (address != null) {
+			return clients.containsKey(address);
 		}
-		return clients.containsKey(address);
+		return false;
 	}
 
 	/**
@@ -688,10 +1418,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *         the server, <code>false</code> otherwise.
 	 */
 	public final boolean hasClient(InetAddress address, int port) {
-		if (port < 0x0000 || port > 0xFFFF) {
-			return false; // Invalid port range
+		if (port >= 0x0000 && port <= 0xFFFF) {
+			return this.hasClient(new InetSocketAddress(address, port));
 		}
-		return this.hasClient(new InetSocketAddress(address, port));
+		return false;
 	}
 
 	/**
@@ -722,12 +1452,11 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *         the server, <code>false</code> otherwise.
 	 */
 	public final boolean hasClient(InetAddress address) {
-		if (address == null) {
-			return false; // No IP address
-		}
-		for (InetSocketAddress clientAddress : clients.keySet()) {
-			if (clientAddress.equals(address)) {
-				return true;
+		if (address != null) {
+			for (InetSocketAddress clientAddress : clients.keySet()) {
+				if (clientAddress.equals(address)) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -759,12 +1488,11 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *         server, <code>false</code> otherwise.
 	 */
 	public final boolean hasClient(int port) {
-		if (port < 0x0000 || port > 0xFFFF) {
-			return false; // Invalid port range
-		}
-		for (InetSocketAddress clientAddress : clients.keySet()) {
-			if (clientAddress.getPort() == port) {
-				return true;
+		if (port >= 0x0000 || port <= 0xFFFF) {
+			for (InetSocketAddress clientAddress : clients.keySet()) {
+				if (clientAddress.getPort() == port) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -780,8 +1508,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *         connected to the server, <code>false</code> otherwise.
 	 */
 	public final boolean hasClient(long guid) {
-		for (RakNetClientSession session : clients.values()) {
-			if (session.getGloballyUniqueId() == guid) {
+		for (RakNetClientPeer peer : clients.values()) {
+			if (peer.getGloballyUniqueId() == guid) {
 				return true;
 			}
 		}
@@ -795,7 +1523,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            the address.
 	 * @return the client with the address, <code>null</code> if there is none.
 	 */
-	public final RakNetClientSession getClient(InetSocketAddress address) {
+	public final RakNetClientPeer getClient(InetSocketAddress address) {
 		return clients.get(address);
 	}
 
@@ -808,13 +1536,11 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            the port.
 	 * @return the client with the address, <code>null</code> if there is none.
 	 */
-	public final RakNetClientSession getClient(InetAddress address, int port) {
-		if (address == null) {
-			return null; // No address
-		} else if (port < 0x0000 || port > 0xFFFF) {
-			return null; // Invalid port range
+	public final RakNetClientPeer getClient(InetAddress address, int port) {
+		if (address != null && port > 0x0000 && port < 0xFFFF) {
+			return this.getClient(new InetSocketAddress(address, port));
 		}
-		return this.getClient(new InetSocketAddress(address, port));
+		return null;
 	}
 
 	/**
@@ -829,11 +1555,11 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *             if no IP address for the <code>host</code> could be found, or
 	 *             if a scope_id was specified for a global IPv6 address.
 	 */
-	public final RakNetClientSession getClient(String address, int port) throws UnknownHostException {
-		if (address == null) {
-			return null; // No address
+	public final RakNetClientPeer getClient(String address, int port) throws UnknownHostException {
+		if (address != null) {
+			return this.getClient(InetAddress.getByName(address), port);
 		}
-		return this.getClient(InetAddress.getByName(address), port);
+		return null;
 	}
 
 	/**
@@ -846,13 +1572,17 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *             if no IP address for the <code>host</code> could be found, or
 	 *             if a scope_id was specified for a global IPv6 address.
 	 */
-	public final RakNetClientSession[] getClient(String address) throws UnknownHostException {
-		if (address == null) {
-			return new RakNetClientSession[0]; // No address
+	public final RakNetClientPeer[] getClient(String address) throws UnknownHostException {
+		ArrayList<RakNetClientPeer> peers = new ArrayList<RakNetClientPeer>();
+		if (address != null) {
+			InetAddress inetAddress = InetAddress.getByName(address);
+			for (RakNetClientPeer peer : clients.values()) {
+				if (peer.getInetAddress().equals(inetAddress)) {
+					peers.add(peer);
+				}
+			}
 		}
-		InetAddress inetAddress = InetAddress.getByName(address);
-		return clients.values().stream().filter(session -> session.getAddress().equals(inetAddress))
-				.toArray(RAKNET_CLIENT_SESSION_FUNCTION);
+		return peers.toArray(new RakNetClientPeer[peers.size()]);
 	}
 
 	/**
@@ -862,12 +1592,17 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *            the port.
 	 * @return the clients with the port.
 	 */
-	public final RakNetClientSession[] getClient(int port) {
+	public final RakNetClientPeer[] getClient(int port) {
 		if (port < 0x0000 || port > 0xFFFF) {
-			return new RakNetClientSession[0]; // Invalid port range
+			return new RakNetClientPeer[0]; // Invalid port range
 		}
-		return clients.values().stream().filter(session -> session.getPort() == port)
-				.toArray(RAKNET_CLIENT_SESSION_FUNCTION);
+		ArrayList<RakNetClientPeer> peers = new ArrayList<RakNetClientPeer>();
+		for (RakNetClientPeer peer : clients.values()) {
+			if (peer.getPort() == port) {
+				peers.add(peer);
+			}
+		}
+		return peers.toArray(new RakNetClientPeer[peers.size()]);
 	}
 
 	/**
@@ -878,10 +1613,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @return the client with the globally unique ID, <code>null</code> if
 	 *         there is none.
 	 */
-	public final RakNetClientSession getClient(long guid) {
-		for (RakNetClientSession session : clients.values()) {
-			if (session.getGloballyUniqueId() == guid) {
-				return session;
+	public final RakNetClientPeer getClient(long guid) {
+		for (RakNetClientPeer peer : clients.values()) {
+			if (peer.getGloballyUniqueId() == guid) {
+				return peer;
 			}
 		}
 		return null;
@@ -962,14 +1697,6 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		this.unbanClient(InetAddress.getByName(address));
 	}
 
-	@Override
-	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, Packet packet) {
-		if (!this.hasClient(guid)) {
-			throw new IllegalArgumentException("No client with the specified GUID exists");
-		}
-		return this.getClient(guid).sendMessage(reliability, channel, packet);
-	}
-
 	/**
 	 * Disconnects a client from the server.
 	 * 
@@ -983,15 +1710,15 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 *          <code>false</code> otherwise.
 	 */
 	public final boolean disconnectClient(InetSocketAddress address, String reason) {
-		RakNetClientSession session = clients.remove(address);
-		if (session == null) {
+		RakNetClientPeer peer = clients.remove(address);
+		if (peer == null) {
 			return false; // No client to disconnect
 		}
-		session.sendMessage(Reliability.UNRELIABLE, RakNetPacket.ID_DISCONNECTION_NOTIFICATION);
+		peer.sendMessage(Reliability.UNRELIABLE, RakNetPacket.ID_DISCONNECTION_NOTIFICATION);
 		log.debug("Disconnected client with address " + address + " for \"" + (reason == null ? "Disconnected" : reason)
 				+ "\"");
 		this.callEvent(
-				listener -> listener.onDisconnect(this, address, session, reason == null ? "Disconnected" : reason));
+				listener -> listener.onDisconnect(this, address, peer, reason == null ? "Disconnected" : reason));
 		return true;
 	}
 
@@ -1097,9 +1824,9 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 */
 	public final boolean disconnectClients(InetAddress address, String reason) {
 		boolean disconnected = false;
-		for (InetSocketAddress sessionAddress : clients.keySet()) {
-			if (address.equals(sessionAddress)) {
-				this.disconnectClient(sessionAddress, reason);
+		for (InetSocketAddress peerAddress : clients.keySet()) {
+			if (address.equals(peerAddress)) {
+				this.disconnectClient(peerAddress, reason);
 				disconnected = true;
 			}
 		}
@@ -1190,8 +1917,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	/**
 	 * Disconnects a client from the server.
 	 * 
-	 * @param session
-	 *            the session of the client to disconnect.
+	 * @param peer
+	 *            the peer of the client to disconnect.
 	 * @param reason
 	 *            the reason for client disconnection. A <code>null</code> value
 	 *            will have <code>"Disconnected"</code> be used as the reason
@@ -1199,31 +1926,29 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 * @return <code>true</code> if a client was disconnected,
 	 *         <code>false</code> otherwise.
 	 * @throws IllegalArgumentException
-	 *             if the given session is fabricated, meaning that the session
-	 *             is not one created by the server but rather one created
-	 *             externally.
+	 *             if the given peer is fabricated, meaning that the peer is not
+	 *             one created by the server but rather one created externally.
 	 */
-	public final void disconnectClient(RakNetClientSession session, String reason) {
-		if (!clients.containsValue(session)) {
+	public final void disconnectClient(RakNetClientPeer peer, String reason) {
+		if (!clients.containsValue(peer)) {
 			throw new IllegalArgumentException("Session must belong to the server");
 		}
-		this.disconnectClient(session.getAddress(), reason);
+		this.disconnectClient(peer.getAddress(), reason);
 	}
 
 	/**
 	 * Disconnects a client from the server.
 	 * 
-	 * @param session
-	 *            the session of the client to disconnect.
+	 * @param peer
+	 *            the peer of the client to disconnect.
 	 * @return <code>true</code> if a client was disconnected,
 	 *         <code>false</code> otherwise.
 	 * @throws IllegalArgumentException
-	 *             if the given session is fabricated, meaning that the session
-	 *             is not one created by the server but rather one created
-	 *             externally.
+	 *             if the given peer is fabricated, meaning that the peer is not
+	 *             one created by the server but rather one created externally.
 	 */
-	public final void disconnectClient(RakNetClientSession session) {
-		this.disconnectClient(session, null);
+	public final void disconnectClient(RakNetClientPeer peer) {
+		this.disconnectClient(peer, null);
 	}
 
 	/**
@@ -1320,12 +2045,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				|| packetId == RakNetPacket.ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
 			UnconnectedPing ping = new UnconnectedPing(packet);
 			ping.decode();
-			if (ping.failed()) {
-				return;
-			}
-			if ((packetId == RakNetPacket.ID_UNCONNECTED_PING
-					|| (clients.size() < this.maxConnections || this.maxConnections < 0))
-					&& this.broadcastingEnabled == true && ping.magic == true) {
+			if (!ping.failed()
+					&& (packetId == RakNetPacket.ID_UNCONNECTED_PING
+							|| (clients.size() < maxConnections || maxConnections < 0))
+					&& broadcastingEnabled == true && ping.magic == true) {
 				ServerPing pingEvent = new ServerPing(sender, ping.connectionType, identifier);
 				this.callEvent(listener -> listener.handlePing(this, pingEvent));
 				if (pingEvent.getIdentifier() != null) {
@@ -1379,7 +2102,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			if (!connectionRequestTwo.failed() && connectionRequestTwo.magic == true) {
 				RakNetPacket errorPacket = this.validateSender(sender);
 				if (errorPacket == null) {
-					if (connectionRequestTwo.maximumTransferUnit <= this.maximumTransferUnit) {
+					if (connectionRequestTwo.maximumTransferUnit <= maximumTransferUnit) {
 						OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo();
 						connectionResponseTwo.serverGuid = this.guid;
 						connectionResponseTwo.clientAddress = sender;
@@ -1387,11 +2110,10 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 						connectionResponseTwo.encode();
 						if (!connectionResponseTwo.failed()) {
 							this.callEvent(listener -> listener.onConnect(this, sender));
-							RakNetClientSession clientSession = new RakNetClientSession(this,
-									System.currentTimeMillis(), connectionRequestTwo.connectionType,
-									connectionRequestTwo.clientGuid, connectionRequestTwo.maximumTransferUnit, channel,
-									sender);
-							clients.put(sender, clientSession);
+							clients.put(sender,
+									new RakNetClientPeer(this, connectionRequestTwo.connectionType,
+											connectionRequestTwo.clientGuid, connectionRequestTwo.maximumTransferUnit,
+											channel, sender));
 							this.sendNettyMessage(connectionResponseTwo, sender);
 						}
 					}
@@ -1399,20 +2121,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 					this.sendNettyMessage(errorPacket, sender);
 				}
 			}
-		} else if (packetId >= RakNetPacket.ID_CUSTOM_0 && packetId <= RakNetPacket.ID_CUSTOM_F) {
-			if (clients.containsKey(sender)) {
-				CustomPacket custom = new CustomPacket(packet);
-				custom.decode();
-				RakNetClientSession session = clients.get(sender);
-				session.handleCustom(custom);
-			}
-		} else if (packetId == RakNetPacket.ID_ACK || packetId == RakNetPacket.ID_NACK) {
-			if (clients.containsKey(sender)) {
-				AcknowledgedPacket acknowledge = new AcknowledgedPacket(packet);
-				acknowledge.decode();
-				RakNetClientSession session = clients.get(sender);
-				session.handleAcknowledge(acknowledge);
-			}
+		} else if (clients.containsKey(sender)) {
+			clients.get(sender).handleMessage(packet);
 		}
 		log.debug("Handled" + RakNetPacket.getName(packet.getId()) + " packet");
 	}
@@ -1429,7 +2139,7 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	private final RakNetPacket validateSender(InetSocketAddress sender) {
 		if (this.hasClient(sender)) {
 			return new RakNetPacket(RakNetPacket.ID_ALREADY_CONNECTED);
-		} else if (this.getClientCount() >= this.maxConnections && this.maxConnections >= 0) {
+		} else if (this.getClientCount() >= maxConnections && maxConnections >= 0) {
 			return new RakNetPacket(RakNetPacket.ID_NO_FREE_INCOMING_CONNECTIONS);
 		} else if (this.isClientBanned(sender.getAddress())) {
 			ConnectionBanned connectionBanned = new ConnectionBanned();
@@ -1442,8 +2152,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 	/**
 	 * Sends a Netty message over the channel raw. This should be used
-	 * sparingly, as if it is used incorrectly it could break client sessions
-	 * entirely. In order to send a message to a session, use one of the
+	 * sparingly, as if it is used incorrectly it could break client peers
+	 * entirely. In order to send a message to a peer, use one of the
 	 * {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, io.netty.buffer.ByteBuf)
 	 * sendMessage()} methods.
 	 * 
@@ -1454,14 +2164,14 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 	 */
 	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(buf, address));
-		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + ") to "
+		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to "
 				+ address);
 	}
 
 	/**
 	 * Sends a Netty message over the channel raw. This should be used
-	 * sparingly, as if it is used incorrectly it could break client sessions
-	 * entirely. In order to send a message to a session, use one of the
+	 * sparingly, as if it is used incorrectly it could break client peers
+	 * entirely. In order to send a message to a peer, use one of the
 	 * {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, Packet)
 	 * sendMessage()} methods.
 	 * 
@@ -1476,8 +2186,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 
 	/**
 	 * Sends a Netty message over the channel raw. This should be used
-	 * sparingly, as if it is used incorrectly it could break client sessions
-	 * entirely. In order to send a message to a session, use one of the
+	 * sparingly, as if it is used incorrectly it could break client peers
+	 * entirely. In order to send a message to a peer, use one of the
 	 * {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(com.whirvis.jraknet.protocol.Reliability, int)
 	 * sendMessage()} methods.
 	 * 
@@ -1516,26 +2226,25 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 			this.running = true;
 			log.debug("Created and bound bootstrap");
 
-			// Create and start session update thread
+			// Create and start peer update thread
 			RakNetServer server = this;
-			this.sessionThread = new Thread("jraknet-session-thread-" + Long.toHexString(guid)) {
+			this.peerThread = new Thread("jraknet-peer-thread-" + Long.toHexString(guid)) {
 
 				@Override
 				public void run() {
 					try {
 						while (server.running == true && !this.isInterrupted()) {
 							Thread.sleep(0, 1); // Lower CPU usage
-							for (RakNetClientSession session : clients.values()) {
+							for (RakNetClientPeer peer : clients.values()) {
 								try {
-									session.update();
-									if (session.getPacketsReceivedThisSecond() >= RakNet.getMaxPacketsPerSecond()) {
-										server.blockAddress(session.getInetAddress(), "Too many packets",
+									peer.update();
+									if (peer.getPacketsReceivedThisSecond() >= RakNet.getMaxPacketsPerSecond()) {
+										server.blockAddress(peer.getInetAddress(), "Too many packets",
 												RakNet.MAX_PACKETS_PER_SECOND_BLOCK);
 									}
 								} catch (Throwable throwable) {
-									server.callEvent(
-											listener -> listener.onSessionException(server, session, throwable));
-									server.disconnectClient(session, throwable.getMessage());
+									server.callEvent(listener -> listener.onPeerException(server, peer, throwable));
+									server.disconnectClient(peer, throwable.getMessage());
 								}
 							}
 						}
@@ -1545,8 +2254,8 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 				}
 
 			};
-			sessionThread.start();
-			log.debug("Created and started session update thread");
+			peerThread.start();
+			log.debug("Created and started peer update thread");
 			this.callEvent(listener -> listener.onStart(this));
 		} catch (InterruptedException e) {
 			this.running = false;
@@ -1569,14 +2278,14 @@ public class RakNetServer implements GeminusRakNetPeer, RakNetServerListener {
 		}
 
 		// Disconnect clients
-		for (RakNetClientSession client : clients.values()) {
+		for (RakNetClientPeer client : clients.values()) {
 			this.disconnectClient(client, reason == null ? "Server shutdown" : reason);
 		}
 		clients.clear();
 
 		// Stop server
 		this.running = false;
-		sessionThread.interrupt();
+		peerThread.interrupt();
 		log.info("Shutdown server");
 
 		// Shutdown networking

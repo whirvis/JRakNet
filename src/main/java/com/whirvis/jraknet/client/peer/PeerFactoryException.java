@@ -28,44 +28,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package com.whirvis.jraknet.client;
+package com.whirvis.jraknet.client.peer;
 
-import java.net.InetSocketAddress;
+import com.whirvis.jraknet.client.RakNetClient;
+import com.whirvis.jraknet.client.RakNetClientException;
 
 /**
- * Signals that a {@link RakNetClient} attempted to connect to a server that has
- * no free incoming connections.
+ * Signals that an error has occurred while a {@link PeerFactory} was attempting
+ * to create a {@link com.whirvis.jraknet.peer.RakNetServerPeer
+ * RakNetServerPeer}.
  *
  * @author Trent Summerlin
- * @since JRakNet v2.0
+ * @since JRakNet v2.0.0
  */
-public class NoFreeIncomingConnectionsException extends RakNetClientException {
+public class PeerFactoryException extends RakNetClientException {
 
-	private static final long serialVersionUID = 5863972657532782029L;
-
-	private final InetSocketAddress address;
+	private static final long serialVersionUID = -5025319984358819345L;
 
 	/**
-	 * Constructs a <code>NoFreeIncomingConnectionsException</code>.
+	 * Constructs a <code>PeerFactoryException</code>.
 	 * 
 	 * @param client
-	 *            the client that attempted to a server with no free incoming
-	 *            connections.
-	 * @param address
-	 *            the address of the server with no free incoming connections.
+	 *            the client that created the peer that threw the exception.
+	 * @param error
+	 *            the detail message.
 	 */
-	public NoFreeIncomingConnectionsException(RakNetClient client, InetSocketAddress address) {
-		super(client, "Server has no free incoming connections");
-		this.address = address;
+	public PeerFactoryException(RakNetClient client, String error) {
+		super(client, error);
 	}
 
 	/**
-	 * Returns the address of the server that has no free incoming connections.
+	 * Constructs a <code>PeerFactoryException</code>.
 	 * 
-	 * @return the address of the server that has no free incoming connections.
+	 * @param client
+	 *            the client that created the peer that threw the exception.
+	 * @param error
+	 *            the <code>Throwable</code> that was thrown.
 	 */
-	public InetSocketAddress getAddress() {
-		return this.address;
+	public PeerFactoryException(RakNetClient client, Throwable error) {
+		super(client, error);
 	}
 
 }

@@ -127,9 +127,6 @@ public class CustomPacket extends RakNetPacket {
 		this.writeTriadLE(sequenceId);
 		if (messages != null) {
 			for (EncapsulatedPacket packet : messages) {
-				packet.buffer = this; // TODO: According to comments this
-										// apparently
-										// broke stuff
 				ArrayList<EncapsulatedPacket> ackMessages = new ArrayList<EncapsulatedPacket>();
 				if (packet.reliability.requiresAck()) {
 					packet.ackRecord = new Record(sequenceId);
@@ -137,7 +134,7 @@ public class CustomPacket extends RakNetPacket {
 				}
 				this.ackMessages = ackMessages.toArray(new EncapsulatedPacket[ackMessages.size()]);
 				packet.encode();
-				packet.buffer = null; // Prevent illegal reuse
+				this.write(packet.getEncoded());
 			}
 		}
 	}
@@ -147,9 +144,7 @@ public class CustomPacket extends RakNetPacket {
 		this.sequenceId = this.readTriadLE();
 		ArrayList<EncapsulatedPacket> messages = new ArrayList<EncapsulatedPacket>();
 		while (this.remaining() >= EncapsulatedPacket.MINIMUM_SIZE) {
-			EncapsulatedPacket packet = new EncapsulatedPacket();
-			packet.buffer = this; // TODO: According to comments this apparently
-									// broke stuff
+			EncapsulatedPacket packet = new EncapsulatedPacket(this.buffer());
 			ArrayList<EncapsulatedPacket> ackMessages = new ArrayList<EncapsulatedPacket>();
 			packet.decode();
 			if (packet.reliability.requiresAck()) {
@@ -157,7 +152,6 @@ public class CustomPacket extends RakNetPacket {
 				ackMessages.add(packet);
 			}
 			this.ackMessages = ackMessages.toArray(new EncapsulatedPacket[ackMessages.size()]);
-			packet.buffer = null; // Prevent illegal reuse
 			messages.add(packet);
 		}
 		this.messages = messages.toArray(new EncapsulatedPacket[messages.size()]);

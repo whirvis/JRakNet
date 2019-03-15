@@ -28,29 +28,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package com.whirvis.jraknet.client;
+package com.whirvis.jraknet.client.peer;
+
+import com.whirvis.jraknet.client.RakNetClient;
 
 /**
- * Signals that a {@link RakNetClient} has experienced an error during the login
- * process.
- *
+ * Signals that the server has requested the {@link RakNetClient} to use an
+ * invalid maximum transfer unit.
+ * 
  * @author Trent Summerlin
- * @since JRakNet v2.0
+ * @since JRakNet v2.11.0
  */
-public class LoginFailureException extends RakNetClientException {
+public class InvalidMaximumTransferUnitException extends PeerFactoryException {
 
-	private static final long serialVersionUID = -5025319984358819345L;
+	private static final long serialVersionUID = 1247149239806409526L;
+
+	private final int maximumTransferUnitSize;
 
 	/**
-	 * Constructs a <code>LoginFailureException</code>.
+	 * Constructs a <code>InvalidMaximumTransferUnitException</code>.
 	 * 
 	 * @param client
-	 *            the client that threw the exception.
-	 * @param error
-	 *            the reason login failed.
+	 *            the client that created the peer that threw the exception.
+	 * @param maximumTransferUnitSize
+	 *            the invalid maximum transfer unit size.
 	 */
-	public LoginFailureException(RakNetClient client, String error) {
-		super(client, error);
+	public InvalidMaximumTransferUnitException(RakNetClient client, int maximumTransferUnitSize) {
+		super(client, "Invalid maximum transfer unit size " + maximumTransferUnitSize);
+		this.maximumTransferUnitSize = maximumTransferUnitSize;
+	}
+
+	/**
+	 * Returns the invalid maximum transfer unit size the server requested the
+	 * {@link RakNetClient} to use.
+	 * 
+	 * @return the invalid maximum transfer unit size the server requested the
+	 *         {@link RakNetClient} to use.
+	 */
+	public int getMaximumTransferUnitSize() {
+		return this.maximumTransferUnitSize;
 	}
 
 }

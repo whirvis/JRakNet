@@ -103,9 +103,21 @@ public class Discovery {
 
 	};
 
+	/**
+	 * The logger used by the discovery system.
+	 */
 	private static final Logger LOG = LogManager.getLogger("jraknet-discovery");
+
+	/**
+	 * The timestamp used in pings sent by the discovery system.
+	 */
 	private static final long TIMESTAMP = System.currentTimeMillis();
+
+	/**
+	 * The ping ID used in pings sent by the discovery system.
+	 */
 	private static final long PING_ID = UUID.randomUUID().getLeastSignificantBits();
+
 	protected static DiscoveryMode discoveryMode = DiscoveryMode.ALL_CONNECTIONS;
 	protected static final ConcurrentLinkedQueue<DiscoveryListener> LISTENERS = new ConcurrentLinkedQueue<DiscoveryListener>();
 	protected static final ConcurrentHashMap<InetSocketAddress, Boolean> DISCOVERY_ADDRESSES = new ConcurrentHashMap<InetSocketAddress, Boolean>();
@@ -191,14 +203,13 @@ public class Discovery {
 	public static synchronized void addListener(DiscoveryListener listener) throws NullPointerException {
 		if (listener == null) {
 			throw new NullPointerException("Listener cannot be null");
-		} else if (LISTENERS.contains(listener)) {
-			return; // Prevent duplicates
-		}
-		LISTENERS.add(listener);
-		LOG.debug("Added listener of class " + listener.getClass().getName());
-		if (thread == null) {
-			thread = new DiscoveryThread();
-			thread.start();
+		} else if (!LISTENERS.contains(listener)) {
+			LISTENERS.add(listener);
+			LOG.debug("Added listener of class " + listener.getClass().getName());
+			if (thread == null) {
+				thread = new DiscoveryThread();
+				thread.start();
+			}
 		}
 	}
 
@@ -327,22 +338,21 @@ public class Discovery {
 	 * use the {@link #removePort(int)} method.
 	 */
 	public static void clearPorts() {
-		if (!DISCOVERY_ADDRESSES.containsValue(LOCAL_SERVER)) {
-			return; // No ports to clear
-		}
-		Iterator<InetSocketAddress> addresses = DISCOVERY_ADDRESSES.keySet().iterator();
-		while (addresses.hasNext()) {
-			InetSocketAddress address = addresses.next();
-			boolean type = DISCOVERY_ADDRESSES.get(address).booleanValue();
-			if (type == LOCAL_SERVER) {
-				addresses.remove();
-				DiscoveredServer forgotten = DISCOVERED.remove(address);
-				if (forgotten != null) {
-					callEvent(listener -> listener.onServerForgotten(forgotten));
+		if (DISCOVERY_ADDRESSES.containsValue(LOCAL_SERVER)) {
+			Iterator<InetSocketAddress> addresses = DISCOVERY_ADDRESSES.keySet().iterator();
+			while (addresses.hasNext()) {
+				InetSocketAddress address = addresses.next();
+				boolean type = DISCOVERY_ADDRESSES.get(address).booleanValue();
+				if (type == LOCAL_SERVER) {
+					addresses.remove();
+					DiscoveredServer forgotten = DISCOVERED.remove(address);
+					if (forgotten != null) {
+						callEvent(listener -> listener.onServerForgotten(forgotten));
+					}
 				}
 			}
+			LOG.debug("Cleared discovery ports");
 		}
-		LOG.debug("Cleared discovery ports");
 	}
 
 	/**
@@ -462,8 +472,7 @@ public class Discovery {
 			return; // No address to remove
 		} else if (DISCOVERY_ADDRESSES.get(address).booleanValue() != EXTERNAL_SERVER) {
 			throw new IllegalArgumentException("Address must be that of an external server");
-		}
-		if (DISCOVERY_ADDRESSES.remove(address) != null) {
+		} else if (DISCOVERY_ADDRESSES.remove(address) != null) {
 			DiscoveredServer forgotten = DISCOVERED.remove(address);
 			if (forgotten != null) {
 				callEvent(listener -> listener.onServerForgotten(forgotten));
@@ -481,12 +490,9 @@ public class Discovery {
 	 *            the server port.
 	 */
 	public static void removeServer(InetAddress address, int port) {
-		if (address == null) {
-			return; // No address
-		} else if (port < 0x0000 || port > 0xFFFF) {
-			return; // Invalid port range
+		if (address != null && port >= 0x0000 && port <= 0xFFFF) {
+			removeServer(new InetSocketAddress(address, port));
 		}
-		removeServer(new InetSocketAddress(address, port));
 	}
 
 	/**
@@ -501,10 +507,9 @@ public class Discovery {
 	 *             scope_id was specified for a global IPv6 address.
 	 */
 	public static void removeServer(String address, int port) throws UnknownHostException {
-		if (address == null) {
-			return; // No address
+		if (address != null) {
+			removeServer(InetAddress.getByName(address), port);
 		}
-		removeServer(InetAddress.getByName(address), port);
 	}
 
 	/**
@@ -530,22 +535,21 @@ public class Discovery {
 	 * method.
 	 */
 	public static void clearServers() {
-		if (!DISCOVERY_ADDRESSES.containsValue(EXTERNAL_SERVER)) {
-			return; // No external servers to clear
-		}
-		Iterator<InetSocketAddress> addresses = DISCOVERY_ADDRESSES.keySet().iterator();
-		while (addresses.hasNext()) {
-			InetSocketAddress address = addresses.next();
-			boolean type = DISCOVERY_ADDRESSES.get(address).booleanValue();
-			if (type == EXTERNAL_SERVER) {
-				addresses.remove();
-				DiscoveredServer forgotten = DISCOVERED.remove(address);
-				if (forgotten != null) {
-					callEvent(listener -> listener.onServerForgotten(forgotten));
+		if (DISCOVERY_ADDRESSES.containsValue(EXTERNAL_SERVER)) {
+			Iterator<InetSocketAddress> addresses = DISCOVERY_ADDRESSES.keySet().iterator();
+			while (addresses.hasNext()) {
+				InetSocketAddress address = addresses.next();
+				boolean type = DISCOVERY_ADDRESSES.get(address).booleanValue();
+				if (type == EXTERNAL_SERVER) {
+					addresses.remove();
+					DiscoveredServer forgotten = DISCOVERED.remove(address);
+					if (forgotten != null) {
+						callEvent(listener -> listener.onServerForgotten(forgotten));
+					}
 				}
 			}
+			LOG.debug("Cleared external servers from discovery");
 		}
-		LOG.debug("Cleared external servers from discovery");
 	}
 
 	/**
@@ -585,10 +589,10 @@ public class Discovery {
 	 * @param sender
 	 *            the server address.
 	 * @param pong
-	 *            the decoded <code>UnconnectedPong</code> packet.
+	 *            the decoded unconnected pong packet.
 	 * @throws NullPointerException
-	 *             if <code>sender</code> is <code>null</code> or the IP address
-	 *             of <code>sender</code> is <code>null</code>.
+	 *             if the <code>sender</code> is <code>null</code> or the IP
+	 *             address of the <code>sender</code> is <code>null</code>.
 	 * @throws IllegalArgumentException
 	 *             if the <code>pong</code> packet failed to decode.
 	 */
@@ -600,28 +604,28 @@ public class Discovery {
 			throw new NullPointerException("Sender IP address cannot be null");
 		} else if (pong.failed()) {
 			throw new IllegalArgumentException("Unconnected pong failed to decode");
-		} else if (!RakNet.isLocalAddress(sender) && !DISCOVERY_ADDRESSES.containsKey(sender)) {
-			return; // Not a local server or a registered external server
-		}
-		boolean external = !RakNet.isLocalAddress(sender);
-		if (DISCOVERY_ADDRESSES.containsKey(sender)) {
-			external = DISCOVERY_ADDRESSES.get(sender).booleanValue();
-		}
+		} else if (RakNet.isLocalAddress(sender) || DISCOVERY_ADDRESSES.containsKey(sender)) {
+			boolean external = !RakNet.isLocalAddress(sender);
+			if (DISCOVERY_ADDRESSES.containsKey(sender)) {
+				external = DISCOVERY_ADDRESSES.get(sender).booleanValue();
+			}
 
-		// Update server information
-		if (!DISCOVERED.containsKey(sender)) {
-			DiscoveredServer discovered = new DiscoveredServer(sender, external, pong.identifier);
-			DISCOVERED.put(sender, discovered);
-			LOG.info("Discovered " + (external ? "external" : "local") + " with address " + sender);
-			callEvent(listener -> listener.onServerDiscovered(discovered));
-		} else {
-			DiscoveredServer discovered = DISCOVERED.get(sender);
-			discovered.setTimestamp(System.currentTimeMillis());
-			if (!pong.identifier.equals(discovered.getIdentifier())) {
-				Identifier oldIdentifier = discovered.getIdentifier();
-				discovered.setIdentifier(pong.identifier);
-				LOG.debug("Updated local server with address " + sender + " identifier to \"" + pong.identifier + "\"");
-				callEvent(listener -> listener.onServerIdentifierUpdate(discovered, oldIdentifier));
+			// Update server information
+			if (!DISCOVERED.containsKey(sender)) {
+				DiscoveredServer discovered = new DiscoveredServer(sender, external, pong.identifier);
+				DISCOVERED.put(sender, discovered);
+				LOG.info("Discovered " + (external ? "external" : "local") + " with address " + sender);
+				callEvent(listener -> listener.onServerDiscovered(discovered));
+			} else {
+				DiscoveredServer discovered = DISCOVERED.get(sender);
+				discovered.setTimestamp(System.currentTimeMillis());
+				if (!pong.identifier.equals(discovered.getIdentifier())) {
+					Identifier oldIdentifier = discovered.getIdentifier();
+					discovered.setIdentifier(pong.identifier);
+					LOG.debug("Updated local server with address " + sender + " identifier to \"" + pong.identifier
+							+ "\"");
+					callEvent(listener -> listener.onServerIdentifierUpdate(discovered, oldIdentifier));
+				}
 			}
 		}
 	}

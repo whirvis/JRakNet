@@ -1,11 +1,11 @@
 /*
- *       _   _____            _      _   _          _
- *      | | |  __ \          | |    | \ | |        | |
- *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_
+ *       _   _____            _      _   _          _   
+ *      | | |  __ \          | |    | \ | |        | |  
+ *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_ 
  *  _   | | |  _  /   / _` | | |/ / | . ` |  / _ \ | __|
- * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_
+ * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
- *
+ *                                                  
  * the MIT License (MIT)
  *
  * Copyright (c) 2016-2019 Trent Summerlin
@@ -26,50 +26,31 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * SOFTWARE.  
  */
-package com.whirvis.jraknet.client;
+package com.whirvis.jraknet.client.peer;
 
-import com.whirvis.jraknet.RakNetPacket;
+import com.whirvis.jraknet.client.RakNetClient;
 
 /**
- * Signals that a packet critical to the {@link RakNetClient} failed to encode
- * or decode correctly.
- *
+ * Signals that an invalid magic was decoded in a login packet being handled by
+ * the {@link PeerFactory}.
+ * 
  * @author Trent Summerlin
- * @since JRakNet v1.0.0
+ * @since JRakNet v2.11.0
  */
-public class PacketBufferException extends RakNetClientException {
+public class InvalidMagicException extends PeerFactoryException {
 
-	private static final long serialVersionUID = -3730545025991834599L;
-
-	private final RakNetPacket packet;
+	private static final long serialVersionUID = -1956033712806029854L;
 
 	/**
-	 * Constructs a <code>PacketBufferException</code>.
+	 * Constructs a <code>InvalidMagicException</code>.
 	 * 
 	 * @param client
-	 *            the client that threw the exception.
-	 * @param packet
-	 *            the packet that failed to encode/decode.
+	 *            the client that created the peer that threw the exception.
 	 */
-	public PacketBufferException(RakNetClient client, RakNetPacket packet) {
-		super(client, RakNetPacket.getName(packet.getId()) + " packet failed to encode/decode");
-		this.packet = packet;
-	}
-
-	/**
-	 * Returns the packet that failed to encode/decode.
-	 * 
-	 * @return the packet that failed to encode/decode.
-	 */
-	public RakNetPacket getPacket() {
-		return this.packet;
-	}
-
-	@Override
-	public String getLocalizedMessage() {
-		return "Packet failed to encode/decode";
+	public InvalidMagicException(RakNetClient client) {
+		super(client, "Invalid MAGIC read in packet");
 	}
 
 }

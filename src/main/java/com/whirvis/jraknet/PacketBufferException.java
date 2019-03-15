@@ -28,46 +28,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.client;
+package com.whirvis.jraknet;
 
-import java.net.InetSocketAddress;
+import com.whirvis.jraknet.RakNetPacket;
 
 /**
- * Signals that a {@link RakNetClient} has attempted to connect to a server that
- * it is already connected to.
+ * Signals that a packet critical to the current task at hand failed to encode
+ * or decode correctly.
  *
  * @author Trent Summerlin
- * @since JRakNet v2.0
+ * @since JRakNet v1.0.0
  */
-public class AlreadyConnectedException extends RakNetClientException {
+public class PacketBufferException extends RakNetException {
 
-	private static final long serialVersionUID = -482118372058339060L;
+	private static final long serialVersionUID = -3730545025991834599L;
 
-	private final InetSocketAddress address;
+	private final RakNetPacket packet;
 
 	/**
-	 * Constructs an <code>AlreadyConnectedException</code>.
+	 * Constructs a <code>PacketBufferException</code>.
 	 * 
-	 * @param client
-	 *            the client that is already connected to the server.
-	 * @param address
-	 *            the address of the server that the client is already connected
-	 *            to.
+	 * @param packet
+	 *            the packet that failed to encode/decode.
 	 */
-	public AlreadyConnectedException(RakNetClient client, InetSocketAddress address) {
-		super(client, "Already connected to server");
-		this.address = address;
+	public PacketBufferException(RakNetPacket packet) {
+		super(RakNetPacket.getName(packet.getId()) + " packet failed to encode/decode");
+		this.packet = packet;
 	}
 
 	/**
-	 * Returns the address of the server that the client is already connected
-	 * to.
+	 * Returns the packet that failed to encode/decode.
 	 * 
-	 * @return the address of the server that the client is already connected
-	 *         to.
+	 * @return the packet that failed to encode/decode.
 	 */
-	public InetSocketAddress getAddress() {
-		return this.address;
+	public RakNetPacket getPacket() {
+		return this.packet;
 	}
 
 }

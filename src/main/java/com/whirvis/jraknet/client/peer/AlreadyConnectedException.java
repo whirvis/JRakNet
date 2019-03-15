@@ -28,11 +28,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+package com.whirvis.jraknet.client.peer;
+
+import java.net.InetSocketAddress;
+
+import com.whirvis.jraknet.client.RakNetClient;
+
 /**
- * The packets that are sent between the server and client during initial
- * connection.
- * 
+ * Signals that a {@link RakNetClient} has attempted to connect to a server that
+ * it is already connected to.
+ *
  * @author Trent Summerlin
- * @since JRakNet v1.0.0
+ * @since JRakNet v2.0
  */
-package com.whirvis.jraknet.protocol.connection;
+public class AlreadyConnectedException extends PeerFactoryException {
+
+	private static final long serialVersionUID = -482118372058339060L;
+
+	private final InetSocketAddress address;
+
+	/**
+	 * Constructs an <code>AlreadyConnectedException</code>.
+	 * 
+	 * @param client
+	 *            the client that is already connected to the server.
+	 * @param address
+	 *            the address of the server that the client is already connected
+	 *            to.
+	 */
+	public AlreadyConnectedException(RakNetClient client, InetSocketAddress address) {
+		super(client, "Already connected to server");
+		this.address = address;
+	}
+
+	/**
+	 * Returns the address of the server that the client is already connected
+	 * to.
+	 * 
+	 * @return the address of the server that the client is already connected
+	 *         to.
+	 */
+	public InetSocketAddress getAddress() {
+		return this.address;
+	}
+
+}

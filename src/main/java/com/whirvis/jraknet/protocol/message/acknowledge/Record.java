@@ -31,7 +31,10 @@
 package com.whirvis.jraknet.protocol.message.acknowledge;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+
+import com.whirvis.jraknet.map.IntMap;
 
 /**
  * Represents a packet record which is used in acknowledgement packets to
@@ -47,7 +50,7 @@ public class Record {
 	 * The record is not ranged.
 	 */
 	public static final int NOT_RANGED = -1;
-	
+
 	// TODO FIX THIS!!!!
 
 	/**
@@ -57,16 +60,24 @@ public class Record {
 	 *            the records to get the sequence IDs from.
 	 * @return the sequence IDs contained within the specified records.
 	 */
-	public static final int[] getSequenceIds(Record... records) {
-		ArrayList<Integer> boxedRecordIds = new ArrayList<Integer>();
+	public static int[] getSequenceIds(Record... records) {
+		// Get sequence IDs from records
+		ArrayList<Integer> sequenceIdsList = new ArrayList<Integer>();
 		for (Record record : records) {
 			for (int recordId : record.getSequenceIds()) {
-				if (!boxedRecordIds.contains(recordId)) {
-					boxedRecordIds.add(recordId);
+				if (!sequenceIdsList.contains(recordId)) {
+					sequenceIdsList.add(recordId);
 				}
 			}
 		}
-		return boxedRecordIds.stream().mapToInt(Integer::intValue).toArray();
+
+		// Convert boxed values to sorted native array
+		int[] sequenceIds = new int[sequenceIdsList.size()];
+		for (int i = 0; i < sequenceIds.length; i++) {
+			sequenceIds[i] = sequenceIdsList.get(i);
+		}
+		Arrays.sort(sequenceIds);
+		return sequenceIds;
 	}
 
 	/**
@@ -76,8 +87,112 @@ public class Record {
 	 *            the records to get the sequence IDs from.
 	 * @return the sequence IDs contained within the specified records.
 	 */
-	public static final int[] getSequenceIds(List<Record> records) {
+	public static int[] getSequenceIds(List<Record> records) {
 		return getSequenceIds(records.toArray(new Record[records.size()]));
+	}
+
+	/**
+	 * Simplifies the specified sequence IDs into a <code>Record[]</code> with
+	 * all sequence IDs having their own dedicated record to make handling them
+	 * easier.
+	 * 
+	 * @param sequenceIds
+	 *            the sequence IDs to simplify.
+	 * @return the simplified records
+	 */
+	public static Record[] simplify(int... sequenceIds) {
+		IntMap<Record> simplified = new IntMap<Record>();
+		for (int i = 0; i < sequenceIds.length; i++) {
+			if (!simplified.containsKey(sequenceIds[i])) {
+				simplified.put(sequenceIds[i], new Record(sequenceIds[i]));
+			}
+		}
+		return simplified.values().toArray(new Record[simplified.size()]);
+	}
+
+	/**
+	 * Simplifies the specified records into a <code>Record[]</code> with all
+	 * sequence IDs within the records having their own dedicated record to make
+	 * handling them easier.
+	 * 
+	 * @param records
+	 *            the records to simplify.
+	 * @return the simplified records
+	 */
+	public static Record[] simplify(Record... records) {
+		return simplify(getSequenceIds(records));
+	}
+
+	/**
+	 * Simplifies the specified records into a <code>Record[]</code> with all
+	 * sequence IDs within the records having their own dedicated record to make
+	 * handling them easier.
+	 * 
+	 * @param records
+	 *            the records to simplify.
+	 * @return the simplified records
+	 */
+	public static Record[] simplify(List<Record> records) {
+		return simplify(records.toArray(new Record[records.size()]));
+	}
+
+	/**
+	 * Condenses the specified records into a <code>Record[]</code> with all
+	 * ranges of sequence IDs being in ranged records to save memory.
+	 * 
+	 * @param records
+	 *            the records to condense.
+	 * @return the condensed records.
+	 */
+	public static Record[] condense(Record... records) {
+		/*
+		 * Get sequence IDs and sort them in ascending order. This is crucial in
+		 * order for condensing to occur.
+		 */
+		int[] sequenceIds = Record.getSequenceIds(records);
+		Arrays.sort(sequenceIds);
+
+		// Condense records
+		ArrayList<Record> condensed = new ArrayList<Record>();
+		for (int i = 0; i < sequenceIds.length; i++) {
+			int startIndex = sequenceIds[i];
+			int endIndex = startIndex;
+			if (i + 1 < sequenceIds.length) {
+				while (endIndex + 1 == sequenceIds[i + 1] && i + 1 < sequenceIds.length) {
+					endIndex = sequenceIds[++i]; // This value is sequential
+				}
+			}
+			condensed.add(new Record(startIndex, endIndex == startIndex ? -1 : endIndex));
+		}
+		return condensed.toArray(new Record[condensed.size()]);
+	}
+
+	/**
+	 * Condenses the specified records into a <code>Record[]</code> with all
+	 * ranges of sequence IDs being in ranged records to save memory.
+	 * 
+	 * @param records
+	 *            the records to condense.
+	 * @return the condensed records.
+	 */
+	public static Record[] condense(List<Record> records) {
+		return condense(records.toArray(new Record[records.size()]));
+	}
+
+	/**
+	 * Condenses the specified sequence IDs into a <code>Record[]</code> with
+	 * all ranges of sequence IDs being in ranged records to save memory.
+	 * 
+	 * @param sequenceIds
+	 *            the sequence IDs to condense.
+	 * @return the condensed records.
+	 */
+	public static Record[] condense(int... sequenceIds) {
+		Record[] records = new Record[sequenceIds.length];
+		for (int i = 0; i < records.length; i++) {
+			records[i] = new Record(sequenceIds[i]);
+		}
+		return condense(records);
 	}
 
 	private int index;
