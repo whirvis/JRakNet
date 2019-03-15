@@ -160,7 +160,7 @@ public class PacketDataOutputStream extends OutputStream implements DataOutput {
 
 	@Override
 	public void writeUTF(String s) throws IOException {
-		packet.writeString(s);
+		packet.writeString(s); // TODO: Proper implementation
 	}
 
 }

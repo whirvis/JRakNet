@@ -30,12 +30,16 @@
  */
 package com.whirvis.jraknet.protocol.message;
 
+import java.util.Arrays;
+
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.map.IntMap;
 import com.whirvis.jraknet.peer.RakNetPeer;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.message.acknowledge.Record;
+
+import io.netty.buffer.ByteBuf;
 
 /**
  * An encapsulated packet.
@@ -101,7 +105,7 @@ public class EncapsulatedPacket implements Cloneable {
 		 *             the packet is too small to be split according to
 		 *             {@link #needsSplit(Reliability, EncapsulatedPacket, int)}.
 		 */
-		public static final EncapsulatedPacket[] split(RakNetPeer peer, EncapsulatedPacket encapsulated)
+		public static EncapsulatedPacket[] split(RakNetPeer peer, EncapsulatedPacket encapsulated)
 				throws NullPointerException, IllegalArgumentException {
 			if (peer == null) {
 				throw new NullPointerException("Peer cannot be null");
@@ -112,8 +116,25 @@ public class EncapsulatedPacket implements Cloneable {
 			} else if (!needsSplit(peer, encapsulated)) {
 				throw new IllegalArgumentException("Encapsulated packet is too small to be split");
 			}
-			byte[][] split = RakNet.splitArray(peer.getMaximumTransferUnit() - CustomPacket.MINIMUM_SIZE
-					- EncapsulatedPacket.size(encapsulated.reliability, true), encapsulated.payload.array());
+
+			// Split packet payload
+			int size = peer.getMaximumTransferUnit() - CustomPacket.MINIMUM_SIZE
+					- EncapsulatedPacket.size(encapsulated.reliability, true);
+			byte[] src = encapsulated.payload.array();
+			int payloadIndex = 0;
+			int splitIndex = 0;
+			byte[][] split = new byte[(int) Math.ceil((float) src.length / (float) size)][size];
+			while (payloadIndex < size) {
+				if (payloadIndex + size <= src.length) {
+					split[splitIndex++] = Arrays.copyOfRange(src, payloadIndex, payloadIndex + size);
+					payloadIndex += size;
+				} else {
+					split[splitIndex++] = Arrays.copyOfRange(src, payloadIndex, src.length);
+					payloadIndex = src.length;
+				}
+			}
+
+			// Generate split encapsulated packets
 			EncapsulatedPacket[] splitPackets = new EncapsulatedPacket[split.length];
 			for (int i = 0; i < split.length; i++) {
 				EncapsulatedPacket encapsulatedSplit = new EncapsulatedPacket();
@@ -288,7 +309,6 @@ public class EncapsulatedPacket implements Cloneable {
 		return size(reliability, split, null);
 	}
 
-	protected Packet buffer;
 	private boolean isClone;
 	private EncapsulatedPacket clone;
 
@@ -410,17 +430,20 @@ public class EncapsulatedPacket implements Cloneable {
 	/**
 	 * Encodes the packet.
 	 * 
+	 * @param buf
+	 *            the buffer to write to.
 	 * @throws NullPointerException
-	 *             if the <code>buffer</code> is <code>null</code> or if the
+	 *             if the <code>buf</code> is <code>null</code>, or if the
 	 *             packet is reliable and the <code>ackRecord</code> is
 	 *             <code>null</code>.
 	 * @throws IllegalArgumentException
 	 *             if the <code>ackRecord</code> is ranged.
 	 */
-	public void encode() throws NullPointerException, IllegalArgumentException {
-		if (buffer == null) {
+	public void encode(ByteBuf buf) throws NullPointerException, IllegalArgumentException {
+		if (buf == null) {
 			throw new NullPointerException("Buffer cannot be null");
 		}
+		Packet buffer = new Packet(buf);
 		byte flags = 0x00;
 		flags |= reliability.getId() << FLAG_RELIABILITY_INDEX;
 		flags |= split == true ? FLAG_SPLIT : 0;
@@ -448,11 +471,17 @@ public class EncapsulatedPacket implements Cloneable {
 
 	/**
 	 * Decodes the packet.
+	 * 
+	 * @param buf
+	 *            the buffer whose data to read from.
+	 * @throws NullPointerException
+	 *             if the <code>buf</code> is <code>null</code>.
 	 */
-	public void decode() {
-		if (buffer == null) {
+	public void decode(ByteBuf buf) throws NullPointerException {
+		if (buf == null) {
 			throw new NullPointerException("Buffer cannot be null");
 		}
+		Packet buffer = new Packet(buf);
 		byte flags = buffer.readByte();
 		this.reliability = Reliability.lookup((flags & FLAG_RELIABILITY) >> FLAG_RELIABILITY_INDEX);
 		this.split = (flags & FLAG_SPLIT) > 0;

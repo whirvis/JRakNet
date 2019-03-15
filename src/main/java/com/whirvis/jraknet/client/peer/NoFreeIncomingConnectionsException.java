@@ -28,71 +28,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package com.whirvis.jraknet.client;
+package com.whirvis.jraknet.client.peer;
 
 import java.net.InetSocketAddress;
 
+import com.whirvis.jraknet.client.RakNetClient;
+
 /**
- * Signals that a {@link RakNetClient} has attempted to connect to a server with
- * an incompatible protocol.
+ * Signals that a {@link RakNetClient} attempted to connect to a server that has
+ * no free incoming connections.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v2.0
  */
-public class IncompatibleProtocolException extends RakNetClientException {
+public class NoFreeIncomingConnectionsException extends PeerFactoryException {
 
-	private static final long serialVersionUID = -3390229698349252537L;
+	private static final long serialVersionUID = 5863972657532782029L;
 
 	private final InetSocketAddress address;
-	private final int clientProtocol;
-	private final int serverProtocol;
 
 	/**
-	 * Constructs an <code>IncompatibleProtocolException</code>.
+	 * Constructs a <code>NoFreeIncomingConnectionsException</code>.
 	 * 
 	 * @param client
-	 *            the client that attempted to connect to an incompatible
-	 *            server.
+	 *            the client that attempted to a server with no free incoming
+	 *            connections.
 	 * @param address
-	 *            the address of the server with the incompatible protocol.
-	 * @param clientProtocol
-	 *            the client protocol
-	 * @param serverProtocol
-	 *            the server protocol
+	 *            the address of the server with no free incoming connections.
 	 */
-	public IncompatibleProtocolException(RakNetClient client, InetSocketAddress address, int clientProtocol,
-			int serverProtocol) {
-		super(client, (clientProtocol < serverProtocol ? "Outdated client" : "Outdated server"));
+	public NoFreeIncomingConnectionsException(RakNetClient client, InetSocketAddress address) {
+		super(client, "Server has no free incoming connections");
 		this.address = address;
-		this.clientProtocol = clientProtocol;
-		this.serverProtocol = serverProtocol;
 	}
 
 	/**
-	 * Returns the address of the server with the incompatible protocol.
+	 * Returns the address of the server that has no free incoming connections.
 	 * 
-	 * @return the address of the server with the incompatible protocol.
+	 * @return the address of the server that has no free incoming connections.
 	 */
 	public InetSocketAddress getAddress() {
 		return this.address;
-	}
-
-	/**
-	 * Returns the protocol the client is running on.
-	 * 
-	 * @return the protocol the client is running on.
-	 */
-	public int getClientProtocol() {
-		return this.clientProtocol;
-	}
-
-	/**
-	 * Returns the protocol the server is running on.
-	 * 
-	 * @return the protocol the server is running on.
-	 */
-	public int getServerProtocol() {
-		return this.serverProtocol;
 	}
 
 }

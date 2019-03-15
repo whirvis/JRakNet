@@ -38,14 +38,14 @@ import com.whirvis.jraknet.identifier.Identifier;
  * Represents a server that has been discovered by the {@link Discovery} system.
  *
  * @author Whirvis T. Wheatley
- * @since JRakNet v2.0
+ * @since JRakNet v2.0.0
  * @see DiscoveryListener
  */
 public class DiscoveredServer {
 
 	/**
-	 * The maximum time the server can not respond to a client ping before it is
-	 * forgotten by the client.
+	 * The maximum time a server can not respond to a ping before it is
+	 * forgotten.
 	 */
 	public static final long SERVER_TIMEOUT_MILLIS = 5000L;
 
@@ -55,7 +55,7 @@ public class DiscoveredServer {
 	private Identifier identifier;
 
 	/**
-	 * Creates a discovered server.
+	 * Constructs a <code>DiscoveredServer</code>.
 	 * 
 	 * @param address
 	 *            the discovered server's address.
@@ -68,7 +68,7 @@ public class DiscoveredServer {
 	 *             if the address, IP address, or identifier are
 	 *             <code>null</code>.
 	 */
-	public DiscoveredServer(InetSocketAddress address, boolean external, Identifier identifier)
+	protected DiscoveredServer(InetSocketAddress address, boolean external, Identifier identifier)
 			throws NullPointerException, IllegalArgumentException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
@@ -95,6 +95,9 @@ public class DiscoveredServer {
 	/**
 	 * Returns whether or not the server is an external server or was discovered
 	 * on the local network.
+	 * <p>
+	 * If the server is on the local network yet was added to the external
+	 * server discovery list, this will yield <code>true</code>.
 	 * 
 	 * @return <code>true</code> if the server is an external server,
 	 *         <code>false</code> if the server was discovered on the local
@@ -118,11 +121,11 @@ public class DiscoveredServer {
 	/**
 	 * Updates the last time the server sent a response back.
 	 * 
-	 * @param discoveryTimestamp
+	 * @param timestamp
 	 *            the new discovery timestamp.
 	 * @throws IllegalArgumentException
-	 *             if the <code>discoveryTimestamp</code> is less than than the
-	 *             current discovery timestamp.
+	 *             if the <code>timestamp</code> is less than than the current
+	 *             discovery timestamp.
 	 */
 	public void setTimestamp(long timestamp) throws IllegalArgumentException {
 		if (timestamp < this.timestamp) {
@@ -159,7 +162,7 @@ public class DiscoveredServer {
 	 * @throws NullPointerException
 	 *             if the <code>identifier</code> is <code>null</code>.
 	 */
-	public void setIdentifier(Identifier identifier) throws NullPointerException {
+	protected void setIdentifier(Identifier identifier) throws NullPointerException {
 		if (identifier == null) {
 			throw new NullPointerException("Identifier cannot be null");
 		}

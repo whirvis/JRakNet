@@ -85,6 +85,7 @@ public class DiscoveryHandler extends ChannelInboundHandlerAdapter {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 		// Ignore
+		// TODO: Remove currently discovered servers that cause this to be thrown
 	}
 
 }

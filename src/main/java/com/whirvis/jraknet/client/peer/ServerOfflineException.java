@@ -1,11 +1,11 @@
 /*
- *       _   _____            _      _   _          _   
- *      | | |  __ \          | |    | \ | |        | |  
- *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_ 
+ *       _   _____            _      _   _          _
+ *      | | |  __ \          | |    | \ | |        | |
+ *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_
  *  _   | | |  _  /   / _` | | |/ / | . ` |  / _ \ | __|
- * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
+ * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
- *                                                  
+ *
  * the MIT License (MIT)
  *
  * Copyright (c) 2016-2019 Whirvis T. Wheatley
@@ -26,31 +26,47 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.  
+ * SOFTWARE.
  */
-package com.whirvis.jraknet.client;
+package com.whirvis.jraknet.client.peer;
+
+import java.net.InetSocketAddress;
+
+import com.whirvis.jraknet.client.RakNetClient;
 
 /**
- * Signals that a {@link RakNetClient} has experienced an error during the login
- * process.
+ * Signals that a {@link RakNetClient} attempted to to connect to an offline
+ * server.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v2.0
  */
-public class LoginFailureException extends RakNetClientException {
+public class ServerOfflineException extends PeerFactoryException {
 
-	private static final long serialVersionUID = -5025319984358819345L;
+	private static final long serialVersionUID = -3916155995964791602L;
+
+	private final InetSocketAddress address;
 
 	/**
-	 * Constructs a <code>LoginFailureException</code>.
+	 * Constructs a <code>ServerOfflineException</code>.
 	 * 
 	 * @param client
-	 *            the client that threw the exception.
-	 * @param error
-	 *            the reason login failed.
+	 *            the client that attempted to the offline server.
+	 * @param address
+	 *            the address of the offline server.
 	 */
-	public LoginFailureException(RakNetClient client, String error) {
-		super(client, error);
+	public ServerOfflineException(RakNetClient client, InetSocketAddress address) {
+		super(client, "Server at address " + address.toString() + " is offline");
+		this.address = address;
+	}
+
+	/**
+	 * Returns the address of the offline server.
+	 * 
+	 * @return the address of the offline server.
+	 */
+	public InetSocketAddress getAddress() {
+		return this.address;
 	}
 
 }

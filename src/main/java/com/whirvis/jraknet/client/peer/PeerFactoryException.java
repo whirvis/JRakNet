@@ -1,11 +1,11 @@
 /*
- *       _   _____            _      _   _          _
- *      | | |  __ \          | |    | \ | |        | |
- *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_
+ *       _   _____            _      _   _          _   
+ *      | | |  __ \          | |    | \ | |        | |  
+ *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_ 
  *  _   | | |  _  /   / _` | | |/ / | . ` |  / _ \ | __|
- * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_
+ * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
  *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
- *
+ *                                                  
  * the MIT License (MIT)
  *
  * Copyright (c) 2016-2019 Whirvis T. Wheatley
@@ -26,48 +26,47 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * SOFTWARE.  
  */
-package com.whirvis.jraknet.client;
+package com.whirvis.jraknet.client.peer;
 
-import java.net.InetSocketAddress;
+import com.whirvis.jraknet.client.RakNetClient;
+import com.whirvis.jraknet.client.RakNetClientException;
 
 /**
- * Signals that a {@link RakNetClient} has attempted to connect to a server that
- * it is already connected to.
+ * Signals that an error has occurred while a {@link PeerFactory} was attempting
+ * to create a {@link com.whirvis.jraknet.peer.RakNetServerPeer
+ * RakNetServerPeer}.
  *
  * @author Whirvis T. Wheatley
- * @since JRakNet v2.0
+ * @since JRakNet v2.0.0
  */
-public class AlreadyConnectedException extends RakNetClientException {
+public class PeerFactoryException extends RakNetClientException {
 
-	private static final long serialVersionUID = -482118372058339060L;
-
-	private final InetSocketAddress address;
+	private static final long serialVersionUID = -5025319984358819345L;
 
 	/**
-	 * Constructs an <code>AlreadyConnectedException</code>.
+	 * Constructs a <code>PeerFactoryException</code>.
 	 * 
 	 * @param client
-	 *            the client that is already connected to the server.
-	 * @param address
-	 *            the address of the server that the client is already connected
-	 *            to.
+	 *            the client that created the peer that threw the exception.
+	 * @param error
+	 *            the detail message.
 	 */
-	public AlreadyConnectedException(RakNetClient client, InetSocketAddress address) {
-		super(client, "Already connected to server");
-		this.address = address;
+	public PeerFactoryException(RakNetClient client, String error) {
+		super(client, error);
 	}
 
 	/**
-	 * Returns the address of the server that the client is already connected
-	 * to.
+	 * Constructs a <code>PeerFactoryException</code>.
 	 * 
-	 * @return the address of the server that the client is already connected
-	 *         to.
+	 * @param client
+	 *            the client that created the peer that threw the exception.
+	 * @param error
+	 *            the <code>Throwable</code> that was thrown.
 	 */
-	public InetSocketAddress getAddress() {
-		return this.address;
+	public PeerFactoryException(RakNetClient client, Throwable error) {
+		super(client, error);
 	}
 
 }

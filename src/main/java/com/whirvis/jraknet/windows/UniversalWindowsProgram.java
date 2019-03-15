@@ -33,13 +33,13 @@ package com.whirvis.jraknet.windows;
 /**
  * A universal Windows program.
  * <p>
- * This is mainly meant to be used to give universal Windows programs loopback
- * exemption so users can connect to JRakNet servers on the same machine. This
- * class can safely be used on other machines that are not running on the
- * Windows 10 operating system without risking crashes due to incompatibilities.
- * However, if the machine is not running Windows 10 then this class is
- * guaranteed to behave differently with code intentionally not running or
- * giving different results.
+ * Mainly meant to be used to give universal Windows programs loopback exemption
+ * so users can connect to JRakNet servers on the same machine. This class can
+ * safely be used on other machines that are not running on the Windows 10
+ * operating system without risking crashes due to incompatibilities. However,
+ * if the machine is not running Windows 10 then this class is guaranteed to
+ * behave differently with code intentionally not running or giving different
+ * results.
  * 
  * @author Whirvis T. Wheatley
  * @since JRakNet v2.10.0
@@ -47,7 +47,7 @@ package com.whirvis.jraknet.windows;
 public class UniversalWindowsProgram {
 
 	/**
-	 * The Minecraftâ„¢ Universal Windows Program.
+	 * The Minecraft™ Universal Windows Program.
 	 */
 	public static final UniversalWindowsProgram MINECRAFT = new UniversalWindowsProgram(
 			"Microsoft.MinecraftUWP_8wekyb3d8bbwe");
@@ -67,7 +67,7 @@ public class UniversalWindowsProgram {
 	 * @return <code>true</code> if the machine is currently running on the
 	 *         Windows 10 operating system, <code>false</code> otherwise.
 	 */
-	public static final boolean isWindows10() {
+	public static boolean isWindows10() {
 		return System.getProperty("os.name").equalsIgnoreCase("Windows 10");
 	}
 

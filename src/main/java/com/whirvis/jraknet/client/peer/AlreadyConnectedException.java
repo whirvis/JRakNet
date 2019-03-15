@@ -28,40 +28,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.client;
+package com.whirvis.jraknet.client.peer;
 
 import java.net.InetSocketAddress;
 
+import com.whirvis.jraknet.client.RakNetClient;
+
 /**
- * Signals that a {@link RakNetClient} attempted to to connect to an offline
- * server.
+ * Signals that a {@link RakNetClient} has attempted to connect to a server that
+ * it is already connected to.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v2.0
  */
-public class ServerOfflineException extends RakNetClientException {
+public class AlreadyConnectedException extends PeerFactoryException {
 
-	private static final long serialVersionUID = -3916155995964791602L;
+	private static final long serialVersionUID = -482118372058339060L;
 
 	private final InetSocketAddress address;
 
 	/**
-	 * Constructs a <code>ServerOfflineException</code>.
+	 * Constructs an <code>AlreadyConnectedException</code>.
 	 * 
 	 * @param client
-	 *            the client that attempted to the offline server.
+	 *            the client that is already connected to the server.
 	 * @param address
-	 *            the address of the offline server.
+	 *            the address of the server that the client is already connected
+	 *            to.
 	 */
-	public ServerOfflineException(RakNetClient client, InetSocketAddress address) {
-		super(client, "Server at address " + address.toString() + " is offline");
+	public AlreadyConnectedException(RakNetClient client, InetSocketAddress address) {
+		super(client, "Already connected to server");
 		this.address = address;
 	}
 
 	/**
-	 * Returns the address of the offline server.
+	 * Returns the address of the server that the client is already connected
+	 * to.
 	 * 
-	 * @return the address of the offline server.
+	 * @return the address of the server that the client is already connected
+	 *         to.
 	 */
 	public InetSocketAddress getAddress() {
 		return this.address;

@@ -901,7 +901,7 @@ public class RakNetPacket extends Packet {
 					short packetId = field.getShort(null);
 					if ((packetId >= ID_CUSTOM_0 && packetId <= ID_CUSTOM_F) || packetId == ID_ACK
 							|| packetId == ID_NACK) {
-						continue; // Ignored
+						continue; // Ignored as they override other packet IDs
 					}
 					String packetName = field.getName();
 					String currentName = PACKET_NAMES.put(packetId, packetName);
@@ -1035,7 +1035,7 @@ public class RakNetPacket extends Packet {
 	 */
 	public RakNetPacket(ByteBuf buffer) throws IllegalArgumentException {
 		super(buffer);
-		if (this.remaining() < 1) {
+		if (this.remaining() < 1) { // TODO
 			throw new IllegalArgumentException("The buffer must have at least one byte to read the ID");
 		}
 		this.id = this.readUnsignedByte();

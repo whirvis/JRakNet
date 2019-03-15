@@ -28,43 +28,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.whirvis.jraknet.client;
+package com.whirvis.jraknet;
 
-import java.net.InetSocketAddress;
+import com.whirvis.jraknet.RakNetPacket;
 
 /**
- * Signals that a {@link RakNetClient} has attempted to connect to a server that
- * has banned its connection.
+ * Signals that a packet critical to the current task at hand failed to encode
+ * or decode correctly.
  *
  * @author Whirvis T. Wheatley
- * @since JRakNet v2.0
+ * @since JRakNet v1.0.0
  */
-public class ConnectionBannedException extends RakNetClientException {
+public class PacketBufferException extends RakNetException {
 
-	private static final long serialVersionUID = 8440218445920818619L;
+	private static final long serialVersionUID = -3730545025991834599L;
 
-	private final InetSocketAddress address;
+	private final RakNetPacket packet;
 
 	/**
-	 * Constructs a <code>ConnectedionBannedException</code>.
+	 * Constructs a <code>PacketBufferException</code>.
 	 * 
-	 * @param client
-	 *            the client that is banned.
-	 * @param address
-	 *            the address of the server that banned the client's connection.
+	 * @param packet
+	 *            the packet that failed to encode/decode.
 	 */
-	public ConnectionBannedException(RakNetClient client, InetSocketAddress address) {
-		super(client, "Connection banned");
-		this.address = address;
+	public PacketBufferException(RakNetPacket packet) {
+		super(RakNetPacket.getName(packet.getId()) + " packet failed to encode/decode");
+		this.packet = packet;
 	}
 
 	/**
-	 * Returns the address of the server that banned the client's connection.
+	 * Returns the packet that failed to encode/decode.
 	 * 
-	 * @return the address of the server that banned the client's connection.
+	 * @return the packet that failed to encode/decode.
 	 */
-	public InetSocketAddress getAddress() {
-		return this.address;
+	public RakNetPacket getPacket() {
+		return this.packet;
 	}
 
 }

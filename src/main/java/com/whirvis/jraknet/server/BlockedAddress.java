@@ -89,7 +89,7 @@ public class BlockedAddress {
 	 *         <code>false</code> otherwise.
 	 */
 	public boolean shouldUnblock() {
-		if (time == PERMANENT_BLOCK) {
+		if (time <= PERMANENT_BLOCK) {
 			return false; // The address has been permanently blocked
 		}
 		return System.currentTimeMillis() - startTime >= time;

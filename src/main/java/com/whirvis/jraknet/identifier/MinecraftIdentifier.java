@@ -33,23 +33,44 @@ package com.whirvis.jraknet.identifier;
 import com.whirvis.jraknet.RakNet;
 
 /**
- * Represents a Minecraftâ„¢ identifier.
+ * Represents a Minecraft™ identifier.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0
  */
 public class MinecraftIdentifier extends Identifier {
 
+	/**
+	 * The header found at the beginning of a Minecraft™ identifier. This allows
+	 * for easy indication that the identifier is actually a Minecraft™
+	 * identifier, rather than
+	 */
 	private static final String HEADER = "MCPE";
+
+	/**
+	 * The separator character used to easily split data from it into parseable
+	 * chunks.
+	 */
 	private static final String SEPARATOR = ";";
+
+	/**
+	 * The amount of fields found in a Minecraft™ identifier when it is in
+	 * legacy mode.
+	 */
 	private static final int DATA_COUNT_LEGACY = 6;
+
+	/**
+	 * The amount of fields found in a Minecraft™ identifier.
+	 */
 	private static final int DATA_COUNT = 9;
 
 	/**
-	 * Returns whether or not the version tag is valid. In order for a version
-	 * tag to be valid, it can only have numbers or periods. A <code>null</code>
-	 * value is also valid, seeing as when the identifier is being built no
-	 * version will be placed inside the identifier string.
+	 * Returns whether or not the version tag is valid.
+	 * <p>
+	 * In order for a version tag to be valid, it can only have numbers or
+	 * periods. A <code>null</code> value is also valid, seeing as when the
+	 * identifier is being built no version will be placed inside the identifier
+	 * string.
 	 * 
 	 * @param versionTag
 	 *            the version tag.
@@ -68,11 +89,11 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Returns whether or not the the identifier is a Minecraftâ„¢ identifier.
+	 * Returns whether or not the the identifier is a Minecraft™ identifier.
 	 * 
 	 * @param identifier
 	 *            the identifier to check.
-	 * @return <code>true</code> if the identifier is a Minecraftâ„¢ identifier,
+	 * @return <code>true</code> if the identifier is a Minecraft™ identifier,
 	 *         <code>false</code> otherwise.
 	 */
 	public static boolean isMinecraftIdentifier(Identifier identifier) {
@@ -93,7 +114,7 @@ public class MinecraftIdentifier extends Identifier {
 	private boolean legacy;
 
 	/**
-	 * Creates a Minecraftâ„¢ identifier.
+	 * Creates a Minecraft™ identifier.
 	 * 
 	 * @param serverName
 	 *            the server name.
@@ -111,22 +132,27 @@ public class MinecraftIdentifier extends Identifier {
 	 *            the world name.
 	 * @param gamemode
 	 *            the gamemode.
+	 * @throws IllegalArgumentException
+	 *             if the <code>serverName</code>, <code>worldName</code>, or
+	 *             <code>gamemode</code> contain the separator character
+	 *             {@value #SEPARATOR}, or if the <code>versionTag</code> is
+	 *             invalid.
 	 */
 	public MinecraftIdentifier(String serverName, int serverProtocol, String versionTag, int onlinePlayerCount,
 			int maxPlayerCount, long guid, String worldName, String gamemode) throws IllegalArgumentException {
-		this.serverName = serverName;
-		this.serverProtocol = serverProtocol;
-		this.versionTag = versionTag;
-		this.onlinePlayerCount = onlinePlayerCount;
-		this.maxPlayerCount = maxPlayerCount;
-		this.guid = guid;
-		this.worldName = worldName;
-		this.gamemode = gamemode;
-		this.legacy = false;
+		this.setServerName(serverName);
+		this.setServerProtocol(serverProtocol);
+		this.setVersionTag(versionTag);
+		this.setOnlinePlayerCount(onlinePlayerCount);
+		this.setMaxPlayerCount(maxPlayerCount);
+		this.setServerGloballyUniqueId(guid);
+		this.setWorldName(worldName);
+		this.setGamemode(gamemode);
+		this.setLegacyMode(false);
 	}
 
 	/**
-	 * Creates a Minecraftâ„¢ identifier from an existing identifier.
+	 * Creates a Minecraft™ identifier from an existing identifier.
 	 * 
 	 * @param identifier
 	 *            the identifier.
@@ -134,7 +160,7 @@ public class MinecraftIdentifier extends Identifier {
 	 *             if the <code>identifier</code> or its contents are
 	 *             <code>null</code>.
 	 * @throws IllegalArgumentException
-	 *             if the <code>identifier</code> is not a Minecraftâ„¢ identifier
+	 *             if the <code>identifier</code> is not a Minecraft™ identifier
 	 *             or there is not enough data present.
 	 */
 	public MinecraftIdentifier(Identifier identifier) throws NullPointerException, IllegalArgumentException {
@@ -168,7 +194,7 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Creates a Minecraftâ„¢ identifier from another identifier.
+	 * Creates a Minecraft™ identifier from another identifier.
 	 * 
 	 * @param identifier
 	 *            the identifier.
@@ -184,7 +210,7 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Creates a blank Minecraftâ„¢ identifier.
+	 * Creates a blank Minecraft™ identifier.
 	 */
 	public MinecraftIdentifier() {
 		this(null, 0, null, 0, 0, 0, null, null);
@@ -267,8 +293,14 @@ public class MinecraftIdentifier extends Identifier {
 	 * 
 	 * @param serverName
 	 *            the new server name.
+	 * @param IllegalArgumentException
+	 *            if the <code>serverName</code> contains the separator
+	 *            character {@value #SEPARATOR}.
 	 */
-	public void setServerName(String serverName) {
+	public void setServerName(String serverName) throws IllegalArgumentException {
+		if (serverName.contains(SEPARATOR)) {
+			throw new IllegalArgumentException("Server name cannot contain contain separator character");
+		}
 		this.serverName = serverName;
 	}
 
@@ -332,8 +364,14 @@ public class MinecraftIdentifier extends Identifier {
 	 * 
 	 * @param worldName
 	 *            the new world name.
+	 * @param IllegalArgumentException
+	 *            if the <code>worldName</code> contains the separator character
+	 *            {@value #SEPARATOR}.
 	 */
-	public void setWorldName(String worldName) {
+	public void setWorldName(String worldName) throws IllegalArgumentException {
+		if (worldName.contains(SEPARATOR)) {
+			throw new IllegalArgumentException("World name cannot contain contain separator character");
+		}
 		this.worldName = worldName;
 	}
 
@@ -342,8 +380,15 @@ public class MinecraftIdentifier extends Identifier {
 	 * 
 	 * @param gamemode
 	 *            the new gamemode.
+	 * 
+	 * @param IllegalArgumentException
+	 *            if the <code>gamemode</code> contains the separator character
+	 *            {@value #SEPARATOR}.
 	 */
-	public void setGamemode(String gamemode) {
+	public void setGamemode(String gamemode) throws IllegalArgumentException {
+		if (gamemode.contains(SEPARATOR)) {
+			throw new IllegalArgumentException("Gamemode cannot contain contain separator character");
+		}
 		this.gamemode = gamemode;
 	}
 
@@ -351,7 +396,8 @@ public class MinecraftIdentifier extends Identifier {
 	 * Enables/Disables the legacy builder.
 	 * 
 	 * @param legacy
-	 *            the legacy toggle.
+	 *            <code>true</code> to enable the legacy builder,
+	 *            <code>false</code> to use the regular builder.
 	 */
 	public void setLegacyMode(boolean legacy) {
 		this.legacy = legacy;
@@ -361,14 +407,15 @@ public class MinecraftIdentifier extends Identifier {
 	 * Returns whether or not the identifier is using the legacy builder.
 	 * 
 	 * @return <code>true</code> if the identifier is using the legacy builder,
-	 *         <code>false</code> otherwise.
+	 *         <code>false</code> if the identifier is using the regular
+	 *         builder.
 	 */
 	public boolean isLegacyMode() {
 		return this.legacy;
 	}
 
 	/**
-	 * Converts the values to a Minecraftâ„¢ identifier string.
+	 * Converts the values to a Minecraft™ identifier string.
 	 * 
 	 * @param values
 	 *            the values to write to the identifier.

@@ -34,13 +34,15 @@ package com.whirvis.jraknet.discovery;
  * Determines how discovery will be handled by the {@link Discovery} system.
  *
  * @author Whirvis T. Wheatley
- * @since JRakNet v2.0
+ * @since JRakNet v2.0.0
  */
 public enum DiscoveryMode {
 
 	/**
-	 * The discovery system will be disabled, and all currently known servers
-	 * will be forgotten.
+	 * No discovery will be performed.
+	 * <p>
+	 * If the discovery system is switched to this mode after creation, all
+	 * currently known servers will be automatically forgotten.
 	 */
 	DISABLED,
 

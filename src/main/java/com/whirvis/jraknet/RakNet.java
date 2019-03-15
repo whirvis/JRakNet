@@ -31,16 +31,12 @@
 package com.whirvis.jraknet;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -76,7 +72,7 @@ public final class RakNet {
 	/**
 	 * Used by the
 	 * {@link RakNet#createBootstrapAndSend(InetSocketAddress, Packet, long, int)}
-	 * method to wait for the packet and return it.
+	 * method to wait for a packet.
 	 *
 	 * @author Whirvis T. Wheatley
 	 * @since JRakNet v1.0.0
@@ -105,13 +101,34 @@ public final class RakNet {
 
 	private static final Logger LOG = LogManager.getLogger(RakNet.class);
 	private static final HashMap<InetAddress, Integer> MAXIMUM_TRANSFER_UNIT_SIZES = new HashMap<InetAddress, Integer>();
+	private static long _maxPacketsPerSecond = 500;
 
-	private static final int PING_RETRIES = 5;
-	private static final long PING_TIMESTAMP = System.currentTimeMillis();
-	private static final long PING_ID = UUID.randomUUID().getLeastSignificantBits();
-	private static final int IDENTIFIER_RETRIES = 3;
+	/**
+	 * The amount of times the {@link #isServerOnline(InetSocketAddress)} and
+	 * {@link #isServerCompatible(InetSocketAddress)} methods will attempt to
+	 * ping the server before giving up.
+	 */
+	public static final int PING_RETRIES = 5;
 
-	private static long maxPacketsPerSecond = 500;
+	/**
+	 * The timestamp the {@link #isServerOnline(InetSocketAddress)} and
+	 * {@link #isServerCompatible(InetSocketAddress)} methods will use as the
+	 * ping timestamp.
+	 */
+	public static final long PING_TIMESTAMP = System.currentTimeMillis();
+
+	/**
+	 * The ping ID that the {@link #isServerOnline(InetSocketAddress)} and
+	 * {@link #isServerCompatible(InetSocketAddress)} methods will use as the
+	 * ping ID.
+	 */
+	public static final long PING_ID = UUID.randomUUID().getLeastSignificantBits();
+
+	/**
+	 * The amount of times the {@link #getServerIdentifier(InetSocketAddress)}
+	 * method will attempt to retrieve the server identifier before giving up.
+	 */
+	public static final int IDENTIFIER_RETRIES = 3;
 
 	/**
 	 * The current supported server network protocol.
@@ -128,8 +145,6 @@ public final class RakNet {
 	 */
 	public static final int MINIMUM_MTU_SIZE = 400;
 
-	// Session data
-
 	/**
 	 * The amount of available channels there are to send packets on.
 	 */
@@ -141,12 +156,13 @@ public final class RakNet {
 	public static final byte DEFAULT_CHANNEL = 0;
 
 	/**
-	 * 
+	 * The maximum amount of chunks a single encapsulatd packet can be split
+	 * into.
 	 */
 	public static final int MAX_SPLIT_COUNT = 128;
 
 	/**
-	 * 
+	 * The maximum amount of split packets can be in the split handle queue.
 	 */
 	public static final int MAX_SPLITS_PER_QUEUE = 4;
 
@@ -177,6 +193,29 @@ public final class RakNet {
 	public static final long MAX_PACKETS_PER_SECOND_BLOCK = 300000L;
 
 	/**
+	 * Sleeps the current thread for the specified amount of time in
+	 * milliseconds.
+	 * <p>
+	 * If an <code>InterruptedException</code> is caught during the sleep,
+	 * <code>Thread.currentThread().interrupt()</code> will automatically be
+	 * called.
+	 * 
+	 * @param time
+	 *            the amount of time the thread should sleep in milliseconds.
+	 * @return <code>true</code> if the current thread was interrupted during
+	 *         the sleep, <code>false</code> otherwise.
+	 */
+	public static boolean sleep(long time) {
+		try {
+			Thread.sleep(time);
+			return false;
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			return true;
+		}
+	}
+
+	/**
 	 * Returns how many packets can be received in the span of a single second
 	 * (1000 milliseconds) before a session is blocked.
 	 * 
@@ -184,30 +223,28 @@ public final class RakNet {
 	 *         before a session is blocked.
 	 */
 	public static long getMaxPacketsPerSecond() {
-		return maxPacketsPerSecond;
+		return _maxPacketsPerSecond;
 	}
 
 	/**
 	 * Sets how many packets can be received in the span of a single second
-	 * (1000 milliseconds) before a session is blocked.
+	 * before an address is blocked.
+	 * <p>
+	 * One must take caution when setting this value, as setting it to low can
+	 * cause communication to become impossible.
 	 * 
 	 * @param maxPacketsPerSecond
 	 *            how many packets can be received in the span of a single
 	 *            second before a session is blocked.
+	 * @throws IllegalArgumentException
+	 *             if <code>maxPacketsPerSecond</code> is less than
+	 *             <code>0</code>.
 	 */
-	public static void setMaxPacketsPerSecond(long maxPacketsPerSecond) {
-		maxPacketsPerSecond = maxPacketsPerSecond;
-	}
-
-	/**
-	 * Removes the max packets per second limit so that no matter how many
-	 * packets a session sends it will never be blocked.
-	 * <p>
-	 * This is unrecommended, as it can open the server or client to DOS/DDOS
-	 * attacks.
-	 */
-	public static void setMaxPacketsPerSecondUnlimited() {
-		maxPacketsPerSecond = Long.MAX_VALUE;
+	public static void setMaxPacketsPerSecond(long maxPacketsPerSecond) throws IllegalArgumentException {
+		if (maxPacketsPerSecond < 0) {
+			throw new IllegalArgumentException("Max packets per second must be greater than 0");
+		}
+		_maxPacketsPerSecond = maxPacketsPerSecond;
 	}
 
 	/**
@@ -267,21 +304,38 @@ public final class RakNet {
 	}
 
 	/**
-	 * Sends a raw message to the address.
+	 * Sends a packet to the address.
 	 * 
 	 * @param address
 	 *            the address to send the packet to.
 	 * @param packet
 	 *            the packet to send.
 	 * @param timeout
-	 *            the interval of which the packet is sent.
+	 *            how long to wait until resending the packet.
 	 * @param retries
-	 *            how many times the packet will be sent.
-	 * @return the received packet, <code>null</code> if no response was
-	 *         received or the thread was interrupted.
+	 *            how many times the packet will be sent before giving uip.
+	 * @return the packet received in response, <code>null</code> if no response
+	 *         was received or the thread was interrupted.
+	 * @throws NullPointerException
+	 *             if the <code>address<code> or <code>packet</code> are
+	 *             <code>null</code>.
+	 * @throws IlelgalArgumentException
+	 *             if the <code>timeout</code> or <code>retries</code> are less
+	 *             than or equal to </code>0</code>.
 	 */
 	private static RakNetPacket createBootstrapAndSend(InetSocketAddress address, Packet packet, long timeout,
 			int retries) {
+		if (address == null) {
+			throw new NullPointerException("Address cannot be null");
+		} else if (packet == null) {
+			throw new NullPointerException("Packet cannot be null");
+		} else if (timeout <= 0) {
+			throw new IllegalArgumentException("Timeout must be greater than 0");
+		} else if (retries <= 0) {
+			throw new IllegalArgumentException("Retriest must be greater than 0");
+		}
+
+		// Prepare bootstrap
 		RakNetPacket received = null;
 		EventLoopGroup group = new NioEventLoopGroup();
 		int maximumTransferUnit = getMaximumTransferUnit();
@@ -305,7 +359,7 @@ public final class RakNet {
 					; // Wait for either a timeout or a response
 				received = handler.packet;
 				retries--;
-			} // TODO: CLEAN!!!
+			}
 		} catch (InterruptedException e) {
 			return null;
 		}
@@ -379,14 +433,11 @@ public final class RakNet {
 	 *         client protocol, <code>false</code> otherwise.
 	 */
 	public static boolean isServerCompatible(InetSocketAddress address) {
-		// Create connection packet
 		OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne();
 		connectionRequestOne.maximumTransferUnit = MINIMUM_MTU_SIZE;
 		connectionRequestOne.networkProtocol = CLIENT_NETWORK_PROTOCOL;
 		connectionRequestOne.encode();
-
-		// Wait for response to come in
-		RakNetPacket packet = createBootstrapAndSend(address, connectionRequestOne, 1000, PING_RETRIES);
+		RakNetPacket packet = createBootstrapAndSend(address, connectionRequestOne, 1000L, PING_RETRIES);
 		if (packet != null) {
 			if (packet.getId() == RakNetPacket.ID_OPEN_CONNECTION_REPLY_1) {
 				OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne(packet);
@@ -397,7 +448,6 @@ public final class RakNet {
 			} else if (packet.getId() == RakNetPacket.ID_INCOMPATIBLE_PROTOCOL_VERSION) {
 				IncompatibleProtocolVersion incompatibleProtocol = new IncompatibleProtocolVersion(packet);
 				incompatibleProtocol.decode();
-
 				return false;
 			}
 		}
@@ -444,17 +494,13 @@ public final class RakNet {
 	 * @return the server <code>Identifier</code>.
 	 */
 	public static Identifier getServerIdentifier(InetSocketAddress address) {
-		// Create ping packet
 		UnconnectedPing ping = new UnconnectedPing();
-		ping.timestamp = (System.currentTimeMillis() - PING_TIMESTAMP);
+		ping.timestamp = System.currentTimeMillis() - PING_TIMESTAMP;
 		ping.pingId = PING_ID;
 		ping.encode();
 		if (ping.failed()) {
-			LOG.error(UnconnectedPing.class.getSimpleName() + " failed to encode");
-			return null;
+			throw new RuntimeException(UnconnectedPing.class.getSimpleName() + " failed to encode");
 		}
-
-		// Wait for response to come in
 		RakNetPacket packet = createBootstrapAndSend(address, ping, 1000, IDENTIFIER_RETRIES);
 		if (packet != null) {
 			if (packet.getId() == RakNetPacket.ID_UNCONNECTED_PONG) {
@@ -598,70 +644,74 @@ public final class RakNet {
 	}
 
 	/**
-	 * Parses a String as a long and returns <code>-1</code> in the case of a
-	 * <code>NumberFormatException</code>.
+	 * Parses the specified string to a <code>long</code>.
 	 * 
-	 * @param longStr
-	 *            the String to parse.
-	 * @return the String as a long.
+	 * @param byteStr
+	 *            the string to parse.
+	 * @return the string as a <code>long</code>, <code>-1</code> if it fails to
+	 *         parse.
 	 */
 	public static long parseLongPassive(String longStr) {
 		try {
 			return Long.parseLong(longStr);
 		} catch (NumberFormatException e) {
-			return -1; // Failed to parse
+			return -1L; // Failed to parse
 		}
 	}
 
 	/**
-	 * Parses a String as an int and returns -1 in the case of a
-	 * <code>NumberFormatException</code>.
+	 * Parses the specified string to an <code>int</code>.
 	 * 
-	 * @param intStr
-	 *            the String to parse.
-	 * @return the String as an int.
+	 * @param byteStr
+	 *            the string to parse.
+	 * @return the string as an <code>int</code>, <code>-1</code> if it fails to
+	 *         parse.
 	 */
 	public static int parseIntPassive(String intStr) {
 		return (int) parseLongPassive(intStr);
 	}
 
 	/**
-	 * Parses a String as a short and returns -1 in the case of a
-	 * <code>NumberFormatException</code>.
+	 * Parses the specified string to a <code>short</code>.
 	 * 
-	 * @param shortStr
-	 *            the String to parse.
-	 * @return the String as a short.
+	 * @param byteStr
+	 *            the string to parse.
+	 * @return the string as a <code>short</code>, <code>-1</code> if fails to
+	 *         parse.
 	 */
 	public static short parseShortPassive(String shortStr) {
 		return (short) parseLongPassive(shortStr);
 	}
 
 	/**
-	 * Parses a String as a byte and returns -1 in the case of a
-	 * <code>NumberFormatException</code>.
+	 * Parses the specified string to a <code>byte</code>.
 	 * 
 	 * @param byteStr
-	 *            the String to parse.
-	 * @return the String as a byte.
+	 *            the string to parse.
+	 * @return the string as a <code>byte</code>, <code>-1</code> if it fails to
+	 *         parse.
 	 */
 	public static byte parseBytePassive(String byteStr) {
 		return (byte) parseLongPassive(byteStr);
 	}
 
 	/**
-	 * Converts the ID to a hex string.
+	 * Converts the specified ID to a hex string.
 	 * 
 	 * @param id
 	 *            the ID to convert to a hex string.
 	 * @return the generated hex string.
 	 */
 	public static String toHexStringId(int id) {
-		return ("0x" + Integer.toHexString(id).toUpperCase());
+		String hexString = Integer.toHexString(id);
+		if (hexString.length() % 2 != 0) {
+			hexString = "0" + hexString;
+		}
+		return "0x" + hexString.toUpperCase();
 	}
 
 	/**
-	 * Converts the ID of the packet to a hex string.
+	 * Converts the ID of the specified packet to a hex string.
 	 * 
 	 * @param packet
 	 *            the packet to get the ID from.
@@ -669,64 +719,6 @@ public final class RakNet {
 	 */
 	public static String toHexStringId(RakNetPacket packet) {
 		return toHexStringId(packet.getId());
-	}
-
-	/**
-	 * Splits an array into chunks with the resulting arrays being no bigger
-	 * than the specified size.
-	 * 
-	 * @param size
-	 *            the maximum size of an array.
-	 * @param src
-	 *            the original array.
-	 * @return the split <code>byte[]</code>s no bigger than the
-	 *         <code>size</code>.
-	 * @throws IllegalArgumentException
-	 *             if the <code>size</code> is less than or equal to
-	 *             <code>0</code>.
-	 * @throws NullPointerException
-	 *             if the <code>src</code> is <code>null</code>.
-	 */
-	public static final byte[][] splitArray(int size, byte... src)
-			throws IllegalArgumentException, NullPointerException {
-		if (size <= 0) {
-			throw new IllegalArgumentException("Size must be greater than 0");
-		} else if (src == null) {
-			throw new NullPointerException("Source cannot be null");
-		}
-		int index = 0;
-		ArrayList<byte[]> split = new ArrayList<byte[]>();
-		while (index < src.length) {
-			if (index + size <= src.length) {
-				split.add(Arrays.copyOfRange(src, index, index + size));
-				index += size;
-			} else {
-				split.add(Arrays.copyOfRange(src, index, src.length));
-				index = src.length;
-			}
-		}
-		return split.toArray(new byte[split.size()][size]);
-	}
-
-	/**
-	 * Returns all the <code>int</code>s in between each other as a normal
-	 * subtraction.
-	 * 
-	 * @param low
-	 *            the starting point.
-	 * @param high
-	 *            the ending point.
-	 * @return the numbers in between high and low.
-	 */
-	public static final int[] subtractArray(int low, int high) {
-		if (low > high) {
-			return new int[0];
-		}
-		int[] arr = new int[high - low - 1];
-		for (int i = 0; i < arr.length; i++) {
-			arr[i] = i + low + 1;
-		}
-		return arr;
 	}
 
 }

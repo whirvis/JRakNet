@@ -38,7 +38,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.peer.RakNetClientSession;
+import com.whirvis.jraknet.peer.RakNetClientPeer;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -93,11 +93,10 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			throw new NullPointerException("Address cannot be null");
 		}
 		blocked.put(address, new BlockedAddress(time));
-		for (RakNetClientSession client : server.getClients()) {
-			if (!client.getAddress().getAddress().equals(address)) {
-				continue; // Client is not blocked
+		for (RakNetClientPeer client : server.getClients()) {
+			if (client.getInetAddress().equals(address)) {
+				server.disconnectClient(client, reason == null ? "Address blocked" : reason);
 			}
-			server.disconnectClient(client, reason == null ? "Address blocked" : reason);
 		}
 		server.callEvent(listener -> listener.onBlock(server, address, reason, time));
 		log.info("Blocked address " + address + " due to \"" + reason + "\" for " + time + " milliseconds");
@@ -114,11 +113,10 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	protected void unblockAddress(InetAddress address) throws NullPointerException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
-		} else if (blocked.remove(address) == null) {
-			return; // No address was unblocked
+		} else if (blocked.remove(address) != null) {
+			server.callEvent(listener -> listener.onUnblock(server, address));
+			log.info("Unblocked address " + address);
 		}
-		server.callEvent(listener -> listener.onUnblock(server, address));
-		log.info("Unblocked address " + address);
 	}
 
 	/**

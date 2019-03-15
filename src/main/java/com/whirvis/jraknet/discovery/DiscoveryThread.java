@@ -136,20 +136,20 @@ public final class DiscoveryThread extends Thread {
 				ping.pingId = Discovery.getPingId();
 				ping.encode();
 				if (ping.failed()) {
+					this.interrupt();
 					Discovery.setDiscoveryMode(DiscoveryMode.DISABLED);
 					log.error("Failed to encode unconnected ping, disabled discovery system");
 				}
 				for (InetSocketAddress address : Discovery.DISCOVERY_ADDRESSES.keySet()) {
 					channel.writeAndFlush(new DatagramPacket(ping.buffer(), address));
 				}
-
 				log.debug("Sent unconnected ping to " + Discovery.DISCOVERY_ADDRESSES.size() + " server"
 						+ (Discovery.DISCOVERY_ADDRESSES.size() == 1 ? "" : "s"));
 				this.lastPingBroadcast = currentTime;
 			}
 		}
 
-		/**
+		/*
 		 * If there are no listeners, no discovery addresses, or discovery is
 		 * simply disabled, we will destroy this thread by nullifying the
 		 * scheduler's reference after the loop has been broken out of. If any

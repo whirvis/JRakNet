@@ -28,12 +28,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.  
  */
-package com.whirvis.jraknet.peer.client;
+package com.whirvis.jraknet.peer;
 
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.peer.InvalidChannelException;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
 

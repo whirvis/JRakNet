@@ -33,7 +33,7 @@ package com.whirvis.jraknet.client;
 import java.net.InetSocketAddress;
 
 import com.whirvis.jraknet.RakNetPacket;
-import com.whirvis.jraknet.peer.server.RakNetServerPeer;
+import com.whirvis.jraknet.peer.RakNetServerPeer;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
 import com.whirvis.jraknet.protocol.message.acknowledge.Record;
 
@@ -65,10 +65,10 @@ public interface RakNetClientListener {
 	 * 
 	 * @param client
 	 *            the client.
-	 * @param session
+	 * @param peer
 	 *            the server.
 	 */
-	public default void onLogin(RakNetClient client, RakNetServerPeer session) {
+	public default void onLogin(RakNetClient client, RakNetServerPeer peer) {
 	}
 
 	/**
@@ -76,12 +76,12 @@ public interface RakNetClientListener {
 	 * 
 	 * @param client
 	 *            the client.
-	 * @param session
+	 * @param peer
 	 *            the server that the client disconnected from.
 	 * @param reason
 	 *            the reason for disconnection.
 	 */
-	public default void onDisconnect(RakNetClient client, RakNetServerPeer session, String reason) {
+	public default void onDisconnect(RakNetClient client, RakNetServerPeer peer, String reason) {
 	}
 
 	/**
@@ -89,14 +89,14 @@ public interface RakNetClientListener {
 	 * 
 	 * @param client
 	 *            the client.
-	 * @param session
+	 * @param peer
 	 *            the server that acknowledged the packet.
 	 * @param record
 	 *            the acknowledged record.
 	 * @param packet
 	 *            the acknowledged packet.
 	 */
-	public default void onAcknowledge(RakNetClient client, RakNetServerPeer session, Record record,
+	public default void onAcknowledge(RakNetClient client, RakNetServerPeer peer, Record record,
 			EncapsulatedPacket packet) {
 	}
 
@@ -105,14 +105,14 @@ public interface RakNetClientListener {
 	 * 
 	 * @param client
 	 *            the client.
-	 * @param session
+	 * @param peer
 	 *            the server that did not acknowledged the packet.
 	 * @param record
 	 *            the not acknowledged record.
 	 * @param packet
 	 *            the not acknowledged packet.
 	 */
-	public default void onNotAcknowledge(RakNetClient client, RakNetServerPeer session, Record record,
+	public default void onNotAcknowledge(RakNetClient client, RakNetServerPeer peer, Record record,
 			EncapsulatedPacket packet) {
 	}
 
@@ -122,33 +122,32 @@ public interface RakNetClientListener {
 	 * 
 	 * @param client
 	 *            the client.
-	 * @param session
+	 * @param peer
 	 *            the server that sent the packet.
 	 * @param packet
 	 *            the received packet.
 	 * @param channel
 	 *            the channel the packet was sent on.
 	 */
-	public default void handleMessage(RakNetClient client, RakNetServerPeer session, RakNetPacket packet,
-			int channel) {
+	public default void handleMessage(RakNetClient client, RakNetServerPeer peer, RakNetPacket packet, int channel) {
 	}
 
 	/**
 	 * Called when a packet with an ID below <code>ID_USER_PACKET_ENUM</code>
-	 * cannot be handled by the session because it is not programmed to handle
-	 * it. This function can be used to add missing features from the regular
-	 * RakNet protocol that are absent in JRakNet if needed.
+	 * cannot be handled by the peer because it is not programmed to handle it.
+	 * This function can be used to add missing features from the regular RakNet
+	 * protocol that are absent in JRakNet if needed.
 	 * 
 	 * @param client
 	 *            the client.
-	 * @param session
+	 * @param peer
 	 *            the server that sent the packet.
 	 * @param packet
 	 *            the unknown packet.
 	 * @param channel
 	 *            the channel the packet was sent on.
 	 */
-	public default void handleUnknownMessage(RakNetClient client, RakNetServerPeer session, RakNetPacket packet,
+	public default void handleUnknownMessage(RakNetClient client, RakNetServerPeer peer, RakNetPacket packet,
 			int channel) {
 	}
 
@@ -184,14 +183,14 @@ public interface RakNetClientListener {
 	}
 
 	/**
-	 * Called when a session exception has occurred.
+	 * Called when a peer exception has occurred.
 	 * 
 	 * @param client
 	 *            the client.
 	 * @param throwable
 	 *            the <code>Throwable</code> that was caught.
 	 */
-	public default void onSessionException(RakNetClient client, Throwable throwable) {
+	public default void onPeerException(RakNetClient client, RakNetServerPeer peer, Throwable throwable) {
 	}
 
 }

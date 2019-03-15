@@ -109,7 +109,7 @@ public enum Reliability {
 	private final boolean requiresAck;
 
 	/**
-	 * Creates a reliability.
+	 * Constructs a <code>Reliability</code>.
 	 * 
 	 * @param id
 	 *            the ID of the reliability.

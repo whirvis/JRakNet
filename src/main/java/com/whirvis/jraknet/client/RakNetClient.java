@@ -47,17 +47,14 @@ import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
+import com.whirvis.jraknet.client.peer.PeerFactory;
 import com.whirvis.jraknet.discovery.DiscoveredServer;
-import com.whirvis.jraknet.peer.RakNetServerSession;
+import com.whirvis.jraknet.peer.RakNetPeerMessenger;
+import com.whirvis.jraknet.peer.RakNetServerPeer;
 import com.whirvis.jraknet.peer.RakNetState;
-import com.whirvis.jraknet.peer.server.RakNetPeerMessenger;
 import com.whirvis.jraknet.protocol.Reliability;
-import com.whirvis.jraknet.protocol.connection.OpenConnectionRequestOne;
-import com.whirvis.jraknet.protocol.connection.OpenConnectionRequestTwo;
 import com.whirvis.jraknet.protocol.login.ConnectionRequest;
-import com.whirvis.jraknet.protocol.message.CustomPacket;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
-import com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgedPacket;
 import com.whirvis.jraknet.scheduler.Scheduler;
 
 import io.netty.bootstrap.Bootstrap;
@@ -73,7 +70,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
  * Used to connect to servers using the RakNet protocol.
  *
  * @author Whirvis T. Wheatley
- * @since JRakNet v1.0
+ * @since JRakNet v1.0.0
  * @see RakNetClientListener
  * @see #addListener(RakNetClientListener)
  * @see #connect(InetSocketAddress)
@@ -106,9 +103,9 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	private InetSocketAddress bindAddress;
 	private MaximumTransferUnit[] maximumTransferUnits;
 	private int highestMaximumTransferUnitSize;
-	private SessionPlanner preparation;
-	private volatile RakNetServerSession session;
-	private Thread sessionThread;
+	private PeerFactory peerFactory;
+	private volatile RakNetServerPeer peer;
+	private Thread peerThread;
 
 	/**
 	 * Creates a RakNet client.
@@ -248,7 +245,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * @return the client's timestamp.
 	 */
 	public final long getTimestamp() {
-		return (System.currentTimeMillis() - this.timestamp);
+		return System.currentTimeMillis() - timestamp;
 	}
 
 	/**
@@ -481,13 +478,13 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	}
 
 	/**
-	 * Returns the session of the server the client is currently connected to.
+	 * Returns the peer of the server the client is currently connected to.
 	 * 
-	 * @return the session of the server the client is currently connected to,
+	 * @return the peer of the server the client is currently connected to,
 	 *         <code>null</code> if it is not connected to a server.
 	 */
-	public final RakNetServerSession getServer() {
-		return this.session;
+	public final RakNetServerPeer getServer() {
+		return this.peer;
 	}
 
 	/**
@@ -497,16 +494,16 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *         server, <code>false</code> otherwise.
 	 */
 	public final boolean isConnected() {
-		if (session == null) {
-			return false; // No session
+		if (peer == null) {
+			return false; // No peer
 		}
-		return session.getState() == RakNetState.LOGGED_IN;
+		return peer.getState() == RakNetState.LOGGED_IN;
 	}
 
 	/**
 	 * Sends a Netty message over the channel raw. This should be used
-	 * sparingly, as if it is used incorrectly it could break server sessions
-	 * entirely. In order to send a message to a session, use one of the
+	 * sparingly, as if it is used incorrectly it could break server peers
+	 * entirely. In order to send a message to a peer, use one of the
 	 * {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, ByteBuf)
 	 * sendMessage()} methods.
 	 * 
@@ -525,8 +522,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 
 	/**
 	 * Sends a Netty message over the channel raw. This should be used
-	 * sparingly, as if it is used incorrectly it could break server sessions
-	 * entirely. In order to send a message to a session, use one of the
+	 * sparingly, as if it is used incorrectly it could break server peers
+	 * entirely. In order to send a message to a peer, use one of the
 	 * {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, Packet)
 	 * sendMessage()} methods.
 	 * 
@@ -543,8 +540,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 
 	/**
 	 * Sends a Netty message over the channel raw. This should be used
-	 * sparingly, as if it is used incorrectly it could break server sessions
-	 * entirely. In order to send a message to a session, use one of the
+	 * sparingly, as if it is used incorrectly it could break server peers
+	 * entirely. In order to send a message to a peer, use one of the
 	 * {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, int)
 	 * sendMessage()} methods.
 	 * 
@@ -570,23 +567,16 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *            the packet to handle.
 	 */
 	protected final void handleMessage(InetSocketAddress sender, RakNetPacket packet) {
-		short packetId = packet.getId();
-		if (preparation != null) {
-			if (sender.equals(preparation.address)) {
-				preparation.handleMessage(packet);
-			}
-		} else if (session != null) {
-			if (sender.equals(session.getAddress())) {
-				if (packetId >= RakNetPacket.ID_CUSTOM_0 && packetId <= RakNetPacket.ID_CUSTOM_F) {
-					CustomPacket custom = new CustomPacket(packet);
-					custom.decode();
-					session.handleCustom(custom);
-				} else if (packetId == RakNetPacket.ID_ACK || packetId == RakNetPacket.ID_NACK) {
-					AcknowledgedPacket acknowledge = new AcknowledgedPacket(packet);
-					acknowledge.decode();
-					session.handleAcknowledge(acknowledge);
+		if (peerFactory != null) {
+			if (sender.equals(peerFactory.getAddress())) {
+				RakNetServerPeer peer = peerFactory.assemble(packet);
+				if (peer != null) {
+					this.peer = peer;
+					this.peerFactory = null;
 				}
 			}
+		} else if (peer != null) {
+			peer.handleMessage(packet);
 		}
 		log.debug("Handled " + RakNetPacket.getName(packet.getId()) + " packet");
 	}
@@ -602,10 +592,12 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *            the <code>Throwable</code> caught by the handler.
 	 */
 	protected final void handleHandlerException(InetSocketAddress address, Throwable cause) {
-		if (address.equals(preparation.address)) {
-			if (preparation != null) {
-				preparation.cancelReason = new NettyHandlerException(this, handler, address, cause);
-			} else if (session != null) {
+		if (peerFactory != null) {
+			if (address.equals(peerFactory.getAddress())) {
+				peerFactory.exceptionCaught(new NettyHandlerException(this, handler, address, cause));
+			}
+		} else if (peer != null) {
+			if (address.equals(peer.getAddress())) {
 				this.disconnect(cause);
 			}
 		}
@@ -657,103 +649,42 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		MaximumTransferUnit[] units = MaximumTransferUnit.sort(maximumTransferUnits);
 		for (MaximumTransferUnit unit : maximumTransferUnits) {
 			unit.reset();
+			log.debug("Reset maximum transfer unit with size of " + unit.getSize() + " bytes (" + (unit.getSize() * 8) + " bits)");
 		}
-		this.preparation = new SessionPlanner(this, units[0].getSize(), highestMaximumTransferUnitSize);
-		preparation.address = address;
-		log.debug("Reset maximum transfer units and created session preparation");
+		this.peerFactory = new PeerFactory(this, address, channel, units[0].getSize(), highestMaximumTransferUnitSize);
+		log.debug("Reset maximum transfer units and created peer peerFactory");
+		peerFactory.startAssembly(units);
 
-		// Send open connection request one with a decreasing MTU
-		int retriesLeft = 0;
-		try {
-			for (MaximumTransferUnit unit : units) {
-				retriesLeft += unit.getRetries();
-				while (unit.retry() > 0 && preparation.loginPackets[0] == false && preparation.cancelReason == null) {
-					OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne();
-					connectionRequestOne.maximumTransferUnit = unit.getSize();
-					connectionRequestOne.networkProtocol = this.getProtocolVersion();
-					connectionRequestOne.encode();
-					this.sendNettyMessage(connectionRequestOne, address);
-					log.debug("Attemped connection request one with maximum transfer unit size " + unit.getSize());
-					Thread.sleep(500);
-				}
-			}
-		} catch (InterruptedException e) {
-			throw new RakNetException(e);
-		}
+		// Send connection packet
+		ConnectionRequest connectionRequest = new ConnectionRequest();
+		connectionRequest.clientGuid = this.guid;
+		connectionRequest.timestamp = System.currentTimeMillis() - timestamp;
+		connectionRequest.encode();
+		peer.sendMessage(Reliability.RELIABLE_ORDERED, connectionRequest);
+		log.debug("Sent connection request to server");
 
-		// If the server did not respond then it is offline
-		if (preparation.loginPackets[0] == false && preparation.cancelReason == null) {
-			preparation.cancelReason = new ServerOfflineException(this, preparation.address);
-		}
+		// Create and start peer update thread
+		RakNetClient client = this;
+		this.peerThread = new Thread("jraknet-peer-thread-" + Long.toHexString(guid).toLowerCase()) {
 
-		// Send open connection request two until a response is received
-		try {
-			while (retriesLeft > 0 && preparation.loginPackets[1] == false && preparation.cancelReason == null) {
-				OpenConnectionRequestTwo connectionRequestTwo = new OpenConnectionRequestTwo();
-				connectionRequestTwo.clientGuid = this.guid;
-				connectionRequestTwo.address = preparation.address;
-				connectionRequestTwo.maximumTransferUnit = preparation.maximumTransferUnit;
-				connectionRequestTwo.encode();
-				if (!connectionRequestTwo.failed()) {
-					this.sendNettyMessage(connectionRequestTwo, address);
-					log.debug("Attempted connection request two");
-					Thread.sleep(500);
-				} else {
-					preparation.cancelReason = new PacketBufferException(this, connectionRequestTwo);
-				}
-			}
-		} catch (InterruptedException e) {
-			throw new RakNetException(e);
-		}
-
-		// If the server did not respond then it is offline
-		if (preparation.loginPackets[1] == false && preparation.cancelReason == null) {
-			preparation.cancelReason = new ServerOfflineException(this, preparation.address);
-		}
-		this.callEvent(listener -> listener.onConnect(this, address));
-
-		// Finish connection
-		if (preparation.readyForSession()) {
-			this.session = preparation.createSession(channel);
-			this.preparation = null;
-			log.debug("Created session from session preparataion");
-
-			// Send connection packet
-			ConnectionRequest connectionRequest = new ConnectionRequest();
-			connectionRequest.clientGuid = this.guid;
-			connectionRequest.timestamp = (System.currentTimeMillis() - this.timestamp);
-			connectionRequest.encode();
-			session.sendMessage(Reliability.RELIABLE_ORDERED, connectionRequest);
-			log.debug("Sent connection request to server");
-
-			// Create and start session update thread
-			RakNetClient client = this;
-			this.sessionThread = new Thread("jraknet-session-thread-" + Long.toHexString(guid).toLowerCase()) {
-
-				@Override
-				public void run() {
-					try {
-						while (session != null && !this.isInterrupted()) {
-							Thread.sleep(0, 1); // Lower CPU usage
-							session.update();
-						}
-					} catch (InterruptedException e) {
-						this.interrupt(); // Interrupted during sleep
-					} catch (Throwable throwable) {
-						client.callEvent(listener -> listener.onSessionException(client, throwable));
-						client.disconnect(throwable);
+			@Override
+			public void run() {
+				try {
+					while (peer != null && !this.isInterrupted()) {
+						Thread.sleep(0, 1); // Lower CPU usage
+						peer.update();
 					}
+				} catch (InterruptedException e) {
+					this.interrupt(); // Interrupted during sleep
+				} catch (Throwable throwable) {
+					client.callEvent(listener -> listener.onSessionException(client, throwable));
+					client.disconnect(throwable);
 				}
+			}
 
-			};
-			sessionThread.start();
-			log.debug("Created and started session update thread");
-		} else {
-			RakNetException cancelReason = preparation.cancelReason;
-			this.preparation = null;
-			this.session = null;
-			throw cancelReason;
-		}
+		};
+		peerThread.start();
+		log.debug("Created and started peer update thread");
 		log.info("Connected to server with address " + address);
 	}
 
@@ -844,7 +775,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		if (!this.isConnected()) {
 			throw new IllegalStateException("Cannot send messages while not connected to a server");
 		}
-		return session.sendMessage(reliability, channel, packet);
+		return peer.sendMessage(reliability, channel, packet);
 	}
 
 	/**
@@ -858,20 +789,20 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *             if the client is not connected to a server.
 	 */
 	public final void disconnect(String reason) throws IllegalStateException {
-		if (session == null) {
+		if (peer == null) {
 			throw new IllegalStateException("Client is not connected to a server");
 		}
 
-		// Close session and interrupt thread
-		session.closeConnection();
-		sessionThread.interrupt();
+		// Close peer and interrupt thread
+		peer.closeConnection();
+		peerThread.interrupt();
 
-		// Destroy session
-		log.info("Disconnected from server with address " + session.getAddress() + " with reason \""
+		// Destroy peer
+		log.info("Disconnected from server with address " + peer.getAddress() + " with reason \""
 				+ (reason == null ? "Disconnected" : reason) + "\"");
-		this.callEvent(listener -> listener.onDisconnect(this, session, reason == null ? "Disconnected" : reason));
-		this.session = null;
-		this.sessionThread = null;
+		this.callEvent(listener -> listener.onDisconnect(this, peer, reason == null ? "Disconnected" : reason));
+		this.peer = null;
+		this.peerThread = null;
 
 		// Shutdown networking
 		channel.close();

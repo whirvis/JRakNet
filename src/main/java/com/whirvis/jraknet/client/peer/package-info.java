@@ -29,13 +29,12 @@
  * SOFTWARE.
  */
 /**
- * Componenents used to interface with RakNet peers, connections to either a
- * server or a client machine.
+ * Components used by the {@link com.whirvis.jraknet.client.RakNetClient
+ * RakNetClient} in order to more easily establish connections with servers
+ * using the {@link com.whirvis.jraknet.client.peer.PeerFactory PeerFactory}
+ * class.
  * 
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
- * @see RakNetPeer
- * @see RakNetServerPeer
- * @see RakNetClientPeer
  */
-package com.whirvis.jraknet.peer;
+package com.whirvis.jraknet.client.peer;
