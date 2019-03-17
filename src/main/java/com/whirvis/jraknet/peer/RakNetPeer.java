@@ -820,13 +820,14 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * @param record
 	 *            the records to send.
 	 */
-	private final void sendAcknowledge(boolean acknowledge, Record... records) throws NullPointerException, IllegalArgumentException {
-		if(records == null) {
+	private final void sendAcknowledge(boolean acknowledge, Record... records)
+			throws NullPointerException, IllegalArgumentException {
+		if (records == null) {
 			throw new NullPointerException("Records cannot be null");
-		} else if(records.length <= 0) {
+		} else if (records.length <= 0) {
 			throw new IllegalArgumentException("There must be a record to send");
 		}
-		
+
 		AcknowledgedPacket acknowledged = acknowledge ? new AcknowledgedPacket() : new NotAcknowledgedPacket();
 		acknowledged.records = records;
 		acknowledged.encode();
@@ -990,5 +991,10 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 *            the packet the channel was sent on.
 	 */
 	public abstract void handleMessage(RakNetPacket packet, int channel);
+
+	/**
+	 * Disconnects the peer.
+	 */
+	public abstract void disconnect();
 
 }

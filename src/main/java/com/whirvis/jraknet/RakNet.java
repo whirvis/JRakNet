@@ -37,12 +37,14 @@ import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.UUID;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.dosse.upnp.UPnP;
 import com.whirvis.jraknet.identifier.Identifier;
 import com.whirvis.jraknet.protocol.connection.IncompatibleProtocolVersion;
 import com.whirvis.jraknet.protocol.connection.OpenConnectionRequestOne;
@@ -68,6 +70,77 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
  * @since JRakNet v1.0.0
  */
 public final class RakNet {
+
+	/**
+	 * Forwards the specified UDP port.
+	 * <p>
+	 * There is no guarantee this method will successfully forward the specified
+	 * UDP port.
+	 * <p>
+	 * This is not a blocking method. However the code required to accomplish
+	 * the task can up to three seconds to execute. As a result, it is
+	 * encapsulated within another thread so as to prevent unnecessary blocking.
+	 * 
+	 * @param port
+	 *            the port to forward.
+	 * @throws IllegalArgumentException
+	 *             if the port is not within the range of <code>0-65535</code>.
+	 */
+	public static synchronized void forwardPort(int port) throws IllegalArgumentException {
+		if (port < 0x0000 || port > 0xFFFF) {
+			throw new IllegalArgumentException("Port must be in between 0 and 65535");
+		}
+		new Thread() {
+			@Override
+			public void run() {
+				this.setName("jraknet-port-forwarder-" + port);
+				UPnP.openPortUDP(port);
+				System.out.println("Opened UPnP port");
+			}
+		}.start();
+	}
+
+	/**
+	 * Closes the specified UDP port.
+	 * <p>
+	 * There is no guarantee this method will successfully close the specified
+	 * UDP port.
+	 * <p>
+	 * This is not a blocking method. However the code required to accomplish
+	 * the task can up to three seconds to execute. As a result, it is
+	 * encapsulated within another thread so as to prevent unnecessary blocking.
+	 * 
+	 * @param port
+	 *            the port to close.
+	 * @throws IllegalArgumentException
+	 *             if the port is not within the range of <code>0-65535</code>.
+	 */
+	public static synchronized void closePort(int port) {
+		if (port < 0x0000 || port > 0xFFFF) {
+			throw new IllegalArgumentException("Port must be in between 0 and 65535");
+		}
+		new Thread() {
+			@Override
+			public void run() {
+				this.setName("jraknet-port-closer-" + port);
+				UPnP.closePortUDP(port);
+			}
+		}.start();
+	}
+
+	/**
+	 * Returns whether or not the specified UDP port is port forwarded.
+	 * <p>
+	 * 
+	 * 
+	 * @param port
+	 *            the port.
+	 * @return <code>true</code> if the specified port is forwarded,
+	 *         <code>false</code> if it is closed.
+	 */
+	public static synchronized boolean isPortForwarded(int port) {
+		return UPnP.isMappedUDP(port);
+	}
 
 	/**
 	 * Used by the
@@ -101,6 +174,7 @@ public final class RakNet {
 
 	private static final Logger LOG = LogManager.getLogger(RakNet.class);
 	private static final HashMap<InetAddress, Integer> MAXIMUM_TRANSFER_UNIT_SIZES = new HashMap<InetAddress, Integer>();
+	private static int lowestMaximumTransferUnitSize = -1;
 	private static long _maxPacketsPerSecond = 500;
 
 	/**
@@ -261,35 +335,47 @@ public final class RakNet {
 		throwable.printStackTrace(stackTracePrint);
 		return new String(stackTraceOut.toByteArray());
 	}
+	
+	static {
+		try {
+			
+			Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+			while (networkInterfaces.hasMoreElements()) {
+				NetworkInterface networkInterface = networkInterfaces.nextElement();
+				Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
+				while (addresses.hasMoreElements()) {
+					InetAddress inetAddress = addresses.nextElement();
+					MAXIMUM_TRANSFER_UNIT_SIZES.put(inetAddress, networkInterface.getMTU());
+				}
+			}
+		} catch (SocketException | NullPointerException e) {
+			lowestMaximumTransferUnitSize = -1;
+		}
+	}
 
 	/**
 	 * Returns the maximum transfer unit of the network card with the specified
 	 * address.
 	 * 
 	 * @param address
-	 *            the address. A <code>null</code> value will have
-	 *            {@link InetAddress#getLocalHost()} be used instead.
+	 *            the address. A <code>null</code> value will have this function
+	 *            go through each and every network interface on the machine and
+	 *            return the lowest value the first time it is called.
 	 * @return the maximum transfer unit of the network card with the specified
 	 *         address, <code>-1</code> if it could not be determined.
 	 */
 	public static int getMaximumTransferUnit(InetAddress address) {
-		try {
-			address = address == null ? InetAddress.getLocalHost() : address;
-			if (!MAXIMUM_TRANSFER_UNIT_SIZES.containsKey(address)) {
-				try {
-					MAXIMUM_TRANSFER_UNIT_SIZES.put(address, NetworkInterface.getByInetAddress(address).getMTU());
-				} catch (SocketException e) {
-					/*
-					 * We failed to determine the maximum transfer unit here, so
-					 * its safe to assume we'll fail again.
-					 */
-					MAXIMUM_TRANSFER_UNIT_SIZES.put(address, -1);
-				}
-			}
-			return MAXIMUM_TRANSFER_UNIT_SIZES.get(address).intValue();
-		} catch (UnknownHostException e) {
-			return -1; // Failed to determine localhost
+		if (address == null) {
+			return lowestMaximumTransferUnitSize;
 		}
+		if (!MAXIMUM_TRANSFER_UNIT_SIZES.containsKey(address)) {
+			try {
+				MAXIMUM_TRANSFER_UNIT_SIZES.put(address, NetworkInterface.getByInetAddress(address).getMTU());
+			} catch (SocketException | NullPointerException e) {
+				MAXIMUM_TRANSFER_UNIT_SIZES.put(address, lowestMaximumTransferUnitSize);
+			}
+		}
+		return MAXIMUM_TRANSFER_UNIT_SIZES.get(address).intValue();
 	}
 
 	/**

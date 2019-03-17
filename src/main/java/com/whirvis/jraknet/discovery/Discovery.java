@@ -78,32 +78,6 @@ public class Discovery {
 	private static final boolean EXTERNAL_SERVER = true;
 
 	/**
-	 * Used to convert a {@link java.util.stream.Stream Stream} to a
-	 * <code>InetSocketAddress[]</code>.
-	 */
-	private static final IntFunction<InetSocketAddress[]> INETSOCKETADDRESS_FUNCTION = new IntFunction<InetSocketAddress[]>() {
-
-		@Override
-		public InetSocketAddress[] apply(int value) {
-			return new InetSocketAddress[value];
-		}
-
-	};
-
-	/**
-	 * Used to convert a {@link java.util.stream.Stream Stream} to a
-	 * <code>DiscoveredServer[]</code>.
-	 */
-	private static final IntFunction<DiscoveredServer[]> DISCOVERED_SERVER_FUNCTION = new IntFunction<DiscoveredServer[]>() {
-
-		@Override
-		public DiscoveredServer[] apply(int value) {
-			return new DiscoveredServer[value];
-		}
-
-	};
-
-	/**
 	 * The logger used by the discovery system.
 	 */
 	private static final Logger LOG = LogManager.getLogger("jraknet-discovery");
@@ -247,6 +221,8 @@ public class Discovery {
 	 * @return the ports that are being broadcasted to on the local network.
 	 */
 	public static int[] getPorts() {
+		// TODO
+		
 		return DISCOVERY_ADDRESSES.keySet().stream()
 				.filter(address -> DISCOVERY_ADDRESSES.get(address).booleanValue() == LOCAL_SERVER)
 				.mapToInt(InetSocketAddress::getPort).toArray();
@@ -361,6 +337,7 @@ public class Discovery {
 	 * @return the servers that are being broadcasted to.
 	 */
 	public static InetSocketAddress[] getServers() {
+		// TODO
 		return DISCOVERY_ADDRESSES.keySet().stream()
 				.filter(address -> DISCOVERY_ADDRESSES.get(address).booleanValue() == EXTERNAL_SERVER)
 				.toArray(INETSOCKETADDRESS_FUNCTION);

@@ -84,7 +84,7 @@ public class RakNetServerPeer extends RakNetPeer implements RakNetPeerMessenger 
 		 */
 		this.setState(RakNetState.HANDSHAKING);
 	}
-	
+
 	@Override
 	public long getTimestamp() {
 		if (timestamp < 0) {
@@ -137,14 +137,18 @@ public class RakNetServerPeer extends RakNetPeer implements RakNetPeerMessenger 
 	}
 
 	/**
-	 * Closes the connection with the server by sending it a
+	 * {@inheritDoc}
+	 * <p>
+	 * Proper disconnection is accomplished here by sending it an unreliable
 	 * <code>DISCONNECTION_NOTIFICATION</code> packet.
 	 */
-	public void closeConnection() {
+	@Override
+	public void disconnect() {
 		/*
 		 * Clear the send queue to make sure the disconnect packet is first in
-		 * line to be sent. The disconnection notification packet has been sent,
-		 * forcefully update the session to ensure the packet is sent out.
+		 * line to be sent. After the disconnection notification packet has been
+		 * sent, the peer will be forcefully updated to ensure the packet is
+		 * sent out at least once.
 		 */
 		sendQueue.clear();
 		this.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);

@@ -33,7 +33,7 @@ package com.whirvis.jraknet.identifier;
 import com.whirvis.jraknet.RakNet;
 
 /**
- * Represents a Minecraft™ identifier.
+ * Represents a Minecraftï¿½ identifier.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0
@@ -41,8 +41,8 @@ import com.whirvis.jraknet.RakNet;
 public class MinecraftIdentifier extends Identifier {
 
 	/**
-	 * The header found at the beginning of a Minecraft™ identifier. This allows
-	 * for easy indication that the identifier is actually a Minecraft™
+	 * The header found at the beginning of a Minecraftï¿½ identifier. This allows
+	 * for easy indication that the identifier is actually a Minecraftï¿½
 	 * identifier, rather than
 	 */
 	private static final String HEADER = "MCPE";
@@ -54,13 +54,13 @@ public class MinecraftIdentifier extends Identifier {
 	private static final String SEPARATOR = ";";
 
 	/**
-	 * The amount of fields found in a Minecraft™ identifier when it is in
+	 * The amount of fields found in a Minecraftï¿½ identifier when it is in
 	 * legacy mode.
 	 */
 	private static final int DATA_COUNT_LEGACY = 6;
 
 	/**
-	 * The amount of fields found in a Minecraft™ identifier.
+	 * The amount of fields found in a Minecraftï¿½ identifier.
 	 */
 	private static final int DATA_COUNT = 9;
 
@@ -89,11 +89,11 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Returns whether or not the the identifier is a Minecraft™ identifier.
+	 * Returns whether or not the the identifier is a Minecraftï¿½ identifier.
 	 * 
 	 * @param identifier
 	 *            the identifier to check.
-	 * @return <code>true</code> if the identifier is a Minecraft™ identifier,
+	 * @return <code>true</code> if the identifier is a Minecraftï¿½ identifier,
 	 *         <code>false</code> otherwise.
 	 */
 	public static boolean isMinecraftIdentifier(Identifier identifier) {
@@ -114,7 +114,7 @@ public class MinecraftIdentifier extends Identifier {
 	private boolean legacy;
 
 	/**
-	 * Creates a Minecraft™ identifier.
+	 * Creates a Minecraftï¿½ identifier.
 	 * 
 	 * @param serverName
 	 *            the server name.
@@ -152,7 +152,7 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Creates a Minecraft™ identifier from an existing identifier.
+	 * Creates a Minecraftï¿½ identifier from an existing identifier.
 	 * 
 	 * @param identifier
 	 *            the identifier.
@@ -160,7 +160,7 @@ public class MinecraftIdentifier extends Identifier {
 	 *             if the <code>identifier</code> or its contents are
 	 *             <code>null</code>.
 	 * @throws IllegalArgumentException
-	 *             if the <code>identifier</code> is not a Minecraft™ identifier
+	 *             if the <code>identifier</code> is not a Minecraftï¿½ identifier
 	 *             or there is not enough data present.
 	 */
 	public MinecraftIdentifier(Identifier identifier) throws NullPointerException, IllegalArgumentException {
@@ -194,7 +194,7 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Creates a Minecraft™ identifier from another identifier.
+	 * Creates a Minecraftï¿½ identifier from another identifier.
 	 * 
 	 * @param identifier
 	 *            the identifier.
@@ -210,7 +210,7 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Creates a blank Minecraft™ identifier.
+	 * Creates a blank Minecraftï¿½ identifier.
 	 */
 	public MinecraftIdentifier() {
 		this(null, 0, null, 0, 0, 0, null, null);
@@ -415,7 +415,7 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Converts the values to a Minecraft™ identifier string.
+	 * Converts the values to a Minecraftï¿½ identifier string.
 	 * 
 	 * @param values
 	 *            the values to write to the identifier.
