@@ -115,13 +115,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *            <code>null</code> address will have the client bind to the
 	 *            wildcard address along with the client giving Netty the
 	 *            responsibility of choosing which port to bind to.
-	 * @throws NullPointerException
-	 *             if the <code>address</code> is <code>null</code>.
 	 */
-	public RakNetClient(InetSocketAddress address) throws NullPointerException {
-		if (address == null) {
-			throw new NullPointerException("Address cannot be null");
-		}
+	public RakNetClient(InetSocketAddress address) {
 		UUID uuid = UUID.randomUUID();
 		this.guid = uuid.getMostSignificantBits();
 		this.log = LogManager.getLogger("jraknet-client-" + Long.toHexString(guid));
@@ -141,10 +136,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *            the port the client will bind to during connection. A port of
 	 *            <code>0</code> will have the client give Netty the
 	 *            respsonsibility of choosing the port to bind to.
-	 * @throws NullPointerException
-	 *             if the <code>address</code> is <code>null</code>.
 	 */
-	public RakNetClient(InetAddress address, int port) throws NullPointerException {
+	public RakNetClient(InetAddress address, int port) {
 		this(new InetSocketAddress(address, port));
 	}
 
@@ -155,8 +148,6 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *            the IP address the client will bind to during connection. A
 	 *            <code>null</code> address will have the client bind to the
 	 *            wildcard address.
-	 * @throws NullPointerException
-	 *             if the <code>address</code> is <code>null</code>.
 	 */
 	public RakNetClient(InetAddress address) {
 		this(new InetSocketAddress(address, 0));
@@ -176,10 +167,6 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
 	 *             if a scope_id was specified for a global IPv6 address.
-	 * @throws NullPointerException
-	 *             if the <code>host</code> is <code>null</code>. if no IP
-	 *             address for the host could be found, or if a scope_id was
-	 *             specified for a global IPv6 address.
 	 */
 	public RakNetClient(String host, int port) throws UnknownHostException {
 		this(InetAddress.getByName(host), port);
@@ -195,10 +182,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
 	 *             if a scope_id was specified for a global IPv6 address.
-	 * @throws NullPointerException
-	 *             if the <code>host</code> is <code>null</code>.
 	 */
-	public RakNetClient(String host) throws NullPointerException, UnknownHostException {
+	public RakNetClient(String host) throws UnknownHostException {
 		this(host, 0);
 	}
 
@@ -649,7 +634,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		MaximumTransferUnit[] units = MaximumTransferUnit.sort(maximumTransferUnits);
 		for (MaximumTransferUnit unit : maximumTransferUnits) {
 			unit.reset();
-			log.debug("Reset maximum transfer unit with size of " + unit.getSize() + " bytes (" + (unit.getSize() * 8) + " bits)");
+			log.debug("Reset maximum transfer unit with size of " + unit.getSize() + " bytes (" + (unit.getSize() * 8)
+					+ " bits)");
 		}
 		this.peerFactory = new PeerFactory(this, address, channel, units[0].getSize(), highestMaximumTransferUnitSize);
 		log.debug("Reset maximum transfer units and created peer peerFactory");
@@ -677,7 +663,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 				} catch (InterruptedException e) {
 					this.interrupt(); // Interrupted during sleep
 				} catch (Throwable throwable) {
-					client.callEvent(listener -> listener.onSessionException(client, throwable));
+					client.callEvent(listener -> listener.onPeerException(client, peer, throwable));
 					client.disconnect(throwable);
 				}
 			}
@@ -794,7 +780,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		}
 
 		// Close peer and interrupt thread
-		peer.closeConnection();
+		peer.disconnect();
 		peerThread.interrupt();
 
 		// Destroy peer

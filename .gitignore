@@ -67,3 +67,9 @@ nb-configuration.xml
 ### Git ###
 # Don't exclude the .gitignore itself
 !.gitignore
+
+### WaifUPnP ###
+# Don't exclude the necessary WaifUPnP library files
+!waifupnp/WaifUPnP.jar
+!waifupnp/WaifUPnP-javadoc.jar
+!waifupnp/WaifUPnP-sources.jar

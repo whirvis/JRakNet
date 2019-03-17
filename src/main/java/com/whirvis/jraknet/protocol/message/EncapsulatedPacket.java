@@ -531,7 +531,7 @@ public class EncapsulatedPacket implements Cloneable {
 	 *            the peer.
 	 * @param encapsulated
 	 *            the packet to split.
-	 * @return the split up encapsualted packet.
+	 * @return the split up encapsulated packet.
 	 * @throws IllegalStateException
 	 *             if the <code>encapsulated</code> is already split or if the
 	 *             packet is too small to be split according to

@@ -56,13 +56,26 @@ import io.netty.channel.socket.DatagramPacket;
  */
 public class RakNetPacket extends Packet {
 
-	private static final Logger LOG = LogManager.getLogger(RakNetPacket.class);
-	private static final int UNSIGNED_BYTE_MIN_VALUE = 0x00;
-	private static final int UNSIGNED_BYTE_MAX_VALUE = 0xFF;
+	/**
+	 * The name of the encode method.
+	 */
 	private static final String ENCODE_METHOD_NAME = "encode";
+
+	/**
+	 * The name of the decode method.
+	 */
 	private static final String DECODE_METHOD_NAME = "decode";
+
+	/**
+	 * The cached packet names, mapped by their ID.
+	 */
 	private static final ShortMap<String> PACKET_NAMES = new ShortMap<String>();
+
+	/**
+	 * The cached packet IDs, mapped by their name.
+	 */
 	private static final HashMap<String, Short> PACKET_IDS = new HashMap<String, Short>();
+
 	private static boolean mappedNameIds;
 
 	/**
@@ -882,7 +895,7 @@ public class RakNetPacket extends Packet {
 	public static final short ID_NACK = 0xA0;
 
 	/**
-	 * Maps all <code>public</code> packet IDs to their respecitve field names
+	 * Maps all <code>public</code> packet IDs to their respetive field names
 	 * and vice-versa.
 	 * <p>
 	 * Packet IDs {@link #ID_CUSTOM_0}, {@link #ID_CUSTOM_1},
@@ -895,31 +908,35 @@ public class RakNetPacket extends Packet {
 	 * packets but they also override other packets with the same ID.
 	 */
 	private static void mapNameIds() {
-		for (Field field : RakNet.class.getFields()) {
-			if (field.getType().equals(short.class)) {
-				try {
-					short packetId = field.getShort(null);
-					if ((packetId >= ID_CUSTOM_0 && packetId <= ID_CUSTOM_F) || packetId == ID_ACK
-							|| packetId == ID_NACK) {
-						continue; // Ignored as they override other packet IDs
-					}
-					String packetName = field.getName();
-					String currentName = PACKET_NAMES.put(packetId, packetName);
-					PACKET_IDS.put(packetName, packetId);
-					if (currentName != null) {
-						if (!currentName.equals(packetName)) {
-							LOG.warn("Found duplicate ID " + RakNet.toHexStringId(packetId) + " for \"" + packetName
-									+ "\" and \"" + currentName + "\", overriding name and ID");
+		if (mappedNameIds == false) {
+			Logger log = LogManager.getLogger(RakNetPacket.class);
+			for (Field field : RakNet.class.getFields()) {
+				if (field.getType().equals(short.class)) {
+					try {
+						short packetId = field.getShort(null);
+						if ((packetId >= ID_CUSTOM_0 && packetId <= ID_CUSTOM_F) || packetId == ID_ACK
+								|| packetId == ID_NACK) {
+							continue; // Ignored as they override other packet
+										// IDs
 						}
-					} else {
-						LOG.debug("Assigned packet ID " + RakNet.toHexStringId(packetId) + " to " + packetName);
+						String packetName = field.getName();
+						String currentName = PACKET_NAMES.put(packetId, packetName);
+						PACKET_IDS.put(packetName, packetId);
+						if (currentName != null) {
+							if (!currentName.equals(packetName)) {
+								log.warn("Found duplicate ID " + RakNet.toHexStringId(packetId) + " for \"" + packetName
+										+ "\" and \"" + currentName + "\", overriding name and ID");
+							}
+						} else {
+							log.debug("Assigned packet ID " + RakNet.toHexStringId(packetId) + " to " + packetName);
+						}
+					} catch (ReflectiveOperationException e) {
+						e.printStackTrace();
 					}
-				} catch (ReflectiveOperationException e) {
-					e.printStackTrace();
 				}
 			}
+			mappedNameIds = true;
 		}
-		mappedNameIds = true;
 	}
 
 	/**
@@ -1008,9 +1025,8 @@ public class RakNetPacket extends Packet {
 	 */
 	public RakNetPacket(int id) throws IllegalArgumentException {
 		super();
-		if (id < UNSIGNED_BYTE_MIN_VALUE || id > UNSIGNED_BYTE_MAX_VALUE) {
-			throw new IllegalArgumentException(
-					"Invalid ID, must be in between " + UNSIGNED_BYTE_MIN_VALUE + " and " + UNSIGNED_BYTE_MAX_VALUE);
+		if (id < 0x00 || id > 0xFF) {
+			throw new IllegalArgumentException("ID must be in between 0 and 255");
 		}
 		this.writeUnsignedByte(this.id = (short) id);
 		try {
@@ -1031,7 +1047,6 @@ public class RakNetPacket extends Packet {
 	 *            least one byte to be read from for the ID.
 	 * @throws IllegalArgumentException
 	 *             if the buffer size is less than one.
-	 * @see io.netty.buffer.ByteBuf ByteBuf
 	 */
 	public RakNetPacket(ByteBuf buffer) throws IllegalArgumentException {
 		super(buffer);
@@ -1059,7 +1074,6 @@ public class RakNetPacket extends Packet {
 	 *             if the size of the buffer contained within the datagram is
 	 *             less than one.
 	 * @see #RakNetPacket(ByteBuf)
-	 * @see io.netty.channel.socket.DatagramPacket DatagramPacket
 	 */
 	public RakNetPacket(DatagramPacket datagram) throws IllegalArgumentException {
 		this(datagram.content());

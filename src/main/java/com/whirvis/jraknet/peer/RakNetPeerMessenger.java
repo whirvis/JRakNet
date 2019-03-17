@@ -41,6 +41,15 @@ import io.netty.buffer.ByteBuf;
 /**
  * Represents an object that has the ability to send messages to a
  * {@link RakNetPeer}.
+ * <p>
+ * The reason these methods are not simply found within the original
+ * {@link RakNetPeer} class is to allow the interface to be implemented by the
+ * {@link com.whirvis.jraknet.client.RakNetClient RakNetClient}. This way, users
+ * are able to simply call the {@link #sendMessage(Reliability, Packet)} method
+ * from the client without needing to get the actual {@link RakNetServerPeer}
+ * object first. Of course, calling from the client is just a shorthand and
+ * would be the exact same thing as grabbing the peer manually and then sending
+ * it a message.
  * 
  * @author Trent Summerlin
  * @since JRakNet v1.0.0

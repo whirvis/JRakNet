@@ -30,7 +30,6 @@
  */
 package com.whirvis.jraknet;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -109,7 +108,8 @@ public class Packet {
 	 * Creates a packet from an existing packet's buffer.
 	 * 
 	 * @param packet
-	 *            the packet whose buffer to copy to read from and write to.
+	 *            the packet whose buffer to copy and then read from and write
+	 *            to.
 	 */
 	public Packet(Packet packet) {
 		this(Unpooled.copiedBuffer(packet.copy()));
@@ -129,8 +129,8 @@ public class Packet {
 	 *            the <code>byte[]</code> to read the data into.
 	 * @return the packet.
 	 * @throws IndexOutOfBoundsException
-	 *             if there are less than the length of the <code>dest</code>
-	 *             readable bytes left in the packet. TODO
+	 *             if there are less readable bytes than the length of
+	 *             <code>dest</code>.
 	 */
 	public final Packet read(byte[] dest) throws IndexOutOfBoundsException {
 		for (int i = 0; i < dest.length; i++) {
@@ -146,8 +146,8 @@ public class Packet {
 	 *            the amount of <code>byte</code>s to read.
 	 * @return the read <code>byte</code>s.
 	 * @throws IndexOutOfBoundsException
-	 *             if there are less than the <code>length</code> readable bytes
-	 *             left in the packet. TODO
+	 *             if there are less readable bytes than the specified
+	 *             <code>length</code>.
 	 */
 	public final byte[] read(int length) throws IndexOutOfBoundsException {
 		byte[] data = new byte[length];
@@ -187,39 +187,8 @@ public class Packet {
 	 *             if there are less than <code>1</code> readable byte left in
 	 *             the packet.
 	 */
-	public final short readUnsignedByte() {
+	public final short readUnsignedByte() throws IndexOutOfBoundsException {
 		return (short) (buffer.readByte() & 0xFF);
-	}
-
-	/**
-	 * Reads a flipped unsigned <code>byte</code> casted back to a
-	 * <code>byte</code>.
-	 * 
-	 * @return a flipped unsigned <code>byte</code> casted back to a
-	 *         <code>byte</code>.
-	 * @throws IndexOutOfBoundsException
-	 *             if there are less than <code>1</code> readable byte left in
-	 *             the packet.
-	 */
-	private final byte readCastedFlippedUnsignedByte() {
-		return (byte) (~buffer.readByte() & 0xFF);
-	}
-
-	/**
-	 * Returns a byte array of the read flipped unsigned <code>byte</code>s
-	 * casted back to a byte.
-	 * 
-	 * @param length
-	 *            the amount of <code>byte</code>s to read.
-	 * @return a <code>byte[]</code> of the read flipped unsigned
-	 *         <code>byte</code>s casted back to a <code>byte</code>. TODO
-	 */
-	private final byte[] readCFU(int length) {
-		byte[] data = new byte[length];
-		for (int i = 0; i < data.length; i++) {
-			data[i] = this.readCastedFlippedUnsignedByte();
-		}
-		return data;
 	}
 
 	/**
@@ -231,7 +200,7 @@ public class Packet {
 	 *             if there are less than <code>1</code> readable byte left in
 	 *             the packet.
 	 */
-	public final boolean readBoolean() {
+	public final boolean readBoolean() throws IndexOutOfBoundsException {
 		return this.readUnsignedByte() > 0x00;
 	}
 
@@ -243,7 +212,7 @@ public class Packet {
 	 *             if there are less than <code>2</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final char readChar() {
+	public final char readChar() throws IndexOutOfBoundsException {
 		return (char) buffer.readShort();
 	}
 
@@ -255,7 +224,7 @@ public class Packet {
 	 *             if there are less than <code>2</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final char readCharLE() {
+	public final char readCharLE() throws IndexOutOfBoundsException {
 		return (char) buffer.readShortLE();
 	}
 
@@ -267,7 +236,7 @@ public class Packet {
 	 *             if there are less than <code>2</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final short readShort() {
+	public final short readShort() throws IndexOutOfBoundsException {
 		return buffer.readShort();
 	}
 
@@ -279,7 +248,7 @@ public class Packet {
 	 *             if there are less than <code>2</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final short readShortLE() {
+	public final short readShortLE() throws IndexOutOfBoundsException {
 		return buffer.readShortLE();
 	}
 
@@ -292,7 +261,7 @@ public class Packet {
 	 *             the packet.
 	 */
 	public final int readUnsignedShort() throws IndexOutOfBoundsException {
-		return (buffer.readShort() & 0xFFFF);
+		return buffer.readShort() & 0xFFFF;
 	}
 
 	/**
@@ -303,8 +272,8 @@ public class Packet {
 	 *             if there are less than <code>2</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final int readUnsignedShortLE() {
-		return (buffer.readShortLE() & 0xFFFF);
+	public final int readUnsignedShortLE() throws IndexOutOfBoundsException {
+		return buffer.readShortLE() & 0xFFFF;
 	}
 
 	/**
@@ -315,7 +284,7 @@ public class Packet {
 	 *             if there are less than <code>3</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final int readTriad() {
+	public final int readTriad() throws IndexOutOfBoundsException {
 		return (buffer.readByte() << 16) | (buffer.readByte() << 8) | buffer.readByte();
 	}
 
@@ -339,8 +308,8 @@ public class Packet {
 	 *             if there are less than <code>3</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final long readUnsignedTriad() {
-		return this.readTriad() & 0x0000000000FFFFFFL;
+	public final int readUnsignedTriad() throws IndexOutOfBoundsException {
+		return this.readTriad() & 0xFFFFFF;
 	}
 
 	/**
@@ -351,8 +320,8 @@ public class Packet {
 	 *             if there are less than <code>3</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final long readUnsignedTriadLE() {
-		return this.readTriadLE() & 0x0000000000FFFFFFL;
+	public final int readUnsignedTriadLE() throws IndexOutOfBoundsException {
+		return this.readTriadLE() & 0xFFFFFF;
 	}
 
 	/**
@@ -363,7 +332,7 @@ public class Packet {
 	 *             if there are less than <code>4</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final int readInt() {
+	public final int readInt() throws IndexOutOfBoundsException {
 		return buffer.readInt();
 	}
 
@@ -375,7 +344,7 @@ public class Packet {
 	 *             if there are less than <code>4</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final int readIntLE() {
+	public final int readIntLE() throws IndexOutOfBoundsException {
 		return buffer.readIntLE();
 	}
 
@@ -387,8 +356,12 @@ public class Packet {
 	 *             if there are less than <code>4</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final long readUnsignedInt() {
-		return buffer.readInt() & 0x00000000FFFFFFFFL;
+	public final long readUnsignedInt() throws IndexOutOfBoundsException {
+		/*
+		 * Don't forget the 'L' at the end of 0xFFFFFFFFL. Without it, the
+		 * unsigned operation will fail as it will not be ANDing with a long!
+		 */
+		return buffer.readInt() & 0xFFFFFFFFL;
 	}
 
 	/**
@@ -399,8 +372,12 @@ public class Packet {
 	 *             if there are less than <code>4</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final long readUnsignedIntLE() {
-		return buffer.readIntLE() & 0x00000000FFFFFFFFL;
+	public final long readUnsignedIntLE() throws IndexOutOfBoundsException {
+		/*
+		 * Don't forget the 'L' at the end of 0xFFFFFFFFL. Without it, the
+		 * unsigned operation will fail as it will not be ANDing with a long!
+		 */
+		return buffer.readIntLE() & 0xFFFFFFFFL;
 	}
 
 	/**
@@ -411,7 +388,7 @@ public class Packet {
 	 *             if there are less than <code>8</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final long readLong() {
+	public final long readLong() throws IndexOutOfBoundsException {
 		return buffer.readLong();
 	}
 
@@ -423,7 +400,7 @@ public class Packet {
 	 *             if there are less than <code>8</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final long readLongLE() {
+	public final long readLongLE() throws IndexOutOfBoundsException {
 		return buffer.readLongLE();
 	}
 
@@ -435,8 +412,8 @@ public class Packet {
 	 *             if there are less than <code>8</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final BigInteger readUnsignedLong() {
-		byte[] ulBytes = this.read(8);
+	public final BigInteger readUnsignedLong() throws IndexOutOfBoundsException {
+		byte[] ulBytes = this.read(Long.BYTES);
 		return new BigInteger(ulBytes);
 	}
 
@@ -448,8 +425,8 @@ public class Packet {
 	 *             if there are less than <code>8</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final BigInteger readUnsignedLongLE() {
-		byte[] ulBytesReversed = this.read(8);
+	public final BigInteger readUnsignedLongLE() throws IndexOutOfBoundsException {
+		byte[] ulBytesReversed = this.read(Long.BYTES);
 		byte[] ulBytes = new byte[ulBytesReversed.length];
 		for (int i = 0; i < ulBytes.length; i++) {
 			ulBytes[i] = ulBytesReversed[ulBytesReversed.length - i - 1];
@@ -465,7 +442,7 @@ public class Packet {
 	 *             if there are less than <code>4</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final float readFloat() {
+	public final float readFloat() throws IndexOutOfBoundsException {
 		return buffer.readFloat();
 	}
 
@@ -477,7 +454,7 @@ public class Packet {
 	 *             if there are less than <code>4</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final float readFloatLE() {
+	public final float readFloatLE() throws IndexOutOfBoundsException {
 		return buffer.readFloatLE();
 	}
 
@@ -489,7 +466,7 @@ public class Packet {
 	 *             if there are less than <code>8</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final double readDouble() {
+	public final double readDouble() throws IndexOutOfBoundsException {
 		return buffer.readDouble();
 	}
 
@@ -501,17 +478,21 @@ public class Packet {
 	 *             if there are less than <code>8</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final double readDoubleLE() {
+	public final double readDoubleLE() throws IndexOutOfBoundsException {
 		return buffer.readDoubleLE();
 	}
 
 	/**
-	 * Reads a UTF-8 <code>String</code> with its length prefixed by an unsigned
+	 * Reads a UTF-8 string with its length prefixed by an unsigned
 	 * <code>short</code>.
 	 * 
-	 * @return a <code>String</code>. TODO
+	 * @return a <code>String</code>.
+	 * @throws IndexOutOfBoundsException
+	 *             if there are less than <code>2</code> readable bytes left in
+	 *             the packet to read the length of the string, or if there are
+	 *             less readable bytes than are specified by the length.
 	 */
-	public final String readString() {
+	public final String readString() throws IndexOutOfBoundsException {
 		int len = this.readUnsignedShort();
 		byte[] data = this.read(len);
 		return new String(data);
@@ -521,9 +502,13 @@ public class Packet {
 	 * Reads a UTF-8 <code>String</code> with its length prefixed by a unsigned
 	 * little -endian <code>short</code>.
 	 * 
-	 * @return a <code>String</code>. TODO
+	 * @return a <code>String</code>.
+	 * @throws IndexOutOfBoundsException
+	 *             if there are less than <code>2</code> readable bytes left in
+	 *             the packet to read the length of the string, or if there are
+	 *             less readable bytes than are specified by the length.
 	 */
-	public final String readStringLE() {
+	public final String readStringLE() throws IndexOutOfBoundsException {
 		int len = this.readUnsignedShortLE();
 		byte[] data = this.read(len);
 		return new String(data);
@@ -533,25 +518,38 @@ public class Packet {
 	 * Reads an IPv4/IPv6 address.
 	 * 
 	 * @return an IPv4/IPv6 address.
+	 * @throws IndexOutOfBoundsException
+	 *             if there are less than <code>8</code> readable bytes left in
+	 *             the packet when it is an IPv4 address or <code>30</code> when
+	 *             it is an IPv6 address.
 	 * @throws UnknownHostException
-	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address. TODO
+	 *             if no IP address for the <code>host</code> could be found, a
+	 *             scope_id was specified for a global IPv6 address, or the
+	 *             address version is an unknown version.
 	 */
-	public final InetSocketAddress readAddress() throws UnknownHostException {
+	public final InetSocketAddress readAddress() throws IndexOutOfBoundsException, UnknownHostException {
 		short version = this.readUnsignedByte();
+		byte[] address = null;
 		if (version == ADDRESS_VERSION_IPV4) {
-			byte[] addressBytes = this.readCFU(ADDRESS_VERSION_IPV4_LENGTH);
-			int port = this.readUnsignedShort();
-			return new InetSocketAddress(InetAddress.getByAddress(addressBytes), port);
+			address = new byte[ADDRESS_VERSION_IPV4_LENGTH];
 		} else if (version == ADDRESS_VERSION_IPV6) {
-			// Read data
-			byte[] addressBytes = this.readCFU(ADDRESS_VERSION_IPV6_LENGTH);
-			this.read(ADDRESS_VERSION_IPV6_MYSTERY_LENGTH); // Mystery bytes
-			int port = this.readUnsignedShort();
-			return new InetSocketAddress(InetAddress.getByAddress(Arrays.copyOfRange(addressBytes, 0, 16)), port);
+			address = new byte[ADDRESS_VERSION_IPV6_LENGTH];
 		} else {
 			throw new UnknownHostException("Unknown protocol IPv" + version);
 		}
+		for (int i = 0; i < address.length; i++) {
+			/*
+			 * This is very peculiar, I honestly don't know why the address
+			 * bytes are not only flipped but need to be made unsigned and then
+			 * casted back to a regular byte.
+			 */
+			address[i] = (byte) (~this.readByte() & 0xFF);
+		}
+		if (version == ADDRESS_VERSION_IPV6) {
+			this.read(ADDRESS_VERSION_IPV6_MYSTERY_LENGTH); // Mystery bytes
+		}
+		int port = this.readUnsignedShort();
+		return new InetSocketAddress(InetAddress.getByAddress(address), port);
 	}
 
 	/**
@@ -562,7 +560,7 @@ public class Packet {
 	 *             if there are less than <code>16</code> readable bytes left in
 	 *             the packet.
 	 */
-	public final UUID readUUID() {
+	public final UUID readUUID() throws IndexOutOfBoundsException {
 		long mostSignificantBits = this.readLong();
 		long leastSignificantBits = this.readLong();
 		return new UUID(mostSignificantBits, leastSignificantBits);
@@ -574,8 +572,13 @@ public class Packet {
 	 * @param data
 	 *            the data to write.
 	 * @return the packet.
+	 * @throws NullPointerException
+	 *             if the <code>data</code> is <code>null</code>.
 	 */
-	public final Packet write(byte[] data) {
+	public final Packet write(byte[] data) throws NullPointerException {
+		if (data == null) {
+			throw new NullPointerException("Data cannot be null");
+		}
 		for (int i = 0; i < data.length; i++) {
 			buffer.writeByte(data[i]);
 		}
@@ -583,8 +586,8 @@ public class Packet {
 	}
 
 	/**
-	 * Writes the specified amount of <code>null (0x00)</code> bytes to the
-	 * packet.
+	 * Writes the specified amount of <code>null</code> (<code>0x00</code>)
+	 * bytes to the packet.
 	 * 
 	 * @param length
 	 *            the amount of bytes to write.
@@ -615,37 +618,14 @@ public class Packet {
 	 * @param b
 	 *            the unsigned <code>byte</code>.
 	 * @return the packet.
+	 * @throws IllegalArgumentException
+	 *             if the value is not within the range of <code>0-255</code>.
 	 */
-	public final Packet writeUnsignedByte(int b) {
-		buffer.writeByte(((byte) b) & 0xFF);
-		return this;
-	}
-
-	/**
-	 * Writes a flipped unsigned <code>byte</code> casted back into a byte to
-	 * the packet.
-	 * 
-	 * @param b
-	 *            the <code>byte</code>
-	 * @return the packet.
-	 */
-	private final Packet writeCFUByte(byte b) {
-		buffer.writeByte(~b & 0xFF);
-		return this;
-	}
-
-	/**
-	 * Writes a byte array of the flipped unsigned <code>byte</code>s casted
-	 * back to a byte to the packet.
-	 * 
-	 * @param data
-	 *            the data to write.
-	 * @return the packet.
-	 */
-	private final Packet writeCFU(byte[] data) {
-		for (int i = 0; i < data.length; i++) {
-			this.writeCFUByte(data[i]);
+	public final Packet writeUnsignedByte(int b) throws IllegalArgumentException {
+		if (b < 0x00 || b > 0xFF) {
+			throw new IllegalArgumentException("Value must be in between 0-255");
 		}
+		buffer.writeByte(((byte) b) & 0xFF);
 		return this;
 	}
 
@@ -1015,25 +995,26 @@ public class Packet {
 	 *             a scope_id was specified for a global IPv6 address, or the
 	 *             length of the address is not either
 	 *             {@value #ADDRESS_VERSION_IPV4_LENGTH} or
-	 *             <code>{@value #ADDRESS_VERSION_IPV6_LENGTH}</code>
-	 *             <code>byte</code>s.
+	 *             {@value #ADDRESS_VERSION_IPV6_LENGTH} <code>byte</code>s.
 	 */
 	public final Packet writeAddress(InetSocketAddress address) throws NullPointerException, UnknownHostException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
 		}
-		byte[] addressBytes = address.getAddress().getAddress();
-		if (addressBytes.length == ADDRESS_VERSION_IPV4_LENGTH) {
+		byte[] ipAddress = address.getAddress().getAddress();
+		if (ipAddress.length == ADDRESS_VERSION_IPV4_LENGTH) {
 			this.writeUnsignedByte(ADDRESS_VERSION_IPV4);
-			this.writeCFU(addressBytes);
-			this.writeUnsignedShort(address.getPort());
-		} else if (addressBytes.length == ADDRESS_VERSION_IPV6_LENGTH) {
+		} else if (ipAddress.length == ADDRESS_VERSION_IPV6_LENGTH) {
 			this.writeUnsignedByte(ADDRESS_VERSION_IPV6);
-			this.writeCFU(addressBytes);
-			this.pad(ADDRESS_VERSION_IPV6_MYSTERY_LENGTH); // Mystery bytes
-			this.writeUnsignedShort(address.getPort());
 		} else {
-			throw new UnknownHostException("Unknown protocol IPv" + addressBytes.length);
+			throw new UnknownHostException(
+					"Unknown protocol for address with length of " + ipAddress.length + " bytes");
+		}
+		for (int i = 0; i < ipAddress.length; i++) {
+			this.writeByte(~ipAddress[i] & 0xFF);
+		}
+		if (ipAddress.length == ADDRESS_VERSION_IPV6_LENGTH) {
+			this.pad(ADDRESS_VERSION_IPV6_MYSTERY_LENGTH); // Mystery bytes
 		}
 		return this;
 	}
@@ -1048,8 +1029,7 @@ public class Packet {
 	 * @return the packet.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
-	 *             TODO
+	 *             if a scope_id was specified for a global IPv6 address. TODO
 	 */
 	public final Packet writeAddress(InetAddress host, int port) throws UnknownHostException {
 		return this.writeAddress(new InetSocketAddress(host, port));
@@ -1065,8 +1045,7 @@ public class Packet {
 	 * @return the packet.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
-	 *             TODO
+	 *             if a scope_id was specified for a global IPv6 address. TODO
 	 */
 	public final Packet writeAddress(String host, int port) throws UnknownHostException {
 		return this.writeAddress(InetAddress.getByName(host), port);
@@ -1078,9 +1057,13 @@ public class Packet {
 	 * @param uuid
 	 *            the <code>UUID</code>.
 	 * @return the packet.
-	 * TODO
+	 * @throws NullPointerException
+	 *             if the <code>uuid</code> is <code>null</code>.
 	 */
-	public final Packet writeUUID(UUID uuid) {
+	public final Packet writeUUID(UUID uuid) throws NullPointerException {
+		if (uuid == null) {
+			throw new NullPointerException("UUID cannot be null");
+		}
 		this.writeLong(uuid.getMostSignificantBits());
 		this.writeLong(uuid.getLeastSignificantBits());
 		return this;
@@ -1089,7 +1072,8 @@ public class Packet {
 	/**
 	 * Returns the packet as a <code>byte[]</code>.
 	 * 
-	 * @return the packet as a <code>byte[]</code>.
+	 * @return the packet as a <code>byte[]</code>, <code>null</code> if the
+	 *         buffer being used within the packet is a direct buffer.
 	 */
 	public byte[] array() {
 		if (buffer.isDirect()) {
@@ -1103,7 +1087,7 @@ public class Packet {
 	 * 
 	 * @return the size of the packet in <code>byte</code>s.
 	 */
-	public int size() {
+	public int size() { // TODO FIX THIS METHOD!
 		return array().length;
 	}
 
@@ -1171,11 +1155,15 @@ public class Packet {
 	 * 
 	 * @param datagram
 	 *            the {@link io.netty.channel.socket.DatagramPacket
-	 *            DatagramPacket} to read from.
+	 *            DatagramPacket} whose buffer to read from and write to.
 	 * @return the packet.
-	 * TODO
+	 * @throws NullPointerException
+	 *             if the <code>datagram</code> packet is <code>null</code>.
 	 */
-	public final Packet setBuffer(DatagramPacket datagram) {
+	public final Packet setBuffer(DatagramPacket datagram) throws NullPointerException {
+		if (datagram == null) {
+			throw new NullPointerException("Datagram packet cannot be null");
+		}
 		return this.setBuffer(datagram.content());
 	}
 
@@ -1185,9 +1173,13 @@ public class Packet {
 	 * @param data
 	 *            the <code>byte[]</code> to read from.
 	 * @return the packet.
-	 * TODO
+	 * @throws NullPointerException
+	 *             if the <code>buffer</code> is <code>null</code>.
 	 */
-	public final Packet setBuffer(byte[] buffer) {
+	public final Packet setBuffer(byte[] buffer) throws NullPointerException {
+		if (buffer == null) {
+			throw new NullPointerException("Buffer cannot be null");
+		}
 		return this.setBuffer(Unpooled.copiedBuffer(buffer));
 	}
 
@@ -1197,9 +1189,13 @@ public class Packet {
 	 * @param packet
 	 *            the packet whose buffer to copy to read from and write to.
 	 * @return the packet.
-	 * TODO
+	 * @throws NullPointerException
+	 *             if the <code>packet</code> is <code>null</code>.
 	 */
-	public final Packet setBuffer(Packet packet) {
+	public final Packet setBuffer(Packet packet) throws NullPointerException {
+		if (packet == null) {
+			throw new NullPointerException("Packet cannot be null");
+		}
 		return this.setBuffer(packet.copy());
 	}
 

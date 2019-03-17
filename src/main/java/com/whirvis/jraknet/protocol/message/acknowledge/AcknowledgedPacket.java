@@ -141,7 +141,7 @@ public class AcknowledgedPacket extends RakNetPacket {
 		ArrayList<Record> records = new ArrayList<Record>();
 		int size = this.readUnsignedShort();
 		for (int i = 0; i < size; i++) {
-			boolean ranged = this.readUnsignedByte() == 0x00;
+			boolean ranged = this.readUnsignedByte() == RANGED;
 			if (ranged == false) {
 				records.add(new Record(this.readTriadLE()));
 			} else {

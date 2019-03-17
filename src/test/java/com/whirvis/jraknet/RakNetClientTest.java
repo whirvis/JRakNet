@@ -38,8 +38,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.client.RakNetClientListener;
-import com.whirvis.jraknet.peer.RakNetServerSession;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
+import com.whirvis.jraknet.peer.RakNetServerPeer;
+import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
 import com.whirvis.jraknet.protocol.message.acknowledge.Record;
 
@@ -54,44 +54,34 @@ public class RakNetClientTest {
 
 	private static final Logger LOG = LogManager.getLogger(RakNetClientTest.class);
 
-	static boolean s = false;
-	
 	public static void main(String[] args) throws IllegalStateException, RakNetException, UnknownHostException {
 		// Create client and add listener
 		RakNetClient client = new RakNetClient();
 		client.addListener(new RakNetClientListener() {
 
 			@Override
-			public void onConnect(RakNetClient client, RakNetServerSession session) {
-				LOG.info("Connected to " + session.getConnectionType().getName() + " server with address "
-						+ session.getAddress() + "!");
+			public void onConnect(RakNetClient client, InetSocketAddress address, ConnectionType connectionType) {
+				LOG.info("Connected to server " + connectionType.getName() + " server with address " + address + "!");
+			}
+
+			@Override
+			public void onLogin(RakNetClient client, RakNetServerPeer peer) {
+				LOG.info("Logged into server!");
 				client.disconnect();
-				if(s == false) {
-					try {
-						client.connect(RakNetTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
-					} catch (IllegalStateException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (RakNetException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					s = true;
-				}
 			}
 
 			@Override
-			public void onAcknowledge(RakNetClient client, RakNetServerSession session, Record record,
+			public void onAcknowledge(RakNetClient client, RakNetServerPeer peer, Record record,
 					EncapsulatedPacket packet) {
-				LOG.info(session.getConnectionType().getName() + " server has acknowledged packet with ID: "
-						+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
+				LOG.info(peer.getConnectionType().getName() + " server has acknowledged packet with ID: "
+						+ RakNetPacket.getName(packet.payload.readUnsignedByte()));
 			}
 
 			@Override
-			public void onNotAcknowledge(RakNetClient client, RakNetServerSession session, Record record,
+			public void onNotAcknowledge(RakNetClient client, RakNetServerPeer peer, Record record,
 					EncapsulatedPacket packet) {
-				LOG.info(session.getConnectionType().getName() + " server has not acknowledged packet with ID: "
-						+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
+				LOG.info(peer.getConnectionType().getName() + " server has not acknowledged packet with ID: "
+						+ RakNetPacket.getName(packet.payload.readUnsignedByte()));
 			}
 
 			@Override

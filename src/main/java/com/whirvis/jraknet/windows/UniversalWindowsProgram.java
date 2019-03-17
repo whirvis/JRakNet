@@ -47,7 +47,7 @@ package com.whirvis.jraknet.windows;
 public class UniversalWindowsProgram {
 
 	/**
-	 * The Minecraft™ Universal Windows Program.
+	 * The Minecraftï¿½ Universal Windows Program.
 	 */
 	public static final UniversalWindowsProgram MINECRAFT = new UniversalWindowsProgram(
 			"Microsoft.MinecraftUWP_8wekyb3d8bbwe");

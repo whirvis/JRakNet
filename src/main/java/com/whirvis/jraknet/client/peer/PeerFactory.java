@@ -60,7 +60,7 @@ import io.netty.channel.Channel;
  * @since JRakNet v2.0.0
  */
 public class PeerFactory {
-	
+
 	// TODO: Set timeout for connection and login!
 
 	/**
@@ -330,6 +330,7 @@ public class PeerFactory {
 					// Create peer
 					this.connectionType = connectionResponseTwo.connectionType;
 					this.factoryState = STATE_PEER_ASSEMBLED;
+					client.callEvent(listener -> listener.onConnect(client, address, connectionType));
 					log.debug("Created server peer using globally unique ID " + Long.toHexString(guid).toUpperCase()
 							+ " and maximum transfer unit with size of " + maximumTransferUnit + " bytes ("
 							+ (maximumTransferUnit * 8) + " bits) for server address " + address);

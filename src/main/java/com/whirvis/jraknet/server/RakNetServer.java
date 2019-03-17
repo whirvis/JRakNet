@@ -43,6 +43,7 @@ import java.util.function.Consumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.dosse.upnp.UPnP;
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetException;
@@ -406,6 +407,35 @@ public class RakNetServer implements RakNetServerListener {
 	public RakNetServer(int port, int maximumTransferUnit, int maxConnections)
 			throws NullPointerException, IllegalArgumentException {
 		this(port, maximumTransferUnit, maxConnections, null);
+	}
+
+	/**
+	 * Forwards the port that the server is running on.
+	 * 
+	 * @see RakNet#forwardPort(int)
+	 */
+	public final void forwardPort() {
+		RakNet.forwardPort(this.getPort());
+	}
+
+	/**
+	 * Closes the port that the server is running on.
+	 * 
+	 * @see RakNet#closePort(int)
+	 */
+	public final void closePort() {
+		RakNet.closePort(this.getPort());
+	}
+
+	/**
+	 * Returns whether or not the port the server is running on is forwarded.
+	 * 
+	 * @return <code>true</code> if the port is forwarded, <code>false</code> if
+	 *         it is closed.
+	 * @see RakNet#isPortForwarded(int)
+	 */
+	public final boolean isPortForwarded() {
+		return RakNet.isPortForwarded(this.getPort());
 	}
 
 	/**
@@ -2109,7 +2139,8 @@ public class RakNetServer implements RakNetServerListener {
 						connectionResponseTwo.maximumTransferUnit = connectionRequestTwo.maximumTransferUnit;
 						connectionResponseTwo.encode();
 						if (!connectionResponseTwo.failed()) {
-							this.callEvent(listener -> listener.onConnect(this, sender));
+							this.callEvent(
+									listener -> listener.onConnect(this, sender, connectionResponseTwo.connectionType));
 							clients.put(sender,
 									new RakNetClientPeer(this, connectionRequestTwo.connectionType,
 											connectionRequestTwo.clientGuid, connectionRequestTwo.maximumTransferUnit,

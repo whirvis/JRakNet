@@ -34,6 +34,7 @@ import java.net.InetSocketAddress;
 
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.peer.RakNetServerPeer;
+import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
 import com.whirvis.jraknet.protocol.message.acknowledge.Record;
 
@@ -56,8 +57,10 @@ public interface RakNetClientListener {
 	 *            the client.
 	 * @param address
 	 *            the server address.
+	 * @param connectionType
+	 *            the connection type of the server.
 	 */
-	public default void onConnect(RakNetClient client, InetSocketAddress address) {
+	public default void onConnect(RakNetClient client, InetSocketAddress address, ConnectionType connectionType) {
 	}
 
 	/**

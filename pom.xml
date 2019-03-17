@@ -95,6 +95,18 @@
 			<artifactId>netty-handler</artifactId>
 			<version>4.1.28.Final</version>
 		</dependency>
+		
+		<!-- UPnP (Universal Plug and Play -->
+		<dependency>
+			<groupId>com.dosse</groupId>
+			<artifactId>upnp</artifactId>
+			<version>1.0.0</version>
+			<!-- This is a third party dependency, it must be installed using the following command:
+			
+				 mvn install:install-file -Dfile=WaifUPnP.jar -DgroupId=com.dosse -DartifactId=upnp -Dversion=1.0.0
+				 	-Dpackaging=jar -Djavadoc=WaifUPnP-javadoc.jar -Dsources=WaifUPnP-sources.jar				
+				-->
+		</dependency>
 	</dependencies>
 
 	<!-- Build lifecycle -->
