@@ -36,7 +36,7 @@ package com.whirvis.jraknet.server;
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
  */
-public class BlockedAddress {
+public final class BlockedAddress {
 
 	/**
 	 * The address is blocked permanently.
@@ -52,8 +52,11 @@ public class BlockedAddress {
 	 * @param time
 	 *            the amount of time until the client is unblocked in
 	 *            milliseconds.
+	 * @throws IllegalArgumentException
+	 *             if the <code>time</code> is less than <code>0</code> and is
+	 *             not equal to {@value #PERMANENT_BLOCK}.
 	 */
-	public BlockedAddress(long time) {
+	public BlockedAddress(long time) throws IllegalArgumentException {
 		if (time <= 0 && time != PERMANENT_BLOCK) {
 			throw new IllegalArgumentException(
 					"Block time must be greater than zero or equal to negative one (for infinite executions)");

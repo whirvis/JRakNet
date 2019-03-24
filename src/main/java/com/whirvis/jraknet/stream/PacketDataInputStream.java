@@ -31,6 +31,8 @@
 package com.whirvis.jraknet.stream;
 
 import java.io.DataInput;
+import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -41,12 +43,18 @@ import com.whirvis.jraknet.Packet;
  * required.
  *
  * @author Whirvis T. Wheatley
- * @since JRakNet vUNKNOWN
+ * @since JRakNet v2.1.0
  * @see Packet#getInputStream()
  */
-public class PacketDataInputStream extends InputStream implements DataInput {
+public final class PacketDataInputStream extends InputStream implements DataInput {
+
+	/**
+	 * Signals that the end of a file has been reached.
+	 */
+	private static final byte EOF = -1;
 
 	private final Packet packet;
+	private final DataInputStream dataIn;
 
 	/**
 	 * Creates a packet input stream to read data from the specified underlying
@@ -57,32 +65,39 @@ public class PacketDataInputStream extends InputStream implements DataInput {
 	 */
 	public PacketDataInputStream(Packet packet) {
 		this.packet = packet;
+		this.dataIn = new DataInputStream(this);
 	}
 
 	@Override
-	public int read() throws IOException {
+	public int read() throws IOException, EOFException {
 		if (packet.remaining() > 0) {
 			return packet.readUnsignedByte();
 		}
-		return -1; // No data remainin
+		return EOF;
 	}
 
 	@Override
-	public void readFully(byte[] b) throws IOException {
+	public void readFully(byte[] b) throws IOException, EOFException {
 		for (int i = 0; i < b.length; i++) {
 			b[i] = packet.readByte();
+			if (b[i] == EOF) {
+				throw new EOFException();
+			}
 		}
 	}
 
 	@Override
-	public void readFully(byte[] b, int off, int len) throws IOException {
+	public void readFully(byte[] b, int off, int len) throws IOException, EOFException {
 		for (int i = off; i < len; i++) {
 			b[i] = packet.readByte();
+			if (b[i] == EOF) {
+				throw new EOFException();
+			}
 		}
 	}
 
 	@Override
-	public int skipBytes(int n) throws IOException {
+	public int skipBytes(int n) throws IOException, EOFException {
 		int skipped = 0;
 		while (skipped < n && packet.remaining() > 0) {
 			packet.readByte();
@@ -92,63 +107,116 @@ public class PacketDataInputStream extends InputStream implements DataInput {
 	}
 
 	@Override
-	public boolean readBoolean() throws IOException {
-		return packet.readBoolean();
+	public boolean readBoolean() throws IOException, EOFException {
+		try {
+			return packet.readBoolean();
+		} catch (IndexOutOfBoundsException e) {
+			throw new EOFException();
+		}
 	}
 
 	@Override
-	public byte readByte() throws IOException {
-		return packet.readByte();
+	public byte readByte() throws IOException, EOFException {
+		try {
+			return packet.readByte();
+		} catch (IndexOutOfBoundsException e) {
+			throw new EOFException();
+		}
 	}
 
 	@Override
-	public int readUnsignedByte() throws IOException {
-		return packet.readUnsignedByte();
+	public int readUnsignedByte() throws IOException, EOFException {
+		try {
+			return packet.readUnsignedByte();
+		} catch (IndexOutOfBoundsException e) {
+			throw new EOFException();
+		}
 	}
 
 	@Override
-	public short readShort() throws IOException {
-		return packet.readShort();
+	public short readShort() throws IOException, EOFException {
+		try {
+			return packet.readShort();
+		} catch (IndexOutOfBoundsException e) {
+			throw new EOFException();
+		}
 	}
 
 	@Override
-	public int readUnsignedShort() throws IOException {
-		return packet.readUnsignedShort();
+	public int readUnsignedShort() throws IOException, EOFException {
+		try {
+			return packet.readUnsignedShort();
+		} catch (IndexOutOfBoundsException e) {
+			throw new EOFException();
+		}
 	}
 
 	@Override
-	public char readChar() throws IOException {
-		return (char) packet.readUnsignedShort();
+	public char readChar() throws IOException, EOFException {
+		try {
+			return (char) packet.readUnsignedShort();
+		} catch (IndexOutOfBoundsException e) {
+			throw new EOFException();
+		}
 	}
 
 	@Override
-	public int readInt() throws IOException {
-		return packet.readInt();
+	public int readInt() throws IOException, EOFException {
+		try {
+			return packet.readInt();
+		} catch (IndexOutOfBoundsException e) {
+			throw new EOFException();
+		}
 	}
 
 	@Override
-	public long readLong() throws IOException {
-		return packet.readLong();
+	public long readLong() throws IOException, EOFException {
+		try {
+			return packet.readLong();
+		} catch (IndexOutOfBoundsException e) {
+			throw new EOFException();
+		}
 	}
 
 	@Override
-	public float readFloat() throws IOException {
-		return packet.readFloat();
+	public float readFloat() throws IOException, EOFException {
+		try {
+			return packet.readFloat();
+		} catch (IndexOutOfBoundsException e) {
+			throw new EOFException();
+		}
 	}
 
 	@Override
-	public double readDouble() throws IOException {
-		return packet.readDouble();
+	public double readDouble() throws IOException, EOFException {
+		try {
+			return packet.readDouble();
+		} catch (IndexOutOfBoundsException e) {
+			throw new EOFException();
+		}
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This method is implemented via a {@link DataInputStream} which refers
+	 * back to this original stream to execute the {@link #readLine()} method.
+	 */
+	@Deprecated
 	@Override
 	public String readLine() throws IOException {
-		return packet.readString(); // TODO: Proper implementation
+		return dataIn.readLine();
 	}
-	
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This method is implemented via a {@link DataInputStream} which refers
+	 * back to this original stream to execute the {@link #readLine()} method.
+	 */
 	@Override
-	public String readUTF() throws IOException {
-		return packet.readString(); // TODO: ^^
+	public String readUTF() throws IOException, EOFException {
+		return dataIn.readUTF();
 	}
 
 }

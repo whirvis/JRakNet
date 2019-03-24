@@ -37,6 +37,6 @@
  * methods.
  * 
  * @author Whirvis T. Wheatley
- * @since JRakNet vUNKNOWN
+ * @since JRakNet v2.1.0
  */
 package com.whirvis.jraknet.stream;

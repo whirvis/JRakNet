@@ -70,8 +70,8 @@ public enum Reliability {
 
 	/**
 	 * Same as {@link #UNRELIABLE}, however you will be notified whether the
-	 * packet was lost or received through <code>onAcknowledge()</code> and
-	 * <code>onNotAcknowledge()</code> methods found inside the
+	 * packet was lost or received through the <code>onAcknowledge()</code> and
+	 * <code>onLoss()</code> methods found inside the
 	 * <code>RakNetServerListener</code> and <code>RakNetClientListener</code>
 	 * classes.
 	 * 

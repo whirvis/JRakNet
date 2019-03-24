@@ -51,9 +51,10 @@ import io.netty.channel.Channel;
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
  */
-public class RakNetServerPeer extends RakNetPeer implements RakNetPeerMessenger {
+public final class RakNetServerPeer extends RakNetPeer implements RakNetPeerMessenger {
 
 	private final RakNetClient client;
+	private EncapsulatedPacket loginRecord;
 	private long timestamp;
 
 	/**
@@ -76,7 +77,6 @@ public class RakNetServerPeer extends RakNetPeer implements RakNetPeerMessenger 
 			ConnectionType connectionType, Channel channel) {
 		super(address, guid, maximumTransferUnit, connectionType, channel);
 		this.client = client;
-		this.timestamp = -1;
 
 		/*
 		 * By the time this object is created, handshaking has begun between the
@@ -87,16 +87,15 @@ public class RakNetServerPeer extends RakNetPeer implements RakNetPeerMessenger 
 
 	@Override
 	public long getTimestamp() {
-		if (timestamp < 0) {
-			return -1L; // Not yet logged in
+		if (this.getState() != RakNetState.LOGGED_IN) {
+			return -1L;
 		}
-		return System.currentTimeMillis() - this.timestamp;
+		return System.currentTimeMillis() - timestamp;
 	}
 
 	@Override
 	public void handleMessage(RakNetPacket packet, int channel) {
-		short packetId = packet.getId();
-		if (packetId == ID_CONNECTION_REQUEST_ACCEPTED && this.getState() == RakNetState.HANDSHAKING) {
+		if (packet.getId() == ID_CONNECTION_REQUEST_ACCEPTED && this.getState() == RakNetState.HANDSHAKING) {
 			ConnectionRequestAccepted connectionRequestAccepted = new ConnectionRequestAccepted(packet);
 			connectionRequestAccepted.decode();
 			if (!connectionRequestAccepted.failed()) {
@@ -106,20 +105,22 @@ public class RakNetServerPeer extends RakNetPeer implements RakNetPeerMessenger 
 				newIncomingConnection.serverTimestamp = connectionRequestAccepted.serverTimestamp;
 				newIncomingConnection.encode();
 				if (!newIncomingConnection.failed()) {
-					this.sendMessage(Reliability.RELIABLE, newIncomingConnection);
-					this.timestamp = System.currentTimeMillis();
-					this.setState(RakNetState.LOGGED_IN); // TODO: Wait for ack?
-					client.callEvent(listener -> listener.onLogin(client, this));
+					this.loginRecord = this.sendMessage(Reliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT,
+							newIncomingConnection);
+					this.getLogger()
+							.debug("Sent new incoming connection, waiting for acknowledgement before confirming login");
 				} else {
-					client.disconnect("Failed to login");
+					client.disconnect("Failed to login (" + newIncomingConnection.getClass().getSimpleName()
+							+ " failed to encode)");
 				}
 			} else {
-				client.disconnect("Failed to login");
+				client.disconnect("Failed to login (" + connectionRequestAccepted.getClass().getSimpleName()
+						+ " failed to decode)");
 			}
-		} else if (packetId == ID_DISCONNECTION_NOTIFICATION) {
+		} else if (packet.getId() == ID_DISCONNECTION_NOTIFICATION) {
 			this.setState(RakNetState.DISCONNECTED);
 			client.disconnect("Server disconnected");
-		} else if (packetId >= ID_USER_PACKET_ENUM) {
+		} else if (packet.getId() >= ID_USER_PACKET_ENUM) {
 			client.callEvent(listener -> listener.handleMessage(client, this, packet, channel));
 		} else {
 			client.callEvent(listener -> listener.handleUnknownMessage(client, this, packet, channel));
@@ -128,31 +129,17 @@ public class RakNetServerPeer extends RakNetPeer implements RakNetPeerMessenger 
 
 	@Override
 	public void onAcknowledge(Record record, EncapsulatedPacket packet) {
+		if (record.equals(loginRecord.ackRecord)) {
+			this.timestamp = System.currentTimeMillis();
+			this.setState(RakNetState.LOGGED_IN);
+			client.callEvent(listener -> listener.onLogin(client, this));
+		}
 		client.callEvent(listener -> listener.onAcknowledge(client, this, record, packet));
 	}
 
 	@Override
 	public void onNotAcknowledge(Record record, EncapsulatedPacket packet) {
-		client.callEvent(listener -> listener.onNotAcknowledge(client, this, record, packet));
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * <p>
-	 * Proper disconnection is accomplished here by sending it an unreliable
-	 * <code>DISCONNECTION_NOTIFICATION</code> packet.
-	 */
-	@Override
-	public void disconnect() {
-		/*
-		 * Clear the send queue to make sure the disconnect packet is first in
-		 * line to be sent. After the disconnection notification packet has been
-		 * sent, the peer will be forcefully updated to ensure the packet is
-		 * sent out at least once.
-		 */
-		sendQueue.clear();
-		this.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
-		this.update();
+		client.callEvent(listener -> listener.onLoss(client, this, record, packet));
 	}
 
 }

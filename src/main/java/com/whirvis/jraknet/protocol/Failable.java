@@ -36,7 +36,7 @@ package com.whirvis.jraknet.protocol;
  * crucial to the success of a connection.
  *
  * @author Whirvis T. Wheatley
- * @since JRakNet vUNKNOWN
+ * @since JRakNet v2.2.0
  */
 public interface Failable {
 

@@ -40,8 +40,9 @@ import com.whirvis.jraknet.map.DynamicKey;
  * worry about boxing them.
  *
  * @author Whirvis T. Wheatley
+ * @since JRakNet v2.8.0
  */
-public class ConcurrentByteMap<T> extends ConcurrentHashMap<Byte, T> implements Map<Byte, T>, DynamicKey<Byte> {
+public final class ConcurrentByteMap<T> extends ConcurrentHashMap<Byte, T> implements Map<Byte, T>, DynamicKey<Byte> {
 
 	private static final long serialVersionUID = 4324132003573381634L;
 
@@ -132,7 +133,7 @@ public class ConcurrentByteMap<T> extends ConcurrentHashMap<Byte, T> implements 
 	public void renameKey(Byte oldKey, Byte newKey) throws NullPointerException {
 		T storedObject = this.remove(oldKey.byteValue());
 		if (storedObject == null) {
-			throw new NullPointerException();
+			throw new NullPointerException("No value associated with old key");
 		}
 		this.put(newKey.byteValue(), storedObject);
 	}

@@ -50,7 +50,7 @@ import io.netty.buffer.ByteBuf;
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
  */
-public class EncapsulatedPacket implements Cloneable {
+public final class EncapsulatedPacket implements Cloneable {
 
 	/**
 	 * Used to easily split and reassemble {@link EncapsulatedPacket
@@ -325,8 +325,8 @@ public class EncapsulatedPacket implements Cloneable {
 	 * onAcknowledge()} is called. Likewise, the same occurs when a
 	 * {@link com.whirvis.jraknet.protocol.message.acknowledge.NotAcknowledgedPacket
 	 * NACK} packet is received with the exception of
-	 * {@link com.whirvis.jraknet.client.RakNetClientListener#onNotAcknowledge(com.whirvis.jraknet.client.RakNetClient, com.whirvis.jraknet.session.RakNetServerSession, Record, EncapsulatedPacket)
-	 * onNotAcknowledge()} being called instead.
+	 * {@link com.whirvis.jraknet.client.RakNetClientListener#onLoss(com.whirvis.jraknet.client.RakNetClient, com.whirvis.jraknet.session.RakNetServerSession, Record, EncapsulatedPacket)
+	 * onLoss()} being called instead.
 	 */
 	public Record ackRecord;
 
@@ -449,10 +449,12 @@ public class EncapsulatedPacket implements Cloneable {
 		flags |= split == true ? FLAG_SPLIT : 0;
 		buffer.writeByte(flags);
 		buffer.writeUnsignedShort(payload.size() * Byte.SIZE);
-		if (reliability.requiresAck() && ackRecord == null) {
+		if (ackRecord == null && reliability.requiresAck()) {
 			throw new NullPointerException("No ACK record set for encapsulated packet with reliability " + reliability);
-		} else if (ackRecord.isRanged()) {
-			throw new IllegalArgumentException("ACK record cannot be ranged");
+		} else if (ackRecord != null) {
+			if (ackRecord.isRanged()) {
+				throw new IllegalArgumentException("ACK record cannot be ranged");
+			}
 		}
 		if (reliability.isReliable()) {
 			buffer.writeTriadLE(messageIndex);

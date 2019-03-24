@@ -56,9 +56,9 @@ import org.apache.logging.log4j.Logger;
  * PowerShell. However, they will ultimately not be executed.
  * 
  * @author Whirvis T. Wheatley
- * @see JRakNet v2.10.0
+ * @since JRakNet v2.10.0
  */
-public class PowerShellCommand {
+public final class PowerShellCommand {
 
 	private static final String POWERSHELL_EXECUTABLE = "powershell.exe";
 	private static final Charset POWERSHELL_BASE64_CHARSET = Charset.forName("UTF-16LE");
@@ -200,7 +200,7 @@ public class PowerShellCommand {
 	 *             if the <code>argumentName</code> does not begin with
 	 *             {@value #ARGUMENT_PREFIX}.
 	 */
-	public PowerShellCommand setArgument(String argumentName, Object value) {
+	public PowerShellCommand setArgument(String argumentName, Object value) throws IllegalArgumentException {
 		if (!argumentName.startsWith(ARGUMENT_PREFIX)) {
 			throw new IllegalArgumentException("Argument name must begin with the argument prefix");
 		}
@@ -221,9 +221,12 @@ public class PowerShellCommand {
 	 *            the argument name.
 	 * @return the value of the argument, <code>null</code> if the argument has
 	 *         not been set.
+	 * @throws IllegalArgumentException
+	 *             if the <code>argumentName</code> does not begin with the
+	 *             {@value #ARGUMENT_PREFIX} character.
 	 */
-	public String getArgument(String argumentName) {
-		if (!argumentName.startsWith(ARGUMENT_PREFIX)) { // TODO: TEST SHIT
+	public String getArgument(String argumentName) throws IllegalArgumentException {
+		if (!argumentName.startsWith(ARGUMENT_PREFIX)) {
 			throw new IllegalArgumentException("Argument name must begin with the argument prefix");
 		}
 		return arguments.get(argumentName);

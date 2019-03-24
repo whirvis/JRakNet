@@ -30,6 +30,8 @@
  */
 package com.whirvis.jraknet.identifier;
 
+import java.util.Objects;
+
 import com.whirvis.jraknet.protocol.ConnectionType;
 
 /**
@@ -109,6 +111,22 @@ public class Identifier implements Cloneable {
 	 */
 	public final ConnectionType getConnectionType() {
 		return this.connectionType;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(identifier, connectionType);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == this) {
+			return true;
+		} else if (!(o instanceof Identifier)) {
+			return false;
+		}
+		Identifier i = (Identifier) o;
+		return Objects.equals(identifier, i.identifier) && Objects.equals(connectionType, i.connectionType);
 	}
 
 	@Override

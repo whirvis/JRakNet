@@ -25,7 +25,7 @@
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * OUT OF OR IN CONECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
 /**
@@ -34,8 +34,8 @@
  * 
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
- * @see RakNetPeer
- * @see RakNetServerPeer
- * @see RakNetClientPeer
+ * @see com.whirvis.jraknet.peer.RakNetPeer RakNetPeer
+ * @see com.whirvis.jraknet.peer.RakNetServerPeer RakNetServerPeer
+ * @see com.whirvis.jraknet.peer.RakNetClientPeer RakNetClientPeer
  */
 package com.whirvis.jraknet.peer;

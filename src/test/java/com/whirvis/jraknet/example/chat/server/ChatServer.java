@@ -74,8 +74,8 @@ public class ChatServer implements RakNetServerListener {
 	private final HashMap<InetSocketAddress, ConnectedClient> connected;
 
 	/**
-	 * Constructs a <code>ChatServer</code> with the name, message of
-	 * the day, port, and maximum amount of connections.
+	 * Constructs a <code>ChatServer</code> with the name, message of the day,
+	 * port, and maximum amount of connections.
 	 * 
 	 * @param name
 	 *            the name.
@@ -126,13 +126,12 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Returns whether or not the server has a client with the
-	 * username.
+	 * Returns whether or not the server has a client with the username.
 	 * 
 	 * @param username
 	 *            the username to check.
-	 * @return <code>true</code> if the server has a client with the
-	 *         username, <code>false</code> otherwise.
+	 * @return <code>true</code> if the server has a client with the username,
+	 *         <code>false</code> otherwise.
 	 */
 	private boolean hasUsername(String username) {
 		for (ConnectedClient client : connected.values()) {
@@ -251,8 +250,8 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Broadcasts the message to the channel and prints it
-	 * out to the console if needed.
+	 * Broadcasts the message to the channel and prints it out to the console if
+	 * needed.
 	 * 
 	 * @param message
 	 *            the message to send.
@@ -317,13 +316,12 @@ public class ChatServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Returns whether or not the server has a client with the
-	 * username.
+	 * Returns whether or not the server has a client with the username.
 	 * 
 	 * @param username
 	 *            the username to check.
-	 * @return <code>true</code> if the server has a client with the
-	 *         username, <code>false</code> otherwise.
+	 * @return <code>true</code> if the server has a client with the username,
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean hasClient(String username) {
 		return (getClient(username) != null);

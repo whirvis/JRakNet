@@ -33,13 +33,6 @@
  * protocol <a href="https://github.com/OculusVR/RakNet">RakNet</a>. This
  * library was meant to be used for Minecraft servers and clients, but can still
  * be used to create game servers and clients for other video games with ease.
- * <p>
- * <a href="http://whirvis.com"><img src="https://i.imgur.com/ytUJtEB.png" width
- * ="145" height="145"></a>
- * <a href="https://github.com/JRakNet/JRakNet"><img src=
- * "https://i.imgur.com/heiZXpr.png" width="145" height="145" hspace="50"></a>
- * <a href="https://github.com/OculusVR/RakNet"><img src=
- * "http://imgur.com/9p1asD8.png" width="145" height="145"></a>
  * 
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0

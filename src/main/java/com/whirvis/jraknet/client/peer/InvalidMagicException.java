@@ -39,7 +39,7 @@ import com.whirvis.jraknet.client.RakNetClient;
  * @author Whirvis T. Wheatley
  * @since JRakNet v2.11.0
  */
-public class InvalidMagicException extends PeerFactoryException {
+public final class InvalidMagicException extends PeerFactoryException {
 
 	private static final long serialVersionUID = -1956033712806029854L;
 

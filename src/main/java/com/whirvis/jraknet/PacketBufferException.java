@@ -39,7 +39,7 @@ import com.whirvis.jraknet.RakNetPacket;
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
  */
-public class PacketBufferException extends RakNetException {
+public final class PacketBufferException extends RakNetException {
 
 	private static final long serialVersionUID = -3730545025991834599L;
 

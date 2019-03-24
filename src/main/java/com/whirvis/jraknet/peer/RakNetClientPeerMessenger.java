@@ -43,7 +43,7 @@ import io.netty.buffer.ByteBuf;
  * {@link RakNetClientPeer}.
  * 
  * @author Whirvis T. Wheatley
- * @since JRakNet v1.0.0
+ * @since JRakNet v2.11.0
  */
 public interface RakNetClientPeerMessenger {
 

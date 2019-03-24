@@ -50,7 +50,7 @@ import io.netty.channel.socket.DatagramPacket;
  * @author Whirvis T. Wheatley
  * @since JRakNet v2.11.0
  */
-public class DiscoveryHandler extends ChannelInboundHandlerAdapter {
+public final class DiscoveryHandler extends ChannelInboundHandlerAdapter {
 
 	private final Logger log;
 
@@ -85,7 +85,8 @@ public class DiscoveryHandler extends ChannelInboundHandlerAdapter {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 		// Ignore
-		// TODO: Remove currently discovered servers that cause this to be thrown
+		// TODO: Remove currently discovered servers that cause this to be
+		// thrown
 	}
 
 }

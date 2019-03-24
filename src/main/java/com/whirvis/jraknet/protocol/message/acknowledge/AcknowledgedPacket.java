@@ -47,12 +47,12 @@ import com.whirvis.jraknet.RakNetPacket;
  * @see Record
  */
 public class AcknowledgedPacket extends RakNetPacket {
-	
+
 	/**
 	 * The record is unranged.
 	 */
 	public static final int RANGED = 0x00;
-	
+
 	/**
 	 * The record is ranged.
 	 */

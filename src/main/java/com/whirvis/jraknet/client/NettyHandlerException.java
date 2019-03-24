@@ -37,9 +37,9 @@ import java.net.InetSocketAddress;
  * {@link RakNetClientHandler}.
  *
  * @author Whirvis T. Wheatley
- * @since JRakNet v2.0
+ * @since JRakNet v2.0.0
  */
-public class NettyHandlerException extends RakNetClientException {
+public final class NettyHandlerException extends RakNetClientException {
 
 	private static final long serialVersionUID = -7405227886962804185L;
 

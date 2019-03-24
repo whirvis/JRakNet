@@ -41,7 +41,7 @@ import com.whirvis.jraknet.RakNetPacket;
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
  */
-public class OpenConnectionRequestOne extends RakNetPacket {
+public final class OpenConnectionRequestOne extends RakNetPacket {
 
 	/**
 	 * At the end of this packet in particular, the client pads the packet with

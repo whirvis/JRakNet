@@ -31,6 +31,7 @@
 package com.whirvis.jraknet.protocol;
 
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -47,10 +48,10 @@ import java.util.UUID;
  * </ul>
  * 
  * @author Whirvis T. Wheatley
- * @since JRakNet vUNKNOWN
+ * @since JRakNet v2.9.0
  * @see com.whirvis.jraknet.identifier.Identifier Identifier
  */
-public class ConnectionType {
+public final class ConnectionType {
 
 	public static final int MAX_METADATA_VALUES = 0xFF;
 	public static final byte[] MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B, 0x43,
@@ -66,7 +67,7 @@ public class ConnectionType {
 	 *             if there is a key without a value or if there are more than
 	 *             {@value #MAX_METADATA_VALUES} metadata values.
 	 */
-	public static HashMap<String, String> createMetaData(String... metadata) {
+	public static HashMap<String, String> createMetaData(String... metadata) throws IllegalArgumentException {
 		if (metadata.length % 2 != 0) {
 			throw new IllegalArgumentException("There must be a value for every key");
 		} else if (metadata.length / 2 > MAX_METADATA_VALUES) {
@@ -122,9 +123,12 @@ public class ConnectionType {
 	 * @param vanilla
 	 *            <code>true</code> if the implementation is a vanilla
 	 *            implementation, <code>false</code> otherwise.
+	 * @throws IllegalArgumentException
+	 *             if there are more than {@value #MAX_METADATA_VALUES} metadata
+	 *             values.
 	 */
 	private ConnectionType(UUID uuid, String name, String language, String version, HashMap<String, String> metadata,
-			boolean vanilla) {
+			boolean vanilla) throws IllegalArgumentException {
 		this.uuid = uuid;
 		this.name = name;
 		this.language = language;
@@ -263,6 +267,24 @@ public class ConnectionType {
 			return false; // No UUID
 		}
 		return uuid.equals(connectionType.uuid);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(uuid, name, language, version, metadata, vanilla);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == this) {
+			return true;
+		} else if (!(o instanceof ConnectionType)) {
+			return false;
+		}
+		ConnectionType ct = (ConnectionType) o;
+		return Objects.equals(uuid, ct.uuid) && Objects.equals(name, ct.name) && Objects.equals(language, ct.language)
+				&& Objects.equals(version, ct.version) && Objects.equals(metadata, ct.metadata)
+				&& Objects.equals(vanilla, ct.vanilla);
 	}
 
 	@Override

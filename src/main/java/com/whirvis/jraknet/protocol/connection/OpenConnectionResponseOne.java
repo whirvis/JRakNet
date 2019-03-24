@@ -42,7 +42,7 @@ import com.whirvis.jraknet.RakNetPacket;
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
  */
-public class OpenConnectionResponseOne extends RakNetPacket {
+public final class OpenConnectionResponseOne extends RakNetPacket {
 
 	/**
 	 * Whether or not the magic bytes read in the packet are valid.

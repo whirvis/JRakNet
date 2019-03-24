@@ -52,15 +52,13 @@ import io.netty.channel.Channel;
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
  */
-public class RakNetClientPeer extends RakNetPeer {
+public final class RakNetClientPeer extends RakNetPeer {
 
 	private final RakNetServer server;
 	private long timestamp;
 
 	/**
-	 * Constructs a <code>RakNetClientSession</code> with the
-	 * <code>RakNetServer</code>, the time the server was created, globally
-	 * unique ID, maximum transfer unit, <code>Channel</code>, and address.
+	 * Creates a RakNet client peer.
 	 * 
 	 * @param server
 	 *            the server that is hosting the connection to the client.
@@ -79,7 +77,6 @@ public class RakNetClientPeer extends RakNetPeer {
 			Channel channel, InetSocketAddress address) {
 		super(address, guid, maximumTransferUnit, connectionType, channel);
 		this.server = server;
-		this.timestamp = System.currentTimeMillis();
 	}
 
 	/**
@@ -93,68 +90,60 @@ public class RakNetClientPeer extends RakNetPeer {
 
 	@Override
 	public long getTimestamp() {
-		return System.currentTimeMillis() - this.timestamp;
+		if (this.getState() != RakNetState.LOGGED_IN) {
+			return -1L;
+		}
+		return System.currentTimeMillis() - timestamp;
 	}
 
 	@Override
 	public void handleMessage(RakNetPacket packet, int channel) {
-		short packetId = packet.getId();
-		if (packetId == ID_CONNECTION_REQUEST && this.getState() == RakNetState.DISCONNECTED) {
+		if (packet.getId() == ID_CONNECTION_REQUEST && this.getState() == RakNetState.DISCONNECTED) {
 			ConnectionRequest request = new ConnectionRequest(packet);
 			request.decode();
-			if (request.clientGuid == this.getGloballyUniqueId() && request.useSecurity != true) {
+			if (request.clientGuid == this.getGloballyUniqueId() && request.useSecurity == false) {
 				ConnectionRequestAccepted requestAccepted = new ConnectionRequestAccepted();
 				requestAccepted.clientAddress = this.getAddress();
 				requestAccepted.clientTimestamp = request.timestamp;
 				requestAccepted.serverTimestamp = server.getTimestamp();
 				requestAccepted.encode();
 				if (!requestAccepted.failed()) {
-					this.timestamp = (System.currentTimeMillis() - request.timestamp);
 					this.sendMessage(Reliability.RELIABLE_ORDERED, requestAccepted);
 					this.setState(RakNetState.HANDSHAKING);
 				} else {
-					server.disconnectClient(this, "Login failed, " + ConnectionRequestAccepted.class.getSimpleName()
-							+ " packet failed to encode");
+					server.disconnectClient(this,
+							"Login failed (" + requestAccepted.getClass().getSimpleName() + " failed to encode)");
 				}
 			} else {
 				String reason = "unknown error";
 				if (request.clientGuid != this.getGloballyUniqueId()) {
-					reason = "client GUID did not match";
+					reason = "client GUID does not match";
 				} else if (request.useSecurity == true) {
 					reason = "client has security enabled";
 				}
-				this.sendMessage(Reliability.RELIABLE, ID_CONNECTION_ATTEMPT_FAILED);
-				this.setState(RakNetState.DISCONNECTED);
-				server.disconnectClient(this, "Login failed, " + reason);
+				this.sendMessage(Reliability.UNRELIABLE, ID_CONNECTION_ATTEMPT_FAILED);
+				server.disconnectClient(this, "Login failed (" + reason + ")");
 			}
-		} else if (packetId == ID_NEW_INCOMING_CONNECTION && this.getState() == RakNetState.HANDSHAKING) {
+		} else if (packet.getId() == ID_NEW_INCOMING_CONNECTION && this.getState() == RakNetState.HANDSHAKING) {
 			NewIncomingConnection clientHandshake = new NewIncomingConnection(packet);
 			clientHandshake.decode();
-
 			if (!clientHandshake.failed()) {
-				this.timestamp = (System.currentTimeMillis() - clientHandshake.clientTimestamp);
+				this.timestamp = System.currentTimeMillis() - clientHandshake.clientTimestamp;
 				this.setState(RakNetState.LOGGED_IN);
 				server.callEvent(listener -> listener.onLogin(server, this));
 			} else {
 				server.disconnectClient(this,
-						"Login failed, " + NewIncomingConnection.class.getSimpleName() + " packet failed to decode");
+						"Failed to login (" + clientHandshake.getClass().getSimpleName() + " failed to decode)");
 			}
-		} else if (packetId == ID_DISCONNECTION_NOTIFICATION) {
+		} else if (packet.getId() == ID_DISCONNECTION_NOTIFICATION) {
 			server.disconnectClient(this, "Disconnected");
+		} else if (packet.getId() >= ID_USER_PACKET_ENUM) {
+			server.callEvent(listener -> listener.handleMessage(server, this, packet, channel));
 		} else {
-			/*
-			 * If the packet is a user packet, we use handleMessage(). If the ID
-			 * is not a user packet but it is unknown to the session, we use
-			 * handleUnknownMessage().
-			 */
-			if (packetId >= ID_USER_PACKET_ENUM) {
-				server.callEvent(listener -> listener.handleMessage(server, this, packet, channel));
-			} else {
-				server.callEvent(listener -> listener.handleUnknownMessage(server, this, packet, channel));
-			}
+			server.callEvent(listener -> listener.handleUnknownMessage(server, this, packet, channel));
 		}
 	}
-	
+
 	@Override
 	public void onAcknowledge(Record record, EncapsulatedPacket packet) {
 		server.callEvent(listener -> listener.onAcknowledge(server, this, record, packet));
@@ -162,7 +151,7 @@ public class RakNetClientPeer extends RakNetPeer {
 
 	@Override
 	public void onNotAcknowledge(Record record, EncapsulatedPacket packet) {
-		server.callEvent(listener -> listener.onNotAcknowledge(server, this, record, packet));
+		server.callEvent(listener -> listener.onLoss(server, this, record, packet));
 	}
 
 }

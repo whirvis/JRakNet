@@ -43,7 +43,7 @@ import com.whirvis.jraknet.RakNetPacket;
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
  */
-public class IncompatibleProtocolVersion extends RakNetPacket {
+public final class IncompatibleProtocolVersion extends RakNetPacket {
 
 	/**
 	 * The network protocol the server is using.

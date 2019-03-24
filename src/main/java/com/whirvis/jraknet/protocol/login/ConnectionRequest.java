@@ -42,7 +42,7 @@ import com.whirvis.jraknet.RakNetPacket;
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
  */
-public class ConnectionRequest extends RakNetPacket {
+public final class ConnectionRequest extends RakNetPacket {
 
 	/**
 	 * The client's globally unique ID.

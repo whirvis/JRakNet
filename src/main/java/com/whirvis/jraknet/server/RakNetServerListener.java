@@ -82,9 +82,10 @@ public interface RakNetServerListener {
 	}
 
 	/**
-	 * Called when a client has connected to the server. This is not the same as
-	 * {@link #onLogin(RakNetServer, RakNetClientPeer)}, where the client has
-	 * also completed connection and login.
+	 * Called when a client has connected to the server.
+	 * <p>
+	 * This is not the same as {@link #onLogin(RakNetServer, RakNetClientPeer)},
+	 * where the client has also completed connection and login.
 	 * 
 	 * @param server
 	 *            the server.
@@ -97,9 +98,11 @@ public interface RakNetServerListener {
 	}
 
 	/**
-	 * Called when a client has logged in to the server. This is not the same as
+	 * Called when a client has logged in to the server.
+	 * <p>
+	 * This is not the same as
 	 * {@link #onConnect(RakNetServer, InetSocketAddress)}, where the client has
-	 * only connected to the server but has not yet logged in.
+	 * only connected to the server and has not yet logged in.
 	 * 
 	 * @param server
 	 *            the server.
@@ -133,7 +136,11 @@ public interface RakNetServerListener {
 	 * disconnected with a
 	 * {@link com.whirvis.jraknet.protocol.connection.ConnectionBanned
 	 * CONNECTION_BANNED} packet. This is different from having an address
-	 * blocked, as all packets sent from the address will simply be ignored.
+	 * blocked, as all packets sent from the address will simply be ignored. The
+	 * server will never automatically ban a client. However, it will
+	 * automatically block an address if it is suspected of a
+	 * <a href="https://en.wikipedia.org/wiki/Denial-of-service_attack">DOS</a>
+	 * attack.
 	 * 
 	 * @param server
 	 *            the server.
@@ -163,7 +170,11 @@ public interface RakNetServerListener {
 	 * ignored. This is different from a client being banned, as it will
 	 * actively be disconnected with a
 	 * {@link com.whirvis.jraknet.protocol.connection.ConnectionBanned
-	 * CONNECTION_BANNED} packet.
+	 * CONNECTION_BANNED} packet. The server will never automatically ban a
+	 * client. However, it will automatically block an address if it is
+	 * suspected of a
+	 * <a href="https://en.wikipedia.org/wiki/Denial-of-service_attack">DOS</a>
+	 * attack.
 	 * 
 	 * @param server
 	 *            the server.
@@ -207,19 +218,18 @@ public interface RakNetServerListener {
 	}
 
 	/**
-	 * Called when a message is not acknowledged by a client.
+	 * Called when a message is lost by a client.
 	 * 
 	 * @param server
 	 *            the server.
 	 * @param peer
-	 *            the client that did not acknowledge the packet.
+	 *            the client that lost the packet.
 	 * @param record
-	 *            the not acknowledged record.
+	 *            the lost record.
 	 * @param packet
-	 *            the not acknowledged packet.
+	 *            the lost packet.
 	 */
-	public default void onNotAcknowledge(RakNetServer server, RakNetClientPeer peer, Record record,
-			EncapsulatedPacket packet) {
+	public default void onLoss(RakNetServer server, RakNetClientPeer peer, Record record, EncapsulatedPacket packet) {
 	}
 
 	/**
@@ -240,7 +250,9 @@ public interface RakNetServerListener {
 
 	/**
 	 * Called when a packet with an ID below <code>ID_USER_PACKET_ENUM</code>
-	 * cannot be handled by the peer because it is not programmed to handle it.
+	 * cannot be handled by the {@link RakNetClientPeer} because it is not
+	 * programmed to handle it.
+	 * <p>
 	 * This function can be used to add missing features from the regular RakNet
 	 * protocol that are absent in JRakNet if needed.
 	 * 
@@ -259,9 +271,11 @@ public interface RakNetServerListener {
 
 	/**
 	 * Called when the handler receives a packet after the server has already
-	 * handled it. This method is useful for handling packets outside of the
-	 * RakNet protocol. All packets received here have already been handled by
-	 * the server.
+	 * handled it.
+	 * <p>
+	 * This method is useful for handling packets outside of the RakNet
+	 * protocol. All packets received here have already been handled by the
+	 * server.
 	 * 
 	 * @param server
 	 *            the server.
@@ -274,8 +288,10 @@ public interface RakNetServerListener {
 	}
 
 	/**
-	 * Called when a handler exception has occurred, these normally do not
-	 * matter as long as the server handles them on its own.
+	 * Called when a handler exception has occurred.
+	 * <p>
+	 * These normally do not matter as long as the server handles them on its
+	 * own.
 	 * 
 	 * @param server
 	 *            the server.

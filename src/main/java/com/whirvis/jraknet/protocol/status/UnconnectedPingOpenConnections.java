@@ -42,7 +42,7 @@ import com.whirvis.jraknet.Packet;
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
  */
-public class UnconnectedPingOpenConnections extends UnconnectedPing {
+public final class UnconnectedPingOpenConnections extends UnconnectedPing {
 
 	/**
 	 * Creates an <code>UNCONNECTED_PING_OPEN_CONNECTIONS</code> packet to be

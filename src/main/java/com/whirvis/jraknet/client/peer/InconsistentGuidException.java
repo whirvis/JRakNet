@@ -41,9 +41,9 @@ import com.whirvis.jraknet.client.RakNetClient;
  * CONNECTION_REQUEST_1} packet.
  * 
  * @author Whirvis T. Wheatley
- * @version JRakNet v2.11.0
+ * @since JRakNet v2.11.0
  */
-public class InconsistentGuidException extends PeerFactoryException {
+public final class InconsistentGuidException extends PeerFactoryException {
 
 	private static final long serialVersionUID = 3864822071239301945L;
 

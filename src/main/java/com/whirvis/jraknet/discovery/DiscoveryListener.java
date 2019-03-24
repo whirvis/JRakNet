@@ -38,7 +38,7 @@ import com.whirvis.jraknet.identifier.Identifier;
  * {@link Discovery#addListener(DiscoveryListener)} method.
  *
  * @author Whirvis T. Wheatley
- * @since JRakNet v2.11,0
+ * @since JRakNet v2.11.0
  * @see DiscoveredServer
  * @see Identifier
  */

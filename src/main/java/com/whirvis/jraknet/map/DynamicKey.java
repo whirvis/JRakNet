@@ -34,6 +34,7 @@ package com.whirvis.jraknet.map;
  * Used in supporting <code>Map</code> classes to rename keys of values.
  *
  * @author Whirvis T. Wheatley
+ * @since JRakNet v2.6.0
  */
 public interface DynamicKey<T> {
 

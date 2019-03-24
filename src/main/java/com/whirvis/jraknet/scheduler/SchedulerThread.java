@@ -48,10 +48,9 @@ import org.apache.logging.log4j.Logger;
  * 
  * @author Whirvis T. Wheatley
  * @since JRakNet v2.11.0
- * @see com.whirvis.jraknet.scheduler.Scheduler Scheduler
- * @see com.whirvis.jraknet.scheduler.ScheduledTask SchedulerTask
+ * @see ScheduledTask
  */
-public class SchedulerThread extends Thread {
+public final class SchedulerThread extends Thread {
 
 	private final Logger log;
 
@@ -63,8 +62,16 @@ public class SchedulerThread extends Thread {
 		this.setName(log.getName());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @throws IllegalStateException
+	 *             if the thread is still alive, yet the reference in the
+	 *             scheduler thread is not the same as the reference to this
+	 *             thread.
+	 */
 	@Override
-	public void run() {
+	public void run() throws IllegalStateException {
 		log.debug("Started scheduler thread");
 		while (!Scheduler.TASKS.isEmpty() && !this.isInterrupted()) {
 			if (Scheduler.thread != this) {
