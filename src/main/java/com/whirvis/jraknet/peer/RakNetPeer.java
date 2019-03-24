@@ -80,7 +80,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 */
 	private static class ConcurrentMessageIndexList {
 
-		private List<Record> indexes;
+		private ArrayList<Record> indexes;
 
 		/**
 		 * Constructs a <code>ConcurrentMesageIndexList</code>.
@@ -97,7 +97,11 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		 */
 		public synchronized void add(int index) {
 			indexes.add(new Record(index));
-			this.indexes = Arrays.asList(Record.condense(indexes));
+			Record[] condensed = Record.condense(indexes);
+			indexes.clear();
+			for (Record record : condensed) {
+				indexes.add(record);
+			}
 		}
 
 		/**
