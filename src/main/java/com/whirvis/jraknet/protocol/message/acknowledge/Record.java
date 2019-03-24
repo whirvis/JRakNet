@@ -52,8 +52,6 @@ public final class Record {
 	 */
 	public static final int NOT_RANGED = -1;
 
-	// TODO FIX THIS!!!!
-
 	/**
 	 * Returns the sequence IDs contained within the specified records.
 	 * 

@@ -457,9 +457,9 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			custom.decode();
 
 			/*
-			 * NACK must be generated first before the session data is updated,
+			 * NACK must be generated first before the peer data is updated,
 			 * otherwise the data needed to know which packets have been lost
-			 * will have been overwriten.
+			 * will have been overwritten.
 			 */
 			int skipped = custom.sequenceId - receiveSequenceNumber - 1;
 			if (skipped > 0) {
@@ -653,7 +653,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * Handles an internal packet.
 	 * <p>
 	 * If the ID is unrecognized it is passed on to the extending peer class via
-	 * the {@link handleMessage(int, RakNetPacket)} method.
+	 * the {@link #handleMessage(RakNetPacket, int)} method.
 	 * 
 	 * @param channel
 	 *            the channel the packet was sent on.
@@ -709,7 +709,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			Iterator<Long> timestampI = latencyTimestamps.iterator();
 			while (timestampI.hasNext()) {
 				long timestamp = timestampI.next().longValue();
-				if (currentTimestamp - timestamp >= RakNet.SESSION_TIMEOUT || latencyTimestamps.size() > 10) {
+				if (currentTimestamp - timestamp >= RakNet.PEER_TIMEOUT || latencyTimestamps.size() > 10) {
 					timestampI.remove();
 					log.debug("Cleared overdue ping response with timestamp " + timestamp);
 				}
@@ -775,7 +775,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 *            otherwise. This should only be <code>true</code> when sending
 	 *            a group of packets for the first time, rather than resending
 	 *            old data that the peer has reported to be lost in transmision.
-	 * @param encapsulated
+	 * @param messages
 	 *            the packets to send.
 	 * @return the sequence number of the {@link CustomFourPacket}.
 	 * @throws NullPointerException
@@ -824,14 +824,15 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	}
 
 	/**
-	 * Sends an {@link Acknowledge ACK} packet with the specified {@link Record
-	 * records}.
+	 * Sends an
+	 * {@link com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgedPacket
+	 * ACK} packet with the specified {@link Record records}.
 	 * 
 	 * @param acknowledge
 	 *            <code>true</code> if the records inside the packet are
 	 *            acknowledged, <code>false</code> if the records are not
 	 *            acknowledged.
-	 * @param record
+	 * @param records
 	 *            the records to send.
 	 * @throws NullPointerException
 	 *             if the <code>records</code> are <code>null</code>.
@@ -913,7 +914,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 */
 	public final void update() throws TimeoutException {
 		long currentTime = System.currentTimeMillis();
-		if (currentTime - lastPacketReceiveTime >= RakNet.SESSION_TIMEOUT) {
+		if (currentTime - lastPacketReceiveTime >= RakNet.PEER_TIMEOUT) {
 			throw new TimeoutException();
 		}
 
@@ -967,7 +968,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * Called when a not acknowledged receipt is received for an
 	 * {@link EncapsulatedPacket}.
 	 * <p>
-	 * Keep in mind that an {@link EncapsualtedPacket} is not the same as a
+	 * Keep in mind that an {@link EncapsulatedPacket} is not the same as a
 	 * regular message (or simply a packet). These have a lot of extra data in
 	 * them other than the payload, including split data if the packet is split
 	 * up.
@@ -988,7 +989,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * Called when a acknowledge receipt is received for an
 	 * {@link EncapsulatedPacket}.
 	 * <p>
-	 * Keep in mind that an {@link EncapsualtedPacket} is not the same as a
+	 * Keep in mind that an {@link EncapsulatedPacket} is not the same as a
 	 * regular message (or simply a packet). These have a lot of extra data in
 	 * them other than the payload, including split data if the packet is split
 	 * up.

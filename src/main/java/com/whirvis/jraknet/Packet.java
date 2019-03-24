@@ -65,11 +65,11 @@ public class Packet {
 	private PacketDataOutputStream output;
 
 	/**
-	 * Creates a packet using the specified {@link io.netty.ByteBuf ByteBuf}
+	 * Creates a packet using the specified {@link ByteBuf}
 	 * 
 	 * @param buffer
-	 *            the {@link io.netty.ByteBuf ByteBuf} to read from and write
-	 *            to, a <code>null</code> value will have a new buffer be used
+	 *            the {@link ByteBuf} to read from and write to, a
+	 *            <code>null</code> value will have a new buffer be used
 	 *            instead.
 	 * @throws IllegalArgumentException
 	 *             if the <code>buffer</code> is an {@link EmptyByteBuf}.
@@ -84,12 +84,10 @@ public class Packet {
 	}
 
 	/**
-	 * Creates packet from an existing
-	 * {@link io.netty.channel.socket.DatagramPacket DatagramPacket}.
+	 * Creates packet from an existing {@link DatagramPacket}.
 	 * 
 	 * @param datagram
-	 *            the {@link io.netty.channel.socket.DatagramPacket
-	 *            DatagramPacket} to read from.
+	 *            the {@link DatagramPacket} to read from.
 	 */
 	public Packet(DatagramPacket datagram) {
 		this(Unpooled.copiedBuffer(datagram.content()));
@@ -487,7 +485,7 @@ public class Packet {
 	 * Reads a UTF-8 string with its length prefixed by an unsigned
 	 * <code>short</code>.
 	 * 
-	 * @return a <code>String</code>.
+	 * @return a string.
 	 * @throws IndexOutOfBoundsException
 	 *             if there are less than <code>2</code> readable bytes left in
 	 *             the packet to read the length of the string, or if there are
@@ -500,10 +498,10 @@ public class Packet {
 	}
 
 	/**
-	 * Reads a UTF-8 <code>String</code> with its length prefixed by a unsigned
-	 * little -endian <code>short</code>.
+	 * Reads a UTF-8 string with its length prefixed by a unsigned little
+	 * -endian <code>short</code>.
 	 * 
-	 * @return a <code>String</code>.
+	 * @return a string.
 	 * @throws IndexOutOfBoundsException
 	 *             if there are less than <code>2</code> readable bytes left in
 	 *             the packet to read the length of the string, or if there are
@@ -852,7 +850,7 @@ public class Packet {
 	 *            the <code>long</code>.
 	 * @return the packet.
 	 * @throws IllegalArgumentException
-	 *             if <code>bi</code> is bigger than {@value Long.BYTES} bytes
+	 *             if <code>bi</code> is bigger than {@value Long#BYTES} bytes
 	 *             or is less than <code>0</code>.
 	 */
 	public final Packet writeUnsignedLong(BigInteger bi) throws IllegalArgumentException {
@@ -967,11 +965,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a UTF-8 <code>String</code> prefixed by an unsigned
-	 * <code>short</code> to the packet.
+	 * Writes a UTF-8 string prefixed by an unsigned <code>short</code> to the
+	 * packet.
 	 * 
 	 * @param s
-	 *            the <code>String</code>.
+	 *            the string.
 	 * @return the packet.
 	 * @throws NullPointerException
 	 *             if <code>s</code> is <code>null</code>.
@@ -987,11 +985,11 @@ public class Packet {
 	}
 
 	/**
-	 * Writes a UTF-8 <code>String</code> prefixed by a little-endian unsigned
+	 * Writes a UTF-8 string prefixed by a little-endian unsigned
 	 * <code>short</code> to the packet.
 	 * 
 	 * @param s
-	 *            the <code>String</code>.
+	 *            the string.
 	 * @return the packet.
 	 * @throws NullPointerException
 	 *             if <code>s</code> is <code>null</code>.
@@ -1212,8 +1210,8 @@ public class Packet {
 	 * Updates the buffer.
 	 * 
 	 * @param datagram
-	 *            the {@link io.netty.channel.socket.DatagramPacket
-	 *            DatagramPacket} whose buffer to read from and write to.
+	 *            the {@link DatagramPacket} whose buffer to read from and write
+	 *            to.
 	 * @return the packet.
 	 * @throws NullPointerException
 	 *             if the <code>datagram</code> packet is <code>null</code>.
@@ -1232,13 +1230,13 @@ public class Packet {
 	 *            the <code>byte[]</code> to create the new buffer from.
 	 * @return the packet.
 	 * @throws NullPointerException
-	 *             if the <code>buffer</code> is <code>null</code>.
+	 *             if the <code>data</code> is <code>null</code>.
 	 */
-	public final Packet setBuffer(byte[] buffer) throws NullPointerException {
-		if (buffer == null) {
-			throw new NullPointerException("Buffer cannot be null");
+	public final Packet setBuffer(byte[] data) throws NullPointerException {
+		if (data == null) {
+			throw new NullPointerException("Data cannot be null");
 		}
-		return this.setBuffer(Unpooled.copiedBuffer(buffer));
+		return this.setBuffer(Unpooled.copiedBuffer(data));
 	}
 
 	/**

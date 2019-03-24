@@ -49,7 +49,6 @@ public final class OpenConnectionRequestOne extends RakNetPacket {
 	 * To prevent an overflow, this is subtracted when encoding as its value is
 	 * the size of all the fields put together. This is added when decoding in
 	 * order to correctly determine the maximum transfer unit.
-	 * <p>
 	 * <ul>
 	 * <li>One <code>byte</code> for the packet ID</li>
 	 * <li>Sixteen <code>byte</code>s for the MAGIC identifier</li>

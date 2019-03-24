@@ -61,8 +61,6 @@ import io.netty.channel.Channel;
  */
 public final class PeerFactory {
 
-	// TODO: Set timeout for connection and login!
-
 	/**
 	 * The factory is not currently in the process of doing anything.
 	 */
@@ -108,6 +106,8 @@ public final class PeerFactory {
 	 *            the client connecting to the server.
 	 * @param address
 	 *            the address of the server.
+	 * @param channel
+	 *            the channel that to use when creating the peer.
 	 * @param initialMaximumTransferUnit
 	 *            the initial maximum transfer unit size.
 	 * @param maximumMaximumTransferUnit
@@ -175,9 +175,14 @@ public final class PeerFactory {
 	 * Netty. When a packet has been received, it should be sent back to the
 	 * factory using the {@link #assemble(RakNetPacket)} method.
 	 * 
+	 * @param units
+	 *            the maximum transfer units the client will attempt to use with
+	 *            the server.
+	 * @throws NullPointerException
+	 *             if the <code>units</code> are <code>null</code>.
 	 * @throws IllegalStateException
 	 *             if the peer has already been assembled or is currently being
-	 *             assembeld.
+	 *             assembled.
 	 * @throws PeerFactoryException
 	 *             if an error occurs when assembling the peer. It is possible
 	 *             for this method to throw a <code>PeerFactoryException</code>
@@ -189,8 +194,10 @@ public final class PeerFactory {
 	 *             if encoding or decoding one of the packets fails.
 	 */
 	public void startAssembly(MaximumTransferUnit[] units)
-			throws IllegalStateException, PeerFactoryException, PacketBufferException {
-		if (factoryState >= STATE_PEER_ASSEMBLED) {
+			throws NullPointerException, IllegalStateException, PeerFactoryException, PacketBufferException {
+		if (units == null) {
+			throw new NullPointerException("Maximum transfer units cannot be null");
+		} else if (factoryState >= STATE_PEER_ASSEMBLED) {
 			throw new IllegalStateException("Peer has already been assembled");
 		} else if (factoryState > STATE_IDLE) {
 			throw new IllegalStateException("Peer is already being assembled");
@@ -289,7 +296,6 @@ public final class PeerFactory {
 					 * the maximum transfer unit requested is smaller than that
 					 * as well.
 					 */
-					// TODO: FIX THIS LOGIC! IT SEEMS TO BE VERY BROKEN...
 					if (connectionResponseOne.maximumTransferUnit <= maximumMaximumTransferUnit) {
 						this.maximumTransferUnit = connectionResponseOne.maximumTransferUnit;
 					} else {

@@ -44,8 +44,7 @@ import io.netty.buffer.ByteBuf;
 /**
  * Used to listen for events that occur in the {@link RakNetServer}. In order to
  * listen for events, one must use the
- * {@link RakNetServer#addListener(RakNetServerListener(RakNetServerListener)}
- * method.
+ * {@link RakNetServer#addListener(RakNetServerListener)} method.
  * 
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
@@ -101,8 +100,9 @@ public interface RakNetServerListener {
 	 * Called when a client has logged in to the server.
 	 * <p>
 	 * This is not the same as
-	 * {@link #onConnect(RakNetServer, InetSocketAddress)}, where the client has
-	 * only connected to the server and has not yet logged in.
+	 * {@link #onConnect(RakNetServer, InetSocketAddress, ConnectionType)},
+	 * where the client has only connected to the server and has not yet logged
+	 * in.
 	 * 
 	 * @param server
 	 *            the server.

@@ -31,7 +31,7 @@
 package com.whirvis.jraknet.peer;
 
 /**
- * Represents the current status of a connection in a {@link RakNetSession}.
+ * Represents the current status of a connection in a {@link RakNetPeer}.
  *
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
@@ -39,17 +39,17 @@ package com.whirvis.jraknet.peer;
 public enum RakNetState {
 
 	/**
-	 * The session is disconnected.
+	 * The peer is disconnected.
 	 */
 	DISCONNECTED,
 
 	/**
-	 * The session is handshaking.
+	 * The peer is handshaking.
 	 */
 	HANDSHAKING,
 
 	/**
-	 * The session is logged in.
+	 * The peer is logged in.
 	 */
 	LOGGED_IN;
 

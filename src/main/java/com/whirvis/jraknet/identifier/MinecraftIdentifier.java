@@ -295,9 +295,9 @@ public final class MinecraftIdentifier extends Identifier {
 	 * 
 	 * @param serverName
 	 *            the new server name.
-	 * @param IllegalArgumentException
-	 *            if the <code>serverName</code> contains the separator
-	 *            character {@value #SEPARATOR}.
+	 * @throws IllegalArgumentException
+	 *             if the <code>serverName</code> contains the separator
+	 *             character {@value #SEPARATOR}.
 	 */
 	public void setServerName(String serverName) throws IllegalArgumentException {
 		if (serverName.contains(SEPARATOR)) {
@@ -366,9 +366,9 @@ public final class MinecraftIdentifier extends Identifier {
 	 * 
 	 * @param worldName
 	 *            the new world name.
-	 * @param IllegalArgumentException
-	 *            if the <code>worldName</code> contains the separator character
-	 *            {@value #SEPARATOR}.
+	 * @throws IllegalArgumentException
+	 *             if the <code>worldName</code> contains the separator
+	 *             character {@value #SEPARATOR}.
 	 */
 	public void setWorldName(String worldName) throws IllegalArgumentException {
 		if (worldName.contains(SEPARATOR)) {
@@ -382,10 +382,9 @@ public final class MinecraftIdentifier extends Identifier {
 	 * 
 	 * @param gamemode
 	 *            the new gamemode.
-	 * 
-	 * @param IllegalArgumentException
-	 *            if the <code>gamemode</code> contains the separator character
-	 *            {@value #SEPARATOR}.
+	 * @throws IllegalArgumentException
+	 *             if the <code>gamemode</code> contains the separator character
+	 *             {@value #SEPARATOR}.
 	 */
 	public void setGamemode(String gamemode) throws IllegalArgumentException {
 		if (gamemode.contains(SEPARATOR)) {
@@ -421,7 +420,7 @@ public final class MinecraftIdentifier extends Identifier {
 	 * 
 	 * @param values
 	 *            the values to write to the identifier.
-	 * @return the built identifier as a <code>String</code>.
+	 * @return the built identifier text.
 	 * @throws NullPointerException
 	 *             if <code>values</code> is <code>null</code>.
 	 */

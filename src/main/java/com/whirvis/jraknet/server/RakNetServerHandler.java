@@ -106,15 +106,13 @@ public final class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	 * 
 	 * @param address
 	 *            the IP address to unblock.
-	 * @throws NullPointerException
-	 *             if <code>address</code> is <code>null</code>.
 	 */
-	protected void unblockAddress(InetAddress address) throws NullPointerException {
-		if (address == null) {
-			throw new NullPointerException("Address cannot be null");
-		} else if (blocked.remove(address) != null) {
-			server.callEvent(listener -> listener.onUnblock(server, address));
-			log.info("Unblocked address " + address);
+	protected void unblockAddress(InetAddress address) {
+		if (address != null) {
+			if (blocked.remove(address) != null) {
+				server.callEvent(listener -> listener.onUnblock(server, address));
+				log.info("Unblocked address " + address);
+			}
 		}
 	}
 
@@ -152,7 +150,7 @@ public final class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			}
 
 			// Handle the packet and release the buffer
-			server.handleMessage(packet, sender);
+			server.handleMessage(sender, packet);
 			datagram.content().readerIndex(0); // Reset position
 			log.debug("Sent packet to server and reset datagram buffer read position");
 			server.callEvent(listener -> listener.handleNettyMessage(server, sender, datagram.content()));

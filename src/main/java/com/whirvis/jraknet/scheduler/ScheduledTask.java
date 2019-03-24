@@ -33,10 +33,8 @@ package com.whirvis.jraknet.scheduler;
 import java.util.function.Consumer;
 
 /**
- * Represents a task that is executed by the
- * {@link com.whirvis.jraknet.scheduler.SchedulerThread SchedulerThread} after
- * being scheduled by the {@link com.whirvis.jrkanet.scheduler.Scheduler
- * Scheduler}.
+ * Represents a task that is executed by the {@link SchedulerThread} after being
+ * scheduled by the {@link Scheduler}.
  * 
  * @author Trent Summerlin
  * @since JRakNet v2.11.0
@@ -77,16 +75,10 @@ public final class ScheduledTask<T> {
 	 *            how long to wait before initially executing the task in
 	 *            milliseconds, and how long to wait before executing the task
 	 *            again if it executes more than once. To have the task be
-	 *            executed immediately, use
-	 *            {@link com.whirvis.jraknet.scheduler.ScheduledTask#INSTANTANEOUS
-	 *            INSTANTANEOUS}.
+	 *            executed immediately, use {@link #INSTANTANEOUS}.
 	 * @param count
 	 *            the amount of times the task should be executed. To have the
-	 *            task be executed indefinitely, use
-	 *            {@link com.whirvis.jraknet.scheduler.ScheduledTask#INFINITE
-	 *            INFINITE}.
-	 * @param <T>
-	 *            the type of the input to the operation.
+	 *            task be executed indefinitely, use {@link #INFINITE}.
 	 * @throws NullPointerException
 	 *             if the operation is <code>null</code>.
 	 * @throws IllegalArgumentException

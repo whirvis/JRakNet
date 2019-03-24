@@ -76,8 +76,6 @@ public class RakNetPacket extends Packet {
 	 */
 	private static final HashMap<String, Short> PACKET_IDS = new HashMap<String, Short>();
 
-	private static boolean mappedNameIds;
-
 	/**
 	 * The magic identifier.
 	 */
@@ -124,7 +122,7 @@ public class RakNetPacket extends Packet {
 
 	/**
 	 * The ID of the
-	 * {@link com.whirvis.jraknet.protocol.connection.OpenConnectionReplyOne
+	 * {@link com.whirvis.jraknet.protocol.connection.OpenConnectionResponseOne
 	 * OPEN_CONNECTION_REPLY_1} packet.
 	 */
 	public static final short ID_OPEN_CONNECTION_REPLY_1 = 0x06;
@@ -138,7 +136,7 @@ public class RakNetPacket extends Packet {
 
 	/**
 	 * The ID of the
-	 * {@link com.whirvis.jraknet.protocol.connection.OpenConnectionReplyTwo
+	 * {@link com.whirvis.jraknet.protocol.connection.OpenConnectionResponseTwo
 	 * OPEN_CONNECTION_REPLY_2} packet.
 	 */
 	public static final short ID_OPEN_CONNECTION_REPLY_2 = 0x08;
@@ -904,8 +902,10 @@ public class RakNetPacket extends Packet {
 	 */
 	public static final short ID_NACK = 0xA0;
 
+	private static boolean mappedNameIds;
+
 	/**
-	 * Maps all <code>public</code> packet IDs to their respetive field names
+	 * Maps all <code>public</code> packet IDs to their respective field names
 	 * and vice-versa.
 	 * <p>
 	 * Packet IDs {@link #ID_CUSTOM_0}, {@link #ID_CUSTOM_1},
@@ -920,7 +920,7 @@ public class RakNetPacket extends Packet {
 	private static void mapNameIds() {
 		if (mappedNameIds == false) {
 			Logger log = LogManager.getLogger("jraknet-raknet-packet");
-			for (Field field : RakNet.class.getFields()) {
+			for (Field field : RakNetPacket.class.getFields()) {
 				if (field.getType().equals(short.class)) {
 					try {
 						short packetId = field.getShort(null);
@@ -1011,19 +1011,16 @@ public class RakNetPacket extends Packet {
 	 * @return the ID of the packet with the specified name, <code>-1</code> if
 	 *         it does not exist.
 	 */
-	public static int getId(String name) {
+	public static short getId(String name) {
 		if (mappedNameIds == false) {
 			mapNameIds();
 		}
-		if (!PACKET_IDS.containsKey(name)) {
-			return -1;
-		}
-		return PACKET_IDS.get(name);
+		return PACKET_IDS.containsKey(name) ? PACKET_IDS.get(name) : -1;
 	}
 
 	/**
 	 * Returns whether or not a method with the specified name has been
-	 * overriden the method in the original specified class by the specified
+	 * overridden the method in the original specified class by the specified
 	 * class instance.
 	 * 
 	 * @param instance
@@ -1032,7 +1029,7 @@ public class RakNetPacket extends Packet {
 	 *            the original class.
 	 * @param methodName
 	 *            the name of the method.
-	 * @return <code>true</code> if the method has been overriden,
+	 * @return <code>true</code> if the method has been overridden,
 	 *         <code>false</code> otherwise.
 	 */
 	private static boolean isMethodOverriden(Class<?> instance, Class<?> clazz, String methodName) {
@@ -1163,19 +1160,15 @@ public class RakNetPacket extends Packet {
 	}
 
 	/**
-	 * Reads a {@link com.whirvis.jraknet.protocol.ConnectionType
-	 * ConnectionType}.
+	 * Reads a {@link ConnectionType}.
 	 * <p>
 	 * This method will check to make sure if there is at least enough data to
 	 * read the the connection type magic before reading the data. This is due
 	 * to the fact that this is meant to be used strictly at the end of packets
 	 * that can be used to signify the protocol implementation of the sender.
 	 * 
-	 * @return a {@link com.whirvis.jraknet.protocol.ConnectionType
-	 *         ConnectionType},
-	 *         {@link com.whirvis.jraknet.protocol.ConnectionType#VANILLA
-	 *         ConnectionType.VANILLA} if not enough data to read one is
-	 *         present.
+	 * @return a {@link ConnectionType}, {@link ConnectionType#VANILLA} if not
+	 *         enough data to read one is present.
 	 * @throws RakNetException
 	 *             if not enough data is present in the packet after the
 	 *             connection type magic or there are duplicate keys in the
@@ -1216,13 +1209,12 @@ public class RakNetPacket extends Packet {
 	}
 
 	/**
-	 * Writes a {@link com.whirvis.jraknet.protocol.ConnectionType
-	 * ConnectionType} to the packet.
+	 * Writes a {@link ConnectionType} to the packet.
 	 * 
 	 * @param connectionType
 	 *            the connection type, a <code>null</code> value will have
-	 *            {@link com.whirvis.jraknet.protocol.ConnectionType#JRAKNET
-	 *            JRAKNET} connection type be used instead.
+	 *            {@link ConnectionType#JRAKNET} connection type be used
+	 *            instead.
 	 * @return the packet.
 	 * @throws RakNetException
 	 *             if there are too many values in the metadata.
@@ -1246,8 +1238,7 @@ public class RakNetPacket extends Packet {
 	}
 
 	/**
-	 * Writes the {@link com.whirvis.jraknet.protocol.ConnectionType#JRAKNET
-	 * JRAKNET} connection type to the packet.
+	 * Writes the {@link ConnectionType#JRAKNET} connection type to the packet.
 	 * 
 	 * @return the packet.
 	 * @throws RuntimeException
@@ -1316,6 +1307,7 @@ public class RakNetPacket extends Packet {
 	 * @param updateId
 	 *            <code>true</code> if the ID should be updated,
 	 *            <code>false</code> otherwise.
+	 * @return the packet.
 	 * @throws IndexOutOfBoundsException
 	 *             if <code>updateId</code> is <code>true</code> and the new
 	 *             buffer has less than <code>1</code> readable
@@ -1334,8 +1326,8 @@ public class RakNetPacket extends Packet {
 	 * Updates the buffer.
 	 * 
 	 * @param datagram
-	 *            the {@link io.netty.channel.socket.DatagramPacket
-	 *            DatagramPacket} whose buffer to read from and write to.
+	 *            the {@link DatagramPacket} whose buffer to read from and write
+	 *            to.
 	 * @param updateId
 	 *            <code>true</code> if the ID should be updated,
 	 *            <code>false</code> otherwise.
@@ -1364,6 +1356,7 @@ public class RakNetPacket extends Packet {
 	 * @param updateId
 	 *            <code>true</code> if the ID should be updated,
 	 *            <code>false</code> otherwise.
+	 * @return the packet.
 	 * @throws NullPointerException
 	 *             if the <code>data</code> is <code>null</code>.
 	 * @throws IndexOutOfBoundsException
@@ -1380,11 +1373,12 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Updates the buffer.
 	 * 
-	 * @param data
+	 * @param packet
 	 *            the packet whose buffer to copy to read from and write to.
 	 * @param updateId
 	 *            <code>true</code> if the ID should be updated,
 	 *            <code>false</code> otherwise.
+	 * @return the packet.
 	 * @throws IndexOutOfBoundsException
 	 *             if <code>updateId</code> is <code>true</code> and the new
 	 *             buffer has less than <code>1</code> readable

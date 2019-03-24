@@ -33,7 +33,7 @@
  * used as an {@link java.io.InputStream InputStream} or
  * {@link java.io.OutputStream OutputStream} using it's
  * {@link com.whirvis.jraknet.Packet#getInputStream() getInputStream()} and
- * {@link com.whirvis.jrkanet.Packet#getOutputStream() getOutputStream()}
+ * {@link com.whirvis.jraknet.Packet#getOutputStream() getOutputStream()}
  * methods.
  * 
  * @author Trent Summerlin

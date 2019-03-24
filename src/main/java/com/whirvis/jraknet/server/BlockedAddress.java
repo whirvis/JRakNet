@@ -68,7 +68,7 @@ public final class BlockedAddress {
 	/**
 	 * Returns the time the address was first blocked. This value is the time
 	 * that the original blocked address object was created, according to
-	 * {@link System#currentTimeMillis() System.currentTimeMillis()}.
+	 * {@link System#currentTimeMillis()}.
 	 * 
 	 * @return the time the address was first blocked.
 	 */
