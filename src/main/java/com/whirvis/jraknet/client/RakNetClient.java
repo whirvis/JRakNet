@@ -332,7 +332,6 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * 
 	 * @return <code>true</code> if the client is running, <code>false</code>
 	 *         otherwise.
-	 * @see #shutdown()
 	 */
 	public final boolean isRunning() {
 		if (channel == null) {
@@ -344,10 +343,10 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Returns the address the client is bound to. This will be the value
 	 * supplied during client creation until the client has connected to a
-	 * server using the {@link #connect(InetSocketAddress) connect()} method.
-	 * Once the client has connected a server, the bind address will be changed
-	 * to the address returned from the channel's
-	 * {@link io.netty.channel.Channel#localAddress() localAddress()} method.
+	 * server using the {@link #connect(InetSocketAddress)} method. Once the
+	 * client has connected a server, the bind address will be changed to the
+	 * address returned from the channel's {@link Channel#localAddress()}
+	 * method.
 	 * 
 	 * @return the address the client is bound to.
 	 */
@@ -401,8 +400,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *             <code>null</code>.
 	 * @throws IllegalArgumentException
 	 *             if the <code>maximumTransferUnitSizes</code> is empty or one
-	 *             of its values is less than
-	 *             {@value com.whirvis.jraknet.RakNet#MINIMUM_MTU_SIZE}.
+	 *             of its values is less than {@value RakNet#MINIMUM_MTU_SIZE}.
 	 * @throws RuntimeException
 	 *             if determining the maximum transfer unit for the network card
 	 *             with the client's bind address was a failure or no valid
@@ -489,17 +487,25 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * Sends a Netty message over the channel raw. This should be used
 	 * sparingly, as if it is used incorrectly it could break server peers
 	 * entirely. In order to send a message to a peer, use one of the
-	 * {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, ByteBuf)
+	 * {@link com.whirvis.jraknet.peer.RakNetPeer#sendMessage(Reliability, ByteBuf)
 	 * sendMessage()} methods.
 	 * 
 	 * @param buf
 	 *            the buffer to send.
 	 * @param address
 	 *            the address to send the buffer to.
-	 * @see com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability,
-	 *      ByteBuf) sendMessage(Reliability, ByteBuf)
+	 * @throws NullPointerException
+	 *             if the <code>buf</code>, <code>address</code>, or IP address
+	 *             of <code>address</code> are <code>null</code>.
 	 */
-	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) {
+	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) throws NullPointerException {
+		if (buf == null) {
+			throw new NullPointerException("Buffer cannot be null");
+		} else if (address == null) {
+			throw new NullPointerException("Address cannot be null");
+		} else if (address.getAddress() == null) {
+			throw new NullPointerException("IP address cannot be null");
+		}
 		channel.writeAndFlush(new DatagramPacket(buf, address));
 		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to "
 				+ address);
@@ -509,17 +515,21 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * Sends a Netty message over the channel raw. This should be used
 	 * sparingly, as if it is used incorrectly it could break server peers
 	 * entirely. In order to send a message to a peer, use one of the
-	 * {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, Packet)
+	 * {@link com.whirvis.jraknet.peer.RakNetPeer#sendMessage(Reliability, Packet)
 	 * sendMessage()} methods.
 	 * 
 	 * @param packet
 	 *            the packet to send.
 	 * @param address
 	 *            the address to send the packet to.
-	 * @see com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability,
-	 *      Packet) sendMessage(Reliability, Packet)
+	 * @throws NullPointerException
+	 *             if the <code>packet</code>, <code>address</code>, or IP
+	 *             address of <code>address</code> are <code>null</code>.
 	 */
-	public final void sendNettyMessage(Packet packet, InetSocketAddress address) {
+	public final void sendNettyMessage(Packet packet, InetSocketAddress address) throws NullPointerException {
+		if (packet == null) {
+			throw new NullPointerException("Packet cannot be null");
+		}
 		this.sendNettyMessage(packet.buffer(), address);
 	}
 
@@ -527,32 +537,38 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * Sends a Netty message over the channel raw. This should be used
 	 * sparingly, as if it is used incorrectly it could break server peers
 	 * entirely. In order to send a message to a peer, use one of the
-	 * {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, int)
+	 * {@link com.whirvis.jraknet.peer.RakNetPeer#sendMessage(Reliability, int)
 	 * sendMessage()} methods.
 	 * 
-	 * @param buffer
+	 * @param packetId
 	 *            the packet ID to send.
 	 * @param address
 	 *            the address to send the packet to.
-	 * @see com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, int)
-	 *      sendMessage(Reliability, int)
+	 * @throws NullPointerException
+	 *             if the <code>address</code> or IP address of
+	 *             <code>address</code> are <code>null</code>.
 	 */
-	public final void sendNettyMessage(int packetId, InetSocketAddress address) {
+	public final void sendNettyMessage(int packetId, InetSocketAddress address) throws NullPointerException {
 		this.sendNettyMessage(new RakNetPacket(packetId), address);
 	}
 
 	/**
-	 * Handles a packet received by the
-	 * {@link com.whirvis.jraknet.client.RakNetClientHandler
-	 * RakNetClientHandler}.
+	 * Handles a packet received by the {@link RakNetClientHandler}.
 	 * 
 	 * @param sender
 	 *            the address of the sender.
 	 * @param packet
 	 *            the packet to handle.
+	 * @throws NullPointerException
+	 *             if the <code>sender</code> or <code>packet</code> are
+	 *             <code>null</code>.
 	 */
-	protected final void handleMessage(InetSocketAddress sender, RakNetPacket packet) {
-		if (peerFactory != null) {
+	protected final void handleMessage(InetSocketAddress sender, RakNetPacket packet) throws NullPointerException {
+		if (sender == null) {
+			throw new NullPointerException("Sender cannot be null");
+		} else if (packet == null) {
+			throw new NullPointerException("Packet cannot be null");
+		} else if (peerFactory != null) {
 			if (sender.equals(peerFactory.getAddress())) {
 				RakNetServerPeer peer = peerFactory.assemble(packet);
 				if (peer != null) {
@@ -575,9 +591,17 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *            the address that caused the exception.
 	 * @param cause
 	 *            the <code>Throwable</code> caught by the handler.
+	 * @throws NullPointerException
+	 *             if the cause <code>address</code> or <code>cause</code> are
+	 *             <code>null</code>.
 	 */
-	protected final void handleHandlerException(InetSocketAddress address, Throwable cause) {
-		if (peerFactory != null) {
+	protected final void handleHandlerException(InetSocketAddress address, Throwable cause)
+			throws NullPointerException {
+		if (address == null) {
+			throw new NullPointerException("Address cannot be null");
+		} else if (cause == null) {
+			throw new NullPointerException("Cause cannot be null");
+		} else if (peerFactory != null) {
 			if (address.equals(peerFactory.getAddress())) {
 				peerFactory.exceptionCaught(new NettyHandlerException(this, handler, address, cause));
 			}
@@ -675,7 +699,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	}
 
 	/**
-	 * Connects the client to a servers.
+	 * Connects the client to a server.
 	 * 
 	 * @param address
 	 *            the IP address of the server to connect to.

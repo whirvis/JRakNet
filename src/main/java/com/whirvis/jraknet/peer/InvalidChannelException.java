@@ -47,6 +47,9 @@ public final class InvalidChannelException extends IllegalArgumentException {
 
 	/**
 	 * Constructs an <code>InvalidChannelException</code>.
+	 * 
+	 * @param channel
+	 *            the invalid channel that was used.
 	 */
 	public InvalidChannelException(int channel) {
 		super("Invalid channel " + channel + ", must be lower than " + RakNet.MAX_CHANNELS);

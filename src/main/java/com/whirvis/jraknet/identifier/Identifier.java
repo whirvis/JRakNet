@@ -96,9 +96,9 @@ public class Identifier implements Cloneable {
 	}
 
 	/**
-	 * Returns the identifier as a <code>String</code>.
+	 * Returns the identifier text.
 	 * 
-	 * @return the identifier as a <code>String</code>.
+	 * @return the identifier text.
 	 */
 	public String build() {
 		return this.identifier;

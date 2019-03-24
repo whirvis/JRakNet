@@ -36,8 +36,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * Used by the {@link com.whirvis.jraknet.scheduler.Scheduler Scheduler} to run
- * tasks in the background at specified intervals.
+ * Used by the {@link Scheduler} to run tasks in the background at specified
+ * intervals.
  * <p>
  * Only one instance of this class can exist at a time. When a task is
  * scheduled, the scheduler will automatically check if a scheduler thread is

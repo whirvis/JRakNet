@@ -31,7 +31,7 @@
 package com.whirvis.jraknet.peer;
 
 /**
- * Signals that a {@link RakNetSession} has timed out.
+ * Signals that a {@link RakNetPeer} has timed out.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
@@ -44,7 +44,7 @@ public final class TimeoutException extends RuntimeException {
 	 * Constructs a <code>TimeoutException</code>.
 	 */
 	public TimeoutException() {
-		super("Session timeout");
+		super("Peer timeout");
 	}
 
 }

@@ -72,7 +72,7 @@ public interface RakNetClientPeerMessenger {
 	 * @param packet
 	 *            the packet to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -100,7 +100,7 @@ public interface RakNetClientPeerMessenger {
 	 * @param packet
 	 *            the packet to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -132,7 +132,7 @@ public interface RakNetClientPeerMessenger {
 	 * @param packets
 	 *            the packets to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -169,7 +169,7 @@ public interface RakNetClientPeerMessenger {
 	 * @param packets
 	 *            the packets to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -199,7 +199,7 @@ public interface RakNetClientPeerMessenger {
 	 * @param packet
 	 *            the packet to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -224,7 +224,7 @@ public interface RakNetClientPeerMessenger {
 	 * @param packet
 	 *            the packet to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -251,7 +251,7 @@ public interface RakNetClientPeerMessenger {
 	 * @param packets
 	 *            the packets to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -276,7 +276,7 @@ public interface RakNetClientPeerMessenger {
 	 * @param packets
 	 *            the packets to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -305,7 +305,7 @@ public interface RakNetClientPeerMessenger {
 	 * @param buf
 	 *            the buffer to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -335,7 +335,7 @@ public interface RakNetClientPeerMessenger {
 	 * @param buf
 	 *            the buffer to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -367,7 +367,7 @@ public interface RakNetClientPeerMessenger {
 	 * @param bufs
 	 *            the buffers to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -395,7 +395,7 @@ public interface RakNetClientPeerMessenger {
 	/**
 	 * Sends messages to the specified peer.
 	 * 
-	 * @param guid
+	 * @param peer
 	 *            the peer to send the packet to.
 	 * @param reliability
 	 *            the reliability of the packets.
@@ -404,7 +404,7 @@ public interface RakNetClientPeerMessenger {
 	 * @param bufs
 	 *            the buffers to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -431,12 +431,10 @@ public interface RakNetClientPeerMessenger {
 	 *            the globally unique ID of the peer to send the packet to.
 	 * @param reliability
 	 *            the reliability of the packet.
-	 * @param channel
-	 *            the channel to send the packet on.
-	 * @param packet
-	 *            the packet to send.
+	 * @param buf
+	 *            the buffer to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -458,12 +456,10 @@ public interface RakNetClientPeerMessenger {
 	 *            the peer to send the packet to.
 	 * @param reliability
 	 *            the reliability of the packet.
-	 * @param channel
-	 *            the channel to send the packet on.
-	 * @param packet
-	 *            the packet to send.
+	 * @param buf
+	 *            the buffer to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -487,12 +483,10 @@ public interface RakNetClientPeerMessenger {
 	 *            the globally unique ID of the peer to send the packet to.
 	 * @param reliability
 	 *            the reliability of the packet.
-	 * @param channel
-	 *            the channel to send the packet on.
-	 * @param packet
-	 *            the packet to send.
+	 * @param bufs
+	 *            the buffers to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -510,16 +504,14 @@ public interface RakNetClientPeerMessenger {
 	/**
 	 * Sends messages to the specified peer on the default channel.
 	 * 
-	 * @param guid
+	 * @param peer
 	 *            the peer to send the packet to.
 	 * @param reliability
 	 *            the reliability of the packet.
-	 * @param channel
-	 *            the channel to send the packet on.
-	 * @param packet
-	 *            the packet to send.
+	 * @param bufs
+	 *            the buffers to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -548,7 +540,7 @@ public interface RakNetClientPeerMessenger {
 	 * @param packetId
 	 *            the message identifier to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -568,7 +560,7 @@ public interface RakNetClientPeerMessenger {
 	/**
 	 * Sends a message identifier to the specified peer.
 	 * 
-	 * @param guid
+	 * @param peer
 	 *            the peer to send the packet to.
 	 * @param reliability
 	 *            the reliability of the message identifier.
@@ -577,7 +569,7 @@ public interface RakNetClientPeerMessenger {
 	 * @param packetId
 	 *            the message identifier to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -606,10 +598,10 @@ public interface RakNetClientPeerMessenger {
 	 *            the reliability of the message identifiers.
 	 * @param channel
 	 *            the channel to send the message identifiers on.
-	 * @param packetId
+	 * @param packetIds
 	 *            the message identifiers to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -637,16 +629,16 @@ public interface RakNetClientPeerMessenger {
 	/**
 	 * Sends message identifiers to the specified peer.
 	 * 
-	 * @param guid
+	 * @param peer
 	 *            the peer to send the packet to.
 	 * @param reliability
 	 *            the reliability of the message identifiers.
 	 * @param channel
 	 *            the channel to send the message identifiers on.
-	 * @param packetId
+	 * @param packetIds
 	 *            the message identifiers to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -676,7 +668,7 @@ public interface RakNetClientPeerMessenger {
 	 * @param packetId
 	 *            the message identifier to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -693,14 +685,14 @@ public interface RakNetClientPeerMessenger {
 	/**
 	 * Sends a message identifier to the specified peer on the default channel.
 	 * 
-	 * @param guid
+	 * @param peer
 	 *            the peer to send the packet to.
 	 * @param reliability
 	 *            the reliability of the message identifier.
 	 * @param packetId
 	 *            the message identifier to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -724,10 +716,10 @@ public interface RakNetClientPeerMessenger {
 	 *            the globally unique ID of the peer to send the packet to.
 	 * @param reliability
 	 *            the reliability of the message identifiers.
-	 * @param packetId
+	 * @param packetIds
 	 *            the message identifiers to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the
@@ -745,14 +737,14 @@ public interface RakNetClientPeerMessenger {
 	/**
 	 * Sends message identifiers to the specified peer on the default channel.
 	 * 
-	 * @param guid
+	 * @param peer
 	 *            the peer to send the packet to.
 	 * @param reliability
 	 *            the reliability of the message identifiers.
-	 * @param packetId
+	 * @param packetIds
 	 *            the message identifiers to send.
 	 * @return the generated encapsulated packet, <code>null</code> if no packet
-	 *         was sent due to the inexistence of the peer with the
+	 *         was sent due to the non existence of the peer with the
 	 *         <code>guid</code>. This is normally not important, however it can
 	 *         be used for packet acknowledged and not acknowledged events if
 	 *         the reliability is of the

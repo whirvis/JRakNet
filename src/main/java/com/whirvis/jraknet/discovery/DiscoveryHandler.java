@@ -30,7 +30,9 @@
  */
 package com.whirvis.jraknet.discovery;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,13 +54,16 @@ import io.netty.channel.socket.DatagramPacket;
  */
 public final class DiscoveryHandler extends ChannelInboundHandlerAdapter {
 
-	private final Logger log;
+	private Logger log;
+	private final ArrayList<InetAddress> blocked;
+	private InetSocketAddress causeAddress;
 
 	/**
 	 * Creates a discovery system Netty handler.
 	 */
 	protected DiscoveryHandler() {
 		this.log = LogManager.getLogger("jraknet-discovery-handler");
+		this.blocked = new ArrayList<InetAddress>();
 	}
 
 	@Override
@@ -69,24 +74,39 @@ public final class DiscoveryHandler extends ChannelInboundHandlerAdapter {
 			InetSocketAddress sender = datagram.sender();
 			RakNetPacket packet = new RakNetPacket(datagram);
 
+			// If an exception happens it's because of this address
+			this.causeAddress = sender;
+
+			// Check if the address is blocked
+			if (blocked.contains(sender.getAddress())) {
+				return; // Address blocked
+			}
+
 			// Handle the packet and release the buffer
 			if (packet.getId() == RakNetPacket.ID_UNCONNECTED_PONG) {
 				UnconnectedPong pong = new UnconnectedPong(packet);
 				pong.decode();
 				if (!pong.failed()) {
 					Discovery.updateDiscoveryData(sender, pong);
-					log.debug("Sent unconneted pong to discovery");
+					log.debug("Sent unconnected pong to discovery system");
 				}
 			}
 			datagram.content().release(); // No longer needed
+
+			// No exceptions occurred, release the suspect
+			this.causeAddress = null;
 		}
 	}
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-		// Ignore
-		// TODO: Remove currently discovered servers that cause this to be
-		// thrown
+		if (!blocked.contains(causeAddress.getAddress())) {
+			blocked.add(causeAddress.getAddress());
+			log.warn("Blocked address " + causeAddress.getAddress() + " that caused " + cause.getClass().getSimpleName()
+					+ " to be thrown, discovering servers from it will no longer be possible");
+		} else {
+			log.error("Blocked address still cause exception to be thrown", cause);
+		}
 	}
 
 }

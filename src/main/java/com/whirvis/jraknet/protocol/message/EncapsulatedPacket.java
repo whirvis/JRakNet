@@ -95,7 +95,7 @@ public final class EncapsulatedPacket implements Cloneable {
 		 *            the peer.
 		 * @param encapsulated
 		 *            the packet to split.
-		 * @return the split up encapsualted packet.
+		 * @return the split up encapsulated packet.
 		 * 
 		 * @throws NullPointerException
 		 *             if the <code>peer</code> or <code>encapsulated</code> is
@@ -103,7 +103,7 @@ public final class EncapsulatedPacket implements Cloneable {
 		 * @throws IllegalArgumentException
 		 *             if the <code>encapsulated</code> is already split or if
 		 *             the packet is too small to be split according to
-		 *             {@link #needsSplit(Reliability, EncapsulatedPacket, int)}.
+		 *             {@link #needsSplit(RakNetPeer, EncapsulatedPacket)}.
 		 */
 		public static EncapsulatedPacket[] split(RakNetPeer peer, EncapsulatedPacket encapsulated)
 				throws NullPointerException, IllegalArgumentException {
@@ -304,6 +304,7 @@ public final class EncapsulatedPacket implements Cloneable {
 	 * @param split
 	 *            <code>true</code> if the packet is split, <code>false</code>
 	 *            otherwise.
+	 * @return the size.
 	 */
 	public static int size(Reliability reliability, boolean split) {
 		return size(reliability, split, null);
@@ -321,12 +322,14 @@ public final class EncapsulatedPacket implements Cloneable {
 	 * an
 	 * {@link com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgedPacket
 	 * ACK} packet, the event method
-	 * {@link com.whirvis.jraknet.client.RakNetClientListener#onAcknowledge(com.whirvis.jraknet.client.RakNetClient, com.whirvis.jraknet.session.RakNetServerSession, Record, EncapsulatedPacket)
-	 * onAcknowledge()} is called. Likewise, the same occurs when a
+	 * {@link com.whirvis.jraknet.client.RakNetClientListener#onAcknowledge(com.whirvis.jraknet.client.RakNetClient, com.whirvis.jraknet.peer.RakNetServerPeer, Record, EncapsulatedPacket)
+	 * onAcknowledge(RakNetClient, RakNetServerPeer, Record,
+	 * EncapsulatedPacket)} is called. Likewise, the same occurs when a
 	 * {@link com.whirvis.jraknet.protocol.message.acknowledge.NotAcknowledgedPacket
 	 * NACK} packet is received with the exception of
-	 * {@link com.whirvis.jraknet.client.RakNetClientListener#onLoss(com.whirvis.jraknet.client.RakNetClient, com.whirvis.jraknet.session.RakNetServerSession, Record, EncapsulatedPacket)
-	 * onLoss()} being called instead.
+	 * {@link com.whirvis.jraknet.client.RakNetClientListener#onLoss(com.whirvis.jraknet.client.RakNetClient, com.whirvis.jraknet.peer.RakNetServerPeer, Record, EncapsulatedPacket)
+	 * onLoss(RakNetClient, RakNetServerPeer, Record, EncapsulatedPacket)} being
+	 * called instead.
 	 */
 	public Record ackRecord;
 
@@ -531,8 +534,6 @@ public final class EncapsulatedPacket implements Cloneable {
 	 * 
 	 * @param peer
 	 *            the peer.
-	 * @param encapsulated
-	 *            the packet to split.
 	 * @return the split up encapsulated packet.
 	 * @throws IllegalStateException
 	 *             if the <code>encapsulated</code> is already split or if the

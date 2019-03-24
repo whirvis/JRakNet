@@ -61,9 +61,9 @@ public final class PowerShellAdministrativeClient {
 	}
 
 	/**
-	 * Converts the <code>InputStream</code> to a <code>String</code>. This will
-	 * result in the closing of the stream, as all available data will be read
-	 * from it during conversion.
+	 * Converts the <code>InputStream</code> to a string. This will result in
+	 * the closing of the stream, as all available data will be read from it
+	 * during conversion.
 	 * 
 	 * @param in
 	 *            the stream to convert.

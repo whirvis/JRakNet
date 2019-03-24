@@ -33,8 +33,8 @@ package com.whirvis.jraknet.peer;
 import com.whirvis.jraknet.RakNet;
 
 /**
- * Signals that a {@link RakNetSession} has attempted to send too many packets
- * at once.
+ * Signals that a {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer} has
+ * attempted to send too many packets at once.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0

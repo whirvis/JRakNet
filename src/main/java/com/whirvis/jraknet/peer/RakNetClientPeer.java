@@ -80,9 +80,9 @@ public final class RakNetClientPeer extends RakNetPeer {
 	}
 
 	/**
-	 * Returns the server this session is connected to.
+	 * Returns the server this peer is connected to.
 	 * 
-	 * @return the server this session is connected to.
+	 * @return the server this peer is connected to.
 	 */
 	public RakNetServer getServer() {
 		return this.server;

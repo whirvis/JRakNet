@@ -138,8 +138,6 @@ public interface RakNetPeerMessenger {
 	 * 
 	 * @param reliability
 	 *            the reliability of the packets.
-	 * @param channel
-	 *            the channel to send the packets on.
 	 * @param packets
 	 *            the packets to send.
 	 * @return the generated encapsulated packets. These are normally not
@@ -219,10 +217,8 @@ public interface RakNetPeerMessenger {
 	 * 
 	 * @param reliability
 	 *            the reliability of the packet.
-	 * @param channel
-	 *            the channel to send the packet on.
-	 * @param packet
-	 *            the packet to send.
+	 * @param buf
+	 *            the buffer to send.
 	 * @return the generated encapsulated packet. This is normally not
 	 *         important, however it can be used for packet acknowledged and not
 	 *         acknowledged events if the reliability is of the
@@ -241,10 +237,8 @@ public interface RakNetPeerMessenger {
 	 * 
 	 * @param reliability
 	 *            the reliability of the packet.
-	 * @param channel
-	 *            the channel to send the packet on.
-	 * @param packet
-	 *            the packet to send.
+	 * @param bufs
+	 *            the buffers to send.
 	 * @return the generated encapsulated packets. These are normally not
 	 *         important, however they can be used for packet acknowledged and
 	 *         not acknowledged events if the reliability is of the
@@ -291,7 +285,7 @@ public interface RakNetPeerMessenger {
 	 *            the reliability of the message identifiers.
 	 * @param channel
 	 *            the channel to send the message identifiers on.
-	 * @param packetId
+	 * @param packetIds
 	 *            the message identifiers to send.
 	 * @return the generated encapsulated packets. These are normally not
 	 *         important, however they can be used for packet acknowledged and
@@ -341,7 +335,7 @@ public interface RakNetPeerMessenger {
 	 * 
 	 * @param reliability
 	 *            the reliability of the message identifiers.
-	 * @param packetId
+	 * @param packetIds
 	 *            the message identifiers to send.
 	 * @return the generated encapsulated packets. These are normally not
 	 *         important, however they can be used for packet acknowledged and

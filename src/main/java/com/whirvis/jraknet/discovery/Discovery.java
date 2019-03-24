@@ -103,9 +103,10 @@ public final class Discovery {
 	}
 
 	/**
-	 * Returns the timestamp of the discovery system. The timestamp of the
-	 * discovery system is how long in milliseconds has passed since it has been
-	 * created.
+	 * Returns the timestamp of the discovery system.
+	 * <p>
+	 * The timestamp of the discovery system is how long in milliseconds has
+	 * passed since it has been created.
 	 * 
 	 * @return the timestamp of the discovery system.
 	 */
@@ -123,8 +124,9 @@ public final class Discovery {
 	}
 
 	/**
-	 * Returns the discovery mode. The discovery mode determines how server
-	 * server discovery is handled.
+	 * Returns the discovery mode.
+	 * <p>
+	 * The discovery mode determines how server server discovery is handled.
 	 * 
 	 * @return the discovery mode.
 	 */
@@ -136,13 +138,14 @@ public final class Discovery {
 	}
 
 	/**
-	 * Sets the discovery mode. If disabling the discovery system, all of the
-	 * currently discovered servers will be treated as if they had been
-	 * forgotten. If discovery is enabled once again later on, all servers
-	 * listed for discovery via {@link #addPort(int)} and
-	 * {@link #addServer(InetSocketAddress)} will be rediscovered. To stop this
-	 * from occurring, they can be removed via {@link #removePort(int)} and
-	 * {@link #removeServer(DiscoveredServer)}
+	 * Sets the discovery mode.
+	 * <p>
+	 * If disabling the discovery system, all of the currently discovered
+	 * servers will be treated as if they had been forgotten. If discovery is
+	 * enabled once again later on, all servers listed for discovery via
+	 * {@link #addPort(int)} and {@link #addServer(InetSocketAddress)} will be
+	 * rediscovered. To stop this from occurring, they can be removed via
+	 * {@link #removePort(int)} and {@link #removeServer(DiscoveredServer)}
 	 * 
 	 * @param mode
 	 *            the new discovery mode. A <code>null</code> value will have
@@ -165,9 +168,10 @@ public final class Discovery {
 	}
 
 	/**
-	 * Adds a {@link DiscoveryListener} to the discovery system. Listeners are
-	 * used to listen for events that occur relating to the discovery system
-	 * such as discovering servers, forgetting servers, etc.
+	 * Adds a {@link DiscoveryListener} to the discovery system.
+	 * <p>
+	 * Listeners are used to listen for events that occur relating to the
+	 * discovery system such as discovering servers, forgetting servers, etc.
 	 * 
 	 * @param listener
 	 *            the listener to add.
@@ -212,7 +216,50 @@ public final class Discovery {
 		if (event == null) {
 			throw new NullPointerException("Event cannot be null");
 		}
-		LISTENERS.forEach(listener -> Scheduler.scheduleSync(listener, event));
+		for (DiscoveryListener listener : LISTENERS) {
+			Scheduler.scheduleSync(listener, event);
+		}
+	}
+
+	/**
+	 * Returns whether or not the specified ports are being broadcasted to.
+	 * 
+	 * @param ports
+	 *            the ports.
+	 * @return <code>true</code> if all of the <code>ports</code> are being
+	 *         broadcasted to, <code>false</code> otherwise.
+	 * @throws NullPointerException
+	 *             if the <code>ports</code> are <code>null</code>.
+	 */
+	public static boolean hasPorts(int... ports) throws NullPointerException {
+		if (ports == null) {
+			throw new NullPointerException("Ports cannot be null");
+		} else if (ports.length <= 0) {
+			return false; // It is impossible to broadcast to zero ports
+		}
+		for (int i = 0; i < ports.length; i++) {
+			for (InetSocketAddress discoveryAddress : DISCOVERY_ADDRESSES.keySet()) {
+				if (discoveryAddress.getAddress().getHostAddress().equals(BROADCAST_ADDRESS)) {
+					if (discoveryAddress.getPort() == ports[i]) {
+						continue;
+					}
+				}
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Returns whether or not the specified port is being broadcasted to.
+	 * 
+	 * @param port
+	 *            the port.
+	 * @return <code>true</code> if the <code>port</code> is being broadcasted
+	 *         to, <code>false</code> otherwise.
+	 */
+	public static boolean hasPort(int port) {
+		return hasPorts(port);
 	}
 
 	/**
@@ -221,17 +268,25 @@ public final class Discovery {
 	 * @return the ports that are being broadcasted to on the local network.
 	 */
 	public static int[] getPorts() {
-		// TODO
-
-		return DISCOVERY_ADDRESSES.keySet().stream()
-				.filter(address -> DISCOVERY_ADDRESSES.get(address).booleanValue() == LOCAL_SERVER)
-				.mapToInt(InetSocketAddress::getPort).toArray();
+		ArrayList<Integer> portsBoxed = new ArrayList<Integer>();
+		for (InetSocketAddress address : DISCOVERY_ADDRESSES.keySet()) {
+			if (DISCOVERY_ADDRESSES.get(address).booleanValue() == LOCAL_SERVER) {
+				portsBoxed.add(address.getPort());
+			}
+		}
+		int[] ports = new int[portsBoxed.size()];
+		for (int i = 0; i < ports.length; i++) {
+			ports[i] = portsBoxed.get(i);
+		}
+		return ports;
 	}
 
 	/**
-	 * Starts broadcasting to the ports on the local network for server
-	 * discovery. It is also possible to discovery only certain servers on the
-	 * local network via {@link #addServer(InetSocketAddress)} if desired.
+	 * Starts broadcasting to the specified ports on the local network for
+	 * server discovery.
+	 * <p>
+	 * It is also possible to discovery only certain servers on the local
+	 * network via {@link #addServer(InetSocketAddress)} if desired.
 	 * 
 	 * @param ports
 	 *            the ports to start broadcasting to.
@@ -255,9 +310,11 @@ public final class Discovery {
 	}
 
 	/**
-	 * Starts broadcasting to the port on the local network for server
-	 * discovery. It is also possible to discovery only certain servers on the
-	 * local network via {@link #addServer(InetSocketAddress)} if desired.
+	 * Starts broadcasting to the specified port on the local network for server
+	 * discovery.
+	 * <p>
+	 * It is also possible to discovery only certain servers on the local
+	 * network via {@link #addServer(InetSocketAddress)} if desired.
 	 * 
 	 * @param port
 	 *            the port to start broadcasting to.
@@ -270,7 +327,7 @@ public final class Discovery {
 	}
 
 	/**
-	 * Stops broadcasting to the ports on the local network.
+	 * Stops broadcasting to the specified ports on the local network.
 	 * 
 	 * @param ports
 	 *            the ports to stop broadcasting to.
@@ -297,7 +354,7 @@ public final class Discovery {
 	}
 
 	/**
-	 * Stops broadcasting to the port on the local network.
+	 * Stops broadcasting to the specified port on the local network.
 	 * 
 	 * @param port
 	 *            the port to stop broadcasting to.
@@ -306,11 +363,11 @@ public final class Discovery {
 		removePorts(port);
 	}
 
-	// TODO: SET PORTS FUNCTION
-
 	/**
-	 * Stops broadcasting to all ports. To stop broadcasting to a specific port,
-	 * use the {@link #removePort(int)} method.
+	 * Stops broadcasting to all ports.
+	 * <p>
+	 * To stop broadcasting to a specific port, use the {@link #removePort(int)}
+	 * method.
 	 */
 	public static void clearPorts() {
 		if (DISCOVERY_ADDRESSES.containsValue(LOCAL_SERVER)) {
@@ -328,6 +385,90 @@ public final class Discovery {
 			}
 			LOG.debug("Cleared discovery ports");
 		}
+	}
+
+	/**
+	 * Sets the ports that will be broadcasted to on the local network.
+	 * <p>
+	 * This method is simply a shorthand for {@link #addPort(int)} and
+	 * {@link #removePort(int)}. The way this method works is by adding all
+	 * ports in the <code>ports</code> parameter that are not already up for
+	 * discovery, and removing all ports that are up for discovery but not found
+	 * in the <code>ports</code> parameter. If the <code>ports</code> parameter
+	 * is empty, the {@link #clearPorts()} method will be called instead.
+	 * 
+	 * @param ports
+	 *            the ports to broadcast to.
+	 * @throws NullPointerException
+	 *             if <code>ports</code> are <code>null</code>.
+	 */
+	public static void setPorts(int... ports) throws NullPointerException {
+		if (ports == null) {
+			throw new NullPointerException("Ports cannot be null");
+		} else if (ports.length > 0) {
+			// Convert to list for use of contains() method
+			ArrayList<Integer> portsList = new ArrayList<Integer>();
+			for (int port : ports) {
+				if (!portsList.contains(port)) {
+					portsList.add(port);
+				}
+			}
+
+			// Add ports in the list that are not up for discovery
+			for (Integer port : portsList) {
+				if (!hasPort(port.intValue())) {
+					addPort(port.intValue());
+				}
+			}
+
+			// Remove ports that are up for discovery but not in the list
+			for (int port : getPorts()) {
+				if (!portsList.contains(port)) {
+					removePort(port);
+				}
+			}
+		} else {
+			clearPorts();
+		}
+	}
+
+	/**
+	 * Returns whether or not the specified servers are being broadcasted to.
+	 * 
+	 * @param servers
+	 *            the servers
+	 * @return <code>true</code> if all of the <code>servers</code> are being
+	 *         broadcasted to, <code>false</code> otherwise.
+	 * @throws NullPointerException
+	 *             if the <code>servers</code> are <code>null</code>.
+	 */
+	public static boolean hasServers(InetSocketAddress... servers) throws NullPointerException {
+		if (servers == null) {
+			throw new NullPointerException("Servers cannot be null");
+		} else if (servers.length <= 0) {
+			return false; // It is impossible to broadcast to zero servers
+		}
+		for (int i = 0; i < servers.length; i++) {
+			for (InetSocketAddress discoveryAddress : DISCOVERY_ADDRESSES.keySet()) {
+				if (discoveryAddress.getAddress().equals(servers[i])) {
+					continue;
+				}
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Returns whether or not the specified server is being broadcasted to.
+	 * 
+	 * @param server
+	 *            the server.
+	 * @return <code>true</code> if the <code>server</code> is being broadcasted
+	 *         to, <code>false</code> otherwise.
+	 */
+	public static boolean hasServer(InetSocketAddress server) {
+		return hasServers(server);
 	}
 
 	/**
@@ -355,8 +496,8 @@ public final class Discovery {
 	 * @param address
 	 *            the server address.
 	 * @throws NullPointerException
-	 *             if the <code>address</code> or the IP address of the <code>address</code> are
-	 *             <code>null</code>.
+	 *             if the <code>address</code> or the IP address of the
+	 *             <code>address</code> are <code>null</code>.
 	 * @throws IllegalArgumentException
 	 *             if the IP address of <code>address</code> is the broadcast
 	 *             address of {@value #BROADCAST_ADDRESS}.
@@ -380,10 +521,11 @@ public final class Discovery {
 	}
 
 	/**
-	 * Starts broadcasting to the server address for server discovery. This
-	 * allows for the discovery of servers on external networks. If discovering
-	 * on the local network, it is possible to discover all servers running on a
-	 * specified port via the {@link #addPort(int)} method.
+	 * Starts broadcasting to the specified server address for server discovery.
+	 * <p>
+	 * This allows for the discovery of servers on external networks. If
+	 * discovering on the local network, it is possible to discover all servers
+	 * running on a specified port via the {@link #addPort(int)} method.
 	 * 
 	 * @param address
 	 *            the server IP address.
@@ -406,10 +548,11 @@ public final class Discovery {
 	}
 
 	/**
-	 * Starts broadcasting to the server address for server discovery. This
-	 * allows for the discovery of servers on external networks. If discovering
-	 * on the local network, it is possible to discover all servers running on a
-	 * specified port via the {@link #addPort(int)} method.
+	 * Starts broadcasting to the specified server address for server discovery.
+	 * <p>
+	 * This allows for the discovery of servers on external networks. If
+	 * discovering on the local network, it is possible to discover all servers
+	 * running on a specified port via the {@link #addPort(int)} method.
 	 * 
 	 * @param host
 	 *            the server IP address.
@@ -436,7 +579,7 @@ public final class Discovery {
 	}
 
 	/**
-	 * Stops broadcasting to the server address.
+	 * Stops broadcasting to the specified server address.
 	 * 
 	 * @param address
 	 *            the server address.
@@ -462,7 +605,7 @@ public final class Discovery {
 	}
 
 	/**
-	 * Stops broadcasting to the server address.
+	 * Stops broadcasting to the specified server address.
 	 * 
 	 * @param address
 	 *            the server IP address.
@@ -476,7 +619,7 @@ public final class Discovery {
 	}
 
 	/**
-	 * Stops broadcasting to the server address.
+	 * Stops broadcasting to the specified server address.
 	 * 
 	 * @param host
 	 *            the server IP address.
@@ -493,7 +636,7 @@ public final class Discovery {
 	}
 
 	/**
-	 * Stops broadcasting to the discovered server.
+	 * Stops broadcasting to the specified discovered server.
 	 * 
 	 * @param server
 	 *            the discovered server.
@@ -507,7 +650,52 @@ public final class Discovery {
 		removeServer(server.getAddress());
 	}
 
-	// TODO: SET SERVERS FUNCTION
+	/**
+	 * Sets the servers that will be broadcasted to.
+	 * <p>
+	 * This method is simply a shorthand for
+	 * {@link #addServer(InetSocketAddress)} and
+	 * {@link #removeServer(InetSocketAddress)}. The way this method works is by
+	 * adding all ports in the <code>servers</code> parameter that are not
+	 * already up for discovery, and removing all ports that are up for
+	 * discovery but not found in the <code>servers</code> parameter. If the
+	 * <code>ports</code> parameter is empty, the {@link #clearServers()} method
+	 * will be called instead.
+	 * 
+	 * @param servers
+	 *            the servers to broadcast to.
+	 * @throws NullPointerException
+	 *             if <code>servers</code> are <code>null</code>.
+	 */
+	public static void setServers(InetSocketAddress... servers) throws NullPointerException {
+		if (servers == null) {
+			throw new NullPointerException("Servers cannot be null");
+		} else if (servers.length > 0) {
+			// Convert to list for use of contains() method
+			ArrayList<InetSocketAddress> serversList = new ArrayList<InetSocketAddress>();
+			for (InetSocketAddress server : servers) {
+				if (!serversList.contains(server)) {
+					serversList.add(server);
+				}
+			}
+
+			// Add servers in the list that are not up for discovery
+			for (InetSocketAddress server : serversList) {
+				if (!hasServer(server)) {
+					addServer(server);
+				}
+			}
+
+			// Remove servers that are up for discovery but not in the list
+			for (InetSocketAddress server : getServers()) {
+				if (!serversList.contains(server)) {
+					removeServer(server);
+				}
+			}
+		} else {
+			clearServers();
+		}
+	}
 
 	/**
 	 * Stops broadcasting to all server addresses. To stop broadcasting to a

@@ -195,6 +195,8 @@ public interface RakNetClientListener {
 	 * 
 	 * @param client
 	 *            the client.
+	 * @param peer
+	 *            the peer that caused the exception to be thrown.
 	 * @param throwable
 	 *            the <code>Throwable</code> that was caught.
 	 */
