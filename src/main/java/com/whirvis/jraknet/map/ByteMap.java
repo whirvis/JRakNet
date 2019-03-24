@@ -38,8 +38,9 @@ import java.util.Map;
  * worry about boxing them.
  *
  * @author Trent Summerlin
+ * @since JRakNet v2.6.0
  */
-public class ByteMap<T> extends HashMap<Byte, T> implements Map<Byte, T>, DynamicKey<Byte> {
+public final class ByteMap<T> extends HashMap<Byte, T> implements Map<Byte, T>, DynamicKey<Byte> {
 
 	private static final long serialVersionUID = 4324132003573381634L;
 
@@ -130,7 +131,7 @@ public class ByteMap<T> extends HashMap<Byte, T> implements Map<Byte, T>, Dynami
 	public void renameKey(Byte oldKey, Byte newKey) throws NullPointerException {
 		T storedObject = this.remove(oldKey.byteValue());
 		if (storedObject == null) {
-			throw new NullPointerException();
+			throw new NullPointerException("No value associated with old key");
 		}
 		this.put(newKey.byteValue(), storedObject);
 	}

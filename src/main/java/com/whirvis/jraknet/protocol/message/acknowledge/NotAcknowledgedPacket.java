@@ -41,10 +41,10 @@ import com.whirvis.jraknet.Packet;
  * crucial during the login process.
  * 
  * @author Trent Summerlin
- * @since JRakNet v1.0.0
+ * @since JRakNet v2.11.0
  * @see Record
  */
-public class NotAcknowledgedPacket extends AcknowledgedPacket {
+public final class NotAcknowledgedPacket extends AcknowledgedPacket {
 
 	/**
 	 * Creates a <code>NACK</code> packet to be encoded.

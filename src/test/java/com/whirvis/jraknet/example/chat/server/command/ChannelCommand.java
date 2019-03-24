@@ -44,7 +44,7 @@ import com.whirvis.jraknet.example.chat.server.ChatServer;
 public class ChannelCommand extends Command {
 
 	private static final Logger LOG = LogManager.getLogger(ChannelCommand.class);
-	
+
 	private final ChatServer server;
 
 	public ChannelCommand(ChatServer server) {

@@ -49,7 +49,7 @@ import io.netty.channel.socket.DatagramPacket;
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
  */
-public class RakNetClientHandler extends ChannelInboundHandlerAdapter {
+public final class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 
 	private final Logger log;
 	private final RakNetClient client;

@@ -33,12 +33,12 @@ package com.whirvis.jraknet.discovery;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
-import java.util.function.IntFunction;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -59,7 +59,7 @@ import com.whirvis.jraknet.scheduler.Scheduler;
  * @see #setDiscoveryMode(DiscoveryMode)
  * @see #addListener(DiscoveryListener)
  */
-public class Discovery {
+public final class Discovery {
 
 	/**
 	 * The address to broadcast to in order to discover servers on the local
@@ -206,7 +206,7 @@ public class Discovery {
 	 *            the event to call.
 	 * @throws NullPointerException
 	 *             if the <code>event</code> is <code>null</code>.
-	 * @see com.whirvis.jraknet.discovery.DiscoveryListener DiscoveryListener
+	 * @see DiscoveryListener
 	 */
 	protected static void callEvent(Consumer<? super DiscoveryListener> event) throws NullPointerException {
 		if (event == null) {
@@ -222,7 +222,7 @@ public class Discovery {
 	 */
 	public static int[] getPorts() {
 		// TODO
-		
+
 		return DISCOVERY_ADDRESSES.keySet().stream()
 				.filter(address -> DISCOVERY_ADDRESSES.get(address).booleanValue() == LOCAL_SERVER)
 				.mapToInt(InetSocketAddress::getPort).toArray();
@@ -236,13 +236,12 @@ public class Discovery {
 	 * @param ports
 	 *            the ports to start broadcasting to.
 	 * @throws IllegalArgumentException
-	 *             if one of the ports is not within the range of
-	 *             <code>0-65535</code>.
+	 *             if one of the ports is not in between <code>0-65535</code>.
 	 */
 	public static synchronized void addPorts(int... ports) throws IllegalArgumentException {
 		for (int port : ports) {
 			if (port < 0x0000 || port > 0xFFFF) {
-				throw new IllegalArgumentException("Invalid port range");
+				throw new IllegalArgumentException("Port must be in between 0-65535");
 			}
 			InetSocketAddress discoveryAddress = new InetSocketAddress(BROADCAST_ADDRESS, port);
 			if (DISCOVERY_ADDRESSES.put(discoveryAddress, LOCAL_SERVER) == null) {
@@ -332,31 +331,35 @@ public class Discovery {
 	}
 
 	/**
-	 * Returns the servers that are being broadcasted to.
+	 * Returns the external servers that are being broadcasted to.
 	 * 
-	 * @return the servers that are being broadcasted to.
+	 * @return the external servers that are being broadcasted to.
 	 */
 	public static InetSocketAddress[] getServers() {
-		// TODO
-		return DISCOVERY_ADDRESSES.keySet().stream()
-				.filter(address -> DISCOVERY_ADDRESSES.get(address).booleanValue() == EXTERNAL_SERVER)
-				.toArray(INETSOCKETADDRESS_FUNCTION);
+		ArrayList<InetSocketAddress> external = new ArrayList<InetSocketAddress>();
+		for (InetSocketAddress address : DISCOVERY_ADDRESSES.keySet()) {
+			if (DISCOVERY_ADDRESSES.get(address).booleanValue() == EXTERNAL_SERVER) {
+				external.add(address);
+			}
+		}
+		return external.toArray(new InetSocketAddress[external.size()]);
 	}
 
 	/**
-	 * Starts broadcasting to the server address for server discovery. This
-	 * allows for the discovery of servers on external networks. If discovering
-	 * on the local network, it is possible to discover all servers running on a
-	 * specified port via the {@link #addPort(int)} method.
+	 * Starts broadcasting to the specified server address for server discovery.
+	 * <p>
+	 * This allows for the discovery of servers on external networks. If
+	 * discovering servers on the local network, it is possible to discover all
+	 * servers running on a specified port via the {@link #addPort(int)} method.
 	 * 
 	 * @param address
 	 *            the server address.
 	 * @throws NullPointerException
-	 *             if the <code>address</code> is <code>null</code>.
+	 *             if the <code>address</code> or the IP address of the <code>address</code> are
+	 *             <code>null</code>.
 	 * @throws IllegalArgumentException
-	 *             if the IP address of <code>address</code> is
-	 *             <code>null</code> or the address is the broadcast address of
-	 *             {@value #BROADCAST_ADDRESS}.
+	 *             if the IP address of <code>address</code> is the broadcast
+	 *             address of {@value #BROADCAST_ADDRESS}.
 	 */
 	public static synchronized void addServer(InetSocketAddress address)
 			throws NullPointerException, IllegalArgumentException {
@@ -389,7 +392,7 @@ public class Discovery {
 	 * @throws NullPointerException
 	 *             if the <code>address</code> is <code>null</code>.
 	 * @throws IllegalArgumentException
-	 *             if the <code>port</code> is not within the range of
+	 *             if the <code>port</code> is not in between
 	 *             <code>0-65535</code> or the <code>address</code> is the
 	 *             broadcast address of {@value #BROADCAST_ADDRESS}.
 	 */
@@ -397,7 +400,7 @@ public class Discovery {
 		if (address == null) {
 			throw new NullPointerException("IP address cannot be null");
 		} else if (port < 0x0000 || port > 0xFFFF) {
-			throw new IllegalArgumentException("Invalid port range");
+			throw new IllegalArgumentException("Port must be in between 0-65535");
 		}
 		addServer(new InetSocketAddress(address, port));
 	}
@@ -415,7 +418,7 @@ public class Discovery {
 	 * @throws NullPointerException
 	 *             if the <code>host</code> is <code>null</code>.
 	 * @throws IllegalArgumentException
-	 *             if the <code>port</code> is not within the range of
+	 *             if the <code>port</code> is not in between
 	 *             <code>0-65535</code> or the <code>host</code> is the
 	 *             broadcast address of {@value #BROADCAST_ADDRESS}.
 	 * @throws UnknownHostException
@@ -427,7 +430,7 @@ public class Discovery {
 		if (host == null) {
 			throw new NullPointerException("IP address cannot be null");
 		} else if (port < 0x0000 || port > 0xFFFF) {
-			throw new IllegalArgumentException("Invalid port range");
+			throw new IllegalArgumentException("Port must be in between 0-65535");
 		}
 		addServer(InetAddress.getByName(host), port);
 	}
@@ -475,7 +478,7 @@ public class Discovery {
 	/**
 	 * Stops broadcasting to the server address.
 	 * 
-	 * @param address
+	 * @param host
 	 *            the server IP address.
 	 * @param port
 	 *            the server port.
@@ -483,9 +486,9 @@ public class Discovery {
 	 *             if no IP address for the host could be found, or if a
 	 *             scope_id was specified for a global IPv6 address.
 	 */
-	public static void removeServer(String address, int port) throws UnknownHostException {
-		if (address != null) {
-			removeServer(InetAddress.getByName(address), port);
+	public static void removeServer(String host, int port) throws UnknownHostException {
+		if (host != null) {
+			removeServer(InetAddress.getByName(host), port);
 		}
 	}
 
@@ -546,8 +549,13 @@ public class Discovery {
 	 * @return the locally discovered servers.
 	 */
 	public static DiscoveredServer[] getLocal() {
-		// TODO: Do not use streams?
-		return DISCOVERED.values().stream().filter(server -> !server.isExternal()).toArray(DISCOVERED_SERVER_FUNCTION);
+		ArrayList<DiscoveredServer> local = new ArrayList<DiscoveredServer>();
+		for (DiscoveredServer server : DISCOVERED.values()) {
+			if (!server.isExternal()) {
+				local.add(server);
+			}
+		}
+		return local.toArray(new DiscoveredServer[local.size()]);
 	}
 
 	/**
@@ -556,8 +564,13 @@ public class Discovery {
 	 * @return the externally discovered servers.
 	 */
 	public static DiscoveredServer[] getExternal() {
-		// TODO: Do not use streams?
-		return DISCOVERED.values().stream().filter(server -> server.isExternal()).toArray(DISCOVERED_SERVER_FUNCTION);
+		ArrayList<DiscoveredServer> external = new ArrayList<DiscoveredServer>();
+		for (DiscoveredServer server : DISCOVERED.values()) {
+			if (server.isExternal()) {
+				external.add(server);
+			}
+		}
+		return external.toArray(new DiscoveredServer[external.size()]);
 	}
 
 	/**

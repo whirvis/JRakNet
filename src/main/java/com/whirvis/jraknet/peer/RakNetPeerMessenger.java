@@ -52,7 +52,7 @@ import io.netty.buffer.ByteBuf;
  * it a message.
  * 
  * @author Trent Summerlin
- * @since JRakNet v1.0.0
+ * @since JRakNet v2.11.0
  */
 public interface RakNetPeerMessenger {
 
@@ -94,7 +94,6 @@ public interface RakNetPeerMessenger {
 	 *         not acknowledged events if the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * 
 	 * @throws NullPointerException
 	 *             if the <code>reliability</code> or <code>packets</code> are
 	 *             <code>null</code>.

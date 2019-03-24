@@ -33,6 +33,7 @@ package com.whirvis.jraknet.protocol.message.acknowledge;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import com.whirvis.jraknet.map.IntMap;
 
@@ -44,7 +45,7 @@ import com.whirvis.jraknet.map.IntMap;
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
  */
-public class Record {
+public final class Record {
 
 	/**
 	 * The record is not ranged.
@@ -206,7 +207,6 @@ public class Record {
 	 *            the starting index.
 	 * @param endIndex
 	 *            the ending index.
-	 * 
 	 * @throws IllegalArgumentException
 	 *             if the <code>index</code> is less than <code>0</code>.
 	 */
@@ -216,6 +216,7 @@ public class Record {
 		}
 		this.index = index;
 		this.endIndex = endIndex;
+		this.updateSequenceIds();
 	}
 
 	/**
@@ -334,6 +335,22 @@ public class Record {
 	 */
 	public int[] getSequenceIds() {
 		return this.sequenceIds;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(index, endIndex);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == this) {
+			return true;
+		} else if (!(o instanceof Record)) {
+			return false;
+		}
+		Record r = (Record) o;
+		return Objects.equals(index, r.index) && Objects.equals(endIndex, r.endIndex);
 	}
 
 	@Override

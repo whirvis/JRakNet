@@ -36,7 +36,7 @@ package com.whirvis.jraknet.peer;
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
  */
-public class SplitQueueOverflowException extends RuntimeException {
+public final class SplitQueueOverflowException extends RuntimeException {
 
 	private static final long serialVersionUID = 969985052588965615L;
 

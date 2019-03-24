@@ -80,7 +80,8 @@ public interface RakNetClientListener {
 	 * @param client
 	 *            the client.
 	 * @param peer
-	 *            the server that the client disconnected from.
+	 *            the server that the client disconnected from,
+	 *            <code>null</code> if login had not yet finished.
 	 * @param reason
 	 *            the reason for disconnection.
 	 */
@@ -104,23 +105,22 @@ public interface RakNetClientListener {
 	}
 
 	/**
-	 * Called when a message is not acknowledged by the server.
+	 * Called when a message is lost by the server.
 	 * 
 	 * @param client
 	 *            the client.
 	 * @param peer
-	 *            the server that did not acknowledged the packet.
+	 *            the server that lost the packet.
 	 * @param record
-	 *            the not acknowledged record.
+	 *            the lost record.
 	 * @param packet
-	 *            the not acknowledged packet.
+	 *            the lost packet.
 	 */
-	public default void onNotAcknowledge(RakNetClient client, RakNetServerPeer peer, Record record,
-			EncapsulatedPacket packet) {
+	public default void onLoss(RakNetClient client, RakNetServerPeer peer, Record record, EncapsulatedPacket packet) {
 	}
 
 	/**
-	 * Called when a packet has been received from the server and is ready to be
+	 * Called when a packet from the server has been received and is ready to be
 	 * handled.
 	 * 
 	 * @param client
@@ -137,7 +137,9 @@ public interface RakNetClientListener {
 
 	/**
 	 * Called when a packet with an ID below <code>ID_USER_PACKET_ENUM</code>
-	 * cannot be handled by the peer because it is not programmed to handle it.
+	 * cannot be handled by the {@link RakNetServerPeer} because it is not
+	 * programmed to handle it.
+	 * <p>
 	 * This function can be used to add missing features from the regular RakNet
 	 * protocol that are absent in JRakNet if needed.
 	 * 
@@ -156,9 +158,11 @@ public interface RakNetClientListener {
 
 	/**
 	 * Called when the handler receives a packet after the server has already
-	 * handled it. This method is useful for handling packets outside of the
-	 * RakNet protocol. All packets received here have already been handled by
-	 * the client.
+	 * handled it.
+	 * <p>
+	 * This method is useful for handling packets outside of the RakNet
+	 * protocol. All packets received here have already been handled by the
+	 * client.
 	 * 
 	 * @param client
 	 *            the client.
@@ -171,9 +175,10 @@ public interface RakNetClientListener {
 	}
 
 	/**
-	 * Called when a handler exception has occurred. These normally do not
-	 * matter as long as it does not come from the address of the server the
-	 * client is connecting to or is connected to.
+	 * Called when a handler exception has occurred.
+	 * <p>
+	 * These normally do not matter as long as it does not come from the address
+	 * of the server the client is connecting to or is connected to.
 	 * 
 	 * @param client
 	 *            the client.

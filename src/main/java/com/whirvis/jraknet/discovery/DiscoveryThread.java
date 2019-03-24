@@ -92,8 +92,16 @@ public final class DiscoveryThread extends Thread {
 		this.setName(log.getName());
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @throws IllegalStateException
+	 *             if the thread is still alive, yet the reference in the
+	 *             discovery thread is not the same as the reference to this
+	 *             thread.
+	 */
 	@Override
-	public void run() {
+	public void run() throws IllegalStateException {
 		log.debug("Started discovery thread");
 		while (!Discovery.LISTENERS.isEmpty() && !Discovery.DISCOVERY_ADDRESSES.isEmpty()
 				&& Discovery.discoveryMode != DiscoveryMode.DISABLED && !this.isInterrupted()) {

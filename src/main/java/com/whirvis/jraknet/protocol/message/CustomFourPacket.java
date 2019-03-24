@@ -6,7 +6,7 @@ package com.whirvis.jraknet.protocol.message;
  * @author Trent Summerlin
  * @since JRakNet v2.11.0
  */
-public class CustomFourPacket extends CustomPacket {
+public final class CustomFourPacket extends CustomPacket {
 
 	/**
 	 * Creates a <code>CUSTOM_4</code> packet to be encoded.

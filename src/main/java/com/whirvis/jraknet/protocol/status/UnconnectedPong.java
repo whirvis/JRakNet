@@ -48,7 +48,7 @@ import com.whirvis.jraknet.protocol.Failable;
  * @author Trent Summerlin
  * @since JRakNet 1.0.0
  */
-public class UnconnectedPong extends RakNetPacket implements Failable {
+public final class UnconnectedPong extends RakNetPacket implements Failable {
 
 	/**
 	 * The timestamp sent in the ping packet.

@@ -57,12 +57,12 @@ import io.netty.channel.socket.DatagramPacket;
 public class RakNetPacket extends Packet {
 
 	/**
-	 * The name of the encode method.
+	 * The name of the <code>encode()</code> method.
 	 */
 	private static final String ENCODE_METHOD_NAME = "encode";
 
 	/**
-	 * The name of the decode method.
+	 * The name of the <code>decode()</code> method.
 	 */
 	private static final String DECODE_METHOD_NAME = "decode";
 
@@ -171,14 +171,24 @@ public class RakNetPacket extends Packet {
 
 	/**
 	 * The ID of the <code>SND_RECEIPT_ACKED</code> packet.
+	 * <p>
+	 * In the original implementation of RakNet, when a packet is acknowledged
+	 * by a peer this packet is sent back through loopback to the original
+	 * sender of the packet with the acknoweldgeable reliability. Since this
+	 * implementation has listeners will special built in acknowledgement and
+	 * loss methods, this packet has no need for implementation.
 	 */
-	// TODO: Implement this packet
 	public static final short ID_SND_RECEIPT_ACKED = 0x0E;
 
 	/**
 	 * The ID of the <code>SND_RECEIPT_LOSS</code> packet.
+	 * <p>
+	 * In the original implementation of RakNet, when a packet is acknowledged
+	 * by a peer this packet is sent back through loopback to the original
+	 * sender of the packet with the acknoweldgeable reliability. Since this
+	 * implementation has listeners will special built in acknowledgement and
+	 * loss methods, this packet has no need for implementation.
 	 */
-	// TODO: Implement this packet
 	public static final short ID_SND_RECEIPT_LOSS = 0x0F;
 
 	/**
@@ -909,7 +919,7 @@ public class RakNetPacket extends Packet {
 	 */
 	private static void mapNameIds() {
 		if (mappedNameIds == false) {
-			Logger log = LogManager.getLogger(RakNetPacket.class);
+			Logger log = LogManager.getLogger("jraknet-raknet-packet");
 			for (Field field : RakNet.class.getFields()) {
 				if (field.getType().equals(short.class)) {
 					try {
@@ -1011,6 +1021,28 @@ public class RakNetPacket extends Packet {
 		return PACKET_IDS.get(name);
 	}
 
+	/**
+	 * Returns whether or not a method with the specified name has been
+	 * overriden the method in the original specified class by the specified
+	 * class instance.
+	 * 
+	 * @param instance
+	 *            the class instance.
+	 * @param clazz
+	 *            the original class.
+	 * @param methodName
+	 *            the name of the method.
+	 * @return <code>true</code> if the method has been overriden,
+	 *         <code>false</code> otherwise.
+	 */
+	private static boolean isMethodOverriden(Class<?> instance, Class<?> clazz, String methodName) {
+		try {
+			return !clazz.getMethod(ENCODE_METHOD_NAME).getDeclaringClass().equals(clazz);
+		} catch (NoSuchMethodException | SecurityException e) {
+			return false;
+		}
+	}
+
 	private short id;
 	private final boolean supportsEncoding;
 	private final boolean supportsDecoding;
@@ -1029,14 +1061,8 @@ public class RakNetPacket extends Packet {
 			throw new IllegalArgumentException("ID must be in between 0 and 255");
 		}
 		this.writeUnsignedByte(this.id = (short) id);
-		try {
-			this.supportsEncoding = !this.getClass().getMethod(ENCODE_METHOD_NAME).getDeclaringClass()
-					.equals(RakNetPacket.class);
-			this.supportsDecoding = !this.getClass().getMethod(DECODE_METHOD_NAME).getDeclaringClass()
-					.equals(RakNetPacket.class);
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new RuntimeException(e);
-		}
+		this.supportsEncoding = isMethodOverriden(this.getClass(), RakNetPacket.class, ENCODE_METHOD_NAME);
+		this.supportsDecoding = isMethodOverriden(this.getClass(), RakNetPacket.class, DECODE_METHOD_NAME);
 	}
 
 	/**
@@ -1046,22 +1072,17 @@ public class RakNetPacket extends Packet {
 	 *            the buffer to read from and write to. The buffer must have at
 	 *            least one byte to be read from for the ID.
 	 * @throws IllegalArgumentException
-	 *             if the buffer size is less than one.
+	 *             if the <code>buffer</code> has less than <code>1</code>
+	 *             readable <code>byte</code>.
 	 */
 	public RakNetPacket(ByteBuf buffer) throws IllegalArgumentException {
 		super(buffer);
-		if (this.remaining() < 1) { // TODO
-			throw new IllegalArgumentException("The buffer must have at least one byte to read the ID");
+		if (this.remaining() < 1) {
+			throw new IllegalArgumentException("Buffer must have at least one readable byte for the ID");
 		}
 		this.id = this.readUnsignedByte();
-		try {
-			this.supportsEncoding = !this.getClass().getMethod(ENCODE_METHOD_NAME).getDeclaringClass()
-					.equals(RakNetPacket.class);
-			this.supportsDecoding = !this.getClass().getMethod(DECODE_METHOD_NAME).getDeclaringClass()
-					.equals(RakNetPacket.class);
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new RuntimeException(e);
-		}
+		this.supportsEncoding = isMethodOverriden(this.getClass(), RakNetPacket.class, ENCODE_METHOD_NAME);
+		this.supportsDecoding = isMethodOverriden(this.getClass(), RakNetPacket.class, DECODE_METHOD_NAME);
 	}
 
 	/**
@@ -1071,8 +1092,8 @@ public class RakNetPacket extends Packet {
 	 *            the datagram packet to read from. The datagram must have at
 	 *            least one byte to be read from for the ID.
 	 * @throws IllegalArgumentException
-	 *             if the size of the buffer contained within the datagram is
-	 *             less than one.
+	 *             if the buffer contained within the datagram has less than
+	 *             <code>1</code> readable <code>byte</code>.
 	 * @see #RakNetPacket(ByteBuf)
 	 */
 	public RakNetPacket(DatagramPacket datagram) throws IllegalArgumentException {
@@ -1086,7 +1107,8 @@ public class RakNetPacket extends Packet {
 	 *            the byte array to read to read from. The byte array must have
 	 *            at least one byte to be read from for the ID.
 	 * @throws IllegalArgumentException
-	 *             if the length of the byte array is less than one.
+	 *             if the length of the <code>data</code> is less than
+	 *             <code>1</code>.
 	 * @see #RakNetPacket(ByteBuf)
 	 */
 	public RakNetPacket(byte[] data) throws IllegalArgumentException {
@@ -1099,14 +1121,12 @@ public class RakNetPacket extends Packet {
 	 * @param packet
 	 *            the packet to read from and write to. The packet must have at
 	 *            least one byte to be read from for the ID. If the packet is an
-	 *            instance of {@link com.whirvis.jraknet.RakNetPacket
-	 *            RakNetPacket}, it will be casted and have its ID retrieved via
-	 *            {@link #getId()}.
+	 *            instance of {@link RakNetPacket}, it will be casted and have
+	 *            its ID retrieved via {@link #getId()}.
 	 * @throws IllegalArgumentException
-	 *             if the packet size is less than one and is not an instance of
-	 *             {@link com.whirvis.jraknet.RakNetPacket RakNetPacket}.
-	 * @see com.whirvis.jraknet.Packet#Packet(Packet) Packet(Packet)
-	 * @see com.whirvis.jraknet.Packet Packet
+	 *             if the packet size has less than <code>1</code> readable
+	 *             <code>byte</code> and is not an instance of
+	 *             {@link RakNetPacket}.
 	 */
 	public RakNetPacket(Packet packet) throws IllegalArgumentException {
 		super(packet);
@@ -1118,14 +1138,8 @@ public class RakNetPacket extends Packet {
 			}
 			this.id = this.readUnsignedByte();
 		}
-		try {
-			this.supportsEncoding = !this.getClass().getMethod(ENCODE_METHOD_NAME).getDeclaringClass()
-					.equals(RakNetPacket.class);
-			this.supportsDecoding = !this.getClass().getMethod(DECODE_METHOD_NAME).getDeclaringClass()
-					.equals(RakNetPacket.class);
-		} catch (NoSuchMethodException | SecurityException e) {
-			throw new RuntimeException(e);
-		}
+		this.supportsEncoding = isMethodOverriden(this.getClass(), RakNetPacket.class, ENCODE_METHOD_NAME);
+		this.supportsDecoding = isMethodOverriden(this.getClass(), RakNetPacket.class, DECODE_METHOD_NAME);
 	}
 
 	/**
@@ -1153,8 +1167,8 @@ public class RakNetPacket extends Packet {
 	 * ConnectionType}.
 	 * <p>
 	 * This method will check to make sure if there is at least enough data to
-	 * read the the connection type magic before reading the data. This due to
-	 * the fact that this is meant to be used strictly at the end of packets
+	 * read the the connection type magic before reading the data. This is due
+	 * to the fact that this is meant to be used strictly at the end of packets
 	 * that can be used to signify the protocol implementation of the sender.
 	 * 
 	 * @return a {@link com.whirvis.jraknet.protocol.ConnectionType
@@ -1181,7 +1195,7 @@ public class RakNetPacket extends Packet {
 					String key = this.readString();
 					String value = this.readString();
 					if (metadata.containsKey(key)) {
-						throw new RakNetException("Duplicate key \"" + key + "\"");
+						throw new RakNetException("Duplicate metadata key \"" + key + "\"");
 					}
 					metadata.put(key, value);
 				}
@@ -1208,7 +1222,7 @@ public class RakNetPacket extends Packet {
 	 * @param connectionType
 	 *            the connection type, a <code>null</code> value will have
 	 *            {@link com.whirvis.jraknet.protocol.ConnectionType#JRAKNET
-	 *            JRAKNET} connection type be used.
+	 *            JRAKNET} connection type be used instead.
 	 * @return the packet.
 	 * @throws RakNetException
 	 *             if there are too many values in the metadata.
@@ -1236,16 +1250,23 @@ public class RakNetPacket extends Packet {
 	 * JRAKNET} connection type to the packet.
 	 * 
 	 * @return the packet.
-	 * @throws RakNetException
-	 *             if there are too many values in the metadata.
+	 * @throws RuntimeException
+	 *             if a <code>RakNetException</code> is caught despite the fact
+	 *             that this method should never throw an error in the first
+	 *             place.
 	 */
-	public final Packet writeConnectionType() throws RakNetException {
-		return this.writeConnectionType(null);
+	public final Packet writeConnectionType() throws RuntimeException {
+		try {
+			return this.writeConnectionType(null);
+		} catch (RakNetException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	/**
 	 * Returns whether or not encoding is supported. If encoding is not
-	 * supported, calling {@link #encode()} will yield an error.
+	 * supported, calling {@link #encode()} will yield an
+	 * <code>UnsupportedOperationException</code>.
 	 * 
 	 * @return <code>true</code> if encoding is supported, <code>false</code>
 	 *         otherwise.
@@ -1257,16 +1278,17 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Encodes the packet.
 	 * 
-	 * @throws RuntimeException
+	 * @throws UnsupportedOperationException
 	 *             if encoding the packet is not supported.
 	 */
-	public void encode() {
-		throw new RuntimeException("Encoding not supported");
+	public void encode() throws UnsupportedOperationException {
+		throw new UnsupportedOperationException("Encoding not supported");
 	}
 
 	/**
 	 * Returns whether or not decoding is supported. If decoding is not
-	 * supported, calling {@link #decode()} will yield an error.
+	 * supported, calling {@link #decode()} will yield an
+	 * <code>UnsupportedOperationException</code>.
 	 * 
 	 * @return <code>true</code> if decoding is supported, <code>false</code>
 	 *         otherwise.
@@ -1278,24 +1300,29 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Decodes the packet.
 	 * 
-	 * @throws RuntimeException
+	 * @throws UnsupportedOperationException
 	 *             if decoding the packet is not supported.
 	 */
-	public void decode() {
-		throw new RuntimeException("Decoding not supported");
+	public void decode() throws UnsupportedOperationException {
+		throw new UnsupportedOperationException("Decoding not supported");
 	}
 
 	/**
 	 * Updates the buffer.
 	 * 
 	 * @param buffer
-	 *            the new buffer.
+	 *            the buffer to read from and write to, a <code>null</code>
+	 *            value will have a new buffer be used instead.
 	 * @param updateId
 	 *            <code>true</code> if the ID should be updated,
 	 *            <code>false</code> otherwise.
+	 * @throws IndexOutOfBoundsException
+	 *             if <code>updateId</code> is <code>true</code> and the new
+	 *             buffer has less than <code>1</code> readable
+	 *             <code>byte</code>.
 	 * @see #setBuffer(ByteBuf)
 	 */
-	public final RakNetPacket setBuffer(ByteBuf buffer, boolean updateId) {
+	public final RakNetPacket setBuffer(ByteBuf buffer, boolean updateId) throws IndexOutOfBoundsException {
 		super.setBuffer(buffer);
 		if (updateId == true) {
 			this.id = this.readUnsignedByte();
@@ -1308,14 +1335,24 @@ public class RakNetPacket extends Packet {
 	 * 
 	 * @param datagram
 	 *            the {@link io.netty.channel.socket.DatagramPacket
-	 *            DatagramPacket} to read from.
+	 *            DatagramPacket} whose buffer to read from and write to.
 	 * @param updateId
 	 *            <code>true</code> if the ID should be updated,
 	 *            <code>false</code> otherwise.
 	 * @return the packet.
+	 * @throws NullPointerException
+	 *             if the <code>datagram</code> packet is <code>null</code>.
+	 * @throws IndexOutOfBoundsException
+	 *             if <code>updateId</code> is <code>true</code> and the new
+	 *             buffer has less than <code>1</code> readable
+	 *             <code>byte</code>.
 	 * @see #setBuffer(DatagramPacket)
 	 */
-	public final RakNetPacket setBuffer(DatagramPacket datagram, boolean updateId) {
+	public final RakNetPacket setBuffer(DatagramPacket datagram, boolean updateId)
+			throws NullPointerException, IndexOutOfBoundsException {
+		if (datagram == null) {
+			throw new NullPointerException("Datagram packet cannot be null");
+		}
 		return this.setBuffer(datagram.content(), updateId);
 	}
 
@@ -1327,9 +1364,16 @@ public class RakNetPacket extends Packet {
 	 * @param updateId
 	 *            <code>true</code> if the ID should be updated,
 	 *            <code>false</code> otherwise.
+	 * @throws NullPointerException
+	 *             if the <code>data</code> is <code>null</code>.
+	 * @throws IndexOutOfBoundsException
+	 *             if <code>updateId</code> is <code>true</code> and the new
+	 *             buffer has less than <code>1</code> readable
+	 *             <code>byte</code>.
 	 * @see #setBuffer(byte[])
 	 */
-	public final RakNetPacket setBuffer(byte[] data, boolean updateId) {
+	public final RakNetPacket setBuffer(byte[] data, boolean updateId)
+			throws NullPointerException, IndexOutOfBoundsException {
 		return this.setBuffer(Unpooled.copiedBuffer(data), updateId);
 	}
 
@@ -1341,9 +1385,14 @@ public class RakNetPacket extends Packet {
 	 * @param updateId
 	 *            <code>true</code> if the ID should be updated,
 	 *            <code>false</code> otherwise.
+	 * @throws IndexOutOfBoundsException
+	 *             if <code>updateId</code> is <code>true</code> and the new
+	 *             buffer has less than <code>1</code> readable
+	 *             <code>byte</code>.
 	 * @see #setBuffer(Packet)
 	 */
-	public final RakNetPacket setBuffer(Packet packet, boolean updateId) {
+	public final RakNetPacket setBuffer(Packet packet, boolean updateId)
+			throws NullPointerException, IndexOutOfBoundsException {
 		return this.setBuffer(packet.copy(), updateId);
 	}
 
@@ -1354,9 +1403,12 @@ public class RakNetPacket extends Packet {
 	 *            <code>true</code> if ID should be updated, <code>false</code>
 	 *            otherwise.
 	 * @return the packet.
+	 * @throws IndexOutOfBoundsException
+	 *             if <code>updateId</code> is <code>true</code> and the buffer
+	 *             has less than <code>1</code> readable <code>byte</code>.
 	 * @see #flip()
 	 */
-	public final RakNetPacket flip(boolean updateId) {
+	public final RakNetPacket flip(boolean updateId) throws IndexOutOfBoundsException {
 		super.flip();
 		if (updateId == true) {
 			this.id = this.readUnsignedByte();
@@ -1367,9 +1419,13 @@ public class RakNetPacket extends Packet {
 	/**
 	 * {@inheritDoc} After the packet has been flipped, an unsigined
 	 * <code>byte</code> will be read to get the ID.
+	 * 
+	 * @throws IndexOutOfBoundsException
+	 *             if the buffer has less than <code>1</code> readable
+	 *             <code>byte</code>.
 	 */
 	@Override
-	public Packet flip() {
+	public Packet flip() throws IndexOutOfBoundsException {
 		return this.flip(true);
 	}
 

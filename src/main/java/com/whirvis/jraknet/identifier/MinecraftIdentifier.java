@@ -30,19 +30,21 @@
  */
 package com.whirvis.jraknet.identifier;
 
+import java.util.Objects;
+
 import com.whirvis.jraknet.RakNet;
 
 /**
- * Represents a Minecraft� identifier.
+ * Represents a Minecraft identifier.
  *
  * @author Trent Summerlin
- * @since JRakNet v1.0
+ * @since JRakNet v1.0.0
  */
-public class MinecraftIdentifier extends Identifier {
+public final class MinecraftIdentifier extends Identifier {
 
 	/**
-	 * The header found at the beginning of a Minecraft� identifier. This allows
-	 * for easy indication that the identifier is actually a Minecraft�
+	 * The header found at the beginning of a Minecraft identifier. This allows
+	 * for easy indication that the identifier is actually a Minecraft
 	 * identifier, rather than
 	 */
 	private static final String HEADER = "MCPE";
@@ -54,13 +56,13 @@ public class MinecraftIdentifier extends Identifier {
 	private static final String SEPARATOR = ";";
 
 	/**
-	 * The amount of fields found in a Minecraft� identifier when it is in
-	 * legacy mode.
+	 * The amount of fields found in a Minecraft identifier when it is in legacy
+	 * mode.
 	 */
 	private static final int DATA_COUNT_LEGACY = 6;
 
 	/**
-	 * The amount of fields found in a Minecraft� identifier.
+	 * The amount of fields found in a Minecraft identifier.
 	 */
 	private static final int DATA_COUNT = 9;
 
@@ -89,11 +91,11 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Returns whether or not the the identifier is a Minecraft� identifier.
+	 * Returns whether or not the the identifier is a Minecraft identifier.
 	 * 
 	 * @param identifier
 	 *            the identifier to check.
-	 * @return <code>true</code> if the identifier is a Minecraft� identifier,
+	 * @return <code>true</code> if the identifier is a Minecraft identifier,
 	 *         <code>false</code> otherwise.
 	 */
 	public static boolean isMinecraftIdentifier(Identifier identifier) {
@@ -114,7 +116,7 @@ public class MinecraftIdentifier extends Identifier {
 	private boolean legacy;
 
 	/**
-	 * Creates a Minecraft� identifier.
+	 * Creates a Minecraft identifier.
 	 * 
 	 * @param serverName
 	 *            the server name.
@@ -152,7 +154,7 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Creates a Minecraft� identifier from an existing identifier.
+	 * Creates a Minecraft identifier from an existing identifier.
 	 * 
 	 * @param identifier
 	 *            the identifier.
@@ -160,7 +162,7 @@ public class MinecraftIdentifier extends Identifier {
 	 *             if the <code>identifier</code> or its contents are
 	 *             <code>null</code>.
 	 * @throws IllegalArgumentException
-	 *             if the <code>identifier</code> is not a Minecraft� identifier
+	 *             if the <code>identifier</code> is not a Minecraft identifier
 	 *             or there is not enough data present.
 	 */
 	public MinecraftIdentifier(Identifier identifier) throws NullPointerException, IllegalArgumentException {
@@ -194,7 +196,7 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Creates a Minecraft� identifier from another identifier.
+	 * Creates a Minecraft identifier from another identifier.
 	 * 
 	 * @param identifier
 	 *            the identifier.
@@ -210,7 +212,7 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Creates a blank Minecraft� identifier.
+	 * Creates a blank Minecraft identifier.
 	 */
 	public MinecraftIdentifier() {
 		this(null, 0, null, 0, 0, 0, null, null);
@@ -415,7 +417,7 @@ public class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Converts the values to a Minecraft� identifier string.
+	 * Converts the values to a Minecraft identifier string.
 	 * 
 	 * @param values
 	 *            the values to write to the identifier.
@@ -436,6 +438,27 @@ public class MinecraftIdentifier extends Identifier {
 		return identifierBuilder.toString();
 	}
 
+	@Override
+	public int hashCode() {
+		return Objects.hash(serverName, serverProtocol, versionTag, onlinePlayerCount, maxPlayerCount, guid, worldName,
+				gamemode, legacy);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == this) {
+			return true;
+		} else if (!(o instanceof MinecraftIdentifier)) {
+			return false;
+		}
+		MinecraftIdentifier mi = (MinecraftIdentifier) o;
+		return Objects.equals(serverName, mi.serverName) && Objects.equals(serverProtocol, mi.serverProtocol)
+				&& Objects.equals(versionTag, mi.versionTag) && Objects.equals(onlinePlayerCount, mi.onlinePlayerCount)
+				&& Objects.equals(maxPlayerCount, mi.maxPlayerCount) && Objects.equals(guid, mi.guid)
+				&& Objects.equals(worldName, mi.worldName) && Objects.equals(gamemode, mi.gamemode)
+				&& Objects.equals(legacy, mi.legacy);
+	}
+
 	/**
 	 * {@inheritDoc}
 	 * 
@@ -443,7 +466,7 @@ public class MinecraftIdentifier extends Identifier {
 	 *             if the version tag is invalid.
 	 */
 	@Override
-	public String build() {
+	public String build() throws IllegalArgumentException {
 		if (!verifyVersionTag(versionTag)) {
 			throw new IllegalArgumentException("Invalid version tag");
 		} else if (legacy == true) {

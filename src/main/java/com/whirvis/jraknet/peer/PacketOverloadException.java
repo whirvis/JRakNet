@@ -39,7 +39,7 @@ import com.whirvis.jraknet.RakNet;
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
  */
-public class PacketOverloadException extends RuntimeException {
+public final class PacketOverloadException extends RuntimeException {
 
 	private static final long serialVersionUID = 8544922469731039197L;
 

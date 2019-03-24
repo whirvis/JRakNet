@@ -46,7 +46,7 @@ import com.whirvis.jraknet.map.concurrent.ConcurrentLongMap;
  * @see #scheduleSync(Object, Consumer, long, boolean)
  * @see #scheduleAsync(Object, Consumer, long, boolean)
  */
-public class Scheduler extends Thread {
+public final class Scheduler extends Thread {
 
 	private static final Logger LOG = LogManager.getLogger("jraknet-scheduler");
 	protected static final ConcurrentLongMap<ScheduledTask<?>> TASKS = new ConcurrentLongMap<ScheduledTask<?>>();

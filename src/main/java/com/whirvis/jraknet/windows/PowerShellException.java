@@ -37,7 +37,7 @@ package com.whirvis.jraknet.windows;
  * @author Trent Summerlin
  * @since JRakNet v2.10.0
  */
-public class PowerShellException extends RuntimeException {
+public final class PowerShellException extends RuntimeException {
 
 	private static final long serialVersionUID = 1662306011110232452L;
 

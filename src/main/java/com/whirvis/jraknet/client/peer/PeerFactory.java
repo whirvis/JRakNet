@@ -59,7 +59,7 @@ import io.netty.channel.Channel;
  * @author Trent Summerlin
  * @since JRakNet v2.0.0
  */
-public class PeerFactory {
+public final class PeerFactory {
 
 	// TODO: Set timeout for connection and login!
 
@@ -113,8 +113,8 @@ public class PeerFactory {
 	 * @param maximumMaximumTransferUnit
 	 *            the maximum transfer unit with the highest size.
 	 * @throws NullPointerException
-	 *             if the <code>client</code> or <code>address</code> are
-	 *             <code>null</code>.
+	 *             if the <code>client</code>, <code>address</code> or IP
+	 *             address are <code>null</code>.
 	 */
 	public PeerFactory(RakNetClient client, InetSocketAddress address, Channel channel, int initialMaximumTransferUnit,
 			int maximumMaximumTransferUnit) throws NullPointerException {
@@ -122,6 +122,8 @@ public class PeerFactory {
 			throw new NullPointerException("Client cannot be null");
 		} else if (address == null) {
 			throw new NullPointerException("Address cannot be null");
+		} else if (address.getAddress() == null) {
+			throw new NullPointerException("IP address cannot be null");
 		}
 		this.factoryState = STATE_IDLE;
 		this.log = LogManager.getLogger("jraknet-peer-factory-" + Long.toHexString(client.getGloballyUniqueId()));
@@ -217,7 +219,7 @@ public class PeerFactory {
 		}
 
 		// Send open connection request two until a response is received
-		while (availableAttempts > 0 && factoryState < STATE_PEER_ASSEMBLED && throwable == null) {
+		while (availableAttempts-- > 0 && factoryState < STATE_PEER_ASSEMBLED && throwable == null) {
 			OpenConnectionRequestTwo connectionRequestTwo = new OpenConnectionRequestTwo();
 			connectionRequestTwo.clientGuid = this.guid;
 			connectionRequestTwo.address = this.address;
@@ -257,7 +259,7 @@ public class PeerFactory {
 	 *             if the <code>packet</code> is <code>null</code>.
 	 * @throws IllegalStateException
 	 *             if the peer is not currently being assembled or if the peer
-	 *             has already been created.
+	 *             has already been assembled.
 	 */
 	public RakNetServerPeer assemble(RakNetPacket packet) throws NullPointerException, IllegalStateException {
 		if (packet == null) {
@@ -265,7 +267,7 @@ public class PeerFactory {
 		} else if (factoryState <= STATE_IDLE) {
 			throw new IllegalStateException("Peer is not currently being assembled");
 		} else if (factoryState >= STATE_PEER_ASSEMBLED) {
-			throw new IllegalStateException("Peer has already been created");
+			throw new IllegalStateException("Peer has already been assembled");
 		} else {
 			try {
 				if (packet.getId() == ID_OPEN_CONNECTION_REPLY_1 && factoryState == STATE_FIRST_CONNECTION_REQUEST) {

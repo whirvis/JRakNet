@@ -50,11 +50,15 @@ import java.net.Socket;
  * @author Trent Summerlin
  * @since JRakNet v2.10.0
  */
-public class PowerShellAdministrativeClient {
+public final class PowerShellAdministrativeClient {
 
 	private static final char END_OF_TEXT = (char) 0x03;
 	private static final int POWERSHELL_ADMINISTRATIVE_TIMEOUT = 10000;
 	private static final int AUTHENTICATION_SUCCESS = 0x01;
+
+	private PowerShellAdministrativeClient() {
+		// Static class
+	}
 
 	/**
 	 * Converts the <code>InputStream</code> to a <code>String</code>. This will

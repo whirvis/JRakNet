@@ -36,7 +36,7 @@ package com.whirvis.jraknet.protocol;
  * crucial to the success of a connection.
  *
  * @author Trent Summerlin
- * @since JRakNet vUNKNOWN
+ * @since JRakNet v2.2.0
  */
 public interface Failable {
 

@@ -46,7 +46,7 @@ import com.whirvis.jraknet.protocol.Failable;
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
  */
-public class NewIncomingConnection extends RakNetPacket implements Failable {
+public final class NewIncomingConnection extends RakNetPacket implements Failable {
 
 	// TODO: Figure out what the unknown addresses are used for
 

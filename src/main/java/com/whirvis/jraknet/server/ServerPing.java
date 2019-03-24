@@ -31,6 +31,7 @@
 package com.whirvis.jraknet.server;
 
 import java.net.InetSocketAddress;
+import java.util.Objects;
 
 import com.whirvis.jraknet.identifier.Identifier;
 import com.whirvis.jraknet.protocol.ConnectionType;
@@ -40,8 +41,9 @@ import com.whirvis.jraknet.protocol.ConnectionType;
  * the server will respond back with.
  * 
  * @author Trent Summerlin
+ * @since JRakNet v1.0.0
  */
-public class ServerPing {
+public final class ServerPing {
 
 	private final InetSocketAddress sender;
 	private final ConnectionType connectionType;
@@ -98,6 +100,23 @@ public class ServerPing {
 	 */
 	public void setIdentifier(Identifier identifier) {
 		this.identifier = identifier;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(sender, connectionType, identifier);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == this) {
+			return true;
+		} else if (!(o instanceof ServerPing)) {
+			return false;
+		}
+		ServerPing sp = (ServerPing) o;
+		return Objects.equals(sender, sp.sender) && Objects.equals(connectionType, sp.connectionType)
+				&& Objects.equals(identifier, sp.identifier);
 	}
 
 	@Override

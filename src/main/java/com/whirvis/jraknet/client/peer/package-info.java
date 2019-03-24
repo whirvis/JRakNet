@@ -35,6 +35,6 @@
  * class.
  * 
  * @author Trent Summerlin
- * @since JRakNet v1.0.0
+ * @since JRakNet v2.11.0
  */
 package com.whirvis.jraknet.client.peer;

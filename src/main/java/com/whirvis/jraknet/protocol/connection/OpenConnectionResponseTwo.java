@@ -30,9 +30,6 @@
  */
 package com.whirvis.jraknet.protocol.connection;
 
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
@@ -48,7 +45,7 @@ import com.whirvis.jraknet.protocol.Failable;
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
  */
-public class OpenConnectionResponseTwo extends RakNetPacket implements Failable {
+public final class OpenConnectionResponseTwo extends RakNetPacket implements Failable {
 
 	/**
 	 * Whether or not the magic bytes read in the packet are valid.
@@ -59,11 +56,6 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 	 * The server's globally unique ID.
 	 */
 	public long serverGuid;
-
-	/**
-	 * The address of the client.
-	 */
-	public InetSocketAddress clientAddress;
 
 	/**
 	 * The maximum transfer unit size the server and the client have agreed
@@ -115,14 +107,12 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 			this.encryptionEnabled = false; // TODO: Not supported
 			this.writeMagic();
 			this.writeLong(serverGuid);
-			this.writeAddress(clientAddress);
 			this.writeUnsignedShort(maximumTransferUnit);
 			this.writeBoolean(encryptionEnabled);
 			this.writeConnectionType(connectionType);
-		} catch (UnknownHostException | RakNetException e) {
+		} catch (RakNetException e) {
 			this.magic = false;
 			this.serverGuid = 0;
-			this.clientAddress = null;
 			this.maximumTransferUnit = 0;
 			this.encryptionEnabled = false;
 			this.connectionType = null;
@@ -136,14 +126,12 @@ public class OpenConnectionResponseTwo extends RakNetPacket implements Failable 
 		try {
 			this.magic = this.readMagic();
 			this.serverGuid = this.readLong();
-			this.clientAddress = this.readAddress();
 			this.maximumTransferUnit = this.readUnsignedShort();
 			this.encryptionEnabled = this.readBoolean();
 			this.connectionType = this.readConnectionType();
-		} catch (UnknownHostException | RakNetException e) {
+		} catch (RakNetException e) {
 			this.magic = false;
 			this.serverGuid = 0;
-			this.clientAddress = null;
 			this.maximumTransferUnit = 0;
 			this.encryptionEnabled = false;
 			this.connectionType = null;

@@ -39,9 +39,9 @@ import com.whirvis.jraknet.client.RakNetClient;
  * server.
  *
  * @author Trent Summerlin
- * @since JRakNet v2.0
+ * @since JRakNet v2.0.0
  */
-public class ServerOfflineException extends PeerFactoryException {
+public final class ServerOfflineException extends PeerFactoryException {
 
 	private static final long serialVersionUID = -3916155995964791602L;
 

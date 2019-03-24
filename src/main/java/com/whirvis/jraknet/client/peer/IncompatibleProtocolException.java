@@ -39,9 +39,9 @@ import com.whirvis.jraknet.client.RakNetClient;
  * an incompatible protocol.
  *
  * @author Trent Summerlin
- * @since JRakNet v2.0
+ * @since JRakNet v2.0.0
  */
-public class IncompatibleProtocolException extends PeerFactoryException {
+public final class IncompatibleProtocolException extends PeerFactoryException {
 
 	private static final long serialVersionUID = -3390229698349252537L;
 

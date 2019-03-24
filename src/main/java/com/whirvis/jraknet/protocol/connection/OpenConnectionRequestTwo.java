@@ -48,7 +48,7 @@ import com.whirvis.jraknet.protocol.Failable;
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
  */
-public class OpenConnectionRequestTwo extends RakNetPacket implements Failable {
+public final class OpenConnectionRequestTwo extends RakNetPacket implements Failable {
 
 	/**
 	 * Whether or not the magic bytes read in the packet are valid.

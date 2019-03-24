@@ -39,9 +39,9 @@ import com.whirvis.jraknet.client.RakNetClient;
  * it is already connected to.
  *
  * @author Trent Summerlin
- * @since JRakNet v2.0
+ * @since JRakNet v2.0.0
  */
-public class AlreadyConnectedException extends PeerFactoryException {
+public final class AlreadyConnectedException extends PeerFactoryException {
 
 	private static final long serialVersionUID = -482118372058339060L;
 

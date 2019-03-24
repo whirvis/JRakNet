@@ -39,15 +39,27 @@ import com.whirvis.jraknet.RakNet;
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
  */
-public class InvalidChannelException extends IllegalArgumentException {
+public final class InvalidChannelException extends IllegalArgumentException {
 
 	private static final long serialVersionUID = -8690545139286694469L;
+
+	private final int channel;
 
 	/**
 	 * Constructs an <code>InvalidChannelException</code>.
 	 */
-	public InvalidChannelException() {
-		super("Channel must be lower than " + RakNet.MAX_CHANNELS);
+	public InvalidChannelException(int channel) {
+		super("Invalid channel " + channel + ", must be lower than " + RakNet.MAX_CHANNELS);
+		this.channel = channel;
+	}
+
+	/**
+	 * Returns the invalid channel that was used.
+	 * 
+	 * @return the invalid channel that was used.
+	 */
+	public int getChannel() {
+		return this.channel;
 	}
 
 }

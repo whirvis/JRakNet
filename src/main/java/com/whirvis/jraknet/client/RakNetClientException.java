@@ -36,7 +36,7 @@ import com.whirvis.jraknet.RakNetException;
  * Signals that an error has occurred in a {@link RakNetClient}
  *
  * @author Trent Summerlin
- * @since JRakNet v2.0
+ * @since JRakNet v2.0.0
  */
 public class RakNetClientException extends RakNetException {
 

@@ -52,7 +52,7 @@ import io.netty.channel.socket.DatagramPacket;
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
  */
-public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
+public final class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 
 	private final Logger log;
 	private final RakNetServer server;
@@ -66,8 +66,7 @@ public class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	 *            the server to send received packets to.
 	 */
 	public RakNetServerHandler(RakNetServer server) {
-		this.log = LogManager
-				.getLogger("RakNet server handler #" + Long.toHexString(server.getGloballyUniqueId()).toUpperCase());
+		this.log = LogManager.getLogger("jraknet-server-handler-" + Long.toHexString(server.getGloballyUniqueId()));
 		this.server = server;
 		this.blocked = new ConcurrentHashMap<InetAddress, BlockedAddress>();
 	}

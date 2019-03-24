@@ -496,8 +496,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *            the buffer to send.
 	 * @param address
 	 *            the address to send the buffer to.
-	 * @see {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, ByteBuf)
-	 *      sendMessage(Reliability, ByteBuf)}
+	 * @see com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability,
+	 *      ByteBuf) sendMessage(Reliability, ByteBuf)
 	 */
 	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) {
 		channel.writeAndFlush(new DatagramPacket(buf, address));
@@ -516,8 +516,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *            the packet to send.
 	 * @param address
 	 *            the address to send the packet to.
-	 * @see {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, Packet)
-	 *      sendMessage(Reliability, Packet)}
+	 * @see com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability,
+	 *      Packet) sendMessage(Reliability, Packet)
 	 */
 	public final void sendNettyMessage(Packet packet, InetSocketAddress address) {
 		this.sendNettyMessage(packet.buffer(), address);
@@ -534,8 +534,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *            the packet ID to send.
 	 * @param address
 	 *            the address to send the packet to.
-	 * @see {@link com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, int)
-	 *      sendMessage(Reliability, int)}
+	 * @see com.whirvis.jraknet.peer.RakNetSession#sendMessage(Reliability, int)
+	 *      sendMessage(Reliability, int)
 	 */
 	public final void sendNettyMessage(int packetId, InetSocketAddress address) {
 		this.sendNettyMessage(new RakNetPacket(packetId), address);
@@ -561,7 +561,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 				}
 			}
 		} else if (peer != null) {
-			peer.handleMessage(packet);
+			peer.handleInternal(packet);
 		}
 		log.debug("Handled " + RakNetPacket.getName(packet.getId()) + " packet");
 	}
@@ -684,7 +684,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * @throws NullPointerException
 	 *             if the <code>address</code> is <code>null</code>.
 	 * @throws IllegalArgumentException
-	 *             if the <code>port</code> is not within the range of
+	 *             if the <code>port</code> is not in between
 	 *             <code>0-65535</code>.
 	 * @throws IllegalStateException
 	 *             if the client is currently connected to a server.
@@ -696,7 +696,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		if (address == null) {
 			throw new NullPointerException("IP address cannot be null");
 		} else if (port < 0x0000 || port > 0xFFFF) {
-			throw new IllegalArgumentException("Invalid port range");
+			throw new IllegalArgumentException("Port must be in between 0-65535");
 		}
 		this.connect(new InetSocketAddress(address, port));
 	}
@@ -735,7 +735,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * @param server
 	 *            the discovered server to connect to.
 	 * @throws NullPointerException
-	 *             if the discovered server is <code>null</code>.
+	 *             if the discovered <code>server</code> is <code>null</code>.
 	 * @throws IllegalStateException
 	 *             if the client is currently connected to a server.
 	 * @throws RakNetException

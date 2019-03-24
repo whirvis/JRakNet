@@ -39,7 +39,7 @@ import com.whirvis.jraknet.client.RakNetClientException;
  * RakNetServerPeer}.
  *
  * @author Trent Summerlin
- * @since JRakNet v2.0.0
+ * @since JRakNet v2.11.0
  */
 public class PeerFactoryException extends RakNetClientException {
 

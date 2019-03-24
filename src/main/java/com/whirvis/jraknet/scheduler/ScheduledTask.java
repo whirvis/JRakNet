@@ -42,10 +42,8 @@ import java.util.function.Consumer;
  * @since JRakNet v2.11.0
  * @param <T>
  *            the type of the input to the operation.
- * @see com.whirvis.jraknet.scheduler.Scheduler Scheduler
- * @see com.whirvis.jraknet.scheduler.SchedulerThread SchedulerThread
  */
-public class ScheduledTask<T> {
+public final class ScheduledTask<T> {
 
 	/**
 	 * The task will execute as soon as possible.
@@ -92,8 +90,8 @@ public class ScheduledTask<T> {
 	 * @throws NullPointerException
 	 *             if the operation is <code>null</code>.
 	 * @throws IllegalArgumentException
-	 *             if the execution count is less than zero and not equal to
-	 *             {@value #INFINITE}.
+	 *             if the execution <code>count</code> is less than zero and not
+	 *             equal to {@value #INFINITE}.
 	 */
 	protected ScheduledTask(boolean sync, T obj, Consumer<T> operation, long wait, int count)
 			throws NullPointerException, IllegalArgumentException {
@@ -146,7 +144,6 @@ public class ScheduledTask<T> {
 	 * @throws IllegalStateException
 	 *             if the state cannot be executed according to
 	 *             {@link #shouldExecute()}.
-	 * @see #shouldExecute()
 	 */
 	protected void execute() throws IllegalStateException {
 		if (!this.shouldExecute()) {

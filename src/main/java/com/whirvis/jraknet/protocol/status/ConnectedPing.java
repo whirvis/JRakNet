@@ -42,7 +42,7 @@ import com.whirvis.jraknet.RakNetPacket;
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
  */
-public class ConnectedPing extends RakNetPacket {
+public final class ConnectedPing extends RakNetPacket {
 
 	/**
 	 * The timestamp of the sender.

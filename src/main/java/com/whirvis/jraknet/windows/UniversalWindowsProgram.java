@@ -30,6 +30,8 @@
  */
 package com.whirvis.jraknet.windows;
 
+import java.util.Objects;
+
 /**
  * A universal Windows program.
  * <p>
@@ -44,10 +46,10 @@ package com.whirvis.jraknet.windows;
  * @author Trent Summerlin
  * @since JRakNet v2.10.0
  */
-public class UniversalWindowsProgram {
+public final class UniversalWindowsProgram {
 
 	/**
-	 * The Minecraft� Universal Windows Program.
+	 * The Minecraft Universal Windows Program.
 	 */
 	public static final UniversalWindowsProgram MINECRAFT = new UniversalWindowsProgram(
 			"Microsoft.MinecraftUWP_8wekyb3d8bbwe");
@@ -143,6 +145,22 @@ public class UniversalWindowsProgram {
 					.execute(true).equals(PowerShellCommand.RESULT_OK);
 		}
 		return true; // No operation executed
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(applicationId);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == this) {
+			return true;
+		} else if (!(o instanceof UniversalWindowsProgram)) {
+			return false;
+		}
+		UniversalWindowsProgram uwp = (UniversalWindowsProgram) o;
+		return Objects.equals(applicationId, uwp.applicationId);
 	}
 
 	@Override

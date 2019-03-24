@@ -78,8 +78,7 @@ public class RakNetClientTest {
 			}
 
 			@Override
-			public void onNotAcknowledge(RakNetClient client, RakNetServerPeer peer, Record record,
-					EncapsulatedPacket packet) {
+			public void onLoss(RakNetClient client, RakNetServerPeer peer, Record record, EncapsulatedPacket packet) {
 				LOG.info(peer.getConnectionType().getName() + " server has not acknowledged packet with ID: "
 						+ RakNetPacket.getName(packet.payload.readUnsignedByte()));
 			}
@@ -94,7 +93,7 @@ public class RakNetClientTest {
 		LOG.info("Created client, connecting to " + RakNetTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
 
 		// Connect to server
-		client.connect(RakNetTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
+		client.connect("192.168.1.8", 19132);
 	}
 
 }

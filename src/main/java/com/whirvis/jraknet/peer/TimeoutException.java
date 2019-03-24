@@ -36,7 +36,7 @@ package com.whirvis.jraknet.peer;
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
  */
-public class TimeoutException extends RuntimeException {
+public final class TimeoutException extends RuntimeException {
 
 	private static final long serialVersionUID = 4216977972114486611L;
 

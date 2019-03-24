@@ -38,8 +38,9 @@ import java.util.Map;
  * worry about boxing them.
  *
  * @author Trent Summerlin
+ * @since JRakNet v2.6.0
  */
-public class LongMap<T> extends HashMap<Long, T> implements Map<Long, T>, DynamicKey<Long> {
+public final class LongMap<T> extends HashMap<Long, T> implements Map<Long, T>, DynamicKey<Long> {
 
 	private static final long serialVersionUID = 4324132003573381634L;
 
@@ -130,7 +131,7 @@ public class LongMap<T> extends HashMap<Long, T> implements Map<Long, T>, Dynami
 	public void renameKey(Long oldKey, Long newKey) throws NullPointerException {
 		T storedObject = this.remove(oldKey.longValue());
 		if (storedObject == null) {
-			throw new NullPointerException();
+			throw new NullPointerException("No value associated with old key");
 		}
 		this.put(newKey.longValue(), storedObject);
 	}

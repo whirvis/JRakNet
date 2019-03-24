@@ -39,9 +39,9 @@ import com.whirvis.jraknet.client.RakNetClient;
  * has banned its connection.
  *
  * @author Trent Summerlin
- * @since JRakNet v2.0
+ * @since JRakNet v2.0.0
  */
-public class ConnectionBannedException extends PeerFactoryException {
+public final class ConnectionBannedException extends PeerFactoryException {
 
 	private static final long serialVersionUID = 8440218445920818619L;
 

@@ -39,9 +39,9 @@ import com.whirvis.jraknet.client.RakNetClient;
  * no free incoming connections.
  *
  * @author Trent Summerlin
- * @since JRakNet v2.0
+ * @since JRakNet v2.0.0
  */
-public class NoFreeIncomingConnectionsException extends PeerFactoryException {
+public final class NoFreeIncomingConnectionsException extends PeerFactoryException {
 
 	private static final long serialVersionUID = 5863972657532782029L;
 

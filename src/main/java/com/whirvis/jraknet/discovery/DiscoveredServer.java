@@ -31,6 +31,7 @@
 package com.whirvis.jraknet.discovery;
 
 import java.net.InetSocketAddress;
+import java.util.Objects;
 
 import com.whirvis.jraknet.identifier.Identifier;
 
@@ -41,7 +42,7 @@ import com.whirvis.jraknet.identifier.Identifier;
  * @since JRakNet v2.0.0
  * @see DiscoveryListener
  */
-public class DiscoveredServer {
+public final class DiscoveredServer {
 
 	/**
 	 * The maximum time a server can not respond to a ping before it is
@@ -69,7 +70,7 @@ public class DiscoveredServer {
 	 *             <code>null</code>.
 	 */
 	protected DiscoveredServer(InetSocketAddress address, boolean external, Identifier identifier)
-			throws NullPointerException, IllegalArgumentException {
+			throws NullPointerException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
 		} else if (address.getAddress() == null) {
@@ -167,6 +168,23 @@ public class DiscoveredServer {
 			throw new NullPointerException("Identifier cannot be null");
 		}
 		this.identifier = identifier;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(address, external, timestamp, identifier);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == this) {
+			return true;
+		} else if (!(o instanceof DiscoveredServer)) {
+			return false;
+		}
+		DiscoveredServer ds = (DiscoveredServer) o;
+		return Objects.equals(address, ds.address) && Objects.equals(external, ds.external)
+				&& Objects.equals(timestamp, ds.timestamp) && Objects.equals(identifier, ds.identifier);
 	}
 
 	@Override

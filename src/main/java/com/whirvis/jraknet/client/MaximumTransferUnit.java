@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -48,7 +49,7 @@ import com.whirvis.jraknet.map.IntMap;
  * @author Trent Summerlin
  * @since JRakNet v2.0.0
  */
-public class MaximumTransferUnit {
+public final class MaximumTransferUnit {
 
 	/**
 	 * Sorts an array of maximum transfer units from the highest to lowest
@@ -160,7 +161,7 @@ public class MaximumTransferUnit {
 	 *             <code>0</code>.
 	 * @see #reset()
 	 */
-	public int retry() {
+	public int retry() throws IllegalStateException {
 		if (retriesLeft < 0) {
 			throw new IllegalStateException(
 					"No more retries left, use reset() in order to reuse a maximum transfer unit");
@@ -180,6 +181,22 @@ public class MaximumTransferUnit {
 		if (retriesLeft != retries) {
 			this.retriesLeft = retries;
 		}
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(size, retries);
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (o == this) {
+			return true;
+		} else if (!(o instanceof MaximumTransferUnit)) {
+			return false;
+		}
+		MaximumTransferUnit mtu = (MaximumTransferUnit) o;
+		return Objects.equals(size, mtu.size) && Objects.equals(retries, mtu.retries);
 	}
 
 	@Override

@@ -72,74 +72,47 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 public final class RakNet {
 
 	/**
-	 * Forwards the specified UDP port.
-	 * <p>
-	 * There is no guarantee this method will successfully forward the specified
-	 * UDP port.
-	 * <p>
-	 * This is not a blocking method. However the code required to accomplish
-	 * the task can up to three seconds to execute. As a result, it is
-	 * encapsulated within another thread so as to prevent unnecessary blocking.
+	 * A <code>Thread</code> which runs in the background to allow for code
+	 * relating to UPnP to be executed through the WaifUPnP without locking up
+	 * the main thread.
 	 * 
-	 * @param port
-	 *            the port to forward.
-	 * @throws IllegalArgumentException
-	 *             if the port is not within the range of <code>0-65535</code>.
+	 * @author Trent Summerlin
+	 * @since JRakNet v2.11.0
+	 * @see #onFinish(Runnable)
+	 * @see #wasSuccessful()
 	 */
-	public static synchronized void forwardPort(int port) throws IllegalArgumentException {
-		if (port < 0x0000 || port > 0xFFFF) {
-			throw new IllegalArgumentException("Port must be in between 0 and 65535");
-		}
-		new Thread() {
-			@Override
-			public void run() {
-				this.setName("jraknet-port-forwarder-" + port);
-				UPnP.openPortUDP(port);
-				System.out.println("Opened UPnP port");
-			}
-		}.start();
-	}
+	public static class UPnPResult extends Thread {
 
-	/**
-	 * Closes the specified UDP port.
-	 * <p>
-	 * There is no guarantee this method will successfully close the specified
-	 * UDP port.
-	 * <p>
-	 * This is not a blocking method. However the code required to accomplish
-	 * the task can up to three seconds to execute. As a result, it is
-	 * encapsulated within another thread so as to prevent unnecessary blocking.
-	 * 
-	 * @param port
-	 *            the port to close.
-	 * @throws IllegalArgumentException
-	 *             if the port is not within the range of <code>0-65535</code>.
-	 */
-	public static synchronized void closePort(int port) {
-		if (port < 0x0000 || port > 0xFFFF) {
-			throw new IllegalArgumentException("Port must be in between 0 and 65535");
-		}
-		new Thread() {
-			@Override
-			public void run() {
-				this.setName("jraknet-port-closer-" + port);
-				UPnP.closePortUDP(port);
-			}
-		}.start();
-	}
+		protected boolean finished;
+		protected Runnable runnable;
+		protected boolean success;
 
-	/**
-	 * Returns whether or not the specified UDP port is port forwarded.
-	 * <p>
-	 * 
-	 * 
-	 * @param port
-	 *            the port.
-	 * @return <code>true</code> if the specified port is forwarded,
-	 *         <code>false</code> if it is closed.
-	 */
-	public static synchronized boolean isPortForwarded(int port) {
-		return UPnP.isMappedUDP(port);
+		/**
+		 * Sets the callback for code that will be executed when the code for
+		 * the task has finished executing. This code will be run on the same
+		 * thread as the original task.
+		 * 
+		 * @param runnable
+		 *            the callback.
+		 */
+		public void onFinish(Runnable runnable) {
+			this.runnable = runnable;
+		}
+
+		/**
+		 * Retursn whether or not the UPnP task was successful.
+		 * 
+		 * @return
+		 * @throws IllegalStateException
+		 *             if the UPnP code is still being executed.
+		 */
+		public boolean wasSuccessful() throws IllegalStateException {
+			if (finished == false) {
+				throw new IllegalStateException("UPnP code is still being executed");
+			}
+			return this.success;
+		}
+
 	}
 
 	/**
@@ -150,7 +123,7 @@ public final class RakNet {
 	 * @author Trent Summerlin
 	 * @since JRakNet v1.0.0
 	 */
-	private static class BootstrapHandler extends ChannelInboundHandlerAdapter {
+	private static final class BootstrapHandler extends ChannelInboundHandlerAdapter {
 
 		public volatile RakNetPacket packet;
 
@@ -168,11 +141,97 @@ public final class RakNet {
 
 	}
 
-	private RakNet() {
-		// Static class
+	/**
+	 * Forwards the specified UDP port via
+	 * <a href="https://en.wikipedia.org/wiki/Universal_Plug_and_Play">UPnP</a>.
+	 * <p>
+	 * In order for this method to work,
+	 * <a href="https://en.wikipedia.org/wiki/Universal_Plug_and_Play">UPnP</a>
+	 * for the router must be enabled. The way to enable this varies depending
+	 * on the router. There is no guarantee this method will successfully
+	 * forward the specified UDP port; as it is completely dependent on the
+	 * gateway (the router in this case) to do so.
+	 * <p>
+	 * This is not a blocking method. However, the code required to accomplish
+	 * the task can up to three seconds to execute. As a result, it is
+	 * encapsulated within another thread so as to prevent unnecessary blocking.
+	 * If one wishes to get the result of the code, use the
+	 * {@link UPnPResult#wasSuccessful() wasSuccessful()} method found inside of
+	 * {@link UPnPResult}. A callback for when the task finishes can also be
+	 * added using the {@link UPnPResult#onFinish(Runnable) onFinish(Runnable)}
+	 * method.
+	 * 
+	 * @param port
+	 *            the port to forward.
+	 * @return the result of the execution.
+	 * @throws IllegalArgumentException
+	 *             if the port is not within the range of <code>0-65535</code>.
+	 */
+	public static synchronized UPnPResult forwardPort(int port) throws IllegalArgumentException {
+		if (port < 0x0000 || port > 0xFFFF) {
+			throw new IllegalArgumentException("Port must be in between 0-65535");
+		}
+		UPnPResult result = new UPnPResult() {
+			@Override
+			public void run() {
+				this.setName("jraknet-port-forwarder-" + port);
+				this.success = UPnP.openPortUDP(port);
+				this.finished = true;
+				if (runnable != null) {
+					runnable.run();
+				}
+			}
+		};
+		result.start();
+		return result;
 	}
 
-	private static final Logger LOG = LogManager.getLogger(RakNet.class);
+	/**
+	 * Closes the specified UDP port via
+	 * <a href="https://en.wikipedia.org/wiki/Universal_Plug_and_Play">UPnP</a>.
+	 * <p>
+	 * In order for this method to work,
+	 * <a href="https://en.wikipedia.org/wiki/Universal_Plug_and_Play">UPnP</a>
+	 * for the router must be enabled. The way to enable this varies depending
+	 * on the router. There is no guarantee this method will successfully close
+	 * the specified UDP port; as it is completely dependent on the gateway (the
+	 * router in this case) to do so.
+	 * <p>
+	 * This is not a blocking method. However the code required to accomplish
+	 * the task can up to three seconds to execute. As a result, it is
+	 * encapsulated within another thread so as to prevent unnecessary blocking.
+	 * If one wishes to get the result of the code, use the
+	 * {@link UPnPResult#wasSuccessful() wasSuccessful()} method found inside of
+	 * {@link UPnPResult}. A callback for when the task finishes can also be
+	 * added using the {@link UPnPResult#onFinish(Runnable) onFinish(Runnable)}
+	 * method.
+	 * 
+	 * @param port
+	 *            the port to close.
+	 * @return the result of the execution.
+	 * @throws IllegalArgumentException
+	 *             if the port is not within the range of <code>0-65535</code>.
+	 */
+	public static synchronized UPnPResult closePort(int port) throws IllegalArgumentException {
+		if (port < 0x0000 || port > 0xFFFF) {
+			throw new IllegalArgumentException("Port must be in between 0-65535");
+		}
+		UPnPResult result = new UPnPResult() {
+			@Override
+			public void run() {
+				this.setName("jraknet-port-closer-" + port);
+				this.success = UPnP.closePortUDP(port);
+				this.finished = true;
+				if (runnable != null) {
+					runnable.run();
+				}
+			}
+		};
+		result.start();
+		return result;
+	}
+
+	private static final Logger LOG = LogManager.getLogger("jraknet");
 	private static final HashMap<InetAddress, Integer> MAXIMUM_TRANSFER_UNIT_SIZES = new HashMap<InetAddress, Integer>();
 	private static int lowestMaximumTransferUnitSize = -1;
 	private static long _maxPacketsPerSecond = 500;
@@ -266,6 +325,10 @@ public final class RakNet {
 	 */
 	public static final long MAX_PACKETS_PER_SECOND_BLOCK = 300000L;
 
+	private RakNet() {
+		// Static class
+	}
+
 	/**
 	 * Sleeps the current thread for the specified amount of time in
 	 * milliseconds.
@@ -291,10 +354,10 @@ public final class RakNet {
 
 	/**
 	 * Returns how many packets can be received in the span of a single second
-	 * (1000 milliseconds) before a session is blocked.
+	 * before an address is automatically blocked.
 	 * 
 	 * @return how many packets can be received in the span of a single second
-	 *         before a session is blocked.
+	 *         before an address is automatically blocked.
 	 */
 	public static long getMaxPacketsPerSecond() {
 		return _maxPacketsPerSecond;
@@ -319,313 +382,6 @@ public final class RakNet {
 			throw new IllegalArgumentException("Max packets per second must be greater than 0");
 		}
 		_maxPacketsPerSecond = maxPacketsPerSecond;
-	}
-
-	/**
-	 * Converts the stack trace of the specified <code>Throwable</code> to a
-	 * string.
-	 * 
-	 * @param throwable
-	 *            the <code>Throwable</code> to get the stack trace from.
-	 * @return the stack trace as a string.
-	 */
-	public static String getStackTrace(Throwable throwable) {
-		ByteArrayOutputStream stackTraceOut = new ByteArrayOutputStream();
-		PrintStream stackTracePrint = new PrintStream(stackTraceOut);
-		throwable.printStackTrace(stackTracePrint);
-		return new String(stackTraceOut.toByteArray());
-	}
-	
-	static {
-		try {
-			
-			Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
-			while (networkInterfaces.hasMoreElements()) {
-				NetworkInterface networkInterface = networkInterfaces.nextElement();
-				Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
-				while (addresses.hasMoreElements()) {
-					InetAddress inetAddress = addresses.nextElement();
-					MAXIMUM_TRANSFER_UNIT_SIZES.put(inetAddress, networkInterface.getMTU());
-				}
-			}
-		} catch (SocketException | NullPointerException e) {
-			lowestMaximumTransferUnitSize = -1;
-		}
-	}
-
-	/**
-	 * Returns the maximum transfer unit of the network card with the specified
-	 * address.
-	 * 
-	 * @param address
-	 *            the address. A <code>null</code> value will have this function
-	 *            go through each and every network interface on the machine and
-	 *            return the lowest value the first time it is called.
-	 * @return the maximum transfer unit of the network card with the specified
-	 *         address, <code>-1</code> if it could not be determined.
-	 */
-	public static int getMaximumTransferUnit(InetAddress address) {
-		if (address == null) {
-			return lowestMaximumTransferUnitSize;
-		}
-		if (!MAXIMUM_TRANSFER_UNIT_SIZES.containsKey(address)) {
-			try {
-				MAXIMUM_TRANSFER_UNIT_SIZES.put(address, NetworkInterface.getByInetAddress(address).getMTU());
-			} catch (SocketException | NullPointerException e) {
-				MAXIMUM_TRANSFER_UNIT_SIZES.put(address, lowestMaximumTransferUnitSize);
-			}
-		}
-		return MAXIMUM_TRANSFER_UNIT_SIZES.get(address).intValue();
-	}
-
-	/**
-	 * Returns the maximum transfer unit of the network card with the localhost
-	 * address according to {@link InetAddress#getLocalHost()}.
-	 * 
-	 * @return the maximum transfer unit of the network card with the specified
-	 *         address, <code>-1</code> if it could not be determined.
-	 */
-	public static int getMaximumTransferUnit() {
-		return getMaximumTransferUnit(null);
-	}
-
-	/**
-	 * Sends a packet to the address.
-	 * 
-	 * @param address
-	 *            the address to send the packet to.
-	 * @param packet
-	 *            the packet to send.
-	 * @param timeout
-	 *            how long to wait until resending the packet.
-	 * @param retries
-	 *            how many times the packet will be sent before giving uip.
-	 * @return the packet received in response, <code>null</code> if no response
-	 *         was received or the thread was interrupted.
-	 * @throws NullPointerException
-	 *             if the <code>address<code> or <code>packet</code> are
-	 *             <code>null</code>.
-	 * @throws IlelgalArgumentException
-	 *             if the <code>timeout</code> or <code>retries</code> are less
-	 *             than or equal to </code>0</code>.
-	 */
-	private static RakNetPacket createBootstrapAndSend(InetSocketAddress address, Packet packet, long timeout,
-			int retries) {
-		if (address == null) {
-			throw new NullPointerException("Address cannot be null");
-		} else if (packet == null) {
-			throw new NullPointerException("Packet cannot be null");
-		} else if (timeout <= 0) {
-			throw new IllegalArgumentException("Timeout must be greater than 0");
-		} else if (retries <= 0) {
-			throw new IllegalArgumentException("Retriest must be greater than 0");
-		}
-
-		// Prepare bootstrap
-		RakNetPacket received = null;
-		EventLoopGroup group = new NioEventLoopGroup();
-		int maximumTransferUnit = getMaximumTransferUnit();
-		if (maximumTransferUnit < MINIMUM_MTU_SIZE) {
-			return null;
-		}
-		try {
-			// Create bootstrap
-			Bootstrap bootstrap = new Bootstrap();
-			BootstrapHandler handler = new BootstrapHandler();
-			bootstrap.group(group).channel(NioDatagramChannel.class).option(ChannelOption.SO_BROADCAST, true)
-					.option(ChannelOption.SO_RCVBUF, maximumTransferUnit)
-					.option(ChannelOption.SO_SNDBUF, maximumTransferUnit).handler(handler);
-			Channel channel = bootstrap.bind(0).sync().channel();
-
-			// Wait for response
-			while (retries > 0 && received == null && !Thread.currentThread().isInterrupted()) {
-				long sendTime = System.currentTimeMillis();
-				channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
-				while (System.currentTimeMillis() - sendTime < timeout && handler.packet == null)
-					; // Wait for either a timeout or a response
-				received = handler.packet;
-				retries--;
-			}
-		} catch (InterruptedException e) {
-			return null;
-		}
-		group.shutdownGracefully();
-		return received;
-	}
-
-	/**
-	 * Returns whether or not the server is online.
-	 * 
-	 * @param address
-	 *            the address of the server.
-	 * @return <code>true</code> if the server is online, <code>false</code>
-	 *         otherwise.
-	 */
-	public static boolean isServerOnline(InetSocketAddress address) {
-		OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne();
-		connectionRequestOne.maximumTransferUnit = MINIMUM_MTU_SIZE;
-		connectionRequestOne.networkProtocol = CLIENT_NETWORK_PROTOCOL;
-		connectionRequestOne.encode();
-		RakNetPacket packet = createBootstrapAndSend(address, connectionRequestOne, 1000, PING_RETRIES);
-		if (packet != null) {
-			if (packet.getId() == RakNetPacket.ID_OPEN_CONNECTION_REPLY_1) {
-				OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne(packet);
-				connectionResponseOne.decode();
-				if (connectionResponseOne.magic == true) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Return whether or not the server is online.
-	 * 
-	 * @param address
-	 *            the address of the server.
-	 * @param port
-	 *            the port of the server.
-	 * @return <code>true</code> if the server is online, <code>false</code>
-	 *         otherwise.
-	 */
-	public static boolean isServerOnline(InetAddress address, int port) {
-		return isServerOnline(new InetSocketAddress(address, port));
-	}
-
-	/**
-	 * Returns whether or not the server is online.
-	 * 
-	 * @param address
-	 *            the address of the server.
-	 * @param port
-	 *            the port of the server.
-	 * @return <code>true</code> if the server is online, <code>false</code>
-	 *         otherwise.
-	 * @throws UnknownHostException
-	 *             if the address is an unknown host.
-	 */
-	public static boolean isServerOnline(String address, int port) throws UnknownHostException {
-		return isServerOnline(InetAddress.getByName(address), port);
-	}
-
-	/**
-	 * Returns whether or not the server is compatible with the current client
-	 * protocol.
-	 * 
-	 * @param address
-	 *            the address of the server.
-	 * @return <code>true</code> if the server is compatible with the current
-	 *         client protocol, <code>false</code> otherwise.
-	 */
-	public static boolean isServerCompatible(InetSocketAddress address) {
-		OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne();
-		connectionRequestOne.maximumTransferUnit = MINIMUM_MTU_SIZE;
-		connectionRequestOne.networkProtocol = CLIENT_NETWORK_PROTOCOL;
-		connectionRequestOne.encode();
-		RakNetPacket packet = createBootstrapAndSend(address, connectionRequestOne, 1000L, PING_RETRIES);
-		if (packet != null) {
-			if (packet.getId() == RakNetPacket.ID_OPEN_CONNECTION_REPLY_1) {
-				OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne(packet);
-				connectionResponseOne.decode();
-				if (connectionResponseOne.magic == true) {
-					return true;
-				}
-			} else if (packet.getId() == RakNetPacket.ID_INCOMPATIBLE_PROTOCOL_VERSION) {
-				IncompatibleProtocolVersion incompatibleProtocol = new IncompatibleProtocolVersion(packet);
-				incompatibleProtocol.decode();
-				return false;
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Returns whether or not the server is compatible with the current client
-	 * protocol.
-	 * 
-	 * @param address
-	 *            the address of the server.
-	 * @param port
-	 *            the port of the server.
-	 * @return <code>true</code> if the server is compatible with the current
-	 *         client protocol, <code>false</code> otherwise.
-	 */
-	public static boolean isServerCompatible(InetAddress address, int port) {
-		return isServerCompatible(new InetSocketAddress(address, port));
-	}
-
-	/**
-	 * Returns whether or not the server is comptaible with the current client
-	 * protocol.
-	 * 
-	 * @param address
-	 *            the address of the server.
-	 * @param port
-	 *            the port of the server.
-	 * @return <code>true</code> if the server is compatible with the current
-	 *         client protocol, <code>false</code> otherwise.
-	 * @throws UnknownHostException
-	 *             if the address is an unknown host.
-	 */
-	public static boolean isServerCompatible(String address, int port) throws UnknownHostException {
-		return isServerCompatible(InetAddress.getByName(address), port);
-	}
-
-	/**
-	 * Returns the server <code>Identifier</code>.
-	 * 
-	 * @param address
-	 *            the address of the server.
-	 * @return the server <code>Identifier</code>.
-	 */
-	public static Identifier getServerIdentifier(InetSocketAddress address) {
-		UnconnectedPing ping = new UnconnectedPing();
-		ping.timestamp = System.currentTimeMillis() - PING_TIMESTAMP;
-		ping.pingId = PING_ID;
-		ping.encode();
-		if (ping.failed()) {
-			throw new RuntimeException(UnconnectedPing.class.getSimpleName() + " failed to encode");
-		}
-		RakNetPacket packet = createBootstrapAndSend(address, ping, 1000, IDENTIFIER_RETRIES);
-		if (packet != null) {
-			if (packet.getId() == RakNetPacket.ID_UNCONNECTED_PONG) {
-				UnconnectedPong pong = new UnconnectedPong(packet);
-				pong.decode();
-				if (!pong.failed() && pong.magic == true) {
-					return pong.identifier;
-				}
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Returns the server <code>Identifier</code>.
-	 * 
-	 * @param address
-	 *            the address of the server.
-	 * @param port
-	 *            the port of the server.
-	 * @return the server <code>Identifier</code>.
-	 */
-	public static Identifier getServerIdentifier(InetAddress address, int port) {
-		return getServerIdentifier(new InetSocketAddress(address, port));
-	}
-
-	/**
-	 * Returns the server <code>Identifier</code>.
-	 * 
-	 * @param address
-	 *            the address of the server.
-	 * @param port
-	 *            the port of the server.
-	 * @return the server <code>Identifier</code>.
-	 * @throws UnknownHostException
-	 *             if the address is an unknown host.
-	 */
-	public static Identifier getServerIdentifier(String address, int port) throws UnknownHostException {
-		return getServerIdentifier(InetAddress.getByName(address), port);
 	}
 
 	/**
@@ -674,7 +430,7 @@ public final class RakNet {
 		if (addressSplit.length == 1 || addressSplit.length == 2) {
 			InetAddress inetAddress = InetAddress.getByName(addressSplit[0]);
 			int port = (addressSplit.length == 2 ? parseIntPassive(addressSplit[1]) : defaultPort);
-			if (port >= 0 && port <= 65535) {
+			if (port >= 0x0000 && port <= 0xFFFF) {
 				return new InetSocketAddress(inetAddress, port);
 			} else {
 				throw new UnknownHostException("Port number must be between 0-65535");
@@ -805,6 +561,324 @@ public final class RakNet {
 	 */
 	public static String toHexStringId(RakNetPacket packet) {
 		return toHexStringId(packet.getId());
+	}
+
+	/**
+	 * Converts the stack trace of the specified <code>Throwable</code> to a
+	 * string.
+	 * 
+	 * @param throwable
+	 *            the <code>Throwable</code> to get the stack trace from.
+	 * @return the stack trace as a string.
+	 * @throws NullPointerException
+	 *             if the <code>throwable</code> is <code>null</code>.
+	 */
+	public static String getStackTrace(Throwable throwable) throws NullPointerException {
+		if (throwable == null) {
+			throw new NullPointerException("Throwable cannot be null");
+		}
+		ByteArrayOutputStream stackTraceOut = new ByteArrayOutputStream();
+		PrintStream stackTracePrint = new PrintStream(stackTraceOut);
+		throwable.printStackTrace(stackTracePrint);
+		return new String(stackTraceOut.toByteArray());
+	}
+
+	// TODO: FIX THIS!!!
+	static {
+		try {
+			lowestMaximumTransferUnitSize = Integer.MAX_VALUE;
+			Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+			while (networkInterfaces.hasMoreElements()) {
+				NetworkInterface networkInterface = networkInterfaces.nextElement();
+				if (networkInterface.getMTU() < lowestMaximumTransferUnitSize && networkInterface.getMTU() >= 0) {
+					lowestMaximumTransferUnitSize = networkInterface.getMTU();
+					System.out.println(lowestMaximumTransferUnitSize);
+				}
+			}
+		} catch (SocketException | NullPointerException e) {
+			e.printStackTrace();
+			lowestMaximumTransferUnitSize = -1;
+		}
+	}
+
+	/**
+	 * Returns the maximum transfer unit of the network card with the specified
+	 * address.
+	 * 
+	 * @param address
+	 *            the address. A <code>null</code> value will have this function
+	 *            go through each and every network interface on the machine and
+	 *            return the lowest value the first time it is called.
+	 * @return the maximum transfer unit of the network card with the specified
+	 *         address, <code>-1</code> if it could not be determined.
+	 */
+	public static int getMaximumTransferUnit(InetAddress address) {
+		if (address == null) {
+			return lowestMaximumTransferUnitSize;
+		}
+		if (!MAXIMUM_TRANSFER_UNIT_SIZES.containsKey(address)) {
+			try {
+				MAXIMUM_TRANSFER_UNIT_SIZES.put(address, NetworkInterface.getByInetAddress(address).getMTU());
+			} catch (SocketException | NullPointerException e) {
+				MAXIMUM_TRANSFER_UNIT_SIZES.put(address, lowestMaximumTransferUnitSize);
+			}
+		}
+		return MAXIMUM_TRANSFER_UNIT_SIZES.get(address).intValue();
+	}
+
+	/**
+	 * Returns the maximum transfer unit of the network card with the localhost
+	 * address according to {@link InetAddress#getLocalHost()}.
+	 * 
+	 * @return the maximum transfer unit of the network card with the specified
+	 *         address, <code>-1</code> if it could not be determined.
+	 */
+	public static int getMaximumTransferUnit() {
+		return getMaximumTransferUnit(null);
+	}
+
+	/**
+	 * Sends a packet to the address.
+	 * 
+	 * @param address
+	 *            the address to send the packet to.
+	 * @param packet
+	 *            the packet to send.
+	 * @param timeout
+	 *            how long to wait until resending the packet.
+	 * @param retries
+	 *            how many times the packet will be sent before giving uip.
+	 * @return the packet received in response, <code>null</code> if no response
+	 *         was received or the thread was interrupted.
+	 * @throws NullPointerException
+	 *             if the <code>address<code> or <code>packet</code> are
+	 *             <code>null</code>.
+	 * @throws IlelgalArgumentException
+	 *             if the <code>timeout</code> or <code>retries</code> are less
+	 *             than or equal to </code>0</code>.
+	 */
+	private static RakNetPacket createBootstrapAndSend(InetSocketAddress address, Packet packet, long timeout,
+			int retries) throws NullPointerException, IllegalArgumentException {
+		if (address == null) {
+			throw new NullPointerException("Address cannot be null");
+		} else if (packet == null) {
+			throw new NullPointerException("Packet cannot be null");
+		} else if (timeout <= 0) {
+			throw new IllegalArgumentException("Timeout must be greater than 0");
+		} else if (retries <= 0) {
+			throw new IllegalArgumentException("Retriest must be greater than 0");
+		}
+
+		// Prepare bootstrap
+		RakNetPacket received = null;
+		EventLoopGroup group = new NioEventLoopGroup();
+		int maximumTransferUnit = getMaximumTransferUnit();
+		if (maximumTransferUnit < MINIMUM_MTU_SIZE) {
+			return null;
+		}
+		try {
+			// Create bootstrap
+			Bootstrap bootstrap = new Bootstrap();
+			BootstrapHandler handler = new BootstrapHandler();
+			bootstrap.group(group).channel(NioDatagramChannel.class).option(ChannelOption.SO_BROADCAST, true)
+					.option(ChannelOption.SO_RCVBUF, maximumTransferUnit)
+					.option(ChannelOption.SO_SNDBUF, maximumTransferUnit).handler(handler);
+			Channel channel = bootstrap.bind(0).sync().channel();
+
+			// Wait for response
+			while (retries > 0 && received == null && !Thread.currentThread().isInterrupted()) {
+				long sendTime = System.currentTimeMillis();
+				channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
+				while (System.currentTimeMillis() - sendTime < timeout && handler.packet == null)
+					; // Wait for either a timeout or a response
+				received = handler.packet;
+				retries--;
+			}
+		} catch (InterruptedException e) {
+			return null;
+		}
+		group.shutdownGracefully();
+		return received;
+	}
+
+	/**
+	 * Returns whether or not the server with the specified address is online.
+	 * 
+	 * @param address
+	 *            the address of the server.
+	 * @return <code>true</code> if the server is online, <code>false</code>
+	 *         otherwise.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> is <code>null</code>.
+	 */
+	public static boolean isServerOnline(InetSocketAddress address) throws NullPointerException {
+		if (address == null) {
+			throw new NullPointerException("Address cannot be null");
+		}
+		OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne();
+		connectionRequestOne.maximumTransferUnit = MINIMUM_MTU_SIZE;
+		connectionRequestOne.networkProtocol = CLIENT_NETWORK_PROTOCOL;
+		connectionRequestOne.encode();
+		RakNetPacket packet = createBootstrapAndSend(address, connectionRequestOne, 1000, PING_RETRIES);
+		if (packet != null) {
+			if (packet.getId() == RakNetPacket.ID_OPEN_CONNECTION_REPLY_1) {
+				OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne(packet);
+				connectionResponseOne.decode();
+				if (connectionResponseOne.magic == true) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Return whether or not the server is online.
+	 * 
+	 * @param address
+	 *            the IP address of the server.
+	 * @param port
+	 *            the port of the server.
+	 * @return <code>true</code> if the server is online, <code>false</code>
+	 *         otherwise.
+	 */
+	public static boolean isServerOnline(InetAddress address, int port) {
+		return isServerOnline(new InetSocketAddress(address, port));
+	}
+
+	/**
+	 * Returns whether or not the server is online.
+	 * 
+	 * @param host
+	 *            the IP address of the server.
+	 * @param port
+	 *            the port of the server.
+	 * @return <code>true</code> if the server is online, <code>false</code>
+	 *         otherwise.
+	 * @throws UnknownHostException
+	 *             if the address is an unknown host.
+	 */
+	public static boolean isServerOnline(String host, int port) throws UnknownHostException {
+		return isServerOnline(InetAddress.getByName(host), port);
+	}
+
+	/**
+	 * Returns whether or not the server is compatible with the current client
+	 * protocol.
+	 * 
+	 * @param address
+	 *            the address of the server.
+	 * @return <code>true</code> if the server is compatible with the current
+	 *         client protocol, <code>false</code> otherwise.
+	 */
+	public static boolean isServerCompatible(InetSocketAddress address) {
+		OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne();
+		connectionRequestOne.maximumTransferUnit = MINIMUM_MTU_SIZE;
+		connectionRequestOne.networkProtocol = CLIENT_NETWORK_PROTOCOL;
+		connectionRequestOne.encode();
+		RakNetPacket packet = createBootstrapAndSend(address, connectionRequestOne, 1000L, PING_RETRIES);
+		if (packet != null) {
+			if (packet.getId() == RakNetPacket.ID_OPEN_CONNECTION_REPLY_1) {
+				OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne(packet);
+				connectionResponseOne.decode();
+				if (connectionResponseOne.magic == true) {
+					return true;
+				}
+			} else if (packet.getId() == RakNetPacket.ID_INCOMPATIBLE_PROTOCOL_VERSION) {
+				IncompatibleProtocolVersion incompatibleProtocol = new IncompatibleProtocolVersion(packet);
+				incompatibleProtocol.decode();
+				return false;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns whether or not the server is compatible with the current client
+	 * protocol.
+	 * 
+	 * @param address
+	 *            the address of the server.
+	 * @param port
+	 *            the port of the server.
+	 * @return <code>true</code> if the server is compatible with the current
+	 *         client protocol, <code>false</code> otherwise.
+	 */
+	public static boolean isServerCompatible(InetAddress address, int port) {
+		return isServerCompatible(new InetSocketAddress(address, port));
+	}
+
+	/**
+	 * Returns whether or not the server is comptaible with the current client
+	 * protocol.
+	 * 
+	 * @param host
+	 *            the IP address of the server.
+	 * @param port
+	 *            the port of the server.
+	 * @return <code>true</code> if the server is compatible with the current
+	 *         client protocol, <code>false</code> otherwise.
+	 * @throws UnknownHostException
+	 *             if the address is an unknown host.
+	 */
+	public static boolean isServerCompatible(String host, int port) throws UnknownHostException {
+		return isServerCompatible(InetAddress.getByName(host), port);
+	}
+
+	/**
+	 * Returns the server <code>Identifier</code>.
+	 * 
+	 * @param address
+	 *            the address of the server.
+	 * @return the server <code>Identifier</code>.
+	 */
+	public static Identifier getServerIdentifier(InetSocketAddress address) {
+		UnconnectedPing ping = new UnconnectedPing();
+		ping.timestamp = System.currentTimeMillis() - PING_TIMESTAMP;
+		ping.pingId = PING_ID;
+		ping.encode();
+		if (ping.failed()) {
+			throw new RuntimeException(UnconnectedPing.class.getSimpleName() + " failed to encode");
+		}
+		RakNetPacket packet = createBootstrapAndSend(address, ping, 1000, IDENTIFIER_RETRIES);
+		if (packet != null) {
+			if (packet.getId() == RakNetPacket.ID_UNCONNECTED_PONG) {
+				UnconnectedPong pong = new UnconnectedPong(packet);
+				pong.decode();
+				if (!pong.failed() && pong.magic == true) {
+					return pong.identifier;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the server <code>Identifier</code>.
+	 * 
+	 * @param address
+	 *            the address of the server.
+	 * @param port
+	 *            the port of the server.
+	 * @return the server <code>Identifier</code>.
+	 */
+	public static Identifier getServerIdentifier(InetAddress address, int port) {
+		return getServerIdentifier(new InetSocketAddress(address, port));
+	}
+
+	/**
+	 * Returns the server <code>Identifier</code>.
+	 * 
+	 * @param host
+	 *            the IP address of the server.
+	 * @param port
+	 *            the port of the server.
+	 * @return the server <code>Identifier</code>.
+	 * @throws UnknownHostException
+	 *             if the address is an unknown host.
+	 */
+	public static Identifier getServerIdentifier(String host, int port) throws UnknownHostException {
+		return getServerIdentifier(InetAddress.getByName(host), port);
 	}
 
 }

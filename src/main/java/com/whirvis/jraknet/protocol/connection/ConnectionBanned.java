@@ -40,10 +40,10 @@ import com.whirvis.jraknet.RakNetPacket;
  * during connection or while it is connected to the server.
  * 
  * @author Trent Summerlin
- * @since JRakNet v1.0.0
+ * @since JRakNet v2.1.0
  */
-public class ConnectionBanned extends RakNetPacket {
-	
+public final class ConnectionBanned extends RakNetPacket {
+
 	/**
 	 * Whether or not the magic is valid.
 	 */

@@ -39,7 +39,7 @@ import com.whirvis.jraknet.client.RakNetClient;
  * @author Trent Summerlin
  * @since JRakNet v2.11.0
  */
-public class InvalidMaximumTransferUnitException extends PeerFactoryException {
+public final class InvalidMaximumTransferUnitException extends PeerFactoryException {
 
 	private static final long serialVersionUID = 1247149239806409526L;
 

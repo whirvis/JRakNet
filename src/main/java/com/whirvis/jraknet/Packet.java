@@ -69,15 +69,16 @@ public class Packet {
 	 * 
 	 * @param buffer
 	 *            the {@link io.netty.ByteBuf ByteBuf} to read from and write
-	 *            to.
+	 *            to, a <code>null</code> value will have a new buffer be used
+	 *            instead.
+	 * @throws IllegalArgumentException
+	 *             if the <code>buffer</code> is an {@link EmptyByteBuf}.
 	 */
-	public Packet(ByteBuf buffer) {
-		if (buffer == null) {
-			throw new IllegalArgumentException("No content");
-		} else if (buffer instanceof EmptyByteBuf) {
+	public Packet(ByteBuf buffer) throws IllegalArgumentException {
+		if (buffer instanceof EmptyByteBuf) {
 			throw new IllegalArgumentException("No content");
 		}
-		this.buffer = buffer;
+		this.buffer = buffer == null ? Unpooled.buffer() : buffer;
 		this.input = new PacketDataInputStream(this);
 		this.output = new PacketDataOutputStream(this);
 	}
@@ -119,7 +120,7 @@ public class Packet {
 	 * Creates an empty packet.
 	 */
 	public Packet() {
-		this(Unpooled.buffer());
+		this((ByteBuf) /* Solves ambiguity */ null);
 	}
 
 	/**
@@ -175,7 +176,7 @@ public class Packet {
 	 *             if there are less than <code>1</code> readable byte left in
 	 *             the packet.
 	 */
-	public final byte readByte() {
+	public final byte readByte() throws IndexOutOfBoundsException {
 		return buffer.readByte();
 	}
 
@@ -619,7 +620,8 @@ public class Packet {
 	 *            the unsigned <code>byte</code>.
 	 * @return the packet.
 	 * @throws IllegalArgumentException
-	 *             if the value is not within the range of <code>0-255</code>.
+	 *             if <code>b</code> is not within the range of
+	 *             <code>0-255</code>.
 	 */
 	public final Packet writeUnsignedByte(int b) throws IllegalArgumentException {
 		if (b < 0x00 || b > 0xFF) {
@@ -672,11 +674,12 @@ public class Packet {
 	 *            the <code>short</code>.
 	 * @return the packet.
 	 * @throws IllegalArgumentException
-	 *             if <code>s</code> is less than <code>0</code>.
+	 *             if <code>s</code> is not within the range of
+	 *             <code>0-65535</code>.
 	 */
 	public final Packet writeUnsignedShort(int s) throws IllegalArgumentException {
-		if (s < 0) {
-			throw new IllegalArgumentException("Value must be greater than or equal to 0");
+		if (s < 0x0000 || s > 0xFFFF) {
+			throw new IllegalArgumentException("Value must be in between 0-65535");
 		}
 		buffer.writeShort(((short) s) & 0xFFFF);
 		return this;
@@ -689,11 +692,11 @@ public class Packet {
 	 *            the <code>short</code>.
 	 * @return the packet.
 	 * @throws IllegalArgumentException
-	 *             if <code>s</code> is less than <code>0</code>.
+	 *             if <code>s</code> is not in between <code>0-65535</code>.
 	 */
 	public final Packet writeUnsignedShortLE(int s) throws IllegalArgumentException {
-		if (s < 0) {
-			throw new IllegalArgumentException("Value must be greater than or equal to 0");
+		if (s < 0x0000 || s > 0xFFFF) {
+			throw new IllegalArgumentException("Value must be in between 0-65535");
 		}
 		buffer.writeShortLE(((short) s) & 0xFFFF);
 		return this;
@@ -734,11 +737,11 @@ public class Packet {
 	 *            the <code>triad</code>.
 	 * @return the packet.
 	 * @throws IllegalArgumentException
-	 *             if <code>t</code> is less than <code>0</code>.
+	 *             if <code>t</code> is not in between <code>0-16777215</code>.
 	 */
-	public final Packet writeUnsignedTriad(int t) {
-		if (t < 0) {
-			throw new IllegalArgumentException("Value must be greater than or equal to 0");
+	public final Packet writeUnsignedTriad(int t) throws IllegalArgumentException {
+		if (t < 0x000000 || t > 0xFFFFFF) {
+			throw new IllegalArgumentException("Value must be in between 0-16777215");
 		}
 		return this.writeTriad(t & 0x00FFFFFF);
 	}
@@ -750,11 +753,11 @@ public class Packet {
 	 *            the <code>triad</code>.
 	 * @return the packet.
 	 * @throws IllegalArgumentException
-	 *             if <code>t</code> is less than <code>0</code>.
+	 *             if <code>t</code> is not in between <code>0-16777215</code>.
 	 */
-	public final Packet writeUnsignedTriadLE(int t) {
-		if (t < 0) {
-			throw new IllegalArgumentException("Value must be greater than or equal to 0");
+	public final Packet writeUnsignedTriadLE(int t) throws IllegalArgumentException {
+		if (t < 0x000000 || t > 0xFFFFFF) {
+			throw new IllegalArgumentException("Value must be in between 0-16777215");
 		}
 		return this.writeTriadLE(t & 0x00FFFFFF);
 	}
@@ -777,10 +780,12 @@ public class Packet {
 	 * @param i
 	 *            the <code>int</code>.
 	 * @return the packet.
+	 * @throws IllegalArgumentException
+	 *             if <code>i</code> is not in between <code>0-4294967295</code>
 	 */
-	public final Packet writeUnsignedInt(long i) {
-		if (i < 0) {
-			throw new IllegalArgumentException("Value must be greater than or equal to 0");
+	public final Packet writeUnsignedInt(long i) throws IllegalArgumentException {
+		if (i < 0x00000000 || i > 0xFFFFFFFF) {
+			throw new IllegalArgumentException("Value must be in between 0-4294967295");
 		}
 		buffer.writeInt(((int) i) & 0xFFFFFFFF);
 		return this;
@@ -804,10 +809,13 @@ public class Packet {
 	 * @param i
 	 *            the <code>int</code>.
 	 * @return the packet.
+	 * @throws IllegalArgumentException
+	 *             if <code>i</code> is not in between
+	 *             <code>0-4294967295</code>.
 	 */
-	public final Packet writeUnsignedIntLE(long i) {
-		if (i < 0) {
-			throw new IllegalArgumentException("Value must be greater than or equal to 0");
+	public final Packet writeUnsignedIntLE(long i) throws IllegalArgumentException {
+		if (i < 0x00000000 || i > 0xFFFFFFFF) {
+			throw new IllegalArgumentException("Value must be in between 0-4294967295");
 		}
 		buffer.writeIntLE(((int) i) & 0xFFFFFFFF);
 		return this;
@@ -843,15 +851,18 @@ public class Packet {
 	 * @param bi
 	 *            the <code>long</code>.
 	 * @return the packet.
+	 * @throws IllegalArgumentException
+	 *             if <code>bi</code> is bigger than {@value Long.BYTES} bytes
+	 *             or is less than <code>0</code>.
 	 */
-	public final Packet writeUnsignedLong(BigInteger bi) {
-		if (bi.longValue() < 0) {
-			throw new IllegalArgumentException("Value must be greater than or equal to 0");
-		}
+	public final Packet writeUnsignedLong(BigInteger bi) throws IllegalArgumentException {
 		byte[] ulBytes = bi.toByteArray();
 		if (ulBytes.length > Long.BYTES) {
-			throw new IllegalArgumentException("BigInteger is too big to fit into a long");
+			throw new IllegalArgumentException("Value is too big to fit into a long");
+		} else if (bi.longValue() < 0) {
+			throw new IllegalArgumentException("Value must be greater than or equal to 0");
 		}
+
 		for (int i = 0; i < Long.BYTES; i++) {
 			this.writeByte(i < ulBytes.length ? ulBytes[i] : 0x00);
 		}
@@ -864,8 +875,10 @@ public class Packet {
 	 * @param l
 	 *            the <code>long</code>.
 	 * @return the packet.
+	 * @throws IllegalArgumentException
+	 *             if <code>l</code> is less than <code>0</code>.
 	 */
-	public final Packet writeUnsignedLong(long l) {
+	public final Packet writeUnsignedLong(long l) throws IllegalArgumentException {
 		return this.writeUnsignedLong(new BigInteger(Long.toString(l)));
 	}
 
@@ -877,15 +890,14 @@ public class Packet {
 	 * @return the packet.
 	 * @throws IllegalArgumentException
 	 *             if the size of the <code>bi</code> is bigger than
-	 *             {@value Long#BYTES}.
+	 *             {@value Long#BYTES} bytes or is less than <code>0</code>.
 	 */
 	public final Packet writeUnsignedLongLE(BigInteger bi) throws IllegalArgumentException {
-		if (bi.longValue() < 0) {
-			throw new IllegalArgumentException("Value must be greater than or equal to 0");
-		}
 		byte[] ulBytes = bi.toByteArray();
 		if (ulBytes.length > Long.BYTES) {
-			throw new IllegalArgumentException("BigInteger is too big to fit into a long");
+			throw new IllegalArgumentException("Value is too big to fit into a long");
+		} else if (bi.longValue() < 0) {
+			throw new IllegalArgumentException("Value must be greater than or equal to 0");
 		}
 		for (int i = Long.BYTES - 1; i >= 0; i--) {
 			this.writeByte(i < ulBytes.length ? ulBytes[i] : 0x00);
@@ -899,8 +911,10 @@ public class Packet {
 	 * @param l
 	 *            the <code>long</code>.
 	 * @return the packet.
+	 * @throws IllegalArgumentException
+	 *             if <code>l</code> is less than <code>0</code>.
 	 */
-	public final Packet writeUnsignedLongLE(long l) {
+	public final Packet writeUnsignedLongLE(long l) throws IllegalArgumentException {
 		return this.writeUnsignedLongLE(new BigInteger(Long.toString(l)));
 	}
 
@@ -959,8 +973,13 @@ public class Packet {
 	 * @param s
 	 *            the <code>String</code>.
 	 * @return the packet.
+	 * @throws NullPointerException
+	 *             if <code>s</code> is <code>null</code>.
 	 */
-	public final Packet writeString(String s) {
+	public final Packet writeString(String s) throws NullPointerException {
+		if (s == null) {
+			throw new NullPointerException("String cannot be null");
+		}
 		byte[] data = s.getBytes();
 		this.writeUnsignedShort(data.length);
 		this.write(data);
@@ -974,8 +993,13 @@ public class Packet {
 	 * @param s
 	 *            the <code>String</code>.
 	 * @return the packet.
+	 * @throws NullPointerException
+	 *             if <code>s</code> is <code>null</code>.
 	 */
-	public final Packet writeStringLE(String s) {
+	public final Packet writeStringLE(String s) throws NullPointerException {
+		if (s == null) {
+			throw new NullPointerException("String cannot be null");
+		}
 		byte[] data = s.getBytes();
 		this.writeUnsignedShortLE(data.length);
 		this.write(data);
@@ -989,7 +1013,8 @@ public class Packet {
 	 *            the address.
 	 * @return the packet.
 	 * @throws NullPointerException
-	 *             if the <code>address</code> is <code>null</code>.
+	 *             if the <code>address</code> or IP address are
+	 *             <code>null</code>.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, if
 	 *             a scope_id was specified for a global IPv6 address, or the
@@ -1000,6 +1025,8 @@ public class Packet {
 	public final Packet writeAddress(InetSocketAddress address) throws NullPointerException, UnknownHostException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
+		} else if (address.getAddress() == null) {
+			throw new NullPointerException("IP address cannot be null");
 		}
 		byte[] ipAddress = address.getAddress().getAddress();
 		if (ipAddress.length == ADDRESS_VERSION_IPV4_LENGTH) {
@@ -1027,11 +1054,22 @@ public class Packet {
 	 * @param port
 	 *            the port.
 	 * @return the packet.
+	 * @throws NullPointerException
+	 *             if the <code>host</code> is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the port is not in between <code>0-65535</code>.
 	 * @throws UnknownHostException
-	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address. TODO
+	 *             if no IP address for the <code>host</code> could not be
+	 *             found, or if a scope_id was specified for a global IPv6
+	 *             address.
 	 */
-	public final Packet writeAddress(InetAddress host, int port) throws UnknownHostException {
+	public final Packet writeAddress(InetAddress host, int port)
+			throws NullPointerException, IllegalArgumentException, UnknownHostException {
+		if (host == null) {
+			throw new NullPointerException("Host cannot be null");
+		} else if (port < 0x0000 || port > 0xFFFF) {
+			throw new IllegalArgumentException("Port must be in between 0-65535");
+		}
 		return this.writeAddress(new InetSocketAddress(host, port));
 	}
 
@@ -1043,11 +1081,22 @@ public class Packet {
 	 * @param port
 	 *            the port.
 	 * @return the packet.
+	 * @throws NullPointerException
+	 *             if the <code>host</code> is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the port is not in between <code>0-65535</code>.
 	 * @throws UnknownHostException
-	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address. TODO
+	 *             if no IP address for the <code>host</code> could not be
+	 *             found, or if a scope_id was specified for a global IPv6
+	 *             address.
 	 */
-	public final Packet writeAddress(String host, int port) throws UnknownHostException {
+	public final Packet writeAddress(String host, int port)
+			throws NullPointerException, IllegalArgumentException, UnknownHostException {
+		if (host == null) {
+			throw new NullPointerException("Host cannot be null");
+		} else if (port < 0x0000 || port > 0xFFFF) {
+			throw new IllegalArgumentException("Port must be in between 0-65535");
+		}
 		return this.writeAddress(InetAddress.getByName(host), port);
 	}
 
@@ -1084,11 +1133,15 @@ public class Packet {
 
 	/**
 	 * Returns the size of the packet in <code>byte</code>s.
+	 * <p>
+	 * This is to be used only for packets that are being written to. To get the
+	 * amount of bytes that are still readable, use the {@link #remaining()}
+	 * method.
 	 * 
 	 * @return the size of the packet in <code>byte</code>s.
 	 */
-	public int size() { // TODO FIX THIS METHOD!
-		return array().length;
+	public int size() {
+		return buffer.writerIndex();
 	}
 
 	/**
@@ -1130,6 +1183,10 @@ public class Packet {
 	/**
 	 * Returns how many readable <code>byte</code>s are left in the packet's
 	 * buffer.
+	 * <p>
+	 * This is to only be used for packets that are being read from. To get the
+	 * amount of bytes that have been written to the packet, use the
+	 * {@link #size()} method.
 	 * 
 	 * @return how many readable <code>byte</code>s are left in the packet's
 	 *         buffer.
@@ -1142,11 +1199,12 @@ public class Packet {
 	 * Updates the buffer.
 	 * 
 	 * @param buffer
-	 *            the buffer to read from and write to.
+	 *            the buffer to read from and write to, a <code>null</code>
+	 *            value will have a new buffer be used instead.
 	 * @return the packet.
 	 */
 	public final Packet setBuffer(ByteBuf buffer) {
-		this.buffer = buffer;
+		this.buffer = buffer == null ? Unpooled.buffer() : buffer;
 		return this;
 	}
 
@@ -1171,7 +1229,7 @@ public class Packet {
 	 * Updates the buffer.
 	 * 
 	 * @param data
-	 *            the <code>byte[]</code> to read from.
+	 *            the <code>byte[]</code> to create the new buffer from.
 	 * @return the packet.
 	 * @throws NullPointerException
 	 *             if the <code>buffer</code> is <code>null</code>.
