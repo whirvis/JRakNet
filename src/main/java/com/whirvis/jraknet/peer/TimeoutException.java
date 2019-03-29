@@ -40,11 +40,26 @@ public final class TimeoutException extends RuntimeException {
 
 	private static final long serialVersionUID = 4216977972114486611L;
 
+	private final RakNetPeer peer;
+
 	/**
 	 * Constructs a <code>TimeoutException</code>.
+	 * 
+	 * @param peer
+	 *            the peer that has timed out.
 	 */
-	public TimeoutException() {
+	public TimeoutException(RakNetPeer peer) {
 		super("Peer timeout");
+		this.peer = peer;
+	}
+
+	/**
+	 * Returns the peer that timed out.
+	 * 
+	 * @return the peer that tiemd out.
+	 */
+	public RakNetPeer getPeer() {
+		return this.peer;
 	}
 
 }

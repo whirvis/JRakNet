@@ -34,17 +34,23 @@ import javax.swing.JFrame;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetTest;
 import com.whirvis.jraknet.identifier.MinecraftIdentifier;
 import com.whirvis.jraknet.server.RakNetServer;
 
 /**
- * Used to test the latency feature in <code>RakNetSession</code>.
+ * Tests the latency feature of {@link com.whirvis.jraknet.peer.RakNetPeer
+ * RakNetPeer}.
  *
  * @author Whirvis T. Wheatley
+ * @since JRakNet v2.0.0
  */
-public class LatencyTest {
+public final class LatencyTest {
 
+	/**
+	 * The latency test identifier.
+	 */
 	private static final MinecraftIdentifier LATENCY_TEST_IDENTIFIER = new MinecraftIdentifier("A JRakNet latency test",
 			RakNetTest.MINECRAFT_PROTOCOL_NUMBER, RakNetTest.MINECRAFT_VERSION, 0, 10,
 			-1 /* We don't know the GUID yet */, "New World", "Developer");
@@ -52,7 +58,10 @@ public class LatencyTest {
 	private final RakNetServer server;
 	private final LatencyFrame frame;
 
-	public LatencyTest() {
+	/**
+	 * Constructs a <code>LatencyTest</code>.
+	 */
+	private LatencyTest() {
 		this.server = new RakNetServer(RakNetTest.MINECRAFT_DEFAULT_PORT, LATENCY_TEST_IDENTIFIER.getMaxPlayerCount());
 		this.frame = new LatencyFrame();
 	}
@@ -60,27 +69,54 @@ public class LatencyTest {
 	/**
 	 * Starts the test.
 	 * 
+	 * @throws RakNetException
+	 *             if a RakNet error occurs.
 	 * @throws InterruptedException
-	 *             if the thread is interrupted while it is sleeping.
+	 *             if any thread has interrupted the current thread. The
+	 *             <i>interrupted status</i> of the current thread is cleared
+	 *             when this exception is thrown.
 	 */
-	public void start() throws InterruptedException {
-
-		// Set server options and start it
+	public void start() throws RakNetException, InterruptedException {
+		// Create server
 		LATENCY_TEST_IDENTIFIER.setServerGloballyUniqueId(server.getGloballyUniqueId());
 		server.setIdentifier(LATENCY_TEST_IDENTIFIER);
-		server.startThreaded();
+		server.start();
 
 		// Create window
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);
 		while (true) {
-			Thread.sleep(500); // Lower CPU usage and give window time to update
+			Thread.sleep(500); // Lower CPU usage
 			frame.updatePaneText(server.getClients());
 		}
 	}
 
+	/**
+	 * The entry point for the test.
+	 * 
+	 * @param args
+	 *            the program arguments. These values are ignored.
+	 * @throws ClassNotFoundException
+	 *             if the <code>LookAndFeel</code> class for the sustem could
+	 *             not be found.
+	 * @throws InstantiationException
+	 *             if a new instance of the <code>LookAndFeel</code> class could
+	 *             not be instantiated.
+	 * @throws IllegalAccessException
+	 *             if the class or initializer for the <code>LookAndFeel</code>
+	 *             class is inaccessible.
+	 * @throws UnsupportedLookAndFeelException
+	 *             if <code>lnf.isSupportedLookAndFeel()</code> is false for the
+	 *             instantiated <code>LookAndFeel</code> class.
+	 * @throws RakNetException
+	 *             if a RakNet error occurs.
+	 * @throws InterruptedException
+	 *             if any thread has interrupted the current thread. The
+	 *             <i>interrupted status</i> of the current thread is cleared
+	 *             when this exception is thrown.
+	 */
 	public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
-			IllegalAccessException, UnsupportedLookAndFeelException, InterruptedException {
+			IllegalAccessException, UnsupportedLookAndFeelException, RakNetException, InterruptedException {
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		LatencyTest test = new LatencyTest();
 		test.start();

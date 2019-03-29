@@ -76,7 +76,7 @@ public final class DiscoveryThread extends Thread {
 	 * Allocates a discovery thread.
 	 */
 	protected DiscoveryThread() {
-		this.log = LogManager.getLogger("jraknet-discovery-thread");
+		this.log = LogManager.getLogger(DiscoveryThread.class);
 		this.bootstrap = new Bootstrap();
 		this.group = new NioEventLoopGroup();
 		this.handler = new DiscoveryHandler();

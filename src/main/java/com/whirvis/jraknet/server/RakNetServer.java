@@ -34,6 +34,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -43,13 +44,13 @@ import java.util.function.Consumer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.whirvis.jraknet.InvalidChannelException;
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.identifier.Identifier;
-import com.whirvis.jraknet.peer.InvalidChannelException;
 import com.whirvis.jraknet.peer.RakNetClientPeer;
 import com.whirvis.jraknet.peer.RakNetState;
 import com.whirvis.jraknet.protocol.Reliability;
@@ -62,7 +63,6 @@ import com.whirvis.jraknet.protocol.connection.OpenConnectionResponseTwo;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
 import com.whirvis.jraknet.protocol.status.UnconnectedPing;
 import com.whirvis.jraknet.protocol.status.UnconnectedPong;
-import com.whirvis.jraknet.scheduler.Scheduler;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -86,6 +86,11 @@ public class RakNetServer implements RakNetServerListener {
 	 * {@link #validateSender(InetSocketAddress, long)} method.
 	 */
 	private static final int NO_GUID = -1;
+
+	/**
+	 * Has the maximum transfer unit automatically determined during startup.
+	 */
+	public static final int AUTOMATIC_MTU = -1;
 
 	/**
 	 * Allows for infinite connections to the server.
@@ -124,7 +129,11 @@ public class RakNetServer implements RakNetServerListener {
 	 *            be sent in one packet. If a packet exceeds this size, it is
 	 *            automatically split up so that it can still be sent over the
 	 *            connection (this is handled automatically by
-	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}).
+	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}). A
+	 *            value of {@value #AUTOMATIC_MTU} will have the maximum
+	 *            transfer unit be determined automatically via
+	 *            {@link RakNet#getMaximumTransferUnit(InetAddress)} with the
+	 *            parameter being the specified bind <code>address</code>.
 	 * @param maxConnections
 	 *            the maximum number of connections, A value of
 	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
@@ -137,34 +146,66 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws NullPointerException
 	 *             if the address is <code>null</code>.
 	 * @throws IllegalArgumentException
-	 *             if the maximum connections is less than zero and not equal to
-	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
-	 *             size is less than {@value RakNet#MINIMUM_MTU_SIZE}
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS} or the maximum
+	 *             transfer unit size is less than
+	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
+	 *             {@value #AUTOMATIC_MTU}.
 	 */
 	public RakNetServer(InetSocketAddress address, int maximumTransferUnit, int maxConnections, Identifier identifier)
 			throws NullPointerException, IllegalArgumentException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
-		} else if (maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE) {
+		} else if (maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE && maximumTransferUnit != AUTOMATIC_MTU) {
 			throw new IllegalArgumentException(
-					"Maximum transfer unit can be no smaller than " + RakNet.MINIMUM_MTU_SIZE);
+					"Maximum transfer unit must be no smaller than " + RakNet.MINIMUM_MTU_SIZE + " or equal to "
+							+ AUTOMATIC_MTU + " for the maximum transfer unit to be determined automatically");
 		} else if (maxConnections < 0 && maxConnections != INFINITE_CONNECTIONS) {
-			throw new IllegalArgumentException(
-					"Maximum connections must be greater than or equal to zero or negative one (for infinite connections)");
+			throw new IllegalArgumentException("Maximum connections must be greater than or equal to 0 or "
+					+ INFINITE_CONNECTIONS + " for infinite connections");
 		}
 		UUID uuid = UUID.randomUUID();
 		this.guid = uuid.getMostSignificantBits();
-		this.log = LogManager.getLogger("jraknet-server-" + Long.toHexString(guid));
+		this.log = LogManager
+				.getLogger(RakNetServer.class.getSimpleName() + "-" + Long.toHexString(guid).toUpperCase());
 		this.pongId = uuid.getLeastSignificantBits();
 		this.timestamp = System.currentTimeMillis();
 		this.bindAddress = address;
 		this.maxConnections = maxConnections;
-		this.maximumTransferUnit = maximumTransferUnit;
+		this.maximumTransferUnit = maximumTransferUnit == AUTOMATIC_MTU ? RakNet.getMaximumTransferUnit(address)
+				: maximumTransferUnit;
 		this.broadcastingEnabled = true;
 		this.identifier = identifier;
 		this.listeners = new ConcurrentLinkedQueue<RakNetServerListener>();
 		this.clients = new ConcurrentHashMap<InetSocketAddress, RakNetClientPeer>();
 		this.banned = new ConcurrentLinkedQueue<InetAddress>();
+	}
+
+	/**
+	 * Creates a RakNet server.
+	 * 
+	 * @param address
+	 *            the address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @param identifier
+	 *            the identifier that will be sent in response to server pings
+	 *            if server broadcasting is enabled. A <code>null</code>
+	 *            identifier means nothing will be sent in response to server
+	 *            pings, even if server broadcasting is enabled.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS}.
+	 */
+	public RakNetServer(InetSocketAddress address, int maxConnections, Identifier identifier)
+			throws NullPointerException, IllegalArgumentException {
+		this(address, AUTOMATIC_MTU, maxConnections, identifier);
 	}
 
 	/**
@@ -180,7 +221,11 @@ public class RakNetServer implements RakNetServerListener {
 	 *            be sent in one packet. If a packet exceeds this size, it is
 	 *            automatically split up so that it can still be sent over the
 	 *            connection (this is handled automatically by
-	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}).
+	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}). A
+	 *            value of {@value #AUTOMATIC_MTU} will have the maximum
+	 *            transfer unit be determined automatically via
+	 *            {@link RakNet#getMaximumTransferUnit(InetAddress)} with the
+	 *            parameter being the specified bind <code>address</code>.
 	 * @param maxConnections
 	 *            the maximum number of connections, A value of
 	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
@@ -188,13 +233,37 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws NullPointerException
 	 *             if the address is <code>null</code>.
 	 * @throws IllegalArgumentException
-	 *             if the maximum connections is less than zero and not equal to
-	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
-	 *             size is less than {@value RakNet#MINIMUM_MTU_SIZE}
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS} or the maximum
+	 *             transfer unit size is less than
+	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
+	 *             {@value #AUTOMATIC_MTU}.
 	 */
 	public RakNetServer(InetSocketAddress address, int maximumTransferUnit, int maxConnections)
 			throws NullPointerException, IllegalArgumentException {
 		this(address, maximumTransferUnit, maxConnections, null);
+	}
+
+	/**
+	 * Creates a RakNet server.
+	 * 
+	 * @param address
+	 *            the address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS}.
+	 */
+	public RakNetServer(InetSocketAddress address, int maxConnections)
+			throws NullPointerException, IllegalArgumentException {
+		this(address, AUTOMATIC_MTU, maxConnections);
 	}
 
 	/**
@@ -212,7 +281,11 @@ public class RakNetServer implements RakNetServerListener {
 	 *            be sent in one packet. If a packet exceeds this size, it is
 	 *            automatically split up so that it can still be sent over the
 	 *            connection (this is handled automatically by
-	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}).
+	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}). A
+	 *            value of {@value #AUTOMATIC_MTU} will have the maximum
+	 *            transfer unit be determined automatically via
+	 *            {@link RakNet#getMaximumTransferUnit(InetAddress)} with the
+	 *            parameter being the specified bind <code>address</code>.
 	 * @param maxConnections
 	 *            the maximum number of connections, A value of
 	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
@@ -225,9 +298,11 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws NullPointerException
 	 *             if the address is <code>null</code>.
 	 * @throws IllegalArgumentException
-	 *             if the maximum connections is less than zero and not equal to
-	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
-	 *             size is less than {@value RakNet#MINIMUM_MTU_SIZE}
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS} or the maximum
+	 *             transfer unit size is less than
+	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
+	 *             {@value #AUTOMATIC_MTU}.
 	 */
 	public RakNetServer(InetAddress address, int port, int maximumTransferUnit, int maxConnections,
 			Identifier identifier) throws NullPointerException, IllegalArgumentException {
@@ -243,13 +318,46 @@ public class RakNetServer implements RakNetServerListener {
 	 *            wildcard address.
 	 * @param port
 	 *            the port the server will bind to during startup.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @param identifier
+	 *            the identifier that will be sent in response to server pings
+	 *            if server broadcasting is enabled. A <code>null</code>
+	 *            identifier means nothing will be sent in response to server
+	 *            pings, even if server broadcasting is enabled.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS}.
+	 */
+	public RakNetServer(InetAddress address, int port, int maxConnections, Identifier identifier)
+			throws NullPointerException, IllegalArgumentException {
+		this(address, port, AUTOMATIC_MTU, maxConnections, identifier);
+	}
+
+	/**
+	 * Creates a RakNet server.
+	 * 
+	 * @param address
+	 *            the IP address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param port
+	 *            the port the server will bind to during startup.
 	 * @param maximumTransferUnit
 	 *            the highest maximum transfer unit a client can use. The
 	 *            maximum transfer unit is the maximum number of bytes that can
 	 *            be sent in one packet. If a packet exceeds this size, it is
 	 *            automatically split up so that it can still be sent over the
 	 *            connection (this is handled automatically by
-	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}).
+	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}). A
+	 *            value of {@value #AUTOMATIC_MTU} will have the maximum
+	 *            transfer unit be determined automatically via
+	 *            {@link RakNet#getMaximumTransferUnit(InetAddress)} with the
+	 *            parameter being the specified bind <code>address</code>.
 	 * @param maxConnections
 	 *            the maximum number of connections, A value of
 	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
@@ -257,13 +365,39 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws NullPointerException
 	 *             if the address is <code>null</code>.
 	 * @throws IllegalArgumentException
-	 *             if the maximum connections is less than zero and not equal to
-	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
-	 *             size is less than {@value RakNet#MINIMUM_MTU_SIZE}
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS} or the maximum
+	 *             transfer unit size is less than
+	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
+	 *             {@value #AUTOMATIC_MTU}.
 	 */
 	public RakNetServer(InetAddress address, int port, int maximumTransferUnit, int maxConnections)
 			throws NullPointerException, IllegalArgumentException {
 		this(address, port, maximumTransferUnit, maxConnections, null);
+	}
+
+	/**
+	 * Creates a RakNet server.
+	 * 
+	 * @param address
+	 *            the IP address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS}.
+	 */
+	public RakNetServer(InetAddress address, int port, int maxConnections)
+			throws NullPointerException, IllegalArgumentException {
+		this(address, port, AUTOMATIC_MTU, maxConnections);
 	}
 
 	/**
@@ -281,7 +415,11 @@ public class RakNetServer implements RakNetServerListener {
 	 *            be sent in one packet. If a packet exceeds this size, it is
 	 *            automatically split up so that it can still be sent over the
 	 *            connection (this is handled automatically by
-	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}).
+	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}). A
+	 *            value of {@value #AUTOMATIC_MTU} will have the maximum
+	 *            transfer unit be determined automatically via
+	 *            {@link RakNet#getMaximumTransferUnit(InetAddress)} with the
+	 *            parameter being the specified bind <code>address</code>.
 	 * @param maxConnections
 	 *            the maximum number of connections, A value of
 	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
@@ -298,9 +436,11 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws NullPointerException
 	 *             if the address is <code>null</code>.
 	 * @throws IllegalArgumentException
-	 *             if the maximum connections is less than zero and not equal to
-	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
-	 *             size is less than {@value RakNet#MINIMUM_MTU_SIZE}
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS} or the maximum
+	 *             transfer unit size is less than
+	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
+	 *             {@value #AUTOMATIC_MTU}.
 	 */
 	public RakNetServer(String host, int port, int maximumTransferUnit, int maxConnections, Identifier identifier)
 			throws UnknownHostException, NullPointerException, IllegalArgumentException {
@@ -316,13 +456,50 @@ public class RakNetServer implements RakNetServerListener {
 	 *            wildcard address.
 	 * @param port
 	 *            the port the server will bind to during startup.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @param identifier
+	 *            the identifier that will be sent in response to server pings
+	 *            if server broadcasting is enabled. A <code>null</code>
+	 *            identifier means nothing will be sent in response to server
+	 *            pings, even if server broadcasting is enabled.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>bindAddress</code> could be
+	 *             found, or if a scope_id was specified for a global IPv6
+	 *             address.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS}.
+	 */
+	public RakNetServer(String host, int port, int maxConnections, Identifier identifier)
+			throws UnknownHostException, NullPointerException, IllegalArgumentException {
+		this(host, port, AUTOMATIC_MTU, maxConnections, identifier);
+	}
+
+	/**
+	 * Creates a RakNet server.
+	 * 
+	 * @param host
+	 *            the IP address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param port
+	 *            the port the server will bind to during startup.
 	 * @param maximumTransferUnit
 	 *            the highest maximum transfer unit a client can use. The
 	 *            maximum transfer unit is the maximum number of bytes that can
 	 *            be sent in one packet. If a packet exceeds this size, it is
 	 *            automatically split up so that it can still be sent over the
 	 *            connection (this is handled automatically by
-	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}).
+	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}). A
+	 *            value of {@value #AUTOMATIC_MTU} will have the maximum
+	 *            transfer unit be determined automatically via
+	 *            {@link RakNet#getMaximumTransferUnit(InetAddress)} with the
+	 *            parameter being the specified bind <code>address</code>.
 	 * @param maxConnections
 	 *            the maximum number of connections, A value of
 	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
@@ -334,13 +511,43 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws NullPointerException
 	 *             if the address is <code>null</code>.
 	 * @throws IllegalArgumentException
-	 *             if the maximum connections is less than zero and not equal to
-	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
-	 *             size is less than {@value RakNet#MINIMUM_MTU_SIZE}
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS} or the maximum
+	 *             transfer unit size is less than
+	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
+	 *             {@value #AUTOMATIC_MTU}.
 	 */
 	public RakNetServer(String host, int port, int maximumTransferUnit, int maxConnections)
 			throws UnknownHostException, NullPointerException, IllegalArgumentException {
 		this(host, port, maximumTransferUnit, maxConnections, null);
+	}
+
+	/**
+	 * Creates a RakNet server.
+	 * 
+	 * @param host
+	 *            the IP address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>bindAddress</code> could be
+	 *             found, or if a scope_id was specified for a global IPv6
+	 *             address.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS}.
+	 */
+	public RakNetServer(String host, int port, int maxConnections)
+			throws UnknownHostException, NullPointerException, IllegalArgumentException {
+		this(host, port, AUTOMATIC_MTU, maxConnections);
 	}
 
 	/**
@@ -354,7 +561,11 @@ public class RakNetServer implements RakNetServerListener {
 	 *            be sent in one packet. If a packet exceeds this size, it is
 	 *            automatically split up so that it can still be sent over the
 	 *            connection (this is handled automatically by
-	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}).
+	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}). A
+	 *            value of {@value #AUTOMATIC_MTU} will have the maximum
+	 *            transfer unit be determined automatically via
+	 *            {@link RakNet#getMaximumTransferUnit(InetAddress)} with the
+	 *            parameter being the specified bind <code>address</code>.
 	 * @param maxConnections
 	 *            the maximum number of connections, A value of
 	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
@@ -367,13 +578,43 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws NullPointerException
 	 *             if the address is <code>null</code>.
 	 * @throws IllegalArgumentException
-	 *             if the maximum connections is less than zero and not equal to
-	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
-	 *             size is less than {@value RakNet#MINIMUM_MTU_SIZE}
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS} or the maximum
+	 *             transfer unit size is less than
+	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
+	 *             {@value #AUTOMATIC_MTU}.
 	 */
 	public RakNetServer(int port, int maximumTransferUnit, int maxConnections, Identifier identifier)
 			throws NullPointerException, IllegalArgumentException {
 		this(new InetSocketAddress((InetAddress) null, port), maximumTransferUnit, maxConnections, identifier);
+	}
+
+	/**
+	 * Creates a RakNet server.
+	 * 
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @param identifier
+	 *            the identifier that will be sent in response to server pings
+	 *            if server broadcasting is enabled. A <code>null</code>
+	 *            identifier means nothing will be sent in response to server
+	 *            pings, even if server broadcasting is enabled.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS} or the maximum
+	 *             transfer unit size is less than
+	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
+	 *             {@value #AUTOMATIC_MTU}.
+	 */
+	public RakNetServer(int port, int maxConnections, Identifier identifier)
+			throws NullPointerException, IllegalArgumentException {
+		this(port, AUTOMATIC_MTU, maxConnections, identifier);
 	}
 
 	/**
@@ -395,13 +636,34 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws NullPointerException
 	 *             if the address is <code>null</code>.
 	 * @throws IllegalArgumentException
-	 *             if the maximum connections is less than zero and not equal to
-	 *             {@value #INFINITE_CONNECTIONS} or the maximum transfer unit
-	 *             size is less than {@value RakNet#MINIMUM_MTU_SIZE}
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS} or the maximum
+	 *             transfer unit size is less than
+	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
+	 *             {@value #AUTOMATIC_MTU}.
 	 */
 	public RakNetServer(int port, int maximumTransferUnit, int maxConnections)
 			throws NullPointerException, IllegalArgumentException {
 		this(port, maximumTransferUnit, maxConnections, null);
+	}
+
+	/**
+	 * Creates a RakNet server.
+	 * 
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS}.
+	 */
+	public RakNetServer(int port, int maxConnections) throws NullPointerException, IllegalArgumentException {
+		this(port, AUTOMATIC_MTU, maxConnections);
 	}
 
 	/**
@@ -512,8 +774,8 @@ public class RakNetServer implements RakNetServerListener {
 	 */
 	public final void setMaxConnections(int maxConnections) throws IllegalArgumentException {
 		if (maxConnections < 0 && maxConnections != INFINITE_CONNECTIONS) {
-			throw new IllegalArgumentException(
-					"Maximum connections must be greater than or equal to zero or negative one for infinite connections");
+			throw new IllegalArgumentException("Maximum connections must be greater than or equal to 0 or "
+					+ INFINITE_CONNECTIONS + " for infinite connections");
 		}
 		this.maxConnections = maxConnections;
 	}
@@ -568,9 +830,10 @@ public class RakNetServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Adds a listener to the server. Listeners are used to listen for events
-	 * that occur relating to the server such as clients connecting to the
-	 * server, receiving messages, and more.
+	 * Adds a listener to the server.
+	 * <p>
+	 * Listeners are used to listen for events that occur relating to the server
+	 * such as clients connecting to the server, receiving messages, and more.
 	 * 
 	 * @param listener
 	 *            the listener to add.
@@ -644,7 +907,7 @@ public class RakNetServer implements RakNetServerListener {
 			throw new NullPointerException("Event cannot be null");
 		}
 		for (RakNetServerListener listener : listeners) {
-			Scheduler.scheduleSync(listener, event);
+			event.accept(listener);
 		}
 	}
 
@@ -1669,7 +1932,7 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws NullPointerException
 	 *             if the <code>address</code> is <code>null</code>.
 	 */
-	public final void banClient(InetAddress address) throws NullPointerException {
+	public final void ban(InetAddress address) throws NullPointerException {
 		if (address == null) {
 			throw new NullPointerException("IP address cannot be null");
 		} else if (!banned.contains(address)) {
@@ -1688,11 +1951,11 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if no IP address for the <code>host</code> could be found, or
 	 *             if a scope_id was specified for a global IPv6 address.
 	 */
-	public final void banClient(String host) throws NullPointerException, UnknownHostException {
+	public final void ban(String host) throws NullPointerException, UnknownHostException {
 		if (host == null) {
 			throw new NullPointerException("IP address cannot be null");
 		}
-		this.banClient(InetAddress.getByName(host));
+		this.ban(InetAddress.getByName(host));
 	}
 
 	/**
@@ -1701,7 +1964,7 @@ public class RakNetServer implements RakNetServerListener {
 	 * @param address
 	 *            the IP address to unban.
 	 */
-	public final void unbanClient(InetAddress address) {
+	public final void unban(InetAddress address) {
 		banned.remove(address);
 	}
 
@@ -1714,9 +1977,9 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if no IP address for the <code>host</code> could be found, or
 	 *             if a scope_id was specified for a global IPv6 address.
 	 */
-	public final void unbanClient(String host) throws UnknownHostException {
+	public final void unban(String host) throws UnknownHostException {
 		if (host != null) {
-			this.unbanClient(InetAddress.getByName(host));
+			this.unban(InetAddress.getByName(host));
 		}
 	}
 
@@ -1732,7 +1995,7 @@ public class RakNetServer implements RakNetServerListener {
 	 * @return <code>true</code> if a client was disconnected,
 	 *         <code>false</code> otherwise.
 	 */
-	public final boolean disconnectClient(InetSocketAddress address, String reason) {
+	public final boolean disconnect(InetSocketAddress address, String reason) {
 		RakNetClientPeer peer = clients.remove(address);
 		if (peer == null) {
 			return false; // No client to disconnect
@@ -1750,11 +2013,27 @@ public class RakNetServer implements RakNetServerListener {
 	 * 
 	 * @param address
 	 *            the address of the client.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
 	 * @return <code>true</code> if a client was disconnected,
 	 *         <code>false</code> otherwise.
 	 */
-	public final boolean disconnectClient(InetSocketAddress address) {
-		return this.disconnectClient(address, null);
+	public final boolean disconnect(InetSocketAddress address, Throwable reason) {
+		return this.disconnect(address, reason == null ? null : RakNet.getStackTrace(reason));
+	}
+
+	/**
+	 * Disconnects a client from the server.
+	 * 
+	 * @param address
+	 *            the address of the client.
+	 * @return <code>true</code> if a client was disconnected,
+	 *         <code>false</code> otherwise.
+	 */
+	public final boolean disconnect(InetSocketAddress address) {
+		return this.disconnect(address, (String) /* Solves ambiguity */ null);
 	}
 
 	/**
@@ -1771,11 +2050,32 @@ public class RakNetServer implements RakNetServerListener {
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 */
-	public final boolean disconnectClient(InetAddress address, int port, String reason) {
+	public final boolean disconnect(InetAddress address, int port, String reason) {
 		if (port < 0x0000 || port > 0xFFFF) {
 			return false; // Invalid port range
 		}
-		return this.disconnectClient(new InetSocketAddress(address, port), reason);
+		return this.disconnect(new InetSocketAddress(address, port), reason);
+	}
+
+	/**
+	 * Disconnects a client from the server.
+	 * 
+	 * @param address
+	 *            the IP address of the client.
+	 * @param port
+	 *            the port.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
+	 * @return <code>true</code> if a client was disconnect, <code>false</code>
+	 *         otherwise.
+	 */
+	public final boolean disconnect(InetAddress address, int port, Throwable reason) {
+		if (port < 0x0000 || port > 0xFFFF) {
+			return false; // Invalid port range
+		}
+		return this.disconnect(new InetSocketAddress(address, port), reason);
 	}
 
 	/**
@@ -1788,8 +2088,8 @@ public class RakNetServer implements RakNetServerListener {
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 */
-	public final boolean disconnectClient(InetAddress address, int port) {
-		return this.disconnectClient(address, port, null);
+	public final boolean disconnect(InetAddress address, int port) {
+		return this.disconnect(address, port, (String) /* Solves ambiguity */ null);
 	}
 
 	/**
@@ -1809,11 +2109,35 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if no IP address for the <code>host</code> could be found, or
 	 *             if a scope_id was specified for a global IPv6 address.
 	 */
-	public final boolean disconnectClient(String host, int port, String reason) throws UnknownHostException {
+	public final boolean disconnect(String host, int port, String reason) throws UnknownHostException {
 		if (host == null) {
 			return false;
 		}
-		return this.disconnectClient(InetAddress.getByName(host), port, reason);
+		return this.disconnect(InetAddress.getByName(host), port, reason);
+	}
+
+	/**
+	 * Disconnects a client from the server.
+	 * 
+	 * @param host
+	 *            the IP address of the client.
+	 * @param port
+	 *            the port.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
+	 * @return <code>true</code> if a client was disconnect, <code>false</code>
+	 *         otherwise.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
+	 */
+	public final boolean disconnect(String host, int port, Throwable reason) throws UnknownHostException {
+		if (host == null) {
+			return false;
+		}
+		return this.disconnect(InetAddress.getByName(host), port, reason);
 	}
 
 	/**
@@ -1829,8 +2153,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if no IP address for the <code>host</code> could be found, or
 	 *             if a scope_id was specified for a global IPv6 address.
 	 */
-	public final boolean disconnectClient(String host, int port) throws UnknownHostException {
-		return this.disconnectClient(host, port, null);
+	public final boolean disconnect(String host, int port) throws UnknownHostException {
+		return this.disconnect(host, port, (String) /* Solves ambiguity */ null);
 	}
 
 	/**
@@ -1845,14 +2169,14 @@ public class RakNetServer implements RakNetServerListener {
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 */
-	public final boolean disconnectClients(InetAddress address, String reason) {
+	public final boolean disconnect(InetAddress address, String reason) {
 		if (address == null) {
 			return false;
 		}
 		boolean disconnected = false;
 		for (InetSocketAddress peerAddress : clients.keySet()) {
 			if (address.equals(peerAddress)) {
-				this.disconnectClient(peerAddress, reason);
+				this.disconnect(peerAddress, reason);
 				disconnected = true;
 			}
 		}
@@ -1867,8 +2191,8 @@ public class RakNetServer implements RakNetServerListener {
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 */
-	public final boolean disconnectClients(InetAddress address) {
-		return this.disconnectClients(address, null);
+	public final boolean disconnect(InetAddress address) {
+		return this.disconnect(address, null);
 	}
 
 	/**
@@ -1886,11 +2210,30 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if no IP address for the <code>host</code> could be found, or
 	 *             if a scope_id was specified for a global IPv6 address.
 	 */
-	public final boolean disconnectClients(String host, String reason) throws UnknownHostException {
+	public final boolean disconnect(String host, String reason) throws UnknownHostException {
 		if (host == null) {
 			return false;
 		}
-		return this.disconnectClients(InetAddress.getByName(host), reason);
+		return this.disconnect(InetAddress.getByName(host), reason);
+	}
+
+	/**
+	 * Disconnects all clients from the server with the IP address.
+	 * 
+	 * @param host
+	 *            the IP address of the client.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
+	 * @return <code>true</code> if a client was disconnect, <code>false</code>
+	 *         otherwise.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
+	 */
+	public final boolean disconnect(String host, Throwable reason) throws UnknownHostException {
+		return this.disconnect(host, reason == null ? null : RakNet.getStackTrace(reason));
 	}
 
 	/**
@@ -1904,8 +2247,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if no IP address for the <code>host</code> could be found, or
 	 *             if a scope_id was specified for a global IPv6 address.
 	 */
-	public final boolean disconnectClients(String host) throws UnknownHostException {
-		return this.disconnectClients(host, null);
+	public final boolean disconnect(String host) throws UnknownHostException {
+		return this.disconnect(host, (String) /* Solves ambiguity */ null);
 	}
 
 	/**
@@ -1920,14 +2263,14 @@ public class RakNetServer implements RakNetServerListener {
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 */
-	public final boolean disconnectClients(int port, String reason) {
+	public final boolean disconnect(int port, String reason) {
 		if (port < 0x0000 || port > 0xFFFF) {
 			return false; // Invalid port range
 		}
 		boolean disconnected = false;
 		for (InetSocketAddress address : clients.keySet()) {
 			if (address.getPort() == port) {
-				this.disconnectClient(address, reason == null ? "Disconnected" : reason);
+				this.disconnect(address, reason == null ? "Disconnected" : reason);
 				disconnected = true;
 			}
 		}
@@ -1939,11 +2282,27 @@ public class RakNetServer implements RakNetServerListener {
 	 * 
 	 * @param port
 	 *            the port.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 */
-	public final boolean disconnectClients(int port) {
-		return this.disconnectClients(port, null);
+	public final boolean disconnect(int port, Throwable reason) {
+		return this.disconnect(port, reason == null ? null : RakNet.getStackTrace(reason));
+	}
+
+	/**
+	 * Disconnects all clients from the server with the port.
+	 * 
+	 * @param port
+	 *            the port.
+	 * @return <code>true</code> if a client was disconnect, <code>false</code>
+	 *         otherwise.
+	 */
+	public final boolean disconnect(int port) {
+		return this.disconnect(port, (String) /* Solves ambiguity */ null);
 	}
 
 	/**
@@ -1961,14 +2320,33 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the given peer is fabricated, meaning that the peer is not
 	 *             one created by the server but rather one created externally.
 	 */
-	public final boolean disconnectClient(RakNetClientPeer peer, String reason) throws IllegalArgumentException {
+	public final boolean disconnect(RakNetClientPeer peer, String reason) throws IllegalArgumentException {
 		if (peer != null) {
-			if (!clients.containsValue(peer)) {
+			if (peer.getServer() != this) {
 				throw new IllegalArgumentException("Peer must belong to the server");
 			}
-			return this.disconnectClient(peer.getAddress(), reason);
+			return this.disconnect(peer.getAddress(), reason);
 		}
 		return false;
+	}
+
+	/**
+	 * Disconnects a client from the server.
+	 * 
+	 * @param peer
+	 *            the peer of the client to disconnect.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code> value
+	 *            will have <code>"Disconnected"</code> be used as the reason
+	 *            instead.
+	 * @return <code>true</code> if a client was disconnected,
+	 *         <code>false</code> otherwise.
+	 * @throws IllegalArgumentException
+	 *             if the given peer is fabricated, meaning that the peer is not
+	 *             one created by the server but rather one created externally.
+	 */
+	public final boolean disconnect(RakNetClientPeer peer, Throwable reason) throws IllegalArgumentException {
+		return this.disconnect(peer, reason == null ? null : RakNet.getStackTrace(reason));
 	}
 
 	/**
@@ -1982,8 +2360,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the given peer is fabricated, meaning that the peer is not
 	 *             one created by the server but rather one created externally.
 	 */
-	public final boolean disconnectClient(RakNetClientPeer peer) {
-		return this.disconnectClient(peer, null);
+	public final boolean disconnect(RakNetClientPeer peer) {
+		return this.disconnect(peer, (String) /* Solves ambiguity */ null);
 	}
 
 	/**
@@ -1999,9 +2377,11 @@ public class RakNetServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Blocks the specified IP address. All currently connected clients with the
-	 * IP address (regardless of port) will be disconnected with the same reason
-	 * that the IP address was blocked.
+	 * Blocks the specified IP address.
+	 * <p>
+	 * All currently connected clients with the IP address (regardless of port)
+	 * will be disconnected with the same reason that the IP address was
+	 * blocked.
 	 * 
 	 * @param address
 	 *            the IP address to block.
@@ -2019,9 +2399,11 @@ public class RakNetServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Blocks the specified IP address. All currently connected clients with the
-	 * IP address (regardless of port) will be disconnected with the same reason
-	 * that the IP address was blocked.
+	 * Blocks the specified IP address.
+	 * <p>
+	 * All currently connected clients with the IP address (regardless of port)
+	 * will be disconnected with the same reason that the IP address was
+	 * blocked.
 	 * 
 	 * @param address
 	 *            the IP address to block.
@@ -2063,7 +2445,7 @@ public class RakNetServer implements RakNetServerListener {
 		} else if (cause == null) {
 			throw new NullPointerException("Cause cannot be null");
 		} else if (this.hasClient(address)) {
-			this.disconnectClient(address, RakNet.getStackTrace(cause));
+			this.disconnect(address, RakNet.getStackTrace(cause));
 		}
 		log.warn("Handled exception " + cause.getClass().getName() + " caused by address " + address);
 		this.callEvent(listener -> listener.onHandlerException(this, address, cause));
@@ -2085,6 +2467,8 @@ public class RakNetServer implements RakNetServerListener {
 			throw new NullPointerException("Sender cannot be null");
 		} else if (packet == null) {
 			throw new NullPointerException("Packet cannot be null");
+		} else if (clients.containsKey(sender)) {
+			clients.get(sender).handleInternal(packet);
 		} else if (packet.getId() == RakNetPacket.ID_UNCONNECTED_PING
 				|| packet.getId() == RakNetPacket.ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
 			UnconnectedPing ping = new UnconnectedPing(packet);
@@ -2094,7 +2478,7 @@ public class RakNetServer implements RakNetServerListener {
 							|| (clients.size() < maxConnections || maxConnections < 0))
 					&& broadcastingEnabled == true && ping.magic == true) {
 				ServerPing pingEvent = new ServerPing(sender, ping.connectionType, identifier);
-				this.callEvent(listener -> listener.handlePing(this, pingEvent));
+				this.callEvent(listener -> listener.onPing(this, pingEvent));
 				if (pingEvent.getIdentifier() != null) {
 					UnconnectedPong pong = new UnconnectedPong();
 					pong.timestamp = ping.timestamp;
@@ -2113,7 +2497,7 @@ public class RakNetServer implements RakNetServerListener {
 			connectionRequestOne.decode();
 			if (clients.containsKey(sender)) {
 				if (clients.get(sender).getState().equals(RakNetState.LOGGED_IN)) {
-					this.disconnectClient(sender, "Client reinstantiated connection");
+					this.disconnect(sender, "Client reinstantiated connection");
 				}
 			}
 			if (connectionRequestOne.magic == true) {
@@ -2122,14 +2506,14 @@ public class RakNetServer implements RakNetServerListener {
 					if (connectionRequestOne.networkProtocol != this.getProtocolVersion()) {
 						IncompatibleProtocolVersion incompatibleProtocol = new IncompatibleProtocolVersion();
 						incompatibleProtocol.networkProtocol = this.getProtocolVersion();
-						incompatibleProtocol.serverGuid = guid;
+						incompatibleProtocol.serverGuid = this.guid;
 						incompatibleProtocol.encode();
 						this.sendNettyMessage(incompatibleProtocol, sender);
 					} else {
 						if (connectionRequestOne.maximumTransferUnit <= maximumTransferUnit) {
 							OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne();
-							connectionResponseOne.serverGuid = guid;
-							connectionResponseOne.maximumTransferUnit = maximumTransferUnit;
+							connectionResponseOne.serverGuid = this.guid;
+							connectionResponseOne.maximumTransferUnit = this.maximumTransferUnit;
 							connectionResponseOne.encode();
 							this.sendNettyMessage(connectionResponseOne, sender);
 						}
@@ -2151,7 +2535,7 @@ public class RakNetServer implements RakNetServerListener {
 						connectionResponseTwo.encode();
 						if (!connectionResponseTwo.failed()) {
 							this.callEvent(
-									listener -> listener.onConnect(this, sender, connectionResponseTwo.connectionType));
+									listener -> listener.onConnect(this, sender, connectionRequestTwo.connectionType));
 							clients.put(sender,
 									new RakNetClientPeer(this, connectionRequestTwo.connectionType,
 											connectionRequestTwo.clientGuid, connectionRequestTwo.maximumTransferUnit,
@@ -2163,15 +2547,15 @@ public class RakNetServer implements RakNetServerListener {
 					this.sendNettyMessage(errorPacket, sender);
 				}
 			}
-		} else if (clients.containsKey(sender)) {
-			clients.get(sender).handleInternal(packet);
 		}
-		log.debug("Handled" + RakNetPacket.getName(packet.getId()) + " packet");
+		log.debug("Handled " + RakNetPacket.getName(packet.getId()) + " packet");
 	}
 
 	/**
-	 * Validates the sender of a packet. This is called throughout initial
-	 * client connection to make sure there are no issues.
+	 * Validates the sender of a packet.
+	 * <p>
+	 * This is called throughout initial client connection to make sure there
+	 * are no issues.
 	 * 
 	 * @param sender
 	 *            the address of the packet sender.
@@ -2200,9 +2584,11 @@ public class RakNetServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Sends a Netty message over the channel raw. This should be used
-	 * sparingly, as if it is used incorrectly it could break client peers
-	 * entirely. In order to send a message to a peer, use one of the
+	 * Sends a Netty message over the channel raw.
+	 * <p>
+	 * This should be used sparingly, as if it is used incorrectly it could
+	 * break client peers entirely. In order to send a message to a peer, use
+	 * one of the
 	 * {@link com.whirvis.jraknet.peer.RakNetPeer#sendMessage(com.whirvis.jraknet.protocol.Reliability, io.netty.buffer.ByteBuf)
 	 * sendMessage()} methods.
 	 * 
@@ -2228,9 +2614,11 @@ public class RakNetServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Sends a Netty message over the channel raw. This should be used
-	 * sparingly, as if it is used incorrectly it could break client peers
-	 * entirely. In order to send a message to a peer, use one of the
+	 * Sends a Netty message over the channel raw.
+	 * <p>
+	 * This should be used sparingly, as if it is used incorrectly it could
+	 * break client peers entirely. In order to send a message to a peer, use
+	 * one of the
 	 * {@link com.whirvis.jraknet.peer.RakNetPeer#sendMessage(Reliability, Packet)
 	 * sendMessage()} methods.
 	 * 
@@ -2250,9 +2638,11 @@ public class RakNetServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Sends a Netty message over the channel raw. This should be used
-	 * sparingly, as if it is used incorrectly it could break client peers
-	 * entirely. In order to send a message to a peer, use one of the
+	 * Sends a Netty message over the channel raw.
+	 * <p>
+	 * This should be used sparingly, as if it is used incorrectly it could
+	 * break client peers entirely. In order to send a message to a peer, use
+	 * one of the
 	 * {@link com.whirvis.jraknet.peer.RakNetPeer#sendMessage(com.whirvis.jraknet.protocol.Reliability, int)
 	 * sendMessage()} methods.
 	 * 
@@ -2269,6 +2659,16 @@ public class RakNetServer implements RakNetServerListener {
 	}
 
 	/**
+	 * Returns whether or not the server is running.
+	 * 
+	 * @return <code>true</code> if the server is running, <code>false</code>
+	 *         otherwise.
+	 */
+	public final boolean isRunning() {
+		return this.running;
+	}
+
+	/**
 	 * Starts the server.
 	 * 
 	 * @throws IllegalStateException
@@ -2276,7 +2676,7 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws RakNetException
 	 *             if an error occurs during startup.
 	 */
-	public final void start() throws IllegalStateException, RakNetException {
+	public void start() throws IllegalStateException, RakNetException {
 		if (running == true) {
 			throw new IllegalStateException("Server is already running");
 		} else if (listeners.isEmpty()) {
@@ -2291,35 +2691,62 @@ public class RakNetServer implements RakNetServerListener {
 
 			// Create bootstrap and bind channel
 			bootstrap.channel(NioDatagramChannel.class).group(group);
-			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false);
+			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false)
+					.option(ChannelOption.SO_SNDBUF, maximumTransferUnit)
+					.option(ChannelOption.SO_RCVBUF, maximumTransferUnit);
 			this.channel = (bindAddress != null ? bootstrap.bind(bindAddress) : bootstrap.bind(0)).sync().channel();
 			this.running = true;
 			log.debug("Created and bound bootstrap");
 
 			// Create and start peer update thread
 			RakNetServer server = this;
-			this.peerThread = new Thread("jraknet-peer-thread-" + Long.toHexString(guid)) {
+			this.peerThread = new Thread(
+					RakNetServer.class.getSimpleName() + "-Peer-Thread-" + Long.toHexString(guid).toUpperCase()) {
 
 				@Override
 				public void run() {
-					try {
-						while (server.running == true && !this.isInterrupted()) {
+					HashMap<RakNetClientPeer, Throwable> disconnected = new HashMap<RakNetClientPeer, Throwable>();
+					while (server.running == true && !this.isInterrupted()) {
+						try {
 							Thread.sleep(0, 1); // Lower CPU usage
-							for (RakNetClientPeer peer : clients.values()) {
-								try {
-									peer.update();
-									if (peer.getPacketsReceivedThisSecond() >= RakNet.getMaxPacketsPerSecond()) {
-										server.blockAddress(peer.getInetAddress(), "Too many packets",
-												RakNet.MAX_PACKETS_PER_SECOND_BLOCK);
-									}
-								} catch (Throwable throwable) {
-									server.callEvent(listener -> listener.onPeerException(server, peer, throwable));
-									server.disconnectClient(peer, throwable.getMessage());
+						} catch (InterruptedException e) {
+							this.interrupt(); // Interrupted during sleep
+						}
+
+						// Update peers
+						for (RakNetClientPeer peer : clients.values()) {
+							try {
+								peer.update();
+								if (peer.getPacketsReceivedThisSecond() >= RakNet.getMaxPacketsPerSecond()) {
+									server.blockAddress(peer.getInetAddress(), "Too many packets",
+											RakNet.MAX_PACKETS_PER_SECOND_BLOCK);
 								}
+							} catch (Throwable throwable) {
+								server.callEvent(listener -> listener.onPeerException(server, peer, throwable));
+								disconnected.put(peer, throwable);
 							}
 						}
-					} catch (InterruptedException e) {
-						this.interrupt(); // Interrupted during sleep
+
+						/*
+						 * Disconnect peers.
+						 * 
+						 * This must be done here as simply removing a client
+						 * from the clients map would be an incorrect way of
+						 * disconnecting a client. This means that calling the
+						 * disconnect() method is required. However, calling it
+						 * while in the loop would cause a
+						 * ConcurrentModifactionException. To get around this,
+						 * the clients that need to be disconnected are properly
+						 * disconnected after the loop is finished. This is done
+						 * simply by having them and their disconnect reason be
+						 * put in a disconnection map.
+						 */
+						if (disconnected.size() > 0) {
+							for (RakNetClientPeer peer : disconnected.keySet()) {
+								server.disconnect(peer, disconnected.get(peer));
+							}
+							disconnected.clear();
+						}
 					}
 				}
 
@@ -2335,8 +2762,10 @@ public class RakNetServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Stops the server. All currently connected clients will be disconnected
-	 * with the same reason used for shutdown.
+	 * Stops the server.
+	 * <p>
+	 * All currently connected clients will be disconnected with the same reason
+	 * used for shutdown.
 	 * 
 	 * @param reason
 	 *            the reason for shutdown. A <code>null</code> reason will have
@@ -2344,14 +2773,14 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws IllegalStateException
 	 *             if the server is not running.
 	 */
-	public final void shutdown(String reason) throws IllegalStateException {
+	public void shutdown(String reason) throws IllegalStateException {
 		if (running == false) {
 			throw new IllegalStateException("Server is not running");
 		}
 
 		// Disconnect clients
 		for (RakNetClientPeer client : clients.values()) {
-			this.disconnectClient(client, reason == null ? "Server shutdown" : reason);
+			this.disconnect(client, reason == null ? "Server shutdown" : reason);
 		}
 		clients.clear();
 
@@ -2373,17 +2802,39 @@ public class RakNetServer implements RakNetServerListener {
 
 	/**
 	 * Stops the server.
+	 * <p>
+	 * All currently connected clients will be disconnected with the same reason
+	 * used for shutdown.
+	 * 
+	 * @param reason
+	 *            the reason for shutdown. A <code>null</code> reason will have
+	 *            <code>"Server shutdown"</code> be used as the reason instead.
+	 * @throws IllegalStateException
+	 *             if the server is not running.
 	 */
-	public final void shutdown() {
-		this.shutdown(null);
+	public final void shutdown(Throwable reason) throws IllegalStateException {
+		this.shutdown(reason != null ? RakNet.getStackTrace(reason) : null);
+	}
+
+	/**
+	 * Stops the server.
+	 * <p>
+	 * All currently connected clients will be disconnected with the same reason
+	 * used for shutdown.
+	 * 
+	 * @throws IllegalstateException
+	 *             if the server is not running.
+	 */
+	public final void shutdown() throws IllegalStateException {
+		this.shutdown((String) /* Solves ambiguity */ null);
 	}
 
 	@Override
 	public String toString() {
-		return "RakNetServer [guid=" + guid + ", log=" + log + ", pongId=" + pongId + ", timestamp=" + timestamp
-				+ ", bindAddress=" + bindAddress + ", maximumTransferUnit=" + maximumTransferUnit + ", maxConnections="
-				+ maxConnections + ", broadcastingEnabled=" + broadcastingEnabled + ", identifier=" + identifier
-				+ ", listeners=" + listeners + ", running=" + running + ", getClientCount()=" + getClientCount() + "]";
+		return "RakNetServer [guid=" + guid + ", pongId=" + pongId + ", timestamp=" + timestamp + ", bindAddress="
+				+ bindAddress + ", maximumTransferUnit=" + maximumTransferUnit + ", maxConnections=" + maxConnections
+				+ ", broadcastingEnabled=" + broadcastingEnabled + ", identifier=" + identifier + ", listeners="
+				+ listeners + ", running=" + running + ", getClientCount()=" + getClientCount() + "]";
 	}
 
 }

@@ -45,25 +45,18 @@ import com.whirvis.jraknet.identifier.Identifier;
 import com.whirvis.jraknet.identifier.MinecraftIdentifier;
 
 /**
- * Used to test the broadcast feature in <code>RakNetClient</code>.
+ * Tests the {@link Discovery} system.
  *
  * @author Whirvis T. Wheatley
+ * @since JRakNet v2.0.0
  */
-public class BroadcastTest {
-
-	private final HashMap<InetSocketAddress, MinecraftIdentifier> discovered;
-	private final BroadcastFrame frame;
-
-	public BroadcastTest() {
-		Discovery.addPort(RakNetTest.MINECRAFT_DEFAULT_PORT);
-		this.discovered = new HashMap<InetSocketAddress, MinecraftIdentifier>();
-		this.frame = new BroadcastFrame();
-	}
+public final class BroadcastTest {
 
 	/**
 	 * The class used to listen for server discovery updates.
 	 *
 	 * @author Whirvis T. Wheatley
+	 * @since JRakNet v2.0.0
 	 */
 	private class ServerDiscoveryListener implements DiscoveryListener {
 
@@ -93,6 +86,18 @@ public class BroadcastTest {
 
 	}
 
+	private final HashMap<InetSocketAddress, MinecraftIdentifier> discovered;
+	private final BroadcastFrame frame;
+
+	/**
+	 * Constructs a <code>BroadcastTest</code>.
+	 */
+	private BroadcastTest() {
+		Discovery.addPort(RakNetTest.MINECRAFT_DEFAULT_PORT);
+		this.discovered = new HashMap<InetSocketAddress, MinecraftIdentifier>();
+		this.frame = new BroadcastFrame();
+	}
+
 	/**
 	 * Starts the test.
 	 */
@@ -102,6 +107,24 @@ public class BroadcastTest {
 		frame.setVisible(true);
 	}
 
+	/**
+	 * The entry point for the test.
+	 * 
+	 * @param args
+	 *            the program arguments. These values are ignored.
+	 * @throws ClassNotFoundException
+	 *             if the <code>LookAndFeel</code> class for the sustem could
+	 *             not be found.
+	 * @throws InstantiationException
+	 *             if a new instance of the <code>LookAndFeel</code> class could
+	 *             not be instantiated.
+	 * @throws IllegalAccessException
+	 *             if the class or initializer for the <code>LookAndFeel</code>
+	 *             class is inaccessible.
+	 * @throws UnsupportedLookAndFeelException
+	 *             if <code>lnf.isSupportedLookAndFeel()</code> is false for the
+	 *             instantiated <code>LookAndFeel</code> class.
+	 */
 	public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
 			IllegalAccessException, UnsupportedLookAndFeelException {
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());

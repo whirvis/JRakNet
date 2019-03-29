@@ -55,7 +55,6 @@ import com.whirvis.jraknet.peer.RakNetState;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.login.ConnectionRequest;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
-import com.whirvis.jraknet.scheduler.Scheduler;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -78,17 +77,19 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 
 	/**
-	 * The default maximum transfer unit sizes used by the client. These were
-	 * chosen due to the maximum transfer unit sizes used by the Minecraft
-	 * client during connection.
+	 * The default maximum transfer unit sizes used by the client.
+	 * <p>
+	 * These were chosen due to the maximum transfer unit sizes used by the
+	 * Minecraft client during connection.
 	 */
 	public static final int[] DEFAULT_TRANSFER_UNIT_SIZES = new int[] { 1492, 1200, 576, RakNet.MINIMUM_MTU_SIZE };
 
 	/**
 	 * The amount of time to wait before the client broadcasts another ping to
-	 * the local network and all added external servers. This was also
-	 * determined based on Minecraft's frequency of broadcasting pings to
-	 * servers.
+	 * the local network and all added external servers.
+	 * <p>
+	 * This was also determined based on Minecraft's frequency of broadcasting
+	 * pings to servers.
 	 */
 	public static final long PING_BROADCAST_WAIT_MILLIS = 1000L;
 
@@ -119,7 +120,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	public RakNetClient(InetSocketAddress address) {
 		UUID uuid = UUID.randomUUID();
 		this.guid = uuid.getMostSignificantBits();
-		this.log = LogManager.getLogger("jraknet-client-" + Long.toHexString(guid));
+		this.log = LogManager
+				.getLogger(RakNetClient.class.getSimpleName() + "-" + Long.toHexString(guid).toUpperCase());
 		this.timestamp = System.currentTimeMillis();
 		this.listeners = new ConcurrentLinkedQueue<RakNetClientListener>();
 		this.bindAddress = address;
@@ -192,7 +194,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * 
 	 * @param port
 	 *            the port the client will bind to during creation. A port of
-	 *            <code>zero</code> will have the client give Netty the
+	 *            <code>0</code> will have the client give Netty the
 	 *            respsonsibility of choosing the port to bind to.
 	 */
 	public RakNetClient(int port) {
@@ -234,9 +236,10 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	}
 
 	/**
-	 * Adds a {@link RakNetClientListener} to the client. Listeners are used to
-	 * listen for events that occur relating to the client such as connecting to
-	 * discovers, discovering local servers, and more.
+	 * Adds a {@link RakNetClientListener} to the client.
+	 * <p>
+	 * Listeners are used to listen for events that occur relating to the client
+	 * such as connecting to discovers, discovering local servers, and more.
 	 * 
 	 * @param listener
 	 *            the listener to add.
@@ -321,14 +324,15 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			throw new NullPointerException("Event cannot be null");
 		}
 		for (RakNetClientListener listener : listeners) {
-			Scheduler.scheduleSync(listener, event);
+			event.accept(listener);
 		}
 	}
 
 	/**
-	 * Returns whether or not the client is currently running. If it is running,
-	 * this means that it is currently connecting to or is connected to a
-	 * server.
+	 * Returns whether or not the client is currently running.
+	 * <p>
+	 * If it is running, this means that it is currently connecting to or is
+	 * connected to a server.
 	 * 
 	 * @return <code>true</code> if the client is running, <code>false</code>
 	 *         otherwise.
@@ -341,12 +345,13 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	}
 
 	/**
-	 * Returns the address the client is bound to. This will be the value
-	 * supplied during client creation until the client has connected to a
-	 * server using the {@link #connect(InetSocketAddress)} method. Once the
-	 * client has connected a server, the bind address will be changed to the
-	 * address returned from the channel's {@link Channel#localAddress()}
-	 * method.
+	 * Returns the address the client is bound to.
+	 * <p>
+	 * This will be the value supplied during client creation until the client
+	 * has connected to a server using the {@link #connect(InetSocketAddress)}
+	 * method. Once the client has connected a server, the bind address will be
+	 * changed to the address returned from the channel's
+	 * {@link Channel#localAddress()} method.
 	 * 
 	 * @return the address the client is bound to.
 	 */
@@ -484,9 +489,26 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	}
 
 	/**
-	 * Sends a Netty message over the channel raw. This should be used
-	 * sparingly, as if it is used incorrectly it could break server peers
-	 * entirely. In order to send a message to a peer, use one of the
+	 * {@inheritDoc}
+	 * 
+	 * @throws IllegalStateException
+	 *             if the client is not connected to a server.
+	 */
+	@Override
+	public final EncapsulatedPacket sendMessage(Reliability reliability, int channel, Packet packet)
+			throws IllegalStateException {
+		if (!this.isConnected()) {
+			throw new IllegalStateException("Cannot send messages while not connected to a server");
+		}
+		return peer.sendMessage(reliability, channel, packet);
+	}
+
+	/**
+	 * Sends a Netty message over the channel raw.
+	 * <p>
+	 * This should be used sparingly, as if it is used incorrectly it could
+	 * break server peers entirely. In order to send a message to a peer, use
+	 * one of the
 	 * {@link com.whirvis.jraknet.peer.RakNetPeer#sendMessage(Reliability, ByteBuf)
 	 * sendMessage()} methods.
 	 * 
@@ -512,9 +534,11 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	}
 
 	/**
-	 * Sends a Netty message over the channel raw. This should be used
-	 * sparingly, as if it is used incorrectly it could break server peers
-	 * entirely. In order to send a message to a peer, use one of the
+	 * Sends a Netty message over the channel raw.
+	 * <p>
+	 * This should be used sparingly, as if it is used incorrectly it could
+	 * break server peers entirely. In order to send a message to a peer, use
+	 * one of the
 	 * {@link com.whirvis.jraknet.peer.RakNetPeer#sendMessage(Reliability, Packet)
 	 * sendMessage()} methods.
 	 * 
@@ -534,9 +558,11 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	}
 
 	/**
-	 * Sends a Netty message over the channel raw. This should be used
-	 * sparingly, as if it is used incorrectly it could break server peers
-	 * entirely. In order to send a message to a peer, use one of the
+	 * Sends a Netty message over the channel raw.
+	 * <p>
+	 * This should be used sparingly, as if it is used incorrectly it could
+	 * break server peers entirely. In order to send a message to a peer, use
+	 * one of the
 	 * {@link com.whirvis.jraknet.peer.RakNetPeer#sendMessage(Reliability, int)
 	 * sendMessage()} methods.
 	 * 
@@ -627,8 +653,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * @throws RakNetException
 	 *             if an error occurs during connection or login.
 	 */
-	public final void connect(InetSocketAddress address)
-			throws NullPointerException, IllegalStateException, RakNetException {
+	public void connect(InetSocketAddress address) throws NullPointerException, IllegalStateException, RakNetException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
 		} else if (address.getAddress() == null) {
@@ -661,7 +686,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			log.debug("Reset maximum transfer unit with size of " + unit.getSize() + " bytes (" + (unit.getSize() * 8)
 					+ " bits)");
 		}
-		this.peerFactory = new PeerFactory(this, address, channel, units[0].getSize(), highestMaximumTransferUnitSize);
+		this.peerFactory = new PeerFactory(this, address, bootstrap, channel, units[0].getSize(),
+				highestMaximumTransferUnitSize);
 		log.debug("Reset maximum transfer units and created peer peerFactory");
 		peerFactory.startAssembly(units);
 
@@ -675,20 +701,23 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 
 		// Create and start peer update thread
 		RakNetClient client = this;
-		this.peerThread = new Thread("jraknet-peer-thread-" + Long.toHexString(guid).toLowerCase()) {
+		this.peerThread = new Thread(
+				RakNetClient.class.getSimpleName() + "-Peer-Thread-" + Long.toHexString(guid).toUpperCase()) {
 
 			@Override
 			public void run() {
-				try {
-					while (peer != null && !this.isInterrupted()) {
+				while (peer != null && !this.isInterrupted()) {
+					try {
 						Thread.sleep(0, 1); // Lower CPU usage
-						peer.update();
+					} catch (InterruptedException e) {
+						this.interrupt(); // Interrupted during sleep
 					}
-				} catch (InterruptedException e) {
-					this.interrupt(); // Interrupted during sleep
-				} catch (Throwable throwable) {
-					client.callEvent(listener -> listener.onPeerException(client, peer, throwable));
-					client.disconnect(throwable);
+					try {
+						peer.update();
+					} catch (Throwable throwable) {
+						client.callEvent(listener -> listener.onPeerException(client, peer, throwable));
+						client.disconnect(throwable);
+					}
 				}
 			}
 
@@ -774,21 +803,6 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * 
-	 * @throws IllegalStateException
-	 *             if the client is not connected to a server.
-	 */
-	@Override
-	public final EncapsulatedPacket sendMessage(Reliability reliability, int channel, Packet packet)
-			throws IllegalStateException {
-		if (!this.isConnected()) {
-			throw new IllegalStateException("Cannot send messages while not connected to a server");
-		}
-		return peer.sendMessage(reliability, channel, packet);
-	}
-
-	/**
 	 * Disconnects the client from the server.
 	 * 
 	 * @param reason
@@ -798,13 +812,15 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * @throws IllegalStateException
 	 *             if the client is not connected to a server.
 	 */
-	public final void disconnect(String reason) throws IllegalStateException {
+	public void disconnect(String reason) throws IllegalStateException {
 		if (peer == null) {
 			throw new IllegalStateException("Client is not connected to a server");
 		}
 
 		// Close peer and interrupt thread
-		peer.disconnect();
+		if (peer.getState() != RakNetState.DISCONNECTED) {
+			peer.disconnect();
+		}
 		peerThread.interrupt();
 
 		// Destroy peer

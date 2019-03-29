@@ -98,7 +98,7 @@ public final class RakNetClientPeer extends RakNetPeer {
 
 	@Override
 	public void handleMessage(RakNetPacket packet, int channel) {
-		if (packet.getId() == ID_CONNECTION_REQUEST && this.getState() == RakNetState.DISCONNECTED) {
+		if (packet.getId() == ID_CONNECTION_REQUEST && this.getState() == RakNetState.CONNECTED) {
 			ConnectionRequest request = new ConnectionRequest(packet);
 			request.decode();
 			if (request.clientGuid == this.getGloballyUniqueId() && request.useSecurity == false) {
@@ -111,7 +111,7 @@ public final class RakNetClientPeer extends RakNetPeer {
 					this.sendMessage(Reliability.RELIABLE_ORDERED, requestAccepted);
 					this.setState(RakNetState.HANDSHAKING);
 				} else {
-					server.disconnectClient(this,
+					server.disconnect(this,
 							"Login failed (" + requestAccepted.getClass().getSimpleName() + " failed to encode)");
 				}
 			} else {
@@ -122,21 +122,23 @@ public final class RakNetClientPeer extends RakNetPeer {
 					reason = "client has security enabled";
 				}
 				this.sendMessage(Reliability.UNRELIABLE, ID_CONNECTION_ATTEMPT_FAILED);
-				server.disconnectClient(this, "Login failed (" + reason + ")");
+				server.disconnect(this, "Login failed (" + reason + ")");
 			}
 		} else if (packet.getId() == ID_NEW_INCOMING_CONNECTION && this.getState() == RakNetState.HANDSHAKING) {
-			NewIncomingConnection clientHandshake = new NewIncomingConnection(packet);
-			clientHandshake.decode();
-			if (!clientHandshake.failed()) {
-				this.timestamp = System.currentTimeMillis() - clientHandshake.clientTimestamp;
+			NewIncomingConnection newIncomingConnection = new NewIncomingConnection(packet);
+			newIncomingConnection.decode();
+			if (!newIncomingConnection.failed()) {
+				this.timestamp = System.currentTimeMillis() - newIncomingConnection.clientTimestamp;
 				this.setState(RakNetState.LOGGED_IN);
+				this.getLogger()
+						.info("Client with globally unique ID " + this.getGloballyUniqueId() + " has logged in");
 				server.callEvent(listener -> listener.onLogin(server, this));
 			} else {
-				server.disconnectClient(this,
-						"Failed to login (" + clientHandshake.getClass().getSimpleName() + " failed to decode)");
+				server.disconnect(this,
+						"Failed to login (" + newIncomingConnection.getClass().getSimpleName() + " failed to decode)");
 			}
 		} else if (packet.getId() == ID_DISCONNECTION_NOTIFICATION) {
-			server.disconnectClient(this, "Disconnected");
+			server.disconnect(this, "Disconnected");
 		} else if (packet.getId() >= ID_USER_PACKET_ENUM) {
 			server.callEvent(listener -> listener.handleMessage(server, this, packet, channel));
 		} else {

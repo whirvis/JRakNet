@@ -140,10 +140,6 @@ public final class RakNet {
 
 	}
 
-	private static final HashMap<InetAddress, Integer> MAXIMUM_TRANSFER_UNIT_SIZES = new HashMap<InetAddress, Integer>();
-	private static int _lowestMaximumTransferUnitSize = -1;
-	private static long _maxPacketsPerSecond = 500;
-
 	/**
 	 * The amount of times the {@link #isServerOnline(InetSocketAddress)} and
 	 * {@link #isServerCompatible(InetSocketAddress)} methods will attempt to
@@ -223,7 +219,12 @@ public final class RakNet {
 	public static final long DETECTION_SEND_INTERVAL = 5000L;
 
 	/**
-	 * The amount of time in milliseconds
+	 * The default amount of time in milliseconds it will take for the peer to
+	 * timeout.
+	 * <p>
+	 * This can be changed in a peer specifically via the
+	 * {@link com.whirvis.jraknet.peer.RakNetPeer#setTimeout(long)
+	 * RakNetPeer.setTimeout(long)} method.
 	 */
 	public static final long PEER_TIMEOUT = DETECTION_SEND_INTERVAL * 5;
 
@@ -232,6 +233,10 @@ public final class RakNet {
 	 * too many packets in one second.
 	 */
 	public static final long MAX_PACKETS_PER_SECOND_BLOCK = 300000L;
+
+	private static final HashMap<InetAddress, Integer> MAXIMUM_TRANSFER_UNIT_SIZES = new HashMap<InetAddress, Integer>();
+	private static int _lowestMaximumTransferUnitSize = -1;
+	private static long _maxPacketsPerSecond = 500;
 
 	private RakNet() {
 		// Static class
@@ -747,7 +752,7 @@ public final class RakNet {
 	 * address.
 	 * 
 	 * @param address
-	 *            the address. A <code>null</code> value will have the lowest
+	 *            the IP address. A <code>null</code> value will have the lowest
 	 *            valid maximum transfer unit be returned instead.
 	 * @return the maximum transfer unit of the network card with the specified
 	 *         address, <code>-1</code> if it could not be determined.
@@ -792,6 +797,32 @@ public final class RakNet {
 	}
 
 	/**
+	 * Returns the maximum transfer unit of the network card with the specified
+	 * address.
+	 * <p>
+	 * This method is simply a shorthand for
+	 * {@link #getMaximumTransferUnit(InetAddress)}, with the port of the
+	 * <code>address</code> not being used. Instead, the
+	 * {@link InetSocketAddress#getAddress()} method is called to retrieve the
+	 * original {@link InetAddress}. If the <code>address</code> is
+	 * <code>null</code>, no <code>NullPointerException</code> will be thrown as
+	 * the possibility of a <code>null</code> value is accounted for.
+	 * 
+	 * @param address
+	 *            the address. A <code>null</code> value will have the lowest
+	 *            valid maximum transfer unit be returned instead.
+	 * @return the maximum transfer unit of the network card with the specified
+	 *         address, <code>-1</code> if it could not be determined.
+	 * @throws RuntimeException
+	 *             if an exception is caught when determining the lowest valid
+	 *             maximum transfer unit size despite the safe checks put in
+	 *             place.
+	 */
+	public static int getMaximumTransferUnit(InetSocketAddress address) {
+		return getMaximumTransferUnit(address == null ? null : address.getAddress());
+	}
+
+	/**
 	 * Returns the lowest valid maximum transfer unit among all of the network
 	 * cards installed on the machine.
 	 * 
@@ -799,7 +830,7 @@ public final class RakNet {
 	 *         cards installed on the machine.
 	 */
 	public static int getMaximumTransferUnit() {
-		return getMaximumTransferUnit(null);
+		return getMaximumTransferUnit((InetAddress) /* Solves ambiguity */ null);
 	}
 
 	/**

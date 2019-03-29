@@ -39,9 +39,12 @@ package com.whirvis.jraknet.peer;
 public enum RakNetState {
 
 	/**
-	 * The peer is disconnected.
+	 * The peer is connected.
+	 * <p>
+	 * This is the starting value of the state for all peers; as it is assumed a
+	 * peer has connected by the time it is created.
 	 */
-	DISCONNECTED,
+	CONNECTED,
 
 	/**
 	 * The peer is handshaking.
@@ -51,6 +54,11 @@ public enum RakNetState {
 	/**
 	 * The peer is logged in.
 	 */
-	LOGGED_IN;
+	LOGGED_IN,
+
+	/**
+	 * The peer is disconnected.
+	 */
+	DISCONNECTED;
 
 }

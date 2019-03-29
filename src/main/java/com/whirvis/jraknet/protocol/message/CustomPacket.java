@@ -59,7 +59,7 @@ public class CustomPacket extends RakNetPacket {
 	/**
 	 * The minimum size of a custom packet.
 	 */
-	public static final int MINIMUM_SIZE = size(new EncapsulatedPacket[0]);
+	public static final int MINIMUM_SIZE = size((EncapsulatedPacket[]) null);
 
 	/**
 	 * Calculates the size of the packet if it had been encoded.
@@ -69,9 +69,11 @@ public class CustomPacket extends RakNetPacket {
 	 * @return the size of the packet if it had been encoded.
 	 */
 	public static int size(EncapsulatedPacket... packets) {
-		int size = 3;
-		for (EncapsulatedPacket packet : packets) {
-			size += packet.size();
+		int size = 4;
+		if (packets != null) {
+			for (EncapsulatedPacket packet : packets) {
+				size += packet.size();
+			}
 		}
 		return size;
 	}
@@ -126,15 +128,15 @@ public class CustomPacket extends RakNetPacket {
 	public void encode() {
 		this.writeTriadLE(sequenceId);
 		if (messages != null) {
+			ArrayList<EncapsulatedPacket> ackMessages = new ArrayList<EncapsulatedPacket>();
 			for (EncapsulatedPacket packet : messages) {
-				ArrayList<EncapsulatedPacket> ackMessages = new ArrayList<EncapsulatedPacket>();
 				if (packet.reliability.requiresAck()) {
 					packet.ackRecord = new Record(sequenceId);
 					ackMessages.add(packet);
 				}
-				this.ackMessages = ackMessages.toArray(new EncapsulatedPacket[ackMessages.size()]);
-				packet.encode(this.buffer());
+				packet.encode(this);
 			}
+			this.ackMessages = ackMessages.toArray(new EncapsulatedPacket[ackMessages.size()]);
 		}
 	}
 
@@ -142,17 +144,17 @@ public class CustomPacket extends RakNetPacket {
 	public void decode() {
 		this.sequenceId = this.readTriadLE();
 		ArrayList<EncapsulatedPacket> messages = new ArrayList<EncapsulatedPacket>();
+		ArrayList<EncapsulatedPacket> ackMessages = new ArrayList<EncapsulatedPacket>();
 		while (this.remaining() >= EncapsulatedPacket.MINIMUM_SIZE) {
 			EncapsulatedPacket packet = new EncapsulatedPacket();
-			ArrayList<EncapsulatedPacket> ackMessages = new ArrayList<EncapsulatedPacket>();
-			packet.decode(this.buffer());
+			packet.decode(this);
 			if (packet.reliability.requiresAck()) {
 				packet.ackRecord = new Record(sequenceId);
 				ackMessages.add(packet);
 			}
-			this.ackMessages = ackMessages.toArray(new EncapsulatedPacket[ackMessages.size()]);
 			messages.add(packet);
 		}
+		this.ackMessages = ackMessages.toArray(new EncapsulatedPacket[ackMessages.size()]);
 		this.messages = messages.toArray(new EncapsulatedPacket[messages.size()]);
 	}
 
