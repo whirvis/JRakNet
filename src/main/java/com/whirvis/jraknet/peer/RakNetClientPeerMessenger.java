@@ -30,6 +30,7 @@
  */
 package com.whirvis.jraknet.peer;
 
+import com.whirvis.jraknet.InvalidChannelException;
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetPacket;

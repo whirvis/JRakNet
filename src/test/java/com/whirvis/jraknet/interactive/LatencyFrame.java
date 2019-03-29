@@ -34,29 +34,39 @@ import javax.swing.JFrame;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
 
-import com.whirvis.jraknet.peer.RakNetClientSession;
+import com.whirvis.jraknet.peer.RakNetClientPeer;
 
 /**
  * The frame used to visualize the latency test.
  *
  * @author Trent Summerlin
+ * @since JRakNEt v2.0.0
  */
-public class LatencyFrame extends JFrame {
+public final class LatencyFrame extends JFrame {
 
 	private static final long serialVersionUID = 9127496840159114268L;
+
+	/**
+	 * The width of the latency test frame.
+	 */
 	private static final int FRAME_WIDTH = 375;
+
+	/**
+	 * The height of the latency test frame.
+	 */
 	private static final int FRAME_HEIGHT = 235;
 
 	private final JTextPane txtPnClientLatencies;
 
-	public LatencyFrame() {
-		// Frame settings
-		setResizable(false);
-		setSize(FRAME_WIDTH, FRAME_HEIGHT);
-		setTitle("JRakNet Latency Test");
-
-		// Content settings
-		getContentPane().setLayout(null);
+	/**
+	 * Creates a latency test frame.
+	 */
+	protected LatencyFrame() {
+		// Frame and content settings
+		this.setResizable(false);
+		this.setSize(FRAME_WIDTH, FRAME_HEIGHT);
+		this.setTitle("JRakNet Latency Test");
+		this.getContentPane().setLayout(null);
 
 		// Client latencies
 		JTextPane txtpnClientLatencies = new JTextPane();
@@ -64,7 +74,7 @@ public class LatencyFrame extends JFrame {
 		txtpnClientLatencies.setText("Client latencies");
 		txtpnClientLatencies.setBackground(UIManager.getColor("Button.background"));
 		txtpnClientLatencies.setBounds(10, 10, 350, 20);
-		getContentPane().add(txtpnClientLatencies);
+		this.getContentPane().add(txtpnClientLatencies);
 
 		// The list of the connected clients
 		txtPnClientLatencies = new JTextPane();
@@ -72,23 +82,22 @@ public class LatencyFrame extends JFrame {
 		txtPnClientLatencies.setEditable(false);
 		txtPnClientLatencies.setBackground(UIManager.getColor("Button.background"));
 		txtPnClientLatencies.setBounds(10, 30, 350, 165);
-		getContentPane().add(txtPnClientLatencies);
+		this.getContentPane().add(txtPnClientLatencies);
 	}
 
 	/**
-	 * Updates the text in the JFrame according to the connecting clients.
+	 * Updates the text in the frame with the specified clients.
 	 * 
-	 * @param sessions
-	 *            the sessions of the clients connected to the server.
+	 * @param clients
+	 *            the clients connected to the server.
 	 */
-	public void updatePaneText(RakNetClientSession[] sessions) {
-		StringBuilder discoverString = new StringBuilder();
-		for (int i = 0; i < sessions.length; i++) {
-			RakNetClientSession session = sessions[i];
-			discoverString.append(session.getConnectionType().getName() + " client " + session.getAddress() + ": "
-					+ session.getLatency() + "MS" + (i + 1 < sessions.length ? "\n" : ""));
+	protected void updatePaneText(RakNetClientPeer[] clients) {
+		StringBuilder latencyBuilder = new StringBuilder();
+		for (int i = 0; i < clients.length; i++) {
+			latencyBuilder.append(clients[i].getConnectionType().getName() + " client " + clients[i].getAddress() + ": "
+					+ clients[i].getLatency() + "MS" + (i + 1 < clients.length ? "\n" : ""));
 		}
-		txtPnClientLatencies.setText(discoverString.toString());
+		txtPnClientLatencies.setText(latencyBuilder.toString());
 	}
 
 }

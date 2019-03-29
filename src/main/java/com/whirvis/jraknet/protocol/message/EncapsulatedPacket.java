@@ -39,8 +39,6 @@ import com.whirvis.jraknet.peer.RakNetPeer;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.message.acknowledge.Record;
 
-import io.netty.buffer.ByteBuf;
-
 /**
  * An encapsulated packet.
  * <p>
@@ -433,20 +431,24 @@ public final class EncapsulatedPacket implements Cloneable {
 	/**
 	 * Encodes the packet.
 	 * 
-	 * @param buf
+	 * @param buffer
 	 *            the buffer to write to.
 	 * @throws NullPointerException
-	 *             if the <code>buf</code> is <code>null</code>, or if the
-	 *             packet is reliable and the <code>ackRecord</code> is
+	 *             if the <code>reliability</code>, <code>payload</code>, or
+	 *             <code>buffer</code> are <code>null</code>, or if the
+	 *             reliability is reliable and the <code>ackRecord</code> is
 	 *             <code>null</code>.
 	 * @throws IllegalArgumentException
 	 *             if the <code>ackRecord</code> is ranged.
 	 */
-	public void encode(ByteBuf buf) throws NullPointerException, IllegalArgumentException {
-		if (buf == null) {
+	public void encode(Packet buffer) throws NullPointerException, IllegalArgumentException {
+		if (buffer == null) {
 			throw new NullPointerException("Buffer cannot be null");
+		} else if (reliability == null) {
+			throw new NullPointerException("Reliability cannot be null");
+		} else if (payload == null) {
+			throw new NullPointerException("Payload cannot be null");
 		}
-		Packet buffer = new Packet(buf);
 		byte flags = 0x00;
 		flags |= reliability.getId() << FLAG_RELIABILITY_INDEX;
 		flags |= split == true ? FLAG_SPLIT : 0;
@@ -477,18 +479,23 @@ public final class EncapsulatedPacket implements Cloneable {
 	/**
 	 * Decodes the packet.
 	 * 
-	 * @param buf
-	 *            the buffer whose data to read from.
+	 * @param buffer
+	 *            the buffer to read from.
 	 * @throws NullPointerException
-	 *             if the <code>buf</code> is <code>null</code>.
+	 *             if the <code>buffer</code> is <code>null</code>, or if the
+	 *             <code>reliability</code> failed to lookup (normally due to an
+	 *             invalid ID).
 	 */
-	public void decode(ByteBuf buf) throws NullPointerException {
-		if (buf == null) {
+	public void decode(Packet buffer) throws NullPointerException {
+		if (buffer == null) {
 			throw new NullPointerException("Buffer cannot be null");
 		}
-		Packet buffer = new Packet(buf);
-		byte flags = buffer.readByte();
+		short flags = buffer.readUnsignedByte();
 		this.reliability = Reliability.lookup((flags & FLAG_RELIABILITY) >> FLAG_RELIABILITY_INDEX);
+		if (reliability == null) {
+			throw new NullPointerException(
+					"Failed to lookup reliability with ID " + ((flags & FLAG_RELIABILITY) >> FLAG_RELIABILITY_INDEX));
+		}
 		this.split = (flags & FLAG_SPLIT) > 0;
 		int length = buffer.readUnsignedShort() / Byte.SIZE;
 		if (reliability.isReliable()) {

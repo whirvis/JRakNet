@@ -566,7 +566,7 @@ public class Packet {
 	}
 
 	/**
-	 * Writes the <code>byte[]</code> to the packet.
+	 * Writes the specified <code>byte</code>s to the packet.
 	 * 
 	 * @param data
 	 *            the data to write.
@@ -574,7 +574,7 @@ public class Packet {
 	 * @throws NullPointerException
 	 *             if the <code>data</code> is <code>null</code>.
 	 */
-	public final Packet write(byte[] data) throws NullPointerException {
+	public final Packet write(byte... data) throws NullPointerException {
 		if (data == null) {
 			throw new NullPointerException("Data cannot be null");
 		}
@@ -582,6 +582,31 @@ public class Packet {
 			buffer.writeByte(data[i]);
 		}
 		return this;
+	}
+
+	/**
+	 * Writes the specified <code>byte</code>s to the packet.
+	 * <p>
+	 * This method is simply a shorthand for the {@link #write(byte...)} method,
+	 * with all the values being automatically casted back to a
+	 * <code>byte</code> before being sent to the original
+	 * {@link #write(byte...)} method.
+	 * 
+	 * @param data
+	 *            the data to write.
+	 * @return the packet.
+	 * @throws NullPointerException
+	 *             if the <code>data</code> is <code>null</code>.
+	 */
+	public final Packet write(int... data) {
+		if (data == null) {
+			throw new NullPointerException("Data cannot be null");
+		}
+		byte[] bData = new byte[data.length];
+		for (int i = 0; i < data.length; i++) {
+			bData[i] = (byte) data[i];
+		}
+		return this.write(bData);
 	}
 
 	/**
@@ -1041,6 +1066,7 @@ public class Packet {
 		if (ipAddress.length == ADDRESS_VERSION_IPV6_LENGTH) {
 			this.pad(ADDRESS_VERSION_IPV6_MYSTERY_LENGTH); // Mystery bytes
 		}
+		this.writeUnsignedShort(address.getPort());
 		return this;
 	}
 

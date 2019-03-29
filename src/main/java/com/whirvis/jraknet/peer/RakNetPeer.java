@@ -35,15 +35,14 @@ import static com.whirvis.jraknet.RakNetPacket.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.whirvis.jraknet.InvalidChannelException;
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetPacket;
@@ -131,6 +130,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	private final ConnectionType connectionType;
 	private final Channel channel;
 	private RakNetState state;
+	private long timeout;
 	private int packetsSentThisSecond;
 	private int packetsReceivedThisSecond;
 	private long lastPacketsSentThisSecondResetTime;
@@ -179,13 +179,14 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 */
 	protected RakNetPeer(InetSocketAddress address, long guid, int maximumTransferUnit, ConnectionType connectionType,
 			Channel channel) {
-		this.log = LogManager.getLogger("jraknet-peer-" + Long.toHexString(guid));
+		this.log = LogManager.getLogger(RakNetPeer.class.getSimpleName() + "-" + Long.toHexString(guid).toUpperCase());
 		this.address = address;
 		this.guid = guid;
 		this.maximumTransferUnit = maximumTransferUnit;
 		this.connectionType = connectionType;
 		this.channel = channel;
-		this.state = RakNetState.DISCONNECTED;
+		this.state = RakNetState.CONNECTED;
+		this.timeout = RakNet.PEER_TIMEOUT;
 		this.lastPacketReceiveTime = System.currentTimeMillis();
 		this.reliablePackets = new ConcurrentMessageIndexList();
 		this.splitQueue = new ConcurrentIntMap<EncapsulatedPacket.Split>();
@@ -296,6 +297,35 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		}
 		this.state = state;
 		log.debug("Set state to " + state.name());
+	}
+
+	/**
+	 * Returns the amount of time in milliseconds it will take for the peer to
+	 * not respond in order for it to timeout.
+	 * <p>
+	 * By default, this value is set to {@value RakNet#PEER_TIMEOUT}.
+	 * 
+	 * @return the amount of time in milliseconds it will take for the peer to
+	 *         not respond in order for it to timeout
+	 */
+	public long getTimeout() {
+		return this.timeout;
+	}
+
+	/**
+	 * Sets the amount of time in milliseconds it will take for the peer to not
+	 * respond in order for it to timeout.
+	 * 
+	 * @param timeout
+	 *            the timeout time.
+	 * @throws IllegalArgumentException
+	 *             if the <code>timeout</code> is less than <code>0</code>.
+	 */
+	public void setTimeout(long timeout) throws IllegalArgumentException {
+		if (timeout < 0) {
+			throw new IllegalArgumentException("Timeout must be greater than 0");
+		}
+		this.timeout = timeout;
 	}
 
 	/**
@@ -820,7 +850,9 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 					reliable.add(packet);
 				}
 			}
-			recoveryQueue.put(custom.sequenceId, reliable.toArray(new EncapsulatedPacket[reliable.size()]));
+			if (reliable.size() > 0) {
+				recoveryQueue.put(custom.sequenceId, reliable.toArray(new EncapsulatedPacket[reliable.size()]));
+			}
 		}
 		log.debug("Sent custom packet containing " + custom.messages.length
 				+ " encapsulated packets with sequence number " + custom.sequenceId);
@@ -918,8 +950,8 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 */
 	public final void update() throws TimeoutException {
 		long currentTime = System.currentTimeMillis();
-		if (currentTime - lastPacketReceiveTime >= RakNet.PEER_TIMEOUT) {
-			throw new TimeoutException();
+		if (currentTime - lastPacketReceiveTime >= timeout) {
+			throw new TimeoutException(this);
 		}
 
 		// Send keep alive packet
@@ -969,6 +1001,58 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	}
 
 	/**
+	 * Disconnects the peer.
+	 * <p>
+	 * Proper disconnection is accomplished here by sending it an unreliable
+	 * <code>DISCONNECTION_NOTIFICATION</code> packet.
+	 * 
+	 * @throws IllegalStateException
+	 *             if the peer is already disconnected.
+	 */
+	public final void disconnect() throws IllegalStateException {
+		if (this.getState() == RakNetState.DISCONNECTED) {
+			throw new IllegalStateException("Peer is already disconnected");
+		}
+
+		/*
+		 * Clear the send queue to make sure the disconnect packet is first in
+		 * line to be sent. After the disconnection notification packet has been
+		 * sent, the peer will be forcefully updated to ensure the packet is
+		 * sent out at least once.
+		 */
+		sendQueue.clear();
+		this.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
+		this.update();
+		this.setState(RakNetState.DISCONNECTED);
+	}
+
+	/**
+	 * Called when a packet is received.
+	 * 
+	 * @param packet
+	 *            the packet to handle.
+	 * @param channel
+	 *            the packet the channel was sent on.
+	 */
+	public abstract void handleMessage(RakNetPacket packet, int channel);
+
+	/**
+	 * Called when a acknowledge receipt is received for an
+	 * {@link EncapsulatedPacket}.
+	 * <p>
+	 * Keep in mind that an {@link EncapsulatedPacket} is not the same as a
+	 * regular message (or simply a packet). These have a lot of extra data in
+	 * them other than the payload, including split data if the packet is split
+	 * up.
+	 * 
+	 * @param record
+	 *            the received record.
+	 * @param packet
+	 *            the received packet.
+	 */
+	public abstract void onAcknowledge(Record record, EncapsulatedPacket packet);
+
+	/**
 	 * Called when a not acknowledged receipt is received for an
 	 * {@link EncapsulatedPacket}.
 	 * <p>
@@ -988,50 +1072,5 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 *            the lost packet.
 	 */
 	public abstract void onNotAcknowledge(Record record, EncapsulatedPacket packet);
-
-	/**
-	 * Called when a acknowledge receipt is received for an
-	 * {@link EncapsulatedPacket}.
-	 * <p>
-	 * Keep in mind that an {@link EncapsulatedPacket} is not the same as a
-	 * regular message (or simply a packet). These have a lot of extra data in
-	 * them other than the payload, including split data if the packet is split
-	 * up.
-	 * 
-	 * @param record
-	 *            the received record.
-	 * @param packet
-	 *            the received packet.
-	 */
-	public abstract void onAcknowledge(Record record, EncapsulatedPacket packet);
-
-	/**
-	 * Called when a packet is received.
-	 * 
-	 * @param packet
-	 *            the packet to handle.
-	 * @param channel
-	 *            the packet the channel was sent on.
-	 */
-	public abstract void handleMessage(RakNetPacket packet, int channel);
-
-	/**
-	 * Disconnects the peer.
-	 * <p>
-	 * Proper disconnection is accomplished here by sending it an unreliable
-	 * <code>DISCONNECTION_NOTIFICATION</code> packet.
-	 */
-	public final void disconnect() {
-		/*
-		 * Clear the send queue to make sure the disconnect packet is first in
-		 * line to be sent. After the disconnection notification packet has been
-		 * sent, the peer will be forcefully updated to ensure the packet is
-		 * sent out at least once.
-		 */
-		sendQueue.clear();
-		this.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
-		this.update();
-		this.setState(RakNetState.DISCONNECTED);
-	}
 
 }

@@ -77,7 +77,7 @@ public interface RakNetServerListener {
 	 * @param ping
 	 *            the response that will be sent to the client.
 	 */
-	public default void handlePing(RakNetServer server, ServerPing ping) {
+	public default void onPing(RakNetServer server, ServerPing ping) {
 	}
 
 	/**

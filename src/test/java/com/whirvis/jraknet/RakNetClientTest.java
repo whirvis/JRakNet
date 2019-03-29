@@ -44,56 +44,74 @@ import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
 import com.whirvis.jraknet.protocol.message.acknowledge.Record;
 
 /**
- * Used to test <code>RakNetClient</code> by connecting to the LifeBoat Survival
- * Games server, sending a dummy packet to make sure the ACK/NACK functions
- * work, and then disconnecting afterwards.
+ * Tests the {@link RakNetClient} by connecting to the LifeBoat Survival Games
+ * server.
  *
  * @author Trent Summerlin
+ * @since JRakNet v2.0.0
  */
-public class RakNetClientTest {
+public final class RakNetClientTest {
 
 	private static final Logger LOG = LogManager.getLogger(RakNetClientTest.class);
 
-	public static void main(String[] args) throws IllegalStateException, RakNetException, UnknownHostException {
-		// Create client and add listener
+	private RakNetClientTest() {
+		// Static class
+	}
+
+	/**
+	 * The entry point for the test.
+	 * 
+	 * @param args
+	 *            the program arguments. These values are ignored.
+	 * @throws RakNetException
+	 *             if a RakNet error occurs.
+	 */
+	public static void main(String[] args) throws UnknownHostException, RakNetException {
 		RakNetClient client = new RakNetClient();
 		client.addListener(new RakNetClientListener() {
 
 			@Override
 			public void onConnect(RakNetClient client, InetSocketAddress address, ConnectionType connectionType) {
-				LOG.info("Connected to server " + connectionType.getName() + " server with address " + address + "!");
+				LOG.info("Connected to " + connectionType.getName() + " server with address " + address);
 			}
 
 			@Override
 			public void onLogin(RakNetClient client, RakNetServerPeer peer) {
-				LOG.info("Logged into server!");
+				LOG.info("Logged into server");
 				client.disconnect();
+			}
+
+			@Override
+			public void onDisconnect(RakNetClient client, RakNetServerPeer peer, String reason) {
+				LOG.info("Disconnected from server");
 			}
 
 			@Override
 			public void onAcknowledge(RakNetClient client, RakNetServerPeer peer, Record record,
 					EncapsulatedPacket packet) {
-				LOG.info(peer.getConnectionType().getName() + " server has acknowledged packet with ID: "
-						+ RakNetPacket.getName(packet.payload.readUnsignedByte()));
+				LOG.info(peer.getConnectionType().getName() + " server has acknowledged "
+						+ RakNetPacket.getName(packet.payload.readUnsignedByte()) + " packet");
 			}
 
 			@Override
 			public void onLoss(RakNetClient client, RakNetServerPeer peer, Record record, EncapsulatedPacket packet) {
-				LOG.info(peer.getConnectionType().getName() + " server has not acknowledged packet with ID: "
-						+ RakNetPacket.getName(packet.payload.readUnsignedByte()));
+				LOG.info(peer.getConnectionType().getName() + " server has not lost "
+						+ RakNetPacket.getName(packet.payload.readUnsignedByte()) + " packet");
 			}
 
 			@Override
 			public void onHandlerException(RakNetClient client, InetSocketAddress address, Throwable cause) {
-				LOG.error("Exception caused by " + address);
-				cause.printStackTrace();
+				LOG.error("Exception caused by " + address, cause);
+			}
+
+			@Override
+			public void onPeerException(RakNetClient client, RakNetServerPeer peer, Throwable cause) {
+				LOG.error("Peer with address " + peer.getAddress() + " threw exception", cause);
 			}
 
 		});
 		LOG.info("Created client, connecting to " + RakNetTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS + "...");
-
-		// Connect to server
-		client.connect("192.168.1.8", 19132);
+		client.connect(RakNetTest.LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
 	}
 
 }

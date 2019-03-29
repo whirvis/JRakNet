@@ -30,16 +30,14 @@
  */
 package com.whirvis.jraknet;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.identifier.MinecraftIdentifier;
-import com.whirvis.jraknet.peer.RakNetClientSession;
-import com.whirvis.jraknet.protocol.MessageIdentifier;
-import com.whirvis.jraknet.protocol.login.NewIncomingConnection;
+import com.whirvis.jraknet.peer.RakNetClientPeer;
+import com.whirvis.jraknet.protocol.ConnectionType;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
 import com.whirvis.jraknet.protocol.message.acknowledge.Record;
 import com.whirvis.jraknet.server.RakNetServer;
@@ -48,103 +46,106 @@ import com.whirvis.jraknet.server.ServerPing;
 import com.whirvis.jraknet.windows.UniversalWindowsProgram;
 
 /**
- * Used to test <code>RakNetServer</code> by starting a server on the default
- * Minecraft port.
+ * Tests {@link RakNetServer} by starting a server on the default Minecraft
+ * port.
+ * <p>
+ * To test this, simply open a Minecraft client on the latest version of the
+ * game, go to the friends list on the main menu, and connect to the server with
+ * the name "A JRakNet server test". Once the client has connected and logged
+ * in, the server will disconnect it and shutdown.
  *
  * @author Trent Summerlin
+ * @since JRakNet v2.0.0
  */
-public class RakNetServerTest {
+public final class RakNetServerTest {
 
 	private static final Logger LOG = LogManager.getLogger(RakNetServerTest.class);
 
-	public static void main(String[] args) {
-		// Add loopback exemption for Minecraft
-		if (!UniversalWindowsProgram.MINECRAFT.addLoopbackExempt()) {
-			LOG.warn("Failed to" + " add loopback exemption for Minecraft");
-		}
+	private RakNetServerTest() {
+		// Static class
+	}
 
-		// Create server and add listener
-		RakNetServer server = new RakNetServer(RakNetTest.MINECRAFT_DEFAULT_PORT, RakNet.getMaximumTransferUnit(), 10,
-				new MinecraftIdentifier("TEST", 0, "0.11.0", 0, 0, 0, "TEST", "TEST"));
+	/**
+	 * The entry point for the test.
+	 * 
+	 * @param args
+	 *            the program arguments. These values are ignored.
+	 */
+	public static void main(String[] args) throws RakNetException {
+		if (!UniversalWindowsProgram.MINECRAFT.setLoopbackExempt(true)) {
+			LOG.warn("Failed to add loopback exemption for Minecraft");
+		}
+		RakNetServer server = new RakNetServer(RakNetTest.MINECRAFT_DEFAULT_PORT, 10);
 		server.addListener(new RakNetServerListener() {
 
 			@Override
-			public void onClientPreConnect(InetSocketAddress address) {
-				LOG.info("Client from " + address + " has instantiated the connection, waiting for "
-						+ NewIncomingConnection.class.getSimpleName() + " packet");
+			public void onStart(RakNetServer server) {
+				LOG.info("Server started");
 			}
 
 			@Override
-			public void onClientPreDisconnect(InetSocketAddress address, String reason) {
-				LOG.info("Client from " + address + " has failed to login for \"" + reason + "\"");
+			public void onShutdown(RakNetServer server) {
+				LOG.info("Server shutdown");
 			}
 
 			@Override
-			public void onClientConnect(RakNetClientSession session) {
-				LOG.info(session.getConnectionType().getName() + " client from address " + session.getAddress()
-						+ " has connected to the server");
+			public void onPing(RakNetServer server, ServerPing ping) {
+				ping.setIdentifier(new MinecraftIdentifier("A JRakNet server test",
+						RakNetTest.MINECRAFT_PROTOCOL_NUMBER, RakNetTest.MINECRAFT_VERSION, server.getClientCount(),
+						server.getMaxConnections(), server.getGloballyUniqueId(), "New World", "Survival"));
 			}
 
 			@Override
-			public void onClientDisconnect(RakNetClientSession session, String reason) {
-				LOG.info(session.getConnectionType().getName() + " client from address " + session.getAddress()
-						+ " has been disconnected for \"" + reason + "\"");
+			public void onConnect(RakNetServer server, InetSocketAddress address, ConnectionType connectionType) {
+				LOG.info("Client from " + address + " has connected using the " + connectionType.getName()
+						+ " implementation, waiting for login");
 			}
 
 			@Override
-			public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
-				LOG.info("Received packet from " + session.getConnectionType().getName() + " client with address "
-						+ session.getAddress() + " with packet ID " + RakNet.toHexStringId(packet) + " on channel "
+			public void onLogin(RakNetServer server, RakNetClientPeer peer) {
+				LOG.info("Client from " + peer.getAddress() + " has logged in");
+				server.disconnect(peer, "Test successful");
+				server.shutdown();
+			}
+
+			@Override
+			public void onDisconnect(RakNetServer server, InetSocketAddress address, RakNetClientPeer peer,
+					String reason) {
+				LOG.info("Client from " + address + " " + (peer == null ? "failed to login" : "disconnected"));
+			}
+
+			@Override
+			public void onAcknowledge(RakNetServer server, RakNetClientPeer peer, Record record,
+					EncapsulatedPacket packet) {
+				LOG.info(peer.getConnectionType().getName() + " client with address " + peer.getAddress()
+						+ " has received " + RakNetPacket.getName(packet.payload.readUnsignedByte()) + " packet");
+			}
+
+			@Override
+			public void onLoss(RakNetServer server, RakNetClientPeer peer, Record record, EncapsulatedPacket packet) {
+				LOG.info(peer.getConnectionType().getName() + " client with address " + peer.getAddress() + " has lost "
+						+ RakNetPacket.getName(packet.payload.readUnsignedByte()) + " packet");
+			}
+
+			@Override
+			public void handleMessage(RakNetServer server, RakNetClientPeer peer, RakNetPacket packet, int channel) {
+				LOG.info("Received packet from " + peer.getConnectionType().getName() + " client with address "
+						+ peer.getAddress() + " with packet ID " + RakNetPacket.getName(packet) + " on channel "
 						+ channel);
 			}
 
 			@Override
-			public void handlePing(ServerPing ping) {
-				MinecraftIdentifier identifier = new MinecraftIdentifier("A JRakNet server test",
-						RakNetTest.MINECRAFT_PROTOCOL_NUMBER, RakNetTest.MINECRAFT_VERSION, server.getClientCount(),
-						server.getMaxConnections(), server.getGloballyUniqueId(), "New World", "Survival");
-				ping.setIdentifier(identifier);
+			public void onHandlerException(RakNetServer server, InetSocketAddress address, Throwable cause) {
+				LOG.error("Exception caused by " + address, cause);
 			}
 
 			@Override
-			public void onAcknowledge(RakNetClientSession session, Record record, EncapsulatedPacket packet) {
-				LOG.info(session.getConnectionType().getName() + " client with address " + session.getAddress()
-						+ " has received packet with ID: "
-						+ MessageIdentifier.getName(packet.payload.readUnsignedByte()));
-			}
-
-			@Override
-			public void onNotAcknowledge(RakNetClientSession session, Record record, EncapsulatedPacket packet) {
-				LOG.info(session.getConnectionType().getName() + " client with address " + session.getAddress()
-						+ " has lost packet with ID: " + MessageIdentifier.getName(packet.payload.readUnsignedByte()));
-			}
-
-			@Override
-			public void onHandlerException(InetSocketAddress address, Throwable cause) {
-				LOG.error("Exception caused by " + address);
-				cause.printStackTrace();
-			}
-
-			@Override
-			public void onAddressBlocked(InetAddress address, String reason, long time) {
-				LOG.info(
-						"Blocked address " + address + " due to \"" + reason + "\" for " + (time / 1000L) + " seconds");
-			}
-
-			@Override
-			public void onAddressUnblocked(InetAddress address) {
-				LOG.info("Unblocked address " + address);
+			public void onPeerException(RakNetServer server, RakNetClientPeer peer, Throwable cause) {
+				LOG.error("Peer with address " + peer.getAddress() + " threw exception", cause);
 			}
 
 		});
-
-		// Start server
-		try {
-			server.start();
-		} catch (RakNetException e) {
-			e.printStackTrace();
-			server.shutdown(e.getClass().getName() + ": " + e.getMessage());
-		}
+		server.start();
 	}
 
 }

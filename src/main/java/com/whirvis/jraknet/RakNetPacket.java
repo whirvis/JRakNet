@@ -52,7 +52,6 @@ import io.netty.channel.socket.DatagramPacket;
  *
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
- * @see Packet
  */
 public class RakNetPacket extends Packet {
 
@@ -919,7 +918,7 @@ public class RakNetPacket extends Packet {
 	 */
 	private static void mapNameIds() {
 		if (mappedNameIds == false) {
-			Logger log = LogManager.getLogger("jraknet-raknet-packet");
+			Logger log = LogManager.getLogger(RakNetPacket.class);
 			for (Field field : RakNetPacket.class.getFields()) {
 				if (field.getType().equals(short.class)) {
 					try {
@@ -976,7 +975,7 @@ public class RakNetPacket extends Packet {
 	}
 
 	/**
-	 * Return the name of the packet with the specified ID.
+	 * Returns the name of the packet with the specified ID.
 	 * <p>
 	 * Packet IDs {@link #ID_CUSTOM_0}, {@link #ID_CUSTOM_1},
 	 * {@link #ID_CUSTOM_2}, {@link #ID_CUSTOM_3}, {@link #ID_CUSTOM_4},
@@ -989,7 +988,7 @@ public class RakNetPacket extends Packet {
 	 * 
 	 * @param id
 	 *            the ID of the packet.
-	 * @return the name of the packet with the specified ID, it's Hexadecimal ID
+	 * @return the name of the packet with the specified ID, it's hexadecimal ID
 	 *         according to {@link RakNet#toHexStringId(int)} if it does not
 	 *         exist.
 	 */
@@ -1001,6 +1000,32 @@ public class RakNetPacket extends Packet {
 			return RakNet.toHexStringId(id);
 		}
 		return PACKET_NAMES.get((short) id);
+	}
+
+	/**
+	 * Returns the name of the specified packet.
+	 * <p>
+	 * Packet IDs {@link #ID_CUSTOM_0}, {@link #ID_CUSTOM_1},
+	 * {@link #ID_CUSTOM_2}, {@link #ID_CUSTOM_3}, {@link #ID_CUSTOM_4},
+	 * {@link #ID_CUSTOM_5}, {@link #ID_CUSTOM_6}, {@link #ID_CUSTOM_7},
+	 * {@link #ID_CUSTOM_8}, {@link #ID_CUSTOM_9}, {@link #ID_CUSTOM_A},
+	 * {@link #ID_CUSTOM_B}, {@link #ID_CUSTOM_C}, {@link #ID_CUSTOM_D},
+	 * {@link #ID_CUSTOM_E}, {@link #ID_CUSTOM_F}, {@link #ID_ACK}, and
+	 * {@link #ID_NACK} will never be returned as they are not only internal
+	 * packets but they also override other packets with the same ID.
+	 * 
+	 * @param packet
+	 *            the packet.
+	 * @return the name of the packet, it's hexadecimal ID according to
+	 *         {@link RakNet#toHexStringId(int)} if it does not exist.
+	 * @throws NullPointerException
+	 *             if the <code>packet</code> is <code>null</code>.
+	 */
+	public static String getName(RakNetPacket packet) throws NullPointerException {
+		if (packet == null) {
+			throw new NullPointerException("Packet cannot be null");
+		}
+		return getName(packet.getId());
 	}
 
 	/**

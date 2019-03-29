@@ -157,8 +157,11 @@ public final class Record {
 			int startIndex = sequenceIds[i];
 			int endIndex = startIndex;
 			if (i + 1 < sequenceIds.length) {
-				while (endIndex + 1 == sequenceIds[i + 1] && i + 1 < sequenceIds.length) {
+				while (endIndex + 1 == sequenceIds[i + 1]) {
 					endIndex = sequenceIds[++i]; // This value is sequential
+					if (i + 1 >= sequenceIds.length) {
+						break;
+					}
 				}
 			}
 			condensed.add(new Record(startIndex, endIndex == startIndex ? -1 : endIndex));

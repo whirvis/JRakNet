@@ -174,7 +174,7 @@ public final class PowerShellCommand {
 	 *            {@value #ARGUMENT_PREFIX} before the argument name.
 	 */
 	public PowerShellCommand(String command) {
-		this.log = LogManager.getLogger("jraknet-powershell-command-" + commandIndex++);
+		this.log = LogManager.getLogger("PowerShellCommand-" + commandIndex++);
 		this.command = command;
 		this.arguments = new HashMap<String, String>();
 	}

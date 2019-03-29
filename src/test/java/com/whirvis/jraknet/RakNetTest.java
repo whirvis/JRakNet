@@ -41,66 +41,108 @@ import com.whirvis.jraknet.identifier.MinecraftIdentifier;
  * Used to test the various functions in the <code>RakNet</code> class.
  *
  * @author Trent Summerlin
+ * @since JRakNet v2.0.0
  */
-public class RakNetTest {
+public final class RakNetTest {
 
 	private static final Logger LOG = LogManager.getLogger(RakNetTest.class);
 
+	/**
+	 * A valid address to make sure the
+	 * {@link RakNet#parseAddressPassive(String)} method functions.
+	 */
 	private static final String ADDRESS_TEST_VALID = "255.255.255.255:65535";
+
+	/**
+	 * A invalid address to make sure the
+	 * {@link RakNet#parseAddressPassive(String)} method functions.
+	 */
 	private static final String ADDRESS_TEST_INVALID = "275.3.6.28:83245";
-	private static final char UNICODE_MINECRAFT_COLOR_SYMBOL = '\u00A7';
+
+	/**
+	 * The development port used by Whirvis' networking related programs.
+	 */
 	public static final int WHIRVIS_DEVELOPMENT_PORT = 30851;
+
+	/**
+	 * The default port used by Minecraft servers.
+	 */
 	public static final int MINECRAFT_DEFAULT_PORT = 19132;
-	public static final int MINECRAFT_PROTOCOL_NUMBER = 137;
-	public static final String MINECRAFT_VERSION = "1.2";
+
+	/**
+	 * The current Minecraft protocol version number.
+	 */
+	public static final int MINECRAFT_PROTOCOL_NUMBER = 340;
+
+	/**
+	 * The current Minecraft version.
+	 */
+	public static final String MINECRAFT_VERSION = "1.10.0";
+
+	/**
+	 * The address of the Lifeboat Survival Games server.
+	 */
 	public static final InetSocketAddress LIFEBOAT_SURVIVAL_GAMES_ADDRESS = new InetSocketAddress("sg.lbsg.net",
 			MINECRAFT_DEFAULT_PORT);
 
+	private RakNetTest() {
+		// Static class
+	}
+
+	/**
+	 * The entry point for the test.
+	 * 
+	 * @param args
+	 *            the program arguments. These values are ignored.
+	 */
 	public static void main(String[] args) throws RakNetException {
+		// Parse addresses
 		LOG.info("Parsing valid address " + ADDRESS_TEST_VALID + " ?= "
 				+ RakNet.parseAddressPassive(ADDRESS_TEST_VALID));
 		LOG.info("Parsing invalid address " + ADDRESS_TEST_INVALID + " ?= "
 				+ RakNet.parseAddressPassive(ADDRESS_TEST_INVALID));
 
-		// Tell the user the sever we are pinging
+		// Print server information
 		LOG.info("Server address: " + LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
 		LOG.info("Maximum Transfer Unit: " + RakNet.getMaximumTransferUnit());
 
-		// Check if the server is online
-		LOG.info("Pinging server... ");
+		// Check if server is online
+		LOG.info("Checking if server is online... ");
 		if (RakNet.isServerOnline(LIFEBOAT_SURVIVAL_GAMES_ADDRESS)) {
-			LOG.info("Success!");
+			LOG.info("\tServer is online");
 		} else {
-			throw new RakNetException("Failed to ping server, unable to proceed with testing!");
+			throw new RakNetException("Server is offline, unable to proceed with testing");
 		}
 
+		// Check if server is compatible
 		LOG.info("Checking compatibility... ");
 		if (RakNet.isServerCompatible(LIFEBOAT_SURVIVAL_GAMES_ADDRESS)) {
-			LOG.info("Success!");
+			LOG.info("\tServer is incompatible");
 		} else {
-			throw new RakNetException("Invalid protocol, we are unable to continue with testing!");
+			throw new RakNetException("Server is incompatible, unable to proceed with testing");
 		}
 
 		// Get the server identifier
 		LOG.info("Getting server identifier...");
 		MinecraftIdentifier identifier = new MinecraftIdentifier(
 				RakNet.getServerIdentifier(LIFEBOAT_SURVIVAL_GAMES_ADDRESS));
-		LOG.info("Success!: " + formatMCPEIdentifier(identifier));
+		LOG.info("\tIdentifier: " + formatMCPEIdentifier(identifier));
 	}
 
 	/**
+	 * Formats the specified Minecraft identifier.
+	 * 
 	 * @param identifier
-	 *            the <code>Identifier</code> to format.
-	 * @return a formated Minecraft identifier.
+	 *            the Minecraft identifier to format.
+	 * @return the formated Minecraft identifier.
 	 */
 	public static String formatMCPEIdentifier(MinecraftIdentifier identifier) {
 		if (identifier.getServerName() == null) {
 			identifier.setServerName("Unknown name");
 		}
-		return ("[Name: " + identifier.getServerName().replaceAll(UNICODE_MINECRAFT_COLOR_SYMBOL + ".", "")
-				+ "] [Version: " + identifier.getVersionTag() + "] [Player count: " + identifier.getOnlinePlayerCount()
-				+ "/" + identifier.getMaxPlayerCount() + "] [Server type: " + identifier.getConnectionType().getName()
-				+ "]");
+		return ("[Name: " + identifier.getServerName().replaceAll("\u00A7.", "") + "] [Version: "
+				+ identifier.getVersionTag() + "] [Player count: " + identifier.getOnlinePlayerCount() + "/"
+				+ identifier.getMaxPlayerCount() + "] [Server type: " + identifier.getConnectionType().getName() + "]");
 	}
 
 }

@@ -46,7 +46,6 @@ import org.apache.logging.log4j.Logger;
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.identifier.Identifier;
 import com.whirvis.jraknet.protocol.status.UnconnectedPong;
-import com.whirvis.jraknet.scheduler.Scheduler;
 
 /**
  * Used to discover servers on the local network and on external networks.
@@ -80,7 +79,7 @@ public final class Discovery {
 	/**
 	 * The logger used by the discovery system.
 	 */
-	private static final Logger LOG = LogManager.getLogger("jraknet-discovery");
+	private static final Logger LOG = LogManager.getLogger(Discovery.class);
 
 	/**
 	 * The timestamp used in pings sent by the discovery system.
@@ -217,7 +216,7 @@ public final class Discovery {
 			throw new NullPointerException("Event cannot be null");
 		}
 		for (DiscoveryListener listener : LISTENERS) {
-			Scheduler.scheduleSync(listener, event);
+			event.accept(listener);
 		}
 	}
 
@@ -430,6 +429,26 @@ public final class Discovery {
 		} else {
 			clearPorts();
 		}
+	}
+
+	/**
+	 * Sets the port that will be broadcasted to on the local network.
+	 * <p>
+	 * This method is simply a shorthand for {@link #clearPorts()} and
+	 * {@link #addPort(int)}. The way this method works is simply by clearing
+	 * all the current ports and then adding the specified port.
+	 * 
+	 * @param ports
+	 *            the ports to broadcast to.
+	 * @throws IllegalArgumentException
+	 *             if the port is not within the range of <code>0-65535</code>.
+	 */
+	public static void setPort(int port) throws IllegalArgumentException {
+		if (port < 0x0000 || port > 0xFFFF) {
+			throw new IllegalArgumentException("Port must be in between 0-65535");
+		}
+		clearPorts();
+		addPort(port);
 	}
 
 	/**
@@ -656,8 +675,8 @@ public final class Discovery {
 	 * This method is simply a shorthand for
 	 * {@link #addServer(InetSocketAddress)} and
 	 * {@link #removeServer(InetSocketAddress)}. The way this method works is by
-	 * adding all ports in the <code>servers</code> parameter that are not
-	 * already up for discovery, and removing all ports that are up for
+	 * adding all servers in the <code>servers</code> parameter that are not
+	 * already up for discovery, and removing all servers that are up for
 	 * discovery but not found in the <code>servers</code> parameter. If the
 	 * <code>ports</code> parameter is empty, the {@link #clearServers()} method
 	 * will be called instead.
@@ -695,6 +714,83 @@ public final class Discovery {
 		} else {
 			clearServers();
 		}
+	}
+
+	/**
+	 * Sets the server that will be broadcasted to.
+	 * <p>
+	 * This method is simply a shorthand for {@link #clearServers()} and
+	 * {@link #addServer(InetSocketAddress)}. The way this method works is
+	 * simply by clearing all the current ports and then adding the specified.
+	 * 
+	 * @param address
+	 *            the server to broadcast to.
+	 * @throws NullPointerException
+	 *             if the <code>server</code> or the <code>server</code> IP
+	 *             address are <code>null</code>.
+	 */
+	public static void setServer(InetSocketAddress server) throws NullPointerException {
+		if (server == null) {
+			throw new NullPointerException("Address cannot be null");
+		} else if (server.getAddress() == null) {
+			throw new NullPointerException("IP address cannot be null");
+		}
+		clearServers();
+		addServer(server);
+	}
+
+	/**
+	 * Sets the server that will be broadcasted to.
+	 * <p>
+	 * This method is simply a shorthand for {@link #clearServers()} and
+	 * {@link #addServer(InetSocketAddress)}. The way this method works is
+	 * simply by clearing all the current ports and then adding the specified.
+	 * 
+	 * @param address
+	 *            the server to broadcast to.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>port</code> is not in between
+	 *             <code>0-65535</code>.
+	 */
+	public static void setServer(InetAddress address, int port) throws NullPointerException, IllegalArgumentException {
+		if (address == null) {
+			throw new NullPointerException("IP address cannot be null");
+		} else if (port < 0x0000 || port > 0xFFFF) {
+			throw new IllegalArgumentException("Port must be in between 0-65535");
+		}
+		clearServers();
+		addServer(address, port);
+	}
+
+	/**
+	 * Sets the server that will be broadcasted to.
+	 * <p>
+	 * This method is simply a shorthand for {@link #clearServers()} and
+	 * {@link #addServer(InetSocketAddress)}. The way this method works is
+	 * simply by clearing all the current ports and then adding the specified.
+	 * 
+	 * @param address
+	 *            the server to broadcast to.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>port</code> is not in between
+	 *             <code>0-65535</code>.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
+	 */
+	public static void setServer(String host, int port)
+			throws NullPointerException, IllegalArgumentException, UnknownHostException {
+		if (host == null) {
+			throw new NullPointerException("IP address cannot be null");
+		} else if (port < 0x0000 || port > 0xFFFF) {
+			throw new IllegalArgumentException("Port must be in between 0-65535");
+		}
+		clearServers();
+		addServer(host, port);
 	}
 
 	/**

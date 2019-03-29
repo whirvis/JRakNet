@@ -30,7 +30,6 @@
  */
 package com.whirvis.jraknet;
 
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
@@ -39,8 +38,8 @@ import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.client.RakNetClientListener;
-import com.whirvis.jraknet.peer.RakNetClientSession;
-import com.whirvis.jraknet.peer.RakNetServerSession;
+import com.whirvis.jraknet.peer.RakNetClientPeer;
+import com.whirvis.jraknet.peer.RakNetServerPeer;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.message.CustomPacket;
 import com.whirvis.jraknet.protocol.message.EncapsulatedPacket;
@@ -49,171 +48,183 @@ import com.whirvis.jraknet.server.RakNetServer;
 import com.whirvis.jraknet.server.RakNetServerListener;
 
 /**
- * Used to test the split packet feature of <code>RakNetSession</code> through a
- * stress test by sending a packet as big as possible (Average packet size is
- * over 146,000 bytes!).
+ * Test the split packet feature of the
+ * {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer} through a stress test.
+ * <p>
+ * This stress test sends the biggest packet possible over the
+ * {@link Reliability#RELIABLE_ORDERED RELIABLE_ORDERED} reliability. The
+ * average packet size when performing this test is 146,000 bytes.
  *
  * @author Trent Summerlin
+ * @since JRakNet v2.0.0
  */
-public class SplitPacketTest {
+public final class SplitPacketTest {
 
 	private static final Logger LOG = LogManager.getLogger(SplitPacketTest.class);
-
-	// Test data
 	private static final short SPLIT_START_ID = 0xFE;
 	private static final short SPLIT_END_ID = 0xFF;
 	private static long startSend = -1;
 
-	public static void main(String[] args) throws RakNetException, InterruptedException, UnknownHostException {
-		LOG.info("Creating server...");
-		createServer();
-
-		LOG.info("Sleeping 3000MS");
-		Thread.sleep(3000L);
-
-		LOG.info("Creating client...");
-		createClient();
+	private SplitPacketTest() {
+		// Static class
 	}
 
 	/**
+	 * The entry point for the test.
+	 * 
+	 * @param args
+	 *            the program arguments. These values are ignored.
+	 * @throws RakNetException
+	 *             if a RakNet error occurs.
+	 * @throws InterruptedException
+	 *             if any thread has interrupted the current thread. The
+	 *             <i>interrupted status</i> of the current thread is cleared
+	 *             when this exception is thrown.
+	 * @throws UnknownHostException
+	 *             if the <code>localhost</code> address could not be found.
+	 */
+	public static void main(String[] args) throws RakNetException, InterruptedException, UnknownHostException {
+		LOG.info("Creating server, sleeping 3000MS, and then creating the client...");
+		createServer();
+		RakNet.sleep(3000L);
+		createClient();
+
+		// Wait for either a result or for a timeout
+		long currentTime = System.currentTimeMillis();
+		while (true) {
+			Thread.sleep(0, 1); // Lower CPU usage
+			if (currentTime - startSend >= 30000 && startSend > -1) {
+				LOG.info("Failed to complete test due to timeout (Took over 30 seconds!), printing results...");
+				System.exit(1);
+			}
+			currentTime = System.currentTimeMillis();
+		}
+	}
+
+	/**
+	 * Creates the server for the test.
+	 * 
 	 * @return the server that will receive the giant packet.
 	 * @throws RakNetException
-	 *             if any problems occur during the stress test.
+	 *             if a RakNet error occurs.
 	 */
 	private static RakNetServer createServer() throws RakNetException {
 		RakNetServer server = new RakNetServer(RakNetTest.WHIRVIS_DEVELOPMENT_PORT, 1);
-
-		// Add listener
 		server.addListener(new RakNetServerListener() {
 
 			@Override
-			public void onClientConnect(RakNetClientSession session) {
-				// Only accept the packet if it's from the same device
-				try {
-					if (!InetAddress.getLocalHost().equals(session.getAddress().getAddress())) {
-						server.disconnectClient(session, "Session is not from local address");
-						server.blockAddress(session.getInetAddress(), BlockedAddress.PERMANENT_BLOCK);
-						return; // The sender is not from our address!
-					}
-				} catch (UnknownHostException e) {
-					e.printStackTrace();
+			public void onLogin(RakNetServer server, RakNetClientPeer peer) {
+				if (RakNet.isLocalAddress(peer.getAddress())) {
+					LOG.info("Server - Client logged in from " + peer.getAddress());
+				} else {
+					server.disconnect(peer, "Session is not from local address");
+					server.blockAddress(peer.getInetAddress(), BlockedAddress.PERMANENT_BLOCK);
 				}
-
-				LOG.info("Server: Client connected from " + session.getAddress() + "!");
 			}
 
 			@Override
-			public void onClientDisconnect(RakNetClientSession session, String reason) {
-				LOG.info("Server: Client from " + session.getAddress() + " disconnected! (" + reason + ")");
+			public void onDisconnect(RakNetServer server, InetSocketAddress address, RakNetClientPeer peer,
+					String reason) {
+				LOG.info("Server - Client from " + address + " disconnected (" + reason + ")");
 				System.exit(1);
 			}
 
 			@Override
-			public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
-				LOG.info("Server: Received packet of " + packet.size() + " bytes from " + session.getAddress()
+			public void handleMessage(RakNetServer server, RakNetClientPeer peer, RakNetPacket packet, int channel) {
+				LOG.info("Server - Received packet of " + packet.size() + " bytes from " + peer.getAddress()
 						+ ", checking data...");
 
-				// Check packet ID
-				LOG.info("Server: Checking header byte...");
+				// Check header byte
+				LOG.info("Server - Checking header byte...");
 				if (packet.getId() != SPLIT_START_ID) {
-					LOG.error("Server: Packet header is " + packet.getId() + " when it should be " + SPLIT_START_ID
-							+ "!");
+					LOG.error("Server - Packet header is " + packet.getId() + " when it should be " + SPLIT_START_ID);
 					System.exit(1);
 				}
 
-				// Check shorts
-				LOG.info("Server: Checking if data is sequenced correctly...");
+				// Check sequencing
+				LOG.info("Server - Checking if data is sequenced correctly...");
 				long lastInt = -1;
 				while (packet.remaining() >= 4) {
 					long currentInt = packet.readUnsignedInt();
 					if (currentInt - lastInt != 1) {
-						LOG.error("Server: Short data was not split correctly!");
+						LOG.error("Server - Short data was not split correctly");
 						System.exit(1);
 					} else {
 						lastInt = currentInt;
 					}
 				}
 
-				// Check packet footer
-				LOG.info("Server: Checking footer byte...");
+				// Check footer byte
+				LOG.info("Server - Checking footer byte...");
 				if (packet.readUnsignedByte() != SPLIT_END_ID) {
-					LOG.error("Server: Packet footer is " + packet.getId() + " when it should be " + SPLIT_START_ID
-							+ "!");
+					LOG.error("Server - Packet footer is " + packet.getId() + " when it should be " + SPLIT_START_ID);
 					System.exit(1);
 				}
-
-				LOG.info("Server: Split packet test passed! (Took " + (System.currentTimeMillis() - startSend) + "MS)");
+				LOG.info("Server - Split packet test passed (Took " + (System.currentTimeMillis() - startSend) + "MS)");
 				System.exit(0);
 			}
 
 			@Override
-			public void onHandlerException(InetSocketAddress address, Throwable cause) {
+			public void onHandlerException(RakNetServer server, InetSocketAddress address, Throwable cause) {
 				cause.printStackTrace();
 				System.exit(1);
 			}
 
 		});
-
-		server.startThreaded();
+		server.start();
 		return server;
 	}
 
 	/**
+	 * Creates the client for the test.
+	 * 
 	 * @return the client that will be sending the giant packet.
 	 * @throws RakNetException
-	 *             if any problems occur during the stress test.
+	 *             if a RakNet error occurs.
 	 * @throws UnknownHostException
-	 *             if the localhost address cannot be found.
+	 *             if the <code>localhost</code> address cannot be found.
 	 */
 	private static RakNetClient createClient() throws RakNetException, UnknownHostException {
-		// Create client and add hooks
 		RakNetClient client = new RakNetClient();
-
-		// Add listener
 		client.addListener(new RakNetClientListener() {
 
-			private Packet packet;
-
 			@Override
-			public void onConnect(RakNetServerSession session) {
-				LOG.info("Client: Connected to server with MTU " + session.getMaximumTransferUnit());
+			public void onLogin(RakNetClient client, RakNetServerPeer peer) {
+				LOG.info("Client - Logged in to server with MTU " + peer.getMaximumTransferUnit()
+						+ ", calculating maximum packet size...");
+				Packet packet = new RakNetPacket(SPLIT_START_ID);
+				int maximumPacketSize = (peer.getMaximumTransferUnit() - CustomPacket.MINIMUM_SIZE
+						- EncapsulatedPacket.size(Reliability.RELIABLE_ORDERED, false)) * RakNet.MAX_SPLIT_COUNT;
 
-				// Calculate maximum packet size
-				this.packet = new RakNetPacket(SPLIT_START_ID);
-				int maximumPacketSize = (session.getMaximumTransferUnit() - CustomPacket.calculateDummy()
-						- EncapsulatedPacket.calculateDummy(Reliability.RELIABLE_ORDERED, false))
-						* RakNet.MAX_SPLIT_COUNT;
-
-				// Fill up packet
-				int integersWritten = 0;
+				// Create giant packet
+				LOG.info("Client - Creating giant packet...");
+				int intsWritten = 0;
 				for (int i = 0; i < (maximumPacketSize - 2) / 4; i++) {
 					packet.writeUnsignedInt(i);
-					integersWritten++;
+					intsWritten++;
 				}
 				packet.writeUnsignedByte(SPLIT_END_ID);
 
-				// Send packet
-				LOG.info("Client: Sending giant packet... (" + packet.size() + " bytes, " + integersWritten + " ints)");
+				// Send giant packet
+				LOG.info("Client - Sending giant packet... (" + packet.size() + " bytes, " + intsWritten + " ints)");
 				startSend = System.currentTimeMillis();
-				session.sendMessage(Reliability.RELIABLE_ORDERED, packet);
+				peer.sendMessage(Reliability.RELIABLE_ORDERED, packet);
 			}
 
 			@Override
-			public void onDisconnect(RakNetServerSession session, String reason) {
-				LOG.error("Client: Lost connection to server! (" + reason + ")");
+			public void onDisconnect(RakNetClient client, RakNetServerPeer peer, String reason) {
+				LOG.error("Client - Lost connection to server (" + reason + ")");
 				System.exit(1);
 			}
 
 			@Override
-			public void onHandlerException(InetSocketAddress address, Throwable cause) {
+			public void onHandlerException(RakNetClient client, InetSocketAddress address, Throwable cause) {
 				cause.printStackTrace();
 				System.exit(1);
 			}
 
 		});
-
-		// Connect to server
-		client.connectThreaded(InetAddress.getLocalHost(), RakNetTest.WHIRVIS_DEVELOPMENT_PORT);
+		client.connect("localhost", RakNetTest.WHIRVIS_DEVELOPMENT_PORT);
 		return client;
 	}
 

@@ -62,7 +62,7 @@ public final class DiscoveryHandler extends ChannelInboundHandlerAdapter {
 	 * Creates a discovery system Netty handler.
 	 */
 	protected DiscoveryHandler() {
-		this.log = LogManager.getLogger("jraknet-discovery-handler");
+		this.log = LogManager.getLogger(DiscoveryHandler.class);
 		this.blocked = new ArrayList<InetAddress>();
 	}
 
