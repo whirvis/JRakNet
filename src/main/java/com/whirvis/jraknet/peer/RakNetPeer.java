@@ -479,7 +479,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		if (packet == null) {
 			throw new NullPointerException("Packet cannot be null");
 		}
-		long currentTime = System.currentTimeMillis();
+		long currentTime = this.lastPacketReceiveTime = System.currentTimeMillis();
 		if (currentTime - lastPacketsReceivedThisSecondResetTime >= 1000L) {
 			this.packetsReceivedThisSecond = 0;
 			this.lastPacketsReceivedThisSecondResetTime = currentTime;
@@ -505,7 +505,6 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				for (EncapsulatedPacket encapsulated : custom.messages) {
 					this.handleEncapsulated(encapsulated);
 				}
-				this.lastPacketReceiveTime = System.currentTimeMillis();
 			}
 			this.sendAcknowledge(true, new Record(custom.sequenceId));
 			log.debug("Handled custom packet with sequence number " + custom.sequenceId);
@@ -530,18 +529,15 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			 * remove them from the recovery queue until the peer has responded
 			 * with an ACK packet.
 			 */
-			int[] oldSequenceNumbers = new int[notAcknowledged.records.length];
-			int[] newSequenceNumbers = new int[oldSequenceNumbers.length];
 			for (int i = 0; i < notAcknowledged.records.length; i++) {
 				Record record = notAcknowledged.records[i];
-				int recordIndex = record.getIndex();
 
 				// Fire onNotAcknowledge() event for packets lost in tranmission
 				Iterator<EncapsulatedPacket> ackReceiptPacketsI = ackReceiptPackets.keySet().iterator();
 				while (ackReceiptPacketsI.hasNext()) {
 					EncapsulatedPacket encapsulated = ackReceiptPacketsI.next();
 					int encapsulatedRecordIndex = ackReceiptPackets.get(encapsulated).intValue();
-					if (recordIndex == encapsulatedRecordIndex) {
+					if (record.getIndex() == encapsulatedRecordIndex) {
 						this.onNotAcknowledge(record, encapsulated);
 						encapsulated.ackRecord = null;
 						ackReceiptPackets.remove(encapsulated);
@@ -549,43 +545,26 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				}
 
 				// Resend packets lost in transmission
-				if (recoveryQueue.containsKey(recordIndex)) {
-					oldSequenceNumbers[i] = recordIndex;
-					newSequenceNumbers[i] = this.sendCustomPacket(false, recoveryQueue.get(oldSequenceNumbers[i]));
-				} else {
-					oldSequenceNumbers[i] = -1;
-					newSequenceNumbers[i] = -1;
-				}
-			}
-
-			/*
-			 * Rename recovery queue keys in case these packets are lost in
-			 * transmission again. Packets are not removed from the recovery
-			 * queue until an ACK packet is received.
-			 */
-			for (int i = 0; i < oldSequenceNumbers.length; i++) {
-				if (oldSequenceNumbers[i] >= 0) {
-					recoveryQueue.renameKey(oldSequenceNumbers[i], newSequenceNumbers[i]);
-					log.debug("Updated sequence number for reliable message from " + oldSequenceNumbers[i] + " to "
-							+ newSequenceNumbers[i]);
+				EncapsulatedPacket[] lost = recoveryQueue.remove(record.getIndex());
+				if (lost != null) {
+					recoveryQueue.put(this.sendCustomPacket(false, lost), lost);
 				}
 			}
 		} else if (packetId == ID_ACK) {
 			AcknowledgedPacket acknowledged = new AcknowledgedPacket(packet);
 			acknowledged.decode();
 			for (Record record : acknowledged.records) {
-				int recordIndex = record.getIndex();
 				Iterator<EncapsulatedPacket> ackReceiptPacketsI = ackReceiptPackets.keySet().iterator();
 				while (ackReceiptPacketsI.hasNext()) {
 					EncapsulatedPacket encapsulated = ackReceiptPacketsI.next();
 					int encapsulatedRecordIndex = ackReceiptPackets.get(encapsulated).intValue();
-					if (recordIndex == encapsulatedRecordIndex) {
+					if (record.getIndex() == encapsulatedRecordIndex) {
 						this.onAcknowledge(record, encapsulated);
 						encapsulated.ackRecord = null;
 						ackReceiptPacketsI.remove();
 					}
 				}
-				recoveryQueue.remove(recordIndex);
+				recoveryQueue.remove(record.getIndex());
 			}
 			log.debug("Handled ACK packet with " + acknowledged.records.length + " record"
 					+ (acknowledged.records.length == 1 ? "" : "s"));
@@ -856,6 +835,9 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		}
 		log.debug("Sent custom packet containing " + custom.messages.length
 				+ " encapsulated packets with sequence number " + custom.sequenceId);
+		for (EncapsulatedPacket e : custom.messages) {
+			System.out.println("\t" + RakNetPacket.getName(e.payload.array()[0] & 0xFF));
+		}
 		return custom.sequenceId;
 	}
 
@@ -882,8 +864,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		} else if (records.length <= 0) {
 			throw new IllegalArgumentException("There must be a record to send");
 		}
-
-		AcknowledgedPacket acknowledged = acknowledge ? new AcknowledgedPacket() : new NotAcknowledgedPacket();
+		AcknowledgedPacket acknowledged = acknowledge == true ? new AcknowledgedPacket() : new NotAcknowledgedPacket();
 		acknowledged.records = records;
 		acknowledged.encode();
 		this.sendNettyMessage(acknowledged);
@@ -956,15 +937,15 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 
 		// Send keep alive packet
 		if (currentTime - lastPacketReceiveTime >= RakNet.DETECTION_SEND_INTERVAL
-				&& currentTime - lastKeepAliveSendTime >= RakNet.DETECTION_SEND_INTERVAL
-				&& state.equals(RakNetState.LOGGED_IN)) {
+				&& currentTime - lastKeepAliveSendTime >= RakNet.DETECTION_SEND_INTERVAL && latencyEnabled == false
+				&& state == RakNetState.LOGGED_IN) {
 			this.sendMessage(Reliability.UNRELIABLE, ID_DETECT_LOST_CONNECTIONS);
 			this.lastKeepAliveSendTime = currentTime;
 		}
 
 		// Send ping to detect latency if it is enabled
 		if (latencyEnabled == true && currentTime - lastPingSendTime >= RakNet.PING_SEND_INTERVAL
-				&& state.equals(RakNetState.LOGGED_IN)) {
+				&& state == RakNetState.LOGGED_IN) {
 			ConnectedPing ping = new ConnectedPing();
 			ping.timestamp = this.getTimestamp();
 			ping.encode();
@@ -1013,6 +994,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		if (this.getState() == RakNetState.DISCONNECTED) {
 			throw new IllegalStateException("Peer is already disconnected");
 		}
+		this.setState(RakNetState.DISCONNECTED);
 
 		/*
 		 * Clear the send queue to make sure the disconnect packet is first in
@@ -1023,7 +1005,6 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		sendQueue.clear();
 		this.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
 		this.update();
-		this.setState(RakNetState.DISCONNECTED);
 	}
 
 	/**

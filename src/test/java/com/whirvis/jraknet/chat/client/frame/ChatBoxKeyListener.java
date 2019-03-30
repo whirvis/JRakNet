@@ -74,9 +74,13 @@ public final class ChatBoxKeyListener implements KeyListener {
 	@Override
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-			TextChannel channel = (TextChannel) frame.cmbServerChannels.getSelectedItem();
-			client.sendChatMessage(frame.txtChatBox.getText(), channel.getChannel());
-			frame.txtChatBox.setText("");
+			TextChannel channel = (TextChannel) frame.cmbTextChannels.getSelectedItem();
+			if (channel != null) {
+				client.sendChatMessage(frame.txtChatBox.getText(), channel.getChannel());
+				frame.txtChatBox.setText("");
+			} else {
+				frame.displayMessage("Please select a channel first");
+			}
 		}
 	}
 

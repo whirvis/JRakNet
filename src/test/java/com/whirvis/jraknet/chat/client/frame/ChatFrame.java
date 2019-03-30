@@ -30,12 +30,15 @@
  */
 package com.whirvis.jraknet.chat.client.frame;
 
+import java.awt.Component;
 import java.util.ArrayList;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -54,6 +57,30 @@ import com.whirvis.jraknet.chat.client.ChatClient;
  */
 public final class ChatFrame extends JFrame {
 
+	/**
+	 * The render used in place of the default so that the text channels list
+	 * uses the actual name of the channel, rather than defaulting to it's
+	 * {@link TextChannel#toString()} method.
+	 * 
+	 * @author Trent Summerlin
+	 * @since JRakNet v2.11.0
+	 */
+	private static class TextChannelRenderer extends DefaultListCellRenderer {
+
+		private static final long serialVersionUID = -3378705654945270562L;
+
+		@Override
+		public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
+				boolean cellHasFocus) {
+			super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+			if (value != null) {
+				this.setText(((TextChannel) value).getName());
+			}
+			return this;
+		}
+
+	}
+
 	private static final long serialVersionUID = -5459540662852804663L;
 
 	/**
@@ -64,7 +91,7 @@ public final class ChatFrame extends JFrame {
 	/**
 	 * The height of the chat frame.
 	 */
-	private static final int FRAME_HEIGHT = 315;
+	private static final int FRAME_HEIGHT = 330;
 
 	/**
 	 * The default server address.
@@ -90,9 +117,9 @@ public final class ChatFrame extends JFrame {
 	protected final JTextField txtServerMotd;
 	protected final JTextField txtServerAddress;
 	protected final JTextField txtClientUsername;
-	protected final JComboBox<TextChannel> cmbServerChannels;
-	protected final JScrollPane serverChannelPane;
-	protected JTextPane txtPaneServerChannel;
+	protected final JComboBox<TextChannel> cmbTextChannels;
+	protected final JScrollPane textChannelPane;
+	protected JTextPane txtPaneTextChannel;
 	protected boolean connected;
 	protected final JButton btnConnectServer;
 	protected final JButton btnUpdateUsername;
@@ -140,16 +167,17 @@ public final class ChatFrame extends JFrame {
 		this.getContentPane().add(txtClientUsername);
 
 		// Box to list channels
-		this.cmbServerChannels = new JComboBox<TextChannel>();
-		cmbServerChannels.setBounds(224, 72, 260, 20);
-		cmbServerChannels.setEnabled(false);
-		this.getContentPane().add(cmbServerChannels);
+		this.cmbTextChannels = new JComboBox<TextChannel>();
+		cmbTextChannels.setBounds(224, 72, 260, 20);
+		cmbTextChannels.setRenderer(new TextChannelRenderer());
+		cmbTextChannels.setEnabled(false);
+		this.getContentPane().add(cmbTextChannels);
 
 		// The container for the channel box
-		this.serverChannelPane = new JScrollPane();
-		serverChannelPane.setBounds(10, 102, 474, 150);
-		serverChannelPane.setAutoscrolls(true);
-		this.getContentPane().add(serverChannelPane);
+		this.textChannelPane = new JScrollPane();
+		textChannelPane.setBounds(10, 102, 474, 150);
+		textChannelPane.setAutoscrolls(true);
+		this.getContentPane().add(textChannelPane);
 
 		// Button to trigger connection request
 		this.btnConnectServer = new JButton("Connect to server");
@@ -158,7 +186,7 @@ public final class ChatFrame extends JFrame {
 		this.getContentPane().add(btnConnectServer);
 
 		// Button to trigger name update request
-		this.btnUpdateUsername = new JButton("Update username");
+		this.btnUpdateUsername = new JButton("Update");
 		btnUpdateUsername.setBounds(224, 40, 125, 20);
 		btnUpdateUsername.setEnabled(false);
 		this.getContentPane().add(btnUpdateUsername);
@@ -172,10 +200,10 @@ public final class ChatFrame extends JFrame {
 		this.getContentPane().add(txtpnInstructions);
 
 		// The text on the current selected channel
-		this.txtPaneServerChannel = new JTextPane();
-		txtPaneServerChannel.setEditable(false);
-		txtPaneServerChannel.setAutoscrolls(true);
-		serverChannelPane.setViewportView(txtPaneServerChannel);
+		this.txtPaneTextChannel = new JTextPane();
+		txtPaneTextChannel.setEditable(false);
+		txtPaneTextChannel.setAutoscrolls(true);
+		textChannelPane.setViewportView(txtPaneTextChannel);
 
 		// Text field to chat
 		this.txtChatBox = new JTextField();
@@ -242,8 +270,11 @@ public final class ChatFrame extends JFrame {
 				cleansed.add(channel);
 			}
 		}
-		cmbServerChannels
+		cmbTextChannels
 				.setModel(new DefaultComboBoxModel<TextChannel>(cleansed.toArray(new TextChannel[cleansed.size()])));
+		if (cmbTextChannels.getModel().getSize() > 0) {
+			cmbTextChannels.setSelectedIndex(0);
+		}
 	}
 
 	/**
@@ -254,11 +285,11 @@ public final class ChatFrame extends JFrame {
 	 * @throws NullPointerException
 	 *             if the <code>channel</code> is <code>null</code>.
 	 */
-	public void setCurrentChannel(TextChannel channel) throws NullPointerException {
+	public void updateChannel(TextChannel channel) throws NullPointerException {
 		if (channel == null) {
 			throw new NullPointerException("Channel cannot be null");
 		}
-		txtPaneServerChannel.setText(channel.getText());
+		txtPaneTextChannel.setText(channel.getText());
 	}
 
 	/**
@@ -270,9 +301,6 @@ public final class ChatFrame extends JFrame {
 	 *             if the <code>instructions</code> are <code>null</code>.
 	 */
 	public void setInstructions(String instructions) throws NullPointerException {
-		if (instructions == null) {
-			throw new NullPointerException("Instructions cannot be null");
-		}
 		txtpnInstructions.setText(instructions);
 	}
 
@@ -291,15 +319,15 @@ public final class ChatFrame extends JFrame {
 			txtServerAddress.setEditable(!connected);
 			btnConnectServer.setText(!connected ? "Connect" : "Disconnect");
 			btnUpdateUsername.setEnabled(connected);
-			cmbServerChannels.setEnabled(connected);
+			cmbTextChannels.setEnabled(connected);
 			txtChatBox.setEnabled(connected);
 			if (connected == false) {
 				txtServerName.setText(DEFAULT_SERVER_NAME);
 				txtServerMotd.setText(DEFAULT_SERVER_MOTD);
 				txtServerAddress.setText(DEFAULT_SERVER_ADDRESS);
 				txtClientUsername.setText(DEFAULT_CLIENT_USERNAME);
-				cmbServerChannels.setModel(new DefaultComboBoxModel<TextChannel>(new TextChannel[0]));
-				txtPaneServerChannel.setText("");
+				cmbTextChannels.setModel(new DefaultComboBoxModel<TextChannel>(new TextChannel[0]));
+				txtPaneTextChannel.setText("");
 				txtChatBox.setText("");
 			}
 		}
@@ -320,7 +348,7 @@ public final class ChatFrame extends JFrame {
 		}
 		btnConnectServer.addActionListener(new ConnectServerListener(this, client));
 		btnUpdateUsername.addActionListener(new UpdateUsernameBoxListener(this, client));
-		cmbServerChannels.addActionListener(new ComboBoxServerChannelListener(this, client));
+		cmbTextChannels.addActionListener(new ComboBoxTextChannelListener(this, client));
 		txtChatBox.addKeyListener(new ChatBoxKeyListener(this, client));
 	}
 

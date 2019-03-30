@@ -159,8 +159,12 @@ public class CommandHandler {
 		// Handle command and print usage if needed
 		if (commands.containsKey(label)) {
 			Command command = commands.get(label);
-			if (command.handleCommand(arguments) == false) {
-				LOG.error("Usage: " + command.getUsage());
+			try {
+				if (command.handleCommand(arguments) == false) {
+					LOG.error("Usage: " + command.getUsage());
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		} else {
 			LOG.error("Unknown command \"" + label + "\"");
