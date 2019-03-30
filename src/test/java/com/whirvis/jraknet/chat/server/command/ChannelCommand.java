@@ -64,9 +64,13 @@ public final class ChannelCommand extends Command {
 	public boolean handleCommand(String[] args) {
 		if (args.length >= 2) {
 			int channelId = RakNet.parseIntPassive(args[1]);
-			TextChannel channel = this.getServer().getChannel(channelId);
+			TextChannel channel = null;
+			if (channelId >= 0) {
+				channel = this.getServer().getChannel(channelId);
+			}
 			if (args[0].equalsIgnoreCase("add")) {
 				// Automatically determine channel ID if necessary
+				boolean specifiedChannel = channelId >= 0;
 				if (channelId < 0) {
 					channelId = 0;
 					while (!this.getServer().hasChannel(channelId)) {
@@ -82,7 +86,7 @@ public final class ChannelCommand extends Command {
 				}
 
 				// Add channel
-				String channelName = this.remainingArguments(channelId < 0 ? 2 : 1, args);
+				String channelName = this.remainingArguments(specifiedChannel ? 2 : 1, args);
 				this.getServer().addChannel(channelId, channelName);
 				LOG.info("Added channel \"" + channelName + "\" with ID " + channelId);
 				return true;

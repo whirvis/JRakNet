@@ -30,6 +30,7 @@
  */
 package com.whirvis.jraknet.chat.server;
 
+import java.util.Arrays;
 import java.util.UUID;
 
 import com.whirvis.jraknet.InvalidChannelException;
@@ -98,6 +99,7 @@ public final class ChatUser {
 		accepted.serverName = server.getName();
 		accepted.serverMotd = server.getMotd();
 		accepted.channels = server.getChannels();
+		System.out.println(Arrays.toString(accepted.channels));
 		accepted.encode();
 		peer.sendMessage(Reliability.RELIABLE_ORDERED, accepted);
 	}

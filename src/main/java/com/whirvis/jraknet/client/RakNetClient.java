@@ -93,6 +93,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 */
 	public static final long PING_BROADCAST_WAIT_MILLIS = 1000L;
 
+	private final InetSocketAddress bindingAddress;
 	private final long guid;
 	private final Logger log;
 	private final long timestamp;
@@ -118,13 +119,12 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *            responsibility of choosing which port to bind to.
 	 */
 	public RakNetClient(InetSocketAddress address) {
-		UUID uuid = UUID.randomUUID();
-		this.guid = uuid.getMostSignificantBits();
+		this.bindingAddress = address;
+		this.guid = UUID.randomUUID().getMostSignificantBits();
 		this.log = LogManager
 				.getLogger(RakNetClient.class.getSimpleName() + "-" + Long.toHexString(guid).toUpperCase());
 		this.timestamp = System.currentTimeMillis();
 		this.listeners = new ConcurrentLinkedQueue<RakNetClientListener>();
-		this.bindAddress = address;
 	}
 
 	/**
@@ -671,7 +671,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			this.handler = new RakNetClientHandler(this);
 			bootstrap.channel(NioDatagramChannel.class).group(group).handler(handler);
 			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false);
-			this.channel = (bindAddress != null ? bootstrap.bind(bindAddress) : bootstrap.bind(0)).sync().channel();
+			this.channel = (bindingAddress != null ? bootstrap.bind(bindingAddress) : bootstrap.bind(0)).sync()
+					.channel();
 			this.bindAddress = (InetSocketAddress) channel.localAddress();
 			this.setMaximumTransferUnitSizes(DEFAULT_TRANSFER_UNIT_SIZES);
 			log.debug("Initialized networking");
@@ -866,8 +867,11 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 
 	@Override
 	public String toString() {
-		return "RakNetClient [guid=" + guid + ", timestamp=" + timestamp + ", bindAddress=" + bindAddress
-				+ ", maximumMaximumTransferUnitSize=" + highestMaximumTransferUnitSize + "]";
+		return "RakNetClient [bindingAddress=" + bindingAddress + ", guid=" + guid + ", timestamp=" + timestamp
+				+ ", bindAddress=" + bindAddress + ", maximumTransferUnits=" + Arrays.toString(maximumTransferUnits)
+				+ ", highestMaximumTransferUnitSize=" + highestMaximumTransferUnitSize + ", getProtocolVersion()="
+				+ getProtocolVersion() + ", getTimestamp()=" + getTimestamp() + ", getAddress()=" + getAddress()
+				+ ", isConnected()=" + isConnected() + "]";
 	}
 
 }

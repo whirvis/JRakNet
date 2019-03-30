@@ -140,7 +140,7 @@ public final class TextChannel {
 
 	@Override
 	public String toString() {
-		return "ServerChannel [channel=" + channel + ", name=" + name + ", channelText=" + channelText + "]";
+		return "TextChannel [channel=" + channel + ", name=" + name + ", channelText=" + channelText + "]";
 	}
 
 }

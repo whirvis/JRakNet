@@ -33,6 +33,8 @@ package com.whirvis.jraknet.chat.client.frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import com.whirvis.jraknet.RakNet;
+import com.whirvis.jraknet.RakNetTest;
 import com.whirvis.jraknet.chat.client.ChatClient;
 
 /**
@@ -73,7 +75,9 @@ public final class ConnectServerListener implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (frame.connected == false) {
-			client.join(frame.txtServerAddress.getText());
+			frame.setInstructions(ChatClient.INSTRUCTIONS_CONNECTING);
+			client.connect(
+					RakNet.parseAddressPassive(frame.txtServerAddress.getText(), RakNetTest.WHIRVIS_DEVELOPMENT_PORT));
 		} else {
 			frame.txtServerAddress.setText("");
 			frame.txtClientUsername.setText("");

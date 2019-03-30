@@ -206,7 +206,7 @@ public final class RakNet {
 	/**
 	 * The interval at which not acknowledged packets are automatically resent.
 	 */
-	public static final long RECOVERY_SEND_INTERVAL = 50L;
+	public static final long RECOVERY_SEND_INTERVAL = 500L;
 
 	/**
 	 * The interval at which keep-alive pings are sent.

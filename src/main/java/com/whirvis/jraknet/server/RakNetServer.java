@@ -97,11 +97,11 @@ public class RakNetServer implements RakNetServerListener {
 	 */
 	public static final int INFINITE_CONNECTIONS = -1;
 
+	private final InetSocketAddress bindingAddress;
 	private final long guid;
 	private final Logger log;
 	private final long pongId;
 	private final long timestamp;
-	private final InetSocketAddress bindAddress;
 	private final int maximumTransferUnit;
 	private int maxConnections;
 	private boolean broadcastingEnabled;
@@ -113,6 +113,7 @@ public class RakNetServer implements RakNetServerListener {
 	private EventLoopGroup group;
 	private RakNetServerHandler handler;
 	private Channel channel;
+	private InetSocketAddress bindAddress;
 	private Thread peerThread;
 	private volatile boolean running;
 
@@ -165,12 +166,12 @@ public class RakNetServer implements RakNetServerListener {
 					+ INFINITE_CONNECTIONS + " for infinite connections");
 		}
 		UUID uuid = UUID.randomUUID();
+		this.bindingAddress = address;
 		this.guid = uuid.getMostSignificantBits();
 		this.log = LogManager
 				.getLogger(RakNetServer.class.getSimpleName() + "-" + Long.toHexString(guid).toUpperCase());
 		this.pongId = uuid.getLeastSignificantBits();
 		this.timestamp = System.currentTimeMillis();
-		this.bindAddress = address;
 		this.maxConnections = maxConnections;
 		this.maximumTransferUnit = maximumTransferUnit == AUTOMATIC_MTU ? RakNet.getMaximumTransferUnit(address)
 				: maximumTransferUnit;
@@ -2694,7 +2695,9 @@ public class RakNetServer implements RakNetServerListener {
 			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false)
 					.option(ChannelOption.SO_SNDBUF, maximumTransferUnit)
 					.option(ChannelOption.SO_RCVBUF, maximumTransferUnit);
-			this.channel = (bindAddress != null ? bootstrap.bind(bindAddress) : bootstrap.bind(0)).sync().channel();
+			this.channel = (bindingAddress != null ? bootstrap.bind(bindingAddress) : bootstrap.bind(0)).sync()
+					.channel();
+			this.bindAddress = (InetSocketAddress) channel.localAddress();
 			this.running = true;
 			log.debug("Created and bound bootstrap");
 
@@ -2831,10 +2834,12 @@ public class RakNetServer implements RakNetServerListener {
 
 	@Override
 	public String toString() {
-		return "RakNetServer [guid=" + guid + ", pongId=" + pongId + ", timestamp=" + timestamp + ", bindAddress="
-				+ bindAddress + ", maximumTransferUnit=" + maximumTransferUnit + ", maxConnections=" + maxConnections
-				+ ", broadcastingEnabled=" + broadcastingEnabled + ", identifier=" + identifier + ", listeners="
-				+ listeners + ", running=" + running + ", getClientCount()=" + getClientCount() + "]";
+		return "RakNetServer [bindingAddress=" + bindingAddress + ", guid=" + guid + ", log=" + log + ", pongId="
+				+ pongId + ", timestamp=" + timestamp + ", maximumTransferUnit=" + maximumTransferUnit
+				+ ", maxConnections=" + maxConnections + ", broadcastingEnabled=" + broadcastingEnabled
+				+ ", identifier=" + identifier + ", bindAddress=" + bindAddress + ", running=" + running
+				+ ", getProtocolVersion()=" + getProtocolVersion() + ", getTimestamp()=" + getTimestamp()
+				+ ", getAddress()=" + getAddress() + ", getClientCount()=" + getClientCount() + "]";
 	}
 
 }

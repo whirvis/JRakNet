@@ -45,13 +45,13 @@ import com.whirvis.jraknet.chat.client.ChatClient;
  * @author Whirvis T. Wheatley
  * @since JRakNet v2.0.0
  */
-public final class ComboBoxServerChannelListener implements ActionListener {
+public final class ComboBoxTextChannelListener implements ActionListener {
 
 	private final ChatFrame frame;
 	private final ChatClient client;
 
 	/**
-	 * Constructs a <code>ComboBoxServerChannelListener</code>.
+	 * Constructs a <code>ComboBoxTextChannelListener</code>.
 	 * 
 	 * @param frame
 	 *            the frame that the listener belongs to.
@@ -61,7 +61,7 @@ public final class ComboBoxServerChannelListener implements ActionListener {
 	 *             if the <code>frame</code> or <code>client</code> are
 	 *             <code>null</code>.
 	 */
-	protected ComboBoxServerChannelListener(ChatFrame frame, ChatClient client) {
+	protected ComboBoxTextChannelListener(ChatFrame frame, ChatClient client) {
 		if (frame == null) {
 			throw new NullPointerException("Chat frame cannot be null");
 		} else if (client == null) {
@@ -74,7 +74,7 @@ public final class ComboBoxServerChannelListener implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		try {
-			TextChannel serverChannel = (TextChannel) frame.cmbServerChannels.getSelectedItem();
+			TextChannel serverChannel = (TextChannel) frame.cmbTextChannels.getSelectedItem();
 			client.setChannel(serverChannel.getChannel());
 		} catch (Exception e1) {
 			frame.displayError(e1);

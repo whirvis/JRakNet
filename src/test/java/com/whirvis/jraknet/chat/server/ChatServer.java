@@ -146,13 +146,13 @@ public final class ChatServer extends RakNetServer {
 	 * @return all channels.
 	 */
 	public TextChannel[] getChannels() {
-		ArrayList<TextChannel> channels = new ArrayList<TextChannel>();
+		ArrayList<TextChannel> cleansed = new ArrayList<TextChannel>();
 		for (TextChannel channel : channels) {
 			if (channel != null) {
-				channels.add(channel);
+				cleansed.add(channel);
 			}
 		}
-		return channels.toArray(new TextChannel[channels.size()]);
+		return cleansed.toArray(new TextChannel[cleansed.size()]);
 	}
 
 	/**
