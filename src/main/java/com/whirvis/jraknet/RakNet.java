@@ -353,7 +353,11 @@ public final class RakNet {
 		ByteArrayOutputStream stackTraceOut = new ByteArrayOutputStream();
 		PrintStream stackTracePrint = new PrintStream(stackTraceOut);
 		throwable.printStackTrace(stackTracePrint);
-		return new String(stackTraceOut.toByteArray());
+		String printedStackTrace = new String(stackTraceOut.toByteArray());
+		if (printedStackTrace.endsWith("\n")) {
+			printedStackTrace = printedStackTrace.substring(0, printedStackTrace.length() - 1);
+		}
+		return printedStackTrace;
 	}
 
 	/**

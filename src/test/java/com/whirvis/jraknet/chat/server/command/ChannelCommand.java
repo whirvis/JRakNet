@@ -57,7 +57,7 @@ public final class ChannelCommand extends Command {
 	 *            the server that the command belongs to.
 	 */
 	public ChannelCommand(ChatServer server) {
-		super(server, "channel", "<add:remove> [id] <name>", "Used to modify channel data");
+		super(server, "channel", "<add:remove:list> [id] <name>", "Used to modify channel data");
 	}
 
 	@Override
@@ -71,11 +71,10 @@ public final class ChannelCommand extends Command {
 			if (args[0].equalsIgnoreCase("add")) {
 				// Automatically determine channel ID if necessary
 				boolean specifiedChannel = channelId >= 0;
-				if (channelId < 0) {
+				if (specifiedChannel == false) {
 					channelId = 0;
-					while (!this.getServer().hasChannel(channelId)) {
-						channelId++;
-						if (channelId >= RakNet.MAX_CHANNELS) {
+					while (this.getServer().hasChannel(channelId)) {
+						if (channelId++ >= RakNet.MAX_CHANNELS) {
 							LOG.error("No more available channels, either remove some or manually assign an ID");
 							return true;
 						}
@@ -92,12 +91,13 @@ public final class ChannelCommand extends Command {
 				return true;
 			} else if (args[0].equalsIgnoreCase("rename") && args.length >= 3) {
 				if (channel == null) {
-					LOG.error("Channel with ID " + channelId + " has not yet been created!");
+					LOG.error("Channel with ID " + channelId + " has not yet been created");
 					return true;
 				}
+				String oldName = channel.getName();
 				this.getServer().renameChannel(channelId, this.remainingArguments(2, args));
-				LOG.info("Renamed channel with ID " + channelId + " from \"" + channel.getName() + "\" to \""
-						+ channel.getName() + "\"");
+				LOG.info("Renamed channel with ID " + channelId + " from \"" + oldName + "\" to \"" + channel.getName()
+						+ "\"");
 				return true;
 			} else if (args[0].equalsIgnoreCase("remove")) {
 				if (channel == null) {
@@ -106,6 +106,25 @@ public final class ChannelCommand extends Command {
 				}
 				this.getServer().removeChannel(channelId);
 				LOG.info("Removed channel \"" + channel.getName() + "\"");
+				return true;
+			}
+		} else if (args.length >= 1) {
+			if (args[0].equalsIgnoreCase("list")) {
+				// Get the last used channel for formatting
+				int lastChannel = RakNet.MAX_CHANNELS - 1;
+				while (!this.getServer().hasChannel(lastChannel)) {
+					lastChannel--;
+				}
+
+				// Print registered channels
+				StringBuilder channelListBuilder = new StringBuilder("Registered channels:\n");
+				for (int i = 0; i < RakNet.MAX_CHANNELS; i++) {
+					if (this.getServer().hasChannel(i)) {
+						channelListBuilder.append("\tChannel " + i + ": " + (lastChannel > 10 && i < 10 ? " " : "")
+								+ this.getServer().getChannel(i).getName() + (i != lastChannel ? "\n" : ""));
+					}
+				}
+				LOG.info(channelListBuilder);
 				return true;
 			}
 		}

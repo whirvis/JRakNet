@@ -46,7 +46,9 @@ public final class TextChannel {
 
 	private final int channel;
 	private String name;
-	private final StringBuilder channelText;
+	private final String[] messages;
+	private int textIndex;
+	private String text;
 
 	/**
 	 * Creates a server channel.
@@ -61,7 +63,8 @@ public final class TextChannel {
 	public TextChannel(int channel, String name) throws InvalidChannelException {
 		this.channel = channel;
 		this.name = name;
-		this.channelText = new StringBuilder();
+		this.messages = new String[100];
+		this.text = new String();
 		if (channel >= RakNet.MAX_CHANNELS) {
 			throw new InvalidChannelException(channel);
 		}
@@ -112,7 +115,29 @@ public final class TextChannel {
 		if (message == null) {
 			throw new NullPointerException("Message cannot be null");
 		}
-		channelText.append(message + "\n");
+
+		// Update messages
+		if (textIndex + 1 >= messages.length) {
+			for (int i = 0; i < messages.length - 1; i++) {
+				messages[i] = messages[i + 1]; // Push back message
+			}
+			this.messages[messages.length - 1] = message;
+		} else {
+			this.messages[textIndex++] = message;
+		}
+
+		// Build text
+		StringBuilder textBuilder = new StringBuilder();
+		for (int i = 0; i < messages.length; i++) {
+			if (messages[i] == null) {
+				break;
+			}
+			textBuilder.append(messages[i]);
+			if (i + 1 < messages.length) {
+				textBuilder.append(messages[i + 1] != null ? "\n" : "");
+			}
+		}
+		this.text = textBuilder.toString();
 	}
 
 	/**
@@ -121,7 +146,7 @@ public final class TextChannel {
 	 * @return the text currently displayed on the channel.
 	 */
 	public String getText() {
-		return channelText.toString();
+		return this.text;
 	}
 
 	@Override
@@ -140,7 +165,7 @@ public final class TextChannel {
 
 	@Override
 	public String toString() {
-		return "TextChannel [channel=" + channel + ", name=" + name + ", channelText=" + channelText + "]";
+		return "TextChannel [channel=" + channel + ", name=" + name + ", channelText=" + messages + "]";
 	}
 
 }

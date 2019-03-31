@@ -134,7 +134,7 @@ public final class ChatServer extends RakNetServer {
 	 *         <code>false</code> otherwise.
 	 */
 	public boolean hasChannel(int channel) {
-		if (channel < RakNet.MAX_CHANNELS) {
+		if (channel < channels.length) {
 			return channels[channel] != null;
 		}
 		return false;
@@ -163,7 +163,7 @@ public final class ChatServer extends RakNetServer {
 	 * @return the text channel, <code>null</code> if it does not exist.
 	 */
 	public TextChannel getChannel(int channel) {
-		if (channel < RakNet.MAX_CHANNELS) {
+		if (channel < channels.length) {
 			return channels[channel];
 		}
 		return null;
@@ -183,7 +183,7 @@ public final class ChatServer extends RakNetServer {
 	 *             if the <code>name</code> is <code>null</code>.
 	 */
 	public void addChannel(int channel, String name) throws InvalidChannelException, NullPointerException {
-		if (channel >= RakNet.MAX_CHANNELS) {
+		if (channel >= channels.length) {
 			throw new InvalidChannelException(channel);
 		} else if (name == null) {
 			throw new NullPointerException("Channel name cannot be null");
@@ -208,7 +208,7 @@ public final class ChatServer extends RakNetServer {
 	 *             if the <code>name</code> is <code>null</code>.
 	 */
 	public void renameChannel(int channel, String name) throws InvalidChannelException {
-		if (channel >= RakNet.MAX_CHANNELS) {
+		if (channel >= channels.length) {
 			throw new InvalidChannelException(channel);
 		} else if (name == null) {
 			throw new NullPointerException("Channel name cannot be null");
@@ -229,7 +229,7 @@ public final class ChatServer extends RakNetServer {
 	 *             {@value RakNet#MAX_CHANNELS}.
 	 */
 	public void removeChannel(int channel) throws InvalidChannelException {
-		if (channel >= RakNet.MAX_CHANNELS) {
+		if (channel >= channels.length) {
 			throw new InvalidChannelException(channel);
 		}
 		this.channels[channel] = null;
@@ -258,7 +258,7 @@ public final class ChatServer extends RakNetServer {
 			throws NullPointerException, InvalidChannelException {
 		if (message == null) {
 			throw new NullPointerException("Message cannot be null");
-		} else if (channel >= RakNet.MAX_CHANNELS) {
+		} else if (channel >= channels.length) {
 			throw new InvalidChannelException(channel);
 		}
 		for (ChatUser user : users.values()) {
@@ -407,10 +407,9 @@ public final class ChatServer extends RakNetServer {
 
 	@Override
 	public void onDisconnect(RakNetServer server, InetSocketAddress address, RakNetClientPeer peer, String reason) {
-		ChatUser user = users.get(peer.getAddress());
+		ChatUser user = users.remove(peer.getAddress());
 		if (user != null) {
 			this.broadcastMessage(user.getUsername() + " has disconnected");
-			users.remove(peer.getAddress());
 		}
 	}
 
@@ -427,7 +426,6 @@ public final class ChatServer extends RakNetServer {
 		ChatServer server = new ChatServer(RakNetTest.WHIRVIS_DEVELOPMENT_PORT, 10, "JRakNet chat server",
 				"This is a JRakNet chat server made both for example and testing purposes");
 		server.start();
-		LOG.info("Started server");
 
 		// Register commands
 		CommandHandler commandHandler = new CommandHandler(server);

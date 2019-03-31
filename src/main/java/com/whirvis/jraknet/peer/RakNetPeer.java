@@ -35,6 +35,7 @@ import static com.whirvis.jraknet.RakNetPacket.*;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -193,6 +194,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		this.sendQueue = new ConcurrentLinkedQueue<EncapsulatedPacket>();
 		this.recoveryQueue = new ConcurrentIntMap<EncapsulatedPacket[]>();
 		this.ackReceiptPackets = new ConcurrentHashMap<EncapsulatedPacket, Integer>();
+		this.receiveSequenceNumber = -1;
 		this.orderSendIndex = new int[RakNet.MAX_CHANNELS];
 		this.orderReceiveIndex = new int[RakNet.MAX_CHANNELS];
 		this.sequenceSendIndex = new int[RakNet.MAX_CHANNELS];
@@ -260,7 +262,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * 
 	 * @return the peer's maximum transfer unit.
 	 */
-	public int getMaximumTransferUnit() {
+	public final int getMaximumTransferUnit() {
 		return this.maximumTransferUnit;
 	}
 
@@ -279,8 +281,48 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * 
 	 * @return the current state of the peer.
 	 */
-	public RakNetState getState() {
+	public final RakNetState getState() {
 		return this.state;
+	}
+
+	/**
+	 * Returns whether or not the peer is connected.
+	 * 
+	 * @return <code>true</code> if the peer is connected, <code>false</code>
+	 *         otherwise.
+	 */
+	public final boolean isConnected() {
+		return state == RakNetState.CONNECTED;
+	}
+
+	/**
+	 * Returns whether or not the peer is handshaking.
+	 * 
+	 * @return <code>true</code> if the peer is handshaking, <code>false</code>
+	 *         otherwise.
+	 */
+	public final boolean isHandshaking() {
+		return state == RakNetState.HANDSHAKING;
+	}
+
+	/**
+	 * Returns whether or not the peer is logged in.
+	 * 
+	 * @return <code>true</code> if the peer is logged in, <code>false</code>
+	 *         otherwise.
+	 */
+	public final boolean isLoggedIn() {
+		return state == RakNetState.LOGGED_IN;
+	}
+
+	/**
+	 * Returns whether or not the peer is disconnected.
+	 * 
+	 * @return <code>true</code> if the peer is disconnected, <code>false</code>
+	 *         otherwise.
+	 */
+	public final boolean isDisconnected() {
+		return state == RakNetState.DISCONNECTED;
 	}
 
 	/**
@@ -291,7 +333,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * @throws NullPointerException
 	 *             if the <code>state</code> is <code>null</code>.
 	 */
-	public void setState(RakNetState state) throws NullPointerException {
+	public final void setState(RakNetState state) throws NullPointerException {
 		if (state == null) {
 			throw new NullPointerException("State cannot be null");
 		}
@@ -308,7 +350,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * @return the amount of time in milliseconds it will take for the peer to
 	 *         not respond in order for it to timeout
 	 */
-	public long getTimeout() {
+	public final long getTimeout() {
 		return this.timeout;
 	}
 
@@ -321,7 +363,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * @throws IllegalArgumentException
 	 *             if the <code>timeout</code> is less than <code>0</code>.
 	 */
-	public void setTimeout(long timeout) throws IllegalArgumentException {
+	public final void setTimeout(long timeout) throws IllegalArgumentException {
 		if (timeout < 0) {
 			throw new IllegalArgumentException("Timeout must be greater than 0");
 		}
@@ -342,7 +384,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * 
 	 * @return the amount of packets sent in the last second.
 	 */
-	public int getPacketsSentThisSecond() {
+	public final int getPacketsSentThisSecond() {
 		return this.packetsSentThisSecond;
 	}
 
@@ -351,7 +393,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * 
 	 * @return the amount of packets received in the last second.
 	 */
-	public int getPacketsReceivedThisSecond() {
+	public final int getPacketsReceivedThisSecond() {
 		return this.packetsReceivedThisSecond;
 	}
 
@@ -360,16 +402,16 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * 
 	 * @return the last time a packet was sent by the peer.
 	 */
-	public long getLastPacketSendTime() {
+	public final long getLastPacketSendTime() {
 		return this.lastPacketSendTime;
 	}
 
 	/**
-	 * Returns the last tiem a packet was received.
+	 * Returns the last time a packet was received.
 	 * 
 	 * @return the last time a packet was received.
 	 */
-	public long getLastPacketReceiveTime() {
+	public final long getLastPacketReceiveTime() {
 		return this.lastPacketReceiveTime;
 	}
 
@@ -383,7 +425,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * 
 	 * @return the message index.
 	 */
-	public int bumpMessageIndex() {
+	public final int bumpMessageIndex() {
 		log.debug("Bumped message index from " + messageIndex + " to " + (messageIndex + 1));
 		return this.messageIndex++;
 	}
@@ -399,7 +441,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 *            <code>true</code> to enable latency detection,
 	 *            <code>false</code> to disable it.
 	 */
-	public void enableLatencyDetection(boolean enabled) {
+	public final void enableLatencyDetection(boolean enabled) {
 		boolean wasEnabled = latencyEnabled;
 		this.latencyEnabled = enabled;
 		this.latency = enabled ? latency : -1;
@@ -415,7 +457,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * @return <code>true</code> if latency detection is enabled,
 	 *         <code>false</code> otherwise.
 	 */
-	public boolean latencyDetectionEnabled() {
+	public final boolean latencyDetectionEnabled() {
 		return this.latencyEnabled;
 	}
 
@@ -424,7 +466,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * 
 	 * @return the average latency for the peer.
 	 */
-	public long getLatency() {
+	public final long getLatency() {
 		return this.latency;
 	}
 
@@ -436,7 +478,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * 
 	 * @return the last calculated latency for the peer.
 	 */
-	public long getLastLatency() {
+	public final long getLastLatency() {
 		return this.lastLatency;
 	}
 
@@ -445,7 +487,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * 
 	 * @return the lowest recorded latency for the peer.
 	 */
-	public long getLowestLatency() {
+	public final long getLowestLatency() {
 		return this.lowestLatency;
 	}
 
@@ -454,7 +496,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * 
 	 * @return the highest recorded latency for the peer.
 	 */
-	public long getHighestLatency() {
+	public final long getHighestLatency() {
 		return this.highestLatency;
 	}
 
@@ -491,6 +533,16 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			custom.decode();
 
 			/*
+			 * We send an ACK packet as soon as we get the packet. This is
+			 * because sometimes handling a packet takes longer than expected
+			 * (or longer than the recovery send interval time). If this
+			 * happens, it will cause the other side to resend a packet that we
+			 * already got. If the resend time is too low, this can end up
+			 * causing the other side to also spam us without meaning to.
+			 */
+			this.sendAcknowledge(true, new Record(custom.sequenceId));
+
+			/*
 			 * NACK must be generated first before the peer data is updated,
 			 * otherwise the data needed to know which packets have been lost
 			 * will have been overwritten.
@@ -506,7 +558,6 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 					this.handleEncapsulated(encapsulated);
 				}
 			}
-			this.sendAcknowledge(true, new Record(custom.sequenceId));
 			log.debug("Handled custom packet with sequence number " + custom.sequenceId);
 		} else if (packetId == ID_NACK) {
 			NotAcknowledgedPacket notAcknowledged = new NotAcknowledgedPacket(packet);
@@ -532,7 +583,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			for (int i = 0; i < notAcknowledged.records.length; i++) {
 				Record record = notAcknowledged.records[i];
 
-				// Fire onNotAcknowledge() event for packets lost in tranmission
+				// Notify peer of packets lost in transmission
 				Iterator<EncapsulatedPacket> ackReceiptPacketsI = ackReceiptPackets.keySet().iterator();
 				while (ackReceiptPacketsI.hasNext()) {
 					EncapsulatedPacket encapsulated = ackReceiptPacketsI.next();
@@ -567,7 +618,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				recoveryQueue.remove(record.getIndex());
 			}
 			log.debug("Handled ACK packet with " + acknowledged.records.length + " record"
-					+ (acknowledged.records.length == 1 ? "" : "s"));
+					+ (acknowledged.records.length == 1 ? "" : "s") + " " + Arrays.toString(acknowledged.records));
 		}
 	}
 
@@ -626,7 +677,8 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				splitQueue.remove(encapsulated.splitId);
 				this.handleEncapsulated(stitched);
 			}
-		} else if (encapsulated.reliability.isReliable() && !reliablePackets.contains(encapsulated.messageIndex)) {
+		} else if (!encapsulated.reliability.isReliable()
+				|| (encapsulated.reliability.isReliable() && !reliablePackets.contains(encapsulated.messageIndex))) {
 			/*
 			 * Determine if the message should be handled based on its
 			 * reliability.
@@ -787,7 +839,8 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 *            stored in the recovery queue for later, <code>false</code>
 	 *            otherwise. This should only be <code>true</code> when sending
 	 *            a group of packets for the first time, rather than resending
-	 *            old data that the peer has reported to be lost in transmision.
+	 *            old data that the peer has reported to be lost in
+	 *            transmission.
 	 * @param messages
 	 *            the packets to send.
 	 * @return the sequence number of the {@link CustomFourPacket}.
@@ -806,7 +859,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 
 		// Encode custom packet
 		CustomFourPacket custom = new CustomFourPacket();
-		custom.sequenceId = sendSequenceNumber++;
+		custom.sequenceId = this.sendSequenceNumber++;
 		custom.messages = messages;
 		custom.encode();
 
@@ -833,10 +886,15 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				recoveryQueue.put(custom.sequenceId, reliable.toArray(new EncapsulatedPacket[reliable.size()]));
 			}
 		}
-		log.debug("Sent custom packet containing " + custom.messages.length
-				+ " encapsulated packets with sequence number " + custom.sequenceId);
-		for (EncapsulatedPacket e : custom.messages) {
-			System.out.println("\t" + RakNetPacket.getName(e.payload.array()[0] & 0xFF));
+		log.debug("Sent custom packet containing " + custom.messages.length + " encapsulated packet"
+				+ (custom.messages.length == 1 ? "" : "s") + " with sequence number " + custom.sequenceId);
+		for (int i = 0; i < custom.messages.length; i++) {
+			if (custom.messages[i].payload.size() > 0) {
+				log.debug("\tID of packet " + i + ": "
+						+ RakNetPacket.getName(custom.messages[i].payload.array()[0] & 0xFF));
+			} else {
+				log.debug("\tID packet " + i + ": none (payload length is 0)");
+			}
 		}
 		return custom.sequenceId;
 	}
@@ -893,8 +951,8 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			log.debug("Bumped message index from " + encapsulated.messageIndex + " to " + messageIndex);
 		}
 		if (reliability.isOrdered() || reliability.isSequenced()) {
-			encapsulated.orderIndex = (reliability.isOrdered() ? orderSendIndex[channel]++
-					: sequenceSendIndex[channel]++);
+			encapsulated.orderIndex = reliability.isOrdered() ? orderSendIndex[channel]++
+					: sequenceSendIndex[channel]++;
 			log.debug("Bumped " + (reliability.isOrdered() ? "order" : "sequence") + " index from "
 					+ ((reliability.isOrdered() ? orderSendIndex[channel] : sequenceSendIndex[channel]) - 1) + " to "
 					+ (reliability.isOrdered() ? orderSendIndex[channel] : sequenceSendIndex[channel]) + " on channel "
@@ -926,13 +984,24 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	/**
 	 * Updates the peer.
 	 * 
+	 * @param force
+	 *            <code>true</code> if the update should be forced,
+	 *            <code>false</code> otherwise.
+	 * @throws IllegalStateException
+	 *             if the peer is disconnected and <code>force</code> is
+	 *             <code>false</code>.
 	 * @throws TimeoutException
-	 *             if the peer has timed out.
+	 *             if the peer has timed out and <code>force</code> is
+	 *             <code>false</code>.
 	 */
-	public final void update() throws TimeoutException {
+	private final void update(boolean force) throws IllegalStateException, TimeoutException {
 		long currentTime = System.currentTimeMillis();
-		if (currentTime - lastPacketReceiveTime >= timeout) {
-			throw new TimeoutException(this);
+		if (force == false) {
+			if (state == RakNetState.DISCONNECTED) {
+				throw new IllegalStateException("Peer disconnected");
+			} else if (currentTime - lastPacketReceiveTime >= timeout) {
+				throw new TimeoutException(this);
+			}
 		}
 
 		// Send keep alive packet
@@ -978,7 +1047,27 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		if (currentTime - lastRecoverySendTime >= RakNet.RECOVERY_SEND_INTERVAL && recoveryQueueI.hasNext()) {
 			this.sendCustomPacket(false, recoveryQueueI.next());
 			this.lastRecoverySendTime = currentTime;
+		} else {
+			/*
+			 * Nothing needs to be recovered if there is nothing in the queue.
+			 * Only start counting the time that has been passed since the last
+			 * recovery packet has been sent when there are reliable packets in
+			 * the queue that have yet to be acknowledged.
+			 */
+			this.lastRecoverySendTime = currentTime;
 		}
+	}
+
+	/**
+	 * Updates the peer.
+	 * 
+	 * @throws IllegalStateException
+	 *             if the peer is disconnected.
+	 * @throws TimeoutException
+	 *             if the peer has timed out.
+	 */
+	public final void update() throws IllegalStateException, TimeoutException {
+		this.update(false);
 	}
 
 	/**
@@ -991,7 +1080,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 *             if the peer is already disconnected.
 	 */
 	public final void disconnect() throws IllegalStateException {
-		if (this.getState() == RakNetState.DISCONNECTED) {
+		if (this.isDisconnected()) {
 			throw new IllegalStateException("Peer is already disconnected");
 		}
 		this.setState(RakNetState.DISCONNECTED);
@@ -1004,7 +1093,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		 */
 		sendQueue.clear();
 		this.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
-		this.update();
+		this.update(true);
 	}
 
 	/**

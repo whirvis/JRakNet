@@ -77,7 +77,7 @@ public final class ComboBoxTextChannelListener implements ActionListener {
 			TextChannel serverChannel = (TextChannel) frame.cmbTextChannels.getSelectedItem();
 			client.setChannel(serverChannel.getChannel());
 		} catch (Exception e1) {
-			frame.displayError(e1);
+			client.caughtError(e1);
 		}
 	}
 

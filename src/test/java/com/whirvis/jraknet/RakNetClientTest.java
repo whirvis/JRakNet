@@ -31,7 +31,6 @@
 package com.whirvis.jraknet;
 
 import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -66,7 +65,7 @@ public final class RakNetClientTest {
 	 * @throws RakNetException
 	 *             if a RakNet error occurs.
 	 */
-	public static void main(String[] args) throws UnknownHostException, RakNetException {
+	public static void main(String[] args) throws RakNetException {
 		RakNetClient client = new RakNetClient();
 		client.addListener(new RakNetClientListener() {
 

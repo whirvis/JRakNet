@@ -438,8 +438,8 @@ public final class Discovery {
 	 * {@link #addPort(int)}. The way this method works is simply by clearing
 	 * all the current ports and then adding the specified port.
 	 * 
-	 * @param ports
-	 *            the ports to broadcast to.
+	 * @param port
+	 *            the port to broadcast to.
 	 * @throws IllegalArgumentException
 	 *             if the port is not within the range of <code>0-65535</code>.
 	 */
@@ -723,7 +723,7 @@ public final class Discovery {
 	 * {@link #addServer(InetSocketAddress)}. The way this method works is
 	 * simply by clearing all the current ports and then adding the specified.
 	 * 
-	 * @param address
+	 * @param server
 	 *            the server to broadcast to.
 	 * @throws NullPointerException
 	 *             if the <code>server</code> or the <code>server</code> IP
@@ -747,7 +747,9 @@ public final class Discovery {
 	 * simply by clearing all the current ports and then adding the specified.
 	 * 
 	 * @param address
-	 *            the server to broadcast to.
+	 *            the server IP address.
+	 * @param port
+	 *            the server port.
 	 * @throws NullPointerException
 	 *             if the <code>address</code> is <code>null</code>.
 	 * @throws IllegalArgumentException
@@ -771,8 +773,10 @@ public final class Discovery {
 	 * {@link #addServer(InetSocketAddress)}. The way this method works is
 	 * simply by clearing all the current ports and then adding the specified.
 	 * 
-	 * @param address
-	 *            the server to broadcast to.
+	 * @param host
+	 *            the server address.
+	 * @param port
+	 *            the server port.
 	 * @throws NullPointerException
 	 *             if the <code>address</code> is <code>null</code>.
 	 * @throws IllegalArgumentException

@@ -35,7 +35,7 @@ import com.whirvis.jraknet.Packet;
 /**
  * A <code>KICK</code> packet.
  * <p>
- * This packet is sent by the {@link com.whirvis.jraknet.chat.ChatServer
+ * This packet is sent by the {@link com.whirvis.jraknet.chat.server.ChatServer
  * ChatServer} when it kicks a {@link com.whirvis.jraknet.chat.client.ChatClient
  * ChatClient}.
  * 

@@ -44,6 +44,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.UIManager;
+import javax.swing.text.DefaultCaret;
 
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.chat.TextChannel;
@@ -180,7 +181,7 @@ public final class ChatFrame extends JFrame {
 		this.getContentPane().add(textChannelPane);
 
 		// Button to trigger connection request
-		this.btnConnectServer = new JButton("Connect to server");
+		this.btnConnectServer = new JButton("Connect");
 		btnConnectServer.setBounds(224, 10, 125, 21);
 		btnConnectServer.setEnabled(true);
 		this.getContentPane().add(btnConnectServer);
@@ -203,6 +204,7 @@ public final class ChatFrame extends JFrame {
 		this.txtPaneTextChannel = new JTextPane();
 		txtPaneTextChannel.setEditable(false);
 		txtPaneTextChannel.setAutoscrolls(true);
+		((DefaultCaret) txtPaneTextChannel.getCaret()).setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
 		textChannelPane.setViewportView(txtPaneTextChannel);
 
 		// Text field to chat
@@ -316,8 +318,8 @@ public final class ChatFrame extends JFrame {
 			this.connected = connected;
 			txtServerName.setEnabled(connected);
 			txtServerMotd.setEnabled(connected);
-			txtServerAddress.setEditable(!connected);
-			btnConnectServer.setText(!connected ? "Connect" : "Disconnect");
+			txtServerAddress.setEditable(connected == false);
+			btnConnectServer.setText(connected ? "Disconnect" : "Connect");
 			btnUpdateUsername.setEnabled(connected);
 			cmbTextChannels.setEnabled(connected);
 			txtChatBox.setEnabled(connected);
