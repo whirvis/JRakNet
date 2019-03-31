@@ -52,7 +52,6 @@ import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.identifier.Identifier;
 import com.whirvis.jraknet.peer.RakNetClientPeer;
-import com.whirvis.jraknet.peer.RakNetState;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.connection.ConnectionBanned;
 import com.whirvis.jraknet.protocol.connection.IncompatibleProtocolVersion;
@@ -853,7 +852,11 @@ public class RakNetServer implements RakNetServerListener {
 			throw new IllegalArgumentException("A server cannot be used as a listener except for itself");
 		} else if (!listeners.contains(listener)) {
 			listeners.add(listener);
-			log.info("Added listener of class " + listener.getClass().getName());
+			if (listener != this) {
+				log.info("Added listener of class " + listener.getClass().getName());
+			} else {
+				log.info("Added self listener");
+			}
 		}
 		return this;
 	}
@@ -2001,7 +2004,7 @@ public class RakNetServer implements RakNetServerListener {
 		if (peer == null) {
 			return false; // No client to disconnect
 		}
-		peer.sendMessage(Reliability.UNRELIABLE, RakNetPacket.ID_DISCONNECTION_NOTIFICATION);
+		peer.disconnect();
 		log.debug("Disconnected client with address " + address + " for \"" + (reason == null ? "Disconnected" : reason)
 				+ "\"");
 		this.callEvent(
@@ -2497,7 +2500,7 @@ public class RakNetServer implements RakNetServerListener {
 			OpenConnectionRequestOne connectionRequestOne = new OpenConnectionRequestOne(packet);
 			connectionRequestOne.decode();
 			if (clients.containsKey(sender)) {
-				if (clients.get(sender).getState().equals(RakNetState.LOGGED_IN)) {
+				if (clients.get(sender).isLoggedIn()) {
 					this.disconnect(sender, "Client reinstantiated connection");
 				}
 			}
@@ -2715,18 +2718,18 @@ public class RakNetServer implements RakNetServerListener {
 						} catch (InterruptedException e) {
 							this.interrupt(); // Interrupted during sleep
 						}
-
-						// Update peers
 						for (RakNetClientPeer peer : clients.values()) {
-							try {
-								peer.update();
-								if (peer.getPacketsReceivedThisSecond() >= RakNet.getMaxPacketsPerSecond()) {
-									server.blockAddress(peer.getInetAddress(), "Too many packets",
-											RakNet.MAX_PACKETS_PER_SECOND_BLOCK);
+							if (!peer.isDisconnected()) {
+								try {
+									peer.update();
+									if (peer.getPacketsReceivedThisSecond() >= RakNet.getMaxPacketsPerSecond()) {
+										server.blockAddress(peer.getInetAddress(), "Too many packets",
+												RakNet.MAX_PACKETS_PER_SECOND_BLOCK);
+									}
+								} catch (Throwable throwable) {
+									server.callEvent(listener -> listener.onPeerException(server, peer, throwable));
+									disconnected.put(peer, throwable);
 								}
-							} catch (Throwable throwable) {
-								server.callEvent(listener -> listener.onPeerException(server, peer, throwable));
-								disconnected.put(peer, throwable);
 							}
 						}
 
@@ -2825,7 +2828,7 @@ public class RakNetServer implements RakNetServerListener {
 	 * All currently connected clients will be disconnected with the same reason
 	 * used for shutdown.
 	 * 
-	 * @throws IllegalstateException
+	 * @throws IllegalStateException
 	 *             if the server is not running.
 	 */
 	public final void shutdown() throws IllegalStateException {

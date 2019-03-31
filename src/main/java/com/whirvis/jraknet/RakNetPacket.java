@@ -997,7 +997,7 @@ public class RakNetPacket extends Packet {
 			mapNameIds();
 		}
 		if (!PACKET_NAMES.containsKey((short) id)) {
-			return RakNet.toHexStringId(id);
+			return RakNet.toHexStringId(id & 0xFF);
 		}
 		return PACKET_NAMES.get((short) id);
 	}

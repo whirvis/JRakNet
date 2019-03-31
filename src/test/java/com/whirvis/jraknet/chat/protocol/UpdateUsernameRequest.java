@@ -35,7 +35,7 @@ import com.whirvis.jraknet.Packet;
 /**
  * An <code>UPDATE_USERNAME_REQUEST</code> packet.
  * <p>
- * This packet is sent by the {@link com.whirvis.jraknet.client.ChatClient
+ * This packet is sent by the {@link com.whirvis.jraknet.chat.client.ChatClient
  * ChatClient} when it wishes to update it's username.
  * 
  * @author Trent Summerlin

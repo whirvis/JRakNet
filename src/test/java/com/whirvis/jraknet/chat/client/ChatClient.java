@@ -34,10 +34,15 @@ import java.net.InetSocketAddress;
 import java.util.UUID;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.InvalidChannelException;
 import com.whirvis.jraknet.RakNet;
+import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.chat.TextChannel;
 import com.whirvis.jraknet.chat.client.frame.ChatFrame;
@@ -62,6 +67,8 @@ import com.whirvis.jraknet.protocol.Reliability;
  * @since JRakNet v2.0.0
  */
 public class ChatClient extends RakNetClient {
+
+	private static final Logger LOG = LogManager.getLogger(ChatClient.class);
 
 	/**
 	 * The instructions that are displayed when the client is connecting to a
@@ -232,16 +239,24 @@ public class ChatClient extends RakNetClient {
 		frame.setChannels(channels);
 	}
 
-	@Override
-	public void connect(InetSocketAddress address) {
-		try {
-			frame.setInstructions(INSTRUCTIONS_CONNECTING);
-			super.connect(address);
-			this.username = frame.getUsername();
-		} catch (Exception e) {
-			frame.setInstructions(null);
-			frame.displayError(e);
+	/**
+	 * Called when an error has been caught anywhere in the client.
+	 * 
+	 * @param throwable
+	 *            the caught error.
+	 */
+	public void caughtError(Throwable throwable) {
+		frame.displayError(throwable);
+		if (this.isConnected()) {
+			this.disconnect();
 		}
+	}
+
+	@Override
+	public void connect(InetSocketAddress address) throws NullPointerException, IllegalStateException, RakNetException {
+		frame.setInstructions(INSTRUCTIONS_CONNECTING);
+		super.connect(address);
+		this.username = frame.getUsername();
 	}
 
 	@Override
@@ -257,9 +272,10 @@ public class ChatClient extends RakNetClient {
 	@Override
 	public void onDisconnect(RakNetClient client, RakNetServerPeer peer, String reason) {
 		this.peer = null;
+		this.resetChannels();
 		frame.setInstructions(null);
 		frame.toggleServerInteraction(false);
-		this.resetChannels();
+		JOptionPane.showMessageDialog(frame, "Disconnected from server: " + reason);
 	}
 
 	@Override
@@ -282,15 +298,14 @@ public class ChatClient extends RakNetClient {
 			frame.displayError("Connection failure", failure.reason);
 			frame.toggleServerInteraction(false);
 			this.disconnect(failure.reason);
-		} else if (packet.getId() == ChatPacket.ID_CHAT_MESSAGE) {
+		} else if (packet.getId() == ChatPacket.ID_CHAT_MESSAGE && channels[channel] != null) {
 			ChatMessage chat = new ChatMessage(packet);
 			chat.decode();
-			if (channels[channel] != null) {
-				channels[channel].addChatMessage(chat.message);
-				if (currentChannel == channel) {
-					frame.updateChannel(channels[channel]);
-				}
+			channels[channel].addChatMessage(chat.message);
+			if (currentChannel == channel) {
+				frame.updateChannel(channels[channel]);
 			}
+			LOG.info(chat.message + " [" + channels[channel].getName() + "]");
 		} else if (packet.getId() == ChatPacket.ID_UPDATE_USERNAME_ACCEPTED) {
 			if (newUsername != null) {
 				this.username = newUsername;
@@ -326,8 +341,7 @@ public class ChatClient extends RakNetClient {
 
 	@Override
 	public void onPeerException(RakNetClient client, RakNetServerPeer peer, Throwable throwable) {
-		frame.displayError(throwable);
-		this.disconnect(throwable);
+		this.caughtError(throwable);
 	}
 
 	/**
@@ -346,9 +360,10 @@ public class ChatClient extends RakNetClient {
 			client = new ChatClient(frame);
 			frame.setVisible(true);
 		} catch (Exception e) {
-			frame.displayError(e);
 			if (client != null) {
-				client.disconnect(e);
+				client.caughtError(e);
+			} else {
+				frame.displayError(e);
 			}
 			RakNet.sleep(10000);
 			System.exit(0);

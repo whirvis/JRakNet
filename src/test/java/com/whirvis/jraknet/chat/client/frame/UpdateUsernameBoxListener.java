@@ -38,7 +38,7 @@ import com.whirvis.jraknet.chat.client.ChatClient;
 /**
  * Used to listen for presses to the update username button in the frame.
  * <p>
- * When a press to the updaet username button has been detected, it will signal
+ * When a press to the update username button has been detected, it will signal
  * the client to request it's username to be updated.
  *
  * @author Trent Summerlin
@@ -75,7 +75,7 @@ public final class UpdateUsernameBoxListener implements ActionListener {
 		try {
 			client.updateUsername(frame.txtClientUsername.getText());
 		} catch (Exception e1) {
-			frame.displayError(e1);
+			client.caughtError(e1);
 		}
 	}
 

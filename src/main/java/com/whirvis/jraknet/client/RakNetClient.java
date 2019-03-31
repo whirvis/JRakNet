@@ -256,14 +256,13 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			throw new NullPointerException("Listener cannot be null");
 		} else if (listener instanceof RakNetClient && !this.equals(listener)) {
 			throw new IllegalArgumentException("A client cannot be used as a listener except for itself");
-		} else if (listeners.contains(listener)) {
-			return this; // Prevent duplicates
-		}
-		listeners.add(listener);
-		if (listener != this) {
-			log.debug("Added listener of class " + listener.getClass().getName());
-		} else {
-			log.debug("Added self listener");
+		} else if (!listeners.contains(listener)) {
+			listeners.add(listener);
+			if (listener != this) {
+				log.info("Added listener of class " + listener.getClass().getName());
+			} else {
+				log.info("Added self listener");
+			}
 		}
 		return this;
 	}
@@ -476,16 +475,55 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	}
 
 	/**
-	 * Returns whether or not the client is currently connected to a server.
+	 * Returns whether or not the client is connected.
 	 * 
-	 * @return <code>true</code> if the client is currently connected to a
-	 *         server, <code>false</code> otherwise.
+	 * @return <code>true</code> if the client is connected, <code>false</code>
+	 *         otherwise.
 	 */
-	public final boolean isConnected() {
+	public boolean isConnected() {
+		if (peer == null) {
+			return false; // No peer
+		}
+		return peer.getState() == RakNetState.CONNECTED;
+	}
+
+	/**
+	 * Returns whether or not the client is handshaking.
+	 * 
+	 * @return <code>true</code> if the client is handshaking,
+	 *         <code>false</code> otherwise.
+	 */
+	public boolean isHandshaking() {
+		if (peer == null) {
+			return false; // No peer
+		}
+		return peer.getState() == RakNetState.HANDSHAKING;
+	}
+
+	/**
+	 * Returns whether or not the client is logged in.
+	 * 
+	 * @return <code>true</code> if the client is logged in, <code>false</code>
+	 *         otherwise.
+	 */
+	public boolean isLoggedIn() {
 		if (peer == null) {
 			return false; // No peer
 		}
 		return peer.getState() == RakNetState.LOGGED_IN;
+	}
+
+	/**
+	 * Returns whether or not the client is disconnected.
+	 * 
+	 * @return <code>true</code> if the client is disconnected,
+	 *         <code>false</code> otherwise.
+	 */
+	public boolean isDisconnected() {
+		if (peer == null) {
+			return true; // No peer
+		}
+		return peer.getState() == RakNetState.DISCONNECTED;
 	}
 
 	/**
@@ -713,11 +751,15 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 					} catch (InterruptedException e) {
 						this.interrupt(); // Interrupted during sleep
 					}
-					try {
-						peer.update();
-					} catch (Throwable throwable) {
-						client.callEvent(listener -> listener.onPeerException(client, peer, throwable));
-						client.disconnect(throwable);
+					if (peer != null) {
+						if (!peer.isDisconnected()) {
+							try {
+								peer.update();
+							} catch (Throwable throwable) {
+								client.callEvent(listener -> listener.onPeerException(client, peer, throwable));
+								client.disconnect(throwable);
+							}
+						}
 					}
 				}
 			}
@@ -818,18 +860,17 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			throw new IllegalStateException("Client is not connected to a server");
 		}
 
-		// Close peer and interrupt thread
-		if (peer.getState() != RakNetState.DISCONNECTED) {
-			peer.disconnect();
-		}
+		// Disconnect peer and interrupt thread
 		peerThread.interrupt();
-
-		// Destroy peer
+		this.peerThread = null;
+		RakNetServerPeer peer = this.peer;
+		if (!peer.isDisconnected()) {
+			peer.disconnect();
+			this.peer = null;
+		}
 		log.info("Disconnected from server with address " + peer.getAddress() + " with reason \""
 				+ (reason == null ? "Disconnected" : reason) + "\"");
 		this.callEvent(listener -> listener.onDisconnect(this, peer, reason == null ? "Disconnected" : reason));
-		this.peer = null;
-		this.peerThread = null;
 
 		// Shutdown networking
 		channel.close();

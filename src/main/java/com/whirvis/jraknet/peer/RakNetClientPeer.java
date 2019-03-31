@@ -90,15 +90,15 @@ public final class RakNetClientPeer extends RakNetPeer {
 
 	@Override
 	public long getTimestamp() {
-		if (this.getState() != RakNetState.LOGGED_IN) {
-			return -1L;
+		if (this.isLoggedIn()) {
+			return System.currentTimeMillis() - timestamp;
 		}
-		return System.currentTimeMillis() - timestamp;
+		return -1L;
 	}
 
 	@Override
 	public void handleMessage(RakNetPacket packet, int channel) {
-		if (packet.getId() == ID_CONNECTION_REQUEST && this.getState() == RakNetState.CONNECTED) {
+		if (packet.getId() == ID_CONNECTION_REQUEST && this.isConnected()) {
 			ConnectionRequest request = new ConnectionRequest(packet);
 			request.decode();
 			if (request.clientGuid == this.getGloballyUniqueId() && request.useSecurity == false) {
@@ -130,15 +130,15 @@ public final class RakNetClientPeer extends RakNetPeer {
 			if (!newIncomingConnection.failed()) {
 				this.timestamp = System.currentTimeMillis() - newIncomingConnection.clientTimestamp;
 				this.setState(RakNetState.LOGGED_IN);
-				this.getLogger()
-						.info("Client with globally unique ID " + this.getGloballyUniqueId() + " has logged in");
+				this.getLogger().info("Client with globally unique ID "
+						+ Long.toHexString(this.getGloballyUniqueId()).toUpperCase() + " has logged in");
 				server.callEvent(listener -> listener.onLogin(server, this));
 			} else {
 				server.disconnect(this,
 						"Failed to login (" + newIncomingConnection.getClass().getSimpleName() + " failed to decode)");
 			}
 		} else if (packet.getId() == ID_DISCONNECTION_NOTIFICATION) {
-			server.disconnect(this, "Disconnected");
+			server.disconnect(this, "Client disconnected");
 		} else if (packet.getId() >= ID_USER_PACKET_ENUM) {
 			server.callEvent(listener -> listener.handleMessage(server, this, packet, channel));
 		} else {

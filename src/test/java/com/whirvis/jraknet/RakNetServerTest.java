@@ -70,6 +70,8 @@ public final class RakNetServerTest {
 	 * 
 	 * @param args
 	 *            the program arguments. These values are ignored.
+	 * @throws RakNetException
+	 *             if a RakNet error occurs.
 	 */
 	public static void main(String[] args) throws RakNetException {
 		if (!UniversalWindowsProgram.MINECRAFT.setLoopbackExempt(true)) {

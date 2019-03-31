@@ -1,8 +1,15 @@
 com.whirvis.jraknet
+com.whirvis.jraknet.chat
+com.whirvis.jraknet.chat.client
+com.whirvis.jraknet.chat.client.frame
+com.whirvis.jraknet.chat.protocol
+com.whirvis.jraknet.chat.server
+com.whirvis.jraknet.chat.server.command
 com.whirvis.jraknet.client
 com.whirvis.jraknet.client.peer
 com.whirvis.jraknet.discovery
 com.whirvis.jraknet.identifier
+com.whirvis.jraknet.interactive
 com.whirvis.jraknet.map
 com.whirvis.jraknet.map.concurrent
 com.whirvis.jraknet.peer
@@ -12,7 +19,6 @@ com.whirvis.jraknet.protocol.login
 com.whirvis.jraknet.protocol.message
 com.whirvis.jraknet.protocol.message.acknowledge
 com.whirvis.jraknet.protocol.status
-com.whirvis.jraknet.scheduler
 com.whirvis.jraknet.server
 com.whirvis.jraknet.stream
 com.whirvis.jraknet.windows
