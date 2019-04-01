@@ -78,7 +78,7 @@
 		<!-- WaifUPnP -->
 		<repository>
 			<id>jraknet.waifupnp</id>
-			<url>https://github.com/JRakNet/WaifUPnP/blob/master</url>
+			<url>https://github.com/JRakNet/WaifUPnP/raw/master</url>
 		</repository>
 	</repositories>
 
