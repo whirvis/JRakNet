@@ -77,8 +77,8 @@
 	<repositories>
 		<!-- WaifUPnP -->
 		<repository>
-			<id>jraknet.waifupnp</id>
-			<url>https://github.com/JRakNet/WaifUPnP/raw/master</url>
+			<id>com.dosse.upnp</id>
+			<url>https://raw.github.com/JRakNet/WaifUPnP/master/</url>
 		</repository>
 	</repositories>
 
