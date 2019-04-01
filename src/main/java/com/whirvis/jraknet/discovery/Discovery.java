@@ -44,6 +44,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.whirvis.jraknet.RakNet;
+import com.whirvis.jraknet.ThreadedListener;
 import com.whirvis.jraknet.identifier.Identifier;
 import com.whirvis.jraknet.protocol.status.UnconnectedPong;
 
@@ -92,6 +93,7 @@ public final class Discovery {
 	private static final long PING_ID = UUID.randomUUID().getLeastSignificantBits();
 
 	protected static DiscoveryMode discoveryMode = DiscoveryMode.ALL_CONNECTIONS;
+	protected static int eventThreadCount;
 	protected static final ConcurrentLinkedQueue<DiscoveryListener> LISTENERS = new ConcurrentLinkedQueue<DiscoveryListener>();
 	protected static final ConcurrentHashMap<InetSocketAddress, Boolean> DISCOVERY_ADDRESSES = new ConcurrentHashMap<InetSocketAddress, Boolean>();
 	protected static final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> DISCOVERED = new ConcurrentHashMap<InetSocketAddress, DiscoveredServer>();
@@ -216,7 +218,20 @@ public final class Discovery {
 			throw new NullPointerException("Event cannot be null");
 		}
 		for (DiscoveryListener listener : LISTENERS) {
-			event.accept(listener);
+			if (listener.getClass().isAnnotationPresent(ThreadedListener.class)) {
+				ThreadedListener threadedListener = listener.getClass().getAnnotation(ThreadedListener.class);
+				new Thread(Discovery.class.getSimpleName() + (threadedListener.name().length() > 0 ? "-" : "")
+						+ threadedListener.name() + "-Thread-" + ++eventThreadCount) {
+
+					@Override
+					public void run() {
+						event.accept(listener);
+					}
+
+				}.start();
+			} else {
+				event.accept(listener);
+			}
 		}
 	}
 
