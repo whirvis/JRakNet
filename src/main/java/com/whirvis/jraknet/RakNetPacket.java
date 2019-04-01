@@ -988,7 +988,7 @@ public class RakNetPacket extends Packet {
 	 * 
 	 * @param id
 	 *            the ID of the packet.
-	 * @return the name of the packet with the specified ID, it's hexadecimal ID
+	 * @return the name of the packet with the specified ID, its hexadecimal ID
 	 *         according to {@link RakNet#toHexStringId(int)} if it does not
 	 *         exist.
 	 */
@@ -1016,7 +1016,7 @@ public class RakNetPacket extends Packet {
 	 * 
 	 * @param packet
 	 *            the packet.
-	 * @return the name of the packet, it's hexadecimal ID according to
+	 * @return the name of the packet, its hexadecimal ID according to
 	 *         {@link RakNet#toHexStringId(int)} if it does not exist.
 	 * @throws NullPointerException
 	 *             if the <code>packet</code> is <code>null</code>.

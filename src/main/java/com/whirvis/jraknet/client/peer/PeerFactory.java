@@ -111,7 +111,7 @@ public final class PeerFactory {
 	 *            the address of the server.
 	 * @param bootstrap
 	 *            the bootstrap the <code>channel</code> belongs to. Once a
-	 *            maximum transfer unit has been decided upon, it's
+	 *            maximum transfer unit has been decided upon, its
 	 *            {@link ChannelOption#SO_SNDBUF} and
 	 *            {@link ChannelOption#SO_RCVBUF} will be set to it.
 	 * @param channel

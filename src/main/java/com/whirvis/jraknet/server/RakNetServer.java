@@ -49,6 +49,7 @@ import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
+import com.whirvis.jraknet.ThreadedListener;
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.identifier.Identifier;
 import com.whirvis.jraknet.peer.RakNetClientPeer;
@@ -105,6 +106,7 @@ public class RakNetServer implements RakNetServerListener {
 	private int maxConnections;
 	private boolean broadcastingEnabled;
 	private Identifier identifier;
+	private int eventThreadCount;
 	private final ConcurrentLinkedQueue<RakNetServerListener> listeners;
 	private final ConcurrentHashMap<InetSocketAddress, RakNetClientPeer> clients;
 	private final ConcurrentLinkedQueue<InetAddress> banned;
@@ -911,7 +913,20 @@ public class RakNetServer implements RakNetServerListener {
 			throw new NullPointerException("Event cannot be null");
 		}
 		for (RakNetServerListener listener : listeners) {
-			event.accept(listener);
+			if (listener.getClass().isAnnotationPresent(ThreadedListener.class)) {
+				ThreadedListener threadedListener = listener.getClass().getAnnotation(ThreadedListener.class);
+				new Thread(RakNetServer.class.getSimpleName() + (threadedListener.name().length() > 0 ? "-" : "")
+						+ threadedListener.name() + "-Thread-" + ++eventThreadCount) {
+
+					@Override
+					public void run() {
+						event.accept(listener);
+					}
+
+				}.start();
+			} else {
+				event.accept(listener);
+			}
 		}
 	}
 
@@ -1214,7 +1229,7 @@ public class RakNetServer implements RakNetServerListener {
 	 *             <code>null</code>.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, Packet packet)
 			throws NullPointerException, IllegalArgumentException {
@@ -1253,7 +1268,7 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the <code>peer</code> is not of the server.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
 			Packet packet) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
@@ -1283,7 +1298,7 @@ public class RakNetServer implements RakNetServerListener {
 	 *             <code>null</code>.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, Packet... packets)
 			throws NullPointerException, InvalidChannelException {
@@ -1322,7 +1337,7 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the <code>peer</code> is not of the server.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
 			Packet... packets) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
@@ -1456,7 +1471,7 @@ public class RakNetServer implements RakNetServerListener {
 	 *             <code>null</code>.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, ByteBuf buf)
 			throws NullPointerException, InvalidChannelException {
@@ -1488,7 +1503,7 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the <code>peer</code> is not of the server.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
 			ByteBuf buf) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
@@ -1518,7 +1533,7 @@ public class RakNetServer implements RakNetServerListener {
 	 *             <code>null</code>.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, ByteBuf... bufs)
 			throws NullPointerException, InvalidChannelException {
@@ -1557,7 +1572,7 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the <code>peer</code> is not of the server.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
 			ByteBuf... bufs) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
@@ -1690,7 +1705,7 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the <code>reliability</code> is <code>null</code>.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, int packetId)
 			throws NullPointerException, InvalidChannelException {
@@ -1722,7 +1737,7 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the <code>peer</code> is not of the server.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
 			int packetId) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
@@ -1752,7 +1767,7 @@ public class RakNetServer implements RakNetServerListener {
 	 *             <code>null</code>.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, int... packetIds)
 			throws NullPointerException, InvalidChannelException {
@@ -1791,7 +1806,7 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the <code>peer</code> is not of the server.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
 			int... packetIds) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
@@ -2717,6 +2732,7 @@ public class RakNetServer implements RakNetServerListener {
 							Thread.sleep(0, 1); // Lower CPU usage
 						} catch (InterruptedException e) {
 							this.interrupt(); // Interrupted during sleep
+							continue;
 						}
 						for (RakNetClientPeer peer : clients.values()) {
 							if (!peer.isDisconnected()) {

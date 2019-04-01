@@ -39,6 +39,7 @@ import org.apache.logging.log4j.Logger;
 import com.whirvis.jraknet.client.RakNetClient;
 import com.whirvis.jraknet.client.RakNetClientListener;
 import com.whirvis.jraknet.peer.RakNetClientPeer;
+import com.whirvis.jraknet.peer.RakNetPeer;
 import com.whirvis.jraknet.peer.RakNetServerPeer;
 import com.whirvis.jraknet.protocol.Reliability;
 import com.whirvis.jraknet.protocol.message.CustomPacket;
@@ -194,7 +195,7 @@ public final class SplitPacketTest {
 						+ ", calculating maximum packet size...");
 				Packet packet = new RakNetPacket(SPLIT_START_ID);
 				int maximumPacketSize = (peer.getMaximumTransferUnit() - CustomPacket.MINIMUM_SIZE
-						- EncapsulatedPacket.size(Reliability.RELIABLE_ORDERED, false)) * RakNet.MAX_SPLIT_COUNT;
+						- EncapsulatedPacket.size(Reliability.RELIABLE_ORDERED, false)) * RakNetPeer.MAX_SPLIT_COUNT;
 
 				// Create giant packet
 				LOG.info("Client - Creating giant packet...");

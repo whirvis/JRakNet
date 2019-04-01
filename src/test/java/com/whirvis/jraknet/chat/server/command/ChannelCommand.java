@@ -74,7 +74,7 @@ public final class ChannelCommand extends Command {
 				if (specifiedChannel == false) {
 					channelId = 0;
 					while (this.getServer().hasChannel(channelId)) {
-						if (channelId++ >= RakNet.MAX_CHANNELS) {
+						if (channelId++ >= RakNet.CHANNEL_COUNT) {
 							LOG.error("No more available channels, either remove some or manually assign an ID");
 							return true;
 						}
@@ -111,14 +111,14 @@ public final class ChannelCommand extends Command {
 		} else if (args.length >= 1) {
 			if (args[0].equalsIgnoreCase("list")) {
 				// Get the last used channel for formatting
-				int lastChannel = RakNet.MAX_CHANNELS - 1;
+				int lastChannel = RakNet.CHANNEL_COUNT - 1;
 				while (!this.getServer().hasChannel(lastChannel)) {
 					lastChannel--;
 				}
 
 				// Print registered channels
 				StringBuilder channelListBuilder = new StringBuilder("Registered channels:\n");
-				for (int i = 0; i < RakNet.MAX_CHANNELS; i++) {
+				for (int i = 0; i < RakNet.CHANNEL_COUNT; i++) {
 					if (this.getServer().hasChannel(i)) {
 						channelListBuilder.append("\tChannel " + i + ": " + (lastChannel > 10 && i < 10 ? " " : "")
 								+ this.getServer().getChannel(i).getName() + (i != lastChannel ? "\n" : ""));

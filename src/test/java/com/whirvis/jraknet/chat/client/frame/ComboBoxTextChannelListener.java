@@ -40,7 +40,7 @@ import com.whirvis.jraknet.chat.client.ChatClient;
  * Listens for changes in the currently selected channel.
  * <p>
  * When a change in the currently selected channel has been detected, it will
- * signal the client to update it's currently displayed channel.
+ * signal the client to update its currently displayed channel.
  *
  * @author Trent Summerlin
  * @since JRakNet v2.0.0

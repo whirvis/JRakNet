@@ -101,7 +101,7 @@ public final class ChatServer extends RakNetServer {
 		}
 		this.name = name;
 		this.motd = motd;
-		this.channels = new TextChannel[RakNet.MAX_CHANNELS];
+		this.channels = new TextChannel[RakNet.CHANNEL_COUNT];
 		this.users = new HashMap<InetSocketAddress, ChatUser>();
 		this.addChannel(0, "Main hall");
 		this.addSelfListener();
@@ -178,7 +178,7 @@ public final class ChatServer extends RakNetServer {
 	 *            the name of the channel.
 	 * @throws InvalidChannelException
 	 *             if the <code>channel</code>. ID is greater than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 * @throws NullPointerException
 	 *             if the <code>name</code> is <code>null</code>.
 	 */
@@ -203,7 +203,7 @@ public final class ChatServer extends RakNetServer {
 	 *            the new name of the channel.
 	 * @throws InvalidChannelException
 	 *             if the <code>channel</code>. ID is greater than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 * @throws NullPointerException
 	 *             if the <code>name</code> is <code>null</code>.
 	 */
@@ -226,7 +226,7 @@ public final class ChatServer extends RakNetServer {
 	 *            the channel ID.
 	 * @throws InvalidChannelException
 	 *             if the <code>channel</code>. ID is greater than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public void removeChannel(int channel) throws InvalidChannelException {
 		if (channel >= channels.length) {
@@ -252,7 +252,7 @@ public final class ChatServer extends RakNetServer {
 	 *             if the <code>message</code> is <code>null</code>.
 	 * @throws InvalidChannelException
 	 *             if the <code>channel</code>. ID is greater than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}
+	 *             {@value RakNet#CHANNEL_COUNT}
 	 */
 	private void broadcastMessage(String message, int channel, boolean print)
 			throws NullPointerException, InvalidChannelException {
@@ -281,7 +281,7 @@ public final class ChatServer extends RakNetServer {
 	 *             if the <code>message</code> is <code>null</code>.
 	 * @throws InvalidChannelException
 	 *             if the <code>channel</code>. ID is greater than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}
+	 *             {@value RakNet#CHANNEL_COUNT}
 	 */
 	public void broadcastMessage(String message, int channel) throws NullPointerException, InvalidChannelException {
 		this.broadcastMessage(message, channel, true);

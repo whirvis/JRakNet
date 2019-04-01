@@ -32,7 +32,7 @@ package com.whirvis.jraknet;
 
 /**
  * Signals that a packet channel in a sent or received packet is higher than the
- * limit of {@value RakNet#MAX_CHANNELS}.
+ * limit of {@value RakNet#CHANNEL_COUNT}.
  *
  * @author Trent Summerlin
  * @since JRakNet v1.0.0
@@ -50,7 +50,7 @@ public final class InvalidChannelException extends IllegalArgumentException {
 	 *            the invalid channel that was used.
 	 */
 	public InvalidChannelException(int channel) {
-		super("Invalid channel " + channel + ", must be lower than " + RakNet.MAX_CHANNELS);
+		super("Invalid channel " + channel + ", must be lower than " + RakNet.CHANNEL_COUNT);
 		this.channel = channel;
 	}
 

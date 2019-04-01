@@ -58,14 +58,14 @@ public final class TextChannel {
 	 * @param name
 	 *            the name.
 	 * @throws InvalidChannelException
-	 *             if the channel is higher than {@value RakNet#MAX_CHANNELS}.
+	 *             if the channel is higher than {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public TextChannel(int channel, String name) throws InvalidChannelException {
 		this.channel = channel;
 		this.name = name;
 		this.messages = new String[100];
 		this.text = new String();
-		if (channel >= RakNet.MAX_CHANNELS) {
+		if (channel >= RakNet.CHANNEL_COUNT) {
 			throw new InvalidChannelException(channel);
 		}
 	}
