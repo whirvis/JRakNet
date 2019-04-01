@@ -47,6 +47,7 @@ import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
+import com.whirvis.jraknet.ThreadedListener;
 import com.whirvis.jraknet.client.peer.PeerFactory;
 import com.whirvis.jraknet.discovery.DiscoveredServer;
 import com.whirvis.jraknet.peer.RakNetPeerMessenger;
@@ -98,6 +99,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	private final Logger log;
 	private final long timestamp;
 	private final ConcurrentLinkedQueue<RakNetClientListener> listeners;
+	private int eventThreadCount;
 	private Bootstrap bootstrap;
 	private RakNetClientHandler handler;
 	private EventLoopGroup group;
@@ -323,7 +325,20 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			throw new NullPointerException("Event cannot be null");
 		}
 		for (RakNetClientListener listener : listeners) {
-			event.accept(listener);
+			if (listener.getClass().isAnnotationPresent(ThreadedListener.class)) {
+				ThreadedListener threadedListener = listener.getClass().getAnnotation(ThreadedListener.class);
+				new Thread(RakNetClient.class.getSimpleName() + (threadedListener.name().length() > 0 ? "-" : "")
+						+ threadedListener.name() + "-Thread-" + ++eventThreadCount) {
+
+					@Override
+					public void run() {
+						event.accept(listener);
+					}
+
+				}.start();
+			} else {
+				event.accept(listener);
+			}
 		}
 	}
 
@@ -750,6 +765,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 						Thread.sleep(0, 1); // Lower CPU usage
 					} catch (InterruptedException e) {
 						this.interrupt(); // Interrupted during sleep
+						continue;
 					}
 					if (peer != null) {
 						if (!peer.isDisconnected()) {
@@ -757,7 +773,9 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 								peer.update();
 							} catch (Throwable throwable) {
 								client.callEvent(listener -> listener.onPeerException(client, peer, throwable));
-								client.disconnect(throwable);
+								if (!peer.isDisconnected()) {
+									client.disconnect(throwable);
+								}
 							}
 						}
 					}

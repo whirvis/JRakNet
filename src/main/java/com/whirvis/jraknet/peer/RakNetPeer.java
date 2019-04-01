@@ -124,6 +124,42 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 
 	}
 
+	/**
+	 * The maximum amount of chunks a single encapsulated packet can be split
+	 * into.
+	 */
+	public static final int MAX_SPLIT_COUNT = 128;
+
+	/**
+	 * The maximum amount of split packets can be in the split handle queue.
+	 */
+	public static final int MAX_SPLITS_PER_QUEUE = 4;
+
+	/**
+	 * The interval at which not acknowledged packets are automatically resent.
+	 */
+	public static final long RECOVERY_SEND_INTERVAL = 500L;
+
+	/**
+	 * The interval at which pings are sent.
+	 */
+	public static final long PING_SEND_INTERVAL = 2500L;
+
+	/**
+	 * The interval at which keep-alive detection packets are sent.
+	 */
+	public static final long DETECTION_SEND_INTERVAL = 2500L;
+
+	/**
+	 * The default amount of time in milliseconds it will take for the peer to
+	 * timeout.
+	 * <p>
+	 * This can be changed in a peer specifically via the
+	 * {@link com.whirvis.jraknet.peer.RakNetPeer#setTimeout(long)
+	 * RakNetPeer.setTimeout(long)} method.
+	 */
+	public static final long PEER_TIMEOUT = DETECTION_SEND_INTERVAL * 10;
+
 	private final Logger log;
 	private final InetSocketAddress address;
 	private final long guid;
@@ -139,7 +175,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	private long lastPacketSendTime;
 	private long lastPacketReceiveTime;
 	private long lastRecoverySendTime;
-	private long lastKeepAliveSendTime;
+	private long lastDetectionSendTime;
 	private long lastPingSendTime;
 	private int messageIndex;
 	private int splitId;
@@ -187,7 +223,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		this.connectionType = connectionType;
 		this.channel = channel;
 		this.state = RakNetState.CONNECTED;
-		this.timeout = RakNet.PEER_TIMEOUT;
+		this.timeout = PEER_TIMEOUT;
 		this.lastPacketReceiveTime = System.currentTimeMillis();
 		this.reliablePackets = new ConcurrentMessageIndexList();
 		this.splitQueue = new ConcurrentIntMap<EncapsulatedPacket.Split>();
@@ -195,12 +231,12 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		this.recoveryQueue = new ConcurrentIntMap<EncapsulatedPacket[]>();
 		this.ackReceiptPackets = new ConcurrentHashMap<EncapsulatedPacket, Integer>();
 		this.receiveSequenceNumber = -1;
-		this.orderSendIndex = new int[RakNet.MAX_CHANNELS];
-		this.orderReceiveIndex = new int[RakNet.MAX_CHANNELS];
-		this.sequenceSendIndex = new int[RakNet.MAX_CHANNELS];
-		this.sequenceReceiveIndex = new int[RakNet.MAX_CHANNELS];
+		this.orderSendIndex = new int[RakNet.CHANNEL_COUNT];
+		this.orderReceiveIndex = new int[RakNet.CHANNEL_COUNT];
+		this.sequenceSendIndex = new int[RakNet.CHANNEL_COUNT];
+		this.sequenceReceiveIndex = new int[RakNet.CHANNEL_COUNT];
 		this.handleQueue = new ConcurrentIntMap<ConcurrentIntMap<EncapsulatedPacket>>();
-		for (int i = 0; i < RakNet.MAX_CHANNELS; i++) {
+		for (int i = 0; i < RakNet.CHANNEL_COUNT; i++) {
 			sequenceReceiveIndex[i] = -1;
 			handleQueue.put(i, new ConcurrentIntMap<EncapsulatedPacket>());
 		}
@@ -345,7 +381,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * Returns the amount of time in milliseconds it will take for the peer to
 	 * not respond in order for it to timeout.
 	 * <p>
-	 * By default, this value is set to {@value RakNet#PEER_TIMEOUT}.
+	 * By default, this value is set to {@value RakNetPeer#PEER_TIMEOUT}.
 	 * 
 	 * @return the amount of time in milliseconds it will take for the peer to
 	 *         not respond in order for it to timeout
@@ -395,6 +431,21 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 */
 	public final int getPacketsReceivedThisSecond() {
 		return this.packetsReceivedThisSecond;
+	}
+
+	/**
+	 * Returns whether or not the peer has timed out.
+	 * <p>
+	 * Keep in mind this method does not reflect the state of the peer
+	 * whatsoever. The peer state can be {@link RakNetState#HANDSHAKING
+	 * HANDSHAKING}, yet the peer can still have timed out due to
+	 * unresponsiveness.
+	 * 
+	 * @return <code>true</code> if the peer has timed out, <code>false</code>
+	 *         otherwise.
+	 */
+	public final boolean hasTimedOut() {
+		return System.currentTimeMillis() - lastPacketReceiveTime >= timeout;
 	}
 
 	/**
@@ -510,7 +561,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * @throws InvalidChannelException
 	 *             if the packet is a {@link CustomPacket CUSTOM_PACKET} and the
 	 *             channel of an encapsulated packet found inside of it is
-	 *             greater than or equal to {@value RakNet#MAX_CHANNELS}.
+	 *             greater than or equal to {@value RakNet#CHANNEL_COUNT}.
 	 * @throws SplitQueueOverflowException
 	 *             if the packet is a {@link CustomPacket CUSTOM_PACKET}, an
 	 *             encapsulated packet found inside of it is split, and adding
@@ -527,8 +578,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			this.lastPacketsReceivedThisSecondResetTime = currentTime;
 		}
 		this.packetsReceivedThisSecond++;
-		int packetId = packet.getId();
-		if (packetId >= ID_CUSTOM_0 && packetId <= ID_CUSTOM_F) {
+		if (packet.getId() >= ID_CUSTOM_0 && packet.getId() <= ID_CUSTOM_F) {
 			CustomPacket custom = new CustomPacket(packet);
 			custom.decode();
 
@@ -559,7 +609,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				}
 			}
 			log.debug("Handled custom packet with sequence number " + custom.sequenceId);
-		} else if (packetId == ID_NACK) {
+		} else if (packet.getId() == ID_NACK) {
 			NotAcknowledgedPacket notAcknowledged = new NotAcknowledgedPacket(packet);
 			notAcknowledged.decode();
 
@@ -601,7 +651,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 					recoveryQueue.put(this.sendCustomPacket(false, lost), lost);
 				}
 			}
-		} else if (packetId == ID_ACK) {
+		} else if (packet.getId() == ID_ACK) {
 			AcknowledgedPacket acknowledged = new AcknowledgedPacket(packet);
 			acknowledged.decode();
 			for (Record record : acknowledged.records) {
@@ -631,7 +681,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 *             if the <code>encapsulated</code> packet is <code>null</code>.
 	 * @throws InvalidChannelException
 	 *             if the channel of the <code>encapsulated</code> packet is
-	 *             greater than or equal to {@value RakNet#MAX_CHANNELS}.
+	 *             greater than or equal to {@value RakNet#CHANNEL_COUNT}.
 	 * @throws SplitQueueOverflowException
 	 *             if the <code>encapsulated</code> packet is split, and adding
 	 *             it to the split queue would cause it to overflow.
@@ -640,7 +690,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			throws InvalidChannelException, SplitQueueOverflowException {
 		if (encapsulated == null) {
 			throw new NullPointerException("Encapsulated packet cannot be null");
-		} else if (encapsulated.orderChannel >= RakNet.MAX_CHANNELS) {
+		} else if (encapsulated.orderChannel >= RakNet.CHANNEL_COUNT) {
 			throw new InvalidChannelException(encapsulated.orderChannel);
 		} else if (encapsulated.split == true) {
 			if (!splitQueue.containsKey(encapsulated.splitId)) {
@@ -653,7 +703,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				 * packets. If the split queue is still too big, then the queue
 				 * has been overloaded.
 				 */
-				if (splitQueue.size() > RakNet.MAX_SPLITS_PER_QUEUE) {
+				if (splitQueue.size() > MAX_SPLITS_PER_QUEUE) {
 					Iterator<EncapsulatedPacket.Split> splitQueueI = splitQueue.values().iterator();
 					int removeCount = 0;
 					while (splitQueueI.hasNext()) {
@@ -667,7 +717,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 						log.warn("Removed " + removeCount
 								+ " unreliable packets from the split queue due to an overflowing split queue");
 					}
-					if (splitQueue.size() > RakNet.MAX_SPLITS_PER_QUEUE) {
+					if (splitQueue.size() > MAX_SPLITS_PER_QUEUE) {
 						throw new SplitQueueOverflowException();
 					}
 				}
@@ -726,13 +776,13 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 *            the packet.
 	 * @throws InvalidChannelException
 	 *             if the <code>channel</code> is greater than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 * @throws NullPointerException
 	 *             if the <code>packet</code> is <code>null</code>.
 	 */
 	private final void handleMessage0(int channel, RakNetPacket packet)
 			throws InvalidChannelException, NullPointerException {
-		if (channel >= RakNet.MAX_CHANNELS) {
+		if (channel >= RakNet.CHANNEL_COUNT) {
 			throw new InvalidChannelException(channel);
 		} else if (packet == null) {
 			throw new NullPointerException("Packet cannot be null");
@@ -774,7 +824,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			Iterator<Long> timestampI = latencyTimestamps.iterator();
 			while (timestampI.hasNext()) {
 				long timestamp = timestampI.next().longValue();
-				if (currentTimestamp - timestamp >= RakNet.PEER_TIMEOUT || latencyTimestamps.size() > 10) {
+				if (currentTimestamp - timestamp >= PEER_TIMEOUT || latencyTimestamps.size() > 10) {
 					timestampI.remove();
 					log.debug("Cleared overdue ping response with timestamp " + timestamp);
 				}
@@ -937,7 +987,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			throw new NullPointerException("Reliability cannot be null");
 		} else if (packet == null) {
 			throw new NullPointerException("Packet cannot be null");
-		} else if (channel >= RakNet.MAX_CHANNELS) {
+		} else if (channel >= RakNet.CHANNEL_COUNT) {
 			throw new InvalidChannelException(channel);
 		}
 
@@ -997,23 +1047,23 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	private final void update(boolean force) throws IllegalStateException, TimeoutException {
 		long currentTime = System.currentTimeMillis();
 		if (force == false) {
-			if (state == RakNetState.DISCONNECTED) {
+			if (this.isDisconnected()) {
 				throw new IllegalStateException("Peer disconnected");
-			} else if (currentTime - lastPacketReceiveTime >= timeout) {
+			} else if (this.hasTimedOut()) {
 				throw new TimeoutException(this);
 			}
 		}
 
 		// Send keep alive packet
-		if (currentTime - lastPacketReceiveTime >= RakNet.DETECTION_SEND_INTERVAL
-				&& currentTime - lastKeepAliveSendTime >= RakNet.DETECTION_SEND_INTERVAL && latencyEnabled == false
+		if (currentTime - lastPacketReceiveTime >= DETECTION_SEND_INTERVAL
+				&& currentTime - lastDetectionSendTime >= DETECTION_SEND_INTERVAL && latencyEnabled == false
 				&& state == RakNetState.LOGGED_IN) {
 			this.sendMessage(Reliability.UNRELIABLE, ID_DETECT_LOST_CONNECTIONS);
-			this.lastKeepAliveSendTime = currentTime;
+			this.lastDetectionSendTime = currentTime;
 		}
 
 		// Send ping to detect latency if it is enabled
-		if (latencyEnabled == true && currentTime - lastPingSendTime >= RakNet.PING_SEND_INTERVAL
+		if (latencyEnabled == true && currentTime - lastPingSendTime >= PING_SEND_INTERVAL
 				&& state == RakNetState.LOGGED_IN) {
 			ConnectedPing ping = new ConnectedPing();
 			ping.timestamp = this.getTimestamp();
@@ -1044,7 +1094,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 
 		// Resend lost packets
 		Iterator<EncapsulatedPacket[]> recoveryQueueI = recoveryQueue.values().iterator();
-		if (currentTime - lastRecoverySendTime >= RakNet.RECOVERY_SEND_INTERVAL && recoveryQueueI.hasNext()) {
+		if (currentTime - lastRecoverySendTime >= RECOVERY_SEND_INTERVAL && recoveryQueueI.hasNext()) {
 			this.sendCustomPacket(false, recoveryQueueI.next());
 			this.lastRecoverySendTime = currentTime;
 		} else {

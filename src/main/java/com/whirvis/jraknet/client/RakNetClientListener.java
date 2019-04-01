@@ -44,6 +44,17 @@ import io.netty.buffer.ByteBuf;
  * Used to listen for events that occur in the {@link RakNetClient}. In order to
  * listen for events, one must use the
  * {@link RakNetClient#addListener(RakNetClientListener)} method.
+ * <p>
+ * Event methods are called on the same thread that called them. Typically, this
+ * is the NIO event loop group that the client is using, or the client thread
+ * itself. This normally does not matter, however in some cases if a listener
+ * takes too long to respond (typically
+ * {@value com.whirvis.jraknet.peer.RakNetPeer#PEER_TIMEOUT} milliseconds) then
+ * the client can actually timeout.
+ * <p>
+ * To have event methods called on their own dedicated thread, annotate the
+ * listening class with the {@link com.whirvis.jraknet.ThreadedListener
+ * ThreadedListener} annotation.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0

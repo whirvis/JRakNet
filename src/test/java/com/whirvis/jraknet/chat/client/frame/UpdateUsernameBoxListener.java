@@ -39,7 +39,7 @@ import com.whirvis.jraknet.chat.client.ChatClient;
  * Used to listen for presses to the update username button in the frame.
  * <p>
  * When a press to the update username button has been detected, it will signal
- * the client to request it's username to be updated.
+ * the client to request its username to be updated.
  *
  * @author Whirvis T. Wheatley
  * @since JRakNet v2.0.0

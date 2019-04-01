@@ -76,7 +76,7 @@ public interface RakNetPeerMessenger {
 	 *             <code>null</code>.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public EncapsulatedPacket sendMessage(Reliability reliability, int channel, Packet packet)
 			throws NullPointerException, InvalidChannelException;
@@ -100,7 +100,7 @@ public interface RakNetPeerMessenger {
 	 *             <code>null</code>.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int channel, Packet... packets)
 			throws NullPointerException, InvalidChannelException {
@@ -173,7 +173,7 @@ public interface RakNetPeerMessenger {
 	 *             <code>null</code>.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public default EncapsulatedPacket sendMessage(Reliability reliability, int channel, ByteBuf buf)
 			throws NullPointerException, InvalidChannelException {
@@ -199,7 +199,7 @@ public interface RakNetPeerMessenger {
 	 *             <code>null</code>.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int channel, ByteBuf... bufs)
 			throws NullPointerException, InvalidChannelException {
@@ -272,7 +272,7 @@ public interface RakNetPeerMessenger {
 	 *             if the <code>reliability</code> is <code>null</code>.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public default EncapsulatedPacket sendMessage(Reliability reliability, int channel, int packetId)
 			throws NullPointerException, InvalidChannelException {
@@ -298,7 +298,7 @@ public interface RakNetPeerMessenger {
 	 *             <code>null</code>.
 	 * @throws InvalidChannelException
 	 *             if the channel is higher than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int channel, int... packetIds)
 			throws NullPointerException, InvalidChannelException {

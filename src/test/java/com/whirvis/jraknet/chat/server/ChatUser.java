@@ -172,12 +172,12 @@ public final class ChatUser {
 	 *             if the <code>message</code> is <code>null</code>.
 	 * @throws InvalidChannelException
 	 *             if the <code>channel</code> is greater than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public void sendChatMessage(String message, int channel) throws NullPointerException, InvalidChannelException {
 		if (message == null) {
 			throw new NullPointerException("Message cannot be null");
-		} else if (channel >= RakNet.MAX_CHANNELS) {
+		} else if (channel >= RakNet.CHANNEL_COUNT) {
 			throw new InvalidChannelException(channel);
 		}
 		ChatMessage chat = new ChatMessage();

@@ -185,48 +185,12 @@ public final class RakNet {
 	/**
 	 * The amount of available channels there are to send packets on.
 	 */
-	public static final int MAX_CHANNELS = 32;
+	public static final int CHANNEL_COUNT = 32;
 
 	/**
 	 * The default channel packets are sent on.
 	 */
 	public static final byte DEFAULT_CHANNEL = 0;
-
-	/**
-	 * The maximum amount of chunks a single encapsulated packet can be split
-	 * into.
-	 */
-	public static final int MAX_SPLIT_COUNT = 128;
-
-	/**
-	 * The maximum amount of split packets can be in the split handle queue.
-	 */
-	public static final int MAX_SPLITS_PER_QUEUE = 4;
-
-	/**
-	 * The interval at which not acknowledged packets are automatically resent.
-	 */
-	public static final long RECOVERY_SEND_INTERVAL = 500L;
-
-	/**
-	 * The interval at which keep-alive pings are sent.
-	 */
-	public static final long PING_SEND_INTERVAL = 2500L;
-
-	/**
-	 * The interval at which detection packets are sent.
-	 */
-	public static final long DETECTION_SEND_INTERVAL = 5000L;
-
-	/**
-	 * The default amount of time in milliseconds it will take for the peer to
-	 * timeout.
-	 * <p>
-	 * This can be changed in a peer specifically via the
-	 * {@link com.whirvis.jraknet.peer.RakNetPeer#setTimeout(long)
-	 * RakNetPeer.setTimeout(long)} method.
-	 */
-	public static final long PEER_TIMEOUT = DETECTION_SEND_INTERVAL * 5;
 
 	/**
 	 * The amount of time in milliseconds an address will be blocked if it sends
@@ -355,7 +319,7 @@ public final class RakNet {
 		throwable.printStackTrace(stackTracePrint);
 		String printedStackTrace = new String(stackTraceOut.toByteArray());
 		if (printedStackTrace.endsWith("\n")) {
-			printedStackTrace = printedStackTrace.substring(0, printedStackTrace.length() - 1);
+			printedStackTrace = printedStackTrace.substring(0, printedStackTrace.length() - 2);
 		}
 		return printedStackTrace;
 	}

@@ -60,7 +60,7 @@ public final class ChatFrame extends JFrame {
 
 	/**
 	 * The render used in place of the default so that the text channels list
-	 * uses the actual name of the channel, rather than defaulting to it's
+	 * uses the actual name of the channel, rather than defaulting to its
 	 * {@link TextChannel#toString()} method.
 	 * 
 	 * @author Whirvis T. Wheatley

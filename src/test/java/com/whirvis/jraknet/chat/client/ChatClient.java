@@ -109,7 +109,7 @@ public class ChatClient extends RakNetClient {
 			throw new NullPointerException("Chat frame cannot be null");
 		}
 		this.frame = frame;
-		this.channels = new TextChannel[RakNet.MAX_CHANNELS];
+		this.channels = new TextChannel[RakNet.CHANNEL_COUNT];
 		frame.updateListeners(this);
 		frame.setInstructions(null);
 		this.addSelfListener();
@@ -142,12 +142,12 @@ public class ChatClient extends RakNetClient {
 	 *            the channel to send the message to.
 	 * @throws InvalidChannelException
 	 *             if the <code>channel</code> ID is greater than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public void sendChatMessage(String message, int channel) throws NullPointerException, InvalidChannelException {
 		if (message == null) {
 			throw new NullPointerException("Message cannot be null");
-		} else if (channel >= RakNet.MAX_CHANNELS) {
+		} else if (channel >= RakNet.CHANNEL_COUNT) {
 			throw new InvalidChannelException(channel);
 		}
 		ChatMessage chatMessage = new ChatMessage();
@@ -186,12 +186,12 @@ public class ChatClient extends RakNetClient {
 	 *            the new channel to display.
 	 * @throws InvalidChannelException
 	 *             if the <code>channel</code> ID is greater than or equal to
-	 *             {@value RakNet#MAX_CHANNELS}.
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 * @throws NullPointerException
 	 *             if the <code>channel</code> does not exist.
 	 */
 	public void setChannel(int channel) throws InvalidChannelException, NullPointerException {
-		if (channel >= RakNet.MAX_CHANNELS) {
+		if (channel >= RakNet.CHANNEL_COUNT) {
 			throw new InvalidChannelException(channel);
 		} else if (channels[channel] == null) {
 			throw new NullPointerException("Channel does not exist");
@@ -223,7 +223,7 @@ public class ChatClient extends RakNetClient {
 	 *            the ID of the channel to remove.
 	 */
 	public void removeChannel(int channel) {
-		if (channel < RakNet.MAX_CHANNELS) {
+		if (channel < RakNet.CHANNEL_COUNT) {
 			this.channels[channel] = null;
 			frame.setChannels(channels);
 		}

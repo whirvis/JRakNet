@@ -31,7 +31,7 @@
 /**
  * Components used to allow a {@link com.whirvis.jraknet.Packet Packet} to be
  * used as an {@link java.io.InputStream InputStream} or
- * {@link java.io.OutputStream OutputStream} using it's
+ * {@link java.io.OutputStream OutputStream} using its'
  * {@link com.whirvis.jraknet.Packet#getInputStream() getInputStream()} and
  * {@link com.whirvis.jraknet.Packet#getOutputStream() getOutputStream()}
  * methods.

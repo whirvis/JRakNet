@@ -33,7 +33,6 @@ package com.whirvis.jraknet.protocol.message;
 import java.util.Arrays;
 
 import com.whirvis.jraknet.Packet;
-import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.map.IntMap;
 import com.whirvis.jraknet.peer.RakNetPeer;
 import com.whirvis.jraknet.protocol.Reliability;
@@ -169,15 +168,15 @@ public final class EncapsulatedPacket implements Cloneable {
 		 * @throws IllegalArgumentException
 		 *             if the <code>splitId</code> is less than <code>0</code>
 		 *             or if the <code>splitCount</code> is greater than
-		 *             {@value RakNet#MAX_SPLIT_COUNT}.
+		 *             {@value RakNetPeer#MAX_SPLIT_COUNT}.
 		 * @throws NullPointerException
 		 *             if the <code>reliability</code> is <code>null</code>.
 		 */
 		public Split(int splitId, int splitCount, Reliability reliability) {
 			if (splitId < 0) {
 				throw new IllegalArgumentException("Split ID can be no less than 0");
-			} else if (splitCount > RakNet.MAX_SPLIT_COUNT) {
-				throw new IllegalArgumentException("Split count can be no greater than " + RakNet.MAX_SPLIT_COUNT);
+			} else if (splitCount > RakNetPeer.MAX_SPLIT_COUNT) {
+				throw new IllegalArgumentException("Split count can be no greater than " + RakNetPeer.MAX_SPLIT_COUNT);
 			} else if (reliability == null) {
 				throw new NullPointerException("Reliability cannot be null");
 			}
@@ -397,7 +396,7 @@ public final class EncapsulatedPacket implements Cloneable {
 	 * {@link Reliability#UNRELIABLE_SEQUENCED SEQUENCED} type.
 	 * <p>
 	 * In total, there are a total of
-	 * {@value com.whirvis.jraknet.RakNet#MAX_CHANNELS} channels that can be
+	 * {@value com.whirvis.jraknet.RakNet#CHANNEL_COUNT} channels that can be
 	 * used to send {@link Reliability#RELIABLE_ORDERED ORDERED} and
 	 * {@link Reliability#UNRELIABLE_SEQUENCED SEQUENCED} packets on. Both have
 	 * their own set of these channels. It is good to make use of this if there
