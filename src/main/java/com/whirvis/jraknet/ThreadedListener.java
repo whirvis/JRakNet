@@ -37,8 +37,9 @@ import java.lang.annotation.Target;
 
 /**
  * Denotes that either a {@link com.whirvis.jraknet.server.RakNetServerListener
- * RakNetServerListener} or
- * {@link com.whirvis.jraknet.client.RakNetClientListener RakNetClientListener}
+ * RakNetServerListener}, {@link com.whirvis.jraknet.client.RakNetClientListener
+ * RakNetClientListener}, or a
+ * {@link com.whirvis.jraknet.discovery.DiscoveryListener DiscoveryListener}
  * wishes to have its' event methods called on their own dedicated thread.
  * 
  * @author Whirvis T. Wheatley
