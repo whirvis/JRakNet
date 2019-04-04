@@ -38,7 +38,6 @@
 	<organization>
 		<name>JRakNet</name>
 		<url>https://github.com/JRakNet/</url>
-		<logo>https://avatars2.githubusercontent.com/u/23224832</logo>
 	</organization>
 
 	<!-- Environment settings -->
@@ -51,9 +50,9 @@
 		<url>https://ci.codemc.org/job/JRakNet/job/JRakNet/</url>
 	</ciManagement>
 	<scm>
-		<connection>scm:git:https://github.com/JRakNet/JRakNet.git</connection>
-		<developerConnection>scm:git:git@github.com:JRakNet/JRakNet.git</developerConnection>
 		<url>https://github.com/JRakNet/JRakNet/</url>
+		<connection>scm:git:git://github.com/JRakNet/JRakNet.git</connection>
+		<developerConnection>scm:git:git@github.com:JRakNet/JRakNet.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
 	<distributionManagement>
