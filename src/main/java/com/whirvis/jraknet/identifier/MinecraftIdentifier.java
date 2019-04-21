@@ -43,9 +43,10 @@ import com.whirvis.jraknet.RakNet;
 public final class MinecraftIdentifier extends Identifier {
 
 	/**
-	 * The header found at the beginning of a Minecraft identifier. This allows
-	 * for easy indication that the identifier is actually a Minecraft
-	 * identifier, rather than
+	 * The header found at the beginning of a Minecraft identifier.
+	 * <p>
+	 * This allows for easy indication that the identifier is actually a
+	 * Minecraft identifier, rather than that of another game.
 	 */
 	private static final String HEADER = "MCPE";
 
@@ -99,10 +100,10 @@ public final class MinecraftIdentifier extends Identifier {
 	 *         <code>false</code> otherwise.
 	 */
 	public static boolean isMinecraftIdentifier(Identifier identifier) {
-		if (identifier == null) {
-			return false; // No identifier
+		if (identifier != null) {
+			return identifier.build().startsWith(HEADER);
 		}
-		return identifier.build().startsWith(HEADER);
+		return false;
 	}
 
 	private String serverName;
@@ -163,7 +164,7 @@ public final class MinecraftIdentifier extends Identifier {
 	 *             <code>null</code>.
 	 * @throws IllegalArgumentException
 	 *             if the <code>identifier</code> is not a Minecraft identifier
-	 *             or there is not enough data present.
+	 *             or there are missing fields.
 	 */
 	public MinecraftIdentifier(Identifier identifier) throws NullPointerException, IllegalArgumentException {
 		super(identifier);
@@ -176,7 +177,7 @@ public final class MinecraftIdentifier extends Identifier {
 		}
 		String[] data = identifier.build().split(SEPARATOR);
 		if (data.length < DATA_COUNT_LEGACY) {
-			throw new IllegalArgumentException("Not enough data");
+			throw new IllegalArgumentException("Missing " + (DATA_COUNT_LEGACY - data.length) + " fields");
 		}
 		for (int i = 0; i < data.length; i++) {
 			data[i] = (data[i].length() > 0 ? data[i] : null);
@@ -196,7 +197,7 @@ public final class MinecraftIdentifier extends Identifier {
 	}
 
 	/**
-	 * Creates a Minecraft identifier from another identifier.
+	 * Creates a Minecraft identifier from an existing identifier.
 	 * 
 	 * @param identifier
 	 *            the identifier.
@@ -205,7 +206,7 @@ public final class MinecraftIdentifier extends Identifier {
 	 *             <code>null</code>.
 	 * @throws IllegalArgumentException
 	 *             if the <code>identifier</code> is not a Minecraft identifier
-	 *             or there is not enough data present.
+	 *             or there are missing fields.
 	 */
 	public MinecraftIdentifier(String identifier) throws NullPointerException, IllegalArgumentException {
 		this(new Identifier(identifier));
