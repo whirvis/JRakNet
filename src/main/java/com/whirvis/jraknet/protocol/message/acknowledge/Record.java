@@ -209,11 +209,11 @@ public final class Record {
 	 * @param endIndex
 	 *            the ending index.
 	 * @throws IllegalArgumentException
-	 *             if the <code>index</code> is less than <code>0</code>.
+	 *             if the <code>index</code> is negative.
 	 */
 	public Record(int index, int endIndex) throws IllegalArgumentException {
 		if (index < 0) {
-			throw new IllegalArgumentException("Index must be greater than or equal to 0");
+			throw new IllegalArgumentException("Index cannot be negative");
 		}
 		this.index = index;
 		this.endIndex = endIndex;
@@ -263,11 +263,11 @@ public final class Record {
 	 * @param index
 	 *            the starting index.
 	 * @throws IllegalArgumentException
-	 *             if the <code>index</code> is less than <code>0</code>.
+	 *             if the <code>index</code> is negative.
 	 */
 	public void setIndex(int index) throws IllegalArgumentException {
 		if (index < 0) {
-			throw new IllegalArgumentException("Index must be greater than or equal to 0");
+			throw new IllegalArgumentException("Index cannot be negative");
 		}
 		this.index = index;
 		this.updateSequenceIds();

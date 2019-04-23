@@ -166,15 +166,15 @@ public final class EncapsulatedPacket implements Cloneable {
 		 * @param reliability
 		 *            the reliability.
 		 * @throws IllegalArgumentException
-		 *             if the <code>splitId</code> is less than <code>0</code>
-		 *             or if the <code>splitCount</code> is greater than
+		 *             if the <code>splitId</code> is negative or if the
+		 *             <code>splitCount</code> is greater than
 		 *             {@value RakNetPeer#MAX_SPLIT_COUNT}.
 		 * @throws NullPointerException
 		 *             if the <code>reliability</code> is <code>null</code>.
 		 */
 		public Split(int splitId, int splitCount, Reliability reliability) {
 			if (splitId < 0) {
-				throw new IllegalArgumentException("Split ID can be no less than 0");
+				throw new IllegalArgumentException("Split ID cannot be negative");
 			} else if (splitCount > RakNetPeer.MAX_SPLIT_COUNT) {
 				throw new IllegalArgumentException("Split count can be no greater than " + RakNetPeer.MAX_SPLIT_COUNT);
 			} else if (reliability == null) {

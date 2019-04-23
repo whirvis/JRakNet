@@ -459,9 +459,6 @@ public final class Discovery {
 	 *             if the port is not within the range of <code>0-65535</code>.
 	 */
 	public static void setPort(int port) throws IllegalArgumentException {
-		if (port < 0x0000 || port > 0xFFFF) {
-			throw new IllegalArgumentException("Port must be in between 0-65535");
-		}
 		clearPorts();
 		addPort(port);
 	}
@@ -606,8 +603,6 @@ public final class Discovery {
 			throws NullPointerException, IllegalArgumentException, UnknownHostException {
 		if (host == null) {
 			throw new NullPointerException("IP address cannot be null");
-		} else if (port < 0x0000 || port > 0xFFFF) {
-			throw new IllegalArgumentException("Port must be in between 0-65535");
 		}
 		addServer(InetAddress.getByName(host), port);
 	}
@@ -772,11 +767,6 @@ public final class Discovery {
 	 *             <code>0-65535</code>.
 	 */
 	public static void setServer(InetAddress address, int port) throws NullPointerException, IllegalArgumentException {
-		if (address == null) {
-			throw new NullPointerException("IP address cannot be null");
-		} else if (port < 0x0000 || port > 0xFFFF) {
-			throw new IllegalArgumentException("Port must be in between 0-65535");
-		}
 		clearServers();
 		addServer(address, port);
 	}
@@ -803,11 +793,6 @@ public final class Discovery {
 	 */
 	public static void setServer(String host, int port)
 			throws NullPointerException, IllegalArgumentException, UnknownHostException {
-		if (host == null) {
-			throw new NullPointerException("IP address cannot be null");
-		} else if (port < 0x0000 || port > 0xFFFF) {
-			throw new IllegalArgumentException("Port must be in between 0-65535");
-		}
 		clearServers();
 		addServer(host, port);
 	}
