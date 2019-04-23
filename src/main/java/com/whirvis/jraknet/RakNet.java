@@ -823,12 +823,11 @@ public final class RakNet {
 	 *            how many packets can be received in the span of a single
 	 *            second before a peer is blocked.
 	 * @throws IllegalArgumentException
-	 *             if <code>maxPacketsPerSecond</code> is less than
-	 *             <code>0</code>.
+	 *             if <code>maxPacketsPerSecond</code> is negative.
 	 */
 	public static void setMaxPacketsPerSecond(long maxPacketsPerSecond) throws IllegalArgumentException {
 		if (maxPacketsPerSecond < 0) {
-			throw new IllegalArgumentException("Max packets per second must be greater than 0");
+			throw new IllegalArgumentException("Max packets per second cannot be negative");
 		}
 		_maxPacketsPerSecond = maxPacketsPerSecond;
 	}

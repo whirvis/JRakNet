@@ -876,14 +876,14 @@ public class Packet {
 	 * @return the packet.
 	 * @throws IllegalArgumentException
 	 *             if <code>bi</code> is bigger than {@value Long#BYTES} bytes
-	 *             or is less than <code>0</code>.
+	 *             or is negative.
 	 */
 	public final Packet writeUnsignedLong(BigInteger bi) throws IllegalArgumentException {
 		byte[] ulBytes = bi.toByteArray();
 		if (ulBytes.length > Long.BYTES) {
 			throw new IllegalArgumentException("Value is too big to fit into a long");
 		} else if (bi.longValue() < 0) {
-			throw new IllegalArgumentException("Value must be greater than or equal to 0");
+			throw new IllegalArgumentException("Value cannot be negative");
 		}
 
 		for (int i = 0; i < Long.BYTES; i++) {
@@ -913,14 +913,14 @@ public class Packet {
 	 * @return the packet.
 	 * @throws IllegalArgumentException
 	 *             if the size of the <code>bi</code> is bigger than
-	 *             {@value Long#BYTES} bytes or is less than <code>0</code>.
+	 *             {@value Long#BYTES} bytes or is negative.
 	 */
 	public final Packet writeUnsignedLongLE(BigInteger bi) throws IllegalArgumentException {
 		byte[] ulBytes = bi.toByteArray();
 		if (ulBytes.length > Long.BYTES) {
 			throw new IllegalArgumentException("Value is too big to fit into a long");
 		} else if (bi.longValue() < 0) {
-			throw new IllegalArgumentException("Value must be greater than or equal to 0");
+			throw new IllegalArgumentException("Value cannot be negative");
 		}
 		for (int i = Long.BYTES - 1; i >= 0; i--) {
 			this.writeByte(i < ulBytes.length ? ulBytes[i] : 0x00);

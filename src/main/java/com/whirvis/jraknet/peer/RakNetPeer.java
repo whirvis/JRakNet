@@ -397,11 +397,11 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * @param timeout
 	 *            the timeout time.
 	 * @throws IllegalArgumentException
-	 *             if the <code>timeout</code> is less than <code>0</code>.
+	 *             if the <code>timeout</code> is negative.
 	 */
 	public final void setTimeout(long timeout) throws IllegalArgumentException {
 		if (timeout < 0) {
-			throw new IllegalArgumentException("Timeout must be greater than 0");
+			throw new IllegalArgumentException("Timeout cannot be negative");
 		}
 		this.timeout = timeout;
 	}

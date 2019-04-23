@@ -1080,7 +1080,7 @@ public class RakNetPacket extends Packet {
 	public RakNetPacket(int id) throws IllegalArgumentException {
 		super();
 		if (id < 0x00 || id > 0xFF) {
-			throw new IllegalArgumentException("ID must be in between 0 and 255");
+			throw new IllegalArgumentException("ID must be in between 0-255");
 		}
 		this.writeUnsignedByte(this.id = (short) id);
 		this.supportsEncoding = isMethodOverriden(this.getClass(), RakNetPacket.class, ENCODE_METHOD_NAME);
