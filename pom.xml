@@ -7,7 +7,7 @@
 	<!-- Maven coordinates -->
 	<groupId>com.whirvis</groupId>
 	<artifactId>jraknet</artifactId>
-	<version>2.11.2-SNAPSHOT</version> <!-- Don't forget to update the JRakNet ConnectionType! -->
+	<version>2.11.2</version> <!-- Don't forget to update the JRakNet ConnectionType! -->
 	<packaging>jar</packaging>
 
 	<!-- Project information -->
@@ -101,14 +101,14 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-handler</artifactId>
-			<version>4.1.35.Final</version>
+			<version>4.1.36.Final</version>
 		</dependency>
 		
 		<!-- UPnP (Universal Plug and Play) -->
 		<dependency>
 			<groupId>com.dosse</groupId>
 			<artifactId>upnp</artifactId>
-			<version>1.0.1</version>
+			<version>1.1</version>
 		</dependency>
 	</dependencies>
 
