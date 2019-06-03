@@ -323,12 +323,17 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 
 	/**
 	 * Returns whether or not the peer is connected.
+	 * <p>
+	 * The peer is considered connected if the current state is
+	 * {@link RakNetState#CONNECTED} or has a higher order. This does not apply
+	 * to the {@link #isHandshaking()}, {@link #isLoggedIn()}, or
+	 * {@link #isDisconnected()} methods.
 	 * 
 	 * @return <code>true</code> if the peer is connected, <code>false</code>
 	 *         otherwise.
 	 */
 	public final boolean isConnected() {
-		return state == RakNetState.CONNECTED;
+		return state.getOrder() >= RakNetState.CONNECTED.getOrder();
 	}
 
 	/**

@@ -121,7 +121,7 @@ public final class EncapsulatedPacket implements Cloneable {
 			int payloadIndex = 0;
 			int splitIndex = 0;
 			byte[][] split = new byte[(int) Math.ceil((float) src.length / (float) size)][size];
-			while (payloadIndex < size) {
+			while (payloadIndex < src.length) {
 				if (payloadIndex + size <= src.length) {
 					split[splitIndex++] = Arrays.copyOfRange(src, payloadIndex, payloadIndex + size);
 					payloadIndex += size;
@@ -248,7 +248,7 @@ public final class EncapsulatedPacket implements Cloneable {
 				stitched.splitCount = encapsulated.splitCount;
 				stitched.splitId = encapsulated.splitId;
 				stitched.splitIndex = -1; // No longer split
-				encapsulated.payload = payload;
+				stitched.payload = payload;
 				return stitched;
 			}
 			return null;

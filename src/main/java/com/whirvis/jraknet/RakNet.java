@@ -931,7 +931,8 @@ public final class RakNet {
 	public static InetSocketAddress parseAddress(String address, int defaultPort) throws UnknownHostException {
 		String[] addressSplit = address.split(":");
 		if (addressSplit.length == 1 || addressSplit.length == 2) {
-			InetAddress inetAddress = InetAddress.getByName(addressSplit[0]);
+			InetAddress inetAddress = InetAddress.getByName(!addressSplit[0].startsWith("/") ? addressSplit[0]
+					: addressSplit[0].substring(1, addressSplit[0].length()));
 			int port = (addressSplit.length == 2 ? parseIntPassive(addressSplit[1]) : defaultPort);
 			if (port >= 0x0000 && port <= 0xFFFF) {
 				return new InetSocketAddress(inetAddress, port);
@@ -951,11 +952,15 @@ public final class RakNet {
 	 *            the address to convert.
 	 * @return the parsed <code>InetSocketAddress</code>.
 	 * @throws UnknownHostException
-	 *             if the address is in an invalid format or if the host cannot
-	 *             be found.
+	 *             if the address is in an invalid format, the host cannot be
+	 *             found, or no port was specifed in the <code>address</code>.
 	 */
 	public static InetSocketAddress parseAddress(String address) throws UnknownHostException {
-		return parseAddress(address, -1);
+		try {
+			return parseAddress(address, -1 /* If no port specified */);
+		} catch (IllegalArgumentException e) {
+			throw new UnknownHostException("No port specified in address");
+		}
 	}
 
 	/**
@@ -966,7 +971,8 @@ public final class RakNet {
 	 *            the address to convert.
 	 * @param defaultPort
 	 *            the default port to use if one is not.
-	 * @return the parsed <code>InetSocketAddress</code>.
+	 * @return the parsed <code>InetSocketAddress</code>, <code>null</code> if
+	 *         it fails to parse.
 	 */
 	public static InetSocketAddress parseAddressPassive(String address, int defaultPort) {
 		try {
@@ -982,7 +988,8 @@ public final class RakNet {
 	 * 
 	 * @param address
 	 *            the address to convert.
-	 * @return the parsed <code>InetSocketAddress</code>.
+	 * @return the parsed <code>InetSocketAddress</code>, <code>null</code> if
+	 *         it fails to parse.
 	 */
 	public static InetSocketAddress parseAddressPassive(String address) {
 		return parseAddressPassive(address, -1);
