@@ -40,7 +40,7 @@ If you are wanting to use a snapshot version, use this repository and dependency
 ```
 
 # How to create a server
-Creating a server in JRakNet is extremely easy, all it takes to create one can be seen right here
+Creating a server in JRakNet is extremely easy, all it takes to create one can be seen here:
 
 ```java
 // Add loopback exemption for Minecraft
@@ -72,7 +72,7 @@ server.addListener(new RakNetServerListener() {
 	@Override
 	public void onDisconnect(RakNetServer server, InetSocketAddress address, RakNetClientPeer peer, String reason) {
 		System.out.println("Client from address " + address
-						+ " has disconnected from the server for the reason \"" + reason + "\"");
+						+ " has disconnected from the server for reason \"" + reason + "\"");
 	}
 
 	// Packet received
@@ -96,8 +96,8 @@ running on the same machine as them. This annoying feature can be disabled by si
 would be Microsoft's Edge which is ```Microsoft.MicrosoftEdge_8wekyb3d8bbwe```. So, in order to enable loopback exemption, it would only take this:
 
 ```java
-UniversalWindowsProgram MICROSOFT_EDGE = new UniversalWindowsProgram("Microsoft.MicrosoftEdge_8wekyb3d8bbwe");
-if(!MICROSOFT_EDGE.addLoopbackExemption()) {
+UniversalWindowsProgram microsoftEdge = new UniversalWindowsProgram("Microsoft.MicrosoftEdge_8wekyb3d8bbwe");
+if(!microsoftEdge.setLoopbackExempt(true)) {
 	System.out.println("Warning: Microsoft Edge is not loopback exempt!"); // It is good practice to make sure that the application managed to become loopback exempted
 }
 ```
@@ -105,7 +105,7 @@ if(!MICROSOFT_EDGE.addLoopbackExemption()) {
 Simple, right? Feel free to implement this if you are running on a non-Windows 10 machine. This implementation was made specifically to work even if your machine does not run Windows 10 or does not have Windows PowerShell installed. Of course, if you are not on a Windows 10 machine with Windows PowerShell installed there really is no way to properly check if your application is loopback exempted. However, I'm sure that this can be solved with the help of a user that has Windows 10 with Windows PowerShell if needed.
 
 # How to create a client
-Creating a client in JRakNet is also very easy. The code required to create a client can be seen here
+Creating a client in JRakNet is also very easy. The code required to create a client can be seen here:
 
 ```java
 // Create client
