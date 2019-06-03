@@ -180,7 +180,7 @@ public final class SequencedPacketTest {
 			}
 
 			@Override
-			public void onDisconnect(RakNetClient client, RakNetServerPeer peer, String reason) {
+			public void onDisconnect(RakNetClient client, InetSocketAddress address, RakNetServerPeer peer, String reason) {
 				LOG.error("Client - Lost connection to server (" + reason + ")");
 				System.exit(1);
 			}

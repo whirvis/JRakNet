@@ -81,7 +81,7 @@ public final class RakNetClientTest {
 			}
 
 			@Override
-			public void onDisconnect(RakNetClient client, RakNetServerPeer peer, String reason) {
+			public void onDisconnect(RakNetClient client, InetSocketAddress address, RakNetServerPeer peer, String reason) {
 				LOG.info("Disconnected from server");
 			}
 

@@ -270,7 +270,7 @@ public class ChatClient extends RakNetClient {
 	}
 
 	@Override
-	public void onDisconnect(RakNetClient client, RakNetServerPeer peer, String reason) {
+	public void onDisconnect(RakNetClient client, InetSocketAddress address, RakNetServerPeer peer, String reason) {
 		this.peer = null;
 		this.resetChannels();
 		frame.setInstructions(null);
