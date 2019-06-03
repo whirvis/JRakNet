@@ -54,8 +54,7 @@ import java.util.UUID;
 public final class ConnectionType {
 
 	public static final int MAX_METADATA_VALUES = 0xFF;
-	public static final byte[] MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B, 0x43,
-			(byte) 0x54, (byte) 0x49 };
+	public static final byte[] MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B, 0x43, (byte) 0x54, (byte) 0x49 };
 
 	/**
 	 * Converts the metadata keys and values to a {@link HashMap}.
@@ -88,14 +87,12 @@ public final class ConnectionType {
 	/**
 	 * A JRakNet connection.
 	 */
-	public static final ConnectionType JRAKNET = new ConnectionType(
-			UUID.fromString("504da9b2-a31c-4db6-bcc3-18e5fe2fb178"), "JRakNet", "Java", "2.11.2");
+	public static final ConnectionType JRAKNET = new ConnectionType(UUID.fromString("504da9b2-a31c-4db6-bcc3-18e5fe2fb178"), "JRakNet", "Java", "2.11.2");
 
 	/**
 	 * A RakLib connection.
 	 */
-	public static final ConnectionType RAKLIB = new ConnectionType(
-			UUID.fromString("41fd1c2f-de79-4434-8fbc-82f3f71214c6"), "RakLib", "PHP", "0.12.3");
+	public static final ConnectionType RAKLIB = new ConnectionType(UUID.fromString("41fd1c2f-de79-4434-8fbc-82f3f71214c6"), "RakLib", "PHP", "0.12.3");
 
 	private final UUID uuid;
 	private final String name;
@@ -127,8 +124,7 @@ public final class ConnectionType {
 	 *             if there are more than {@value #MAX_METADATA_VALUES} metadata
 	 *             values.
 	 */
-	private ConnectionType(UUID uuid, String name, String language, String version, HashMap<String, String> metadata,
-			boolean vanilla) throws IllegalArgumentException {
+	private ConnectionType(UUID uuid, String name, String language, String version, HashMap<String, String> metadata, boolean vanilla) throws IllegalArgumentException {
 		this.uuid = uuid;
 		this.name = name;
 		this.language = language;
@@ -282,15 +278,13 @@ public final class ConnectionType {
 			return false;
 		}
 		ConnectionType ct = (ConnectionType) o;
-		return Objects.equals(uuid, ct.uuid) && Objects.equals(name, ct.name) && Objects.equals(language, ct.language)
-				&& Objects.equals(version, ct.version) && Objects.equals(metadata, ct.metadata)
-				&& Objects.equals(vanilla, ct.vanilla);
+		return Objects.equals(uuid, ct.uuid) && Objects.equals(name, ct.name) && Objects.equals(language, ct.language) && Objects.equals(version, ct.version)
+				&& Objects.equals(metadata, ct.metadata) && Objects.equals(vanilla, ct.vanilla);
 	}
 
 	@Override
 	public String toString() {
-		return "ConnectionType [uuid=" + uuid + ", name=" + name + ", language=" + language + ", version=" + version
-				+ ", metadata=" + metadata + ", vanilla=" + vanilla + "]";
+		return "ConnectionType [uuid=" + uuid + ", name=" + name + ", language=" + language + ", version=" + version + ", metadata=" + metadata + ", vanilla=" + vanilla + "]";
 	}
 
 }

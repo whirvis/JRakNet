@@ -294,21 +294,16 @@ public final class PowerShellCommand {
 				int state = 0;
 				long password = new Random().nextLong();
 				long startTime = System.currentTimeMillis();
-				log.debug("Created PowerShell administrative server  with password " + password + " on port "
-						+ server.getLocalPort());
+				log.debug("Created PowerShell administrative server  with password " + password + " on port " + server.getLocalPort());
 
 				// Create client process
 				log.debug("Executing administrative PowerShell command...");
-				String administrativeCommand = PowerShellCommand.POWERSHELL_EXECUTABLE
-						+ " Start-Process -Verb runAs javaw.exe \'" + "-cp \"$path\" "
-						+ PowerShellAdministrativeClient.class.getName() + " " + server.getLocalPort() + " " + password
-						+ " " + command + END_OF_TEXT + "\'";
+				String administrativeCommand = PowerShellCommand.POWERSHELL_EXECUTABLE + " Start-Process -Verb runAs javaw.exe \'" + "-cp \"$path\" "
+						+ PowerShellAdministrativeClient.class.getName() + " " + server.getLocalPort() + " " + password + " " + command + END_OF_TEXT + "\'";
 				if (getRunningJarFile() != null) {
-					administrativeCommand = administrativeCommand.replace("$path",
-							getRunningJarFile().getAbsolutePath());
+					administrativeCommand = administrativeCommand.replace("$path", getRunningJarFile().getAbsolutePath());
 				} else {
-					administrativeCommand = administrativeCommand.replace("$path",
-							getRunningLocation().getAbsolutePath());
+					administrativeCommand = administrativeCommand.replace("$path", getRunningLocation().getAbsolutePath());
 				}
 				Process powerShell = Runtime.getRuntime().exec(administrativeCommand);
 				powerShell.getOutputStream().close();
@@ -342,8 +337,7 @@ public final class PowerShellCommand {
 							connectionOut.writeInt(AUTHENTICATION_SUCCESS);
 							connectionOut.flush();
 							state = STATE_ERROR_RESULT;
-							log.debug(
-									"Administrative PowerShell client has authenticated, waiting for error results...");
+							log.debug("Administrative PowerShell client has authenticated, waiting for error results...");
 						} else {
 							connectionOut.writeInt(AUTHENTICATION_FAILURE);
 							connectionOut.flush();

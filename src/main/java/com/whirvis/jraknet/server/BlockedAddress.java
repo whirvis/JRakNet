@@ -58,8 +58,7 @@ public final class BlockedAddress {
 	 */
 	public BlockedAddress(long time) throws IllegalArgumentException {
 		if (time <= 0 && time != PERMANENT_BLOCK) {
-			throw new IllegalArgumentException(
-					"Block time must be greater than 0 or equal to " + PERMANENT_BLOCK + " for a permanent block");
+			throw new IllegalArgumentException("Block time must be greater than 0 or equal to " + PERMANENT_BLOCK + " for a permanent block");
 		}
 		this.startTime = System.currentTimeMillis();
 		this.time = time;

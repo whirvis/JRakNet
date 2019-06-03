@@ -126,8 +126,7 @@ public final class BroadcastFrame extends JFrame {
 	/**
 	 * The discovery mode options that can be chosen from.
 	 */
-	private static final String[] DISCOVERY_MODE_OPTIONS = new String[] { "All Connections", "Open Connections",
-			"No discovery" };
+	private static final String[] DISCOVERY_MODE_OPTIONS = new String[] { "All Connections", "Open Connections", "No discovery" };
 
 	private final JTextPane txtPnDiscoveredMcpeServerList;
 
@@ -151,8 +150,7 @@ public final class BroadcastFrame extends JFrame {
 
 		// How the client will discover servers on the local network
 		JComboBox<String> comboBoxDiscoveryType = new JComboBox<String>();
-		comboBoxDiscoveryType.setToolTipText(
-				"Changing this will update how the client will discover servers, by default it will look for any possible connection on the network");
+		comboBoxDiscoveryType.setToolTipText("Changing this will update how the client will discover servers, by default it will look for any possible connection on the network");
 		comboBoxDiscoveryType.setModel(new DefaultComboBoxModel<String>(DISCOVERY_MODE_OPTIONS));
 		comboBoxDiscoveryType.setBounds(370, 10, 115, 20);
 		comboBoxDiscoveryType.addActionListener(new RakNetBroadcastDiscoveryTypeListener());
@@ -187,8 +185,7 @@ public final class BroadcastFrame extends JFrame {
 	protected void updatePaneText(MinecraftIdentifier[] identifiers) {
 		StringBuilder discoveryBuilder = new StringBuilder();
 		for (int i = 0; i < identifiers.length; i++) {
-			discoveryBuilder
-					.append(RakNetTest.formatMCPEIdentifier(identifiers[i]) + (i + 1 < identifiers.length ? "\n" : ""));
+			discoveryBuilder.append(RakNetTest.formatMCPEIdentifier(identifiers[i]) + (i + 1 < identifiers.length ? "\n" : ""));
 		}
 		txtPnDiscoveredMcpeServerList.setText(discoveryBuilder.toString());
 	}

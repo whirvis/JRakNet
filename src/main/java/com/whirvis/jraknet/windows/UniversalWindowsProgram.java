@@ -51,16 +51,13 @@ public final class UniversalWindowsProgram {
 	/**
 	 * The Minecraft Universal Windows Program.
 	 */
-	public static final UniversalWindowsProgram MINECRAFT = new UniversalWindowsProgram(
-			"Microsoft.MinecraftUWP_8wekyb3d8bbwe");
+	public static final UniversalWindowsProgram MINECRAFT = new UniversalWindowsProgram("Microsoft.MinecraftUWP_8wekyb3d8bbwe");
 
 	private static final String APPLICATION_ARGUMENT = PowerShellCommand.ARGUMENT_PREFIX + "application";
-	private static final PowerShellCommand CHECKNETISOLATION_LOOPBACKEXEMPT_ADD = new PowerShellCommand(
-			"CheckNetIsolation LoopbackExempt -a -n=\"" + APPLICATION_ARGUMENT + "\"");
+	private static final PowerShellCommand CHECKNETISOLATION_LOOPBACKEXEMPT_ADD = new PowerShellCommand("CheckNetIsolation LoopbackExempt -a -n=\"" + APPLICATION_ARGUMENT + "\"");
 	private static final PowerShellCommand CHECKNETISOLATION_LOOPBACKEXEMPT_DELETE = new PowerShellCommand(
 			"CheckNetIsolation LoopbackExempt -d -n=\"" + APPLICATION_ARGUMENT + "\"");
-	private static final PowerShellCommand CHECKNETISOLATION_LOOPBACKEXEMPT_SHOW = new PowerShellCommand(
-			"CheckNetIsolation LoopbackExempt -s");
+	private static final PowerShellCommand CHECKNETISOLATION_LOOPBACKEXEMPT_SHOW = new PowerShellCommand("CheckNetIsolation LoopbackExempt -s");
 
 	/**
 	 * Returns whether or not the machine is currently running on the Windows 10
@@ -110,8 +107,7 @@ public final class UniversalWindowsProgram {
 		if (!isWindows10()) {
 			return true; // Already exempted on non-Windows 10 machine
 		}
-		return CHECKNETISOLATION_LOOPBACKEXEMPT_SHOW.execute().toLowerCase()
-				.contains(this.getApplicationId().toLowerCase());
+		return CHECKNETISOLATION_LOOPBACKEXEMPT_SHOW.execute().toLowerCase().contains(this.getApplicationId().toLowerCase());
 	}
 
 	/**
@@ -138,11 +134,9 @@ public final class UniversalWindowsProgram {
 		}
 		boolean exempted = isLoopbackExempt();
 		if (exempt == true && exempted == false) {
-			return CHECKNETISOLATION_LOOPBACKEXEMPT_ADD.setArgument(APPLICATION_ARGUMENT, this.getApplicationId())
-					.execute(true).equals(PowerShellCommand.RESULT_OK);
+			return CHECKNETISOLATION_LOOPBACKEXEMPT_ADD.setArgument(APPLICATION_ARGUMENT, this.getApplicationId()).execute(true).equals(PowerShellCommand.RESULT_OK);
 		} else if (exempt == false && exempted == true) {
-			return CHECKNETISOLATION_LOOPBACKEXEMPT_DELETE.setArgument(APPLICATION_ARGUMENT, this.getApplicationId())
-					.execute(true).equals(PowerShellCommand.RESULT_OK);
+			return CHECKNETISOLATION_LOOPBACKEXEMPT_DELETE.setArgument(APPLICATION_ARGUMENT, this.getApplicationId()).execute(true).equals(PowerShellCommand.RESULT_OK);
 		}
 		return true; // No operation executed
 	}

@@ -78,8 +78,7 @@ public interface RakNetPeerMessenger {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public EncapsulatedPacket sendMessage(Reliability reliability, int channel, Packet packet)
-			throws NullPointerException, InvalidChannelException;
+	public EncapsulatedPacket sendMessage(Reliability reliability, int channel, Packet packet) throws NullPointerException, InvalidChannelException;
 
 	/**
 	 * Sends messages to the peer.
@@ -102,8 +101,7 @@ public interface RakNetPeerMessenger {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int channel, Packet... packets)
-			throws NullPointerException, InvalidChannelException {
+	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int channel, Packet... packets) throws NullPointerException, InvalidChannelException {
 		if (packets == null) {
 			throw new NullPointerException("Packets cannot be null");
 		}
@@ -175,8 +173,7 @@ public interface RakNetPeerMessenger {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket sendMessage(Reliability reliability, int channel, ByteBuf buf)
-			throws NullPointerException, InvalidChannelException {
+	public default EncapsulatedPacket sendMessage(Reliability reliability, int channel, ByteBuf buf) throws NullPointerException, InvalidChannelException {
 		return this.sendMessage(reliability, channel, new Packet(buf));
 	}
 
@@ -201,8 +198,7 @@ public interface RakNetPeerMessenger {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int channel, ByteBuf... bufs)
-			throws NullPointerException, InvalidChannelException {
+	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int channel, ByteBuf... bufs) throws NullPointerException, InvalidChannelException {
 		if (bufs == null) {
 			throw new NullPointerException("Buffers cannot be null");
 		}
@@ -249,8 +245,7 @@ public interface RakNetPeerMessenger {
 	 *             if the <code>reliability</code> or <code>bufs</code> are
 	 *             <code>null</code>.
 	 */
-	public default EncapsulatedPacket[] sendMessage(Reliability reliability, ByteBuf... bufs)
-			throws NullPointerException {
+	public default EncapsulatedPacket[] sendMessage(Reliability reliability, ByteBuf... bufs) throws NullPointerException {
 		return this.sendMessage(reliability, RakNet.DEFAULT_CHANNEL, bufs);
 	}
 
@@ -274,8 +269,7 @@ public interface RakNetPeerMessenger {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket sendMessage(Reliability reliability, int channel, int packetId)
-			throws NullPointerException, InvalidChannelException {
+	public default EncapsulatedPacket sendMessage(Reliability reliability, int channel, int packetId) throws NullPointerException, InvalidChannelException {
 		return this.sendMessage(reliability, channel, new RakNetPacket(packetId));
 	}
 
@@ -300,8 +294,7 @@ public interface RakNetPeerMessenger {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int channel, int... packetIds)
-			throws NullPointerException, InvalidChannelException {
+	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int channel, int... packetIds) throws NullPointerException, InvalidChannelException {
 		if (packetIds == null) {
 			throw new NullPointerException("Packet IDs cannot be null");
 		}
@@ -347,8 +340,7 @@ public interface RakNetPeerMessenger {
 	 *             if the <code>reliability</code> or <code>packetIds</code> are
 	 *             <code>null</code>.
 	 */
-	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int... packetIds)
-			throws NullPointerException {
+	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int... packetIds) throws NullPointerException {
 		return this.sendMessage(reliability, RakNet.DEFAULT_CHANNEL, packetIds);
 	}
 

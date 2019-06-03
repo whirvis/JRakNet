@@ -103,16 +103,14 @@ public final class DiscoveryThread extends Thread {
 	@Override
 	public void run() throws IllegalStateException {
 		log.debug("Started discovery thread");
-		while (!Discovery.LISTENERS.isEmpty() && !Discovery.DISCOVERY_ADDRESSES.isEmpty()
-				&& Discovery.discoveryMode != DiscoveryMode.DISABLED && !this.isInterrupted()) {
+		while (!Discovery.LISTENERS.isEmpty() && !Discovery.DISCOVERY_ADDRESSES.isEmpty() && Discovery.discoveryMode != DiscoveryMode.DISABLED && !this.isInterrupted()) {
 			if (Discovery.thread != this) {
 				/*
 				 * Normally we would just break the thread here, but if two of
 				 * these are running it indicates a synchronization problem in
 				 * the code.
 				 */
-				throw new IllegalStateException(
-						"Discovery thread must be this while running, are there multiple discovery threads running?");
+				throw new IllegalStateException("Discovery thread must be this while running, are there multiple discovery threads running?");
 			}
 			try {
 				Thread.sleep(0, 1); // Save CPU usage
@@ -138,8 +136,7 @@ public final class DiscoveryThread extends Thread {
 
 			// Broadcast ping to local and external servers
 			if (currentTime - lastPingBroadcast > 1000L) {
-				UnconnectedPing ping = Discovery.getDiscoveryMode() == DiscoveryMode.OPEN_CONNECTIONS
-						? new UnconnectedPingOpenConnections() : new UnconnectedPing();
+				UnconnectedPing ping = Discovery.getDiscoveryMode() == DiscoveryMode.OPEN_CONNECTIONS ? new UnconnectedPingOpenConnections() : new UnconnectedPing();
 				ping.timestamp = Discovery.getTimestamp();
 				ping.pingId = Discovery.getPingId();
 				ping.encode();
@@ -151,8 +148,7 @@ public final class DiscoveryThread extends Thread {
 				for (InetSocketAddress address : Discovery.DISCOVERY_ADDRESSES.keySet()) {
 					channel.writeAndFlush(new DatagramPacket(ping.buffer(), address));
 				}
-				log.debug("Sent unconnected ping to " + Discovery.DISCOVERY_ADDRESSES.size() + " server"
-						+ (Discovery.DISCOVERY_ADDRESSES.size() == 1 ? "" : "s"));
+				log.debug("Sent unconnected ping to " + Discovery.DISCOVERY_ADDRESSES.size() + " server" + (Discovery.DISCOVERY_ADDRESSES.size() == 1 ? "" : "s"));
 				this.lastPingBroadcast = currentTime;
 			}
 		}

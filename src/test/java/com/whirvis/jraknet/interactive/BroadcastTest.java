@@ -125,8 +125,7 @@ public final class BroadcastTest {
 	 *             if <code>lnf.isSupportedLookAndFeel()</code> is false for the
 	 *             instantiated <code>LookAndFeel</code> class.
 	 */
-	public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
-			IllegalAccessException, UnsupportedLookAndFeelException {
+	public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		BroadcastTest test = new BroadcastTest();
 		test.start();

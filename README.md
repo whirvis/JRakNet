@@ -129,9 +129,8 @@ client.addListener(new RakNetClientListener() {
 
 	// Disconnected from server
 	@Override
-	public void onDisconnect(RakNetClient client, RakNetServerPeer peer, String reason) {
-		System.out.println("Successfully disconnected from server with address " + peer.getAddress()
-				+ " for reason \"" + reason + "\"");
+	public void onDisconnect(RakNetClient client, InetSocketAddress address, RakNetServerPeer peer, String reason) {
+		System.out.println("Successfully disconnected from server with address " + address + " for reason \"" + reason + "\"");
 	}
 
 });
