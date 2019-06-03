@@ -69,8 +69,7 @@ public final class DiscoveredServer {
 	 *             if the address, IP address, or identifier are
 	 *             <code>null</code>.
 	 */
-	protected DiscoveredServer(InetSocketAddress address, boolean external, Identifier identifier)
-			throws NullPointerException {
+	protected DiscoveredServer(InetSocketAddress address, boolean external, Identifier identifier) throws NullPointerException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
 		} else if (address.getAddress() == null) {
@@ -183,14 +182,13 @@ public final class DiscoveredServer {
 			return false;
 		}
 		DiscoveredServer ds = (DiscoveredServer) o;
-		return Objects.equals(address, ds.address) && Objects.equals(external, ds.external)
-				&& Objects.equals(timestamp, ds.timestamp) && Objects.equals(identifier, ds.identifier);
+		return Objects.equals(address, ds.address) && Objects.equals(external, ds.external) && Objects.equals(timestamp, ds.timestamp) && Objects.equals(identifier, ds.identifier);
 	}
 
 	@Override
 	public String toString() {
-		return "DiscoveredServer [address=" + address + ", external=" + external + ", timestamp=" + timestamp
-				+ ", identifier=" + identifier + ", getTimestamp()=" + getTimestamp() + "]";
+		return "DiscoveredServer [address=" + address + ", external=" + external + ", timestamp=" + timestamp + ", identifier=" + identifier + ", getTimestamp()=" + getTimestamp()
+				+ "]";
 	}
 
 }

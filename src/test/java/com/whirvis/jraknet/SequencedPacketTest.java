@@ -125,8 +125,7 @@ public final class SequencedPacketTest {
 			}
 
 			@Override
-			public void onDisconnect(RakNetServer server, InetSocketAddress address, RakNetClientPeer peer,
-					String reason) {
+			public void onDisconnect(RakNetServer server, InetSocketAddress address, RakNetClientPeer peer, String reason) {
 				LOG.info("Server - Client from " + address + " disconnected (" + reason + ")");
 				System.exit(1);
 			}
@@ -168,8 +167,7 @@ public final class SequencedPacketTest {
 
 			@Override
 			public void onLogin(RakNetClient client, RakNetServerPeer peer) {
-				LOG.info("Client - Logged in to server with MTU " + peer.getMaximumTransferUnit() + ", sending "
-						+ PACKET_SEND_COUNT + " packets...");
+				LOG.info("Client - Logged in to server with MTU " + peer.getMaximumTransferUnit() + ", sending " + PACKET_SEND_COUNT + " packets...");
 				int packetSize = 0;
 				startSend = System.currentTimeMillis();
 				for (int i = 0; i < PACKET_SEND_COUNT; i++) {
@@ -178,8 +176,7 @@ public final class SequencedPacketTest {
 					packetSize += sequencedPacket.size();
 					peer.sendMessage(Reliability.UNRELIABLE_SEQUENCED, sequencedPacket);
 				}
-				LOG.info("Client - Sent " + PACKET_SEND_COUNT + " packets (" + packetSize + " bytes, "
-						+ (packetSize / 4) + " ints)");
+				LOG.info("Client - Sent " + PACKET_SEND_COUNT + " packets (" + packetSize + " bytes, " + (packetSize / 4) + " ints)");
 			}
 
 			@Override
@@ -205,9 +202,7 @@ public final class SequencedPacketTest {
 	private static void printResults() {
 		LOG.info("Server - Sequenced packet test finished, lost "
 				+ (packetReceiveCount >= PACKET_SEND_COUNT ? "no"
-						: Float.toString(
-								((float) PACKET_SEND_COUNT - packetReceiveCount / (float) PACKET_SEND_COUNT) * 100)
-								.substring(0, 3).replace(".", "") + "% of")
+						: Float.toString(((float) PACKET_SEND_COUNT - packetReceiveCount / (float) PACKET_SEND_COUNT) * 100).substring(0, 3).replace(".", "") + "% of")
 				+ " packets (Took " + (System.currentTimeMillis() - startSend) + "MS)");
 		if (packetReceiveCount < PACKET_SEND_COUNT) {
 			ArrayList<Integer> lostPackets = new ArrayList<Integer>();

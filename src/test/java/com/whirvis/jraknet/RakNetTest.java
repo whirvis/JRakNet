@@ -82,8 +82,7 @@ public final class RakNetTest {
 	/**
 	 * The address of the Lifeboat Survival Games server.
 	 */
-	public static final InetSocketAddress LIFEBOAT_SURVIVAL_GAMES_ADDRESS = new InetSocketAddress("sg.lbsg.net",
-			MINECRAFT_DEFAULT_PORT);
+	public static final InetSocketAddress LIFEBOAT_SURVIVAL_GAMES_ADDRESS = new InetSocketAddress("sg.lbsg.net", MINECRAFT_DEFAULT_PORT);
 
 	private RakNetTest() {
 		// Static class
@@ -99,10 +98,8 @@ public final class RakNetTest {
 	 */
 	public static void main(String[] args) throws RakNetException {
 		// Parse addresses
-		LOG.info("Parsing valid address " + ADDRESS_TEST_VALID + " ?= "
-				+ RakNet.parseAddressPassive(ADDRESS_TEST_VALID));
-		LOG.info("Parsing invalid address " + ADDRESS_TEST_INVALID + " ?= "
-				+ RakNet.parseAddressPassive(ADDRESS_TEST_INVALID));
+		LOG.info("Parsing valid address " + ADDRESS_TEST_VALID + " ?= " + RakNet.parseAddressPassive(ADDRESS_TEST_VALID));
+		LOG.info("Parsing invalid address " + ADDRESS_TEST_INVALID + " ?= " + RakNet.parseAddressPassive(ADDRESS_TEST_INVALID));
 
 		// Print server information
 		LOG.info("Server address: " + LIFEBOAT_SURVIVAL_GAMES_ADDRESS);
@@ -126,8 +123,7 @@ public final class RakNetTest {
 
 		// Get the server identifier
 		LOG.info("Getting server identifier...");
-		MinecraftIdentifier identifier = new MinecraftIdentifier(
-				RakNet.getServerIdentifier(LIFEBOAT_SURVIVAL_GAMES_ADDRESS));
+		MinecraftIdentifier identifier = new MinecraftIdentifier(RakNet.getServerIdentifier(LIFEBOAT_SURVIVAL_GAMES_ADDRESS));
 		LOG.info("\tIdentifier: " + formatMCPEIdentifier(identifier));
 	}
 
@@ -142,9 +138,8 @@ public final class RakNetTest {
 		if (identifier.getServerName() == null) {
 			identifier.setServerName("Unknown name");
 		}
-		return ("[Name: " + identifier.getServerName().replaceAll("\u00A7.", "") + "] [Version: "
-				+ identifier.getVersionTag() + "] [Player count: " + identifier.getOnlinePlayerCount() + "/"
-				+ identifier.getMaxPlayerCount() + "] [Server type: " + identifier.getConnectionType().getName() + "]");
+		return ("[Name: " + identifier.getServerName().replaceAll("\u00A7.", "") + "] [Version: " + identifier.getVersionTag() + "] [Player count: "
+				+ identifier.getOnlinePlayerCount() + "/" + identifier.getMaxPlayerCount() + "] [Server type: " + identifier.getConnectionType().getName() + "]");
 	}
 
 }

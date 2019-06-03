@@ -82,8 +82,7 @@ public abstract class Command {
 	 *             if an unoverridable command with the same <code>label</code>
 	 *             already exists.
 	 */
-	protected Command(ChatServer server, boolean overridable, String label, String usage, String description)
-			throws NullPointerException, IllegalArgumentException {
+	protected Command(ChatServer server, boolean overridable, String label, String usage, String description) throws NullPointerException, IllegalArgumentException {
 		if (server == null) {
 			throw new NullPointerException("Chat server cannot be null");
 		} else if (label == null) {
@@ -123,8 +122,7 @@ public abstract class Command {
 	 *             if an unoverridable command with the same <code>label</code>
 	 *             already exists.
 	 */
-	protected Command(ChatServer server, String label, String usage, String description)
-			throws NullPointerException, IllegalArgumentException {
+	protected Command(ChatServer server, String label, String usage, String description) throws NullPointerException, IllegalArgumentException {
 		this(server, true, label, usage, description);
 	}
 
@@ -144,8 +142,7 @@ public abstract class Command {
 	 *             if an unoverridable command with the same <code>label</code>
 	 *             already exists.
 	 */
-	protected Command(ChatServer server, String label, String description)
-			throws NullPointerException, IllegalArgumentException {
+	protected Command(ChatServer server, String label, String description) throws NullPointerException, IllegalArgumentException {
 		this(server, label, label, description);
 	}
 

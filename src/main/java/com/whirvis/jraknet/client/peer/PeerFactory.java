@@ -124,8 +124,8 @@ public final class PeerFactory {
 	 *             if the <code>client</code>, <code>address</code> or IP
 	 *             address are <code>null</code>.
 	 */
-	public PeerFactory(RakNetClient client, InetSocketAddress address, Bootstrap bootstrap, Channel channel,
-			int initialMaximumTransferUnit, int maximumMaximumTransferUnit) throws NullPointerException {
+	public PeerFactory(RakNetClient client, InetSocketAddress address, Bootstrap bootstrap, Channel channel, int initialMaximumTransferUnit, int maximumMaximumTransferUnit)
+			throws NullPointerException {
 		if (client == null) {
 			throw new NullPointerException("Client cannot be null");
 		} else if (address == null) {
@@ -134,8 +134,7 @@ public final class PeerFactory {
 			throw new NullPointerException("IP address cannot be null");
 		}
 		this.factoryState = STATE_IDLE;
-		this.log = LogManager.getLogger(
-				PeerFactory.class.getSimpleName() + "-" + Long.toHexString(client.getGloballyUniqueId()).toUpperCase());
+		this.log = LogManager.getLogger(PeerFactory.class.getSimpleName() + "-" + Long.toHexString(client.getGloballyUniqueId()).toUpperCase());
 		this.client = client;
 		this.address = address;
 		this.bootstrap = bootstrap;
@@ -203,8 +202,7 @@ public final class PeerFactory {
 	 * @throws PacketBufferException
 	 *             if encoding or decoding one of the packets fails.
 	 */
-	public void startAssembly(MaximumTransferUnit... units)
-			throws NullPointerException, IllegalStateException, PeerFactoryException, PacketBufferException {
+	public void startAssembly(MaximumTransferUnit... units) throws NullPointerException, IllegalStateException, PeerFactoryException, PacketBufferException {
 		if (units == null) {
 			throw new NullPointerException("Maximum transfer units cannot be null");
 		} else if (factoryState >= STATE_PEER_ASSEMBLED) {
@@ -224,8 +222,7 @@ public final class PeerFactory {
 				connectionRequestOne.networkProtocol = client.getProtocolVersion();
 				connectionRequestOne.encode();
 				client.sendNettyMessage(connectionRequestOne, address);
-				log.debug("Attemped connection request one with maximum transfer unit size " + unit.getSize() + " ("
-						+ (unit.getSize() * 8) + " bits)");
+				log.debug("Attemped connection request one with maximum transfer unit size " + unit.getSize() + " (" + (unit.getSize() * 8) + " bits)");
 				RakNet.sleep(500);
 			}
 		}
@@ -293,8 +290,7 @@ public final class PeerFactory {
 					if (connectionResponseOne.magic == false) {
 						throw new InvalidMagicException(client);
 					} else if (connectionResponseOne.maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE) {
-						throw new InvalidMaximumTransferUnitException(client,
-								connectionResponseOne.maximumTransferUnit);
+						throw new InvalidMaximumTransferUnitException(client, connectionResponseOne.maximumTransferUnit);
 					}
 
 					/*
@@ -303,14 +299,12 @@ public final class PeerFactory {
 					 * use the highest valid maximum transfer unit of the
 					 * client.
 					 */
-					this.maximumTransferUnit = connectionResponseOne.maximumTransferUnit < maximumMaximumTransferUnit
-							? connectionResponseOne.maximumTransferUnit : maximumMaximumTransferUnit;
+					this.maximumTransferUnit = connectionResponseOne.maximumTransferUnit < maximumMaximumTransferUnit ? connectionResponseOne.maximumTransferUnit
+							: maximumMaximumTransferUnit;
 					this.serverGuid = connectionResponseOne.serverGuid;
 					this.factoryState = STATE_SECOND_CONNECTION_REQUEST;
-					log.debug("Applied maximum transfer unit " + maximumTransferUnit + " and globally unique ID "
-							+ serverGuid + " from " + getName(packet.getId()) + " packet");
-				} else if (packet.getId() == ID_OPEN_CONNECTION_REPLY_2
-						&& factoryState == STATE_SECOND_CONNECTION_REQUEST) {
+					log.debug("Applied maximum transfer unit " + maximumTransferUnit + " and globally unique ID " + serverGuid + " from " + getName(packet.getId()) + " packet");
+				} else if (packet.getId() == ID_OPEN_CONNECTION_REPLY_2 && factoryState == STATE_SECOND_CONNECTION_REQUEST) {
 					OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo(packet);
 					connectionResponseTwo.decode();
 					if (connectionResponseTwo.failed()) {
@@ -319,8 +313,7 @@ public final class PeerFactory {
 						throw new InvalidMagicException(client);
 					} else if (connectionResponseTwo.serverGuid != serverGuid) {
 						throw new InconsistentGuidException(client);
-					} else if (connectionResponseTwo.maximumTransferUnit > maximumMaximumTransferUnit
-							|| connectionResponseTwo.maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE) {
+					} else if (connectionResponseTwo.maximumTransferUnit > maximumMaximumTransferUnit || connectionResponseTwo.maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE) {
 						throw new InvalidMaximumTransferUnitException(client, maximumTransferUnit);
 					}
 
@@ -333,19 +326,15 @@ public final class PeerFactory {
 						log.warn("Server responded with higher maximum transfer unit than agreed upon earlier");
 					}
 
-					bootstrap.option(ChannelOption.SO_SNDBUF, maximumTransferUnit).option(ChannelOption.SO_RCVBUF,
-							maximumTransferUnit);
+					bootstrap.option(ChannelOption.SO_SNDBUF, maximumTransferUnit).option(ChannelOption.SO_RCVBUF, maximumTransferUnit);
 
 					// Create peer
 					this.connectionType = connectionResponseTwo.connectionType;
 					this.factoryState = STATE_PEER_ASSEMBLED;
 					client.callEvent(listener -> listener.onConnect(client, address, connectionType));
-					log.debug(
-							"Created server peer using globally unique ID " + Long.toHexString(serverGuid).toUpperCase()
-									+ " and maximum transfer unit with size of " + maximumTransferUnit + " bytes ("
-									+ (maximumTransferUnit * 8) + " bits) for server address " + address);
-					return new RakNetServerPeer(client, address, serverGuid, maximumTransferUnit, connectionType,
-							channel);
+					log.debug("Created server peer using globally unique ID " + Long.toHexString(serverGuid).toUpperCase() + " and maximum transfer unit with size of "
+							+ maximumTransferUnit + " bytes (" + (maximumTransferUnit * 8) + " bits) for server address " + address);
+					return new RakNetServerPeer(client, address, serverGuid, maximumTransferUnit, connectionType, channel);
 				} else if (packet.getId() == ID_ALREADY_CONNECTED) {
 					throw new AlreadyConnectedException(client, address);
 				} else if (packet.getId() == ID_NO_FREE_INCOMING_CONNECTIONS) {
@@ -362,8 +351,7 @@ public final class PeerFactory {
 					IncompatibleProtocolVersion incompatibleProtocol = new IncompatibleProtocolVersion(packet);
 					incompatibleProtocol.decode();
 					if (incompatibleProtocol.serverGuid == serverGuid) {
-						throw new IncompatibleProtocolException(client, address, client.getProtocolVersion(),
-								incompatibleProtocol.networkProtocol);
+						throw new IncompatibleProtocolException(client, address, client.getProtocolVersion(), incompatibleProtocol.networkProtocol);
 					}
 				}
 			} catch (PeerFactoryException | PacketBufferException e) {
@@ -375,10 +363,9 @@ public final class PeerFactory {
 
 	@Override
 	public String toString() {
-		return "PeerFactory [factoryState=" + factoryState + ", client=" + client + ", address=" + address
-				+ ", initialMaximumTransferUnit=" + initialMaximumTransferUnit + ", maximumMaximumTransferUnit="
-				+ maximumMaximumTransferUnit + ", serverGuid=" + serverGuid + ", maximumTransferUnit="
-				+ maximumTransferUnit + ", connectionType=" + connectionType + "]";
+		return "PeerFactory [factoryState=" + factoryState + ", client=" + client + ", address=" + address + ", initialMaximumTransferUnit=" + initialMaximumTransferUnit
+				+ ", maximumMaximumTransferUnit=" + maximumMaximumTransferUnit + ", serverGuid=" + serverGuid + ", maximumTransferUnit=" + maximumTransferUnit + ", connectionType="
+				+ connectionType + "]";
 	}
 
 }

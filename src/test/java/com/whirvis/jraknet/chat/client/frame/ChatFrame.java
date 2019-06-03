@@ -71,8 +71,7 @@ public final class ChatFrame extends JFrame {
 		private static final long serialVersionUID = -3378705654945270562L;
 
 		@Override
-		public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
-				boolean cellHasFocus) {
+		public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 			super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 			if (value != null) {
 				this.setText(((TextChannel) value).getName());
@@ -272,8 +271,7 @@ public final class ChatFrame extends JFrame {
 				cleansed.add(channel);
 			}
 		}
-		cmbTextChannels
-				.setModel(new DefaultComboBoxModel<TextChannel>(cleansed.toArray(new TextChannel[cleansed.size()])));
+		cmbTextChannels.setModel(new DefaultComboBoxModel<TextChannel>(cleansed.toArray(new TextChannel[cleansed.size()])));
 		if (cmbTextChannels.getModel().getSize() > 0) {
 			cmbTextChannels.setSelectedIndex(0);
 		}

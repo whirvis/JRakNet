@@ -62,8 +62,7 @@ public final class IncompatibleProtocolException extends PeerFactoryException {
 	 * @param serverProtocol
 	 *            the server protocol
 	 */
-	public IncompatibleProtocolException(RakNetClient client, InetSocketAddress address, int clientProtocol,
-			int serverProtocol) {
+	public IncompatibleProtocolException(RakNetClient client, InetSocketAddress address, int clientProtocol, int serverProtocol) {
 		super(client, (clientProtocol < serverProtocol ? "Outdated client" : "Outdated server"));
 		this.address = address;
 		this.clientProtocol = clientProtocol;

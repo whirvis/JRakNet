@@ -220,8 +220,7 @@ public final class Discovery {
 		for (DiscoveryListener listener : LISTENERS) {
 			if (listener.getClass().isAnnotationPresent(ThreadedListener.class)) {
 				ThreadedListener threadedListener = listener.getClass().getAnnotation(ThreadedListener.class);
-				new Thread(Discovery.class.getSimpleName() + (threadedListener.name().length() > 0 ? "-" : "")
-						+ threadedListener.name() + "-Thread-" + ++eventThreadCount) {
+				new Thread(Discovery.class.getSimpleName() + (threadedListener.name().length() > 0 ? "-" : "") + threadedListener.name() + "-Thread-" + ++eventThreadCount) {
 
 					@Override
 					public void run() {
@@ -533,8 +532,7 @@ public final class Discovery {
 	 *             if the IP address of <code>address</code> is the broadcast
 	 *             address of {@value #BROADCAST_ADDRESS}.
 	 */
-	public static synchronized void addServer(InetSocketAddress address)
-			throws NullPointerException, IllegalArgumentException {
+	public static synchronized void addServer(InetSocketAddress address) throws NullPointerException, IllegalArgumentException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
 		} else if (address.getAddress() == null) {
@@ -599,8 +597,7 @@ public final class Discovery {
 	 *             if no IP address for the <code>host</code> could be found, or
 	 *             if a scope_id was specified for a global IPv6 address.
 	 */
-	public static void addServer(String host, int port)
-			throws NullPointerException, IllegalArgumentException, UnknownHostException {
+	public static void addServer(String host, int port) throws NullPointerException, IllegalArgumentException, UnknownHostException {
 		if (host == null) {
 			throw new NullPointerException("IP address cannot be null");
 		}
@@ -791,8 +788,7 @@ public final class Discovery {
 	 *             if no IP address for the <code>host</code> could be found, or
 	 *             if a scope_id was specified for a global IPv6 address.
 	 */
-	public static void setServer(String host, int port)
-			throws NullPointerException, IllegalArgumentException, UnknownHostException {
+	public static void setServer(String host, int port) throws NullPointerException, IllegalArgumentException, UnknownHostException {
 		clearServers();
 		addServer(host, port);
 	}
@@ -874,8 +870,7 @@ public final class Discovery {
 	 * @throws IllegalArgumentException
 	 *             if the <code>pong</code> packet failed to decode.
 	 */
-	protected static synchronized void updateDiscoveryData(InetSocketAddress sender, UnconnectedPong pong)
-			throws NullPointerException, IllegalArgumentException {
+	protected static synchronized void updateDiscoveryData(InetSocketAddress sender, UnconnectedPong pong) throws NullPointerException, IllegalArgumentException {
 		if (sender == null) {
 			throw new NullPointerException("Sender cannot be null");
 		} else if (sender.getAddress() == null) {
@@ -900,8 +895,7 @@ public final class Discovery {
 				if (!pong.identifier.equals(discovered.getIdentifier())) {
 					Identifier oldIdentifier = discovered.getIdentifier();
 					discovered.setIdentifier(pong.identifier);
-					LOG.debug("Updated local server with address " + sender + " identifier to \"" + pong.identifier
-							+ "\"");
+					LOG.debug("Updated local server with address " + sender + " identifier to \"" + pong.identifier + "\"");
 					callEvent(listener -> listener.onServerIdentifierUpdate(discovered, oldIdentifier));
 				}
 			}

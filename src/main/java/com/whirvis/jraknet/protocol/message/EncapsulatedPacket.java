@@ -73,8 +73,7 @@ public final class EncapsulatedPacket implements Cloneable {
 		 * @throws IllegalArgumentException
 		 *             if the <code>encapsulated</code> is already split.
 		 */
-		public static boolean needsSplit(RakNetPeer peer, EncapsulatedPacket encapsulated)
-				throws NullPointerException, IllegalArgumentException {
+		public static boolean needsSplit(RakNetPeer peer, EncapsulatedPacket encapsulated) throws NullPointerException, IllegalArgumentException {
 			if (peer == null) {
 				throw new NullPointerException("Peer cannot be null");
 			} else if (encapsulated == null) {
@@ -102,8 +101,7 @@ public final class EncapsulatedPacket implements Cloneable {
 		 *             the packet is too small to be split according to
 		 *             {@link #needsSplit(RakNetPeer, EncapsulatedPacket)}.
 		 */
-		public static EncapsulatedPacket[] split(RakNetPeer peer, EncapsulatedPacket encapsulated)
-				throws NullPointerException, IllegalArgumentException {
+		public static EncapsulatedPacket[] split(RakNetPeer peer, EncapsulatedPacket encapsulated) throws NullPointerException, IllegalArgumentException {
 			if (peer == null) {
 				throw new NullPointerException("Peer cannot be null");
 			} else if (encapsulated == null) {
@@ -115,8 +113,7 @@ public final class EncapsulatedPacket implements Cloneable {
 			}
 
 			// Split packet payload
-			int size = peer.getMaximumTransferUnit() - CustomPacket.MINIMUM_SIZE
-					- EncapsulatedPacket.size(encapsulated.reliability, true);
+			int size = peer.getMaximumTransferUnit() - CustomPacket.MINIMUM_SIZE - EncapsulatedPacket.size(encapsulated.reliability, true);
 			byte[] src = encapsulated.payload.array();
 			int payloadIndex = 0;
 			int splitIndex = 0;
@@ -216,12 +213,10 @@ public final class EncapsulatedPacket implements Cloneable {
 		 *             <code>encapsulated</code> packet has been registered with
 		 *             the same <code>splitIndex</code>.
 		 */
-		public EncapsulatedPacket update(EncapsulatedPacket encapsulated)
-				throws NullPointerException, IllegalArgumentException {
+		public EncapsulatedPacket update(EncapsulatedPacket encapsulated) throws NullPointerException, IllegalArgumentException {
 			if (encapsulated == null) {
 				throw new NullPointerException("Encapsulated packet cannot be null");
-			} else if (encapsulated.split != true || encapsulated.splitId != splitId
-					|| encapsulated.splitCount != splitCount || encapsulated.reliability != reliability) {
+			} else if (encapsulated.split != true || encapsulated.splitId != splitId || encapsulated.splitCount != splitCount || encapsulated.reliability != reliability) {
 				throw new IllegalArgumentException("This split packet does not belong to this one");
 			} else if (encapsulated.splitIndex < 0 || encapsulated.splitIndex >= encapsulated.splitCount) {
 				throw new IllegalArgumentException("Encapsulated packet split index out of range");
@@ -492,8 +487,7 @@ public final class EncapsulatedPacket implements Cloneable {
 		short flags = buffer.readUnsignedByte();
 		this.reliability = Reliability.lookup((flags & FLAG_RELIABILITY) >> FLAG_RELIABILITY_INDEX);
 		if (reliability == null) {
-			throw new NullPointerException(
-					"Failed to lookup reliability with ID " + ((flags & FLAG_RELIABILITY) >> FLAG_RELIABILITY_INDEX));
+			throw new NullPointerException("Failed to lookup reliability with ID " + ((flags & FLAG_RELIABILITY) >> FLAG_RELIABILITY_INDEX));
 		}
 		this.split = (flags & FLAG_SPLIT) > 0;
 		int length = buffer.readUnsignedShort() / Byte.SIZE;
@@ -605,10 +599,9 @@ public final class EncapsulatedPacket implements Cloneable {
 
 	@Override
 	public String toString() {
-		return "EncapsulatedPacket [isClone=" + isClone + ", ackRecord=" + ackRecord + ", reliability=" + reliability
-				+ ", split=" + split + ", messageIndex=" + messageIndex + ", orderIndex=" + orderIndex
-				+ ", orderChannel=" + orderChannel + ", splitCount=" + splitCount + ", splitId=" + splitId
-				+ ", splitIndex=" + splitIndex + ", calculateSize()=" + size() + "]";
+		return "EncapsulatedPacket [isClone=" + isClone + ", ackRecord=" + ackRecord + ", reliability=" + reliability + ", split=" + split + ", messageIndex=" + messageIndex
+				+ ", orderIndex=" + orderIndex + ", orderChannel=" + orderChannel + ", splitCount=" + splitCount + ", splitId=" + splitId + ", splitIndex=" + splitIndex
+				+ ", calculateSize()=" + size() + "]";
 	}
 
 }

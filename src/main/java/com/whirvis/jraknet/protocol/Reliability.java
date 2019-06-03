@@ -129,8 +129,7 @@ public enum Reliability {
 	 *             if both <code>ordered</code> and <code>sequenced</code> are
 	 *             <code>true</code>.
 	 */
-	private Reliability(int id, boolean reliable, boolean ordered, boolean sequenced, boolean requiresAck)
-			throws IllegalArgumentException {
+	private Reliability(int id, boolean reliable, boolean ordered, boolean sequenced, boolean requiresAck) throws IllegalArgumentException {
 		this.id = (byte) id;
 		this.reliable = reliable;
 		this.ordered = ordered;

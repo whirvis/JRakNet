@@ -114,8 +114,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		 */
 		public synchronized boolean contains(int index) {
 			for (Record record : indexes) {
-				if ((record.isRanged() && record.getIndex() >= index && record.getIndex() <= index)
-						|| record.getIndex() == index) {
+				if ((record.isRanged() && record.getIndex() >= index && record.getIndex() <= index) || record.getIndex() == index) {
 					return true;
 				}
 			}
@@ -214,8 +213,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * @param channel
 	 *            the channel to communicate to the peer with.
 	 */
-	protected RakNetPeer(InetSocketAddress address, long guid, int maximumTransferUnit, ConnectionType connectionType,
-			Channel channel) {
+	protected RakNetPeer(InetSocketAddress address, long guid, int maximumTransferUnit, ConnectionType connectionType, Channel channel) {
 		this.log = LogManager.getLogger(RakNetPeer.class.getSimpleName() + "-" + Long.toHexString(guid).toUpperCase());
 		this.address = address;
 		this.guid = guid;
@@ -572,8 +570,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 *             encapsulated packet found inside of it is split, and adding
 	 *             it to the split queue would cause it to overflow.
 	 */
-	public final void handleInternal(RakNetPacket packet)
-			throws NullPointerException, InvalidChannelException, SplitQueueOverflowException {
+	public final void handleInternal(RakNetPacket packet) throws NullPointerException, InvalidChannelException, SplitQueueOverflowException {
 		if (packet == null) {
 			throw new NullPointerException("Packet cannot be null");
 		}
@@ -604,8 +601,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			 */
 			int skipped = custom.sequenceId - receiveSequenceNumber - 1;
 			if (skipped > 0) {
-				this.sendAcknowledge(false, skipped == 1 ? new Record(custom.sequenceId - 1)
-						: new Record(receiveSequenceNumber + 1, custom.sequenceId - 1));
+				this.sendAcknowledge(false, skipped == 1 ? new Record(custom.sequenceId - 1) : new Record(receiveSequenceNumber + 1, custom.sequenceId - 1));
 			}
 			if (custom.sequenceId > receiveSequenceNumber - 1) {
 				this.receiveSequenceNumber = custom.sequenceId;
@@ -672,8 +668,8 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				}
 				recoveryQueue.remove(record.getIndex());
 			}
-			log.debug("Handled ACK packet with " + acknowledged.records.length + " record"
-					+ (acknowledged.records.length == 1 ? "" : "s") + " " + Arrays.toString(acknowledged.records));
+			log.debug("Handled ACK packet with " + acknowledged.records.length + " record" + (acknowledged.records.length == 1 ? "" : "s") + " "
+					+ Arrays.toString(acknowledged.records));
 		}
 	}
 
@@ -691,16 +687,14 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 *             if the <code>encapsulated</code> packet is split, and adding
 	 *             it to the split queue would cause it to overflow.
 	 */
-	private final void handleEncapsulated(EncapsulatedPacket encapsulated)
-			throws InvalidChannelException, SplitQueueOverflowException {
+	private final void handleEncapsulated(EncapsulatedPacket encapsulated) throws InvalidChannelException, SplitQueueOverflowException {
 		if (encapsulated == null) {
 			throw new NullPointerException("Encapsulated packet cannot be null");
 		} else if (encapsulated.orderChannel >= RakNet.CHANNEL_COUNT) {
 			throw new InvalidChannelException(encapsulated.orderChannel);
 		} else if (encapsulated.split == true) {
 			if (!splitQueue.containsKey(encapsulated.splitId)) {
-				splitQueue.put(encapsulated.splitId, new EncapsulatedPacket.Split(encapsulated.splitId,
-						encapsulated.splitCount, encapsulated.reliability));
+				splitQueue.put(encapsulated.splitId, new EncapsulatedPacket.Split(encapsulated.splitId, encapsulated.splitCount, encapsulated.reliability));
 
 				/**
 				 * If the split queue is greater than the maximum amount of
@@ -719,8 +713,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 						}
 					}
 					if (removeCount > 0) {
-						log.warn("Removed " + removeCount
-								+ " unreliable packets from the split queue due to an overflowing split queue");
+						log.warn("Removed " + removeCount + " unreliable packets from the split queue due to an overflowing split queue");
 					}
 					if (splitQueue.size() > MAX_SPLITS_PER_QUEUE) {
 						throw new SplitQueueOverflowException();
@@ -732,8 +725,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				splitQueue.remove(encapsulated.splitId);
 				this.handleEncapsulated(stitched);
 			}
-		} else if (!encapsulated.reliability.isReliable()
-				|| (encapsulated.reliability.isReliable() && !reliablePackets.contains(encapsulated.messageIndex))) {
+		} else if (!encapsulated.reliability.isReliable() || (encapsulated.reliability.isReliable() && !reliablePackets.contains(encapsulated.messageIndex))) {
 			/*
 			 * Determine if the message should be handled based on its
 			 * reliability.
@@ -751,22 +743,19 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			reliablePackets.add(encapsulated.messageIndex);
 			if (encapsulated.reliability.isOrdered()) {
 				handleQueue.get(encapsulated.orderChannel).put(encapsulated.orderIndex, encapsulated);
-				while (handleQueue.get(encapsulated.orderChannel)
-						.containsKey(orderReceiveIndex[encapsulated.orderChannel])) {
+				while (handleQueue.get(encapsulated.orderChannel).containsKey(orderReceiveIndex[encapsulated.orderChannel])) {
 					this.handleMessage0(encapsulated.orderChannel,
-							new RakNetPacket(handleQueue.get(encapsulated.orderChannel)
-									.remove(orderReceiveIndex[encapsulated.orderChannel]++).payload));
+							new RakNetPacket(handleQueue.get(encapsulated.orderChannel).remove(orderReceiveIndex[encapsulated.orderChannel]++).payload));
 				}
-			} else if (encapsulated.reliability.isSequenced()
-					&& encapsulated.orderIndex > sequenceReceiveIndex[encapsulated.orderChannel]) {
+			} else if (encapsulated.reliability.isSequenced() && encapsulated.orderIndex > sequenceReceiveIndex[encapsulated.orderChannel]) {
 				sequenceReceiveIndex[encapsulated.orderChannel] = encapsulated.orderIndex;
 				this.handleMessage0(encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
 			} else {
 				this.handleMessage0(encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
 			}
 		}
-		log.debug("Handled " + (encapsulated.split ? "split " : "") + "encapsulated packet with "
-				+ encapsulated.reliability + " reliability on channel " + encapsulated.orderChannel);
+		log.debug("Handled " + (encapsulated.split ? "split " : "") + "encapsulated packet with " + encapsulated.reliability + " reliability on channel "
+				+ encapsulated.orderChannel);
 	}
 
 	/**
@@ -785,8 +774,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * @throws NullPointerException
 	 *             if the <code>packet</code> is <code>null</code>.
 	 */
-	private final void handleMessage0(int channel, RakNetPacket packet)
-			throws InvalidChannelException, NullPointerException {
+	private final void handleMessage0(int channel, RakNetPacket packet) throws InvalidChannelException, NullPointerException {
 		if (channel >= RakNet.CHANNEL_COUNT) {
 			throw new InvalidChannelException(channel);
 		} else if (packet == null) {
@@ -819,9 +807,8 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				}
 				this.totalLatency += responseTime;
 				this.latency = totalLatency / ++pongsReceived;
-				log.debug("Updated latency information (last latency timestamp: " + lastLatency + ", lowest latency: "
-						+ lowestLatency + ", highest latency: " + highestLatency + ", total latency: " + totalLatency
-						+ ", pongs received: " + pongsReceived + ", average latency: " + latency + ")");
+				log.debug("Updated latency information (last latency timestamp: " + lastLatency + ", lowest latency: " + lowestLatency + ", highest latency: " + highestLatency
+						+ ", total latency: " + totalLatency + ", pongs received: " + pongsReceived + ", average latency: " + latency + ")");
 			}
 
 			// Clear overdue ping responses
@@ -863,8 +850,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		}
 		this.lastPacketSendTime = currentTime;
 		this.packetsSentThisSecond++;
-		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to "
-				+ address);
+		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to " + address);
 	}
 
 	/**
@@ -904,8 +890,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * @throws IllegalArgumentException
 	 *             if the <code>messages</code> array is empty.
 	 */
-	private final int sendCustomPacket(boolean updateRecoveryQueue, EncapsulatedPacket... messages)
-			throws NullPointerException, IllegalArgumentException {
+	private final int sendCustomPacket(boolean updateRecoveryQueue, EncapsulatedPacket... messages) throws NullPointerException, IllegalArgumentException {
 		if (messages == null) {
 			throw new NullPointerException("Messages cannot be null");
 		} else if (messages.length <= 0) {
@@ -941,12 +926,11 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				recoveryQueue.put(custom.sequenceId, reliable.toArray(new EncapsulatedPacket[reliable.size()]));
 			}
 		}
-		log.debug("Sent custom packet containing " + custom.messages.length + " encapsulated packet"
-				+ (custom.messages.length == 1 ? "" : "s") + " with sequence number " + custom.sequenceId);
+		log.debug("Sent custom packet containing " + custom.messages.length + " encapsulated packet" + (custom.messages.length == 1 ? "" : "s") + " with sequence number "
+				+ custom.sequenceId);
 		for (int i = 0; i < custom.messages.length; i++) {
 			if (custom.messages[i].payload.size() > 0) {
-				log.debug("\tID of packet " + i + ": "
-						+ RakNetPacket.getName(custom.messages[i].payload.array()[0] & 0xFF));
+				log.debug("\tID of packet " + i + ": " + RakNetPacket.getName(custom.messages[i].payload.array()[0] & 0xFF));
 			} else {
 				log.debug("\tID packet " + i + ": none (payload length is 0)");
 			}
@@ -970,8 +954,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * @throws IllegalArgumentException
 	 *             if the <code>records</code> array is empty.
 	 */
-	private final void sendAcknowledge(boolean acknowledge, Record... records)
-			throws NullPointerException, IllegalArgumentException {
+	private final void sendAcknowledge(boolean acknowledge, Record... records) throws NullPointerException, IllegalArgumentException {
 		if (records == null) {
 			throw new NullPointerException("Records cannot be null");
 		} else if (records.length <= 0) {
@@ -981,13 +964,12 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		acknowledged.records = records;
 		acknowledged.encode();
 		this.sendNettyMessage(acknowledged);
-		log.debug("Sent " + acknowledged.records.length + " record" + (acknowledged.records.length == 1 ? "" : "s")
-				+ " in " + (acknowledged.isAcknowledgement() ? "ACK" : "NACK") + " packet");
+		log.debug("Sent " + acknowledged.records.length + " record" + (acknowledged.records.length == 1 ? "" : "s") + " in " + (acknowledged.isAcknowledgement() ? "ACK" : "NACK")
+				+ " packet");
 	}
 
 	@Override
-	public final EncapsulatedPacket sendMessage(Reliability reliability, int channel, Packet packet)
-			throws NullPointerException, InvalidChannelException {
+	public final EncapsulatedPacket sendMessage(Reliability reliability, int channel, Packet packet) throws NullPointerException, InvalidChannelException {
 		if (reliability == null) {
 			throw new NullPointerException("Reliability cannot be null");
 		} else if (packet == null) {
@@ -1006,12 +988,10 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			log.debug("Bumped message index from " + encapsulated.messageIndex + " to " + messageIndex);
 		}
 		if (reliability.isOrdered() || reliability.isSequenced()) {
-			encapsulated.orderIndex = reliability.isOrdered() ? orderSendIndex[channel]++
-					: sequenceSendIndex[channel]++;
+			encapsulated.orderIndex = reliability.isOrdered() ? orderSendIndex[channel]++ : sequenceSendIndex[channel]++;
 			log.debug("Bumped " + (reliability.isOrdered() ? "order" : "sequence") + " index from "
 					+ ((reliability.isOrdered() ? orderSendIndex[channel] : sequenceSendIndex[channel]) - 1) + " to "
-					+ (reliability.isOrdered() ? orderSendIndex[channel] : sequenceSendIndex[channel]) + " on channel "
-					+ channel);
+					+ (reliability.isOrdered() ? orderSendIndex[channel] : sequenceSendIndex[channel]) + " on channel " + channel);
 		}
 
 		// Add to send queue
@@ -1025,8 +1005,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			sendQueue.add(encapsulated);
 			log.debug("Added encapsulated packet to the send queue");
 		}
-		log.debug("Sent packet with size of " + packet.size() + " bytes (" + (packet.size() * 8)
-				+ " bits) with reliability " + reliability + " on channel " + channel);
+		log.debug("Sent packet with size of " + packet.size() + " bytes (" + (packet.size() * 8) + " bits) with reliability " + reliability + " on channel " + channel);
 
 		/*
 		 * Return a copy of the encapsulated packet as if a single variable is
@@ -1060,16 +1039,14 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		}
 
 		// Send keep alive packet
-		if (currentTime - lastPacketReceiveTime >= DETECTION_SEND_INTERVAL
-				&& currentTime - lastDetectionSendTime >= DETECTION_SEND_INTERVAL && latencyEnabled == false
+		if (currentTime - lastPacketReceiveTime >= DETECTION_SEND_INTERVAL && currentTime - lastDetectionSendTime >= DETECTION_SEND_INTERVAL && latencyEnabled == false
 				&& state == RakNetState.LOGGED_IN) {
 			this.sendMessage(Reliability.UNRELIABLE, ID_DETECT_LOST_CONNECTIONS);
 			this.lastDetectionSendTime = currentTime;
 		}
 
 		// Send ping to detect latency if it is enabled
-		if (latencyEnabled == true && currentTime - lastPingSendTime >= PING_SEND_INTERVAL
-				&& state == RakNetState.LOGGED_IN) {
+		if (latencyEnabled == true && currentTime - lastPingSendTime >= PING_SEND_INTERVAL && state == RakNetState.LOGGED_IN) {
 			ConnectedPing ping = new ConnectedPing();
 			ping.timestamp = this.getTimestamp();
 			ping.encode();

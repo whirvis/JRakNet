@@ -59,8 +59,7 @@ public final class NettyHandlerException extends RakNetClientException {
 	 * @param cause
 	 *            the cause.
 	 */
-	public NettyHandlerException(RakNetClient client, RakNetClientHandler handler, InetSocketAddress address,
-			Throwable cause) {
+	public NettyHandlerException(RakNetClient client, RakNetClientHandler handler, InetSocketAddress address, Throwable cause) {
 		super(client, "Exception in handler \"" + cause.getMessage() + "\"");
 		this.handler = handler;
 		this.address = address;

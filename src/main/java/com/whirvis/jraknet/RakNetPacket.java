@@ -78,9 +78,8 @@ public class RakNetPacket extends Packet {
 	/**
 	 * The magic identifier.
 	 */
-	public final static byte[] MAGIC = new byte[] { (byte) 0x00, (byte) 0xFF, (byte) 0xFF, 0x00, (byte) 0xFE,
-			(byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xFD, (byte) 0xFD, (byte) 0xFD, (byte) 0xFD, (byte) 0x12,
-			(byte) 0x34, (byte) 0x56, (byte) 0x78 };
+	public final static byte[] MAGIC = new byte[] { (byte) 0x00, (byte) 0xFF, (byte) 0xFF, 0x00, (byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xFD, (byte) 0xFD,
+			(byte) 0xFD, (byte) 0xFD, (byte) 0x12, (byte) 0x34, (byte) 0x56, (byte) 0x78 };
 
 	/**
 	 * The ID of the {@link com.whirvis.jraknet.protocol.status.ConnectedPing
@@ -923,8 +922,7 @@ public class RakNetPacket extends Packet {
 				if (field.getType().equals(short.class)) {
 					try {
 						short packetId = field.getShort(null);
-						if ((packetId >= ID_CUSTOM_0 && packetId <= ID_CUSTOM_F) || packetId == ID_ACK
-								|| packetId == ID_NACK) {
+						if ((packetId >= ID_CUSTOM_0 && packetId <= ID_CUSTOM_F) || packetId == ID_ACK || packetId == ID_NACK) {
 							continue; // Ignored as they override other packet
 										// IDs
 						}
@@ -933,8 +931,8 @@ public class RakNetPacket extends Packet {
 						PACKET_IDS.put(packetName, packetId);
 						if (currentName != null) {
 							if (!currentName.equals(packetName)) {
-								log.warn("Found duplicate ID " + RakNet.toHexStringId(packetId) + " for \"" + packetName
-										+ "\" and \"" + currentName + "\", overriding name and ID");
+								log.warn(
+										"Found duplicate ID " + RakNet.toHexStringId(packetId) + " for \"" + packetName + "\" and \"" + currentName + "\", overriding name and ID");
 							}
 						} else {
 							log.debug("Assigned packet ID " + RakNet.toHexStringId(packetId) + " to " + packetName);
@@ -1365,8 +1363,7 @@ public class RakNetPacket extends Packet {
 	 *             <code>byte</code>.
 	 * @see #setBuffer(DatagramPacket)
 	 */
-	public final RakNetPacket setBuffer(DatagramPacket datagram, boolean updateId)
-			throws NullPointerException, IndexOutOfBoundsException {
+	public final RakNetPacket setBuffer(DatagramPacket datagram, boolean updateId) throws NullPointerException, IndexOutOfBoundsException {
 		if (datagram == null) {
 			throw new NullPointerException("Datagram packet cannot be null");
 		}
@@ -1390,8 +1387,7 @@ public class RakNetPacket extends Packet {
 	 *             <code>byte</code>.
 	 * @see #setBuffer(byte[])
 	 */
-	public final RakNetPacket setBuffer(byte[] data, boolean updateId)
-			throws NullPointerException, IndexOutOfBoundsException {
+	public final RakNetPacket setBuffer(byte[] data, boolean updateId) throws NullPointerException, IndexOutOfBoundsException {
 		return this.setBuffer(Unpooled.copiedBuffer(data), updateId);
 	}
 
@@ -1410,8 +1406,7 @@ public class RakNetPacket extends Packet {
 	 *             <code>byte</code>.
 	 * @see #setBuffer(Packet)
 	 */
-	public final RakNetPacket setBuffer(Packet packet, boolean updateId)
-			throws NullPointerException, IndexOutOfBoundsException {
+	public final RakNetPacket setBuffer(Packet packet, boolean updateId) throws NullPointerException, IndexOutOfBoundsException {
 		return this.setBuffer(packet.copy(), updateId);
 	}
 

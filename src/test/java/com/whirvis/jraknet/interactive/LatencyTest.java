@@ -51,8 +51,8 @@ public final class LatencyTest {
 	/**
 	 * The latency test identifier.
 	 */
-	private static final MinecraftIdentifier LATENCY_TEST_IDENTIFIER = new MinecraftIdentifier("A JRakNet latency test",
-			RakNetTest.MINECRAFT_PROTOCOL_NUMBER, RakNetTest.MINECRAFT_VERSION, 0, 10,
+	private static final MinecraftIdentifier LATENCY_TEST_IDENTIFIER = new MinecraftIdentifier("A JRakNet latency test", RakNetTest.MINECRAFT_PROTOCOL_NUMBER,
+			RakNetTest.MINECRAFT_VERSION, 0, 10,
 			-1 /* We don't know the GUID yet */, "New World", "Developer");
 
 	private final RakNetServer server;
@@ -115,8 +115,8 @@ public final class LatencyTest {
 	 *             <i>interrupted status</i> of the current thread is cleared
 	 *             when this exception is thrown.
 	 */
-	public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
-			IllegalAccessException, UnsupportedLookAndFeelException, RakNetException, InterruptedException {
+	public static void main(String[] args)
+			throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException, RakNetException, InterruptedException {
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		LatencyTest test = new LatencyTest();
 		test.start();

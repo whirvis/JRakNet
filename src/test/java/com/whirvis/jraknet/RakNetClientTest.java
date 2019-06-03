@@ -86,16 +86,13 @@ public final class RakNetClientTest {
 			}
 
 			@Override
-			public void onAcknowledge(RakNetClient client, RakNetServerPeer peer, Record record,
-					EncapsulatedPacket packet) {
-				LOG.info(peer.getConnectionType().getName() + " server has acknowledged "
-						+ RakNetPacket.getName(packet.payload.readUnsignedByte()) + " packet");
+			public void onAcknowledge(RakNetClient client, RakNetServerPeer peer, Record record, EncapsulatedPacket packet) {
+				LOG.info(peer.getConnectionType().getName() + " server has acknowledged " + RakNetPacket.getName(packet.payload.readUnsignedByte()) + " packet");
 			}
 
 			@Override
 			public void onLoss(RakNetClient client, RakNetServerPeer peer, Record record, EncapsulatedPacket packet) {
-				LOG.info(peer.getConnectionType().getName() + " server has not lost "
-						+ RakNetPacket.getName(packet.payload.readUnsignedByte()) + " packet");
+				LOG.info(peer.getConnectionType().getName() + " server has not lost " + RakNetPacket.getName(packet.payload.readUnsignedByte()) + " packet");
 			}
 
 			@Override

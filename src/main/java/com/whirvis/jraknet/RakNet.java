@@ -251,9 +251,8 @@ public final class RakNet {
 				return true; // Address is in range of 127.0.0.1-127.0.0.8
 			}
 		} else if (ab.length >= 16) {
-			if (ab[0] == 0 && ab[1] == 0 && ab[2] == 0 && ab[3] == 0 && ab[4] == 0 && ab[5] == 0 && ab[6] == 0
-					&& ab[7] == 0 && ab[8] == 0 && ab[9] == 0 && ab[10] == 0 && ab[11] == 0 && ab[12] == 0
-					&& ab[13] == 0 && ab[14] == 0 && ab[15] == 1) {
+			if (ab[0] == 0 && ab[1] == 0 && ab[2] == 0 && ab[3] == 0 && ab[4] == 0 && ab[5] == 0 && ab[6] == 0 && ab[7] == 0 && ab[8] == 0 && ab[9] == 0 && ab[10] == 0
+					&& ab[11] == 0 && ab[12] == 0 && ab[13] == 0 && ab[14] == 0 && ab[15] == 1) {
 				return true; // Address is equal to 0:0:0:0:0:0:0:1
 			}
 		}
@@ -433,8 +432,7 @@ public final class RakNet {
 	 *             if the <code>timeout</code> or <code>retries</code> are less
 	 *             than or equal to <code>0</code>.
 	 */
-	private static RakNetPacket createBootstrapAndSend(InetSocketAddress address, Packet packet, long timeout,
-			int retries) throws NullPointerException, IllegalArgumentException {
+	private static RakNetPacket createBootstrapAndSend(InetSocketAddress address, Packet packet, long timeout, int retries) throws NullPointerException, IllegalArgumentException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
 		} else if (address.getAddress() == null) {
@@ -458,8 +456,7 @@ public final class RakNet {
 			// Create bootstrap
 			Bootstrap bootstrap = new Bootstrap();
 			BootstrapHandler handler = new BootstrapHandler();
-			bootstrap.group(group).channel(NioDatagramChannel.class).option(ChannelOption.SO_BROADCAST, true)
-					.option(ChannelOption.SO_RCVBUF, maximumTransferUnit)
+			bootstrap.group(group).channel(NioDatagramChannel.class).option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_RCVBUF, maximumTransferUnit)
 					.option(ChannelOption.SO_SNDBUF, maximumTransferUnit).handler(handler);
 			Channel channel = bootstrap.bind(0).sync().channel();
 
@@ -707,8 +704,7 @@ public final class RakNet {
 	 *             if no IP address for the <code>host</code> could be found, or
 	 *             if a scope_id was specified for a global IPv6 address.
 	 */
-	public static Identifier getServerIdentifier(String host, int port)
-			throws NullPointerException, UnknownHostException {
+	public static Identifier getServerIdentifier(String host, int port) throws NullPointerException, UnknownHostException {
 		if (host == null) {
 			throw new NullPointerException("IP address cannot be null");
 		}
@@ -931,8 +927,7 @@ public final class RakNet {
 	public static InetSocketAddress parseAddress(String address, int defaultPort) throws UnknownHostException {
 		String[] addressSplit = address.split(":");
 		if (addressSplit.length == 1 || addressSplit.length == 2) {
-			InetAddress inetAddress = InetAddress.getByName(!addressSplit[0].startsWith("/") ? addressSplit[0]
-					: addressSplit[0].substring(1, addressSplit[0].length()));
+			InetAddress inetAddress = InetAddress.getByName(!addressSplit[0].startsWith("/") ? addressSplit[0] : addressSplit[0].substring(1, addressSplit[0].length()));
 			int port = (addressSplit.length == 2 ? parseIntPassive(addressSplit[1]) : defaultPort);
 			if (port >= 0x0000 && port <= 0xFFFF) {
 				return new InetSocketAddress(inetAddress, port);
