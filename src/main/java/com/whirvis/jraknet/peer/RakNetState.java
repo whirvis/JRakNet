@@ -38,48 +38,72 @@ package com.whirvis.jraknet.peer;
  */
 public enum RakNetState {
 
+	/*
+	 * The registration states use bitflags to simplify things. The first bit
+	 * signifies if the peer is connected, the second bit indicates if the peer
+	 * is handshaking, and the thirt bit indicates if the peer is logged in.
+	 */
+
 	/**
 	 * The peer is connected.
 	 * <p>
-	 * This is the starting value of the state for all peers; as it is assumed a
+	 * This is the starting value of the state for all peers as it is assumed a
 	 * peer has connected by the time it is created.
 	 */
-	CONNECTED(0),
+	CONNECTED(0b001, 0b001),
 
 	/**
 	 * The peer is handshaking.
 	 */
-	HANDSHAKING(1),
+	HANDSHAKING(0b011, 0b010),
 
 	/**
 	 * The peer is logged in.
 	 */
-	LOGGED_IN(2),
+	LOGGED_IN(0b101, 0b101),
 
 	/**
 	 * The peer is disconnected.
 	 */
-	DISCONNECTED(-1);
+	DISCONNECTED(0b000, 0b000);
 
-	private final int order;
+	private final int flags;
+	private final int defining;
 
 	/**
-	 * Constructs a <code>RakNetState</code> with the specified order.
+	 * Constructs a <code>RakNetState</code> with the specified ID.
 	 * 
-	 * @param order
-	 *            the order of the state.
+	 * @param flags
+	 *            the flags of the state.
+	 * @param defining
+	 *            the defining flags of the state. If the <code>flags</code> of
+	 *            another state AND'ed with the <code>defining</code> flags of
+	 *            this state are greater than <code>0</code>, then the other
+	 *            state is a derivative of this state.
 	 */
-	private RakNetState(int order) {
-		this.order = order;
+	private RakNetState(int flags, int defining) {
+		this.flags = flags;
+		this.defining = defining;
 	}
 
 	/**
-	 * Returns the order of the state.
+	 * Returns whether or not this state is a derivative of the specified state.
 	 * 
-	 * @return the order of the state.
+	 * @param state
+	 *            the state.
+	 * @return <code>true</code> if the state is a derivative of this state,
+	 *         <code>false</code> otherwise.
+	 * @throws UnsupportedOperationException
+	 *             if the defining flags of the <code>state</code> are
+	 *             <code>null (0)</code>.
 	 */
-	public int getOrder() {
-		return this.order;
+	public boolean isDerivative(RakNetState state) throws UnsupportedOperationException {
+		if (state == null) {
+			return false;
+		} else if (state.defining == 0) {
+			throw new UnsupportedOperationException("Defining flags are null (0)");
+		}
+		return (flags & state.defining) > 0;
 	}
 
 }

@@ -331,7 +331,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 *         otherwise.
 	 */
 	public final boolean isConnected() {
-		return state.getOrder() >= RakNetState.CONNECTED.getOrder();
+		return state.isDerivative(RakNetState.CONNECTED);
 	}
 
 	/**
@@ -341,7 +341,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 *         otherwise.
 	 */
 	public final boolean isHandshaking() {
-		return state == RakNetState.HANDSHAKING;
+		return state.isDerivative(RakNetState.HANDSHAKING);
 	}
 
 	/**
@@ -351,7 +351,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 *         otherwise.
 	 */
 	public final boolean isLoggedIn() {
-		return state == RakNetState.LOGGED_IN;
+		return state.isDerivative(RakNetState.LOGGED_IN);
 	}
 
 	/**
