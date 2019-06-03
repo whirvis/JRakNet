@@ -44,36 +44,42 @@ Creating a server in JRakNet is extremely easy, all it takes to create one can b
 
 ```java
 // Add loopback exemption for Minecraft
-if (!UniversalWindowsProgram.MINECRAFT.addLoopbackExempt()) {
-	log.warn("Failed to add loopback exemption for Minecraft");
+if (!UniversalWindowsProgram.MINECRAFT.setLoopbackExempt(true)) {
+	System.err.println("Failed to add loopback exemption for Minecraft");
 }
 
 // Create server
-RakNetServer server = new RakNetServer(19132, 10,
-		new MinecraftIdentifier("JRakNet Example Server", 282, "1.6", 0, 10,
-				new Random().nextLong() /* Server broadcast ID */, "New World", "Survival"));
+RakNetServer server = new RakNetServer(19132, 10);
+server.setIdentifier(new MinecraftIdentifier("JRakNet Example Server", 354, "1.11", 0, 10,
+	server.getGloballyUniqueId(), "New World", "Survival"));
 
 // Add listener
 server.addListener(new RakNetServerListener() {
 
 	// Client connected
 	@Override
-	public void onClientConnect(RakNetClientSession session) {
-		System.out.println("Client from address " + session.getAddress() + " has connected to the server");
+	public void onConnect(RakNetServer server, InetSocketAddress address, ConnectionType connectionType) {
+		System.out.println("Client from address " + address + " has connected to the server");
+	}
+	
+	// Client logged in
+	@Override
+	public void onLogin(RakNetServer server, RakNetClientPeer peer) {
+		System.out.println("Client from address " + peer.getAddress() + " has logged in");
 	}
 
 	// Client disconnected
 	@Override
-	public void onClientDisconnect(RakNetClientSession session, String reason) {
-		System.out.println("Client from address " + session.getAddress()
-				+ " has disconnected from the server for the reason \"" + reason + "\"");
+	public void onDisconnect(RakNetServer server, InetSocketAddress address, RakNetClientPeer peer, String reason) {
+		System.out.println("Client from address " + address
+						+ " has disconnected from the server for the reason \"" + reason + "\"");
 	}
 
 	// Packet received
 	@Override
-	public void handleMessage(RakNetClientSession session, RakNetPacket packet, int channel) {
-		System.out.println("Client from address " + session.getAddress() + " sent packet with ID "
-				+ RakNetUtils.toHexStringId(packet) + " on channel " + channel);
+	public void handleMessage(RakNetServer server, RakNetClientPeer peer, RakNetPacket packet, int channel) {
+		System.out.println("Client from address " + peer.getAddress() + " sent packet with ID "
+				+ RakNet.toHexStringId(packet) + " on channel " + channel);
 	}
 
 });
@@ -82,15 +88,12 @@ server.addListener(new RakNetServerListener() {
 server.start();
 ```
 
-This is a simple RakNet server that can be tested through Minecraft by going to the "Friends" tab where the server should show up. Once
-the server pops up, you should be able to click on it to trigger the connection and packet hooks.
+This is a simple RakNet server that can be tested through Minecraft by going to the "Friends" tab where the server should show up. Once the server pops up, you should be able to click on it to trigger the connection and packet hooks.
 
 # How to enable loopback exemption
 On Windows 10, applications that use the Universal Windows Program framework by default are not able to connect to servers that are
-running on the same machine as them. This annoying feature can be disabled by simply creating a ```UniversalWindowsProgram``` object
-with the first and only parameter being the ID of the application that you are wanting to be able to connect to. An example
-would be Microsoft's Edge which is ```Microsoft.MicrosoftEdge_8wekyb3d8bbwe```. So, in order to enable loopback exemption, it would only
-take this:
+running on the same machine as them. This annoying feature can be disabled by simply creating a ```UniversalWindowsProgram``` object with the first and only parameter being the ID of the application that you are wanting to be able to connect to. An example
+would be Microsoft's Edge which is ```Microsoft.MicrosoftEdge_8wekyb3d8bbwe```. So, in order to enable loopback exemption, it would only take this:
 
 ```java
 UniversalWindowsProgram MICROSOFT_EDGE = new UniversalWindowsProgram("Microsoft.MicrosoftEdge_8wekyb3d8bbwe");
@@ -99,48 +102,45 @@ if(!MICROSOFT_EDGE.addLoopbackExemption()) {
 }
 ```
 
-Simple, right? Feel free to implement this if you are running on a non-Windows 10 machine. This implementation was made specifically to
-work even if your machine does not run Windows 10 or does not have Windows PowerShell installed. Of course, if you are not on a Windows
-10 machine with Windows PowerShell installed there really is no way to properly check if your application is loopback exempted. However,
-I'm sure that this can be solved with the help of a user that has Windows 10 with Windows PowerShell if needed.
+Simple, right? Feel free to implement this if you are running on a non-Windows 10 machine. This implementation was made specifically to work even if your machine does not run Windows 10 or does not have Windows PowerShell installed. Of course, if you are not on a Windows 10 machine with Windows PowerShell installed there really is no way to properly check if your application is loopback exempted. However, I'm sure that this can be solved with the help of a user that has Windows 10 with Windows PowerShell if needed.
 
 # How to create a client
 Creating a client in JRakNet is also very easy. The code required to create a client can be seen here
 
 ```java
-// Server address and port
-String SERVER_ADDRESS = "sg.lbsg.net";
-int SERVER_PORT = 19132;
-
 // Create client
 RakNetClient client = new RakNetClient();
 		
 // Add listener
 client.addListener(new RakNetClientListener() {
 
-	// Server connected
+	// Connected to server
 	@Override
-	public void onConnect(RakNetServerSession session) {
-		System.out.println("Successfully connected to server with address " + session.getAddress());
+	public void onConnect(RakNetClient client, InetSocketAddress address, ConnectionType connectionType) {
+		System.out.println("Successfully connected to server with address " + address);
+	}
+	
+	// Logged into server
+	@Override
+	public void onLogin(RakNetClient client, RakNetServerPeer peer) {
+		System.out.println("Successfully logged into server");
 		client.disconnect();
 	}
 
-	// Server disconnected
+	// Disconnected from server
 	@Override
-	public void onDisconnect(RakNetServerSession session, String reason) {
-		System.out.println("Successfully disconnected from server with address " + session.getAddress()
-				+ " for the reason \"" + reason + "\"");
-		client.shutdown();
+	public void onDisconnect(RakNetClient client, RakNetServerPeer peer, String reason) {
+		System.out.println("Successfully disconnected from server with address " + peer.getAddress()
+				+ " for reason \"" + reason + "\"");
 	}
 
 });
 
 // Connect to server
-client.connect(SERVER_ADDRESS, SERVER_PORT);
+client.connect("sg.lbsg.net", 19132);
 ```
 
-This is a simple RakNet client that attempts to connect to the main [LBSG](https://lbsg.net/) server. When it is connected, it closes
-the connection and shuts down.
+This is a simple RakNet client that attempts to connect to the main [LBSG](https://lbsg.net/) server. When it is connected, it closes the connection.
 
 <br>
 

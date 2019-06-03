@@ -491,6 +491,11 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 
 	/**
 	 * Returns whether or not the client is connected.
+	 * <p>
+	 * The client is considered connected if the current state is
+	 * {@link RakNetState#CONNECTED} or has a higher order. This does not apply
+	 * to the {@link #isHandshaking()}, {@link #isLoggedIn()}, or
+	 * {@link #isDisconnected()} methods.
 	 * 
 	 * @return <code>true</code> if the client is connected, <code>false</code>
 	 *         otherwise.
@@ -499,7 +504,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		if (peer == null) {
 			return false; // No peer
 		}
-		return peer.getState() == RakNetState.CONNECTED;
+		return peer.isConnected();
 	}
 
 	/**
@@ -512,7 +517,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		if (peer == null) {
 			return false; // No peer
 		}
-		return peer.getState() == RakNetState.HANDSHAKING;
+		return peer.isHandshaking();
 	}
 
 	/**
@@ -525,7 +530,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		if (peer == null) {
 			return false; // No peer
 		}
-		return peer.getState() == RakNetState.LOGGED_IN;
+		return peer.isLoggedIn();
 	}
 
 	/**
@@ -538,7 +543,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		if (peer == null) {
 			return true; // No peer
 		}
-		return peer.getState() == RakNetState.DISCONNECTED;
+		return peer.isDisconnected();
 	}
 
 	/**

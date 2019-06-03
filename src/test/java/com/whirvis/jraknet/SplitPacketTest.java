@@ -195,7 +195,7 @@ public final class SplitPacketTest {
 						+ ", calculating maximum packet size...");
 				Packet packet = new RakNetPacket(SPLIT_START_ID);
 				int maximumPacketSize = (peer.getMaximumTransferUnit() - CustomPacket.MINIMUM_SIZE
-						- EncapsulatedPacket.size(Reliability.RELIABLE_ORDERED, false)) * RakNetPeer.MAX_SPLIT_COUNT;
+						- EncapsulatedPacket.size(Reliability.RELIABLE_ORDERED, true)) * RakNetPeer.MAX_SPLIT_COUNT;
 
 				// Create giant packet
 				LOG.info("Client - Creating giant packet...");

@@ -44,21 +44,42 @@ public enum RakNetState {
 	 * This is the starting value of the state for all peers; as it is assumed a
 	 * peer has connected by the time it is created.
 	 */
-	CONNECTED,
+	CONNECTED(0),
 
 	/**
 	 * The peer is handshaking.
 	 */
-	HANDSHAKING,
+	HANDSHAKING(1),
 
 	/**
 	 * The peer is logged in.
 	 */
-	LOGGED_IN,
+	LOGGED_IN(2),
 
 	/**
 	 * The peer is disconnected.
 	 */
-	DISCONNECTED;
+	DISCONNECTED(-1);
+
+	private final int order;
+
+	/**
+	 * Constructs a <code>RakNetState</code> with the specified order.
+	 * 
+	 * @param order
+	 *            the order of the state.
+	 */
+	private RakNetState(int order) {
+		this.order = order;
+	}
+
+	/**
+	 * Returns the order of the state.
+	 * 
+	 * @return the order of the state.
+	 */
+	public int getOrder() {
+		return this.order;
+	}
 
 }

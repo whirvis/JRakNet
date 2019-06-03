@@ -109,7 +109,7 @@ public class CustomPacket extends RakNetPacket {
 	protected CustomPacket(int type) throws IllegalArgumentException {
 		super(type);
 		if (type < ID_CUSTOM_0 || type > ID_CUSTOM_F) {
-			throw new IllegalArgumentException("Custom packet ID must be in between ID_CUSTOM_0 and ID_CUSTOM_f");
+			throw new IllegalArgumentException("Custom packet ID must be in between ID_CUSTOM_0 and ID_CUSTOM_F");
 		}
 	}
 

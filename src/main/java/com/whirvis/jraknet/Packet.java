@@ -284,7 +284,7 @@ public class Packet {
 	 *             the packet.
 	 */
 	public final int readTriad() throws IndexOutOfBoundsException {
-		return (buffer.readByte() << 16) | (buffer.readByte() << 8) | buffer.readByte();
+		return buffer.readMedium();
 	}
 
 	/**
@@ -296,7 +296,7 @@ public class Packet {
 	 *             the packet.
 	 */
 	public final int readTriadLE() {
-		return buffer.readByte() | (buffer.readByte() << 8) | (buffer.readByte() << 16);
+		return buffer.readMediumLE();
 	}
 
 	/**
@@ -320,7 +320,7 @@ public class Packet {
 	 *             the packet.
 	 */
 	public final int readUnsignedTriadLE() throws IndexOutOfBoundsException {
-		return this.readTriadLE() & 0xFFFFFF;
+		return this.readTriad() & 0xFFFFFF;
 	}
 
 	/**
@@ -733,9 +733,7 @@ public class Packet {
 	 * @return the packet.
 	 */
 	public final Packet writeTriad(int t) {
-		buffer.writeByte((byte) (t >> 16));
-		buffer.writeByte((byte) (t >> 8));
-		buffer.writeByte((byte) t);
+		buffer.writeMedium(t);
 		return this;
 	}
 
@@ -747,9 +745,7 @@ public class Packet {
 	 * @return the packet.
 	 */
 	public final Packet writeTriadLE(int t) {
-		buffer.writeByte((byte) t);
-		buffer.writeByte((byte) (t >> 8));
-		buffer.writeByte((byte) (t >> 16));
+		buffer.writeMediumLE(t);
 		return this;
 	}
 
@@ -766,7 +762,7 @@ public class Packet {
 		if (t < 0x000000 || t > 0xFFFFFF) {
 			throw new IllegalArgumentException("Value must be in between 0-16777215");
 		}
-		return this.writeTriad(t & 0x00FFFFFF);
+		return this.writeTriad(t & 0xFFFFFF);
 	}
 
 	/**
@@ -782,7 +778,7 @@ public class Packet {
 		if (t < 0x000000 || t > 0xFFFFFF) {
 			throw new IllegalArgumentException("Value must be in between 0-16777215");
 		}
-		return this.writeTriadLE(t & 0x00FFFFFF);
+		return this.writeTriadLE(t & 0xFFFFFF);
 	}
 
 	/**
@@ -807,7 +803,7 @@ public class Packet {
 	 *             if <code>i</code> is not in between <code>0-4294967295</code>
 	 */
 	public final Packet writeUnsignedInt(long i) throws IllegalArgumentException {
-		if (i < 0x00000000 || i > 0xFFFFFFFF) {
+		if (i < 0x00000000 || i > 0xFFFFFFFFL) {
 			throw new IllegalArgumentException("Value must be in between 0-4294967295");
 		}
 		buffer.writeInt(((int) i) & 0xFFFFFFFF);
@@ -837,7 +833,7 @@ public class Packet {
 	 *             <code>0-4294967295</code>.
 	 */
 	public final Packet writeUnsignedIntLE(long i) throws IllegalArgumentException {
-		if (i < 0x00000000 || i > 0xFFFFFFFF) {
+		if (i < 0x00000000 || i > 0xFFFFFFFFL) {
 			throw new IllegalArgumentException("Value must be in between 0-4294967295");
 		}
 		buffer.writeIntLE(((int) i) & 0xFFFFFFFF);
