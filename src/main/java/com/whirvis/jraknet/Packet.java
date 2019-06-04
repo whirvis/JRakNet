@@ -1,11 +1,10 @@
 /*
- *       _   _____            _      _   _          _   
- *      | | |  __ \          | |    | \ | |        | |  
- *      | | | |__) |   __ _  | | __ |  \| |   ___  | |_ 
- *  _   | | |  _  /   / _` | | |/ / | . ` |  / _ \ | __|
- * | |__| | | | \ \  | (_| | |   <  | |\  | |  __/ | |_ 
- *  \____/  |_|  \_\  \__,_| |_|\_\ |_| \_|  \___|  \__|
- *                                                  
+ *    __     ______     ______     __  __     __   __     ______     ______  
+ *   /\ \   /\  == \   /\  __ \   /\ \/ /    /\ "-.\ \   /\  ___\   /\__  _\
+ *  _\_\ \  \ \  __<   \ \  __ \  \ \  _"-.  \ \ \-.  \  \ \  __\   \/_/\ \/  
+ * /\_____\  \ \_\ \_\  \ \_\ \_\  \ \_\ \_\  \ \_\\"\_\  \ \_____\    \ \_\ 
+ * \/_____/   \/_/ /_/   \/_/\/_/   \/_/\/_/   \/_/ \/_/   \/_____/     \/_/                                                                          
+ *
  * the MIT License (MIT)
  *
  * Copyright (c) 2016-2019 Whirvis T. Wheatley
@@ -26,7 +25,7 @@
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.  
+ * SOFTWARE.
  */
 package com.whirvis.jraknet;
 
