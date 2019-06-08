@@ -98,7 +98,7 @@ would be Microsoft's Edge which is ```Microsoft.MicrosoftEdge_8wekyb3d8bbwe```. 
 ```java
 UniversalWindowsProgram microsoftEdge = new UniversalWindowsProgram("Microsoft.MicrosoftEdge_8wekyb3d8bbwe");
 if(!microsoftEdge.setLoopbackExempt(true)) {
-	System.out.println("Warning: Microsoft Edge is not loopback exempt!"); // It is good practice to make sure that the application managed to become loopback exempted
+	System.err.println("Failed to enable loopback exemption for Microsoft Edge");
 }
 ```
 
