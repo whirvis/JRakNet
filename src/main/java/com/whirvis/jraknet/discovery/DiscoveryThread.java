@@ -47,7 +47,7 @@ import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 
 /**
- * Used by the {@link Discovery} system to server pings in the background.
+ * Used by the {@link Discovery} system to send server pings in the background.
  * <p>
  * Only one instance of this class can exist at a time. When a discovery
  * listener is added, if discovery is enabled and there is at least one
