@@ -135,7 +135,7 @@ public class Identifier implements Cloneable {
 
 	@Override
 	public Object clone() {
-		return new Identifier(identifier, connectionType);
+		return new Identifier(this.build(), connectionType);
 	}
 
 }
