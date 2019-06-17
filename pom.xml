@@ -198,18 +198,34 @@
 				<version>3.0.2</version>
 			</plugin>
 
-			<!-- JavaDoc configuration -->
+			<!-- Generate JavaDoc -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>3.0.0</version>
+				<executions>
+					<execution>
+						<id>attach-javadoc</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
-			<!-- Sources configuration -->
+			<!-- Generate sources -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
 				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 
 			<!-- Generate shaded JAR file -->
@@ -272,34 +288,6 @@
 									<replacement>true</replacement>
 									<failIfNoMatch>false</failIfNoMatch>
 								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-
-					<!-- Generate JavaDoc JAR file -->
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-javadoc-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>attach-javadoc</id>
-								<goals>
-									<goal>jar</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
-
-					<!-- Generate sources JAR file -->
-					<plugin>
-						<groupId>org.apache.maven.plugins</groupId>
-						<artifactId>maven-source-plugin</artifactId>
-						<executions>
-							<execution>
-								<id>attach-sources</id>
-								<goals>
-									<goal>jar-no-fork</goal>
-								</goals>
 							</execution>
 						</executions>
 					</plugin>
