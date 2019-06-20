@@ -114,7 +114,7 @@
 
 	<!-- Build lifecycle -->
 	<build>
-		<defaultGoal>clean package</defaultGoal>
+		<defaultGoal>clean package install</defaultGoal>
 
 		<resources>
 			<resource>
@@ -222,7 +222,7 @@
 					<execution>
 						<id>attach-sources</id>
 						<goals>
-							<goal>jar-no-fork</goal>
+							<goal>jar</goal>
 						</goals>
 					</execution>
 				</executions>
