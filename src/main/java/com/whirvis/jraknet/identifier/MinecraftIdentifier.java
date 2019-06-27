@@ -82,7 +82,7 @@ public final class MinecraftIdentifier extends Identifier {
 	private static boolean verifyVersionTag(String versionTag) {
 		if (versionTag != null) {
 			for (char c : versionTag.toCharArray()) {
-				if ((c < '0' || c > '9') && c != '.' && c != 'v') {
+				if ((c < '0' || c > '9') && c != '.') {
 					return false;
 				}
 			}
