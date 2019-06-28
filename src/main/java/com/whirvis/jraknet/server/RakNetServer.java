@@ -2506,10 +2506,10 @@ public class RakNetServer implements RakNetServerListener {
 					connectionResponseTwo.maximumTransferUnit = Math.min(connectionRequestTwo.maximumTransferUnit, maximumTransferUnit);
 					connectionResponseTwo.encode();
 					if (!connectionResponseTwo.failed()) {
+						this.callEvent(listener -> listener.onConnect(this, sender, connectionRequestTwo.connectionType));
 						clients.put(sender, new RakNetClientPeer(this, connectionRequestTwo.connectionType, connectionRequestTwo.clientGuid,
 								connectionResponseTwo.maximumTransferUnit, channel, sender));
 						this.sendNettyMessage(connectionResponseTwo, sender);
-						this.callEvent(listener -> listener.onConnect(this, sender, connectionRequestTwo.connectionType));
 					}
 				} else {
 					this.sendNettyMessage(errorPacket, sender);

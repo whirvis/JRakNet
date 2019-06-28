@@ -531,10 +531,7 @@ public class Packet {
 			int port = this.readUnsignedShort();
 			return new InetSocketAddress(InetAddress.getByAddress(ipAddress), port);
 		} else if (version == RakNet.IPV6) {
-			short family = this.readShortLE();
-			if (family != RakNet.AF_INET6) {
-				throw new UnknownHostException("Invalid family " + family + " for IPv6, expecting AF_INET6 (" + RakNet.AF_INET6 + ")");
-			}
+			this.readShortLE(); // Family
 			int port = this.readUnsignedShort();
 			this.readInt(); // Flow info
 			byte[] ipAddress = new byte[RakNet.IPV6_ADDRESS_LENGTH];
