@@ -33,6 +33,7 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 import com.whirvis.jraknet.Packet;
+import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.protocol.Failable;
 
@@ -48,12 +49,15 @@ import com.whirvis.jraknet.protocol.Failable;
  */
 public final class ConnectionRequestAccepted extends RakNetPacket implements Failable {
 
-	// TODO: Figure out what the unknown addresses are used for
-
 	/**
 	 * The address of the client that sent the connection request.
 	 */
 	public InetSocketAddress clientAddress;
+
+	/**
+	 * The RakNet system addresses.
+	 */
+	public InetSocketAddress[] systemAddresses;
 
 	/**
 	 * The client timestamp.
@@ -77,6 +81,10 @@ public final class ConnectionRequestAccepted extends RakNetPacket implements Fai
 	 */
 	public ConnectionRequestAccepted() {
 		super(ID_CONNECTION_REQUEST_ACCEPTED);
+		this.systemAddresses = new InetSocketAddress[RakNet.getSystemAddressCount()];
+		for (int i = 0; i < systemAddresses.length; i++) {
+			systemAddresses[i] = RakNet.SYSTEM_ADDRESS;
+		}
 	}
 
 	/**
@@ -95,8 +103,8 @@ public final class ConnectionRequestAccepted extends RakNetPacket implements Fai
 		try {
 			this.writeAddress(clientAddress);
 			this.writeShort(0);
-			for (int i = 0; i < 10; i++) {
-				this.writeAddress("0.0.0.0", 0);
+			for (int i = 0; i < systemAddresses.length; i++) {
+				this.writeAddress(systemAddresses[i]);
 			}
 			this.writeLong(clientTimestamp);
 			this.writeLong(serverTimestamp);
@@ -113,9 +121,14 @@ public final class ConnectionRequestAccepted extends RakNetPacket implements Fai
 	public void decode() {
 		try {
 			this.clientAddress = this.readAddress();
-			this.readShort(); // Unknown use
-			for (int i = 0; i < 10; i++) {
-				this.readAddress(); // Unknown use
+			this.readShort(); // TODO: Discover usage
+			this.systemAddresses = new InetSocketAddress[RakNet.getSystemAddressCount()];
+			for (int i = 0; i < systemAddresses.length; i++) {
+				if (this.remaining() > Long.SIZE + Long.SIZE) {
+					this.systemAddresses[i] = this.readAddress();
+				} else {
+					this.systemAddresses[i] = RakNet.SYSTEM_ADDRESS;
+				}
 			}
 			this.clientTimestamp = this.readLong();
 			this.serverTimestamp = this.readLong();

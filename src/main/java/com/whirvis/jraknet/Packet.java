@@ -53,12 +53,6 @@ import io.netty.channel.socket.DatagramPacket;
  */
 public class Packet {
 
-	private static final int ADDRESS_VERSION_IPV4 = 0x04;
-	private static final int ADDRESS_VERSION_IPV6 = 0x06;
-	private static final int ADDRESS_VERSION_IPV4_LENGTH = 0x04;
-	private static final int ADDRESS_VERSION_IPV6_LENGTH = 0x10;
-	private static final int ADDRESS_VERSION_IPV6_MYSTERY_LENGTH = 0x0A;
-
 	private ByteBuf buffer;
 	private PacketDataInputStream input;
 	private PacketDataOutputStream output;
@@ -521,33 +515,37 @@ public class Packet {
 	 *             the packet when it is an IPv4 address or <code>30</code> when
 	 *             it is an IPv6 address.
 	 * @throws UnknownHostException
-	 *             if no IP address for the <code>host</code> could be found, a
-	 *             scope_id was specified for a global IPv6 address, or the
-	 *             address version is an unknown version.
+	 *             if no IP address for the <code>host</code> could be found,
+	 *             the family for an IPv6 address was not
+	 *             {@value RakNet#AF_INET6}, a scope_id was specified for a
+	 *             global IPv6 address, or the address version is an unknown
+	 *             version.
 	 */
 	public final InetSocketAddress readAddress() throws IndexOutOfBoundsException, UnknownHostException {
 		short version = this.readUnsignedByte();
-		byte[] address = null;
-		if (version == ADDRESS_VERSION_IPV4) {
-			address = new byte[ADDRESS_VERSION_IPV4_LENGTH];
-		} else if (version == ADDRESS_VERSION_IPV6) {
-			address = new byte[ADDRESS_VERSION_IPV6_LENGTH];
+		if (version == RakNet.IPV4) {
+			byte[] ipAddress = new byte[RakNet.IPV4_ADDRESS_LENGTH];
+			for (int i = 0; i < ipAddress.length; i++) {
+				ipAddress[i] = (byte) (~this.readByte() & 0xFF);
+			}
+			int port = this.readUnsignedShort();
+			return new InetSocketAddress(InetAddress.getByAddress(ipAddress), port);
+		} else if (version == RakNet.IPV6) {
+			short family = this.readShortLE();
+			if (family != RakNet.AF_INET6) {
+				throw new UnknownHostException("Invalid family " + family + " for IPv6, expecting AF_INET6 (" + RakNet.AF_INET6 + ")");
+			}
+			int port = this.readUnsignedShort();
+			this.readInt(); // Flow info
+			byte[] ipAddress = new byte[RakNet.IPV6_ADDRESS_LENGTH];
+			for (int i = 0; i < ipAddress.length; i++) {
+				ipAddress[i] = this.readByte();
+			}
+			this.readInt(); // Scope ID
+			return new InetSocketAddress(InetAddress.getByAddress(ipAddress), port);
 		} else {
 			throw new UnknownHostException("Unknown protocol IPv" + version);
 		}
-		for (int i = 0; i < address.length; i++) {
-			/*
-			 * This is very peculiar, I honestly don't know why the address
-			 * bytes are not only flipped but need to be made unsigned and then
-			 * casted back to a regular byte.
-			 */
-			address[i] = (byte) (~this.readByte() & 0xFF);
-		}
-		if (version == ADDRESS_VERSION_IPV6) {
-			this.read(ADDRESS_VERSION_IPV6_MYSTERY_LENGTH); // Mystery bytes
-		}
-		int port = this.readUnsignedShort();
-		return new InetSocketAddress(InetAddress.getByAddress(address), port);
 	}
 
 	/**
@@ -1037,8 +1035,8 @@ public class Packet {
 	 *             if no IP address for the <code>host</code> could be found, if
 	 *             a scope_id was specified for a global IPv6 address, or the
 	 *             length of the address is not either
-	 *             {@value #ADDRESS_VERSION_IPV4_LENGTH} or
-	 *             {@value #ADDRESS_VERSION_IPV6_LENGTH} <code>byte</code>s.
+	 *             {@value RakNet#IPV4_ADDRESS_LENGTH} or
+	 *             {@value RakNet#IPV6_ADDRESS_LENGTH} <code>byte</code>s.
 	 */
 	public final Packet writeAddress(InetSocketAddress address) throws NullPointerException, UnknownHostException {
 		if (address == null) {
@@ -1047,20 +1045,23 @@ public class Packet {
 			throw new NullPointerException("IP address cannot be null");
 		}
 		byte[] ipAddress = address.getAddress().getAddress();
-		if (ipAddress.length == ADDRESS_VERSION_IPV4_LENGTH) {
-			this.writeUnsignedByte(ADDRESS_VERSION_IPV4);
-		} else if (ipAddress.length == ADDRESS_VERSION_IPV6_LENGTH) {
-			this.writeUnsignedByte(ADDRESS_VERSION_IPV6);
+		int version = RakNet.getAddressVersion(address);
+		if (version == RakNet.IPV4) {
+			this.writeUnsignedByte(RakNet.IPV4);
+			for (int i = 0; i < ipAddress.length; i++) {
+				this.writeByte(~ipAddress[i] & 0xFF);
+			}
+			this.writeUnsignedShort(address.getPort());
+		} else if (version == RakNet.IPV6) {
+			this.writeUnsignedByte(RakNet.IPV6);
+			this.writeShortLE(RakNet.AF_INET6);
+			this.writeShort(address.getPort());
+			this.writeInt(0x00); // Flow info
+			this.write(ipAddress);
+			this.writeInt(0x00); // Scope ID
 		} else {
 			throw new UnknownHostException("Unknown protocol for address with length of " + ipAddress.length + " bytes");
 		}
-		for (int i = 0; i < ipAddress.length; i++) {
-			this.writeByte(~ipAddress[i] & 0xFF);
-		}
-		if (ipAddress.length == ADDRESS_VERSION_IPV6_LENGTH) {
-			this.pad(ADDRESS_VERSION_IPV6_MYSTERY_LENGTH); // Mystery bytes
-		}
-		this.writeUnsignedShort(address.getPort());
 		return this;
 	}
 

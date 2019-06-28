@@ -29,6 +29,9 @@
  */
 package com.whirvis.jraknet.protocol.connection;
 
+import java.io.IOException;
+import java.net.InetSocketAddress;
+
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNetException;
 import com.whirvis.jraknet.RakNetPacket;
@@ -57,16 +60,22 @@ public final class OpenConnectionResponseTwo extends RakNetPacket implements Fai
 	public long serverGuid;
 
 	/**
+	 * The address of the client.
+	 */
+	public InetSocketAddress clientAddress;
+
+	/**
 	 * The maximum transfer unit size the server and the client have agreed
 	 * upon.
 	 */
 	public int maximumTransferUnit;
 
 	/**
-	 * Whether or not encryption is enabled. Since JRakNet does not have this
-	 * feature implemented, <code>false</code> will always be the value used
-	 * when sending this value. However, this value can be <code>true</code> if
-	 * it is being set through decoding.
+	 * Whether or not encryption is enabled.
+	 * <p>
+	 * Since JRakNet does not have this feature implemented, <code>false</code>
+	 * will always be the value used when sending this value. However, this
+	 * value can be <code>true</code> if it is being set through decoding.
 	 */
 	public boolean encryptionEnabled;
 
@@ -106,12 +115,14 @@ public final class OpenConnectionResponseTwo extends RakNetPacket implements Fai
 			this.encryptionEnabled = false; // TODO: Not supported
 			this.writeMagic();
 			this.writeLong(serverGuid);
+			this.writeAddress(clientAddress);
 			this.writeUnsignedShort(maximumTransferUnit);
 			this.writeBoolean(encryptionEnabled);
 			this.writeConnectionType(connectionType);
-		} catch (RakNetException e) {
+		} catch (IOException | RakNetException e) {
 			this.magic = false;
 			this.serverGuid = 0;
+			this.clientAddress = null;
 			this.maximumTransferUnit = 0;
 			this.encryptionEnabled = false;
 			this.connectionType = null;
@@ -125,12 +136,14 @@ public final class OpenConnectionResponseTwo extends RakNetPacket implements Fai
 		try {
 			this.magic = this.readMagic();
 			this.serverGuid = this.readLong();
+			this.clientAddress = this.readAddress();
 			this.maximumTransferUnit = this.readUnsignedShort();
 			this.encryptionEnabled = this.readBoolean();
 			this.connectionType = this.readConnectionType();
-		} catch (RakNetException e) {
+		} catch (IOException | RakNetException e) {
 			this.magic = false;
 			this.serverGuid = 0;
+			this.clientAddress = null;
 			this.maximumTransferUnit = 0;
 			this.encryptionEnabled = false;
 			this.connectionType = null;

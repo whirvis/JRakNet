@@ -57,7 +57,7 @@ public final class OpenConnectionRequestTwo extends RakNetPacket implements Fail
 	/**
 	 * The address of the server that the client wishes to connect to.
 	 */
-	public InetSocketAddress address;
+	public InetSocketAddress serverAddress;
 
 	/**
 	 * The maximum transfer unit size the client and the server have agreed
@@ -104,13 +104,13 @@ public final class OpenConnectionRequestTwo extends RakNetPacket implements Fail
 	public void encode() {
 		try {
 			this.writeMagic();
-			this.writeAddress(address);
+			this.writeAddress(serverAddress);
 			this.writeUnsignedShort(maximumTransferUnit);
 			this.writeLong(clientGuid);
 			this.writeConnectionType(connectionType);
 		} catch (UnknownHostException | RakNetException e) {
 			this.magic = false;
-			this.address = null;
+			this.serverAddress = null;
 			this.maximumTransferUnit = 0;
 			this.clientGuid = 0;
 			this.connectionType = null;
@@ -123,13 +123,13 @@ public final class OpenConnectionRequestTwo extends RakNetPacket implements Fail
 	public void decode() {
 		try {
 			this.magic = this.readMagic();
-			this.address = this.readAddress();
+			this.serverAddress = this.readAddress();
 			this.maximumTransferUnit = this.readUnsignedShort();
 			this.clientGuid = this.readLong();
 			this.connectionType = this.readConnectionType();
 		} catch (UnknownHostException | RakNetException e) {
 			this.magic = false;
-			this.address = null;
+			this.serverAddress = null;
 			this.maximumTransferUnit = 0;
 			this.clientGuid = 0;
 			this.connectionType = null;

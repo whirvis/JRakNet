@@ -140,6 +140,31 @@ public final class RakNet {
 	}
 
 	/**
+	 * The length of IPv4 addresses.
+	 */
+	public static final int IPV4_ADDRESS_LENGTH = 4;
+
+	/**
+	 * The length of IPv6 addresses.
+	 */
+	public static final int IPV6_ADDRESS_LENGTH = 16;
+
+	/**
+	 * The IPv4 version.
+	 */
+	public static final int IPV4 = 4;
+
+	/**
+	 * The IPv6 version.
+	 */
+	public static final int IPV6 = 6;
+
+	/**
+	 * The Inet 6 address family.
+	 */
+	public static final int AF_INET6 = 10;
+
+	/**
 	 * The amount of times the {@link #isServerOnline(InetSocketAddress)} and
 	 * {@link #isServerCompatible(InetSocketAddress)} methods will attempt to
 	 * ping the server before giving up.
@@ -197,9 +222,25 @@ public final class RakNet {
 	 */
 	public static final long MAX_PACKETS_PER_SECOND_BLOCK = 300000L;
 
+	/**
+	 * The default system address used when one is left unspecified.
+	 */
+	public static final InetSocketAddress SYSTEM_ADDRESS = new InetSocketAddress("0.0.0.0", 0);
+
+	/**
+	 * The default of amount of system address used by RakNet.
+	 */
+	public static final int RAKNET_SYSTEM_ADDRESS_COUNT = 10;
+
+	/**
+	 * The amount of system addresses used by Minecraft.
+	 */
+	public static final int MINECRAFT_SYSTEM_ADDRESS_COUNT = 20;
+
 	private static final HashMap<InetAddress, Integer> MAXIMUM_TRANSFER_UNIT_SIZES = new HashMap<InetAddress, Integer>();
 	private static int _lowestMaximumTransferUnitSize = -1;
 	private static long _maxPacketsPerSecond = 500;
+	private static int _systemAddressCount = RAKNET_SYSTEM_ADDRESS_COUNT;
 
 	private RakNet() {
 		// Static class
@@ -226,6 +267,47 @@ public final class RakNet {
 			Thread.currentThread().interrupt();
 			return true;
 		}
+	}
+
+	/**
+	 * Returns the version of the specified IP address.
+	 * 
+	 * @param address
+	 *            the IP address.
+	 * @return the version of the IP address, <code>-1</code> if the version is
+	 *         unknown.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> is <code>null</code>.
+	 */
+	public static int getAddressVersion(InetAddress address) throws NullPointerException {
+		if (address == null) {
+			throw new NullPointerException("IP address cannot be null");
+		}
+		int length = address.getAddress().length;
+		if (length == IPV4_ADDRESS_LENGTH) {
+			return IPV4;
+		} else if (length == IPV6_ADDRESS_LENGTH) {
+			return IPV6;
+		}
+		return -1;
+	}
+
+	/**
+	 * Returns the version of the IP address of the specified address.
+	 * 
+	 * @param address
+	 *            the address.
+	 * @return the version of the IP address, <code>-1</code> if the version is
+	 *         unknown.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> or the IP of the
+	 *             <code>address</code> are <code>null</code>.
+	 */
+	public static int getAddressVersion(InetSocketAddress address) throws NullPointerException {
+		if (address == null) {
+			throw new NullPointerException("Address cannot be null");
+		}
+		return getAddressVersion(address.getAddress());
 	}
 
 	/**
@@ -825,6 +907,40 @@ public final class RakNet {
 			throw new IllegalArgumentException("Max packets per second cannot be negative");
 		}
 		_maxPacketsPerSecond = maxPacketsPerSecond;
+	}
+
+	/**
+	 * Returns the amount of system addresses sent in the
+	 * {@link com.whirvis.jraknet.protocol.login.ConnectionRequestAccepted
+	 * CONNECTION_REQUEST_ACCEPTED} packet.
+	 * 
+	 * @return the amount of system addresses sent in the
+	 *         {@link com.whirvis.jraknet.protocol.login.ConnectionRequestAccepted
+	 *         CONNECTION_REQUEST_ACCEPTED} packet.
+	 */
+	public static int getSystemAddressCount() {
+		return _systemAddressCount;
+	}
+
+	/**
+	 * Sets the amount of system addresses to send in the
+	 * {@link com.whirvis.jraknet.protocol.login.ConnectionRequestAccepted
+	 * CONNECTION_REQUEST_ACCEPTED} packet.
+	 * <p>
+	 * Normally this does not need to be changed. However, some games have a
+	 * custom amount of system addresses that are sent during login.
+	 * 
+	 * @param systemAddressCount
+	 *            the system address count.
+	 * @throws IllegalArgumentException
+	 *             if the <code>systemAddressCount</code> is less than
+	 *             {@value #RAKNET_SYSTEM_ADDRESS_COUNT}.
+	 */
+	public static void setSystemAddressCount(int systemAddressCount) throws IllegalArgumentException {
+		if (systemAddressCount < RAKNET_SYSTEM_ADDRESS_COUNT) {
+			throw new IllegalArgumentException("System address count cannot be less than " + RAKNET_SYSTEM_ADDRESS_COUNT);
+		}
+		_systemAddressCount = systemAddressCount;
 	}
 
 	/**
