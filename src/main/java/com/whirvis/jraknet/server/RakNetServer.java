@@ -68,6 +68,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.FixedRecvByteBufAllocator;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.channel.socket.nio.NioDatagramChannel;
@@ -2483,13 +2484,11 @@ public class RakNetServer implements RakNetServerListener {
 						incompatibleProtocol.encode();
 						this.sendNettyMessage(incompatibleProtocol, sender);
 					} else {
-						if (connectionRequestOne.maximumTransferUnit <= maximumTransferUnit) {
-							OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne();
-							connectionResponseOne.serverGuid = this.guid;
-							connectionResponseOne.maximumTransferUnit = this.maximumTransferUnit;
-							connectionResponseOne.encode();
-							this.sendNettyMessage(connectionResponseOne, sender);
-						}
+						OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne();
+						connectionResponseOne.serverGuid = this.guid;
+						connectionResponseOne.maximumTransferUnit = connectionRequestOne.maximumTransferUnit;
+						connectionResponseOne.encode();
+						this.sendNettyMessage(connectionResponseOne, sender);
 					}
 				} else {
 					this.sendNettyMessage(errorPacket, sender);
@@ -2498,20 +2497,19 @@ public class RakNetServer implements RakNetServerListener {
 		} else if (packet.getId() == RakNetPacket.ID_OPEN_CONNECTION_REQUEST_2) {
 			OpenConnectionRequestTwo connectionRequestTwo = new OpenConnectionRequestTwo(packet);
 			connectionRequestTwo.decode();
-			if (!connectionRequestTwo.failed() && connectionRequestTwo.magic == true) {
+			if (!connectionRequestTwo.failed() && connectionRequestTwo.magic == true && connectionRequestTwo.maximumTransferUnit >= RakNet.MINIMUM_MTU_SIZE) {
 				RakNetPacket errorPacket = this.validateSender(sender, connectionRequestTwo.clientGuid);
 				if (errorPacket == null) {
-					if (connectionRequestTwo.maximumTransferUnit <= maximumTransferUnit) {
-						OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo();
-						connectionResponseTwo.serverGuid = this.guid;
-						connectionResponseTwo.maximumTransferUnit = connectionRequestTwo.maximumTransferUnit;
-						connectionResponseTwo.encode();
-						if (!connectionResponseTwo.failed()) {
-							this.callEvent(listener -> listener.onConnect(this, sender, connectionRequestTwo.connectionType));
-							clients.put(sender, new RakNetClientPeer(this, connectionRequestTwo.connectionType, connectionRequestTwo.clientGuid,
-									connectionRequestTwo.maximumTransferUnit, channel, sender));
-							this.sendNettyMessage(connectionResponseTwo, sender);
-						}
+					OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo();
+					connectionResponseTwo.serverGuid = this.guid;
+					connectionResponseTwo.clientAddress = sender;
+					connectionResponseTwo.maximumTransferUnit = Math.min(connectionRequestTwo.maximumTransferUnit, maximumTransferUnit);
+					connectionResponseTwo.encode();
+					if (!connectionResponseTwo.failed()) {
+						clients.put(sender, new RakNetClientPeer(this, connectionRequestTwo.connectionType, connectionRequestTwo.clientGuid,
+								connectionResponseTwo.maximumTransferUnit, channel, sender));
+						this.sendNettyMessage(connectionResponseTwo, sender);
+						this.callEvent(listener -> listener.onConnect(this, sender, connectionRequestTwo.connectionType));
 					}
 				} else {
 					this.sendNettyMessage(errorPacket, sender);
@@ -2651,7 +2649,6 @@ public class RakNetServer implements RakNetServerListener {
 		} else if (listeners.isEmpty()) {
 			log.warn("Server has no listeners");
 		}
-
 		try {
 			this.bootstrap = new Bootstrap();
 			this.group = new NioEventLoopGroup();
@@ -2661,7 +2658,7 @@ public class RakNetServer implements RakNetServerListener {
 			// Create bootstrap and bind channel
 			bootstrap.channel(NioDatagramChannel.class).group(group);
 			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false).option(ChannelOption.SO_SNDBUF, maximumTransferUnit)
-					.option(ChannelOption.SO_RCVBUF, maximumTransferUnit);
+					.option(ChannelOption.SO_RCVBUF, maximumTransferUnit).option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(maximumTransferUnit));
 			this.channel = (bindingAddress != null ? bootstrap.bind(bindingAddress) : bootstrap.bind(0)).sync().channel();
 			this.bindAddress = (InetSocketAddress) channel.localAddress();
 			this.running = true;

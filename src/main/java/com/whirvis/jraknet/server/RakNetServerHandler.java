@@ -134,7 +134,7 @@ public final class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			DatagramPacket datagram = (DatagramPacket) msg;
 			InetSocketAddress sender = datagram.sender();
 			RakNetPacket packet = new RakNetPacket(datagram);
-
+			
 			// If an exception happens it's because of this address
 			this.causeAddress = sender;
 

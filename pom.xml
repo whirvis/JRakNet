@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<!-- Maven coordinates -->
 	<groupId>com.whirvis</groupId>
 	<artifactId>jraknet</artifactId>
-	<version>2.11.2</version> <!-- Don't forget to update the JRakNet ConnectionType! -->
+	<version>2.11.3</version> <!-- Don't forget to update the JRakNet ConnectionType! -->
 	<packaging>jar</packaging>
 
 	<!-- Project information -->
@@ -73,7 +72,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.build.timestamp.format>HHmm-ddMMyyyy</maven.build.timestamp.format>
 	</properties>
-	
+
 	<repositories>
 		<!-- WaifUPnP -->
 		<repository>
@@ -103,7 +102,7 @@
 			<artifactId>netty-handler</artifactId>
 			<version>4.1.36.Final</version>
 		</dependency>
-		
+
 		<!-- UPnP (Universal Plug and Play) -->
 		<dependency>
 			<groupId>com.dosse</groupId>
@@ -119,7 +118,7 @@
 		<resources>
 			<resource>
 				<directory>src/main/resources/</directory>
-				
+
 				<!-- Filter variables inside resources -->
 				<filtering>true</filtering>
 			</resource>
@@ -128,7 +127,7 @@
 				<includes>
 					<include>LICENSE</include>
 				</includes>
-					<filtering>false</filtering>
+				<filtering>false</filtering>
 			</resource>
 		</resources>
 
@@ -147,9 +146,9 @@
 				<version>3.0</version>
 				<configuration>
 					<header>LICENSE</header>
-						<mapping>
-							<java>SLASHSTAR_STYLE</java>
-						</mapping>
+					<mapping>
+						<java>SLASHSTAR_STYLE</java>
+					</mapping>
 					<includes>
 						<include>src/test/java/**</include>
 						<include>src/main/java/**</include>
@@ -283,7 +282,7 @@
 								</goals>
 								<configuration>
 									<name>isSnapshot</name>
-										<value>${project.version}</value>
+									<value>${project.version}</value>
 									<regex>.*-SNAPSHOT</regex>
 									<replacement>true</replacement>
 									<failIfNoMatch>false</failIfNoMatch>
@@ -292,7 +291,8 @@
 						</executions>
 					</plugin>
 
-					<!-- GPG plugin: requires 'gpg' to be installed along with settings.xml with credentials -->
+					<!-- GPG plugin: requires 'gpg' to be installed along with settings.xml 
+						with credentials -->
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-gpg-plugin</artifactId>

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="ERROR">
-    <Appenders>
-        <Console name="STD_OUT" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss} [%level] %logger{1}: %msg%n"/>
-        </Console>
-    </Appenders>
-    <Loggers>
-        <Root level="INFO">
-            <AppenderRef ref="STD_OUT"/>
-        </Root>
-    </Loggers>
+	<Appenders>
+		<Console name="STD_OUT" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{HH:mm:ss} [%level] %logger{1}: %msg%n" />
+		</Console>
+	</Appenders>
+	<Loggers>
+		<Root level="INFO">
+			<AppenderRef ref="STD_OUT" />
+		</Root>
+	</Loggers>
 </Configuration>

@@ -45,16 +45,11 @@ public final class OpenConnectionRequestOne extends RakNetPacket {
 	/**
 	 * At the end of this packet in particular, the client pads the packet with
 	 * the remaining data left according the <code>maximumTransferUnit</code>.
-	 * To prevent an overflow, this is subtracted when encoding as its value is
-	 * the size of all the fields put together. This is added when decoding in
-	 * order to correctly determine the maximum transfer unit.
-	 * <ul>
-	 * <li>One <code>byte</code> for the packet ID</li>
-	 * <li>Sixteen <code>byte</code>s for the MAGIC identifier</li>
-	 * <li>One <code>byte</code> for the network protocol version</li>
-	 * </ul>
+	 * <p>
+	 * This value is equivalent to the size of the IP header (20 bytes) and the
+	 * size of the UDP header (8 bytes) combined.
 	 */
-	private static final int MTU_PADDING = Byte.BYTES + MAGIC.length + Byte.BYTES;
+	private static final int MTU_PADDING = 28;
 
 	/**
 	 * Whether or not the magic bytes read in the packet are valid.
@@ -102,7 +97,7 @@ public final class OpenConnectionRequestOne extends RakNetPacket {
 	public void decode() {
 		this.magic = this.readMagic();
 		this.networkProtocol = this.readUnsignedByte();
-		this.maximumTransferUnit = (this.remaining() + MTU_PADDING);
+		this.maximumTransferUnit = this.remaining() + MTU_PADDING;
 		this.skip(this.remaining());
 	}
 

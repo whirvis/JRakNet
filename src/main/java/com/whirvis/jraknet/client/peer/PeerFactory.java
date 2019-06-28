@@ -53,6 +53,7 @@ import com.whirvis.jraknet.protocol.connection.OpenConnectionResponseTwo;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.FixedRecvByteBufAllocator;
 
 /**
  * Used by the {@link RakNetClient} to create a {@link RakNetServerPeer}.
@@ -235,7 +236,7 @@ public final class PeerFactory {
 		while (availableAttempts-- > 0 && factoryState < STATE_PEER_ASSEMBLED && throwable == null) {
 			OpenConnectionRequestTwo connectionRequestTwo = new OpenConnectionRequestTwo();
 			connectionRequestTwo.clientGuid = client.getGloballyUniqueId();
-			connectionRequestTwo.address = this.address;
+			connectionRequestTwo.serverAddress = this.address;
 			connectionRequestTwo.maximumTransferUnit = this.maximumTransferUnit;
 			connectionRequestTwo.encode();
 			if (!connectionRequestTwo.failed()) {
@@ -298,8 +299,7 @@ public final class PeerFactory {
 					 * use the highest valid maximum transfer unit of the
 					 * client.
 					 */
-					this.maximumTransferUnit = connectionResponseOne.maximumTransferUnit < maximumMaximumTransferUnit ? connectionResponseOne.maximumTransferUnit
-							: maximumMaximumTransferUnit;
+					this.maximumTransferUnit = Math.min(connectionResponseOne.maximumTransferUnit, maximumMaximumTransferUnit);
 					this.serverGuid = connectionResponseOne.serverGuid;
 					this.factoryState = STATE_SECOND_CONNECTION_REQUEST;
 					log.debug("Applied maximum transfer unit " + maximumTransferUnit + " and globally unique ID " + serverGuid + " from " + getName(packet.getId()) + " packet");
@@ -314,20 +314,14 @@ public final class PeerFactory {
 						throw new InconsistentGuidException(client);
 					} else if (connectionResponseTwo.maximumTransferUnit > maximumMaximumTransferUnit || connectionResponseTwo.maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE) {
 						throw new InvalidMaximumTransferUnitException(client, maximumTransferUnit);
-					}
-
-					// Update maximum transfer unit if needed
-					if (connectionResponseTwo.maximumTransferUnit < maximumTransferUnit) {
-						this.maximumTransferUnit = connectionResponseTwo.maximumTransferUnit;
-						log.warn("Server responded with lower maximum transfer unit than agreed upon earlier");
-					} else if (connectionResponseTwo.maximumTransferUnit > maximumMaximumTransferUnit) {
-						this.maximumTransferUnit = connectionResponseTwo.maximumTransferUnit;
+					} else if (connectionResponseTwo.maximumTransferUnit > maximumTransferUnit) {
 						log.warn("Server responded with higher maximum transfer unit than agreed upon earlier");
 					}
-
-					bootstrap.option(ChannelOption.SO_SNDBUF, maximumTransferUnit).option(ChannelOption.SO_RCVBUF, maximumTransferUnit);
+					bootstrap.option(ChannelOption.SO_SNDBUF, maximumTransferUnit).option(ChannelOption.SO_RCVBUF, maximumTransferUnit).option(ChannelOption.RCVBUF_ALLOCATOR,
+							new FixedRecvByteBufAllocator(maximumTransferUnit));
 
 					// Create peer
+					this.maximumTransferUnit = connectionResponseTwo.maximumTransferUnit;
 					this.connectionType = connectionResponseTwo.connectionType;
 					this.factoryState = STATE_PEER_ASSEMBLED;
 					client.callEvent(listener -> listener.onConnect(client, address, connectionType));

@@ -33,6 +33,7 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 
 import com.whirvis.jraknet.Packet;
+import com.whirvis.jraknet.RakNet;
 import com.whirvis.jraknet.RakNetPacket;
 import com.whirvis.jraknet.protocol.Failable;
 
@@ -47,12 +48,15 @@ import com.whirvis.jraknet.protocol.Failable;
  */
 public final class NewIncomingConnection extends RakNetPacket implements Failable {
 
-	// TODO: Figure out what the unknown addresses are used for
-
 	/**
 	 * The server address.
 	 */
 	public InetSocketAddress serverAddress;
+
+	/**
+	 * The RakNet system addresses.
+	 */
+	public InetSocketAddress[] systemAddresses;
 
 	/**
 	 * The server timestamp.
@@ -76,6 +80,10 @@ public final class NewIncomingConnection extends RakNetPacket implements Failabl
 	 */
 	public NewIncomingConnection() {
 		super(ID_NEW_INCOMING_CONNECTION);
+		this.systemAddresses = new InetSocketAddress[RakNet.getSystemAddressCount()];
+		for (int i = 0; i < systemAddresses.length; i++) {
+			systemAddresses[i] = RakNet.SYSTEM_ADDRESS;
+		}
 	}
 
 	/**
@@ -93,8 +101,8 @@ public final class NewIncomingConnection extends RakNetPacket implements Failabl
 	public void encode() {
 		try {
 			this.writeAddress(serverAddress);
-			for (int i = 0; i < 10; i++) {
-				this.writeAddress("0.0.0.0", 0);
+			for (int i = 0; i < systemAddresses.length; i++) {
+				this.writeAddress(systemAddresses[i]);
 			}
 			this.writeLong(serverTimestamp);
 			this.writeLong(clientTimestamp);
@@ -111,8 +119,13 @@ public final class NewIncomingConnection extends RakNetPacket implements Failabl
 	public void decode() {
 		try {
 			this.serverAddress = this.readAddress();
-			for (int i = 0; i < 10; i++) {
-				this.readAddress(); // Ignore, unknown use
+			this.systemAddresses = new InetSocketAddress[RakNet.getSystemAddressCount()];
+			for (int i = 0; i < systemAddresses.length; i++) {
+				if (this.remaining() > Long.SIZE + Long.SIZE) {
+					this.systemAddresses[i] = this.readAddress();
+				} else {
+					this.systemAddresses[i] = RakNet.SYSTEM_ADDRESS;
+				}
 			}
 			this.serverTimestamp = this.readLong();
 			this.clientTimestamp = this.readLong();
