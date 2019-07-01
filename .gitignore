@@ -69,3 +69,4 @@ nb-configuration.xml
 !.gitignore
 .factorypath
 .vscode/launch.json
+.vscode/settings.json
