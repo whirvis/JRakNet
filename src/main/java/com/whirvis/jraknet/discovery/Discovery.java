@@ -479,7 +479,7 @@ public final class Discovery {
 		}
 		for (int i = 0; i < servers.length; i++) {
 			for (InetSocketAddress discoveryAddress : DISCOVERY_ADDRESSES.keySet()) {
-				if (discoveryAddress.getAddress().equals(servers[i])) {
+				if (discoveryAddress.getAddress().equals(servers[i].getAddress())) {
 					continue;
 				}
 				return false;

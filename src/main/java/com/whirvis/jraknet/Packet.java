@@ -29,6 +29,8 @@
  */
 package com.whirvis.jraknet;
 
+import java.io.EOFException;
+import java.io.IOException;
 import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -475,6 +477,98 @@ public class Packet {
 	}
 
 	/**
+	 * Reads a <code>VarInt</code>.
+	 * 
+	 * @return a <code>VarInt</code>.
+	 * @throws IndexOutOfBoundsException
+	 *             if there are not enough bytes to read a <code>VarInt</code>
+	 *             or the <code>VarInt</code> exceeds the size limit.
+	 * @throws RuntimeException
+	 *             if an I/O error occurs despite the fact it should never
+	 *             happen.
+	 * @see VarInt#readVarInt(java.io.InputStream)
+	 *      VarInt.readVarInt(InputStream)
+	 */
+	public final int readVarInt() throws IndexOutOfBoundsException, RuntimeException {
+		try {
+			return VarInt.readVarInt(this.getInputStream());
+		} catch (EOFException e) {
+			throw new IndexOutOfBoundsException("VarInt underflow");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Reads an unsigned <code>VarInt</code>.
+	 * 
+	 * @return an unsigned <code>VarInt</code>.
+	 * @throws IndexOutOfBoundsException
+	 *             if there are not enough bytes to read a <code>VarInt</code>
+	 *             or the <code>VarInt</code> exceeds the size limit.
+	 * @throws RuntimeException
+	 *             if an I/O error occurs despite the fact it should never
+	 *             happen.
+	 * @see VarInt#readUnsignedVarInt(java.io.InputStream)
+	 *      VarInt.readUnsignedVarInt(InputStream)
+	 */
+	public final long readUnsignedVarInt() throws IndexOutOfBoundsException, RuntimeException {
+		try {
+			return VarInt.readUnsignedVarInt(this.getInputStream());
+		} catch (EOFException e) {
+			throw new IndexOutOfBoundsException("VarInt underflow");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Reads a <code>VarLong</code>.
+	 * 
+	 * @return a <code>VarLong</code>.
+	 * @throws IndexOutOfBoundsException
+	 *             if there are not enough bytes to read a <code>VarLong</code>
+	 *             or the <code>VarLong</code> exceeds the size limit.
+	 * @throws RuntimeException
+	 *             if an I/O error occurs despite the fact it should never
+	 *             happen.
+	 * @see VarInt#readVarLong(java.io.InputStream)
+	 *      VarInt.readVarLong(InputStream)
+	 */
+	public final long readVarLong() throws IndexOutOfBoundsException, RuntimeException {
+		try {
+			return VarInt.readVarLong(this.getInputStream());
+		} catch (EOFException e) {
+			throw new IndexOutOfBoundsException("VarInt underflow");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
+	 * Reads an unsigned <code>VarLong</code>.
+	 * 
+	 * @return an unsigned <code>VarLong</code>.
+	 * @throws IndexOutOfBoundsException
+	 *             if there are not enough bytes to read a <code>VarLong</code>
+	 *             or the <code>VarLong</code> exceeds the size limit.
+	 * @throws RuntimeException
+	 *             if an I/O error occurs despite the fact it should never
+	 *             happen.
+	 * @see VarInt#readUnsignedVarLong(java.io.InputStream)
+	 *      VarInt.readUnsignedVarLong(InputStream)
+	 */
+	public final long readUnsignedVarLong() throws IndexOutOfBoundsException, RuntimeException {
+		try {
+			return VarInt.readUnsignedVarLong(this.getInputStream());
+		} catch (EOFException e) {
+			throw new IndexOutOfBoundsException("VarLong underflow");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	/**
 	 * Reads a UTF-8 string with its length prefixed by an unsigned
 	 * <code>short</code>.
 	 * 
@@ -875,7 +969,6 @@ public class Packet {
 		} else if (bi.longValue() < 0) {
 			throw new IllegalArgumentException("Value cannot be negative");
 		}
-
 		for (int i = 0; i < Long.BYTES; i++) {
 			this.writeByte(i < ulBytes.length ? ulBytes[i] : 0x00);
 		}
@@ -976,6 +1069,102 @@ public class Packet {
 	 */
 	public final Packet writeDoubleLE(double d) {
 		buffer.writeDoubleLE(d);
+		return this;
+	}
+
+	/**
+	 * Writes a <code>VarInt</code> to the packet.
+	 * 
+	 * @param i
+	 *            the <code>VarInt</code>.
+	 * @return the packet.
+	 * @throws RuntimeException
+	 *             if an I/O error occurs despite the fact it should never
+	 *             happen.
+	 * @see VarInt#writeVarInt(int, java.io.OutputStream)
+	 *      VarInt.writeVarInt(int, OutputStream)
+	 */
+	public final Packet writeVarInt(int i) throws RuntimeException {
+		try {
+			VarInt.writeVarInt(i, this.getOutputStream());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return this;
+	}
+
+	/**
+	 * Writes a unsigned <code>VarInt</code> to the packet.
+	 * 
+	 * @param i
+	 *            the <code>VarInt</code>.
+	 * @return the packet.
+	 * @throws IllegalArgumentException
+	 *             if <code>i</code> is not within the range of
+	 *             <code>0-4294967295</code>.
+	 * @throws RuntimeException
+	 *             if an I/O error occurs despite the fact it should never
+	 *             happen.
+	 * @see VarInt#writeUnsignedVarInt(int, java.io.OutputStream)
+	 *      VarInt.writeUnsignedVarInt(int, OutputStream)
+	 */
+	public final Packet writeUnsignedVarInt(int i) throws RuntimeException {
+		if (i < 0x00000000 || i > 0xFFFFFFFFL) {
+			throw new IllegalArgumentException("Value must be in between 0-4294967295");
+		}
+		try {
+			VarInt.writeUnsignedVarInt(i, this.getOutputStream());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return this;
+	}
+
+	/**
+	 * Writes a <code>VarLong</code> to the packet.
+	 * 
+	 * @param l
+	 *            the <code>VarLong</code>.
+	 * @return the packet.
+	 * @throws RuntimeException
+	 *             if an I/O error occurs despite the fact it should never
+	 *             happen.
+	 * @see VarInt#writeVarLong(long, java.io.OutputStream)
+	 *      VarInt.writeVarLong(long, OutputStream)
+	 */
+	public final Packet writeVarLong(long l) throws RuntimeException {
+		try {
+			VarInt.writeVarLong(l, this.getOutputStream());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		return this;
+	}
+
+	/**
+	 * Writes a unsigned <code>VarLong</code> to the packet.
+	 * 
+	 * @param l
+	 *            the <code>VarLong</code>.
+	 * @return the packet.
+	 * @throws IllegalArgumentException
+	 *             if <code>i</code> is not within the range of
+	 *             <code>0-18446744073709551615L</code>.
+	 * @throws RuntimeException
+	 *             if an I/O error occurs despite the fact it should never
+	 *             happen.
+	 * @see VarInt#writeUnsignedVarLong(long, java.io.OutputStream)
+	 *      VarInt.writeUnsignedVarLong(long, OutputStream)
+	 */
+	public final Packet writeUnsignedVarLong(long l) throws RuntimeException {
+		if (l < 0x0000000000000000 || l > 0xFFFFFFFFFFFFFFFFL) {
+			throw new IllegalArgumentException("Value must be in between 0-18446744073709551615L");
+		}
+		try {
+			VarInt.writeUnsignedVarLong(l, this.getOutputStream());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 		return this;
 	}
 

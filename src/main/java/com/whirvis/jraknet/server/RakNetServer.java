@@ -991,7 +991,7 @@ public class RakNetServer implements RakNetServerListener {
 	public final boolean hasClient(InetAddress address) {
 		if (address != null) {
 			for (InetSocketAddress clientAddress : clients.keySet()) {
-				if (clientAddress.equals(address)) {
+				if (clientAddress.getAddress().equals(address)) {
 					return true;
 				}
 			}
@@ -2153,7 +2153,7 @@ public class RakNetServer implements RakNetServerListener {
 		}
 		boolean disconnected = false;
 		for (InetSocketAddress peerAddress : clients.keySet()) {
-			if (address.equals(peerAddress)) {
+			if (address.equals(peerAddress.getAddress())) {
 				this.disconnect(peerAddress, reason);
 				disconnected = true;
 			}
