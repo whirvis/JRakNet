@@ -46,7 +46,7 @@ public class VarInt {
 	/**
 	 * The maximum amount of bits a <code>VarInt</code> can be.
 	 */
-	private static final int VARINT_MAX_SIZE = 35;
+	public static final int VARINT_MAX_SIZE = 35;
 
 	/**
 	 * The maximum amount of bits a <code>VarLong</code> can be.
@@ -62,16 +62,19 @@ public class VarInt {
 	 * @throws NullPointerException      if the <code>in</code> stream is
 	 *                                   <code>null</code>.
 	 * @throws IllegalArgumentException  if the <code>max</code> bits is less than
-	 *                                   or equal to <code>0</code>.
+	 *                                   or equal to <code>0</code> or is greater
+	 *                                   than {@value #VARLONG_MAX_SIZE}.
 	 * @throws IOException               if an I/O error occurs.
 	 * @throws IndexOutOfBoundsException if the <code>VarInt</code> exceeds the
 	 *                                   <code>max</code> amount of bits.
 	 */
-	private static long read(InputStream in, int max) throws IOException {
+	public static long read(InputStream in, int max) throws IOException {
 		if (in == null) {
 			throw new NullPointerException("Input stream cannot be null");
 		} else if (max <= 0) {
 			throw new IllegalArgumentException("Max bits must be greater than 0");
+		} else if (max > VARLONG_MAX_SIZE) {
+			throw new IllegalArgumentException("Max bits can be no greater than " + VARLONG_MAX_SIZE);
 		}
 		int result = 0;
 		int shift = 0;
@@ -99,22 +102,25 @@ public class VarInt {
 	 * @throws NullPointerException      if the <code>out</code> stream is
 	 *                                   <code>null</code>.
 	 * @throws IllegalArgumentException  if the <code>max</code> bits is less than
-	 *                                   or equal to <code>0</code>.
+	 *                                   or equal to <code>0</code> or is greater
+	 *                                   than {@value #VARLONG_MAX_SIZE}.
 	 * @throws IOException               if an I/O error occurs.
 	 * @throws IndexOutOfBoundsException if the <code>VarInt</code> exceeds the
 	 *                                   <code>max</code> amount of bits.
 	 */
-	private static void write(long l, OutputStream out, int max)
+	public static void write(long l, OutputStream out, int max)
 			throws NullPointerException, IllegalArgumentException, IOException, IndexOutOfBoundsException {
 		if (out == null) {
 			throw new NullPointerException("Output stream cannot be null");
 		} else if (max <= 0) {
 			throw new IllegalArgumentException("Max bits must be greater than 0");
+		} else if (max > VARLONG_MAX_SIZE) {
+			throw new IllegalArgumentException("Max bits can be no greater than " + VARLONG_MAX_SIZE);
 		}
 		boolean more = true;
 		int shift = 0;
 		while (more == true) {
-			if (shift >= max) {
+			if (max != VARLONG_MAX_SIZE && shift >= max) {
 				throw new IndexOutOfBoundsException("VarInt overflow");
 			}
 			long bits = (long) (l >>> shift) & 0x7F;
@@ -135,22 +141,25 @@ public class VarInt {
 	 * @throws NullPointerException      if the <code>out</code> stream is
 	 *                                   <code>null</code>.
 	 * @throws IllegalArgumentException  if the <code>max</code> bits is less than
-	 *                                   or equal to <code>0</code>.
+	 *                                   or equal to <code>0</code> or is greater
+	 *                                   than {@value #VARINT_MAX_SIZE}.
 	 * @throws IOException               if an I/O error occurs.
 	 * @throws IndexOutOfBoundsException if the <code>VarInt</code> exceeds the
 	 *                                   <code>max</code> amount of bits.
 	 */
-	private static void write(int i, OutputStream out, int max)
+	public static void write(int i, OutputStream out, int max)
 			throws NullPointerException, IllegalArgumentException, IOException, IndexOutOfBoundsException {
 		if (out == null) {
 			throw new NullPointerException("Output stream cannot be null");
 		} else if (max <= 0) {
 			throw new IllegalArgumentException("Max bits must be greater than 0");
+		} else if (max > VARINT_MAX_SIZE) {
+			throw new IllegalArgumentException("Max bits can be no greater than " + VARINT_MAX_SIZE);
 		}
 		boolean more = true;
 		int shift = 0;
 		while (more == true) {
-			if (shift >= max) {
+			if (max != VARINT_MAX_SIZE && shift >= max) {
 				throw new IndexOutOfBoundsException("VarInt overflow");
 			}
 			int bits = (i >>> shift) & 0x7F;
@@ -233,17 +242,20 @@ public class VarInt {
 	 * @throws NullPointerException      if the <code>in</code> stream is
 	 *                                   <code>null</code>.
 	 * @throws IllegalArgumentException  if the <code>max</code> bits is less than
-	 *                                   or equal to <code>0</code>.
+	 *                                   or equal to <code>0</code> or is greater
+	 *                                   than {@value #VARLONG_MAX_SIZE}.
 	 * @throws IOException               if an I/O error occurs.
 	 * @throws IndexOutOfBoundsException if the <code>VarInt</code> exceeds the
 	 *                                   <code>max</code> amount of bits.
 	 */
-	private static long readUnsigned(InputStream in, int max)
+	public static long readUnsigned(InputStream in, int max)
 			throws NullPointerException, IllegalArgumentException, IOException, IndexOutOfBoundsException {
 		if (in == null) {
 			throw new NullPointerException("Input stream cannot be null");
 		} else if (max <= 0) {
 			throw new IllegalArgumentException("Max bits must be greater than 0");
+		} else if (max > VARLONG_MAX_SIZE) {
+			throw new IllegalArgumentException("Max bits can be no greater than " + VARLONG_MAX_SIZE);
 		}
 		long result = 0;
 		int shift = 0;
@@ -270,14 +282,15 @@ public class VarInt {
 	 * @param max the maximum amount of bits the <code>VarInt</code> can be.
 	 * @throws IllegalArgumentException  if the value is negative or the
 	 *                                   <code>max</code> bits is less than or equal
-	 *                                   to <code>0</code>.
+	 *                                   to <code>0</code> or is greater than
+	 *                                   {@value #VARLONG_MAX_SIZE}.
 	 * @throws NullPointerException      if the <code>out</code> stream is
 	 *                                   <code>null</code>.
 	 * @throws IOException               if an I/O error occurs.
 	 * @throws IndexOutOfBoundsException if the <code>VarInt</code> exceeds the
 	 *                                   <code>max</code> amount of bits.
 	 */
-	private static void writeUnsigned(long l, OutputStream out, int max)
+	public static void writeUnsigned(long l, OutputStream out, int max)
 			throws IllegalArgumentException, NullPointerException, IOException, IndexOutOfBoundsException {
 		if (l < 0) {
 			throw new IllegalArgumentException("Value cannot be negative");
@@ -285,6 +298,8 @@ public class VarInt {
 			throw new NullPointerException("Output stream cannot be null");
 		} else if (max < 0) {
 			throw new IllegalArgumentException("Max bits must be greater than 0");
+		} else if (max > VARLONG_MAX_SIZE) {
+			throw new IllegalArgumentException("Max bits can be no greater than " + VARLONG_MAX_SIZE);
 		}
 		int shift = 0;
 		boolean moreBits = true;
