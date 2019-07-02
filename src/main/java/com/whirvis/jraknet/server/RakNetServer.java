@@ -121,60 +121,56 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Creates a RakNet server.
 	 * 
-	 * @param address             the address the server will bind to during
-	 *                            startup. A <code>null</code> IP address will have
-	 *                            the server bind to the wildcard address.
-	 * @param maximumTransferUnit the highest maximum transfer unit a client can
-	 *                            use. The maximum transfer unit is the maximum
-	 *                            number of bytes that can be sent in one packet. If
-	 *                            a packet exceeds this size, it is automatically
-	 *                            split up so that it can still be sent over the
-	 *                            connection (this is handled automatically by
-	 *                            {@link com.whirvis.jraknet.peer.RakNetPeer
-	 *                            RakNetPeer}). A value of {@value #AUTOMATIC_MTU}
-	 *                            will have the maximum transfer unit be determined
-	 *                            automatically via
-	 *                            {@link RakNet#getMaximumTransferUnit(InetAddress)}
-	 *                            with the parameter being the specified bind
-	 *                            <code>address</code>.
-	 * @param maxConnections      the maximum number of connections, A value of
-	 *                            {@value #INFINITE_CONNECTIONS} will allow for an
-	 *                            infinite number of connections.
-	 * @param identifier          the identifier that will be sent in response to
-	 *                            server pings if server broadcasting is enabled. A
-	 *                            <code>null</code> identifier means nothing will be
-	 *                            sent in response to server pings, even if server
-	 *                            broadcasting is enabled.
-	 * @throws NullPointerException     if the address is <code>null</code>.
-	 * @throws IllegalArgumentException if the maximum connections is less than
-	 *                                  <code>0</code> and not equal to
-	 *                                  {@value #INFINITE_CONNECTIONS} or the
-	 *                                  maximum transfer unit size is less than
-	 *                                  {@value RakNet#MINIMUM_MTU_SIZE} and is not
-	 *                                  equal to {@value #AUTOMATIC_MTU}.
+	 * @param address
+	 *            the address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param maximumTransferUnit
+	 *            the highest maximum transfer unit a client can use. The
+	 *            maximum transfer unit is the maximum number of bytes that can
+	 *            be sent in one packet. If a packet exceeds this size, it is
+	 *            automatically split up so that it can still be sent over the
+	 *            connection (this is handled automatically by
+	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}). A
+	 *            value of {@value #AUTOMATIC_MTU} will have the maximum
+	 *            transfer unit be determined automatically via
+	 *            {@link RakNet#getMaximumTransferUnit(InetAddress)} with the
+	 *            parameter being the specified bind <code>address</code>.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @param identifier
+	 *            the identifier that will be sent in response to server pings
+	 *            if server broadcasting is enabled. A <code>null</code>
+	 *            identifier means nothing will be sent in response to server
+	 *            pings, even if server broadcasting is enabled.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS} or the maximum
+	 *             transfer unit size is less than
+	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
+	 *             {@value #AUTOMATIC_MTU}.
 	 */
-	public RakNetServer(InetSocketAddress address, int maximumTransferUnit, int maxConnections, Identifier identifier)
-			throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(InetSocketAddress address, int maximumTransferUnit, int maxConnections, Identifier identifier) throws NullPointerException, IllegalArgumentException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
 		} else if (maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE && maximumTransferUnit != AUTOMATIC_MTU) {
-			throw new IllegalArgumentException(
-					"Maximum transfer unit must be no smaller than " + RakNet.MINIMUM_MTU_SIZE + " or equal to "
-							+ AUTOMATIC_MTU + " for the maximum transfer unit to be determined automatically");
+			throw new IllegalArgumentException("Maximum transfer unit must be no smaller than " + RakNet.MINIMUM_MTU_SIZE + " or equal to " + AUTOMATIC_MTU
+					+ " for the maximum transfer unit to be determined automatically");
 		} else if (maxConnections < 0 && maxConnections != INFINITE_CONNECTIONS) {
-			throw new IllegalArgumentException("Maximum connections must be greater than or equal to 0 or "
-					+ INFINITE_CONNECTIONS + " for infinite connections");
+			throw new IllegalArgumentException("Maximum connections must be greater than or equal to 0 or " + INFINITE_CONNECTIONS + " for infinite connections");
 		}
 		UUID uuid = UUID.randomUUID();
 		this.bindingAddress = address;
 		this.guid = uuid.getMostSignificantBits();
-		this.log = LogManager
-				.getLogger(RakNetServer.class.getSimpleName() + "-" + Long.toHexString(guid).toUpperCase());
+		this.log = LogManager.getLogger(RakNetServer.class.getSimpleName() + "-" + Long.toHexString(guid).toUpperCase());
 		this.pongId = uuid.getLeastSignificantBits();
 		this.timestamp = System.currentTimeMillis();
 		this.maxConnections = maxConnections;
-		this.maximumTransferUnit = maximumTransferUnit == AUTOMATIC_MTU ? RakNet.getMaximumTransferUnit(address)
-				: maximumTransferUnit;
+		this.maximumTransferUnit = maximumTransferUnit == AUTOMATIC_MTU ? RakNet.getMaximumTransferUnit(address) : maximumTransferUnit;
 		this.broadcastingEnabled = true;
 		this.identifier = identifier;
 		this.listeners = new ConcurrentLinkedQueue<RakNetServerListener>();
@@ -185,242 +181,256 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Creates a RakNet server.
 	 * 
-	 * @param address        the address the server will bind to during startup. A
-	 *                       <code>null</code> IP address will have the server bind
-	 *                       to the wildcard address.
-	 * @param maxConnections the maximum number of connections, A value of
-	 *                       {@value #INFINITE_CONNECTIONS} will allow for an
-	 *                       infinite number of connections.
-	 * @param identifier     the identifier that will be sent in response to server
-	 *                       pings if server broadcasting is enabled. A
-	 *                       <code>null</code> identifier means nothing will be sent
-	 *                       in response to server pings, even if server
-	 *                       broadcasting is enabled.
-	 * @throws NullPointerException     if the address is <code>null</code>.
-	 * @throws IllegalArgumentException if the maximum connections is less than
-	 *                                  <code>0</code> and not equal to
-	 *                                  {@value #INFINITE_CONNECTIONS}.
+	 * @param address
+	 *            the address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @param identifier
+	 *            the identifier that will be sent in response to server pings
+	 *            if server broadcasting is enabled. A <code>null</code>
+	 *            identifier means nothing will be sent in response to server
+	 *            pings, even if server broadcasting is enabled.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS}.
 	 */
-	public RakNetServer(InetSocketAddress address, int maxConnections, Identifier identifier)
-			throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(InetSocketAddress address, int maxConnections, Identifier identifier) throws NullPointerException, IllegalArgumentException {
 		this(address, AUTOMATIC_MTU, maxConnections, identifier);
 	}
 
 	/**
 	 * Creates a RakNet server.
 	 * 
-	 * @param address             the address the server will bind to during
-	 *                            startup. A <code>null</code> IP address will have
-	 *                            the server bind to the wildcard address.
-	 * @param maximumTransferUnit the highest maximum transfer unit a client can
-	 *                            use. The maximum transfer unit is the maximum
-	 *                            number of bytes that can be sent in one packet. If
-	 *                            a packet exceeds this size, it is automatically
-	 *                            split up so that it can still be sent over the
-	 *                            connection (this is handled automatically by
-	 *                            {@link com.whirvis.jraknet.peer.RakNetPeer
-	 *                            RakNetPeer}). A value of {@value #AUTOMATIC_MTU}
-	 *                            will have the maximum transfer unit be determined
-	 *                            automatically via
-	 *                            {@link RakNet#getMaximumTransferUnit(InetAddress)}
-	 *                            with the parameter being the specified bind
-	 *                            <code>address</code>.
-	 * @param maxConnections      the maximum number of connections, A value of
-	 *                            {@value #INFINITE_CONNECTIONS} will allow for an
-	 *                            infinite number of connections.
-	 * @throws NullPointerException     if the address is <code>null</code>.
-	 * @throws IllegalArgumentException if the maximum connections is less than
-	 *                                  <code>0</code> and not equal to
-	 *                                  {@value #INFINITE_CONNECTIONS} or the
-	 *                                  maximum transfer unit size is less than
-	 *                                  {@value RakNet#MINIMUM_MTU_SIZE} and is not
-	 *                                  equal to {@value #AUTOMATIC_MTU}.
+	 * @param address
+	 *            the address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param maximumTransferUnit
+	 *            the highest maximum transfer unit a client can use. The
+	 *            maximum transfer unit is the maximum number of bytes that can
+	 *            be sent in one packet. If a packet exceeds this size, it is
+	 *            automatically split up so that it can still be sent over the
+	 *            connection (this is handled automatically by
+	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}). A
+	 *            value of {@value #AUTOMATIC_MTU} will have the maximum
+	 *            transfer unit be determined automatically via
+	 *            {@link RakNet#getMaximumTransferUnit(InetAddress)} with the
+	 *            parameter being the specified bind <code>address</code>.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS} or the maximum
+	 *             transfer unit size is less than
+	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
+	 *             {@value #AUTOMATIC_MTU}.
 	 */
-	public RakNetServer(InetSocketAddress address, int maximumTransferUnit, int maxConnections)
-			throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(InetSocketAddress address, int maximumTransferUnit, int maxConnections) throws NullPointerException, IllegalArgumentException {
 		this(address, maximumTransferUnit, maxConnections, null);
 	}
 
 	/**
 	 * Creates a RakNet server.
 	 * 
-	 * @param address        the address the server will bind to during startup. A
-	 *                       <code>null</code> IP address will have the server bind
-	 *                       to the wildcard address.
-	 * @param maxConnections the maximum number of connections, A value of
-	 *                       {@value #INFINITE_CONNECTIONS} will allow for an
-	 *                       infinite number of connections.
-	 * @throws NullPointerException     if the address is <code>null</code>.
-	 * @throws IllegalArgumentException if the maximum connections is less than
-	 *                                  <code>0</code> and not equal to
-	 *                                  {@value #INFINITE_CONNECTIONS}.
+	 * @param address
+	 *            the address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS}.
 	 */
-	public RakNetServer(InetSocketAddress address, int maxConnections)
-			throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(InetSocketAddress address, int maxConnections) throws NullPointerException, IllegalArgumentException {
 		this(address, AUTOMATIC_MTU, maxConnections);
 	}
 
 	/**
 	 * Creates a RakNet server.
 	 * 
-	 * @param address             the IP address the server will bind to during
-	 *                            startup. A <code>null</code> IP address will have
-	 *                            the server bind to the wildcard address.
-	 * @param port                the port the server will bind to during startup.
-	 * @param maximumTransferUnit the highest maximum transfer unit a client can
-	 *                            use. The maximum transfer unit is the maximum
-	 *                            number of bytes that can be sent in one packet. If
-	 *                            a packet exceeds this size, it is automatically
-	 *                            split up so that it can still be sent over the
-	 *                            connection (this is handled automatically by
-	 *                            {@link com.whirvis.jraknet.peer.RakNetPeer
-	 *                            RakNetPeer}). A value of {@value #AUTOMATIC_MTU}
-	 *                            will have the maximum transfer unit be determined
-	 *                            automatically via
-	 *                            {@link RakNet#getMaximumTransferUnit(InetAddress)}
-	 *                            with the parameter being the specified bind
-	 *                            <code>address</code>.
-	 * @param maxConnections      the maximum number of connections, A value of
-	 *                            {@value #INFINITE_CONNECTIONS} will allow for an
-	 *                            infinite number of connections.
-	 * @param identifier          the identifier that will be sent in response to
-	 *                            server pings if server broadcasting is enabled. A
-	 *                            <code>null</code> identifier means nothing will be
-	 *                            sent in response to server pings, even if server
-	 *                            broadcasting is enabled.
-	 * @throws NullPointerException     if the address is <code>null</code>.
-	 * @throws IllegalArgumentException if the maximum connections is less than
-	 *                                  <code>0</code> and not equal to
-	 *                                  {@value #INFINITE_CONNECTIONS} or the
-	 *                                  maximum transfer unit size is less than
-	 *                                  {@value RakNet#MINIMUM_MTU_SIZE} and is not
-	 *                                  equal to {@value #AUTOMATIC_MTU}.
+	 * @param address
+	 *            the IP address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maximumTransferUnit
+	 *            the highest maximum transfer unit a client can use. The
+	 *            maximum transfer unit is the maximum number of bytes that can
+	 *            be sent in one packet. If a packet exceeds this size, it is
+	 *            automatically split up so that it can still be sent over the
+	 *            connection (this is handled automatically by
+	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}). A
+	 *            value of {@value #AUTOMATIC_MTU} will have the maximum
+	 *            transfer unit be determined automatically via
+	 *            {@link RakNet#getMaximumTransferUnit(InetAddress)} with the
+	 *            parameter being the specified bind <code>address</code>.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @param identifier
+	 *            the identifier that will be sent in response to server pings
+	 *            if server broadcasting is enabled. A <code>null</code>
+	 *            identifier means nothing will be sent in response to server
+	 *            pings, even if server broadcasting is enabled.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS} or the maximum
+	 *             transfer unit size is less than
+	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
+	 *             {@value #AUTOMATIC_MTU}.
 	 */
-	public RakNetServer(InetAddress address, int port, int maximumTransferUnit, int maxConnections,
-			Identifier identifier) throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(InetAddress address, int port, int maximumTransferUnit, int maxConnections, Identifier identifier) throws NullPointerException, IllegalArgumentException {
 		this(new InetSocketAddress(address, port), maximumTransferUnit, maxConnections, identifier);
 	}
 
 	/**
 	 * Creates a RakNet server.
 	 * 
-	 * @param address        the IP address the server will bind to during startup.
-	 *                       A <code>null</code> IP address will have the server
-	 *                       bind to the wildcard address.
-	 * @param port           the port the server will bind to during startup.
-	 * @param maxConnections the maximum number of connections, A value of
-	 *                       {@value #INFINITE_CONNECTIONS} will allow for an
-	 *                       infinite number of connections.
-	 * @param identifier     the identifier that will be sent in response to server
-	 *                       pings if server broadcasting is enabled. A
-	 *                       <code>null</code> identifier means nothing will be sent
-	 *                       in response to server pings, even if server
-	 *                       broadcasting is enabled.
-	 * @throws NullPointerException     if the address is <code>null</code>.
-	 * @throws IllegalArgumentException if the maximum connections is less than
-	 *                                  <code>0</code> and not equal to
-	 *                                  {@value #INFINITE_CONNECTIONS}.
+	 * @param address
+	 *            the IP address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @param identifier
+	 *            the identifier that will be sent in response to server pings
+	 *            if server broadcasting is enabled. A <code>null</code>
+	 *            identifier means nothing will be sent in response to server
+	 *            pings, even if server broadcasting is enabled.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS}.
 	 */
-	public RakNetServer(InetAddress address, int port, int maxConnections, Identifier identifier)
-			throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(InetAddress address, int port, int maxConnections, Identifier identifier) throws NullPointerException, IllegalArgumentException {
 		this(address, port, AUTOMATIC_MTU, maxConnections, identifier);
 	}
 
 	/**
 	 * Creates a RakNet server.
 	 * 
-	 * @param address             the IP address the server will bind to during
-	 *                            startup. A <code>null</code> IP address will have
-	 *                            the server bind to the wildcard address.
-	 * @param port                the port the server will bind to during startup.
-	 * @param maximumTransferUnit the highest maximum transfer unit a client can
-	 *                            use. The maximum transfer unit is the maximum
-	 *                            number of bytes that can be sent in one packet. If
-	 *                            a packet exceeds this size, it is automatically
-	 *                            split up so that it can still be sent over the
-	 *                            connection (this is handled automatically by
-	 *                            {@link com.whirvis.jraknet.peer.RakNetPeer
-	 *                            RakNetPeer}). A value of {@value #AUTOMATIC_MTU}
-	 *                            will have the maximum transfer unit be determined
-	 *                            automatically via
-	 *                            {@link RakNet#getMaximumTransferUnit(InetAddress)}
-	 *                            with the parameter being the specified bind
-	 *                            <code>address</code>.
-	 * @param maxConnections      the maximum number of connections, A value of
-	 *                            {@value #INFINITE_CONNECTIONS} will allow for an
-	 *                            infinite number of connections.
-	 * @throws NullPointerException     if the address is <code>null</code>.
-	 * @throws IllegalArgumentException if the maximum connections is less than
-	 *                                  <code>0</code> and not equal to
-	 *                                  {@value #INFINITE_CONNECTIONS} or the
-	 *                                  maximum transfer unit size is less than
-	 *                                  {@value RakNet#MINIMUM_MTU_SIZE} and is not
-	 *                                  equal to {@value #AUTOMATIC_MTU}.
+	 * @param address
+	 *            the IP address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maximumTransferUnit
+	 *            the highest maximum transfer unit a client can use. The
+	 *            maximum transfer unit is the maximum number of bytes that can
+	 *            be sent in one packet. If a packet exceeds this size, it is
+	 *            automatically split up so that it can still be sent over the
+	 *            connection (this is handled automatically by
+	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}). A
+	 *            value of {@value #AUTOMATIC_MTU} will have the maximum
+	 *            transfer unit be determined automatically via
+	 *            {@link RakNet#getMaximumTransferUnit(InetAddress)} with the
+	 *            parameter being the specified bind <code>address</code>.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS} or the maximum
+	 *             transfer unit size is less than
+	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
+	 *             {@value #AUTOMATIC_MTU}.
 	 */
-	public RakNetServer(InetAddress address, int port, int maximumTransferUnit, int maxConnections)
-			throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(InetAddress address, int port, int maximumTransferUnit, int maxConnections) throws NullPointerException, IllegalArgumentException {
 		this(address, port, maximumTransferUnit, maxConnections, null);
 	}
 
 	/**
 	 * Creates a RakNet server.
 	 * 
-	 * @param address        the IP address the server will bind to during startup.
-	 *                       A <code>null</code> IP address will have the server
-	 *                       bind to the wildcard address.
-	 * @param port           the port the server will bind to during startup.
-	 * @param maxConnections the maximum number of connections, A value of
-	 *                       {@value #INFINITE_CONNECTIONS} will allow for an
-	 *                       infinite number of connections.
-	 * @throws NullPointerException     if the address is <code>null</code>.
-	 * @throws IllegalArgumentException if the maximum connections is less than
-	 *                                  <code>0</code> and not equal to
-	 *                                  {@value #INFINITE_CONNECTIONS}.
+	 * @param address
+	 *            the IP address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS}.
 	 */
-	public RakNetServer(InetAddress address, int port, int maxConnections)
-			throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(InetAddress address, int port, int maxConnections) throws NullPointerException, IllegalArgumentException {
 		this(address, port, AUTOMATIC_MTU, maxConnections);
 	}
 
 	/**
 	 * Creates a RakNet server.
 	 * 
-	 * @param host                the IP address the server will bind to during
-	 *                            startup. A <code>null</code> IP address will have
-	 *                            the server bind to the wildcard address.
-	 * @param port                the port the server will bind to during startup.
-	 * @param maximumTransferUnit the highest maximum transfer unit a client can
-	 *                            use. The maximum transfer unit is the maximum
-	 *                            number of bytes that can be sent in one packet. If
-	 *                            a packet exceeds this size, it is automatically
-	 *                            split up so that it can still be sent over the
-	 *                            connection (this is handled automatically by
-	 *                            {@link com.whirvis.jraknet.peer.RakNetPeer
-	 *                            RakNetPeer}). A value of {@value #AUTOMATIC_MTU}
-	 *                            will have the maximum transfer unit be determined
-	 *                            automatically via
-	 *                            {@link RakNet#getMaximumTransferUnit(InetAddress)}
-	 *                            with the parameter being the specified bind
-	 *                            <code>address</code>.
-	 * @param maxConnections      the maximum number of connections, A value of
-	 *                            {@value #INFINITE_CONNECTIONS} will allow for an
-	 *                            infinite number of connections.
-	 * @param identifier          the identifier that will be sent in response to
-	 *                            server pings if server broadcasting is enabled. A
-	 *                            <code>null</code> identifier means nothing will be
-	 *                            sent in response to server pings, even if server
-	 *                            broadcasting is enabled.
-	 * @throws UnknownHostException     if no IP address for the
-	 *                                  <code>bindAddress</code> could be found, or
-	 *                                  if a scope_id was specified for a global
-	 *                                  IPv6 address.
-	 * @throws NullPointerException     if the address is <code>null</code>.
-	 * @throws IllegalArgumentException if the maximum connections is less than
-	 *                                  <code>0</code> and not equal to
-	 *                                  {@value #INFINITE_CONNECTIONS} or the
-	 *                                  maximum transfer unit size is less than
-	 *                                  {@value RakNet#MINIMUM_MTU_SIZE} and is not
-	 *                                  equal to {@value #AUTOMATIC_MTU}.
+	 * @param host
+	 *            the IP address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maximumTransferUnit
+	 *            the highest maximum transfer unit a client can use. The
+	 *            maximum transfer unit is the maximum number of bytes that can
+	 *            be sent in one packet. If a packet exceeds this size, it is
+	 *            automatically split up so that it can still be sent over the
+	 *            connection (this is handled automatically by
+	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}). A
+	 *            value of {@value #AUTOMATIC_MTU} will have the maximum
+	 *            transfer unit be determined automatically via
+	 *            {@link RakNet#getMaximumTransferUnit(InetAddress)} with the
+	 *            parameter being the specified bind <code>address</code>.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @param identifier
+	 *            the identifier that will be sent in response to server pings
+	 *            if server broadcasting is enabled. A <code>null</code>
+	 *            identifier means nothing will be sent in response to server
+	 *            pings, even if server broadcasting is enabled.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>bindAddress</code> could be
+	 *             found, or if a scope_id was specified for a global IPv6
+	 *             address.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS} or the maximum
+	 *             transfer unit size is less than
+	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
+	 *             {@value #AUTOMATIC_MTU}.
 	 */
 	public RakNetServer(String host, int port, int maximumTransferUnit, int maxConnections, Identifier identifier)
 			throws UnknownHostException, NullPointerException, IllegalArgumentException {
@@ -430,198 +440,211 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Creates a RakNet server.
 	 * 
-	 * @param host           the IP address the server will bind to during startup.
-	 *                       A <code>null</code> IP address will have the server
-	 *                       bind to the wildcard address.
-	 * @param port           the port the server will bind to during startup.
-	 * @param maxConnections the maximum number of connections, A value of
-	 *                       {@value #INFINITE_CONNECTIONS} will allow for an
-	 *                       infinite number of connections.
-	 * @param identifier     the identifier that will be sent in response to server
-	 *                       pings if server broadcasting is enabled. A
-	 *                       <code>null</code> identifier means nothing will be sent
-	 *                       in response to server pings, even if server
-	 *                       broadcasting is enabled.
-	 * @throws UnknownHostException     if no IP address for the
-	 *                                  <code>bindAddress</code> could be found, or
-	 *                                  if a scope_id was specified for a global
-	 *                                  IPv6 address.
-	 * @throws NullPointerException     if the address is <code>null</code>.
-	 * @throws IllegalArgumentException if the maximum connections is less than
-	 *                                  <code>0</code> and not equal to
-	 *                                  {@value #INFINITE_CONNECTIONS}.
+	 * @param host
+	 *            the IP address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @param identifier
+	 *            the identifier that will be sent in response to server pings
+	 *            if server broadcasting is enabled. A <code>null</code>
+	 *            identifier means nothing will be sent in response to server
+	 *            pings, even if server broadcasting is enabled.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>bindAddress</code> could be
+	 *             found, or if a scope_id was specified for a global IPv6
+	 *             address.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS}.
 	 */
-	public RakNetServer(String host, int port, int maxConnections, Identifier identifier)
-			throws UnknownHostException, NullPointerException, IllegalArgumentException {
+	public RakNetServer(String host, int port, int maxConnections, Identifier identifier) throws UnknownHostException, NullPointerException, IllegalArgumentException {
 		this(host, port, AUTOMATIC_MTU, maxConnections, identifier);
 	}
 
 	/**
 	 * Creates a RakNet server.
 	 * 
-	 * @param host                the IP address the server will bind to during
-	 *                            startup. A <code>null</code> IP address will have
-	 *                            the server bind to the wildcard address.
-	 * @param port                the port the server will bind to during startup.
-	 * @param maximumTransferUnit the highest maximum transfer unit a client can
-	 *                            use. The maximum transfer unit is the maximum
-	 *                            number of bytes that can be sent in one packet. If
-	 *                            a packet exceeds this size, it is automatically
-	 *                            split up so that it can still be sent over the
-	 *                            connection (this is handled automatically by
-	 *                            {@link com.whirvis.jraknet.peer.RakNetPeer
-	 *                            RakNetPeer}). A value of {@value #AUTOMATIC_MTU}
-	 *                            will have the maximum transfer unit be determined
-	 *                            automatically via
-	 *                            {@link RakNet#getMaximumTransferUnit(InetAddress)}
-	 *                            with the parameter being the specified bind
-	 *                            <code>address</code>.
-	 * @param maxConnections      the maximum number of connections, A value of
-	 *                            {@value #INFINITE_CONNECTIONS} will allow for an
-	 *                            infinite number of connections.
-	 * @throws UnknownHostException     if no IP address for the
-	 *                                  <code>bindAddress</code> could be found, or
-	 *                                  if a scope_id was specified for a global
-	 *                                  IPv6 address.
-	 * @throws NullPointerException     if the address is <code>null</code>.
-	 * @throws IllegalArgumentException if the maximum connections is less than
-	 *                                  <code>0</code> and not equal to
-	 *                                  {@value #INFINITE_CONNECTIONS} or the
-	 *                                  maximum transfer unit size is less than
-	 *                                  {@value RakNet#MINIMUM_MTU_SIZE} and is not
-	 *                                  equal to {@value #AUTOMATIC_MTU}.
+	 * @param host
+	 *            the IP address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maximumTransferUnit
+	 *            the highest maximum transfer unit a client can use. The
+	 *            maximum transfer unit is the maximum number of bytes that can
+	 *            be sent in one packet. If a packet exceeds this size, it is
+	 *            automatically split up so that it can still be sent over the
+	 *            connection (this is handled automatically by
+	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}). A
+	 *            value of {@value #AUTOMATIC_MTU} will have the maximum
+	 *            transfer unit be determined automatically via
+	 *            {@link RakNet#getMaximumTransferUnit(InetAddress)} with the
+	 *            parameter being the specified bind <code>address</code>.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>bindAddress</code> could be
+	 *             found, or if a scope_id was specified for a global IPv6
+	 *             address.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS} or the maximum
+	 *             transfer unit size is less than
+	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
+	 *             {@value #AUTOMATIC_MTU}.
 	 */
-	public RakNetServer(String host, int port, int maximumTransferUnit, int maxConnections)
-			throws UnknownHostException, NullPointerException, IllegalArgumentException {
+	public RakNetServer(String host, int port, int maximumTransferUnit, int maxConnections) throws UnknownHostException, NullPointerException, IllegalArgumentException {
 		this(host, port, maximumTransferUnit, maxConnections, null);
 	}
 
 	/**
 	 * Creates a RakNet server.
 	 * 
-	 * @param host           the IP address the server will bind to during startup.
-	 *                       A <code>null</code> IP address will have the server
-	 *                       bind to the wildcard address.
-	 * @param port           the port the server will bind to during startup.
-	 * @param maxConnections the maximum number of connections, A value of
-	 *                       {@value #INFINITE_CONNECTIONS} will allow for an
-	 *                       infinite number of connections.
-	 * @throws UnknownHostException     if no IP address for the
-	 *                                  <code>bindAddress</code> could be found, or
-	 *                                  if a scope_id was specified for a global
-	 *                                  IPv6 address.
-	 * @throws NullPointerException     if the address is <code>null</code>.
-	 * @throws IllegalArgumentException if the maximum connections is less than
-	 *                                  <code>0</code> and not equal to
-	 *                                  {@value #INFINITE_CONNECTIONS}.
+	 * @param host
+	 *            the IP address the server will bind to during startup. A
+	 *            <code>null</code> IP address will have the server bind to the
+	 *            wildcard address.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>bindAddress</code> could be
+	 *             found, or if a scope_id was specified for a global IPv6
+	 *             address.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS}.
 	 */
-	public RakNetServer(String host, int port, int maxConnections)
-			throws UnknownHostException, NullPointerException, IllegalArgumentException {
+	public RakNetServer(String host, int port, int maxConnections) throws UnknownHostException, NullPointerException, IllegalArgumentException {
 		this(host, port, AUTOMATIC_MTU, maxConnections);
 	}
 
 	/**
 	 * Creates a RakNet server.
 	 * 
-	 * @param port                the port the server will bind to during startup.
-	 * @param maximumTransferUnit the highest maximum transfer unit a client can
-	 *                            use. The maximum transfer unit is the maximum
-	 *                            number of bytes that can be sent in one packet. If
-	 *                            a packet exceeds this size, it is automatically
-	 *                            split up so that it can still be sent over the
-	 *                            connection (this is handled automatically by
-	 *                            {@link com.whirvis.jraknet.peer.RakNetPeer
-	 *                            RakNetPeer}). A value of {@value #AUTOMATIC_MTU}
-	 *                            will have the maximum transfer unit be determined
-	 *                            automatically via
-	 *                            {@link RakNet#getMaximumTransferUnit(InetAddress)}
-	 *                            with the parameter being the specified bind
-	 *                            <code>address</code>.
-	 * @param maxConnections      the maximum number of connections, A value of
-	 *                            {@value #INFINITE_CONNECTIONS} will allow for an
-	 *                            infinite number of connections.
-	 * @param identifier          the identifier that will be sent in response to
-	 *                            server pings if server broadcasting is enabled. A
-	 *                            <code>null</code> identifier means nothing will be
-	 *                            sent in response to server pings, even if server
-	 *                            broadcasting is enabled.
-	 * @throws NullPointerException     if the address is <code>null</code>.
-	 * @throws IllegalArgumentException if the maximum connections is less than
-	 *                                  <code>0</code> and not equal to
-	 *                                  {@value #INFINITE_CONNECTIONS} or the
-	 *                                  maximum transfer unit size is less than
-	 *                                  {@value RakNet#MINIMUM_MTU_SIZE} and is not
-	 *                                  equal to {@value #AUTOMATIC_MTU}.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maximumTransferUnit
+	 *            the highest maximum transfer unit a client can use. The
+	 *            maximum transfer unit is the maximum number of bytes that can
+	 *            be sent in one packet. If a packet exceeds this size, it is
+	 *            automatically split up so that it can still be sent over the
+	 *            connection (this is handled automatically by
+	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}). A
+	 *            value of {@value #AUTOMATIC_MTU} will have the maximum
+	 *            transfer unit be determined automatically via
+	 *            {@link RakNet#getMaximumTransferUnit(InetAddress)} with the
+	 *            parameter being the specified bind <code>address</code>.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @param identifier
+	 *            the identifier that will be sent in response to server pings
+	 *            if server broadcasting is enabled. A <code>null</code>
+	 *            identifier means nothing will be sent in response to server
+	 *            pings, even if server broadcasting is enabled.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS} or the maximum
+	 *             transfer unit size is less than
+	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
+	 *             {@value #AUTOMATIC_MTU}.
 	 */
-	public RakNetServer(int port, int maximumTransferUnit, int maxConnections, Identifier identifier)
-			throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(int port, int maximumTransferUnit, int maxConnections, Identifier identifier) throws NullPointerException, IllegalArgumentException {
 		this(new InetSocketAddress((InetAddress) null, port), maximumTransferUnit, maxConnections, identifier);
 	}
 
 	/**
 	 * Creates a RakNet server.
 	 * 
-	 * @param port           the port the server will bind to during startup.
-	 * @param maxConnections the maximum number of connections, A value of
-	 *                       {@value #INFINITE_CONNECTIONS} will allow for an
-	 *                       infinite number of connections.
-	 * @param identifier     the identifier that will be sent in response to server
-	 *                       pings if server broadcasting is enabled. A
-	 *                       <code>null</code> identifier means nothing will be sent
-	 *                       in response to server pings, even if server
-	 *                       broadcasting is enabled.
-	 * @throws NullPointerException     if the address is <code>null</code>.
-	 * @throws IllegalArgumentException if the maximum connections is less than
-	 *                                  <code>0</code> and not equal to
-	 *                                  {@value #INFINITE_CONNECTIONS} or the
-	 *                                  maximum transfer unit size is less than
-	 *                                  {@value RakNet#MINIMUM_MTU_SIZE} and is not
-	 *                                  equal to {@value #AUTOMATIC_MTU}.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @param identifier
+	 *            the identifier that will be sent in response to server pings
+	 *            if server broadcasting is enabled. A <code>null</code>
+	 *            identifier means nothing will be sent in response to server
+	 *            pings, even if server broadcasting is enabled.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS} or the maximum
+	 *             transfer unit size is less than
+	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
+	 *             {@value #AUTOMATIC_MTU}.
 	 */
-	public RakNetServer(int port, int maxConnections, Identifier identifier)
-			throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(int port, int maxConnections, Identifier identifier) throws NullPointerException, IllegalArgumentException {
 		this(port, AUTOMATIC_MTU, maxConnections, identifier);
 	}
 
 	/**
 	 * Creates a RakNet server.
 	 * 
-	 * @param port                the port the server will bind to during startup.
-	 * @param maximumTransferUnit the highest maximum transfer unit a client can
-	 *                            use. The maximum transfer unit is the maximum
-	 *                            number of bytes that can be sent in one packet. If
-	 *                            a packet exceeds this size, it is automatically
-	 *                            split up so that it can still be sent over the
-	 *                            connection (this is handled automatically by
-	 *                            {@link com.whirvis.jraknet.peer.RakNetPeer
-	 *                            RakNetPeer}).
-	 * @param maxConnections      the maximum number of connections, A value of
-	 *                            {@value #INFINITE_CONNECTIONS} will allow for an
-	 *                            infinite number of connections.
-	 * @throws NullPointerException     if the address is <code>null</code>.
-	 * @throws IllegalArgumentException if the maximum connections is less than
-	 *                                  <code>0</code> and not equal to
-	 *                                  {@value #INFINITE_CONNECTIONS} or the
-	 *                                  maximum transfer unit size is less than
-	 *                                  {@value RakNet#MINIMUM_MTU_SIZE} and is not
-	 *                                  equal to {@value #AUTOMATIC_MTU}.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maximumTransferUnit
+	 *            the highest maximum transfer unit a client can use. The
+	 *            maximum transfer unit is the maximum number of bytes that can
+	 *            be sent in one packet. If a packet exceeds this size, it is
+	 *            automatically split up so that it can still be sent over the
+	 *            connection (this is handled automatically by
+	 *            {@link com.whirvis.jraknet.peer.RakNetPeer RakNetPeer}).
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS} or the maximum
+	 *             transfer unit size is less than
+	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
+	 *             {@value #AUTOMATIC_MTU}.
 	 */
-	public RakNetServer(int port, int maximumTransferUnit, int maxConnections)
-			throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(int port, int maximumTransferUnit, int maxConnections) throws NullPointerException, IllegalArgumentException {
 		this(port, maximumTransferUnit, maxConnections, null);
 	}
 
 	/**
 	 * Creates a RakNet server.
 	 * 
-	 * @param port           the port the server will bind to during startup.
-	 * @param maxConnections the maximum number of connections, A value of
-	 *                       {@value #INFINITE_CONNECTIONS} will allow for an
-	 *                       infinite number of connections.
-	 * @throws NullPointerException     if the address is <code>null</code>.
-	 * @throws IllegalArgumentException if the maximum connections is less than
-	 *                                  <code>0</code> and not equal to
-	 *                                  {@value #INFINITE_CONNECTIONS}.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @throws NullPointerException
+	 *             if the address is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the maximum connections is less than <code>0</code> and
+	 *             not equal to {@value #INFINITE_CONNECTIONS}.
 	 */
 	public RakNetServer(int port, int maxConnections) throws NullPointerException, IllegalArgumentException {
 		this(port, AUTOMATIC_MTU, maxConnections);
@@ -714,8 +737,8 @@ public class RakNetServer implements RakNetServerListener {
 	 * Returns the maximum amount of connections allowed at once.
 	 * 
 	 * @return the maximum amount of connections allowed at once,
-	 *         {@value #INFINITE_CONNECTIONS} if an infinite amount of connections
-	 *         are allowed.
+	 *         {@value #INFINITE_CONNECTIONS} if an infinite amount of
+	 *         connections are allowed.
 	 */
 	public final int getMaxConnections() {
 		return this.maxConnections;
@@ -724,17 +747,18 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Sets the maximum amount of connections allowed at once.
 	 * 
-	 * @param maxConnections the maximum number of connections. A value of
-	 *                       {@value #INFINITE_CONNECTIONS} will allow for an
-	 *                       infinite number of connections.
-	 * @throws IllegalArgumentException if the <code>maxConnections</code> is less
-	 *                                  than <code>0</code> and is not equal to
-	 *                                  {@value #INFINITE_CONNECTIONS}.
+	 * @param maxConnections
+	 *            the maximum number of connections. A value of
+	 *            {@value #INFINITE_CONNECTIONS} will allow for an infinite
+	 *            number of connections.
+	 * @throws IllegalArgumentException
+	 *             if the <code>maxConnections</code> is less than
+	 *             <code>0</code> and is not equal to
+	 *             {@value #INFINITE_CONNECTIONS}.
 	 */
 	public final void setMaxConnections(int maxConnections) throws IllegalArgumentException {
 		if (maxConnections < 0 && maxConnections != INFINITE_CONNECTIONS) {
-			throw new IllegalArgumentException("Maximum connections must be greater than or equal to 0 or "
-					+ INFINITE_CONNECTIONS + " for infinite connections");
+			throw new IllegalArgumentException("Maximum connections must be greater than or equal to 0 or " + INFINITE_CONNECTIONS + " for infinite connections");
 		}
 		this.maxConnections = maxConnections;
 	}
@@ -742,8 +766,9 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Enables/disables server broadcasting.
 	 * 
-	 * @param enabled <code>true</code> to enable broadcasting, <code>false</code>
-	 *                to disable broadcasting.
+	 * @param enabled
+	 *            <code>true</code> to enable broadcasting, <code>false</code>
+	 *            to disable broadcasting.
 	 */
 	public final void setBroadcastingEnabled(boolean enabled) {
 		boolean wasBroadcasting = this.broadcastingEnabled;
@@ -775,7 +800,8 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Sets the server's identifier used for discovery.
 	 * 
-	 * @param identifier the new identifier.
+	 * @param identifier
+	 *            the new identifier.
 	 */
 	public final void setIdentifier(Identifier identifier) {
 		this.identifier = identifier;
@@ -792,14 +818,16 @@ public class RakNetServer implements RakNetServerListener {
 	 * Listeners are used to listen for events that occur relating to the server
 	 * such as clients connecting to the server, receiving messages, and more.
 	 * 
-	 * @param listener the listener to add.
+	 * @param listener
+	 *            the listener to add.
 	 * @return the server.
-	 * @throws NullPointerException     if the listener is <code>null</code>.
-	 * @throws IllegalArgumentException if the listener is another server that is
-	 *                                  not the server itself.
+	 * @throws NullPointerException
+	 *             if the listener is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the listener is another server that is not the server
+	 *             itself.
 	 */
-	public final RakNetServer addListener(RakNetServerListener listener)
-			throws NullPointerException, IllegalArgumentException {
+	public final RakNetServer addListener(RakNetServerListener listener) throws NullPointerException, IllegalArgumentException {
 		if (listener == null) {
 			throw new NullPointerException("Listener cannot be null");
 		} else if (listener instanceof RakNetClient && !this.equals(listener)) {
@@ -829,7 +857,8 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Removes a listener from the server.
 	 * 
-	 * @param listener the listener to remove.
+	 * @param listener
+	 *            the listener to remove.
 	 * @return the server.
 	 */
 	public final RakNetServer removeListener(RakNetServerListener listener) {
@@ -854,8 +883,10 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Calls the event.
 	 * 
-	 * @param event the event to call.
-	 * @throws NullPointerException if the event is <code>null</code>.
+	 * @param event
+	 *            the event to call.
+	 * @throws NullPointerException
+	 *             if the event is <code>null</code>.
 	 */
 	public final void callEvent(Consumer<? super RakNetServerListener> event) throws NullPointerException {
 		if (event == null) {
@@ -864,8 +895,7 @@ public class RakNetServer implements RakNetServerListener {
 		for (RakNetServerListener listener : listeners) {
 			if (listener.getClass().isAnnotationPresent(ThreadedListener.class)) {
 				ThreadedListener threadedListener = listener.getClass().getAnnotation(ThreadedListener.class);
-				new Thread(RakNetServer.class.getSimpleName() + (threadedListener.name().length() > 0 ? "-" : "")
-						+ threadedListener.name() + "-Thread-" + ++eventThreadCount) {
+				new Thread(RakNetServer.class.getSimpleName() + (threadedListener.name().length() > 0 ? "-" : "") + threadedListener.name() + "-Thread-" + ++eventThreadCount) {
 
 					@Override
 					public void run() {
@@ -901,9 +931,10 @@ public class RakNetServer implements RakNetServerListener {
 	 * Returns whether or not a client with the specified address is currently
 	 * connected to the server.
 	 * 
-	 * @param address the address.
-	 * @return <code>true</code> if a client with the address is connected to the
-	 *         server, <code>false</code> otherwise.
+	 * @param address
+	 *            the address.
+	 * @return <code>true</code> if a client with the address is connected to
+	 *         the server, <code>false</code> otherwise.
 	 */
 	public final boolean hasClient(InetSocketAddress address) {
 		if (address != null) {
@@ -916,10 +947,12 @@ public class RakNetServer implements RakNetServerListener {
 	 * Returns whether or not a client with the specified address is currently
 	 * connected to the server.
 	 * 
-	 * @param address the IP address.
-	 * @param port    the port.
-	 * @return <code>true</code> if a client with the address is connected to the
-	 *         server, <code>false</code> otherwise.
+	 * @param address
+	 *            the IP address.
+	 * @param port
+	 *            the port.
+	 * @return <code>true</code> if a client with the address is connected to
+	 *         the server, <code>false</code> otherwise.
 	 */
 	public final boolean hasClient(InetAddress address, int port) {
 		if (port >= 0x0000 && port <= 0xFFFF) {
@@ -932,25 +965,28 @@ public class RakNetServer implements RakNetServerListener {
 	 * Returns whether or not a client with the specified address is currently
 	 * connected to the server.
 	 * 
-	 * @param host the IP address.
-	 * @param port the port.
-	 * @return <code>true</code> if a client with the address is connected to the
-	 *         server, <code>false</code> otherwise.
-	 * @throws UnknownHostException if no IP address for the <code>host</code> could
-	 *                              be found, or if a scope_id was specified for a
-	 *                              global IPv6 address.
+	 * @param host
+	 *            the IP address.
+	 * @param port
+	 *            the port.
+	 * @return <code>true</code> if a client with the address is connected to
+	 *         the server, <code>false</code> otherwise.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final boolean hasClient(String host, int port) throws UnknownHostException {
 		return this.hasClient(InetAddress.getByName(host), port);
 	}
 
 	/**
-	 * Returns whether or not a client with the specified IP address is currently
-	 * connected to the server.
+	 * Returns whether or not a client with the specified IP address is
+	 * currently connected to the server.
 	 * 
-	 * @param address the IP address.
-	 * @return <code>true</code> if a client with the IP address is connected to the
-	 *         server, <code>false</code> otherwise.
+	 * @param address
+	 *            the IP address.
+	 * @return <code>true</code> if a client with the IP address is connected to
+	 *         the server, <code>false</code> otherwise.
 	 */
 	public final boolean hasClient(InetAddress address) {
 		if (address != null) {
@@ -964,15 +1000,16 @@ public class RakNetServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Returns whether or not a client with the specified IP address is currently
-	 * connected to the server.
+	 * Returns whether or not a client with the specified IP address is
+	 * currently connected to the server.
 	 * 
-	 * @param host the IP address.
-	 * @return <code>true</code> if a client with the IP address is connected to the
-	 *         server, <code>false</code> otherwise.
-	 * @throws UnknownHostException if no IP address for the <code>host</code> could
-	 *                              be found, or if a scope_id was specified for a
-	 *                              global IPv6 address.
+	 * @param host
+	 *            the IP address.
+	 * @return <code>true</code> if a client with the IP address is connected to
+	 *         the server, <code>false</code> otherwise.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final boolean hasClient(String host) throws UnknownHostException {
 		return this.hasClient(InetAddress.getByName(host));
@@ -982,7 +1019,8 @@ public class RakNetServer implements RakNetServerListener {
 	 * Returns whether or not a client with the specified port is currently
 	 * connected to the server.
 	 * 
-	 * @param port the port.
+	 * @param port
+	 *            the port.
 	 * @return <code>true</code> if a client with the port is connected to the
 	 *         server, <code>false</code> otherwise.
 	 */
@@ -998,10 +1036,11 @@ public class RakNetServer implements RakNetServerListener {
 	}
 
 	/**
-	 * Returns whether or not the client with the specified globally unique ID is
-	 * currently connected to the server.
+	 * Returns whether or not the client with the specified globally unique ID
+	 * is currently connected to the server.
 	 * 
-	 * @param guid the globally unique ID.
+	 * @param guid
+	 *            the globally unique ID.
 	 * @return <code>true</code> if a client with the globally unique ID is
 	 *         connected to the server, <code>false</code> otherwise.
 	 */
@@ -1017,7 +1056,8 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Returns the client with the specified address.
 	 * 
-	 * @param address the address.
+	 * @param address
+	 *            the address.
 	 * @return the client with the address, <code>null</code> if there is none.
 	 */
 	public final RakNetClientPeer getClient(InetSocketAddress address) {
@@ -1027,8 +1067,10 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Returns the client with the specified address.
 	 * 
-	 * @param address the IP address.
-	 * @param port    the port.
+	 * @param address
+	 *            the IP address.
+	 * @param port
+	 *            the port.
 	 * @return the client with the address, <code>null</code> if there is none.
 	 */
 	public final RakNetClientPeer getClient(InetAddress address, int port) {
@@ -1041,12 +1083,14 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Returns the client with the specified address.
 	 * 
-	 * @param host the IP address.
-	 * @param port the port.
+	 * @param host
+	 *            the IP address.
+	 * @param port
+	 *            the port.
 	 * @return the client with the address, <code>null</code> if there is none.
-	 * @throws UnknownHostException if no IP address for the <code>host</code> could
-	 *                              be found, or if a scope_id was specified for a
-	 *                              global IPv6 address.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final RakNetClientPeer getClient(String host, int port) throws UnknownHostException {
 		if (host != null) {
@@ -1058,11 +1102,12 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Returns all clients with the specified IP address.
 	 * 
-	 * @param host the IP address.
+	 * @param host
+	 *            the IP address.
 	 * @return the clients with the IP address.
-	 * @throws UnknownHostException if no IP address for the <code>host</code> could
-	 *                              be found, or if a scope_id was specified for a
-	 *                              global IPv6 address.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final RakNetClientPeer[] getClient(String host) throws UnknownHostException {
 		ArrayList<RakNetClientPeer> peers = new ArrayList<RakNetClientPeer>();
@@ -1080,7 +1125,8 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Returns all clients with the specified port.
 	 * 
-	 * @param port the port.
+	 * @param port
+	 *            the port.
 	 * @return the clients with the port.
 	 */
 	public final RakNetClientPeer[] getClient(int port) {
@@ -1099,9 +1145,10 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Returns the client with the specified globally unique ID.
 	 * 
-	 * @param guid the globally unique ID of the client.
-	 * @return the client with the globally unique ID, <code>null</code> if there is
-	 *         none.
+	 * @param guid
+	 *            the globally unique ID of the client.
+	 * @return the client with the globally unique ID, <code>null</code> if
+	 *         there is none.
 	 */
 	public final RakNetClientPeer getClient(long guid) {
 		for (RakNetClientPeer peer : clients.values()) {
@@ -1115,13 +1162,14 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Returns the globally unique ID of the specified peer.
 	 * 
-	 * @param peer the peer.
-	 * @return the globally unique ID of the specified peer, <code>-1</code> if it
-	 *         does not exist.
-	 * @throws NullPointerException     if the <code>peer</code> is
-	 *                                  <code>null</code>.
-	 * @throws IllegalArgumentException if the <code>peer</code> is not of the
-	 *                                  server.
+	 * @param peer
+	 *            the peer.
+	 * @return the globally unique ID of the specified peer, <code>-1</code> if
+	 *         it does not exist.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code> is <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
 	 */
 	public final long getGuid(RakNetClientPeer peer) throws NullPointerException, IllegalArgumentException {
 		if (peer == null) {
@@ -1140,23 +1188,29 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Sends a message to the specified peer.
 	 * 
-	 * @param guid        the globally unique ID of the peer to send the packet to.
-	 * @param reliability the reliability of the packet.
-	 * @param channel     the channel to send the packet on.
-	 * @param packet      the packet to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param channel
+	 *            the channel to send the packet on.
+	 * @param packet
+	 *            the packet to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException    if the <code>reliability</code> or
-	 *                                 <code>packet</code> are <code>null</code>.
-	 * @throws InvalidChannelException if the channel is higher than or equal to
-	 *                                 {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>packet</code> are
+	 *             <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, Packet packet)
-			throws NullPointerException, IllegalArgumentException {
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, Packet packet) throws NullPointerException, IllegalArgumentException {
 		if (reliability == null) {
 			throw new NullPointerException("Reliability cannot be null");
 		} else if (packet == null) {
@@ -1170,49 +1224,61 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Sends a message to the specified peer.
 	 * 
-	 * @param peer        the peer to send the packet to.
-	 * @param reliability the reliability of the packet.
-	 * @param channel     the channel to send the packet on.
-	 * @param packet      the packet to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param peer
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param channel
+	 *            the channel to send the packet on.
+	 * @param packet
+	 *            the packet to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException     if the <code>peer</code>,
-	 *                                  <code>reliability</code> or
-	 *                                  <code>packet</code> are <code>null</code>.
-	 * @throws IllegalArgumentException if the <code>peer</code> is not of the
-	 *                                  server.
-	 * @throws InvalidChannelException  if the channel is higher than or equal to
-	 *                                  {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>packet</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
-			Packet packet) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel, Packet packet)
+			throws NullPointerException, IllegalArgumentException, InvalidChannelException {
 		return this.sendMessage(this.getGuid(peer), reliability, channel, packet);
 	}
 
 	/**
 	 * Sends messages to the specified peer.
 	 * 
-	 * @param guid        the globally unique ID of the peer to send the packet to.
-	 * @param reliability the reliability of the packets.
-	 * @param channel     the channel to send the packets on.
-	 * @param packets     the packets to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packets.
+	 * @param channel
+	 *            the channel to send the packets on.
+	 * @param packets
+	 *            the packets to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException    if the <code>reliability</code> or
-	 *                                 <code>packets</code> are <code>null</code>.
-	 * @throws InvalidChannelException if the channel is higher than or equal to
-	 *                                 {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>packets</code> are
+	 *             <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, Packet... packets)
-			throws NullPointerException, InvalidChannelException {
+	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, Packet... packets) throws NullPointerException, InvalidChannelException {
 		if (packets == null) {
 			throw new NullPointerException("Packets cannot be null");
 		}
@@ -1226,184 +1292,222 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Sends messages to the specified peer.
 	 * 
-	 * @param peer        the peer to send the packet to.
-	 * @param reliability the reliability of the packets.
-	 * @param channel     the channel to send the packets on.
-	 * @param packets     the packets to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param peer
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packets.
+	 * @param channel
+	 *            the channel to send the packets on.
+	 * @param packets
+	 *            the packets to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException     if the <code>peer</code>,
-	 *                                  <code>reliability</code> or
-	 *                                  <code>packets</code> are <code>null</code>.
-	 * @throws IllegalArgumentException if the <code>peer</code> is not of the
-	 *                                  server.
-	 * @throws InvalidChannelException  if the channel is higher than or equal to
-	 *                                  {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>packets</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
-			Packet... packets) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel, Packet... packets)
+			throws NullPointerException, IllegalArgumentException, InvalidChannelException {
 		return this.sendMessage(this.getGuid(peer), reliability, channel, packets);
 	}
 
 	/**
 	 * Sends a message to the specified peer on the default channel.
 	 * 
-	 * @param guid        the globally unique ID of the peer to send the packet to.
-	 * @param reliability the reliability of the packet.
-	 * @param packet      the packet to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param packet
+	 *            the packet to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException if the <code>reliability</code> or
-	 *                              <code>packet</code> are <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>packet</code> are
+	 *             <code>null</code>.
 	 */
-	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, Packet packet)
-			throws NullPointerException {
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, Packet packet) throws NullPointerException {
 		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, packet);
 	}
 
 	/**
 	 * Sends a message to the specified peer on the default channel.
 	 * 
-	 * @param peer        the peer to send the packet to.
-	 * @param reliability the reliability of the packet.
-	 * @param packet      the packet to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param peer
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param packet
+	 *            the packet to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException     if the <code>peer</code>,
-	 *                                  <code>reliability</code> or
-	 *                                  <code>packet</code> are <code>null</code>.
-	 * @throws IllegalArgumentException if the <code>peer</code> is not of the
-	 *                                  server.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>packet</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
 	 */
-	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, Packet packet)
-			throws NullPointerException, IllegalArgumentException {
+	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, Packet packet) throws NullPointerException, IllegalArgumentException {
 		return this.sendMessage(this.getGuid(peer), reliability, packet);
 	}
 
 	/**
 	 * Sends messages to the specified peer on the default channel.
 	 * 
-	 * @param guid        the globally unique ID of the peer to send the packet to.
-	 * @param reliability the reliability of the packets.
-	 * @param packets     the packets to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packets.
+	 * @param packets
+	 *            the packets to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException if the <code>reliability</code> or
-	 *                              <code>packets</code> are <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>packets</code> are
+	 *             <code>null</code>.
 	 */
-	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, Packet... packets)
-			throws NullPointerException {
+	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, Packet... packets) throws NullPointerException {
 		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, packets);
 	}
 
 	/**
 	 * Sends messages to the specified peer on the default channel.
 	 * 
-	 * @param peer        the peer to send the packet to.
-	 * @param reliability the reliability of the packets.
-	 * @param packets     the packets to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param peer
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packets.
+	 * @param packets
+	 *            the packets to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException     if the <code>peer</code>,
-	 *                                  <code>reliability</code> or
-	 *                                  <code>packets</code> are <code>null</code>.
-	 * @throws IllegalArgumentException if the <code>peer</code> is not of the
-	 *                                  server.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>packets</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
 	 */
-	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, Packet... packets)
-			throws NullPointerException, IllegalArgumentException {
+	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, Packet... packets) throws NullPointerException, IllegalArgumentException {
 		return this.sendMessage(this.getGuid(peer), reliability, packets);
 	}
 
 	/**
 	 * Sends a message to the specified peer.
 	 * 
-	 * @param guid        the globally unique ID of the peer to send the packet to.
-	 * @param reliability the reliability of the packet.
-	 * @param channel     the channel to send the packet on.
-	 * @param buf         the buffer to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param channel
+	 *            the channel to send the packet on.
+	 * @param buf
+	 *            the buffer to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException    if the <code>reliability</code> or
-	 *                                 <code>buf</code> are <code>null</code>.
-	 * @throws InvalidChannelException if the channel is higher than or equal to
-	 *                                 {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>buf</code> are
+	 *             <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, ByteBuf buf)
-			throws NullPointerException, InvalidChannelException {
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, ByteBuf buf) throws NullPointerException, InvalidChannelException {
 		return this.sendMessage(guid, reliability, channel, new Packet(buf));
 	}
 
 	/**
 	 * Sends a message to the specified peer.
 	 * 
-	 * @param peer        the peer to send the packet to.
-	 * @param reliability the reliability of the packet.
-	 * @param channel     the channel to send the packet on.
-	 * @param buf         the buffer to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param peer
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param channel
+	 *            the channel to send the packet on.
+	 * @param buf
+	 *            the buffer to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException     if the <code>peer</code>,
-	 *                                  <code>reliability</code> or <code>buf</code>
-	 *                                  are <code>null</code>.
-	 * @throws IllegalArgumentException if the <code>peer</code> is not of the
-	 *                                  server.
-	 * @throws InvalidChannelException  if the channel is higher than or equal to
-	 *                                  {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>buf</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
-			ByteBuf buf) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel, ByteBuf buf)
+			throws NullPointerException, IllegalArgumentException, InvalidChannelException {
 		return this.sendMessage(this.getGuid(peer), reliability, channel, buf);
 	}
 
 	/**
 	 * Sends messages to the specified peer.
 	 * 
-	 * @param guid        the globally unique ID of the peer to send the packet to.
-	 * @param reliability the reliability of the packets.
-	 * @param channel     the channel to send the packets on.
-	 * @param bufs        the buffers to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packets.
+	 * @param channel
+	 *            the channel to send the packets on.
+	 * @param bufs
+	 *            the buffers to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException    if the <code>reliability</code> or
-	 *                                 <code>bufs</code> are <code>null</code>.
-	 * @throws InvalidChannelException if the channel is higher than or equal to
-	 *                                 {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>bufs</code> are
+	 *             <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, ByteBuf... bufs)
-			throws NullPointerException, InvalidChannelException {
+	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, ByteBuf... bufs) throws NullPointerException, InvalidChannelException {
 		if (bufs == null) {
 			throw new NullPointerException("Buffers cannot be null");
 		}
@@ -1417,184 +1521,221 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Sends messages to the specified peer.
 	 * 
-	 * @param peer        the peer to send the packet to.
-	 * @param reliability the reliability of the packets.
-	 * @param channel     the channel to send the packets on.
-	 * @param bufs        the buffers to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param peer
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packets.
+	 * @param channel
+	 *            the channel to send the packets on.
+	 * @param bufs
+	 *            the buffers to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException     if the <code>peer</code>,
-	 *                                  <code>reliability</code> or
-	 *                                  <code>bufs</code> are <code>null</code>.
-	 * @throws IllegalArgumentException if the <code>peer</code> is not of the
-	 *                                  server.
-	 * @throws InvalidChannelException  if the channel is higher than or equal to
-	 *                                  {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>bufs</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
-			ByteBuf... bufs) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel, ByteBuf... bufs)
+			throws NullPointerException, IllegalArgumentException, InvalidChannelException {
 		return this.sendMessage(this.getGuid(peer), reliability, bufs);
 	}
 
 	/**
 	 * Sends messages to the specified peer on the default channel.
 	 * 
-	 * @param guid        the globally unique ID of the peer to send the packet to.
-	 * @param reliability the reliability of the packet.
-	 * @param buf         the buffer to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the inexistence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param buf
+	 *            the buffer to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the inexistence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException if the <code>reliability</code> or
-	 *                              <code>buf</code> are <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>buf</code> are
+	 *             <code>null</code>.
 	 */
-	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, ByteBuf buf)
-			throws NullPointerException {
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, ByteBuf buf) throws NullPointerException {
 		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, buf);
 	}
 
 	/**
 	 * Sends messages to the specified peer on the default channel.
 	 * 
-	 * @param peer        the peer to send the packet to.
-	 * @param reliability the reliability of the packet.
-	 * @param buf         the buffer to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param peer
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param buf
+	 *            the buffer to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException     if the <code>peer</code>,
-	 *                                  <code>reliability</code> or <code>buf</code>
-	 *                                  are <code>null</code>.
-	 * @throws IllegalArgumentException if the <code>peer</code> is not of the
-	 *                                  server.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>buf</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
 	 */
-	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, ByteBuf buf)
-			throws NullPointerException, IllegalArgumentException {
+	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, ByteBuf buf) throws NullPointerException, IllegalArgumentException {
 		return this.sendMessage(this.getGuid(peer), reliability, buf);
 	}
 
 	/**
 	 * Sends messages to the specified peer on the default channel.
 	 * 
-	 * @param guid        the globally unique ID of the peer to send the packet to.
-	 * @param reliability the reliability of the packet.
-	 * @param bufs        the buffers to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param bufs
+	 *            the buffers to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException if the <code>reliability</code> or
-	 *                              <code>bufs</code> are <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>bufs</code> are
+	 *             <code>null</code>.
 	 */
-	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, ByteBuf... bufs)
-			throws NullPointerException {
+	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, ByteBuf... bufs) throws NullPointerException {
 		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, bufs);
 	}
 
 	/**
 	 * Sends messages to the specified peer on the default channel.
 	 * 
-	 * @param peer        the peer to send the packet to.
-	 * @param reliability the reliability of the packet.
-	 * @param bufs        the buffers to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param peer
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param bufs
+	 *            the buffers to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException     if the <code>peer</code>,
-	 *                                  <code>reliability</code> or
-	 *                                  <code>bufs</code> are <code>null</code>.
-	 * @throws IllegalArgumentException if the <code>peer</code> is not of the
-	 *                                  server.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>bufs</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
 	 */
-	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, ByteBuf... bufs)
-			throws NullPointerException, IllegalArgumentException {
+	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, ByteBuf... bufs) throws NullPointerException, IllegalArgumentException {
 		return this.sendMessage(this.getGuid(peer), reliability, bufs);
 	}
 
 	/**
 	 * Sends a message identifier to the specified peer.
 	 * 
-	 * @param guid        the globally unique ID of the peer to send the packet to.
-	 * @param reliability the reliability of the message identifier.
-	 * @param channel     the channel to send the message identifier on.
-	 * @param packetId    the message identifier to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the message identifier.
+	 * @param channel
+	 *            the channel to send the message identifier on.
+	 * @param packetId
+	 *            the message identifier to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException    if the <code>reliability</code> is
-	 *                                 <code>null</code>.
-	 * @throws InvalidChannelException if the channel is higher than or equal to
-	 *                                 {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> is <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, int packetId)
-			throws NullPointerException, InvalidChannelException {
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, int packetId) throws NullPointerException, InvalidChannelException {
 		return this.sendMessage(guid, reliability, channel, new RakNetPacket(packetId));
 	}
 
 	/**
 	 * Sends a message identifier to the specified peer.
 	 * 
-	 * @param peer        the peer to send the packet to.
-	 * @param reliability the reliability of the message identifier.
-	 * @param channel     the channel to send the message identifier on.
-	 * @param packetId    the message identifier to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param peer
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the message identifier.
+	 * @param channel
+	 *            the channel to send the message identifier on.
+	 * @param packetId
+	 *            the message identifier to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException     if the<code>peer</code> or
-	 *                                  <code>reliability</code> are
-	 *                                  <code>null</code>.
-	 * @throws IllegalArgumentException if the <code>peer</code> is not of the
-	 *                                  server.
-	 * @throws InvalidChannelException  if the channel is higher than or equal to
-	 *                                  {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the<code>peer</code> or <code>reliability</code> are
+	 *             <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
-			int packetId) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel, int packetId)
+			throws NullPointerException, IllegalArgumentException, InvalidChannelException {
 		return this.sendMessage(this.getGuid(peer), reliability, channel, packetId);
 	}
 
 	/**
 	 * Sends message identifiers to the specified peer.
 	 * 
-	 * @param guid        the globally unique ID of the peer to send the packet to.
-	 * @param reliability the reliability of the message identifiers.
-	 * @param channel     the channel to send the message identifiers on.
-	 * @param packetIds   the message identifiers to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the message identifiers.
+	 * @param channel
+	 *            the channel to send the message identifiers on.
+	 * @param packetIds
+	 *            the message identifiers to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException    if the <code>reliability</code> or
-	 *                                 <code>packetIds</code> are <code>null</code>.
-	 * @throws InvalidChannelException if the channel is higher than or equal to
-	 *                                 {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>packetIds</code> are
+	 *             <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, int... packetIds)
-			throws NullPointerException, InvalidChannelException {
+	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, int... packetIds) throws NullPointerException, InvalidChannelException {
 		if (packetIds == null) {
 			throw new NullPointerException("Packet IDs cannot be null");
 		}
@@ -1608,123 +1749,141 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Sends message identifiers to the specified peer.
 	 * 
-	 * @param peer        the peer to send the packet to.
-	 * @param reliability the reliability of the message identifiers.
-	 * @param channel     the channel to send the message identifiers on.
-	 * @param packetIds   the message identifiers to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param peer
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the message identifiers.
+	 * @param channel
+	 *            the channel to send the message identifiers on.
+	 * @param packetIds
+	 *            the message identifiers to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException     if the <code>peer</code>,
-	 *                                  <code>reliability</code> or
-	 *                                  <code>packetIds</code> are
-	 *                                  <code>null</code>.
-	 * @throws IllegalArgumentException if the <code>peer</code> is not of the
-	 *                                  server.
-	 * @throws InvalidChannelException  if the channel is higher than or equal to
-	 *                                  {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>packetIds</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
-			int... packetIds) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel, int... packetIds)
+			throws NullPointerException, IllegalArgumentException, InvalidChannelException {
 		return this.sendMessage(this.getGuid(peer), reliability, channel, packetIds);
 	}
 
 	/**
 	 * Sends a message identifier to the specified peer on the default channel.
 	 * 
-	 * @param guid        the globally unique ID of the peer to send the packet to.
-	 * @param reliability the reliability of the message identifier.
-	 * @param packetId    the message identifier to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the message identifier.
+	 * @param packetId
+	 *            the message identifier to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException if the <code>reliability</code> is
-	 *                              <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> is <code>null</code>.
 	 */
-	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int packetId)
-			throws NullPointerException {
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int packetId) throws NullPointerException {
 		return this.sendMessage(guid, reliability, new RakNetPacket(packetId));
 	}
 
 	/**
 	 * Sends a message identifier to the specified peer on the default channel.
 	 * 
-	 * @param peer        the peer to send the packet to.
-	 * @param reliability the reliability of the message identifier.
-	 * @param packetId    the message identifier to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param peer
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the message identifier.
+	 * @param packetId
+	 *            the message identifier to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException     if the <code>peer</code>,
-	 *                                  <code>reliability</code> is
-	 *                                  <code>null</code>.
-	 * @throws IllegalArgumentException if the <code>peer</code> is not of the
-	 *                                  server.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> is
+	 *             <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
 	 */
-	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int packetId)
-			throws NullPointerException, IllegalArgumentException {
+	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int packetId) throws NullPointerException, IllegalArgumentException {
 		return this.sendMessage(this.getGuid(peer), reliability, packetId);
 	}
 
 	/**
 	 * Sends message identifiers to the specified peer on the default channel.
 	 * 
-	 * @param guid        the globally unique ID of the peer to send the packet to.
-	 * @param reliability the reliability of the message identifiers.
-	 * @param packetIds   the message identifiers to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param guid
+	 *            the globally unique ID of the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the message identifiers.
+	 * @param packetIds
+	 *            the message identifiers to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException if the <code>reliability</code> or
-	 *                              <code>packetIds</code> are <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>packetIds</code> are
+	 *             <code>null</code>.
 	 */
-	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int... packetIds)
-			throws NullPointerException {
+	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int... packetIds) throws NullPointerException {
 		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, packetIds);
 	}
 
 	/**
 	 * Sends message identifiers to the specified peer on the default channel.
 	 * 
-	 * @param peer        the peer to send the packet to.
-	 * @param reliability the reliability of the message identifiers.
-	 * @param packetIds   the message identifiers to send.
-	 * @return the generated encapsulated packet, <code>null</code> if no packet was
-	 *         sent due to the non existence of the peer with the <code>guid</code>.
-	 *         This is normally not important, however it can be used for packet
-	 *         acknowledged and not acknowledged events if the reliability is of the
+	 * @param peer
+	 *            the peer to send the packet to.
+	 * @param reliability
+	 *            the reliability of the message identifiers.
+	 * @param packetIds
+	 *            the message identifiers to send.
+	 * @return the generated encapsulated packet, <code>null</code> if no packet
+	 *         was sent due to the non existence of the peer with the
+	 *         <code>guid</code>. This is normally not important, however it can
+	 *         be used for packet acknowledged and not acknowledged events if
+	 *         the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException     if the <code>peer</code>,
-	 *                                  <code>reliability</code> or
-	 *                                  <code>packetIds</code> are
-	 *                                  <code>null</code>.
-	 * @throws IllegalArgumentException if the <code>peer</code> is not of the
-	 *                                  server.
+	 * @throws NullPointerException
+	 *             if the <code>peer</code>, <code>reliability</code> or
+	 *             <code>packetIds</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>peer</code> is not of the server.
 	 */
-	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int... packetIds)
-			throws NullPointerException, IllegalArgumentException {
+	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int... packetIds) throws NullPointerException, IllegalArgumentException {
 		return this.sendMessage(this.getGuid(peer), reliability, packetIds);
 	}
 
 	/**
 	 * Returns whether or not the specified client IP address is banned.
 	 * 
-	 * @param address the IP address.
-	 * @return <code>true</code> if the client address is banned, <code>false</code>
-	 *         otherwise.
+	 * @param address
+	 *            the IP address.
+	 * @return <code>true</code> if the client address is banned,
+	 *         <code>false</code> otherwise.
 	 */
 	public final boolean isClientBanned(InetAddress address) {
 		return banned.contains(address);
@@ -1733,12 +1892,13 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Returns whether or not the specified client IP address is banned.
 	 * 
-	 * @param host the IP address.
-	 * @throws UnknownHostException if no IP address for the <code>host</code> could
-	 *                              be found, or if a scope_id was specified for a
-	 *                              global IPv6 address.
-	 * @return <code>true</code> if the client address is banned, <code>false</code>
-	 *         otherwise.
+	 * @param host
+	 *            the IP address.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
+	 * @return <code>true</code> if the client address is banned,
+	 *         <code>false</code> otherwise.
 	 */
 	public final boolean isClientBanned(String host) throws UnknownHostException {
 		return banned.contains(InetAddress.getByName(host));
@@ -1747,9 +1907,10 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Bans the specified client IP address.
 	 * 
-	 * @param address the IP address to ban.
-	 * @throws NullPointerException if the <code>address</code> is
-	 *                              <code>null</code>.
+	 * @param address
+	 *            the IP address to ban.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> is <code>null</code>.
 	 */
 	public final void ban(InetAddress address) throws NullPointerException {
 		if (address == null) {
@@ -1762,11 +1923,13 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Bans the specified client IP address.
 	 * 
-	 * @param host the IP address to ban.
-	 * @throws NullPointerException if the <code>host</code> is <code>null</code>.
-	 * @throws UnknownHostException if no IP address for the <code>host</code> could
-	 *                              be found, or if a scope_id was specified for a
-	 *                              global IPv6 address.
+	 * @param host
+	 *            the IP address to ban.
+	 * @throws NullPointerException
+	 *             if the <code>host</code> is <code>null</code>.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final void ban(String host) throws NullPointerException, UnknownHostException {
 		if (host == null) {
@@ -1778,7 +1941,8 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Unbans the specified client IP address.
 	 * 
-	 * @param address the IP address to unban.
+	 * @param address
+	 *            the IP address to unban.
 	 */
 	public final void unban(InetAddress address) {
 		banned.remove(address);
@@ -1787,10 +1951,11 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Unbans the specified client IP address.
 	 * 
-	 * @param host the IP address to unban.
-	 * @throws UnknownHostException if no IP address for the <code>host</code> could
-	 *                              be found, or if a scope_id was specified for a
-	 *                              global IPv6 address.
+	 * @param host
+	 *            the IP address to unban.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final void unban(String host) throws UnknownHostException {
 		if (host != null) {
@@ -1801,12 +1966,14 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects a client from the server.
 	 * 
-	 * @param address the address of the client.
-	 * @param reason  the reason for client disconnection. A <code>null</code>
-	 *                reason will have <code>"Disconnected"</code> be used as the
-	 *                reason instead.
-	 * @return <code>true</code> if a client was disconnected, <code>false</code>
-	 *         otherwise.
+	 * @param address
+	 *            the address of the client.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
+	 * @return <code>true</code> if a client was disconnected,
+	 *         <code>false</code> otherwise.
 	 */
 	public final boolean disconnect(InetSocketAddress address, String reason) {
 		RakNetClientPeer peer = clients.remove(address);
@@ -1814,22 +1981,22 @@ public class RakNetServer implements RakNetServerListener {
 			return false; // No client to disconnect
 		}
 		peer.disconnect();
-		log.debug("Disconnected client with address " + address + " for \"" + (reason == null ? "Disconnected" : reason)
-				+ "\"");
-		this.callEvent(
-				listener -> listener.onDisconnect(this, address, peer, reason == null ? "Disconnected" : reason));
+		log.debug("Disconnected client with address " + address + " for \"" + (reason == null ? "Disconnected" : reason) + "\"");
+		this.callEvent(listener -> listener.onDisconnect(this, address, peer, reason == null ? "Disconnected" : reason));
 		return true;
 	}
 
 	/**
 	 * Disconnects a client from the server.
 	 * 
-	 * @param address the address of the client.
-	 * @param reason  the reason for client disconnection. A <code>null</code>
-	 *                reason will have <code>"Disconnected"</code> be used as the
-	 *                reason instead.
-	 * @return <code>true</code> if a client was disconnected, <code>false</code>
-	 *         otherwise.
+	 * @param address
+	 *            the address of the client.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
+	 * @return <code>true</code> if a client was disconnected,
+	 *         <code>false</code> otherwise.
 	 */
 	public final boolean disconnect(InetSocketAddress address, Throwable reason) {
 		return this.disconnect(address, reason == null ? null : RakNet.getStackTrace(reason));
@@ -1838,9 +2005,10 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects a client from the server.
 	 * 
-	 * @param address the address of the client.
-	 * @return <code>true</code> if a client was disconnected, <code>false</code>
-	 *         otherwise.
+	 * @param address
+	 *            the address of the client.
+	 * @return <code>true</code> if a client was disconnected,
+	 *         <code>false</code> otherwise.
 	 */
 	public final boolean disconnect(InetSocketAddress address) {
 		return this.disconnect(address, (String) /* Solves ambiguity */ null);
@@ -1849,11 +2017,14 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects a client from the server.
 	 * 
-	 * @param address the IP address of the client.
-	 * @param port    the port.
-	 * @param reason  the reason for client disconnection. A <code>null</code>
-	 *                reason will have <code>"Disconnected"</code> be used as the
-	 *                reason instead.
+	 * @param address
+	 *            the IP address of the client.
+	 * @param port
+	 *            the port.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 */
@@ -1867,11 +2038,14 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects a client from the server.
 	 * 
-	 * @param address the IP address of the client.
-	 * @param port    the port.
-	 * @param reason  the reason for client disconnection. A <code>null</code>
-	 *                reason will have <code>"Disconnected"</code> be used as the
-	 *                reason instead.
+	 * @param address
+	 *            the IP address of the client.
+	 * @param port
+	 *            the port.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 */
@@ -1885,8 +2059,10 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects a client from the server.
 	 * 
-	 * @param address the IP address of the client.
-	 * @param port    the port.
+	 * @param address
+	 *            the IP address of the client.
+	 * @param port
+	 *            the port.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 */
@@ -1897,16 +2073,19 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects a client from the server.
 	 * 
-	 * @param host   the IP address of the client.
-	 * @param port   the port.
-	 * @param reason the reason for client disconnection. A <code>null</code> reason
-	 *               will have <code>"Disconnected"</code> be used as the reason
-	 *               instead.
+	 * @param host
+	 *            the IP address of the client.
+	 * @param port
+	 *            the port.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
-	 * @throws UnknownHostException if no IP address for the <code>host</code> could
-	 *                              be found, or if a scope_id was specified for a
-	 *                              global IPv6 address.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final boolean disconnect(String host, int port, String reason) throws UnknownHostException {
 		if (host == null) {
@@ -1918,16 +2097,19 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects a client from the server.
 	 * 
-	 * @param host   the IP address of the client.
-	 * @param port   the port.
-	 * @param reason the reason for client disconnection. A <code>null</code> reason
-	 *               will have <code>"Disconnected"</code> be used as the reason
-	 *               instead.
+	 * @param host
+	 *            the IP address of the client.
+	 * @param port
+	 *            the port.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
-	 * @throws UnknownHostException if no IP address for the <code>host</code> could
-	 *                              be found, or if a scope_id was specified for a
-	 *                              global IPv6 address.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final boolean disconnect(String host, int port, Throwable reason) throws UnknownHostException {
 		if (host == null) {
@@ -1939,13 +2121,15 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects a client from the server.
 	 * 
-	 * @param host the IP address of the client.
-	 * @param port the port.
+	 * @param host
+	 *            the IP address of the client.
+	 * @param port
+	 *            the port.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
-	 * @throws UnknownHostException if no IP address for the <code>host</code> could
-	 *                              be found, or if a scope_id was specified for a
-	 *                              global IPv6 address.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final boolean disconnect(String host, int port) throws UnknownHostException {
 		return this.disconnect(host, port, (String) /* Solves ambiguity */ null);
@@ -1954,10 +2138,12 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects all clients from the server with the address.
 	 * 
-	 * @param address the IP address of the client.
-	 * @param reason  the reason for client disconnection. A <code>null</code>
-	 *                reason will have <code>"Disconnected"</code> be used as the
-	 *                reason instead.
+	 * @param address
+	 *            the IP address of the client.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 */
@@ -1978,7 +2164,8 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects all clients from the server with the IP address.
 	 * 
-	 * @param address the IP address of the client.
+	 * @param address
+	 *            the IP address of the client.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 */
@@ -1989,15 +2176,17 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects all clients from the server with the IP address.
 	 * 
-	 * @param host   the IP address of the client.
-	 * @param reason the reason for client disconnection. A <code>null</code> reason
-	 *               will have <code>"Disconnected"</code> be used as the reason
-	 *               instead.
+	 * @param host
+	 *            the IP address of the client.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
-	 * @throws UnknownHostException if no IP address for the <code>host</code> could
-	 *                              be found, or if a scope_id was specified for a
-	 *                              global IPv6 address.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final boolean disconnect(String host, String reason) throws UnknownHostException {
 		if (host == null) {
@@ -2009,15 +2198,17 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects all clients from the server with the IP address.
 	 * 
-	 * @param host   the IP address of the client.
-	 * @param reason the reason for client disconnection. A <code>null</code> reason
-	 *               will have <code>"Disconnected"</code> be used as the reason
-	 *               instead.
+	 * @param host
+	 *            the IP address of the client.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
-	 * @throws UnknownHostException if no IP address for the <code>host</code> could
-	 *                              be found, or if a scope_id was specified for a
-	 *                              global IPv6 address.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final boolean disconnect(String host, Throwable reason) throws UnknownHostException {
 		return this.disconnect(host, reason == null ? null : RakNet.getStackTrace(reason));
@@ -2026,12 +2217,13 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects all clients from the server with the IP address.
 	 * 
-	 * @param host the IP address of the client.
+	 * @param host
+	 *            the IP address of the client.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
-	 * @throws UnknownHostException if no IP address for the <code>host</code> could
-	 *                              be found, or if a scope_id was specified for a
-	 *                              global IPv6 address.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public final boolean disconnect(String host) throws UnknownHostException {
 		return this.disconnect(host, (String) /* Solves ambiguity */ null);
@@ -2040,10 +2232,12 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects all clients from the server with the port.
 	 * 
-	 * @param port   the port.
-	 * @param reason the reason for client disconnection. A <code>null</code> reason
-	 *               will have <code>"Disconnected"</code> be used as the reason
-	 *               instead.
+	 * @param port
+	 *            the port.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 */
@@ -2064,10 +2258,12 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects all clients from the server with the port.
 	 * 
-	 * @param port   the port.
-	 * @param reason the reason for client disconnection. A <code>null</code> reason
-	 *               will have <code>"Disconnected"</code> be used as the reason
-	 *               instead.
+	 * @param port
+	 *            the port.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code>
+	 *            reason will have <code>"Disconnected"</code> be used as the
+	 *            reason instead.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 */
@@ -2078,7 +2274,8 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects all clients from the server with the port.
 	 * 
-	 * @param port the port.
+	 * @param port
+	 *            the port.
 	 * @return <code>true</code> if a client was disconnect, <code>false</code>
 	 *         otherwise.
 	 */
@@ -2089,15 +2286,17 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects a client from the server.
 	 * 
-	 * @param peer   the peer of the client to disconnect.
-	 * @param reason the reason for client disconnection. A <code>null</code> value
-	 *               will have <code>"Disconnected"</code> be used as the reason
-	 *               instead.
-	 * @return <code>true</code> if a client was disconnected, <code>false</code>
-	 *         otherwise.
-	 * @throws IllegalArgumentException if the given peer is fabricated, meaning
-	 *                                  that the peer is not one created by the
-	 *                                  server but rather one created externally.
+	 * @param peer
+	 *            the peer of the client to disconnect.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code> value
+	 *            will have <code>"Disconnected"</code> be used as the reason
+	 *            instead.
+	 * @return <code>true</code> if a client was disconnected,
+	 *         <code>false</code> otherwise.
+	 * @throws IllegalArgumentException
+	 *             if the given peer is fabricated, meaning that the peer is not
+	 *             one created by the server but rather one created externally.
 	 */
 	public final boolean disconnect(RakNetClientPeer peer, String reason) throws IllegalArgumentException {
 		if (peer != null) {
@@ -2112,15 +2311,17 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects a client from the server.
 	 * 
-	 * @param peer   the peer of the client to disconnect.
-	 * @param reason the reason for client disconnection. A <code>null</code> value
-	 *               will have <code>"Disconnected"</code> be used as the reason
-	 *               instead.
-	 * @return <code>true</code> if a client was disconnected, <code>false</code>
-	 *         otherwise.
-	 * @throws IllegalArgumentException if the given peer is fabricated, meaning
-	 *                                  that the peer is not one created by the
-	 *                                  server but rather one created externally.
+	 * @param peer
+	 *            the peer of the client to disconnect.
+	 * @param reason
+	 *            the reason for client disconnection. A <code>null</code> value
+	 *            will have <code>"Disconnected"</code> be used as the reason
+	 *            instead.
+	 * @return <code>true</code> if a client was disconnected,
+	 *         <code>false</code> otherwise.
+	 * @throws IllegalArgumentException
+	 *             if the given peer is fabricated, meaning that the peer is not
+	 *             one created by the server but rather one created externally.
 	 */
 	public final boolean disconnect(RakNetClientPeer peer, Throwable reason) throws IllegalArgumentException {
 		return this.disconnect(peer, reason == null ? null : RakNet.getStackTrace(reason));
@@ -2129,12 +2330,13 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Disconnects a client from the server.
 	 * 
-	 * @param peer the peer of the client to disconnect.
-	 * @return <code>true</code> if a client was disconnected, <code>false</code>
-	 *         otherwise.
-	 * @throws IllegalArgumentException if the given peer is fabricated, meaning
-	 *                                  that the peer is not one created by the
-	 *                                  server but rather one created externally.
+	 * @param peer
+	 *            the peer of the client to disconnect.
+	 * @return <code>true</code> if a client was disconnected,
+	 *         <code>false</code> otherwise.
+	 * @throws IllegalArgumentException
+	 *             if the given peer is fabricated, meaning that the peer is not
+	 *             one created by the server but rather one created externally.
 	 */
 	public final boolean disconnect(RakNetClientPeer peer) {
 		return this.disconnect(peer, (String) /* Solves ambiguity */ null);
@@ -2143,9 +2345,10 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Returns whether or not the specified IP address is blocked.
 	 * 
-	 * @param address the IP address to check.
-	 * @return <code>true</code> if the IP address is blocked, <code>false</code>
-	 *         otherwise.
+	 * @param address
+	 *            the IP address to check.
+	 * @return <code>true</code> if the IP address is blocked,
+	 *         <code>false</code> otherwise.
 	 */
 	public final boolean isAddressBlocked(InetAddress address) {
 		return handler.isAddressBlocked(address);
@@ -2154,15 +2357,20 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Blocks the specified IP address.
 	 * <p>
-	 * All currently connected clients with the IP address (regardless of port) will
-	 * be disconnected with the same reason that the IP address was blocked.
+	 * All currently connected clients with the IP address (regardless of port)
+	 * will be disconnected with the same reason that the IP address was
+	 * blocked.
 	 * 
-	 * @param address the IP address to block.
-	 * @param reason  the reason the address was blocked. A <code>null</code> reason
-	 *                will have <code>"Address blocked"</code> be used as the reason
-	 *                instead.
-	 * @param time    how long the address will blocked in milliseconds.
-	 * @throws NullPointerException if <code>address</code> is <code>null</code>.
+	 * @param address
+	 *            the IP address to block.
+	 * @param reason
+	 *            the reason the address was blocked. A <code>null</code> reason
+	 *            will have <code>"Address blocked"</code> be used as the reason
+	 *            instead.
+	 * @param time
+	 *            how long the address will blocked in milliseconds.
+	 * @throws NullPointerException
+	 *             if <code>address</code> is <code>null</code>.
 	 */
 	public final void blockAddress(InetAddress address, String reason, long time) throws NullPointerException {
 		handler.blockAddress(address, reason, time);
@@ -2171,12 +2379,16 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Blocks the specified IP address.
 	 * <p>
-	 * All currently connected clients with the IP address (regardless of port) will
-	 * be disconnected with the same reason that the IP address was blocked.
+	 * All currently connected clients with the IP address (regardless of port)
+	 * will be disconnected with the same reason that the IP address was
+	 * blocked.
 	 * 
-	 * @param address the IP address to block.
-	 * @param time    how long the address will blocked in milliseconds.
-	 * @throws NullPointerException if <code>address</code> is <code>null</code>.
+	 * @param address
+	 *            the IP address to block.
+	 * @param time
+	 *            how long the address will blocked in milliseconds.
+	 * @throws NullPointerException
+	 *             if <code>address</code> is <code>null</code>.
 	 */
 	public final void blockAddress(InetAddress address, long time) throws NullPointerException {
 		this.blockAddress(address, null, time);
@@ -2185,7 +2397,8 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Unblocks the specified IP address.
 	 * 
-	 * @param address the IP address to unblock.
+	 * @param address
+	 *            the IP address to unblock.
 	 */
 	public final void unblockAddress(InetAddress address) {
 		handler.unblockAddress(address);
@@ -2195,13 +2408,15 @@ public class RakNetServer implements RakNetServerListener {
 	 * Called by the {@link RakNetServerHandler} when it catches a
 	 * <code>Throwable</code> while handling a packet.
 	 * 
-	 * @param address the address that caused the exception.
-	 * @param cause   the <code>Throwable</code> caught by the handler.
-	 * @throws NullPointerException if the cause <code>address</code> or
-	 *                              <code>cause</code> are <code>null</code>.
+	 * @param address
+	 *            the address that caused the exception.
+	 * @param cause
+	 *            the <code>Throwable</code> caught by the handler.
+	 * @throws NullPointerException
+	 *             if the cause <code>address</code> or <code>cause</code> are
+	 *             <code>null</code>.
 	 */
-	protected final void handleHandlerException(InetSocketAddress address, Throwable cause)
-			throws NullPointerException {
+	protected final void handleHandlerException(InetSocketAddress address, Throwable cause) throws NullPointerException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
 		} else if (cause == null) {
@@ -2216,10 +2431,13 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Handles a packet received by the {@link RakNetServerHandler}.
 	 * 
-	 * @param sender the address of the sender.
-	 * @param packet the packet to handle.
-	 * @throws NullPointerException if the <code>sender</code> or
-	 *                              <code>packet</code> are <code>null</code>.
+	 * @param sender
+	 *            the address of the sender.
+	 * @param packet
+	 *            the packet to handle.
+	 * @throws NullPointerException
+	 *             if the <code>sender</code> or <code>packet</code> are
+	 *             <code>null</code>.
 	 */
 	protected final void handleMessage(InetSocketAddress sender, RakNetPacket packet) throws NullPointerException {
 		if (sender == null) {
@@ -2228,14 +2446,11 @@ public class RakNetServer implements RakNetServerListener {
 			throw new NullPointerException("Packet cannot be null");
 		} else if (clients.containsKey(sender)) {
 			clients.get(sender).handleInternal(packet);
-		} else if (packet.getId() == RakNetPacket.ID_UNCONNECTED_PING
-				|| packet.getId() == RakNetPacket.ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
+		} else if (packet.getId() == RakNetPacket.ID_UNCONNECTED_PING || packet.getId() == RakNetPacket.ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
 			UnconnectedPing ping = new UnconnectedPing(packet);
 			ping.decode();
-			if (!ping.failed()
-					&& (packet.getId() == RakNetPacket.ID_UNCONNECTED_PING
-							|| (clients.size() < maxConnections || maxConnections < 0))
-					&& broadcastingEnabled == true && ping.magic == true) {
+			if (!ping.failed() && (packet.getId() == RakNetPacket.ID_UNCONNECTED_PING || (clients.size() < maxConnections || maxConnections < 0)) && broadcastingEnabled == true
+					&& ping.magic == true) {
 				ServerPing pingEvent = new ServerPing(sender, ping.connectionType, identifier);
 				this.callEvent(listener -> listener.onPing(this, pingEvent));
 				if (pingEvent.getIdentifier() != null) {
@@ -2282,23 +2497,18 @@ public class RakNetServer implements RakNetServerListener {
 		} else if (packet.getId() == RakNetPacket.ID_OPEN_CONNECTION_REQUEST_2) {
 			OpenConnectionRequestTwo connectionRequestTwo = new OpenConnectionRequestTwo(packet);
 			connectionRequestTwo.decode();
-			if (!connectionRequestTwo.failed() && connectionRequestTwo.magic == true
-					&& connectionRequestTwo.maximumTransferUnit >= RakNet.MINIMUM_MTU_SIZE) {
+			if (!connectionRequestTwo.failed() && connectionRequestTwo.magic == true && connectionRequestTwo.maximumTransferUnit >= RakNet.MINIMUM_MTU_SIZE) {
 				RakNetPacket errorPacket = this.validateSender(sender, connectionRequestTwo.clientGuid);
 				if (errorPacket == null) {
 					OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo();
 					connectionResponseTwo.serverGuid = this.guid;
 					connectionResponseTwo.clientAddress = sender;
-					connectionResponseTwo.maximumTransferUnit = Math.min(connectionRequestTwo.maximumTransferUnit,
-							maximumTransferUnit);
+					connectionResponseTwo.maximumTransferUnit = Math.min(connectionRequestTwo.maximumTransferUnit, maximumTransferUnit);
 					connectionResponseTwo.encode();
 					if (!connectionResponseTwo.failed()) {
-						this.callEvent(
-								listener -> listener.onConnect(this, sender, connectionRequestTwo.connectionType));
-						clients.put(sender,
-								new RakNetClientPeer(this, connectionRequestTwo.connectionType,
-										connectionRequestTwo.clientGuid, connectionResponseTwo.maximumTransferUnit,
-										channel, sender));
+						this.callEvent(listener -> listener.onConnect(this, sender, connectionRequestTwo.connectionType));
+						clients.put(sender, new RakNetClientPeer(this, connectionRequestTwo.connectionType, connectionRequestTwo.clientGuid,
+								connectionResponseTwo.maximumTransferUnit, channel, sender));
 						this.sendNettyMessage(connectionResponseTwo, sender);
 					}
 				} else {
@@ -2312,15 +2522,18 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Validates the sender of a packet.
 	 * <p>
-	 * This is called throughout initial client connection to make sure there are no
-	 * issues.
+	 * This is called throughout initial client connection to make sure there
+	 * are no issues.
 	 * 
-	 * @param sender the address of the packet sender.
-	 * @param guid   the globally unique ID of the sender, {@value #NO_GUID} if
-	 *               there is none.
-	 * @return the packet to respond with if there was an error, <code>null</code>
-	 *         if there are no issues.
-	 * @throws NullPointerException if the <code>sender</code> is <code>null</code>.
+	 * @param sender
+	 *            the address of the packet sender.
+	 * @param guid
+	 *            the globally unique ID of the sender, {@value #NO_GUID} if
+	 *            there is none.
+	 * @return the packet to respond with if there was an error,
+	 *         <code>null</code> if there are no issues.
+	 * @throws NullPointerException
+	 *             if the <code>sender</code> is <code>null</code>.
 	 */
 	private final RakNetPacket validateSender(InetSocketAddress sender, long guid) throws NullPointerException {
 		if (sender == null) {
@@ -2341,16 +2554,19 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Sends a Netty message over the channel raw.
 	 * <p>
-	 * This should be used sparingly, as if it is used incorrectly it could break
-	 * client peers entirely. In order to send a message to a peer, use one of the
+	 * This should be used sparingly, as if it is used incorrectly it could
+	 * break client peers entirely. In order to send a message to a peer, use
+	 * one of the
 	 * {@link com.whirvis.jraknet.peer.RakNetPeer#sendMessage(com.whirvis.jraknet.protocol.Reliability, io.netty.buffer.ByteBuf)
 	 * sendMessage()} methods.
 	 * 
-	 * @param buf     the buffer to send.
-	 * @param address the address to send the buffer to.
-	 * @throws NullPointerException if the <code>buf</code>, <code>address</code>,
-	 *                              or IP address of the <code>address</code> are
-	 *                              <code>null</code>.
+	 * @param buf
+	 *            the buffer to send.
+	 * @param address
+	 *            the address to send the buffer to.
+	 * @throws NullPointerException
+	 *             if the <code>buf</code>, <code>address</code>, or IP address
+	 *             of the <code>address</code> are <code>null</code>.
 	 */
 	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) throws NullPointerException {
 		if (buf == null) {
@@ -2361,23 +2577,25 @@ public class RakNetServer implements RakNetServerListener {
 			throw new NullPointerException("IP address cannot be null");
 		}
 		channel.writeAndFlush(new DatagramPacket(buf, address));
-		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to "
-				+ address);
+		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to " + address);
 	}
 
 	/**
 	 * Sends a Netty message over the channel raw.
 	 * <p>
-	 * This should be used sparingly, as if it is used incorrectly it could break
-	 * client peers entirely. In order to send a message to a peer, use one of the
+	 * This should be used sparingly, as if it is used incorrectly it could
+	 * break client peers entirely. In order to send a message to a peer, use
+	 * one of the
 	 * {@link com.whirvis.jraknet.peer.RakNetPeer#sendMessage(Reliability, Packet)
 	 * sendMessage()} methods.
 	 * 
-	 * @param packet  the packet to send.
-	 * @param address the address to send the packet to.
-	 * @throws NullPointerException if the <code>packet</code>,
-	 *                              <code>address</code>, or IP address of the
-	 *                              <code>address</code> are <code>null</code>.
+	 * @param packet
+	 *            the packet to send.
+	 * @param address
+	 *            the address to send the packet to.
+	 * @throws NullPointerException
+	 *             if the <code>packet</code>, <code>address</code>, or IP
+	 *             address of the <code>address</code> are <code>null</code>.
 	 */
 	public final void sendNettyMessage(Packet packet, InetSocketAddress address) throws NullPointerException {
 		if (packet == null) {
@@ -2389,15 +2607,19 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Sends a Netty message over the channel raw.
 	 * <p>
-	 * This should be used sparingly, as if it is used incorrectly it could break
-	 * client peers entirely. In order to send a message to a peer, use one of the
+	 * This should be used sparingly, as if it is used incorrectly it could
+	 * break client peers entirely. In order to send a message to a peer, use
+	 * one of the
 	 * {@link com.whirvis.jraknet.peer.RakNetPeer#sendMessage(com.whirvis.jraknet.protocol.Reliability, int)
 	 * sendMessage()} methods.
 	 * 
-	 * @param packetId the packet ID to send.
-	 * @param address  the address to send the packet to.
-	 * @throws NullPointerException if the <code>address</code> or IP address of the
-	 *                              <code>address</code> are <code>null</code>.
+	 * @param packetId
+	 *            the packet ID to send.
+	 * @param address
+	 *            the address to send the packet to.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> or IP address of the
+	 *             <code>address</code> are <code>null</code>.
 	 */
 	public final void sendNettyMessage(int packetId, InetSocketAddress address) throws NullPointerException {
 		this.sendNettyMessage(new RakNetPacket(packetId), address);
@@ -2416,8 +2638,10 @@ public class RakNetServer implements RakNetServerListener {
 	/**
 	 * Starts the server.
 	 * 
-	 * @throws IllegalStateException if the server is already running.
-	 * @throws RakNetException       if an error occurs during startup.
+	 * @throws IllegalStateException
+	 *             if the server is already running.
+	 * @throws RakNetException
+	 *             if an error occurs during startup.
 	 */
 	public void start() throws IllegalStateException, RakNetException {
 		if (running == true) {
@@ -2433,20 +2657,16 @@ public class RakNetServer implements RakNetServerListener {
 
 			// Create bootstrap and bind channel
 			bootstrap.channel(NioDatagramChannel.class).group(group);
-			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false)
-					.option(ChannelOption.SO_SNDBUF, maximumTransferUnit)
-					.option(ChannelOption.SO_RCVBUF, maximumTransferUnit)
-					.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(maximumTransferUnit));
-			this.channel = (bindingAddress != null ? bootstrap.bind(bindingAddress) : bootstrap.bind(0)).sync()
-					.channel();
+			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false).option(ChannelOption.SO_SNDBUF, maximumTransferUnit)
+					.option(ChannelOption.SO_RCVBUF, maximumTransferUnit).option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(maximumTransferUnit));
+			this.channel = (bindingAddress != null ? bootstrap.bind(bindingAddress) : bootstrap.bind(0)).sync().channel();
 			this.bindAddress = (InetSocketAddress) channel.localAddress();
 			this.running = true;
 			log.debug("Created and bound bootstrap");
 
 			// Create and start peer update thread
 			RakNetServer server = this;
-			this.peerThread = new Thread(
-					RakNetServer.class.getSimpleName() + "-Peer-Thread-" + Long.toHexString(guid).toUpperCase()) {
+			this.peerThread = new Thread(RakNetServer.class.getSimpleName() + "-Peer-Thread-" + Long.toHexString(guid).toUpperCase()) {
 
 				@Override
 				public void run() {
@@ -2463,8 +2683,7 @@ public class RakNetServer implements RakNetServerListener {
 								try {
 									peer.update();
 									if (peer.getPacketsReceivedThisSecond() >= RakNet.getMaxPacketsPerSecond()) {
-										server.blockAddress(peer.getInetAddress(), "Too many packets",
-												RakNet.MAX_PACKETS_PER_SECOND_BLOCK);
+										server.blockAddress(peer.getInetAddress(), "Too many packets", RakNet.MAX_PACKETS_PER_SECOND_BLOCK);
 									}
 								} catch (Throwable throwable) {
 									server.callEvent(listener -> listener.onPeerException(server, peer, throwable));
@@ -2476,13 +2695,16 @@ public class RakNetServer implements RakNetServerListener {
 						/*
 						 * Disconnect peers.
 						 * 
-						 * This must be done here as simply removing a client from the clients map would
-						 * be an incorrect way of disconnecting a client. This means that calling the
-						 * disconnect() method is required. However, calling it while in the loop would
-						 * cause a ConcurrentModifactionException. To get around this, the clients that
-						 * need to be disconnected are properly disconnected after the loop is finished.
-						 * This is done simply by having them and their disconnect reason be put in a
-						 * disconnection map.
+						 * This must be done here as simply removing a client
+						 * from the clients map would be an incorrect way of
+						 * disconnecting a client. This means that calling the
+						 * disconnect() method is required. However, calling it
+						 * while in the loop would cause a
+						 * ConcurrentModifactionException. To get around this,
+						 * the clients that need to be disconnected are properly
+						 * disconnected after the loop is finished. This is done
+						 * simply by having them and their disconnect reason be
+						 * put in a disconnection map.
 						 */
 						if (disconnected.size() > 0) {
 							for (RakNetClientPeer peer : disconnected.keySet()) {
@@ -2510,9 +2732,11 @@ public class RakNetServer implements RakNetServerListener {
 	 * All currently connected clients will be disconnected with the same reason
 	 * used for shutdown.
 	 * 
-	 * @param reason the reason for shutdown. A <code>null</code> reason will have
-	 *               <code>"Server shutdown"</code> be used as the reason instead.
-	 * @throws IllegalStateException if the server is not running.
+	 * @param reason
+	 *            the reason for shutdown. A <code>null</code> reason will have
+	 *            <code>"Server shutdown"</code> be used as the reason instead.
+	 * @throws IllegalStateException
+	 *             if the server is not running.
 	 */
 	public void shutdown(String reason) throws IllegalStateException {
 		if (running == false) {
@@ -2547,9 +2771,11 @@ public class RakNetServer implements RakNetServerListener {
 	 * All currently connected clients will be disconnected with the same reason
 	 * used for shutdown.
 	 * 
-	 * @param reason the reason for shutdown. A <code>null</code> reason will have
-	 *               <code>"Server shutdown"</code> be used as the reason instead.
-	 * @throws IllegalStateException if the server is not running.
+	 * @param reason
+	 *            the reason for shutdown. A <code>null</code> reason will have
+	 *            <code>"Server shutdown"</code> be used as the reason instead.
+	 * @throws IllegalStateException
+	 *             if the server is not running.
 	 */
 	public final void shutdown(Throwable reason) throws IllegalStateException {
 		this.shutdown(reason != null ? RakNet.getStackTrace(reason) : null);
@@ -2561,7 +2787,8 @@ public class RakNetServer implements RakNetServerListener {
 	 * All currently connected clients will be disconnected with the same reason
 	 * used for shutdown.
 	 * 
-	 * @throws IllegalStateException if the server is not running.
+	 * @throws IllegalStateException
+	 *             if the server is not running.
 	 */
 	public final void shutdown() throws IllegalStateException {
 		this.shutdown((String) /* Solves ambiguity */ null);
@@ -2569,12 +2796,10 @@ public class RakNetServer implements RakNetServerListener {
 
 	@Override
 	public String toString() {
-		return "RakNetServer [bindingAddress=" + bindingAddress + ", guid=" + guid + ", log=" + log + ", pongId="
-				+ pongId + ", timestamp=" + timestamp + ", maximumTransferUnit=" + maximumTransferUnit
-				+ ", maxConnections=" + maxConnections + ", broadcastingEnabled=" + broadcastingEnabled
-				+ ", identifier=" + identifier + ", bindAddress=" + bindAddress + ", running=" + running
-				+ ", getProtocolVersion()=" + getProtocolVersion() + ", getTimestamp()=" + getTimestamp()
-				+ ", getAddress()=" + getAddress() + ", getClientCount()=" + getClientCount() + "]";
+		return "RakNetServer [bindingAddress=" + bindingAddress + ", guid=" + guid + ", log=" + log + ", pongId=" + pongId + ", timestamp=" + timestamp + ", maximumTransferUnit="
+				+ maximumTransferUnit + ", maxConnections=" + maxConnections + ", broadcastingEnabled=" + broadcastingEnabled + ", identifier=" + identifier + ", bindAddress="
+				+ bindAddress + ", running=" + running + ", getProtocolVersion()=" + getProtocolVersion() + ", getTimestamp()=" + getTimestamp() + ", getAddress()=" + getAddress()
+				+ ", getClientCount()=" + getClientCount() + "]";
 	}
 
 }

@@ -48,23 +48,24 @@ public final class BlockedAddress {
 	/**
 	 * Creates a blocked address.
 	 * 
-	 * @param time the amount of time until the client is unblocked in milliseconds.
-	 * @throws IllegalArgumentException if the <code>time</code> is less than
-	 *                                  <code>0</code> and is not equal to
-	 *                                  {@value #PERMANENT_BLOCK}.
+	 * @param time
+	 *            the amount of time until the client is unblocked in
+	 *            milliseconds.
+	 * @throws IllegalArgumentException
+	 *             if the <code>time</code> is less than <code>0</code> and is
+	 *             not equal to {@value #PERMANENT_BLOCK}.
 	 */
 	public BlockedAddress(long time) throws IllegalArgumentException {
 		if (time <= 0 && time != PERMANENT_BLOCK) {
-			throw new IllegalArgumentException(
-					"Block time must be greater than 0 or equal to " + PERMANENT_BLOCK + " for a permanent block");
+			throw new IllegalArgumentException("Block time must be greater than 0 or equal to " + PERMANENT_BLOCK + " for a permanent block");
 		}
 		this.startTime = System.currentTimeMillis();
 		this.time = time;
 	}
 
 	/**
-	 * Returns the time the address was first blocked. This value is the time that
-	 * the original blocked address object was created, according to
+	 * Returns the time the address was first blocked. This value is the time
+	 * that the original blocked address object was created, according to
 	 * {@link System#currentTimeMillis()}.
 	 * 
 	 * @return the time the address was first blocked.

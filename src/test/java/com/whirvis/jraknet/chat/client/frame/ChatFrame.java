@@ -58,8 +58,8 @@ import com.whirvis.jraknet.chat.client.ChatClient;
 public final class ChatFrame extends JFrame {
 
 	/**
-	 * The render used in place of the default so that the text channels list uses
-	 * the actual name of the channel, rather than defaulting to its
+	 * The render used in place of the default so that the text channels list
+	 * uses the actual name of the channel, rather than defaulting to its
 	 * {@link TextChannel#toString()} method.
 	 * 
 	 * @author Whirvis T. Wheatley
@@ -70,8 +70,7 @@ public final class ChatFrame extends JFrame {
 		private static final long serialVersionUID = -3378705654945270562L;
 
 		@Override
-		public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
-				boolean cellHasFocus) {
+		public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 			super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 			if (value != null) {
 				this.setText(((TextChannel) value).getName());
@@ -226,9 +225,10 @@ public final class ChatFrame extends JFrame {
 	/**
 	 * Sets the displayed server name.
 	 * 
-	 * @param serverName the name to display.
-	 * @throws NullPointerException if the <code>serverName</code> is
-	 *                              <code>null</code>.
+	 * @param serverName
+	 *            the name to display.
+	 * @throws NullPointerException
+	 *             if the <code>serverName</code> is <code>null</code>.
 	 */
 	public void setServerName(String serverName) throws NullPointerException {
 		if (serverName == null) {
@@ -240,9 +240,10 @@ public final class ChatFrame extends JFrame {
 	/**
 	 * Sets the displayed server message of the day.
 	 * 
-	 * @param serverMotd the message of the day to display.
-	 * @throws NullPointerException if the <code>serverMotd</code> is
-	 *                              <code>null</code>.
+	 * @param serverMotd
+	 *            the message of the day to display.
+	 * @throws NullPointerException
+	 *             if the <code>serverMotd</code> is <code>null</code>.
 	 */
 	public void setServerMotd(String serverMotd) throws NullPointerException {
 		if (serverMotd == null) {
@@ -254,9 +255,10 @@ public final class ChatFrame extends JFrame {
 	/**
 	 * Sets the current displayed channels.
 	 * 
-	 * @param channels the channels to display.
-	 * @throws NullPointerException if the <code>channels</code> are
-	 *                              <code>null</code>.
+	 * @param channels
+	 *            the channels to display.
+	 * @throws NullPointerException
+	 *             if the <code>channels</code> are <code>null</code>.
 	 */
 	public void setChannels(TextChannel[] channels) throws NullPointerException {
 		if (channels == null) {
@@ -268,8 +270,7 @@ public final class ChatFrame extends JFrame {
 				cleansed.add(channel);
 			}
 		}
-		cmbTextChannels
-				.setModel(new DefaultComboBoxModel<TextChannel>(cleansed.toArray(new TextChannel[cleansed.size()])));
+		cmbTextChannels.setModel(new DefaultComboBoxModel<TextChannel>(cleansed.toArray(new TextChannel[cleansed.size()])));
 		if (cmbTextChannels.getModel().getSize() > 0) {
 			cmbTextChannels.setSelectedIndex(0);
 		}
@@ -278,9 +279,10 @@ public final class ChatFrame extends JFrame {
 	/**
 	 * Sets the current channel.
 	 * 
-	 * @param channel the channel to display.
-	 * @throws NullPointerException if the <code>channel</code> is
-	 *                              <code>null</code>.
+	 * @param channel
+	 *            the channel to display.
+	 * @throws NullPointerException
+	 *             if the <code>channel</code> is <code>null</code>.
 	 */
 	public void updateChannel(TextChannel channel) throws NullPointerException {
 		if (channel == null) {
@@ -292,9 +294,10 @@ public final class ChatFrame extends JFrame {
 	/**
 	 * Sets the displayed instructions.
 	 * 
-	 * @param instructions the instructions to display.
-	 * @throws NullPointerException if the <code>instructions</code> are
-	 *                              <code>null</code>.
+	 * @param instructions
+	 *            the instructions to display.
+	 * @throws NullPointerException
+	 *             if the <code>instructions</code> are <code>null</code>.
 	 */
 	public void setInstructions(String instructions) throws NullPointerException {
 		txtpnInstructions.setText(instructions);
@@ -303,8 +306,9 @@ public final class ChatFrame extends JFrame {
 	/**
 	 * Enables/disables server interaction.
 	 * 
-	 * @param connected <code>true</code> to enable server interaction,
-	 *                  <code>false</code> to disable it.
+	 * @param connected
+	 *            <code>true</code> to enable server interaction,
+	 *            <code>false</code> to disable it.
 	 */
 	public void toggleServerInteraction(boolean connected) {
 		if (this.connected != connected) {
@@ -329,11 +333,13 @@ public final class ChatFrame extends JFrame {
 	}
 
 	/**
-	 * Updates the listeners required for the frame to function properly based on
-	 * the specified client.
+	 * Updates the listeners required for the frame to function properly based
+	 * on the specified client.
 	 * 
-	 * @param client the client to assign the listeners to.
-	 * @throws NullPointerException if the <code>client</code> is <code>null</code>.
+	 * @param client
+	 *            the client to assign the listeners to.
+	 * @throws NullPointerException
+	 *             if the <code>client</code> is <code>null</code>.
 	 */
 	public void updateListeners(ChatClient client) throws NullPointerException {
 		if (client == null) {
@@ -348,9 +354,10 @@ public final class ChatFrame extends JFrame {
 	/**
 	 * Displays a message.
 	 * 
-	 * @param message the message to display.
-	 * @throws NullPointerException if the <code>message</code> is
-	 *                              <code>null</code>.
+	 * @param message
+	 *            the message to display.
+	 * @throws NullPointerException
+	 *             if the <code>message</code> is <code>null</code>.
 	 */
 	public void displayMessage(String message) throws NullPointerException {
 		if (message == null) {
@@ -362,10 +369,13 @@ public final class ChatFrame extends JFrame {
 	/**
 	 * Displays an error with the title and message.
 	 * 
-	 * @param title the title of the error.
-	 * @param error the error message.
-	 * @throws NullPointerException if the <code>title</code> or <code>error</code>
-	 *                              message are <code>null</code>.
+	 * @param title
+	 *            the title of the error.
+	 * @param error
+	 *            the error message.
+	 * @throws NullPointerException
+	 *             if the <code>title</code> or <code>error</code> message are
+	 *             <code>null</code>.
 	 */
 	public void displayError(String title, String error) throws NullPointerException {
 		if (title == null) {
@@ -379,9 +389,10 @@ public final class ChatFrame extends JFrame {
 	/**
 	 * Displays an error using the exception.
 	 * 
-	 * @param throwable the caught exception.
-	 * @throws NullPointerException if the <code>throwable</code> is
-	 *                              <code>null</code>.
+	 * @param throwable
+	 *            the caught exception.
+	 * @throws NullPointerException
+	 *             if the <code>throwable</code> is <code>null</code>.
 	 */
 	public void displayError(Throwable throwable) throws NullPointerException {
 		if (throwable == null) {

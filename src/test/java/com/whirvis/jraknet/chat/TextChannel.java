@@ -52,10 +52,12 @@ public final class TextChannel {
 	/**
 	 * Creates a server channel.
 	 * 
-	 * @param channel the channel.
-	 * @param name    the name.
-	 * @throws InvalidChannelException if the channel is higher than
-	 *                                 {@value RakNet#CHANNEL_COUNT}.
+	 * @param channel
+	 *            the channel.
+	 * @param name
+	 *            the name.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public TextChannel(int channel, String name) throws InvalidChannelException {
 		this.channel = channel;
@@ -88,8 +90,10 @@ public final class TextChannel {
 	/**
 	 * Sets the name of the channel.
 	 * 
-	 * @param name the new channel name.
-	 * @throws NullPointerException if the <code>name</code> is <code>null</code>.
+	 * @param name
+	 *            the new channel name.
+	 * @throws NullPointerException
+	 *             if the <code>name</code> is <code>null</code>.
 	 */
 	public void setName(String name) throws NullPointerException {
 		if (name == null) {
@@ -101,9 +105,10 @@ public final class TextChannel {
 	/**
 	 * Adds a chat message to the server channel.
 	 * 
-	 * @param message the message to add.
-	 * @throws NullPointerException if the <code>message</code> is
-	 *                              <code>null</code>.
+	 * @param message
+	 *            the message to add.
+	 * @throws NullPointerException
+	 *             if the <code>message</code> is <code>null</code>.
 	 */
 	public void addChatMessage(String message) throws NullPointerException {
 		if (message == null) {

@@ -59,8 +59,9 @@ public final class LoginFailure extends ChatPacket {
 	/**
 	 * Creates an <code>LOGIN_FAILURE</code> packet to be decoded.
 	 * 
-	 * @param packet the original packet whose data will be read from in the
-	 *               {@link #decode()} method.
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
 	 */
 	public LoginFailure(Packet packet) {
 		super(packet);

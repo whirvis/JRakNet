@@ -49,8 +49,10 @@ public class Identifier implements Cloneable {
 	/**
 	 * Creates an identifier.
 	 * 
-	 * @param identifier     the identifier text.
-	 * @param connectionType the protocol implementation that sent the identifier.
+	 * @param identifier
+	 *            the identifier text.
+	 * @param connectionType
+	 *            the protocol implementation that sent the identifier.
 	 */
 	public Identifier(String identifier, ConnectionType connectionType) {
 		this.identifier = identifier;
@@ -62,7 +64,8 @@ public class Identifier implements Cloneable {
 	 * {@link com.whirvis.jraknet.protocol.ConnectionType#JRAKNET
 	 * ConnectionType.JRAKNET} connection type.
 	 * 
-	 * @param identifier the identifier text.
+	 * @param identifier
+	 *            the identifier text.
 	 */
 	public Identifier(String identifier) {
 		this.identifier = identifier;
@@ -72,7 +75,8 @@ public class Identifier implements Cloneable {
 	/**
 	 * Creates an identifier from another identifier.
 	 * 
-	 * @param identifier the identifier to grab the information from.
+	 * @param identifier
+	 *            the identifier to grab the information from.
 	 */
 	public Identifier(Identifier identifier) {
 		this.identifier = identifier.identifier;
@@ -80,8 +84,8 @@ public class Identifier implements Cloneable {
 	}
 
 	/**
-	 * Creates an identifier with the identifier text being set to <code>null</code>
-	 * and the connection type defaulting to the
+	 * Creates an identifier with the identifier text being set to
+	 * <code>null</code> and the connection type defaulting to the
 	 * {@link com.whirvis.jraknet.protocol.ConnectionType#JRAKNET
 	 * ConnectionType.JRAKNET} connection type.
 	 */

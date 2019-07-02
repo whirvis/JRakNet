@@ -60,13 +60,15 @@ public final class PowerShellAdministrativeClient {
 	}
 
 	/**
-	 * Converts the <code>InputStream</code> to a string. This will result in the
-	 * closing of the stream, as all available data will be read from it during
-	 * conversion.
+	 * Converts the <code>InputStream</code> to a string. This will result in
+	 * the closing of the stream, as all available data will be read from it
+	 * during conversion.
 	 * 
-	 * @param in the stream to convert.
+	 * @param in
+	 *            the stream to convert.
 	 * @return the converted stream.
-	 * @throws IOException if an I/O error occurs.
+	 * @throws IOException
+	 *             if an I/O error occurs.
 	 */
 	private static String ioStr(InputStream in) throws IOException {
 		String str = new String();
@@ -83,14 +85,16 @@ public final class PowerShellAdministrativeClient {
 	}
 
 	/**
-	 * The main method for the administrative PowerShell process. This must act as a
-	 * main method since it is called through the JVM as a normal process.
+	 * The main method for the administrative PowerShell process. This must act
+	 * as a main method since it is called through the JVM as a normal process.
 	 * 
-	 * @param args the arguments. The first should be the port the PowerShell server
-	 *             is listening on, with the second being the password, and the
-	 *             final being the command itself terminated by an
-	 *             <code>ETX 0x03</code> character.
-	 * @throws IOException if an I/O error occurs.
+	 * @param args
+	 *            the arguments. The first should be the port the PowerShell
+	 *            server is listening on, with the second being the password,
+	 *            and the final being the command itself terminated by an
+	 *            <code>ETX 0x03</code> character.
+	 * @throws IOException
+	 *             if an I/O error occurs.
 	 */
 	public static void main(String[] args) throws IOException {
 		Socket client = null;

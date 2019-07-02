@@ -63,7 +63,8 @@ public class CustomPacket extends RakNetPacket {
 	/**
 	 * Calculates the size of the packet if it had been encoded.
 	 * 
-	 * @param packets the packets inside the custom packet.
+	 * @param packets
+	 *            the packets inside the custom packet.
 	 * @return the size of the packet if it had been encoded.
 	 */
 	public static int size(EncapsulatedPacket... packets) {
@@ -82,7 +83,8 @@ public class CustomPacket extends RakNetPacket {
 	public int sequenceId;
 
 	/**
-	 * If encoding, these are the packets that will be encoded into the packet. <br>
+	 * If encoding, these are the packets that will be encoded into the packet.
+	 * <br>
 	 * If decoding, these are the packets decoded from the packet.
 	 */
 	public EncapsulatedPacket[] messages;
@@ -95,11 +97,12 @@ public class CustomPacket extends RakNetPacket {
 	/**
 	 * Creates a custom packet to be encoded.
 	 * 
-	 * @param type the type of custom packet being in between
+	 * @param type
+	 *            the type of custom packet being in between
+	 *            <code>ID_CUSTOM_0</code> and <code>ID_CUSTOM_F</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>type</code> is not in between code
 	 *             <code>ID_CUSTOM_0</code> and <code>ID_CUSTOM_F</code>.
-	 * @throws IllegalArgumentException if the <code>type</code> is not in between
-	 *                                  code <code>ID_CUSTOM_0</code> and
-	 *                                  <code>ID_CUSTOM_F</code>.
 	 * @see #encode()
 	 */
 	protected CustomPacket(int type) throws IllegalArgumentException {
@@ -112,8 +115,9 @@ public class CustomPacket extends RakNetPacket {
 	/**
 	 * Creates a <code>CUSTOM</code> packet to be decoded.
 	 * 
-	 * @param packet the original packet whose data will be read from in the
-	 *               {@link #decode()} method.
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
 	 */
 	public CustomPacket(Packet packet) {
 		super(packet);

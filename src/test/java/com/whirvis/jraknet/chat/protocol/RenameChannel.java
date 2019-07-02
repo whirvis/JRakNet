@@ -64,8 +64,9 @@ public final class RenameChannel extends ChatPacket {
 	/**
 	 * Creates an <code>RENAME_CHANNEL</code> packet to be decoded.
 	 * 
-	 * @param packet the original packet whose data will be read from in the
-	 *               {@link #decode()} method.
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
 	 */
 	public RenameChannel(Packet packet) {
 		super(packet);

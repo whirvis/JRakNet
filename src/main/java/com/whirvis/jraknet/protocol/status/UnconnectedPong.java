@@ -91,8 +91,9 @@ public final class UnconnectedPong extends RakNetPacket implements Failable {
 	/**
 	 * Creates an <code>UNCONNECTED_PONG</code> packet to be decoded.
 	 * 
-	 * @param packet the original packet whose data will be read from in the
-	 *               {@link #decode()} method.
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
 	 */
 	public UnconnectedPong(Packet packet) {
 		super(packet);

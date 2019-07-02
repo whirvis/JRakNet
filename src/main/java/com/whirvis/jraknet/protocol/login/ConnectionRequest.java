@@ -56,9 +56,9 @@ public final class ConnectionRequest extends RakNetPacket {
 	/**
 	 * Whether or not security should be used.
 	 * <p>
-	 * Since JRakNet does not have this feature implemented, <code>false</code> will
-	 * always be the value used when sending this value. However, this value can be
-	 * <code>true</code> if it is being set through decoding.
+	 * Since JRakNet does not have this feature implemented, <code>false</code>
+	 * will always be the value used when sending this value. However, this
+	 * value can be <code>true</code> if it is being set through decoding.
 	 */
 	public boolean useSecurity;
 
@@ -74,8 +74,9 @@ public final class ConnectionRequest extends RakNetPacket {
 	/**
 	 * Creates a <code>CONNECTION_REQUEST</code> packet to be decoded.
 	 * 
-	 * @param packet the original packet whose data will be read from in the
-	 *               {@link #decode()} method.
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
 	 */
 	public ConnectionRequest(Packet packet) {
 		super(packet);

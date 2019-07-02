@@ -90,7 +90,8 @@ public final class PowerShellCommand {
 	public static final String RESULT_COMMAND_EXECUTION_FAILED = "Command execution failed.";
 
 	/**
-	 * Command execution was successful, however getting the results was a failure.
+	 * Command execution was successful, however getting the results was a
+	 * failure.
 	 */
 	public static final String RESULT_COMMAND_SUCCEEDED_FAILED_TO_GET_RESULT = "Command succeeded, but failed to get result.";
 
@@ -116,8 +117,8 @@ public final class PowerShellCommand {
 	/**
 	 * Returns the currently running JAR file.
 	 * 
-	 * @return the currently running JAR file, <code>null</code> if the application
-	 *         is not being run from a JAR.
+	 * @return the currently running JAR file, <code>null</code> if the
+	 *         application is not being run from a JAR.
 	 * @see #getRunningLocation()
 	 */
 	private static File getRunningJarFile() {
@@ -129,15 +130,17 @@ public final class PowerShellCommand {
 	}
 
 	/**
-	 * Converts the specified {@link InputStream} to a string. This will result in
-	 * the closing of the stream, as all available data will be read from it during
-	 * conversion.
+	 * Converts the specified {@link InputStream} to a string. This will result
+	 * in the closing of the stream, as all available data will be read from it
+	 * during conversion.
 	 * 
-	 * @param in the stream to convert.
+	 * @param in
+	 *            the stream to convert.
 	 * @return the converted string.
-	 * @throws NullPointerException if the <code>in</code> stream is
-	 *                              <code>null</code>.
-	 * @throws IOException          if an I/O error occurs.
+	 * @throws NullPointerException
+	 *             if the <code>in</code> stream is <code>null</code>.
+	 * @throws IOException
+	 *             if an I/O error occurs.
 	 */
 	private static String ioStr(InputStream in) throws NullPointerException, IOException {
 		if (in == null) {
@@ -165,8 +168,9 @@ public final class PowerShellCommand {
 	/**
 	 * Creates a PowerShell command that can be executed.
 	 * 
-	 * @param command the command string. To allow for the use of arguments, use
-	 *                {@value #ARGUMENT_PREFIX} before the argument name.
+	 * @param command
+	 *            the command string. To allow for the use of arguments, use
+	 *            {@value #ARGUMENT_PREFIX} before the argument name.
 	 */
 	public PowerShellCommand(String command) {
 		this.log = LogManager.getLogger("PowerShellCommand-" + commandIndex++);
@@ -186,11 +190,14 @@ public final class PowerShellCommand {
 	/**
 	 * Sets an argument.
 	 * 
-	 * @param argumentName the argument name.
-	 * @param value        the value.
+	 * @param argumentName
+	 *            the argument name.
+	 * @param value
+	 *            the value.
 	 * @return the command.
-	 * @throws IllegalArgumentException if the <code>argumentName</code> does not
-	 *                                  begin with {@value #ARGUMENT_PREFIX}.
+	 * @throws IllegalArgumentException
+	 *             if the <code>argumentName</code> does not begin with
+	 *             {@value #ARGUMENT_PREFIX}.
 	 */
 	public PowerShellCommand setArgument(String argumentName, Object value) throws IllegalArgumentException {
 		if (!argumentName.startsWith(ARGUMENT_PREFIX)) {
@@ -209,12 +216,13 @@ public final class PowerShellCommand {
 	/**
 	 * Returns the value of the argument.
 	 * 
-	 * @param argumentName the argument name.
-	 * @return the value of the argument, <code>null</code> if the argument has not
-	 *         been set.
-	 * @throws IllegalArgumentException if the <code>argumentName</code> does not
-	 *                                  begin with the {@value #ARGUMENT_PREFIX}
-	 *                                  character.
+	 * @param argumentName
+	 *            the argument name.
+	 * @return the value of the argument, <code>null</code> if the argument has
+	 *         not been set.
+	 * @throws IllegalArgumentException
+	 *             if the <code>argumentName</code> does not begin with the
+	 *             {@value #ARGUMENT_PREFIX} character.
 	 */
 	public String getArgument(String argumentName) throws IllegalArgumentException {
 		if (!argumentName.startsWith(ARGUMENT_PREFIX)) {
@@ -224,21 +232,23 @@ public final class PowerShellCommand {
 	}
 
 	/**
-	 * Executes the command. Once the command has been executed, its arguments will
-	 * be cleared so they do not linger in the case the same command with different
-	 * arguments is executed.
+	 * Executes the command. Once the command has been executed, its arguments
+	 * will be cleared so they do not linger in the case the same command with
+	 * different arguments is executed.
 	 * <p>
-	 * Take note that a <code>PowerShellException</code> not being thrown is not an
-	 * indication that the command actually executed. Rather, it just means that the
-	 * execution of this method in particular did not fail. The main case of this is
-	 * being a command not being executed either because the machine is not running
-	 * on Windows 10 or that it requires elevation but the user declined.
+	 * Take note that a <code>PowerShellException</code> not being thrown is not
+	 * an indication that the command actually executed. Rather, it just means
+	 * that the execution of this method in particular did not fail. The main
+	 * case of this is being a command not being executed either because the
+	 * machine is not running on Windows 10 or that it requires elevation but
+	 * the user declined.
 	 * 
-	 * @param requiresElevation <code>true</code> if the PowerShell command should
-	 *                          be executed under an elevated process,
-	 *                          <code>false</code> otherwise.
+	 * @param requiresElevation
+	 *            <code>true</code> if the PowerShell command should be executed
+	 *            under an elevated process, <code>false</code> otherwise.
 	 * @return the execution result.
-	 * @throws PowerShellException if a PowerShell error occurs.
+	 * @throws PowerShellException
+	 *             if a PowerShell error occurs.
 	 */
 	public synchronized String execute(boolean requiresElevation) throws PowerShellException {
 		// Create encoded command with arguments
@@ -283,21 +293,16 @@ public final class PowerShellCommand {
 				int state = 0;
 				long password = new Random().nextLong();
 				long startTime = System.currentTimeMillis();
-				log.debug("Created PowerShell administrative server  with password " + password + " on port "
-						+ server.getLocalPort());
+				log.debug("Created PowerShell administrative server  with password " + password + " on port " + server.getLocalPort());
 
 				// Create client process
 				log.debug("Executing administrative PowerShell command...");
-				String administrativeCommand = PowerShellCommand.POWERSHELL_EXECUTABLE
-						+ " Start-Process -Verb runAs javaw.exe \'" + "-cp \"$path\" "
-						+ PowerShellAdministrativeClient.class.getName() + " " + server.getLocalPort() + " " + password
-						+ " " + command + END_OF_TEXT + "\'";
+				String administrativeCommand = PowerShellCommand.POWERSHELL_EXECUTABLE + " Start-Process -Verb runAs javaw.exe \'" + "-cp \"$path\" "
+						+ PowerShellAdministrativeClient.class.getName() + " " + server.getLocalPort() + " " + password + " " + command + END_OF_TEXT + "\'";
 				if (getRunningJarFile() != null) {
-					administrativeCommand = administrativeCommand.replace("$path",
-							getRunningJarFile().getAbsolutePath());
+					administrativeCommand = administrativeCommand.replace("$path", getRunningJarFile().getAbsolutePath());
 				} else {
-					administrativeCommand = administrativeCommand.replace("$path",
-							getRunningLocation().getAbsolutePath());
+					administrativeCommand = administrativeCommand.replace("$path", getRunningLocation().getAbsolutePath());
 				}
 				Process powerShell = Runtime.getRuntime().exec(administrativeCommand);
 				powerShell.getOutputStream().close();
@@ -331,8 +336,7 @@ public final class PowerShellCommand {
 							connectionOut.writeInt(AUTHENTICATION_SUCCESS);
 							connectionOut.flush();
 							state = STATE_ERROR_RESULT;
-							log.debug(
-									"Administrative PowerShell client has authenticated, waiting for error results...");
+							log.debug("Administrative PowerShell client has authenticated, waiting for error results...");
 						} else {
 							connectionOut.writeInt(AUTHENTICATION_FAILURE);
 							connectionOut.flush();
@@ -362,18 +366,20 @@ public final class PowerShellCommand {
 	}
 
 	/**
-	 * Executes the command. Once the command has been executed, its arguments will
-	 * be cleared so they do not linger in the case the same command with different
-	 * arguments is executed.
+	 * Executes the command. Once the command has been executed, its arguments
+	 * will be cleared so they do not linger in the case the same command with
+	 * different arguments is executed.
 	 * <p>
-	 * Take note that a <code>PowerShellException</code> not being thrown is not an
-	 * indication that the command actually executed. Rather, it just means that the
-	 * execution of this method in particular did not fail. The main case of this is
-	 * being a command not being executed either because the machine is not running
-	 * on Windows 10 or that it requires elevation but the user declined.
+	 * Take note that a <code>PowerShellException</code> not being thrown is not
+	 * an indication that the command actually executed. Rather, it just means
+	 * that the execution of this method in particular did not fail. The main
+	 * case of this is being a command not being executed either because the
+	 * machine is not running on Windows 10 or that it requires elevation but
+	 * the user declined.
 	 * 
 	 * @return the execution result.
-	 * @throws PowerShellException if a PowerShell error occurs.
+	 * @throws PowerShellException
+	 *             if a PowerShell error occurs.
 	 */
 	public synchronized String execute() throws PowerShellException {
 		return this.execute(false);

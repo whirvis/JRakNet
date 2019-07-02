@@ -49,9 +49,11 @@ public final class AlreadyConnectedException extends PeerFactoryException {
 	/**
 	 * Constructs an <code>AlreadyConnectedException</code>.
 	 * 
-	 * @param client  the client that is already connected to the server.
-	 * @param address the address of the server that the client is already connected
-	 *                to.
+	 * @param client
+	 *            the client that is already connected to the server.
+	 * @param address
+	 *            the address of the server that the client is already connected
+	 *            to.
 	 */
 	public AlreadyConnectedException(RakNetClient client, InetSocketAddress address) {
 		super(client, "Already connected to server");
@@ -59,9 +61,11 @@ public final class AlreadyConnectedException extends PeerFactoryException {
 	}
 
 	/**
-	 * Returns the address of the server that the client is already connected to.
+	 * Returns the address of the server that the client is already connected
+	 * to.
 	 * 
-	 * @return the address of the server that the client is already connected to.
+	 * @return the address of the server that the client is already connected
+	 *         to.
 	 */
 	public InetSocketAddress getAddress() {
 		return this.address;

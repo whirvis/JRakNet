@@ -71,8 +71,8 @@ import io.netty.channel.socket.DatagramPacket;
 public abstract class RakNetPeer implements RakNetPeerMessenger {
 
 	/**
-	 * Used to store the message index for received reliable packets in a condensed
-	 * fashion.
+	 * Used to store the message index for received reliable packets in a
+	 * condensed fashion.
 	 * 
 	 * @author Whirvis T. Wheatley
 	 * @since JRakNet v2.11.0
@@ -91,7 +91,8 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		/**
 		 * Adds the specified message index to the list.
 		 * 
-		 * @param index the index to add.
+		 * @param index
+		 *            the index to add.
 		 */
 		public synchronized void add(int index) {
 			indexes.add(new Record(index));
@@ -105,13 +106,14 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		/**
 		 * Returns whether or not the list contains the specified message index.
 		 * 
-		 * @param index the index.
-		 * @return <code>true</code> if the list contains the <code>index</code>.
+		 * @param index
+		 *            the index.
+		 * @return <code>true</code> if the list contains the
+		 *         <code>index</code>.
 		 */
 		public synchronized boolean contains(int index) {
 			for (Record record : indexes) {
-				if ((record.isRanged() && record.getIndex() >= index && record.getIndex() <= index)
-						|| record.getIndex() == index) {
+				if ((record.isRanged() && record.getIndex() >= index && record.getIndex() <= index) || record.getIndex() == index) {
 					return true;
 				}
 			}
@@ -121,7 +123,8 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	}
 
 	/**
-	 * The maximum amount of chunks a single encapsulated packet can be split into.
+	 * The maximum amount of chunks a single encapsulated packet can be split
+	 * into.
 	 */
 	public static final int MAX_SPLIT_COUNT = 128;
 
@@ -198,14 +201,18 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	/**
 	 * Creates a RakNet peer.
 	 * 
-	 * @param address             the address of the peer.
-	 * @param guid                the globally unique ID of the peer.
-	 * @param maximumTransferUnit the maximum transfer unit of the peer.
-	 * @param connectionType      the connection type of the peer.
-	 * @param channel             the channel to communicate to the peer with.
+	 * @param address
+	 *            the address of the peer.
+	 * @param guid
+	 *            the globally unique ID of the peer.
+	 * @param maximumTransferUnit
+	 *            the maximum transfer unit of the peer.
+	 * @param connectionType
+	 *            the connection type of the peer.
+	 * @param channel
+	 *            the channel to communicate to the peer with.
 	 */
-	protected RakNetPeer(InetSocketAddress address, long guid, int maximumTransferUnit, ConnectionType connectionType,
-			Channel channel) {
+	protected RakNetPeer(InetSocketAddress address, long guid, int maximumTransferUnit, ConnectionType connectionType, Channel channel) {
 		this.log = LogManager.getLogger(RakNetPeer.class.getSimpleName() + "-" + Long.toHexString(guid).toUpperCase());
 		this.address = address;
 		this.guid = guid;
@@ -315,8 +322,8 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * Returns whether or not the peer is connected.
 	 * <p>
 	 * The peer is considered connected if the current state is
-	 * {@link RakNetState#CONNECTED} or has a higher order. This does not apply to
-	 * the {@link #isHandshaking()}, {@link #isLoggedIn()}, or
+	 * {@link RakNetState#CONNECTED} or has a higher order. This does not apply
+	 * to the {@link #isHandshaking()}, {@link #isLoggedIn()}, or
 	 * {@link #isDisconnected()} methods.
 	 * 
 	 * @return <code>true</code> if the peer is connected, <code>false</code>
@@ -359,8 +366,10 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	/**
 	 * Sets the current state of the peer.
 	 * 
-	 * @param state the state.
-	 * @throws NullPointerException if the <code>state</code> is <code>null</code>.
+	 * @param state
+	 *            the state.
+	 * @throws NullPointerException
+	 *             if the <code>state</code> is <code>null</code>.
 	 */
 	public final void setState(RakNetState state) throws NullPointerException {
 		if (state == null) {
@@ -371,13 +380,13 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	}
 
 	/**
-	 * Returns the amount of time in milliseconds it will take for the peer to not
-	 * respond in order for it to timeout.
+	 * Returns the amount of time in milliseconds it will take for the peer to
+	 * not respond in order for it to timeout.
 	 * <p>
 	 * By default, this value is set to {@value RakNetPeer#PEER_TIMEOUT}.
 	 * 
-	 * @return the amount of time in milliseconds it will take for the peer to not
-	 *         respond in order for it to timeout
+	 * @return the amount of time in milliseconds it will take for the peer to
+	 *         not respond in order for it to timeout
 	 */
 	public final long getTimeout() {
 		return this.timeout;
@@ -387,8 +396,10 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * Sets the amount of time in milliseconds it will take for the peer to not
 	 * respond in order for it to timeout.
 	 * 
-	 * @param timeout the timeout time.
-	 * @throws IllegalArgumentException if the <code>timeout</code> is negative.
+	 * @param timeout
+	 *            the timeout time.
+	 * @throws IllegalArgumentException
+	 *             if the <code>timeout</code> is negative.
 	 */
 	public final void setTimeout(long timeout) throws IllegalArgumentException {
 		if (timeout < 0) {
@@ -427,9 +438,10 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	/**
 	 * Returns whether or not the peer has timed out.
 	 * <p>
-	 * Keep in mind this method does not reflect the state of the peer whatsoever.
-	 * The peer state can be {@link RakNetState#HANDSHAKING HANDSHAKING}, yet the
-	 * peer can still have timed out due to unresponsiveness.
+	 * Keep in mind this method does not reflect the state of the peer
+	 * whatsoever. The peer state can be {@link RakNetState#HANDSHAKING
+	 * HANDSHAKING}, yet the peer can still have timed out due to
+	 * unresponsiveness.
 	 * 
 	 * @return <code>true</code> if the peer has timed out, <code>false</code>
 	 *         otherwise.
@@ -460,9 +472,9 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * Returns the message index and bumps it.
 	 * <p>
 	 * This method should only ever be called by the
-	 * {@link EncapsulatedPacket.Split} class. If it is called by anyone else and it
-	 * is set out of sync, all {@link Reliability#RELIABLE RELIABLE} based
-	 * reliabilities will break and the connection will have to be closed.
+	 * {@link EncapsulatedPacket.Split} class. If it is called by anyone else
+	 * and it is set out of sync, all {@link Reliability#RELIABLE RELIABLE}
+	 * based reliabilities will break and the connection will have to be closed.
 	 * 
 	 * @return the message index.
 	 */
@@ -474,12 +486,13 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	/**
 	 * Enables/disables latency detection.
 	 * <p>
-	 * When disabled, all methods relating to latency will report <code>-1</code>.
-	 * If the peer is not yet in the keep alive state then the packets needed to
-	 * detect the latency will not be sent until then.
+	 * When disabled, all methods relating to latency will report
+	 * <code>-1</code>. If the peer is not yet in the keep alive state then the
+	 * packets needed to detect the latency will not be sent until then.
 	 * 
-	 * @param enabled <code>true</code> to enable latency detection,
-	 *                <code>false</code> to disable it.
+	 * @param enabled
+	 *            <code>true</code> to enable latency detection,
+	 *            <code>false</code> to disable it.
 	 */
 	public final void enableLatencyDetection(boolean enabled) {
 		boolean wasEnabled = latencyEnabled;
@@ -494,8 +507,8 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	/**
 	 * Returns whether or not latency detection is enabled.
 	 * 
-	 * @return <code>true</code> if latency detection is enabled, <code>false</code>
-	 *         otherwise.
+	 * @return <code>true</code> if latency detection is enabled,
+	 *         <code>false</code> otherwise.
 	 */
 	public final boolean latencyDetectionEnabled() {
 		return this.latencyEnabled;
@@ -543,22 +556,20 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	/**
 	 * Handles the specified internal packet.
 	 * 
-	 * @param packet the packet to handle.
-	 * @throws NullPointerException        if the <code>packet</code> is
-	 *                                     <code>null</code>.
-	 * @throws InvalidChannelException     if the packet is a {@link CustomPacket
-	 *                                     CUSTOM_PACKET} and the channel of an
-	 *                                     encapsulated packet found inside of it is
-	 *                                     greater than or equal to
-	 *                                     {@value RakNet#CHANNEL_COUNT}.
-	 * @throws SplitQueueOverflowException if the packet is a {@link CustomPacket
-	 *                                     CUSTOM_PACKET}, an encapsulated packet
-	 *                                     found inside of it is split, and adding
-	 *                                     it to the split queue would cause it to
-	 *                                     overflow.
+	 * @param packet
+	 *            the packet to handle.
+	 * @throws NullPointerException
+	 *             if the <code>packet</code> is <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the packet is a {@link CustomPacket CUSTOM_PACKET} and the
+	 *             channel of an encapsulated packet found inside of it is
+	 *             greater than or equal to {@value RakNet#CHANNEL_COUNT}.
+	 * @throws SplitQueueOverflowException
+	 *             if the packet is a {@link CustomPacket CUSTOM_PACKET}, an
+	 *             encapsulated packet found inside of it is split, and adding
+	 *             it to the split queue would cause it to overflow.
 	 */
-	public final void handleInternal(RakNetPacket packet)
-			throws NullPointerException, InvalidChannelException, SplitQueueOverflowException {
+	public final void handleInternal(RakNetPacket packet) throws NullPointerException, InvalidChannelException, SplitQueueOverflowException {
 		if (packet == null) {
 			throw new NullPointerException("Packet cannot be null");
 		}
@@ -573,22 +584,23 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			custom.decode();
 
 			/*
-			 * We send an ACK packet as soon as we get the packet. This is because sometimes
-			 * handling a packet takes longer than expected (or longer than the recovery
-			 * send interval time). If this happens, it will cause the other side to resend
-			 * a packet that we already got. If the resend time is too low, this can end up
+			 * We send an ACK packet as soon as we get the packet. This is
+			 * because sometimes handling a packet takes longer than expected
+			 * (or longer than the recovery send interval time). If this
+			 * happens, it will cause the other side to resend a packet that we
+			 * already got. If the resend time is too low, this can end up
 			 * causing the other side to also spam us without meaning to.
 			 */
 			this.sendAcknowledge(true, new Record(custom.sequenceId));
 
 			/*
-			 * NACK must be generated first before the peer data is updated, otherwise the
-			 * data needed to know which packets have been lost will have been overwritten.
+			 * NACK must be generated first before the peer data is updated,
+			 * otherwise the data needed to know which packets have been lost
+			 * will have been overwritten.
 			 */
 			int skipped = custom.sequenceId - receiveSequenceNumber - 1;
 			if (skipped > 0) {
-				this.sendAcknowledge(false, skipped == 1 ? new Record(custom.sequenceId - 1)
-						: new Record(receiveSequenceNumber + 1, custom.sequenceId - 1));
+				this.sendAcknowledge(false, skipped == 1 ? new Record(custom.sequenceId - 1) : new Record(receiveSequenceNumber + 1, custom.sequenceId - 1));
 			}
 			if (custom.sequenceId > receiveSequenceNumber - 1) {
 				this.receiveSequenceNumber = custom.sequenceId;
@@ -602,19 +614,21 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			notAcknowledged.decode();
 
 			/*
-			 * When a peer realizes they have lost a packet in transmission, they only send
-			 * a NACK packet once. This makes implementation easier. However, this can make
-			 * this code look a bit whacky.
+			 * When a peer realizes they have lost a packet in transmission,
+			 * they only send a NACK packet once. This makes implementation
+			 * easier. However, this can make this code look a bit whacky.
 			 * 
-			 * What's happening here is we are getting the old sequence numbers of the lost
-			 * packets and then creating an array to store the new ones in. The new sequence
-			 * number is found when sending the custom packet containing the lost data
-			 * without updating the recovery queue.
+			 * What's happening here is we are getting the old sequence numbers
+			 * of the lost packets and then creating an array to store the new
+			 * ones in. The new sequence number is found when sending the custom
+			 * packet containing the lost data without updating the recovery
+			 * queue.
 			 * 
-			 * As a final step, we rename the keys in the recovery queue from the old
-			 * sequence number to the new sequence number after all the packets that were
-			 * lost in transmission were resent. We do not remove them from the recovery
-			 * queue until the peer has responded with an ACK packet.
+			 * As a final step, we rename the keys in the recovery queue from
+			 * the old sequence number to the new sequence number after all the
+			 * packets that were lost in transmission were resent. We do not
+			 * remove them from the recovery queue until the peer has responded
+			 * with an ACK packet.
 			 */
 			for (int i = 0; i < notAcknowledged.records.length; i++) {
 				Record record = notAcknowledged.records[i];
@@ -653,40 +667,39 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				}
 				recoveryQueue.remove(record.getIndex());
 			}
-			log.debug("Handled ACK packet with " + acknowledged.records.length + " record"
-					+ (acknowledged.records.length == 1 ? "" : "s") + " " + Arrays.toString(acknowledged.records));
+			log.debug("Handled ACK packet with " + acknowledged.records.length + " record" + (acknowledged.records.length == 1 ? "" : "s") + " "
+					+ Arrays.toString(acknowledged.records));
 		}
 	}
 
 	/**
 	 * Handles an {@link EncapsulatedPacket}.
 	 * 
-	 * @param encapsulated the encapsulated packet.
-	 * @throws NullPointerException        if the <code>encapsulated</code> packet
-	 *                                     is <code>null</code>.
-	 * @throws InvalidChannelException     if the channel of the
-	 *                                     <code>encapsulated</code> packet is
-	 *                                     greater than or equal to
-	 *                                     {@value RakNet#CHANNEL_COUNT}.
-	 * @throws SplitQueueOverflowException if the <code>encapsulated</code> packet
-	 *                                     is split, and adding it to the split
-	 *                                     queue would cause it to overflow.
+	 * @param encapsulated
+	 *            the encapsulated packet.
+	 * @throws NullPointerException
+	 *             if the <code>encapsulated</code> packet is <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel of the <code>encapsulated</code> packet is
+	 *             greater than or equal to {@value RakNet#CHANNEL_COUNT}.
+	 * @throws SplitQueueOverflowException
+	 *             if the <code>encapsulated</code> packet is split, and adding
+	 *             it to the split queue would cause it to overflow.
 	 */
-	private final void handleEncapsulated(EncapsulatedPacket encapsulated)
-			throws InvalidChannelException, SplitQueueOverflowException {
+	private final void handleEncapsulated(EncapsulatedPacket encapsulated) throws InvalidChannelException, SplitQueueOverflowException {
 		if (encapsulated == null) {
 			throw new NullPointerException("Encapsulated packet cannot be null");
 		} else if (encapsulated.orderChannel >= RakNet.CHANNEL_COUNT) {
 			throw new InvalidChannelException(encapsulated.orderChannel);
 		} else if (encapsulated.split == true) {
 			if (!splitQueue.containsKey(encapsulated.splitId)) {
-				splitQueue.put(encapsulated.splitId, new EncapsulatedPacket.Split(encapsulated.splitId,
-						encapsulated.splitCount, encapsulated.reliability));
+				splitQueue.put(encapsulated.splitId, new EncapsulatedPacket.Split(encapsulated.splitId, encapsulated.splitCount, encapsulated.reliability));
 
 				/**
-				 * If the split queue is greater than the maximum amount of packets that can be
-				 * split, remove all unreliable split packets. If the split queue is still too
-				 * big, then the queue has been overloaded.
+				 * If the split queue is greater than the maximum amount of
+				 * packets that can be split, remove all unreliable split
+				 * packets. If the split queue is still too big, then the queue
+				 * has been overloaded.
 				 */
 				if (splitQueue.size() > MAX_SPLITS_PER_QUEUE) {
 					Iterator<EncapsulatedPacket.Split> splitQueueI = splitQueue.values().iterator();
@@ -699,8 +712,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 						}
 					}
 					if (removeCount > 0) {
-						log.warn("Removed " + removeCount
-								+ " unreliable packets from the split queue due to an overflowing split queue");
+						log.warn("Removed " + removeCount + " unreliable packets from the split queue due to an overflowing split queue");
 					}
 					if (splitQueue.size() > MAX_SPLITS_PER_QUEUE) {
 						throw new SplitQueueOverflowException();
@@ -712,56 +724,56 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				splitQueue.remove(encapsulated.splitId);
 				this.handleEncapsulated(stitched);
 			}
-		} else if (!encapsulated.reliability.isReliable()
-				|| (encapsulated.reliability.isReliable() && !reliablePackets.contains(encapsulated.messageIndex))) {
+		} else if (!encapsulated.reliability.isReliable() || (encapsulated.reliability.isReliable() && !reliablePackets.contains(encapsulated.messageIndex))) {
 			/*
-			 * Determine if the message should be handled based on its reliability.
+			 * Determine if the message should be handled based on its
+			 * reliability.
 			 * 
-			 * If the message is ordered, only handle it when all the messages before it on
-			 * the channel have also been received and are ready to be handled.
+			 * If the message is ordered, only handle it when all the messages
+			 * before it on the channel have also been received and are ready to
+			 * be handled.
 			 * 
-			 * If the message is sequenced, only handle it if it is the newest packet on the
-			 * channel.
+			 * If the message is sequenced, only handle it if it is the newest
+			 * packet on the channel.
 			 * 
-			 * If the message is neither ordered nor sequenced, then it is handled
-			 * regardless.
+			 * If the message is neither ordered nor sequenced, then it is
+			 * handled regardless.
 			 */
 			reliablePackets.add(encapsulated.messageIndex);
 			if (encapsulated.reliability.isOrdered()) {
 				handleQueue.get(encapsulated.orderChannel).put(encapsulated.orderIndex, encapsulated);
-				while (handleQueue.get(encapsulated.orderChannel)
-						.containsKey(orderReceiveIndex[encapsulated.orderChannel])) {
+				while (handleQueue.get(encapsulated.orderChannel).containsKey(orderReceiveIndex[encapsulated.orderChannel])) {
 					this.handleMessage0(encapsulated.orderChannel,
-							new RakNetPacket(handleQueue.get(encapsulated.orderChannel)
-									.remove(orderReceiveIndex[encapsulated.orderChannel]++).payload));
+							new RakNetPacket(handleQueue.get(encapsulated.orderChannel).remove(orderReceiveIndex[encapsulated.orderChannel]++).payload));
 				}
-			} else if (encapsulated.reliability.isSequenced()
-					&& encapsulated.orderIndex > sequenceReceiveIndex[encapsulated.orderChannel]) {
+			} else if (encapsulated.reliability.isSequenced() && encapsulated.orderIndex > sequenceReceiveIndex[encapsulated.orderChannel]) {
 				sequenceReceiveIndex[encapsulated.orderChannel] = encapsulated.orderIndex;
 				this.handleMessage0(encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
 			} else {
 				this.handleMessage0(encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
 			}
 		}
-		log.debug("Handled " + (encapsulated.split ? "split " : "") + "encapsulated packet with "
-				+ encapsulated.reliability + " reliability on channel " + encapsulated.orderChannel);
+		log.debug("Handled " + (encapsulated.split ? "split " : "") + "encapsulated packet with " + encapsulated.reliability + " reliability on channel "
+				+ encapsulated.orderChannel);
 	}
 
 	/**
 	 * Handles an internal packet.
 	 * <p>
-	 * If the ID is unrecognized it is passed on to the extending peer class via the
-	 * {@link #handleMessage(RakNetPacket, int)} method.
+	 * If the ID is unrecognized it is passed on to the extending peer class via
+	 * the {@link #handleMessage(RakNetPacket, int)} method.
 	 * 
-	 * @param channel the channel the packet was sent on.
-	 * @param packet  the packet.
-	 * @throws InvalidChannelException if the <code>channel</code> is greater than
-	 *                                 or equal to {@value RakNet#CHANNEL_COUNT}.
-	 * @throws NullPointerException    if the <code>packet</code> is
-	 *                                 <code>null</code>.
+	 * @param channel
+	 *            the channel the packet was sent on.
+	 * @param packet
+	 *            the packet.
+	 * @throws InvalidChannelException
+	 *             if the <code>channel</code> is greater than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>packet</code> is <code>null</code>.
 	 */
-	private final void handleMessage0(int channel, RakNetPacket packet)
-			throws InvalidChannelException, NullPointerException {
+	private final void handleMessage0(int channel, RakNetPacket packet) throws InvalidChannelException, NullPointerException {
 		if (channel >= RakNet.CHANNEL_COUNT) {
 			throw new InvalidChannelException(channel);
 		} else if (packet == null) {
@@ -794,9 +806,8 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				}
 				this.totalLatency += responseTime;
 				this.latency = totalLatency / ++pongsReceived;
-				log.debug("Updated latency information (last latency timestamp: " + lastLatency + ", lowest latency: "
-						+ lowestLatency + ", highest latency: " + highestLatency + ", total latency: " + totalLatency
-						+ ", pongs received: " + pongsReceived + ", average latency: " + latency + ")");
+				log.debug("Updated latency information (last latency timestamp: " + lastLatency + ", lowest latency: " + lowestLatency + ", highest latency: " + highestLatency
+						+ ", total latency: " + totalLatency + ", pongs received: " + pongsReceived + ", average latency: " + latency + ")");
 			}
 
 			// Clear overdue ping responses
@@ -821,8 +832,10 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * This will automatically update the <code>lastPacketSendTime</code> and
 	 * <code>packetsSentThisSecond</code> variable.
 	 * 
-	 * @param buf the buffer.
-	 * @throws NullPointerException if the <code>buf</code> is <code>null</code>.
+	 * @param buf
+	 *            the buffer.
+	 * @throws NullPointerException
+	 *             if the <code>buf</code> is <code>null</code>.
 	 */
 	public final void sendNettyMessage(ByteBuf buf) throws NullPointerException {
 		if (buf == null) {
@@ -836,8 +849,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		}
 		this.lastPacketSendTime = currentTime;
 		this.packetsSentThisSecond++;
-		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to "
-				+ address);
+		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to " + address);
 	}
 
 	/**
@@ -846,8 +858,10 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * This will automatically update the <code>lastPacketSendTime</code> and
 	 * <code>packettSentThisSecond</code> variable.
 	 * 
-	 * @param packet the packet.
-	 * @throws NullPointerException if the <code>packet</code> is <code>null</code>.
+	 * @param packet
+	 *            the packet.
+	 * @throws NullPointerException
+	 *             if the <code>packet</code> is <code>null</code>.
 	 */
 	public final void sendNettyMessage(Packet packet) throws NullPointerException {
 		if (packet == null) {
@@ -860,21 +874,22 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * Sends a {@link CustomFourPacket} to the peer with the specified
 	 * {@link EncapsulatedPacket encapsulated packets}.
 	 * 
-	 * @param updateRecoveryQueue <code>true</code> if the the encapsulated packets
-	 *                            should be stored in the recovery queue for later,
-	 *                            <code>false</code> otherwise. This should only be
-	 *                            <code>true</code> when sending a group of packets
-	 *                            for the first time, rather than resending old data
-	 *                            that the peer has reported to be lost in
-	 *                            transmission.
-	 * @param messages            the packets to send.
+	 * @param updateRecoveryQueue
+	 *            <code>true</code> if the the encapsulated packets should be
+	 *            stored in the recovery queue for later, <code>false</code>
+	 *            otherwise. This should only be <code>true</code> when sending
+	 *            a group of packets for the first time, rather than resending
+	 *            old data that the peer has reported to be lost in
+	 *            transmission.
+	 * @param messages
+	 *            the packets to send.
 	 * @return the sequence number of the {@link CustomFourPacket}.
-	 * @throws NullPointerException     if the <code>messages</code> are
-	 *                                  <code>null</code>.
-	 * @throws IllegalArgumentException if the <code>messages</code> array is empty.
+	 * @throws NullPointerException
+	 *             if the <code>messages</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>messages</code> array is empty.
 	 */
-	private final int sendCustomPacket(boolean updateRecoveryQueue, EncapsulatedPacket... messages)
-			throws NullPointerException, IllegalArgumentException {
+	private final int sendCustomPacket(boolean updateRecoveryQueue, EncapsulatedPacket... messages) throws NullPointerException, IllegalArgumentException {
 		if (messages == null) {
 			throw new NullPointerException("Messages cannot be null");
 		} else if (messages.length <= 0) {
@@ -910,12 +925,11 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				recoveryQueue.put(custom.sequenceId, reliable.toArray(new EncapsulatedPacket[reliable.size()]));
 			}
 		}
-		log.debug("Sent custom packet containing " + custom.messages.length + " encapsulated packet"
-				+ (custom.messages.length == 1 ? "" : "s") + " with sequence number " + custom.sequenceId);
+		log.debug("Sent custom packet containing " + custom.messages.length + " encapsulated packet" + (custom.messages.length == 1 ? "" : "s") + " with sequence number "
+				+ custom.sequenceId);
 		for (int i = 0; i < custom.messages.length; i++) {
 			if (custom.messages[i].payload.size() > 0) {
-				log.debug("\tID of packet " + i + ": "
-						+ RakNetPacket.getName(custom.messages[i].payload.array()[0] & 0xFF));
+				log.debug("\tID of packet " + i + ": " + RakNetPacket.getName(custom.messages[i].payload.array()[0] & 0xFF));
 			} else {
 				log.debug("\tID packet " + i + ": none (payload length is 0)");
 			}
@@ -928,16 +942,18 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * {@link com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgedPacket
 	 * ACK} packet with the specified {@link Record records}.
 	 * 
-	 * @param acknowledge <code>true</code> if the records inside the packet are
-	 *                    acknowledged, <code>false</code> if the records are not
-	 *                    acknowledged.
-	 * @param records     the records to send.
-	 * @throws NullPointerException     if the <code>records</code> are
-	 *                                  <code>null</code>.
-	 * @throws IllegalArgumentException if the <code>records</code> array is empty.
+	 * @param acknowledge
+	 *            <code>true</code> if the records inside the packet are
+	 *            acknowledged, <code>false</code> if the records are not
+	 *            acknowledged.
+	 * @param records
+	 *            the records to send.
+	 * @throws NullPointerException
+	 *             if the <code>records</code> are <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>records</code> array is empty.
 	 */
-	private final void sendAcknowledge(boolean acknowledge, Record... records)
-			throws NullPointerException, IllegalArgumentException {
+	private final void sendAcknowledge(boolean acknowledge, Record... records) throws NullPointerException, IllegalArgumentException {
 		if (records == null) {
 			throw new NullPointerException("Records cannot be null");
 		} else if (records.length <= 0) {
@@ -947,13 +963,12 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		acknowledged.records = records;
 		acknowledged.encode();
 		this.sendNettyMessage(acknowledged);
-		log.debug("Sent " + acknowledged.records.length + " record" + (acknowledged.records.length == 1 ? "" : "s")
-				+ " in " + (acknowledged.isAcknowledgement() ? "ACK" : "NACK") + " packet");
+		log.debug("Sent " + acknowledged.records.length + " record" + (acknowledged.records.length == 1 ? "" : "s") + " in " + (acknowledged.isAcknowledgement() ? "ACK" : "NACK")
+				+ " packet");
 	}
 
 	@Override
-	public final EncapsulatedPacket sendMessage(Reliability reliability, int channel, Packet packet)
-			throws NullPointerException, InvalidChannelException {
+	public final EncapsulatedPacket sendMessage(Reliability reliability, int channel, Packet packet) throws NullPointerException, InvalidChannelException {
 		if (reliability == null) {
 			throw new NullPointerException("Reliability cannot be null");
 		} else if (packet == null) {
@@ -972,12 +987,10 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			log.debug("Bumped message index from " + encapsulated.messageIndex + " to " + messageIndex);
 		}
 		if (reliability.isOrdered() || reliability.isSequenced()) {
-			encapsulated.orderIndex = reliability.isOrdered() ? orderSendIndex[channel]++
-					: sequenceSendIndex[channel]++;
+			encapsulated.orderIndex = reliability.isOrdered() ? orderSendIndex[channel]++ : sequenceSendIndex[channel]++;
 			log.debug("Bumped " + (reliability.isOrdered() ? "order" : "sequence") + " index from "
 					+ ((reliability.isOrdered() ? orderSendIndex[channel] : sequenceSendIndex[channel]) - 1) + " to "
-					+ (reliability.isOrdered() ? orderSendIndex[channel] : sequenceSendIndex[channel]) + " on channel "
-					+ channel);
+					+ (reliability.isOrdered() ? orderSendIndex[channel] : sequenceSendIndex[channel]) + " on channel " + channel);
 		}
 
 		// Add to send queue
@@ -991,13 +1004,12 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			sendQueue.add(encapsulated);
 			log.debug("Added encapsulated packet to the send queue");
 		}
-		log.debug("Sent packet with size of " + packet.size() + " bytes (" + (packet.size() * 8)
-				+ " bits) with reliability " + reliability + " on channel " + channel);
+		log.debug("Sent packet with size of " + packet.size() + " bytes (" + (packet.size() * 8) + " bits) with reliability " + reliability + " on channel " + channel);
 
 		/*
-		 * Return a copy of the encapsulated packet as if a single variable is modified
-		 * in the encapsulated packet before it is sent, the communication with the peer
-		 * could cease to function entirely.
+		 * Return a copy of the encapsulated packet as if a single variable is
+		 * modified in the encapsulated packet before it is sent, the
+		 * communication with the peer could cease to function entirely.
 		 */
 		return encapsulated.getClone();
 	}
@@ -1005,12 +1017,15 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	/**
 	 * Updates the peer.
 	 * 
-	 * @param force <code>true</code> if the update should be forced,
-	 *              <code>false</code> otherwise.
-	 * @throws IllegalStateException if the peer is disconnected and
-	 *                               <code>force</code> is <code>false</code>.
-	 * @throws TimeoutException      if the peer has timed out and
-	 *                               <code>force</code> is <code>false</code>.
+	 * @param force
+	 *            <code>true</code> if the update should be forced,
+	 *            <code>false</code> otherwise.
+	 * @throws IllegalStateException
+	 *             if the peer is disconnected and <code>force</code> is
+	 *             <code>false</code>.
+	 * @throws TimeoutException
+	 *             if the peer has timed out and <code>force</code> is
+	 *             <code>false</code>.
 	 */
 	private final void update(boolean force) throws IllegalStateException, TimeoutException {
 		long currentTime = System.currentTimeMillis();
@@ -1023,16 +1038,14 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		}
 
 		// Send keep alive packet
-		if (currentTime - lastPacketReceiveTime >= DETECTION_SEND_INTERVAL
-				&& currentTime - lastDetectionSendTime >= DETECTION_SEND_INTERVAL && latencyEnabled == false
+		if (currentTime - lastPacketReceiveTime >= DETECTION_SEND_INTERVAL && currentTime - lastDetectionSendTime >= DETECTION_SEND_INTERVAL && latencyEnabled == false
 				&& state == RakNetState.LOGGED_IN) {
 			this.sendMessage(Reliability.UNRELIABLE, ID_DETECT_LOST_CONNECTIONS);
 			this.lastDetectionSendTime = currentTime;
 		}
 
 		// Send ping to detect latency if it is enabled
-		if (latencyEnabled == true && currentTime - lastPingSendTime >= PING_SEND_INTERVAL
-				&& state == RakNetState.LOGGED_IN) {
+		if (latencyEnabled == true && currentTime - lastPingSendTime >= PING_SEND_INTERVAL && state == RakNetState.LOGGED_IN) {
 			ConnectedPing ping = new ConnectedPing();
 			ping.timestamp = this.getTimestamp();
 			ping.encode();
@@ -1067,10 +1080,10 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			this.lastRecoverySendTime = currentTime;
 		} else {
 			/*
-			 * Nothing needs to be recovered if there is nothing in the queue. Only start
-			 * counting the time that has been passed since the last recovery packet has
-			 * been sent when there are reliable packets in the queue that have yet to be
-			 * acknowledged.
+			 * Nothing needs to be recovered if there is nothing in the queue.
+			 * Only start counting the time that has been passed since the last
+			 * recovery packet has been sent when there are reliable packets in
+			 * the queue that have yet to be acknowledged.
 			 */
 			this.lastRecoverySendTime = currentTime;
 		}
@@ -1079,8 +1092,10 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	/**
 	 * Updates the peer.
 	 * 
-	 * @throws IllegalStateException if the peer is disconnected.
-	 * @throws TimeoutException      if the peer has timed out.
+	 * @throws IllegalStateException
+	 *             if the peer is disconnected.
+	 * @throws TimeoutException
+	 *             if the peer has timed out.
 	 */
 	public final void update() throws IllegalStateException, TimeoutException {
 		this.update(false);
@@ -1092,7 +1107,8 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * Proper disconnection is accomplished here by sending it an unreliable
 	 * <code>DISCONNECTION_NOTIFICATION</code> packet.
 	 * 
-	 * @throws IllegalStateException if the peer is already disconnected.
+	 * @throws IllegalStateException
+	 *             if the peer is already disconnected.
 	 */
 	public final void disconnect() throws IllegalStateException {
 		if (this.isDisconnected()) {
@@ -1101,9 +1117,10 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		this.setState(RakNetState.DISCONNECTED);
 
 		/*
-		 * Clear the send queue to make sure the disconnect packet is first in line to
-		 * be sent. After the disconnection notification packet has been sent, the peer
-		 * will be forcefully updated to ensure the packet is sent out at least once.
+		 * Clear the send queue to make sure the disconnect packet is first in
+		 * line to be sent. After the disconnection notification packet has been
+		 * sent, the peer will be forcefully updated to ensure the packet is
+		 * sent out at least once.
 		 */
 		sendQueue.clear();
 		this.sendMessage(Reliability.UNRELIABLE, ID_DISCONNECTION_NOTIFICATION);
@@ -1113,8 +1130,10 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	/**
 	 * Called when a packet is received.
 	 * 
-	 * @param packet  the packet to handle.
-	 * @param channel the packet the channel was sent on.
+	 * @param packet
+	 *            the packet to handle.
+	 * @param channel
+	 *            the packet the channel was sent on.
 	 */
 	public abstract void handleMessage(RakNetPacket packet, int channel);
 
@@ -1122,12 +1141,15 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * Called when a acknowledge receipt is received for an
 	 * {@link EncapsulatedPacket}.
 	 * <p>
-	 * Keep in mind that an {@link EncapsulatedPacket} is not the same as a regular
-	 * message (or simply a packet). These have a lot of extra data in them other
-	 * than the payload, including split data if the packet is split up.
+	 * Keep in mind that an {@link EncapsulatedPacket} is not the same as a
+	 * regular message (or simply a packet). These have a lot of extra data in
+	 * them other than the payload, including split data if the packet is split
+	 * up.
 	 * 
-	 * @param record the received record.
-	 * @param packet the received packet.
+	 * @param record
+	 *            the received record.
+	 * @param packet
+	 *            the received packet.
 	 */
 	public abstract void onAcknowledge(Record record, EncapsulatedPacket packet);
 
@@ -1135,17 +1157,20 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * Called when a not acknowledged receipt is received for an
 	 * {@link EncapsulatedPacket}.
 	 * <p>
-	 * Keep in mind that an {@link EncapsulatedPacket} is not the same as a regular
-	 * message (or simply a packet). These have a lot of extra data in them other
-	 * than the payload, including split data if the packet is split up.
+	 * Keep in mind that an {@link EncapsulatedPacket} is not the same as a
+	 * regular message (or simply a packet). These have a lot of extra data in
+	 * them other than the payload, including split data if the packet is split
+	 * up.
 	 * <p>
-	 * This does not mean they will never arrive. It simply means they were lost in
-	 * transmission and need to be resent to the peer. The only time this means that
-	 * a packet will never be received is if the packet was sent using an
-	 * {@link Reliability#UNRELIABLE UNRELIABLE} reliability.
+	 * This does not mean they will never arrive. It simply means they were lost
+	 * in transmission and need to be resent to the peer. The only time this
+	 * means that a packet will never be received is if the packet was sent
+	 * using an {@link Reliability#UNRELIABLE UNRELIABLE} reliability.
 	 * 
-	 * @param record the lost record.
-	 * @param packet the lost packet.
+	 * @param record
+	 *            the lost record.
+	 * @param packet
+	 *            the lost packet.
 	 */
 	public abstract void onNotAcknowledge(Record record, EncapsulatedPacket packet);
 

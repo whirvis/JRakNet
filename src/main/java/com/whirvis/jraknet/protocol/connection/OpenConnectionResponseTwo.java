@@ -65,16 +65,17 @@ public final class OpenConnectionResponseTwo extends RakNetPacket implements Fai
 	public InetSocketAddress clientAddress;
 
 	/**
-	 * The maximum transfer unit size the server and the client have agreed upon.
+	 * The maximum transfer unit size the server and the client have agreed
+	 * upon.
 	 */
 	public int maximumTransferUnit;
 
 	/**
 	 * Whether or not encryption is enabled.
 	 * <p>
-	 * Since JRakNet does not have this feature implemented, <code>false</code> will
-	 * always be the value used when sending this value. However, this value can be
-	 * <code>true</code> if it is being set through decoding.
+	 * Since JRakNet does not have this feature implemented, <code>false</code>
+	 * will always be the value used when sending this value. However, this
+	 * value can be <code>true</code> if it is being set through decoding.
 	 */
 	public boolean encryptionEnabled;
 
@@ -100,8 +101,9 @@ public final class OpenConnectionResponseTwo extends RakNetPacket implements Fai
 	/**
 	 * Creates an <code>OPEN_CONNECTION_RESPONSE_2</code> packet to be decoded.
 	 * 
-	 * @param packet the original packet whose data will be read from in the
-	 *               {@link #decode()} method.
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
 	 */
 	public OpenConnectionResponseTwo(Packet packet) {
 		super(packet);

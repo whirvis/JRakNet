@@ -51,10 +51,13 @@ public final class UpdateUsernameBoxListener implements ActionListener {
 	/**
 	 * Constructs a <code>UpdateUsernameBoxListener</code>.
 	 * 
-	 * @param frame  the frame that the listener belongs to.
-	 * @param client the client that the listener will signal.
-	 * @throws NullPointerException if the <code>frame</code> or <code>client</code>
-	 *                              are <code>null</code>.
+	 * @param frame
+	 *            the frame that the listener belongs to.
+	 * @param client
+	 *            the client that the listener will signal.
+	 * @throws NullPointerException
+	 *             if the <code>frame</code> or <code>client</code> are
+	 *             <code>null</code>.
 	 */
 	protected UpdateUsernameBoxListener(ChatFrame frame, ChatClient client) throws NullPointerException {
 		if (frame == null) {

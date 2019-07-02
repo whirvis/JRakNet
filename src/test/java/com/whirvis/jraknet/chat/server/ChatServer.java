@@ -77,14 +77,19 @@ public final class ChatServer extends RakNetServer {
 	/**
 	 * Creates a chat server.
 	 * 
-	 * @param port           the port the server will bind to during startup.
-	 * @param maxConnections the maximum number of connections, A value of
-	 *                       {@value RakNetServer#INFINITE_CONNECTIONS} will allow
-	 *                       for an infinite number of connections.
-	 * @param name           the server name.
-	 * @param motd           the server message of the day.
-	 * @throws NullPointerException if the server <code>name</code> or server
-	 *                              <code>motd</code> are <code>null</code>.
+	 * @param port
+	 *            the port the server will bind to during startup.
+	 * @param maxConnections
+	 *            the maximum number of connections, A value of
+	 *            {@value RakNetServer#INFINITE_CONNECTIONS} will allow for an
+	 *            infinite number of connections.
+	 * @param name
+	 *            the server name.
+	 * @param motd
+	 *            the server message of the day.
+	 * @throws NullPointerException
+	 *             if the server <code>name</code> or server <code>motd</code>
+	 *             are <code>null</code>.
 	 */
 	private ChatServer(int port, int maxConnections, String name, String motd) throws NullPointerException {
 		super(port, maxConnections);
@@ -122,9 +127,10 @@ public final class ChatServer extends RakNetServer {
 	/**
 	 * Returns whether or not the server has the channel with the specified ID.
 	 * 
-	 * @param channel the channel ID.
-	 * @return <code>true</code> if the server has the channel, <code>false</code>
-	 *         otherwise.
+	 * @param channel
+	 *            the channel ID.
+	 * @return <code>true</code> if the server has the channel,
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean hasChannel(int channel) {
 		if (channel < channels.length) {
@@ -151,7 +157,8 @@ public final class ChatServer extends RakNetServer {
 	/**
 	 * Returns the text channel with the specified channel ID.
 	 * 
-	 * @param channel the channel ID.
+	 * @param channel
+	 *            the channel ID.
 	 * @return the text channel, <code>null</code> if it does not exist.
 	 */
 	public TextChannel getChannel(int channel) {
@@ -164,13 +171,15 @@ public final class ChatServer extends RakNetServer {
 	/**
 	 * Adds a channel to the server.
 	 * 
-	 * @param channel the channel ID.
-	 * @param name    the name of the channel.
-	 * @throws InvalidChannelException if the <code>channel</code>. ID is greater
-	 *                                 than or equal to
-	 *                                 {@value RakNet#CHANNEL_COUNT}.
-	 * @throws NullPointerException    if the <code>name</code> is
-	 *                                 <code>null</code>.
+	 * @param channel
+	 *            the channel ID.
+	 * @param name
+	 *            the name of the channel.
+	 * @throws InvalidChannelException
+	 *             if the <code>channel</code>. ID is greater than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>name</code> is <code>null</code>.
 	 */
 	public void addChannel(int channel, String name) throws InvalidChannelException, NullPointerException {
 		if (channel >= channels.length) {
@@ -187,13 +196,15 @@ public final class ChatServer extends RakNetServer {
 	/**
 	 * Renames the channel.
 	 * 
-	 * @param channel the channel ID.
-	 * @param name    the new name of the channel.
-	 * @throws InvalidChannelException if the <code>channel</code>. ID is greater
-	 *                                 than or equal to
-	 *                                 {@value RakNet#CHANNEL_COUNT}.
-	 * @throws NullPointerException    if the <code>name</code> is
-	 *                                 <code>null</code>.
+	 * @param channel
+	 *            the channel ID.
+	 * @param name
+	 *            the new name of the channel.
+	 * @throws InvalidChannelException
+	 *             if the <code>channel</code>. ID is greater than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>name</code> is <code>null</code>.
 	 */
 	public void renameChannel(int channel, String name) throws InvalidChannelException {
 		if (channel >= channels.length) {
@@ -210,10 +221,11 @@ public final class ChatServer extends RakNetServer {
 	/**
 	 * Removes the channel.
 	 * 
-	 * @param channel the channel ID.
-	 * @throws InvalidChannelException if the <code>channel</code>. ID is greater
-	 *                                 than or equal to
-	 *                                 {@value RakNet#CHANNEL_COUNT}.
+	 * @param channel
+	 *            the channel ID.
+	 * @throws InvalidChannelException
+	 *             if the <code>channel</code>. ID is greater than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public void removeChannel(int channel) throws InvalidChannelException {
 		if (channel >= channels.length) {
@@ -228,18 +240,20 @@ public final class ChatServer extends RakNetServer {
 	/**
 	 * Broadcasts the specified message on the specified channel.
 	 * 
-	 * @param message the message to send.
-	 * @param channel the channel to send the message to.
-	 * @param print   <code>true</code> the message should be printed to the
-	 *                console, <code>false</code> otherwise.
-	 * @throws NullPointerException    if the <code>message</code> is
-	 *                                 <code>null</code>.
-	 * @throws InvalidChannelException if the <code>channel</code>. ID is greater
-	 *                                 than or equal to
-	 *                                 {@value RakNet#CHANNEL_COUNT}
+	 * @param message
+	 *            the message to send.
+	 * @param channel
+	 *            the channel to send the message to.
+	 * @param print
+	 *            <code>true</code> the message should be printed to the
+	 *            console, <code>false</code> otherwise.
+	 * @throws NullPointerException
+	 *             if the <code>message</code> is <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the <code>channel</code>. ID is greater than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}
 	 */
-	private void broadcastMessage(String message, int channel, boolean print)
-			throws NullPointerException, InvalidChannelException {
+	private void broadcastMessage(String message, int channel, boolean print) throws NullPointerException, InvalidChannelException {
 		if (message == null) {
 			throw new NullPointerException("Message cannot be null");
 		} else if (channel >= channels.length) {
@@ -254,16 +268,18 @@ public final class ChatServer extends RakNetServer {
 	}
 
 	/**
-	 * Broadcasts the specified message on the specified channel and prints it to
-	 * the console.
+	 * Broadcasts the specified message on the specified channel and prints it
+	 * to the console.
 	 * 
-	 * @param message the message to send.
-	 * @param channel the channel to send the message to.
-	 * @throws NullPointerException    if the <code>message</code> is
-	 *                                 <code>null</code>.
-	 * @throws InvalidChannelException if the <code>channel</code>. ID is greater
-	 *                                 than or equal to
-	 *                                 {@value RakNet#CHANNEL_COUNT}
+	 * @param message
+	 *            the message to send.
+	 * @param channel
+	 *            the channel to send the message to.
+	 * @throws NullPointerException
+	 *             if the <code>message</code> is <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the <code>channel</code>. ID is greater than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}
 	 */
 	public void broadcastMessage(String message, int channel) throws NullPointerException, InvalidChannelException {
 		this.broadcastMessage(message, channel, true);
@@ -272,9 +288,10 @@ public final class ChatServer extends RakNetServer {
 	/**
 	 * Broadcasts the specified message on every. channel.
 	 * 
-	 * @param message the message to send.
-	 * @throws NullPointerException if the <code>message</code> is
-	 *                              <code>null</code>.
+	 * @param message
+	 *            the message to send.
+	 * @throws NullPointerException
+	 *             if the <code>message</code> is <code>null</code>.
 	 */
 	public void broadcastMessage(String message) throws NullPointerException {
 		for (TextChannel channel : getChannels()) {
@@ -286,7 +303,8 @@ public final class ChatServer extends RakNetServer {
 	/**
 	 * Returns whether or not a user with the specified username exists.
 	 * 
-	 * @param username the username.
+	 * @param username
+	 *            the username.
 	 * @return <code>true</code> if a user with the specified username exists,
 	 *         <code>false</code> otherwise.
 	 */
@@ -304,9 +322,10 @@ public final class ChatServer extends RakNetServer {
 	/**
 	 * Returns the user with the specified username.
 	 * 
-	 * @param username the username.
-	 * @return the user with the specified username, <code>null</code> if they do no
-	 *         exist.
+	 * @param username
+	 *            the username.
+	 * @return the user with the specified username, <code>null</code> if they
+	 *         do no exist.
 	 */
 	public ChatUser getUser(String username) {
 		if (username != null) {
@@ -322,10 +341,13 @@ public final class ChatServer extends RakNetServer {
 	/**
 	 * Kicks the specified user from the server.
 	 * 
-	 * @param user   the user to kick.
-	 * @param reason the reason the user was kicked, a <code>null</code> value will
-	 *               have "Kicked" be used instead.
-	 * @throws NullPointerException if the <code>user</code> is <code>null</code>.
+	 * @param user
+	 *            the user to kick.
+	 * @param reason
+	 *            the reason the user was kicked, a <code>null</code> value will
+	 *            have "Kicked" be used instead.
+	 * @throws NullPointerException
+	 *             if the <code>user</code> is <code>null</code>.
 	 */
 	public void kickUser(ChatUser user, String reason) throws NullPointerException {
 		if (user == null) {
@@ -392,8 +414,10 @@ public final class ChatServer extends RakNetServer {
 	/**
 	 * The entry point for the chat server.
 	 * 
-	 * @param args the program arguments. These values are ignored.
-	 * @throws RakNetException if a RakNet error occurs.
+	 * @param args
+	 *            the program arguments. These values are ignored.
+	 * @throws RakNetException
+	 *             if a RakNet error occurs.
 	 */
 	public static void main(String[] args) throws RakNetException {
 		// Create and start server

@@ -46,7 +46,8 @@ public interface DiscoveryListener {
 	/**
 	 * Called when a server is discovered on the local network.
 	 * 
-	 * @param server the newly discovered server.
+	 * @param server
+	 *            the newly discovered server.
 	 */
 	public default void onServerDiscovered(DiscoveredServer server) {
 	}
@@ -54,8 +55,10 @@ public interface DiscoveryListener {
 	/**
 	 * Called when the identifier of an already discovered server changes.
 	 * 
-	 * @param server        the server whose identifier has updated.
-	 * @param oldIdentifier the old identifier.
+	 * @param server
+	 *            the server whose identifier has updated.
+	 * @param oldIdentifier
+	 *            the old identifier.
 	 */
 	public default void onServerIdentifierUpdate(DiscoveredServer server, Identifier oldIdentifier) {
 	}
@@ -63,7 +66,8 @@ public interface DiscoveryListener {
 	/**
 	 * Called when a previously discovered server has been forgotten.
 	 * 
-	 * @param server the server that was forgotten.
+	 * @param server
+	 *            the server that was forgotten.
 	 */
 	public default void onServerForgotten(DiscoveredServer server) {
 	}

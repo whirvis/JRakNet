@@ -60,8 +60,9 @@ public final class LoginRequest extends ChatPacket {
 	/**
 	 * Creates an <code>LOGIN_REQUEST</code> packet to be decoded.
 	 * 
-	 * @param packet the original packet whose data will be read from in the
-	 *               {@link #decode()} method.
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
 	 */
 	public LoginRequest(Packet packet) {
 		super(packet);

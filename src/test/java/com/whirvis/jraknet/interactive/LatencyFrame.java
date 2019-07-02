@@ -87,13 +87,14 @@ public final class LatencyFrame extends JFrame {
 	/**
 	 * Updates the text in the frame with the specified clients.
 	 * 
-	 * @param clients the clients connected to the server.
+	 * @param clients
+	 *            the clients connected to the server.
 	 */
 	protected void updatePaneText(RakNetClientPeer[] clients) {
 		StringBuilder latencyBuilder = new StringBuilder();
 		for (int i = 0; i < clients.length; i++) {
-			latencyBuilder.append(clients[i].getConnectionType().getName() + " client " + clients[i].getAddress() + ": "
-					+ clients[i].getLatency() + "MS" + (i + 1 < clients.length ? "\n" : ""));
+			latencyBuilder.append(
+					clients[i].getConnectionType().getName() + " client " + clients[i].getAddress() + ": " + clients[i].getLatency() + "MS" + (i + 1 < clients.length ? "\n" : ""));
 		}
 		txtPnClientLatencies.setText(latencyBuilder.toString());
 	}

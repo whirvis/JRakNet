@@ -45,7 +45,8 @@ public final class InvalidMagicException extends PeerFactoryException {
 	/**
 	 * Constructs a <code>InvalidMagicException</code>.
 	 * 
-	 * @param client the client that created the peer that threw the exception.
+	 * @param client
+	 *            the client that created the peer that threw the exception.
 	 */
 	public InvalidMagicException(RakNetClient client) {
 		super(client, "Invalid MAGIC read in packet");

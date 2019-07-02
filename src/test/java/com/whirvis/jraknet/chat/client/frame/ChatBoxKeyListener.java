@@ -52,10 +52,13 @@ public final class ChatBoxKeyListener implements KeyListener {
 	/**
 	 * Constructs a <code>ChatBoxKeyListener</code>.
 	 * 
-	 * @param frame  the frame that the listener belongs to.
-	 * @param client the client that the listener will signal.
-	 * @throws NullPointerException if the <code>frame</code> or <code>client</code>
-	 *                              are <code>null</code>.
+	 * @param frame
+	 *            the frame that the listener belongs to.
+	 * @param client
+	 *            the client that the listener will signal.
+	 * @throws NullPointerException
+	 *             if the <code>frame</code> or <code>client</code> are
+	 *             <code>null</code>.
 	 */
 	protected ChatBoxKeyListener(ChatFrame frame, ChatClient client) throws NullPointerException {
 		if (frame == null) {

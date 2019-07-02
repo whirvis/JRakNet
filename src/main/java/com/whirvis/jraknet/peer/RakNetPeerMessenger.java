@@ -59,40 +59,48 @@ public interface RakNetPeerMessenger {
 	/**
 	 * Sends a message to the peer.
 	 * 
-	 * @param reliability the reliability of the packet.
-	 * @param channel     the channel to send the packet on.
-	 * @param packet      the packet to send.
-	 * @return the generated encapsulated packet. This is normally not important,
-	 *         however it can be used for packet acknowledged and not acknowledged
-	 *         events if the reliability is of the
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param channel
+	 *            the channel to send the packet on.
+	 * @param packet
+	 *            the packet to send.
+	 * @return the generated encapsulated packet. This is normally not
+	 *         important, however it can be used for packet acknowledged and not
+	 *         acknowledged events if the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException    if the <code>reliability</code> or
-	 *                                 <code>packet</code> are <code>null</code>.
-	 * @throws InvalidChannelException if the channel is higher than or equal to
-	 *                                 {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>packet</code> are
+	 *             <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public EncapsulatedPacket sendMessage(Reliability reliability, int channel, Packet packet)
-			throws NullPointerException, InvalidChannelException;
+	public EncapsulatedPacket sendMessage(Reliability reliability, int channel, Packet packet) throws NullPointerException, InvalidChannelException;
 
 	/**
 	 * Sends messages to the peer.
 	 * 
-	 * @param reliability the reliability of the packets.
-	 * @param channel     the channel to send the packets on.
-	 * @param packets     the packets to send.
-	 * @return the generated encapsulated packets. These are normally not important,
-	 *         however they can be used for packet acknowledged and not acknowledged
-	 *         events if the reliability is of the
+	 * @param reliability
+	 *            the reliability of the packets.
+	 * @param channel
+	 *            the channel to send the packets on.
+	 * @param packets
+	 *            the packets to send.
+	 * @return the generated encapsulated packets. These are normally not
+	 *         important, however they can be used for packet acknowledged and
+	 *         not acknowledged events if the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException    if the <code>reliability</code> or
-	 *                                 <code>packets</code> are <code>null</code>.
-	 * @throws InvalidChannelException if the channel is higher than or equal to
-	 *                                 {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>packets</code> are
+	 *             <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int channel, Packet... packets)
-			throws NullPointerException, InvalidChannelException {
+	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int channel, Packet... packets) throws NullPointerException, InvalidChannelException {
 		if (packets == null) {
 			throw new NullPointerException("Packets cannot be null");
 		}
@@ -106,15 +114,18 @@ public interface RakNetPeerMessenger {
 	/**
 	 * Sends a message to the peer on the default channel.
 	 * 
-	 * @param reliability the reliability of the packet.
-	 * @param packet      the packet to send.
-	 * @return the generated encapsulated packet. This is normally not important,
-	 *         however it can be used for packet acknowledged and not acknowledged
-	 *         events if the reliability is of the
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param packet
+	 *            the packet to send.
+	 * @return the generated encapsulated packet. This is normally not
+	 *         important, however it can be used for packet acknowledged and not
+	 *         acknowledged events if the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException if the <code>reliability</code> or
-	 *                              <code>packet</code> are <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>packet</code> are
+	 *             <code>null</code>.
 	 */
 	public default EncapsulatedPacket sendMessage(Reliability reliability, Packet packet) throws NullPointerException {
 		return this.sendMessage(reliability, RakNet.DEFAULT_CHANNEL, packet);
@@ -123,15 +134,18 @@ public interface RakNetPeerMessenger {
 	/**
 	 * Sends messages to the peer on the default channel.
 	 * 
-	 * @param reliability the reliability of the packets.
-	 * @param packets     the packets to send.
-	 * @return the generated encapsulated packets. These are normally not important,
-	 *         however they can be used for packet acknowledged and not acknowledged
-	 *         events if the reliability is of the
+	 * @param reliability
+	 *            the reliability of the packets.
+	 * @param packets
+	 *            the packets to send.
+	 * @return the generated encapsulated packets. These are normally not
+	 *         important, however they can be used for packet acknowledged and
+	 *         not acknowledged events if the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException if the <code>reliability</code> or
-	 *                              <code>packets</code> are <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>packets</code> are
+	 *             <code>null</code>.
 	 */
 	public default EncapsulatedPacket[] sendMessage(Reliability reliability, Packet... packets) {
 		return this.sendMessage(reliability, RakNet.DEFAULT_CHANNEL, packets);
@@ -140,42 +154,50 @@ public interface RakNetPeerMessenger {
 	/**
 	 * Sends a message to the peer.
 	 * 
-	 * @param reliability the reliability of the packet.
-	 * @param channel     the channel to send the packet on.
-	 * @param buf         the buffer to send.
-	 * @return the generated encapsulated packet. This is normally not important,
-	 *         however it can be used for packet acknowledged and not acknowledged
-	 *         events if the reliability is of the
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param channel
+	 *            the channel to send the packet on.
+	 * @param buf
+	 *            the buffer to send.
+	 * @return the generated encapsulated packet. This is normally not
+	 *         important, however it can be used for packet acknowledged and not
+	 *         acknowledged events if the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException    if the <code>reliability</code> or
-	 *                                 <code>buf</code> are <code>null</code>.
-	 * @throws InvalidChannelException if the channel is higher than or equal to
-	 *                                 {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>buf</code> are
+	 *             <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket sendMessage(Reliability reliability, int channel, ByteBuf buf)
-			throws NullPointerException, InvalidChannelException {
+	public default EncapsulatedPacket sendMessage(Reliability reliability, int channel, ByteBuf buf) throws NullPointerException, InvalidChannelException {
 		return this.sendMessage(reliability, channel, new Packet(buf));
 	}
 
 	/**
 	 * Sends messages to the peer.
 	 * 
-	 * @param reliability the reliability of the packets.
-	 * @param channel     the channel to send the packets on.
-	 * @param bufs        the buffers to send.
-	 * @return the generated encapsulated packet. This is normally not important,
-	 *         however it can be used for packet acknowledged and not acknowledged
-	 *         events if the reliability is of the
+	 * @param reliability
+	 *            the reliability of the packets.
+	 * @param channel
+	 *            the channel to send the packets on.
+	 * @param bufs
+	 *            the buffers to send.
+	 * @return the generated encapsulated packet. This is normally not
+	 *         important, however it can be used for packet acknowledged and not
+	 *         acknowledged events if the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException    if the <code>reliability</code> or
-	 *                                 <code>bufs</code> are <code>null</code>.
-	 * @throws InvalidChannelException if the channel is higher than or equal to
-	 *                                 {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>bufs</code> are
+	 *             <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int channel, ByteBuf... bufs)
-			throws NullPointerException, InvalidChannelException {
+	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int channel, ByteBuf... bufs) throws NullPointerException, InvalidChannelException {
 		if (bufs == null) {
 			throw new NullPointerException("Buffers cannot be null");
 		}
@@ -189,15 +211,18 @@ public interface RakNetPeerMessenger {
 	/**
 	 * Sends messages to the peer on the default channel.
 	 * 
-	 * @param reliability the reliability of the packet.
-	 * @param buf         the buffer to send.
-	 * @return the generated encapsulated packet. This is normally not important,
-	 *         however it can be used for packet acknowledged and not acknowledged
-	 *         events if the reliability is of the
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param buf
+	 *            the buffer to send.
+	 * @return the generated encapsulated packet. This is normally not
+	 *         important, however it can be used for packet acknowledged and not
+	 *         acknowledged events if the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException if the <code>reliability</code> or
-	 *                              <code>buf</code> are <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>buf</code> are
+	 *             <code>null</code>.
 	 */
 	public default EncapsulatedPacket sendMessage(Reliability reliability, ByteBuf buf) throws NullPointerException {
 		return this.sendMessage(reliability, RakNet.DEFAULT_CHANNEL, buf);
@@ -206,60 +231,69 @@ public interface RakNetPeerMessenger {
 	/**
 	 * Sends messages to the peer on the default channel.
 	 * 
-	 * @param reliability the reliability of the packet.
-	 * @param bufs        the buffers to send.
-	 * @return the generated encapsulated packets. These are normally not important,
-	 *         however they can be used for packet acknowledged and not acknowledged
-	 *         events if the reliability is of the
+	 * @param reliability
+	 *            the reliability of the packet.
+	 * @param bufs
+	 *            the buffers to send.
+	 * @return the generated encapsulated packets. These are normally not
+	 *         important, however they can be used for packet acknowledged and
+	 *         not acknowledged events if the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException if the <code>reliability</code> or
-	 *                              <code>bufs</code> are <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>bufs</code> are
+	 *             <code>null</code>.
 	 */
-	public default EncapsulatedPacket[] sendMessage(Reliability reliability, ByteBuf... bufs)
-			throws NullPointerException {
+	public default EncapsulatedPacket[] sendMessage(Reliability reliability, ByteBuf... bufs) throws NullPointerException {
 		return this.sendMessage(reliability, RakNet.DEFAULT_CHANNEL, bufs);
 	}
 
 	/**
 	 * Sends a message identifier to the peer.
 	 * 
-	 * @param reliability the reliability of the message identifier.
-	 * @param channel     the channel to send the message identifier on.
-	 * @param packetId    the message identifier to send.
-	 * @return the generated encapsulated packet. This is normally not important,
-	 *         however it can be used for packet acknowledged and not acknowledged
-	 *         events if the reliability is of the
+	 * @param reliability
+	 *            the reliability of the message identifier.
+	 * @param channel
+	 *            the channel to send the message identifier on.
+	 * @param packetId
+	 *            the message identifier to send.
+	 * @return the generated encapsulated packet. This is normally not
+	 *         important, however it can be used for packet acknowledged and not
+	 *         acknowledged events if the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException    if the <code>reliability</code> is
-	 *                                 <code>null</code>.
-	 * @throws InvalidChannelException if the channel is higher than or equal to
-	 *                                 {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> is <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket sendMessage(Reliability reliability, int channel, int packetId)
-			throws NullPointerException, InvalidChannelException {
+	public default EncapsulatedPacket sendMessage(Reliability reliability, int channel, int packetId) throws NullPointerException, InvalidChannelException {
 		return this.sendMessage(reliability, channel, new RakNetPacket(packetId));
 	}
 
 	/**
 	 * Sends message identifiers to the peer.
 	 * 
-	 * @param reliability the reliability of the message identifiers.
-	 * @param channel     the channel to send the message identifiers on.
-	 * @param packetIds   the message identifiers to send.
-	 * @return the generated encapsulated packets. These are normally not important,
-	 *         however they can be used for packet acknowledged and not acknowledged
-	 *         events if the reliability is of the
+	 * @param reliability
+	 *            the reliability of the message identifiers.
+	 * @param channel
+	 *            the channel to send the message identifiers on.
+	 * @param packetIds
+	 *            the message identifiers to send.
+	 * @return the generated encapsulated packets. These are normally not
+	 *         important, however they can be used for packet acknowledged and
+	 *         not acknowledged events if the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException    if the <code>reliability</code> or
-	 *                                 <code>packetIds</code> are <code>null</code>.
-	 * @throws InvalidChannelException if the channel is higher than or equal to
-	 *                                 {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>packetIds</code> are
+	 *             <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the channel is higher than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int channel, int... packetIds)
-			throws NullPointerException, InvalidChannelException {
+	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int channel, int... packetIds) throws NullPointerException, InvalidChannelException {
 		if (packetIds == null) {
 			throw new NullPointerException("Packet IDs cannot be null");
 		}
@@ -273,15 +307,17 @@ public interface RakNetPeerMessenger {
 	/**
 	 * Sends a message identifier to the peer on the default channel.
 	 * 
-	 * @param reliability the reliability of the message identifier.
-	 * @param packetId    the message identifier to send.
-	 * @return the generated encapsulated packet. This is normally not important,
-	 *         however it can be used for packet acknowledged and not acknowledged
-	 *         events if the reliability is of the
+	 * @param reliability
+	 *            the reliability of the message identifier.
+	 * @param packetId
+	 *            the message identifier to send.
+	 * @return the generated encapsulated packet. This is normally not
+	 *         important, however it can be used for packet acknowledged and not
+	 *         acknowledged events if the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException if the <code>reliability</code> is
-	 *                              <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> is <code>null</code>.
 	 */
 	public default EncapsulatedPacket sendMessage(Reliability reliability, int packetId) throws NullPointerException {
 		return this.sendMessage(reliability, new RakNetPacket(packetId));
@@ -290,18 +326,20 @@ public interface RakNetPeerMessenger {
 	/**
 	 * Sends message identifiers to the peer on the default channel.
 	 * 
-	 * @param reliability the reliability of the message identifiers.
-	 * @param packetIds   the message identifiers to send.
-	 * @return the generated encapsulated packets. These are normally not important,
-	 *         however they can be used for packet acknowledged and not acknowledged
-	 *         events if the reliability is of the
+	 * @param reliability
+	 *            the reliability of the message identifiers.
+	 * @param packetIds
+	 *            the message identifiers to send.
+	 * @return the generated encapsulated packets. These are normally not
+	 *         important, however they can be used for packet acknowledged and
+	 *         not acknowledged events if the reliability is of the
 	 *         {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
 	 *         type.
-	 * @throws NullPointerException if the <code>reliability</code> or
-	 *                              <code>packetIds</code> are <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>reliability</code> or <code>packetIds</code> are
+	 *             <code>null</code>.
 	 */
-	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int... packetIds)
-			throws NullPointerException {
+	public default EncapsulatedPacket[] sendMessage(Reliability reliability, int... packetIds) throws NullPointerException {
 		return this.sendMessage(reliability, RakNet.DEFAULT_CHANNEL, packetIds);
 	}
 

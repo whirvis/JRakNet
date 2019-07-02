@@ -51,7 +51,8 @@ public final class KickCommand extends Command {
 	/**
 	 * Constructs a <code>KickCommand</code>.
 	 * 
-	 * @param server the server that the command belongs to.
+	 * @param server
+	 *            the server that the command belongs to.
 	 */
 	public KickCommand(ChatServer server) {
 		super(server, "kick", "<player> [reason]", "Removes the user from the server");

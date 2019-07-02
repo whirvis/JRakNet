@@ -47,8 +47,10 @@ public class PeerFactoryException extends RakNetClientException {
 	/**
 	 * Constructs a <code>PeerFactoryException</code>.
 	 * 
-	 * @param client the client that created the peer that threw the exception.
-	 * @param error  the detail message.
+	 * @param client
+	 *            the client that created the peer that threw the exception.
+	 * @param error
+	 *            the detail message.
 	 */
 	public PeerFactoryException(RakNetClient client, String error) {
 		super(client, error);
@@ -57,8 +59,10 @@ public class PeerFactoryException extends RakNetClientException {
 	/**
 	 * Constructs a <code>PeerFactoryException</code>.
 	 * 
-	 * @param client the client that created the peer that threw the exception.
-	 * @param error  the <code>Throwable</code> that was thrown.
+	 * @param client
+	 *            the client that created the peer that threw the exception.
+	 * @param error
+	 *            the <code>Throwable</code> that was thrown.
 	 */
 	public PeerFactoryException(RakNetClient client, Throwable error) {
 		super(client, error);

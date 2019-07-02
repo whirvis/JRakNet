@@ -65,8 +65,9 @@ public final class ConnectedPong extends RakNetPacket {
 	/**
 	 * Creates a <code>CONNECTED_PONG</code> packet to be decoded.
 	 * 
-	 * @param packet the original packet whose data will be read from in the
-	 *               {@link #decode()} method.
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
 	 */
 	public ConnectedPong(Packet packet) {
 		super(packet);

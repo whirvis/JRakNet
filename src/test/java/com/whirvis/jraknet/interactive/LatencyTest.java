@@ -50,8 +50,8 @@ public final class LatencyTest {
 	/**
 	 * The latency test identifier.
 	 */
-	private static final MinecraftIdentifier LATENCY_TEST_IDENTIFIER = new MinecraftIdentifier("A JRakNet latency test",
-			RakNetTest.MINECRAFT_PROTOCOL_NUMBER, RakNetTest.MINECRAFT_VERSION, 0, 10,
+	private static final MinecraftIdentifier LATENCY_TEST_IDENTIFIER = new MinecraftIdentifier("A JRakNet latency test", RakNetTest.MINECRAFT_PROTOCOL_NUMBER,
+			RakNetTest.MINECRAFT_VERSION, 0, 10,
 			-1 /* We don't know the GUID yet */, "New World", "Developer");
 
 	private final RakNetServer server;
@@ -68,11 +68,12 @@ public final class LatencyTest {
 	/**
 	 * Starts the test.
 	 * 
-	 * @throws RakNetException      if a RakNet error occurs.
-	 * @throws InterruptedException if any thread has interrupted the current
-	 *                              thread. The <i>interrupted status</i> of the
-	 *                              current thread is cleared when this exception is
-	 *                              thrown.
+	 * @throws RakNetException
+	 *             if a RakNet error occurs.
+	 * @throws InterruptedException
+	 *             if any thread has interrupted the current thread. The
+	 *             <i>interrupted status</i> of the current thread is cleared
+	 *             when this exception is thrown.
 	 */
 	public void start() throws RakNetException, InterruptedException {
 		// Create server
@@ -92,28 +93,29 @@ public final class LatencyTest {
 	/**
 	 * The entry point for the test.
 	 * 
-	 * @param args the program arguments. These values are ignored.
-	 * @throws ClassNotFoundException          if the <code>LookAndFeel</code> class
-	 *                                         for the sustem could not be found.
-	 * @throws InstantiationException          if a new instance of the
-	 *                                         <code>LookAndFeel</code> class could
-	 *                                         not be instantiated.
-	 * @throws IllegalAccessException          if the class or initializer for the
-	 *                                         <code>LookAndFeel</code> class is
-	 *                                         inaccessible.
-	 * @throws UnsupportedLookAndFeelException if
-	 *                                         <code>lnf.isSupportedLookAndFeel()</code>
-	 *                                         is false for the instantiated
-	 *                                         <code>LookAndFeel</code> class.
-	 * @throws RakNetException                 if a RakNet error occurs.
-	 * @throws InterruptedException            if any thread has interrupted the
-	 *                                         current thread. The <i>interrupted
-	 *                                         status</i> of the current thread is
-	 *                                         cleared when this exception is
-	 *                                         thrown.
+	 * @param args
+	 *            the program arguments. These values are ignored.
+	 * @throws ClassNotFoundException
+	 *             if the <code>LookAndFeel</code> class for the sustem could
+	 *             not be found.
+	 * @throws InstantiationException
+	 *             if a new instance of the <code>LookAndFeel</code> class could
+	 *             not be instantiated.
+	 * @throws IllegalAccessException
+	 *             if the class or initializer for the <code>LookAndFeel</code>
+	 *             class is inaccessible.
+	 * @throws UnsupportedLookAndFeelException
+	 *             if <code>lnf.isSupportedLookAndFeel()</code> is false for the
+	 *             instantiated <code>LookAndFeel</code> class.
+	 * @throws RakNetException
+	 *             if a RakNet error occurs.
+	 * @throws InterruptedException
+	 *             if any thread has interrupted the current thread. The
+	 *             <i>interrupted status</i> of the current thread is cleared
+	 *             when this exception is thrown.
 	 */
-	public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
-			IllegalAccessException, UnsupportedLookAndFeelException, RakNetException, InterruptedException {
+	public static void main(String[] args)
+			throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException, RakNetException, InterruptedException {
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		LatencyTest test = new LatencyTest();
 		test.start();

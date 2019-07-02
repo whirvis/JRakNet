@@ -90,8 +90,9 @@ public final class ConnectionRequestAccepted extends RakNetPacket implements Fai
 	/**
 	 * Creates a <code>CONNECTION_REQUEST_ACCEPTED</code> packet to be decoded.
 	 * 
-	 * @param packet the original packet whose data will be read from in the
-	 *               {@link #decode()} method.
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
 	 */
 	public ConnectionRequestAccepted(Packet packet) {
 		super(packet);

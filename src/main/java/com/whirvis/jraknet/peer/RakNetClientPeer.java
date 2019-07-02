@@ -59,16 +59,20 @@ public final class RakNetClientPeer extends RakNetPeer {
 	/**
 	 * Creates a RakNet client peer.
 	 * 
-	 * @param server              the server that is hosting the connection to the
-	 *                            client.
-	 * @param address             the address of the peer.
-	 * @param guid                the globally unique ID of the peer.
-	 * @param maximumTransferUnit the maximum transfer unit of the peer.
-	 * @param connectionType      the connection type of the peer.
-	 * @param channel             the channel to communicate to the peer with.
+	 * @param server
+	 *            the server that is hosting the connection to the client.
+	 * @param address
+	 *            the address of the peer.
+	 * @param guid
+	 *            the globally unique ID of the peer.
+	 * @param maximumTransferUnit
+	 *            the maximum transfer unit of the peer.
+	 * @param connectionType
+	 *            the connection type of the peer.
+	 * @param channel
+	 *            the channel to communicate to the peer with.
 	 */
-	public RakNetClientPeer(RakNetServer server, ConnectionType connectionType, long guid, int maximumTransferUnit,
-			Channel channel, InetSocketAddress address) {
+	public RakNetClientPeer(RakNetServer server, ConnectionType connectionType, long guid, int maximumTransferUnit, Channel channel, InetSocketAddress address) {
 		super(address, guid, maximumTransferUnit, connectionType, channel);
 		this.server = server;
 	}
@@ -105,8 +109,7 @@ public final class RakNetClientPeer extends RakNetPeer {
 					this.sendMessage(Reliability.RELIABLE_ORDERED, requestAccepted);
 					this.setState(RakNetState.HANDSHAKING);
 				} else {
-					server.disconnect(this,
-							"Login failed (" + requestAccepted.getClass().getSimpleName() + " failed to encode)");
+					server.disconnect(this, "Login failed (" + requestAccepted.getClass().getSimpleName() + " failed to encode)");
 				}
 			} else {
 				String reason = "unknown error";
@@ -124,12 +127,10 @@ public final class RakNetClientPeer extends RakNetPeer {
 			if (!newIncomingConnection.failed()) {
 				this.timestamp = System.currentTimeMillis() - newIncomingConnection.clientTimestamp;
 				this.setState(RakNetState.LOGGED_IN);
-				this.getLogger().info("Client with globally unique ID "
-						+ Long.toHexString(this.getGloballyUniqueId()).toUpperCase() + " has logged in");
+				this.getLogger().info("Client with globally unique ID " + Long.toHexString(this.getGloballyUniqueId()).toUpperCase() + " has logged in");
 				server.callEvent(listener -> listener.onLogin(server, this));
 			} else {
-				server.disconnect(this,
-						"Failed to login (" + newIncomingConnection.getClass().getSimpleName() + " failed to decode)");
+				server.disconnect(this, "Failed to login (" + newIncomingConnection.getClass().getSimpleName() + " failed to decode)");
 			}
 		} else if (packet.getId() == ID_DISCONNECTION_NOTIFICATION) {
 			server.disconnect(this, "Client disconnected");
