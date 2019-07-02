@@ -297,19 +297,21 @@ public class VarInt {
 	 *            the output stream to write to.
 	 * @param max
 	 *            the maximum amount of bits the <code>VarInt</code> can be.
+	 * @throws IllegalArgumentException
+	 *             if the value is negative or the <code>max</code> bits is
+	 * 			   less than or equal to <code>0</code>.
 	 * @throws NullPointerException
 	 *             if the <code>out</code> stream is <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             if the <code>max</code> bits is less than or equal to
-	 *             <code>0</code>.
 	 * @throws IOException
 	 *             if an I/O error occurs.
 	 * @throws IndexOutOfBoundsException
 	 *             if the <code>VarInt</code> exceeds the <code>max</code>
 	 *             amount of bits.
 	 */
-	private static void writeUnsigned(long l, OutputStream out, int max) throws NullPointerException, IllegalArgumentException, IOException, IndexOutOfBoundsException {
-		if (out == null) {
+	private static void writeUnsigned(long l, OutputStream out, int max) throws IllegalArgumentException, NullPointerException, IOException, IndexOutOfBoundsException {
+		if(l < 0) {
+			throw new IllegalArgumentException("Value cannot be negative");
+		} else if (out == null) {
 			throw new NullPointerException("Output stream cannot be null");
 		} else if (max < 0) {
 			throw new IllegalArgumentException("Max bits must be greater than 0");
@@ -353,6 +355,8 @@ public class VarInt {
 	 *            the value to write.
 	 * @param out
 	 *            the output stream to write to.
+	 * @throws IllegalArgumentException
+	 *             if the value is negative.
 	 * @throws NullPointerException
 	 *             if the <code>out</code> stream is <code>null</code>.
 	 * @throws IOException
@@ -360,7 +364,7 @@ public class VarInt {
 	 * @throws IndexOutOfBoundsException
 	 *             if more than {@value #VARINT_MAX_SIZE} bits are written.
 	 */
-	public static void writeUnsignedVarInt(int i, OutputStream out) throws NullPointerException, IOException, IndexOutOfBoundsException {
+	public static void writeUnsignedVarInt(int i, OutputStream out) throws IllegalArgumentException, NullPointerException, IOException, IndexOutOfBoundsException {
 		writeUnsigned(i, out, VARINT_MAX_SIZE);
 	}
 
@@ -371,6 +375,8 @@ public class VarInt {
 	 * @param in
 	 *            the input stream to read from.
 	 * @return an unsigned <code>VarLong</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>value</code> is negative.
 	 * @throws NullPointerException
 	 *             if the <code>in</code> stream is <code>null</code>.
 	 * @throws IOException
@@ -390,6 +396,8 @@ public class VarInt {
 	 *            the value to write.
 	 * @param out
 	 *            the output stream to write to.
+	 * @throws IllegalArgumentException
+	 *             if the value is negative.
 	 * @throws NullPointerException
 	 *             if the <code>out</code> stream is <code>null</code>.
 	 * @throws IOException
@@ -397,7 +405,7 @@ public class VarInt {
 	 * @throws IndexOutOfBoundsException
 	 *             if more than {@value #VARLONG_MAX_SIZE} bits are written.
 	 */
-	public static void writeUnsignedVarLong(long l, OutputStream out) throws NullPointerException, IOException, IndexOutOfBoundsException {
+	public static void writeUnsignedVarLong(long l, OutputStream out) throws IllegalArgumentException, NullPointerException, IOException, IndexOutOfBoundsException {
 		writeUnsigned(l, out, VARLONG_MAX_SIZE);
 	}
 
