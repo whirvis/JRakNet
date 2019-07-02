@@ -47,9 +47,10 @@ public final class InvalidMaximumTransferUnitException extends PeerFactoryExcept
 	/**
 	 * Constructs a <code>InvalidMaximumTransferUnitException</code>.
 	 * 
-	 * @param client                  the client that created the peer that threw
-	 *                                the exception.
-	 * @param maximumTransferUnitSize the invalid maximum transfer unit size.
+	 * @param client
+	 *            the client that created the peer that threw the exception.
+	 * @param maximumTransferUnitSize
+	 *            the invalid maximum transfer unit size.
 	 */
 	public InvalidMaximumTransferUnitException(RakNetClient client, int maximumTransferUnitSize) {
 		super(client, "Invalid maximum transfer unit size " + maximumTransferUnitSize);

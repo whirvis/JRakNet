@@ -49,8 +49,10 @@ public final class ServerOfflineException extends PeerFactoryException {
 	/**
 	 * Constructs a <code>ServerOfflineException</code>.
 	 * 
-	 * @param client  the client that attempted to the offline server.
-	 * @param address the address of the offline server.
+	 * @param client
+	 *            the client that attempted to the offline server.
+	 * @param address
+	 *            the address of the offline server.
 	 */
 	public ServerOfflineException(RakNetClient client, InetSocketAddress address) {
 		super(client, "Server at address " + address.toString() + " is offline");

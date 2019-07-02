@@ -44,8 +44,8 @@ public final class MinecraftIdentifier extends Identifier {
 	/**
 	 * The header found at the beginning of a Minecraft identifier.
 	 * <p>
-	 * This allows for easy indication that the identifier is actually a Minecraft
-	 * identifier, rather than that of another game.
+	 * This allows for easy indication that the identifier is actually a
+	 * Minecraft identifier, rather than that of another game.
 	 */
 	private static final String HEADER = "MCPE";
 
@@ -69,11 +69,13 @@ public final class MinecraftIdentifier extends Identifier {
 	/**
 	 * Returns whether or not the version tag is valid.
 	 * <p>
-	 * In order for a version tag to be valid, it can only have numbers or periods.
-	 * A <code>null</code> value is also valid, seeing as when the identifier is
-	 * being built no version will be placed inside the identifier string.
+	 * In order for a version tag to be valid, it can only have numbers or
+	 * periods. A <code>null</code> value is also valid, seeing as when the
+	 * identifier is being built no version will be placed inside the identifier
+	 * string.
 	 * 
-	 * @param versionTag the version tag.
+	 * @param versionTag
+	 *            the version tag.
 	 * @return <code>true</code> if the version tag is valid, <code>false</code>
 	 *         otherwise.
 	 */
@@ -91,7 +93,8 @@ public final class MinecraftIdentifier extends Identifier {
 	/**
 	 * Returns whether or not the the identifier is a Minecraft identifier.
 	 * 
-	 * @param identifier the identifier to check.
+	 * @param identifier
+	 *            the identifier to check.
 	 * @return <code>true</code> if the identifier is a Minecraft identifier,
 	 *         <code>false</code> otherwise.
 	 */
@@ -115,22 +118,30 @@ public final class MinecraftIdentifier extends Identifier {
 	/**
 	 * Creates a Minecraft identifier.
 	 * 
-	 * @param serverName        the server name.
-	 * @param serverProtocol    the server protocol.
-	 * @param versionTag        the version tag.
-	 * @param onlinePlayerCount the online player count.
-	 * @param maxPlayerCount    the max player count.
-	 * @param guid              the globally unique ID.
-	 * @param worldName         the world name.
-	 * @param gamemode          the gamemode.
-	 * @throws IllegalArgumentException if the <code>serverName</code>,
-	 *                                  <code>worldName</code>, or
-	 *                                  <code>gamemode</code> contain the separator
-	 *                                  character {@value #SEPARATOR}, or if the
-	 *                                  <code>versionTag</code> is invalid.
+	 * @param serverName
+	 *            the server name.
+	 * @param serverProtocol
+	 *            the server protocol.
+	 * @param versionTag
+	 *            the version tag.
+	 * @param onlinePlayerCount
+	 *            the online player count.
+	 * @param maxPlayerCount
+	 *            the max player count.
+	 * @param guid
+	 *            the globally unique ID.
+	 * @param worldName
+	 *            the world name.
+	 * @param gamemode
+	 *            the gamemode.
+	 * @throws IllegalArgumentException
+	 *             if the <code>serverName</code>, <code>worldName</code>, or
+	 *             <code>gamemode</code> contain the separator character
+	 *             {@value #SEPARATOR}, or if the <code>versionTag</code> is
+	 *             invalid.
 	 */
-	public MinecraftIdentifier(String serverName, int serverProtocol, String versionTag, int onlinePlayerCount,
-			int maxPlayerCount, long guid, String worldName, String gamemode) throws IllegalArgumentException {
+	public MinecraftIdentifier(String serverName, int serverProtocol, String versionTag, int onlinePlayerCount, int maxPlayerCount, long guid, String worldName, String gamemode)
+			throws IllegalArgumentException {
 		this.setServerName(serverName);
 		this.setServerProtocol(serverProtocol);
 		this.setVersionTag(versionTag);
@@ -145,12 +156,14 @@ public final class MinecraftIdentifier extends Identifier {
 	/**
 	 * Creates a Minecraft identifier from an existing identifier.
 	 * 
-	 * @param identifier the identifier.
-	 * @throws NullPointerException     if the <code>identifier</code> or its
-	 *                                  contents are <code>null</code>.
-	 * @throws IllegalArgumentException if the <code>identifier</code> is not a
-	 *                                  Minecraft identifier or there are missing
-	 *                                  fields.
+	 * @param identifier
+	 *            the identifier.
+	 * @throws NullPointerException
+	 *             if the <code>identifier</code> or its contents are
+	 *             <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>identifier</code> is not a Minecraft identifier
+	 *             or there are missing fields.
 	 */
 	public MinecraftIdentifier(Identifier identifier) throws NullPointerException, IllegalArgumentException {
 		super(identifier);
@@ -185,12 +198,14 @@ public final class MinecraftIdentifier extends Identifier {
 	/**
 	 * Creates a Minecraft identifier from an existing identifier.
 	 * 
-	 * @param identifier the identifier.
-	 * @throws NullPointerException     if the <code>identifier</code> or its
-	 *                                  contents are <code>null</code>.
-	 * @throws IllegalArgumentException if the <code>identifier</code> is not a
-	 *                                  Minecraft identifier or there are missing
-	 *                                  fields.
+	 * @param identifier
+	 *            the identifier.
+	 * @throws NullPointerException
+	 *             if the <code>identifier</code> or its contents are
+	 *             <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>identifier</code> is not a Minecraft identifier
+	 *             or there are missing fields.
 	 */
 	public MinecraftIdentifier(String identifier) throws NullPointerException, IllegalArgumentException {
 		this(new Identifier(identifier));
@@ -278,9 +293,11 @@ public final class MinecraftIdentifier extends Identifier {
 	/**
 	 * Sets the server name.
 	 * 
-	 * @param serverName the new server name.
-	 * @throws IllegalArgumentException if the <code>serverName</code> contains the
-	 *                                  separator character {@value #SEPARATOR}.
+	 * @param serverName
+	 *            the new server name.
+	 * @throws IllegalArgumentException
+	 *             if the <code>serverName</code> contains the separator
+	 *             character {@value #SEPARATOR}.
 	 */
 	public void setServerName(String serverName) throws IllegalArgumentException {
 		if (serverName.contains(SEPARATOR)) {
@@ -292,7 +309,8 @@ public final class MinecraftIdentifier extends Identifier {
 	/**
 	 * Sets the server protocol.
 	 * 
-	 * @param serverProtocol the new server protocol.
+	 * @param serverProtocol
+	 *            the new server protocol.
 	 */
 	public void setServerProtocol(int serverProtocol) {
 		this.serverProtocol = serverProtocol;
@@ -301,8 +319,10 @@ public final class MinecraftIdentifier extends Identifier {
 	/**
 	 * Sets the version tag.
 	 * 
-	 * @param versionTag the new version tag.
-	 * @throws IllegalArgumentException if the version tag is invalid.
+	 * @param versionTag
+	 *            the new version tag.
+	 * @throws IllegalArgumentException
+	 *             if the version tag is invalid.
 	 */
 	public void setVersionTag(String versionTag) throws IllegalArgumentException {
 		if (!verifyVersionTag(versionTag)) {
@@ -314,7 +334,8 @@ public final class MinecraftIdentifier extends Identifier {
 	/**
 	 * Sets the online player count.
 	 * 
-	 * @param onlinePlayerCount the new online player count.
+	 * @param onlinePlayerCount
+	 *            the new online player count.
 	 */
 	public void setOnlinePlayerCount(int onlinePlayerCount) {
 		this.onlinePlayerCount = onlinePlayerCount;
@@ -323,7 +344,8 @@ public final class MinecraftIdentifier extends Identifier {
 	/**
 	 * Sets the max player count.
 	 * 
-	 * @param maxPlayerCount the new max player count.
+	 * @param maxPlayerCount
+	 *            the new max player count.
 	 */
 	public void setMaxPlayerCount(int maxPlayerCount) {
 		this.maxPlayerCount = maxPlayerCount;
@@ -332,7 +354,8 @@ public final class MinecraftIdentifier extends Identifier {
 	/**
 	 * Sets the globally unique ID.
 	 * 
-	 * @param guid the new globally unique ID.
+	 * @param guid
+	 *            the new globally unique ID.
 	 */
 	public void setServerGloballyUniqueId(long guid) {
 		this.guid = guid;
@@ -341,9 +364,11 @@ public final class MinecraftIdentifier extends Identifier {
 	/**
 	 * Sets the world name.
 	 * 
-	 * @param worldName the new world name.
-	 * @throws IllegalArgumentException if the <code>worldName</code> contains the
-	 *                                  separator character {@value #SEPARATOR}.
+	 * @param worldName
+	 *            the new world name.
+	 * @throws IllegalArgumentException
+	 *             if the <code>worldName</code> contains the separator
+	 *             character {@value #SEPARATOR}.
 	 */
 	public void setWorldName(String worldName) throws IllegalArgumentException {
 		if (worldName.contains(SEPARATOR)) {
@@ -355,9 +380,11 @@ public final class MinecraftIdentifier extends Identifier {
 	/**
 	 * Sets the gamemode.
 	 * 
-	 * @param gamemode the new gamemode.
-	 * @throws IllegalArgumentException if the <code>gamemode</code> contains the
-	 *                                  separator character {@value #SEPARATOR}.
+	 * @param gamemode
+	 *            the new gamemode.
+	 * @throws IllegalArgumentException
+	 *             if the <code>gamemode</code> contains the separator character
+	 *             {@value #SEPARATOR}.
 	 */
 	public void setGamemode(String gamemode) throws IllegalArgumentException {
 		if (gamemode.contains(SEPARATOR)) {
@@ -369,8 +396,9 @@ public final class MinecraftIdentifier extends Identifier {
 	/**
 	 * Enables/Disables the legacy builder.
 	 * 
-	 * @param legacy <code>true</code> to enable the legacy builder,
-	 *               <code>false</code> to use the regular builder.
+	 * @param legacy
+	 *            <code>true</code> to enable the legacy builder,
+	 *            <code>false</code> to use the regular builder.
 	 */
 	public void setLegacyMode(boolean legacy) {
 		this.legacy = legacy;
@@ -380,7 +408,8 @@ public final class MinecraftIdentifier extends Identifier {
 	 * Returns whether or not the identifier is using the legacy builder.
 	 * 
 	 * @return <code>true</code> if the identifier is using the legacy builder,
-	 *         <code>false</code> if the identifier is using the regular builder.
+	 *         <code>false</code> if the identifier is using the regular
+	 *         builder.
 	 */
 	public boolean isLegacyMode() {
 		return this.legacy;
@@ -389,9 +418,11 @@ public final class MinecraftIdentifier extends Identifier {
 	/**
 	 * Converts the values to a Minecraft identifier string.
 	 * 
-	 * @param values the values to write to the identifier.
+	 * @param values
+	 *            the values to write to the identifier.
 	 * @return the built identifier text.
-	 * @throws NullPointerException if <code>values</code> is <code>null</code>.
+	 * @throws NullPointerException
+	 *             if <code>values</code> is <code>null</code>.
 	 */
 	private String createBuildString(Object... values) throws NullPointerException {
 		if (values == null) {
@@ -408,8 +439,7 @@ public final class MinecraftIdentifier extends Identifier {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(serverName, serverProtocol, versionTag, onlinePlayerCount, maxPlayerCount, guid, worldName,
-				gamemode, legacy);
+		return Objects.hash(serverName, serverProtocol, versionTag, onlinePlayerCount, maxPlayerCount, guid, worldName, gamemode, legacy);
 	}
 
 	@Override
@@ -420,17 +450,16 @@ public final class MinecraftIdentifier extends Identifier {
 			return false;
 		}
 		MinecraftIdentifier mi = (MinecraftIdentifier) o;
-		return Objects.equals(serverName, mi.serverName) && Objects.equals(serverProtocol, mi.serverProtocol)
-				&& Objects.equals(versionTag, mi.versionTag) && Objects.equals(onlinePlayerCount, mi.onlinePlayerCount)
-				&& Objects.equals(maxPlayerCount, mi.maxPlayerCount) && Objects.equals(guid, mi.guid)
-				&& Objects.equals(worldName, mi.worldName) && Objects.equals(gamemode, mi.gamemode)
-				&& Objects.equals(legacy, mi.legacy);
+		return Objects.equals(serverName, mi.serverName) && Objects.equals(serverProtocol, mi.serverProtocol) && Objects.equals(versionTag, mi.versionTag)
+				&& Objects.equals(onlinePlayerCount, mi.onlinePlayerCount) && Objects.equals(maxPlayerCount, mi.maxPlayerCount) && Objects.equals(guid, mi.guid)
+				&& Objects.equals(worldName, mi.worldName) && Objects.equals(gamemode, mi.gamemode) && Objects.equals(legacy, mi.legacy);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 * 
-	 * @throws IllegalArgumentException if the version tag is invalid.
+	 * @throws IllegalArgumentException
+	 *             if the version tag is invalid.
 	 */
 	@Override
 	public String build() throws IllegalArgumentException {
@@ -439,8 +468,7 @@ public final class MinecraftIdentifier extends Identifier {
 		} else if (legacy == true) {
 			return this.createBuildString(serverName, serverProtocol, versionTag, onlinePlayerCount, maxPlayerCount);
 		}
-		return this.createBuildString(serverName, serverProtocol, versionTag, onlinePlayerCount, maxPlayerCount, guid,
-				worldName, gamemode);
+		return this.createBuildString(serverName, serverProtocol, versionTag, onlinePlayerCount, maxPlayerCount, guid, worldName, gamemode);
 	}
 
 }

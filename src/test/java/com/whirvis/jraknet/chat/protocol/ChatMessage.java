@@ -61,8 +61,9 @@ public final class ChatMessage extends ChatPacket {
 	/**
 	 * Creates a <code>CHAT_MESSAGE</code> packet to be decoded.
 	 * 
-	 * @param packet the original packet whose data will be read from in the
-	 *               {@link #decode()} method.
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
 	 */
 	public ChatMessage(Packet packet) {
 		super(packet);

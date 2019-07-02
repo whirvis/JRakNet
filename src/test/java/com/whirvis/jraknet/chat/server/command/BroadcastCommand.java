@@ -45,7 +45,8 @@ public final class BroadcastCommand extends Command {
 	/**
 	 * Constructs a <code>BroadcastCommand</code>.
 	 * 
-	 * @param server the server that the command belongs to.
+	 * @param server
+	 *            the server that the command belongs to.
 	 */
 	public BroadcastCommand(ChatServer server) {
 		super(server, "broadcast", "<message>", "Broadcasts a message to all channels");

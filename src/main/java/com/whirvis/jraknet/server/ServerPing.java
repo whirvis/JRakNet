@@ -51,9 +51,12 @@ public final class ServerPing {
 	/**
 	 * Creates a server ping.
 	 * 
-	 * @param sender         the address of the ping sender.
-	 * @param connectionType the connection type of the ping sender.
-	 * @param identifier     the identifier to respond with.
+	 * @param sender
+	 *            the address of the ping sender.
+	 * @param connectionType
+	 *            the connection type of the ping sender.
+	 * @param identifier
+	 *            the identifier to respond with.
 	 */
 	public ServerPing(InetSocketAddress sender, ConnectionType connectionType, Identifier identifier) {
 		this.sender = sender;
@@ -91,7 +94,8 @@ public final class ServerPing {
 	/**
 	 * Sets the identifier being sent back to the sender.
 	 * 
-	 * @param identifier the new identifier.
+	 * @param identifier
+	 *            the new identifier.
 	 */
 	public void setIdentifier(Identifier identifier) {
 		this.identifier = identifier;
@@ -110,14 +114,12 @@ public final class ServerPing {
 			return false;
 		}
 		ServerPing sp = (ServerPing) o;
-		return Objects.equals(sender, sp.sender) && Objects.equals(connectionType, sp.connectionType)
-				&& Objects.equals(identifier, sp.identifier);
+		return Objects.equals(sender, sp.sender) && Objects.equals(connectionType, sp.connectionType) && Objects.equals(identifier, sp.identifier);
 	}
 
 	@Override
 	public String toString() {
-		return "ServerPing [sender=" + sender + ", identifier=" + identifier + ", connectionType=" + connectionType
-				+ "]";
+		return "ServerPing [sender=" + sender + ", identifier=" + identifier + ", connectionType=" + connectionType + "]";
 	}
 
 }

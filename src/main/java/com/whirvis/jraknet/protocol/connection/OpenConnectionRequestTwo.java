@@ -60,7 +60,8 @@ public final class OpenConnectionRequestTwo extends RakNetPacket implements Fail
 	public InetSocketAddress serverAddress;
 
 	/**
-	 * The maximum transfer unit size the client and the server have agreed upon.
+	 * The maximum transfer unit size the client and the server have agreed
+	 * upon.
 	 */
 	public int maximumTransferUnit;
 
@@ -91,8 +92,9 @@ public final class OpenConnectionRequestTwo extends RakNetPacket implements Fail
 	/**
 	 * Creates an <code>OPEN_CONNECTION_REQUEST_2</code> packet to be decoded.
 	 * 
-	 * @param packet the original packet whose data will be read from in the
-	 *               {@link #decode()} method.
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
 	 */
 	public OpenConnectionRequestTwo(Packet packet) {
 		super(packet);

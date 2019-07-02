@@ -65,9 +65,10 @@ public class AcknowledgedPacket extends RakNetPacket {
 	/**
 	 * Creates an <code>ACK</code> packet to be encoded.
 	 * 
-	 * @param acknowledge <code>true</code> if the records inside the packet are
-	 *                    acknowledged, <code>false</code> if the records are not
-	 *                    acknowledged.
+	 * @param acknowledge
+	 *            <code>true</code> if the records inside the packet are
+	 *            acknowledged, <code>false</code> if the records are not
+	 *            acknowledged.
 	 * @see #encode()
 	 */
 	protected AcknowledgedPacket(boolean acknowledge) {
@@ -86,8 +87,9 @@ public class AcknowledgedPacket extends RakNetPacket {
 	/**
 	 * Creates an <code>ACK</code> packet to be decoded.
 	 * 
-	 * @param packet the original packet whose data will be read from in the
-	 *               {@link #decode()} method.
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
 	 */
 	public AcknowledgedPacket(Packet packet) {
 		super(packet);
@@ -96,8 +98,9 @@ public class AcknowledgedPacket extends RakNetPacket {
 	/**
 	 * Returns whether or not the records inside the packet are acknowledged.
 	 * 
-	 * @return <code>true</code> if the records inside the packet are acknowledged,
-	 *         <code>false</code> if the records are not acknowledged.
+	 * @return <code>true</code> if the records inside the packet are
+	 *         acknowledged, <code>false</code> if the records are not
+	 *         acknowledged.
 	 */
 	public boolean isAcknowledgement() {
 		return this.getId() == ID_ACK;
@@ -106,10 +109,10 @@ public class AcknowledgedPacket extends RakNetPacket {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * Before encoding, all records will be condensed. This means that all records
-	 * that can be converted to ranged records will be converted to ranged records,
-	 * making them use less memory. The <code>records</code> field will be updated
-	 * with these condensed records.
+	 * Before encoding, all records will be condensed. This means that all
+	 * records that can be converted to ranged records will be converted to
+	 * ranged records, making them use less memory. The <code>records</code>
+	 * field will be updated with these condensed records.
 	 */
 	@Override
 	public void encode() {
@@ -127,10 +130,10 @@ public class AcknowledgedPacket extends RakNetPacket {
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * After decoding is finished, all records will be expanded. This means that all
-	 * ranged records will be converted to single records, making it easier to cycle
-	 * through them. The <code>records</code> field will be updated with these
-	 * expanded records.
+	 * After decoding is finished, all records will be expanded. This means that
+	 * all ranged records will be converted to single records, making it easier
+	 * to cycle through them. The <code>records</code> field will be updated
+	 * with these expanded records.
 	 */
 	@Override
 	public void decode() {

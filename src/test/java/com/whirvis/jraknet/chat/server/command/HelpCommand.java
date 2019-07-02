@@ -50,7 +50,8 @@ public final class HelpCommand extends Command {
 	/**
 	 * Constructs a <code>HelpCommand</code>.
 	 * 
-	 * @param server the server that the command belongs to.
+	 * @param server
+	 *            the server that the command belongs to.
 	 */
 	public HelpCommand(ChatServer server) {
 		super(server, "help", "Displays all the commands that can be used");

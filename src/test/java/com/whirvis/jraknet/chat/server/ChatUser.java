@@ -60,16 +60,21 @@ public final class ChatUser {
 	 * Creates a chat user.
 	 * <p>
 	 * As soon as this user is created, a {@link LoginAccepted LOGIN_ACCEPTED}
-	 * packet will be sent to it. When a chat user is created, it is assumed that
-	 * they are already validated.
+	 * packet will be sent to it. When a chat user is created, it is assumed
+	 * that they are already validated.
 	 * 
-	 * @param server   the server that the user belongs to.
-	 * @param peer     the peer.
-	 * @param uuid     the universally unique ID.
-	 * @param username the username.
-	 * @throws NullPointerException if the <code>server</code>, <code>peer</code>,
-	 *                              <code>uuid</code> or <code>username</code> are
-	 *                              <code>null</code>.
+	 * @param server
+	 *            the server that the user belongs to.
+	 * @param peer
+	 *            the peer.
+	 * @param uuid
+	 *            the universally unique ID.
+	 * @param username
+	 *            the username.
+	 * @throws NullPointerException
+	 *             if the <code>server</code>, <code>peer</code>,
+	 *             <code>uuid</code> or <code>username</code> are
+	 *             <code>null</code>.
 	 */
 	public ChatUser(ChatServer server, RakNetClientPeer peer, UUID uuid, String username) throws NullPointerException {
 		if (server == null) {
@@ -135,9 +140,10 @@ public final class ChatUser {
 	/**
 	 * Tells the user its new username update request has been accepted.
 	 * 
-	 * @param username the new username of the user.
-	 * @throws NullPointerException if the <code>username</code> is
-	 *                              <code>null</code>.
+	 * @param username
+	 *            the new username of the user.
+	 * @throws NullPointerException
+	 *             if the <code>username</code> is <code>null</code>.
 	 */
 	public void acceptUsernameUpdate(String username) throws NullPointerException {
 		if (username == null) {
@@ -157,12 +163,15 @@ public final class ChatUser {
 	/**
 	 * Sends a chat message to the user on the specified channel.
 	 * 
-	 * @param message the message to send.
-	 * @param channel the channel to send the message on.
-	 * @throws NullPointerException    if the <code>message</code> is
-	 *                                 <code>null</code>.
-	 * @throws InvalidChannelException if the <code>channel</code> is greater than
-	 *                                 or equal to {@value RakNet#CHANNEL_COUNT}.
+	 * @param message
+	 *            the message to send.
+	 * @param channel
+	 *            the channel to send the message on.
+	 * @throws NullPointerException
+	 *             if the <code>message</code> is <code>null</code>.
+	 * @throws InvalidChannelException
+	 *             if the <code>channel</code> is greater than or equal to
+	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public void sendChatMessage(String message, int channel) throws NullPointerException, InvalidChannelException {
 		if (message == null) {
@@ -179,10 +188,12 @@ public final class ChatUser {
 	/**
 	 * Notifies the user of a new channel.
 	 * 
-	 * @param channel the ID of the channel.
-	 * @param name    the name of the channel.
-	 * @throws NullPointerException if the channel <code>name</code> is
-	 *                              <code>null</code>.
+	 * @param channel
+	 *            the ID of the channel.
+	 * @param name
+	 *            the name of the channel.
+	 * @throws NullPointerException
+	 *             if the channel <code>name</code> is <code>null</code>.
 	 */
 	public void addChannel(int channel, String name) throws NullPointerException {
 		if (name == null) {
@@ -198,10 +209,12 @@ public final class ChatUser {
 	/**
 	 * Notifies the user of a channel rename.
 	 * 
-	 * @param channel the ID of the channel.
-	 * @param name    the new name of the channel.
-	 * @throws NullPointerException if the channel <code>name</code> is
-	 *                              <code>null</code>.
+	 * @param channel
+	 *            the ID of the channel.
+	 * @param name
+	 *            the new name of the channel.
+	 * @throws NullPointerException
+	 *             if the channel <code>name</code> is <code>null</code>.
 	 */
 	public void renameChannel(int channel, String name) throws NullPointerException {
 		if (name == null) {
@@ -217,7 +230,8 @@ public final class ChatUser {
 	/**
 	 * Notifies the user of a removed channel.
 	 * 
-	 * @param channel the ID of the channel.
+	 * @param channel
+	 *            the ID of the channel.
 	 */
 	public void removeChannel(int channel) {
 		RemoveChannel removeChannel = new RemoveChannel();
@@ -229,8 +243,9 @@ public final class ChatUser {
 	/**
 	 * Kicks the user.
 	 * 
-	 * @param reason the reason the user was kicked, <code>null</code> value will
-	 *               have "Kicked" be used as the reason instead.
+	 * @param reason
+	 *            the reason the user was kicked, <code>null</code> value will
+	 *            have "Kicked" be used as the reason instead.
 	 */
 	public void kick(String reason) {
 		Kick kick = new Kick();

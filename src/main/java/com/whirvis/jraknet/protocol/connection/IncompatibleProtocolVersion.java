@@ -60,7 +60,8 @@ public final class IncompatibleProtocolVersion extends RakNetPacket {
 	public long serverGuid;
 
 	/**
-	 * Creates an <code>INCOMPATIBLE_PROTOCOL_VERSION</code> packet to be encoded.
+	 * Creates an <code>INCOMPATIBLE_PROTOCOL_VERSION</code> packet to be
+	 * encoded.
 	 * 
 	 * @see #encode()
 	 */
@@ -69,10 +70,12 @@ public final class IncompatibleProtocolVersion extends RakNetPacket {
 	}
 
 	/**
-	 * Creates an <code>INCOMPATIBLE_PROTOCOL_VERSION</code> packet to be decoded.
+	 * Creates an <code>INCOMPATIBLE_PROTOCOL_VERSION</code> packet to be
+	 * decoded.
 	 * 
-	 * @param packet the original packet whose data will be read from in the
-	 *               {@link #decode()} method.
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
 	 */
 	public IncompatibleProtocolVersion(Packet packet) {
 		super(packet);

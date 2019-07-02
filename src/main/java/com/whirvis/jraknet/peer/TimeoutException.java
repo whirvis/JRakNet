@@ -44,7 +44,8 @@ public final class TimeoutException extends RuntimeException {
 	/**
 	 * Constructs a <code>TimeoutException</code>.
 	 * 
-	 * @param peer the peer that has timed out.
+	 * @param peer
+	 *            the peer that has timed out.
 	 */
 	public TimeoutException(RakNetPeer peer) {
 		super("Peer timeout");

@@ -47,7 +47,8 @@ public final class PacketBufferException extends RakNetException {
 	/**
 	 * Constructs a <code>PacketBufferException</code>.
 	 * 
-	 * @param packet the packet that failed to encode/decode.
+	 * @param packet
+	 *            the packet that failed to encode/decode.
 	 */
 	public PacketBufferException(RakNetPacket packet) {
 		super(RakNetPacket.getName(packet.getId()) + " packet failed to encode/decode");

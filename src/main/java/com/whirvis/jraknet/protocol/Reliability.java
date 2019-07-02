@@ -39,7 +39,8 @@ package com.whirvis.jraknet.protocol;
 public enum Reliability {
 
 	/**
-	 * The packet will be sent, but it is not guaranteed that it will be received.
+	 * The packet will be sent, but it is not guaranteed that it will be
+	 * received.
 	 */
 	UNRELIABLE(0, false, false, false, false),
 
@@ -55,20 +56,20 @@ public enum Reliability {
 	RELIABLE(2, true, false, false, false),
 
 	/**
-	 * Same as {@link #RELIABLE}, however it will not be handled until all packets
-	 * sent before it are also received.
+	 * Same as {@link #RELIABLE}, however it will not be handled until all
+	 * packets sent before it are also received.
 	 */
 	RELIABLE_ORDERED(3, true, true, false, false),
 
 	/**
-	 * Same as {@link RELIABLE}, however it will not be handled if a newer sequenced
-	 * packet on the channel has already arrived.
+	 * Same as {@link RELIABLE}, however it will not be handled if a newer
+	 * sequenced packet on the channel has already arrived.
 	 */
 	RELIABLE_SEQUENCED(4, true, false, true, false),
 
 	/**
-	 * Same as {@link #UNRELIABLE}, however you will be notified whether the packet
-	 * was lost or received through the <code>onAcknowledge()</code> and
+	 * Same as {@link #UNRELIABLE}, however you will be notified whether the
+	 * packet was lost or received through the <code>onAcknowledge()</code> and
 	 * <code>onLoss()</code> methods found inside the
 	 * <code>RakNetServerListener</code> and <code>RakNetClientListener</code>
 	 * classes.
@@ -79,8 +80,8 @@ public enum Reliability {
 	UNRELIABLE_WITH_ACK_RECEIPT(5, false, false, false, true),
 
 	/**
-	 * Same as {@link #RELIABLE}, however you will be notified when the packet was
-	 * received through the <code>onAcknowledge()</code> method through the
+	 * Same as {@link #RELIABLE}, however you will be notified when the packet
+	 * was received through the <code>onAcknowledge()</code> method through the
 	 * <code>RakNetServerListener</code> and <code>RakNetClientListener</code>
 	 * classes.
 	 * 
@@ -91,9 +92,9 @@ public enum Reliability {
 
 	/**
 	 * Same as {@link #RELIABLE_ORDERED}, however you will be notified when the
-	 * packet was received through the <code>onAcknowledge()</code> method through
-	 * the <code>RakNetServerListener</code> and <code>RakNetClientListener</code>
-	 * classes.
+	 * packet was received through the <code>onAcknowledge()</code> method
+	 * through the <code>RakNetServerListener</code> and
+	 * <code>RakNetClientListener</code> classes.
 	 * 
 	 * @see com.whirvis.jraknet.server.RakNetServerListener RakNetServerListener
 	 * @see com.whirvis.jraknet.client.RakNetClientListener RakNetClientListener
@@ -109,21 +110,25 @@ public enum Reliability {
 	/**
 	 * Constructs a <code>Reliability</code>.
 	 * 
-	 * @param id          the ID of the reliability.
-	 * @param reliable    <code>true</code> if it is reliable, <code>false</code>
-	 *                    otherwise.
-	 * @param ordered     <code>true</code> if it is ordered, <code>false</code>
-	 *                    otherwise.
-	 * @param sequenced   <code>true</code> if it is sequenced, <code>false</code>
-	 *                    otherwise.
-	 * @param requiresAck <code>true</code> if it requires an acknowledge receipt,
-	 *                    <code>false</code> otherwise.
-	 * @throws IllegalArgumentException if both <code>ordered</code> and
-	 *                                  <code>sequenced</code> are
-	 *                                  <code>true</code>.
+	 * @param id
+	 *            the ID of the reliability.
+	 * @param reliable
+	 *            <code>true</code> if it is reliable, <code>false</code>
+	 *            otherwise.
+	 * @param ordered
+	 *            <code>true</code> if it is ordered, <code>false</code>
+	 *            otherwise.
+	 * @param sequenced
+	 *            <code>true</code> if it is sequenced, <code>false</code>
+	 *            otherwise.
+	 * @param requiresAck
+	 *            <code>true</code> if it requires an acknowledge receipt,
+	 *            <code>false</code> otherwise.
+	 * @throws IllegalArgumentException
+	 *             if both <code>ordered</code> and <code>sequenced</code> are
+	 *             <code>true</code>.
 	 */
-	private Reliability(int id, boolean reliable, boolean ordered, boolean sequenced, boolean requiresAck)
-			throws IllegalArgumentException {
+	private Reliability(int id, boolean reliable, boolean ordered, boolean sequenced, boolean requiresAck) throws IllegalArgumentException {
 		this.id = (byte) id;
 		this.reliable = reliable;
 		this.ordered = ordered;
@@ -146,8 +151,8 @@ public enum Reliability {
 	/**
 	 * Returns whether or not the reliability is reliable.
 	 * 
-	 * @return <code>true</code> if the reliability is reliable, <code>false</code>
-	 *         otherwise.
+	 * @return <code>true</code> if the reliability is reliable,
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean isReliable() {
 		return this.reliable;
@@ -156,8 +161,8 @@ public enum Reliability {
 	/**
 	 * Returns whether or not the reliability is ordered.
 	 * 
-	 * @return <code>true</code> if the reliability is ordered, <code>false</code>
-	 *         otherwise.
+	 * @return <code>true</code> if the reliability is ordered,
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean isOrdered() {
 		return this.ordered;
@@ -166,8 +171,8 @@ public enum Reliability {
 	/**
 	 * Returns whether not the reliability is sequenced.
 	 * 
-	 * @return <code>true</code> if the reliability is sequenced, <code>false</code>
-	 *         otherwise.
+	 * @return <code>true</code> if the reliability is sequenced,
+	 *         <code>false</code> otherwise.
 	 */
 	public boolean isSequenced() {
 		return this.sequenced;
@@ -186,7 +191,8 @@ public enum Reliability {
 	/**
 	 * Returns the reliability based on its ID.
 	 * 
-	 * @param id the ID of the reliability.
+	 * @param id
+	 *            the ID of the reliability.
 	 * @return the reliability with the specified ID.
 	 */
 	public static Reliability lookup(int id) {

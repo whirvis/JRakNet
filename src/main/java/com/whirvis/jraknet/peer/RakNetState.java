@@ -39,15 +39,15 @@ public enum RakNetState {
 
 	/*
 	 * The registration states use bitflags to simplify things. The first bit
-	 * signifies if the peer is connected, the second bit indicates if the peer is
-	 * handshaking, and the thirt bit indicates if the peer is logged in.
+	 * signifies if the peer is connected, the second bit indicates if the peer
+	 * is handshaking, and the thirt bit indicates if the peer is logged in.
 	 */
 
 	/**
 	 * The peer is connected.
 	 * <p>
-	 * This is the starting value of the state for all peers as it is assumed a peer
-	 * has connected by the time it is created.
+	 * This is the starting value of the state for all peers as it is assumed a
+	 * peer has connected by the time it is created.
 	 */
 	CONNECTED(0b001, 0b001),
 
@@ -72,11 +72,13 @@ public enum RakNetState {
 	/**
 	 * Constructs a <code>RakNetState</code> with the specified ID.
 	 * 
-	 * @param flags    the flags of the state.
-	 * @param defining the defining flags of the state. If the <code>flags</code> of
-	 *                 another state AND'ed with the <code>defining</code> flags of
-	 *                 this state are greater than <code>0</code>, then the other
-	 *                 state is a derivative of this state.
+	 * @param flags
+	 *            the flags of the state.
+	 * @param defining
+	 *            the defining flags of the state. If the <code>flags</code> of
+	 *            another state AND'ed with the <code>defining</code> flags of
+	 *            this state are greater than <code>0</code>, then the other
+	 *            state is a derivative of this state.
 	 */
 	private RakNetState(int flags, int defining) {
 		this.flags = flags;
@@ -86,12 +88,13 @@ public enum RakNetState {
 	/**
 	 * Returns whether or not this state is a derivative of the specified state.
 	 * 
-	 * @param state the state.
+	 * @param state
+	 *            the state.
 	 * @return <code>true</code> if the state is a derivative of this state,
 	 *         <code>false</code> otherwise.
-	 * @throws UnsupportedOperationException if the defining flags of the
-	 *                                       <code>state</code> are
-	 *                                       <code>null (0)</code>.
+	 * @throws UnsupportedOperationException
+	 *             if the defining flags of the <code>state</code> are
+	 *             <code>null (0)</code>.
 	 */
 	public boolean isDerivative(RakNetState state) throws UnsupportedOperationException {
 		if (state == null) {

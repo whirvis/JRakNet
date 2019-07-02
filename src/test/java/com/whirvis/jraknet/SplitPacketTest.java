@@ -72,14 +72,16 @@ public final class SplitPacketTest {
 	/**
 	 * The entry point for the test.
 	 * 
-	 * @param args the program arguments. These values are ignored.
-	 * @throws RakNetException      if a RakNet error occurs.
-	 * @throws InterruptedException if any thread has interrupted the current
-	 *                              thread. The <i>interrupted status</i> of the
-	 *                              current thread is cleared when this exception is
-	 *                              thrown.
-	 * @throws UnknownHostException if the <code>localhost</code> address could not
-	 *                              be found.
+	 * @param args
+	 *            the program arguments. These values are ignored.
+	 * @throws RakNetException
+	 *             if a RakNet error occurs.
+	 * @throws InterruptedException
+	 *             if any thread has interrupted the current thread. The
+	 *             <i>interrupted status</i> of the current thread is cleared
+	 *             when this exception is thrown.
+	 * @throws UnknownHostException
+	 *             if the <code>localhost</code> address could not be found.
 	 */
 	public static void main(String[] args) throws RakNetException, InterruptedException, UnknownHostException {
 		LOG.info("Creating server, sleeping 3000MS, and then creating the client...");
@@ -103,7 +105,8 @@ public final class SplitPacketTest {
 	 * Creates the server for the test.
 	 * 
 	 * @return the server that will receive the giant packet.
-	 * @throws RakNetException if a RakNet error occurs.
+	 * @throws RakNetException
+	 *             if a RakNet error occurs.
 	 */
 	private static RakNetServer createServer() throws RakNetException {
 		RakNetServer server = new RakNetServer(RakNetTest.WHIRVIS_DEVELOPMENT_PORT, 1);
@@ -120,16 +123,14 @@ public final class SplitPacketTest {
 			}
 
 			@Override
-			public void onDisconnect(RakNetServer server, InetSocketAddress address, RakNetClientPeer peer,
-					String reason) {
+			public void onDisconnect(RakNetServer server, InetSocketAddress address, RakNetClientPeer peer, String reason) {
 				LOG.info("Server - Client from " + address + " disconnected (" + reason + ")");
 				System.exit(1);
 			}
 
 			@Override
 			public void handleMessage(RakNetServer server, RakNetClientPeer peer, RakNetPacket packet, int channel) {
-				LOG.info("Server - Received packet of " + packet.size() + " bytes from " + peer.getAddress()
-						+ ", checking data...");
+				LOG.info("Server - Received packet of " + packet.size() + " bytes from " + peer.getAddress() + ", checking data...");
 
 				// Check header byte
 				LOG.info("Server - Checking header byte...");
@@ -176,9 +177,10 @@ public final class SplitPacketTest {
 	 * Creates the client for the test.
 	 * 
 	 * @return the client that will be sending the giant packet.
-	 * @throws RakNetException      if a RakNet error occurs.
-	 * @throws UnknownHostException if the <code>localhost</code> address cannot be
-	 *                              found.
+	 * @throws RakNetException
+	 *             if a RakNet error occurs.
+	 * @throws UnknownHostException
+	 *             if the <code>localhost</code> address cannot be found.
 	 */
 	private static RakNetClient createClient() throws RakNetException, UnknownHostException {
 		RakNetClient client = new RakNetClient();
@@ -186,11 +188,10 @@ public final class SplitPacketTest {
 
 			@Override
 			public void onLogin(RakNetClient client, RakNetServerPeer peer) {
-				LOG.info("Client - Logged in to server with MTU " + peer.getMaximumTransferUnit()
-						+ ", calculating maximum packet size...");
+				LOG.info("Client - Logged in to server with MTU " + peer.getMaximumTransferUnit() + ", calculating maximum packet size...");
 				Packet packet = new RakNetPacket(SPLIT_START_ID);
-				int maximumPacketSize = (peer.getMaximumTransferUnit() - CustomPacket.MINIMUM_SIZE
-						- EncapsulatedPacket.size(Reliability.RELIABLE_ORDERED, true)) * RakNetPeer.MAX_SPLIT_COUNT;
+				int maximumPacketSize = (peer.getMaximumTransferUnit() - CustomPacket.MINIMUM_SIZE - EncapsulatedPacket.size(Reliability.RELIABLE_ORDERED, true))
+						* RakNetPeer.MAX_SPLIT_COUNT;
 
 				// Create giant packet
 				LOG.info("Client - Creating giant packet...");
@@ -208,8 +209,7 @@ public final class SplitPacketTest {
 			}
 
 			@Override
-			public void onDisconnect(RakNetClient client, InetSocketAddress address, RakNetServerPeer peer,
-					String reason) {
+			public void onDisconnect(RakNetClient client, InetSocketAddress address, RakNetServerPeer peer, String reason) {
 				LOG.error("Client - Lost connection to server (" + reason + ")");
 				System.exit(1);
 			}

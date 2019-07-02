@@ -51,7 +51,8 @@ public final class StopCommand extends Command {
 	/**
 	 * Constructs a <code>StopCommand</code>.
 	 * 
-	 * @param server the server that the command belongs to.
+	 * @param server
+	 *            the server that the command belongs to.
 	 */
 	public StopCommand(ChatServer server) {
 		super(server, "stop", "Stops the server");

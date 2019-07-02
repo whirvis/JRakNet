@@ -40,9 +40,11 @@ public class RakNetException extends Exception {
 	private static final long serialVersionUID = -685945306592443928L;
 
 	/**
-	 * Constructs a <code>RakNetException</code> with the specified detail message.
+	 * Constructs a <code>RakNetException</code> with the specified detail
+	 * message.
 	 * 
-	 * @param message the detail message.
+	 * @param message
+	 *            the detail message.
 	 */
 	public RakNetException(String message) {
 		super(message);
@@ -52,7 +54,8 @@ public class RakNetException extends Exception {
 	 * Constructs a <code>RakNetException</code> with the specified
 	 * <code>Throwable</code>.
 	 * 
-	 * @param cause the <code>Throwable</code> that was thrown.
+	 * @param cause
+	 *            the <code>Throwable</code> that was thrown.
 	 */
 	public RakNetException(Throwable cause) {
 		this(cause.getMessage());

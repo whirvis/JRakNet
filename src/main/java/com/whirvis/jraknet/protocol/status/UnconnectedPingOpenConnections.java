@@ -57,8 +57,9 @@ public final class UnconnectedPingOpenConnections extends UnconnectedPing {
 	 * Creates an <code>UNCONNECTED_PING_OPEN_CONNECTIONS</code> packet to be
 	 * decoded.
 	 * 
-	 * @param packet the original packet whose data will be read from in the
-	 *               {@link #decode()} method.
+	 * @param packet
+	 *            the original packet whose data will be read from in the
+	 *            {@link #decode()} method.
 	 */
 	public UnconnectedPingOpenConnections(Packet packet) {
 		super(packet);

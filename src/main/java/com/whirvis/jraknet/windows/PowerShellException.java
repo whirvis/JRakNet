@@ -43,7 +43,8 @@ public final class PowerShellException extends RuntimeException {
 	/**
 	 * Constructs a <code>PowerShellException</code>.
 	 * 
-	 * @param message the detail message.
+	 * @param message
+	 *            the detail message.
 	 */
 	public PowerShellException(String message) {
 		super(message);

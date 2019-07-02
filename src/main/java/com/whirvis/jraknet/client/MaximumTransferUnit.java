@@ -51,14 +51,16 @@ import com.whirvis.jraknet.map.IntMap;
 public final class MaximumTransferUnit {
 
 	/**
-	 * Sorts an array of maximum transfer units from the highest to lowest maximum
-	 * transfer units based on their maximum transfer unit size.
+	 * Sorts an array of maximum transfer units from the highest to lowest
+	 * maximum transfer units based on their maximum transfer unit size.
 	 * 
-	 * @param units the maximum transfer units to sort.
+	 * @param units
+	 *            the maximum transfer units to sort.
 	 * @return the sorted maximum transfer units.
-	 * @throws NullPointerException if the <code>units</code> are <code>null</code>
-	 *                              or if any of the maximum transfer units inside
-	 *                              of the <code>unit</code> are <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>units</code> are <code>null</code> or if any of
+	 *             the maximum transfer units inside of the <code>unit</code>
+	 *             are <code>null</code>.
 	 */
 	public static MaximumTransferUnit[] sort(MaximumTransferUnit... units) throws NullPointerException {
 		if (units == null) {
@@ -74,8 +76,7 @@ public final class MaximumTransferUnit {
 			unitMap.put(unit.getSize(), unit);
 		}
 		ArrayList<MaximumTransferUnit> unitList = new ArrayList<MaximumTransferUnit>();
-		NavigableMap<Integer, MaximumTransferUnit> unitTreeMap = new TreeMap<Integer, MaximumTransferUnit>(unitMap)
-				.descendingMap();
+		NavigableMap<Integer, MaximumTransferUnit> unitTreeMap = new TreeMap<Integer, MaximumTransferUnit>(unitMap).descendingMap();
 		Set<Entry<Integer, MaximumTransferUnit>> unitSet = unitTreeMap.entrySet();
 		Iterator<Entry<Integer, MaximumTransferUnit>> unitI = unitSet.iterator();
 		while (unitI.hasNext()) {
@@ -92,14 +93,16 @@ public final class MaximumTransferUnit {
 	/**
 	 * Creates a maximum transfer unit.
 	 * 
-	 * @param size    the size of the maximum transfer unit in bytes.
-	 * @param retries the amount of time the client should try to use it before
-	 *                going to the next lowest maximum transfer unit size.
-	 * @throws IllegalArgumentException if the <code>size</code> is less than or
-	 *                                  equal to <code>0</code>, if the
-	 *                                  <code>size</code> odd (not divisible by
-	 *                                  <code>2</code>), or the retry count is less
-	 *                                  than or equal to <code>0</code>.
+	 * @param size
+	 *            the size of the maximum transfer unit in bytes.
+	 * @param retries
+	 *            the amount of time the client should try to use it before
+	 *            going to the next lowest maximum transfer unit size.
+	 * @throws IllegalArgumentException
+	 *             if the <code>size</code> is less than or equal to
+	 *             <code>0</code>, if the <code>size</code> odd (not divisible
+	 *             by <code>2</code>), or the retry count is less than or equal
+	 *             to <code>0</code>.
 	 */
 	public MaximumTransferUnit(int size, int retries) throws IllegalArgumentException {
 		if (size <= 0) {
@@ -136,8 +139,9 @@ public final class MaximumTransferUnit {
 
 	/**
 	 * Returns the amount of times {@link #retry()} can be called before
-	 * {@link #reset()} needs to be called. If this is <code>0</code>, then calling
-	 * the {@link #retry()} method will yield a <code>IllegalStateException</code>.
+	 * {@link #reset()} needs to be called. If this is <code>0</code>, then
+	 * calling the {@link #retry()} method will yield a
+	 * <code>IllegalStateException</code>.
 	 * 
 	 * @return the amount of times {@link #retry()} can be called before
 	 *         {@link #reset()} needs to be called.
@@ -150,14 +154,14 @@ public final class MaximumTransferUnit {
 	 * Lowers the amount of retries left.
 	 * 
 	 * @return the amount of retries left.
-	 * @throws IllegalStateException if the amount of retries left is than or equal
-	 *                               to <code>0</code>.
+	 * @throws IllegalStateException
+	 *             if the amount of retries left is than or equal to
+	 *             <code>0</code>.
 	 * @see #reset()
 	 */
 	public int retry() throws IllegalStateException {
 		if (retriesLeft < 0) {
-			throw new IllegalStateException(
-					"No more retries left, use reset() in order to reuse a maximum transfer unit");
+			throw new IllegalStateException("No more retries left, use reset() in order to reuse a maximum transfer unit");
 		}
 		return this.retriesLeft--;
 	}
@@ -165,8 +169,8 @@ public final class MaximumTransferUnit {
 	/**
 	 * Sets the amount of retries left back to the default.
 	 * <p>
-	 * This is necessary in order to be able to reuse a maximum transfer unit once
-	 * it has been depleted of its retries left.
+	 * This is necessary in order to be able to reuse a maximum transfer unit
+	 * once it has been depleted of its retries left.
 	 * 
 	 * @see #retry()
 	 */

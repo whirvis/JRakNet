@@ -68,9 +68,9 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 public final class RakNet {
 
 	/**
-	 * A <code>Thread</code> which runs in the background to allow for code relating
-	 * to UPnP to be executed through the WaifUPnP without locking up the main
-	 * thread.
+	 * A <code>Thread</code> which runs in the background to allow for code
+	 * relating to UPnP to be executed through the WaifUPnP without locking up
+	 * the main thread.
 	 * 
 	 * @author Trent Summerlin
 	 * @since JRakNet v2.11.0
@@ -86,9 +86,11 @@ public final class RakNet {
 		/**
 		 * Sets the callback for when the task has finished executing.
 		 * <p>
-		 * This callback method will be run on the same thread as the original task.
+		 * This callback method will be run on the same thread as the original
+		 * task.
 		 * 
-		 * @param runnable the callback.
+		 * @param runnable
+		 *            the callback.
 		 */
 		public void onFinish(Runnable runnable) {
 			this.runnable = runnable;
@@ -97,9 +99,10 @@ public final class RakNet {
 		/**
 		 * Returns whether or not the UPnP task was successful.
 		 * 
-		 * @return <code>true</code> if the UPnP task was successful, <code>false</code>
-		 *         otherwise.
-		 * @throws IllegalStateException if the UPnP code is still being executed.
+		 * @return <code>true</code> if the UPnP task was successful,
+		 *         <code>false</code> otherwise.
+		 * @throws IllegalStateException
+		 *             if the UPnP code is still being executed.
 		 */
 		public boolean wasSuccessful() throws IllegalStateException {
 			if (finished == false) {
@@ -163,22 +166,22 @@ public final class RakNet {
 
 	/**
 	 * The amount of times the {@link #isServerOnline(InetSocketAddress)} and
-	 * {@link #isServerCompatible(InetSocketAddress)} methods will attempt to ping
-	 * the server before giving up.
+	 * {@link #isServerCompatible(InetSocketAddress)} methods will attempt to
+	 * ping the server before giving up.
 	 */
 	public static final int PING_RETRIES = 5;
 
 	/**
 	 * The timestamp the {@link #isServerOnline(InetSocketAddress)} and
-	 * {@link #isServerCompatible(InetSocketAddress)} methods will use as the ping
-	 * timestamp.
+	 * {@link #isServerCompatible(InetSocketAddress)} methods will use as the
+	 * ping timestamp.
 	 */
 	public static final long PING_TIMESTAMP = System.currentTimeMillis();
 
 	/**
 	 * The ping ID that the {@link #isServerOnline(InetSocketAddress)} and
-	 * {@link #isServerCompatible(InetSocketAddress)} methods will use as the ping
-	 * ID.
+	 * {@link #isServerCompatible(InetSocketAddress)} methods will use as the
+	 * ping ID.
 	 */
 	public static final long PING_ID = UUID.randomUUID().getLeastSignificantBits();
 
@@ -214,8 +217,8 @@ public final class RakNet {
 	public static final byte DEFAULT_CHANNEL = 0;
 
 	/**
-	 * The amount of time in milliseconds an address will be blocked if it sends too
-	 * many packets in one second.
+	 * The amount of time in milliseconds an address will be blocked if it sends
+	 * too many packets in one second.
 	 */
 	public static final long MAX_PACKETS_PER_SECOND_BLOCK = 300000L;
 
@@ -244,14 +247,17 @@ public final class RakNet {
 	}
 
 	/**
-	 * Sleeps the current thread for the specified amount of time in milliseconds.
+	 * Sleeps the current thread for the specified amount of time in
+	 * milliseconds.
 	 * <p>
 	 * If an <code>InterruptedException</code> is caught during the sleep,
-	 * <code>Thread.currentThread().interrupt()</code> will automatically be called.
+	 * <code>Thread.currentThread().interrupt()</code> will automatically be
+	 * called.
 	 * 
-	 * @param time the amount of time the thread should sleep in milliseconds.
-	 * @return <code>true</code> if the current thread was interrupted during the
-	 *         sleep, <code>false</code> otherwise.
+	 * @param time
+	 *            the amount of time the thread should sleep in milliseconds.
+	 * @return <code>true</code> if the current thread was interrupted during
+	 *         the sleep, <code>false</code> otherwise.
 	 */
 	public static boolean sleep(long time) {
 		try {
@@ -266,11 +272,12 @@ public final class RakNet {
 	/**
 	 * Returns the version of the specified IP address.
 	 * 
-	 * @param address the IP address.
+	 * @param address
+	 *            the IP address.
 	 * @return the version of the IP address, <code>-1</code> if the version is
 	 *         unknown.
-	 * @throws NullPointerException if the <code>address</code> is
-	 *                              <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> is <code>null</code>.
 	 */
 	public static int getAddressVersion(InetAddress address) throws NullPointerException {
 		if (address == null) {
@@ -288,11 +295,13 @@ public final class RakNet {
 	/**
 	 * Returns the version of the IP address of the specified address.
 	 * 
-	 * @param address the address.
+	 * @param address
+	 *            the address.
 	 * @return the version of the IP address, <code>-1</code> if the version is
 	 *         unknown.
-	 * @throws NullPointerException if the <code>address</code> or the IP of the
-	 *                              <code>address</code> are <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> or the IP of the
+	 *             <code>address</code> are <code>null</code>.
 	 */
 	public static int getAddressVersion(InetSocketAddress address) throws NullPointerException {
 		if (address == null) {
@@ -304,11 +313,12 @@ public final class RakNet {
 	/**
 	 * Returns whether or not the specified IP address is a local address.
 	 * 
-	 * @param address the IP address.
+	 * @param address
+	 *            the IP address.
 	 * @return <code>true</code> if the address is a local address,
 	 *         <code>false</code> otherwise.
-	 * @throws NullPointerException if the <code>address</code> is
-	 *                              <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> is <code>null</code>.
 	 */
 	public static boolean isLocalAddress(InetAddress address) throws NullPointerException {
 		if (address == null) {
@@ -322,9 +332,8 @@ public final class RakNet {
 				return true; // Address is in range of 127.0.0.1-127.0.0.8
 			}
 		} else if (ab.length >= 16) {
-			if (ab[0] == 0 && ab[1] == 0 && ab[2] == 0 && ab[3] == 0 && ab[4] == 0 && ab[5] == 0 && ab[6] == 0
-					&& ab[7] == 0 && ab[8] == 0 && ab[9] == 0 && ab[10] == 0 && ab[11] == 0 && ab[12] == 0
-					&& ab[13] == 0 && ab[14] == 0 && ab[15] == 1) {
+			if (ab[0] == 0 && ab[1] == 0 && ab[2] == 0 && ab[3] == 0 && ab[4] == 0 && ab[5] == 0 && ab[6] == 0 && ab[7] == 0 && ab[8] == 0 && ab[9] == 0 && ab[10] == 0
+					&& ab[11] == 0 && ab[12] == 0 && ab[13] == 0 && ab[14] == 0 && ab[15] == 1) {
 				return true; // Address is equal to 0:0:0:0:0:0:0:1
 			}
 		}
@@ -334,13 +343,15 @@ public final class RakNet {
 	/**
 	 * Returns whether or not the specified IP address is a local address.
 	 * 
-	 * @param host the IP address.
+	 * @param host
+	 *            the IP address.
 	 * @return <code>true</code> if the address is a local address,
 	 *         <code>false</code> otherwise.
-	 * @throws NullPointerException if the <code>host</code> is <code>null</code>.
-	 * @throws UnknownHostException if no IP address for the <code>host</code> could
-	 *                              be found, or if a scope_id was specified for a
-	 *                              global IPv6 address.
+	 * @throws NullPointerException
+	 *             if the <code>host</code> is <code>null</code>.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public static boolean isLocalAddress(String host) throws NullPointerException, UnknownHostException {
 		if (host == null) {
@@ -352,11 +363,13 @@ public final class RakNet {
 	/**
 	 * Returns whether or not the address is a local address.
 	 * 
-	 * @param address the address.
+	 * @param address
+	 *            the address.
 	 * @return <code>true</code> if the address is a local address,
 	 *         <code>false</code> otherwise.
-	 * @throws NullPointerException if the <code>address</code> or the IP address of
-	 *                              the <code>address</code> are <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> or the IP address of the
+	 *             <code>address</code> are <code>null</code>.
 	 */
 	public static boolean isLocalAddress(InetSocketAddress address) throws NullPointerException {
 		if (address == null) {
@@ -368,12 +381,14 @@ public final class RakNet {
 	}
 
 	/**
-	 * Converts the stack trace of the specified <code>Throwable</code> to a string.
+	 * Converts the stack trace of the specified <code>Throwable</code> to a
+	 * string.
 	 * 
-	 * @param throwable the <code>Throwable</code> to get the stack trace from.
+	 * @param throwable
+	 *            the <code>Throwable</code> to get the stack trace from.
 	 * @return the stack trace as a string.
-	 * @throws NullPointerException if the <code>throwable</code> is
-	 *                              <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>throwable</code> is <code>null</code>.
 	 */
 	public static String getStackTrace(Throwable throwable) throws NullPointerException {
 		if (throwable == null) {
@@ -394,23 +409,25 @@ public final class RakNet {
 	 * <a href="https://en.wikipedia.org/wiki/Universal_Plug_and_Play">UPnP</a>.
 	 * <p>
 	 * In order for this method to work,
-	 * <a href="https://en.wikipedia.org/wiki/Universal_Plug_and_Play">UPnP</a> for
-	 * the router must be enabled. The way to enable this varies depending on the
-	 * router. There is no guarantee this method will successfully forward the
-	 * specified UDP port; as it is completely dependent on the gateway (the router
-	 * in this case) to do so.
+	 * <a href="https://en.wikipedia.org/wiki/Universal_Plug_and_Play">UPnP</a>
+	 * for the router must be enabled. The way to enable this varies depending
+	 * on the router. There is no guarantee this method will successfully
+	 * forward the specified UDP port; as it is completely dependent on the
+	 * gateway (the router in this case) to do so.
 	 * <p>
-	 * This is not a blocking method. However, the code required to accomplish the
-	 * task can up to three seconds to execute. As a result, it is encapsulated
-	 * within another thread so as to prevent unnecessary blocking. If one wishes to
-	 * get the result of the code, use the {@link UPnPResult#wasSuccessful()} method
-	 * found inside of {@link UPnPResult}. A callback for when the task finishes can
-	 * also be set using the {@link UPnPResult#onFinish(Runnable)} method.
+	 * This is not a blocking method. However, the code required to accomplish
+	 * the task can up to three seconds to execute. As a result, it is
+	 * encapsulated within another thread so as to prevent unnecessary blocking.
+	 * If one wishes to get the result of the code, use the
+	 * {@link UPnPResult#wasSuccessful()} method found inside of
+	 * {@link UPnPResult}. A callback for when the task finishes can also be set
+	 * using the {@link UPnPResult#onFinish(Runnable)} method.
 	 * 
-	 * @param port the port to forward.
+	 * @param port
+	 *            the port to forward.
 	 * @return the result of the execution.
-	 * @throws IllegalArgumentException if the port is not within the range of
-	 *                                  <code>0-65535</code>.
+	 * @throws IllegalArgumentException
+	 *             if the port is not within the range of <code>0-65535</code>.
 	 */
 	public static synchronized UPnPResult forwardPort(int port) throws IllegalArgumentException {
 		if (port < 0x0000 || port > 0xFFFF) {
@@ -436,23 +453,25 @@ public final class RakNet {
 	 * <a href="https://en.wikipedia.org/wiki/Universal_Plug_and_Play">UPnP</a>.
 	 * <p>
 	 * In order for this method to work,
-	 * <a href="https://en.wikipedia.org/wiki/Universal_Plug_and_Play">UPnP</a> for
-	 * the router must be enabled. The way to enable this varies depending on the
-	 * router. There is no guarantee this method will successfully close the
-	 * specified UDP port; as it is completely dependent on the gateway (the router
-	 * in this case) to do so.
+	 * <a href="https://en.wikipedia.org/wiki/Universal_Plug_and_Play">UPnP</a>
+	 * for the router must be enabled. The way to enable this varies depending
+	 * on the router. There is no guarantee this method will successfully close
+	 * the specified UDP port; as it is completely dependent on the gateway (the
+	 * router in this case) to do so.
 	 * <p>
-	 * This is not a blocking method. However the code required to accomplish the
-	 * task can up to three seconds to execute. As a result, it is encapsulated
-	 * within another thread so as to prevent unnecessary blocking. If one wishes to
-	 * get the result of the code, use the {@link UPnPResult#wasSuccessful()} method
-	 * found inside of {@link UPnPResult}. A callback for when the task finishes can
-	 * also be set using the {@link UPnPResult#onFinish(Runnable)} method.
+	 * This is not a blocking method. However the code required to accomplish
+	 * the task can up to three seconds to execute. As a result, it is
+	 * encapsulated within another thread so as to prevent unnecessary blocking.
+	 * If one wishes to get the result of the code, use the
+	 * {@link UPnPResult#wasSuccessful()} method found inside of
+	 * {@link UPnPResult}. A callback for when the task finishes can also be set
+	 * using the {@link UPnPResult#onFinish(Runnable)} method.
 	 * 
-	 * @param port the port to close.
+	 * @param port
+	 *            the port to close.
 	 * @return the result of the execution.
-	 * @throws IllegalArgumentException if the port is not within the range of
-	 *                                  <code>0-65535</code>.
+	 * @throws IllegalArgumentException
+	 *             if the port is not within the range of <code>0-65535</code>.
 	 */
 	public static synchronized UPnPResult closePort(int port) throws IllegalArgumentException {
 		if (port < 0x0000 || port > 0xFFFF) {
@@ -476,21 +495,25 @@ public final class RakNet {
 	/**
 	 * Sends a packet to the specified address.
 	 * 
-	 * @param address the address to send the packet to.
-	 * @param packet  the packet to send.
-	 * @param timeout how long to wait until resending the packet.
-	 * @param retries how many times the packet will be sent before giving up.
-	 * @return the packet received in response, <code>null</code> if no response was
-	 *         received or the thread was interrupted.
-	 * @throws NullPointerException     if the <code>address</code>, IP address of
-	 *                                  the <code>address</code>, or
-	 *                                  <code>packet</code> are <code>null</code>.
-	 * @throws IllegalArgumentException if the <code>timeout</code> or
-	 *                                  <code>retries</code> are less than or equal
-	 *                                  to <code>0</code>.
+	 * @param address
+	 *            the address to send the packet to.
+	 * @param packet
+	 *            the packet to send.
+	 * @param timeout
+	 *            how long to wait until resending the packet.
+	 * @param retries
+	 *            how many times the packet will be sent before giving up.
+	 * @return the packet received in response, <code>null</code> if no response
+	 *         was received or the thread was interrupted.
+	 * @throws NullPointerException
+	 *             if the <code>address</code>, IP address of the
+	 *             <code>address</code>, or <code>packet</code> are
+	 *             <code>null</code>.
+	 * @throws IllegalArgumentException
+	 *             if the <code>timeout</code> or <code>retries</code> are less
+	 *             than or equal to <code>0</code>.
 	 */
-	private static RakNetPacket createBootstrapAndSend(InetSocketAddress address, Packet packet, long timeout,
-			int retries) throws NullPointerException, IllegalArgumentException {
+	private static RakNetPacket createBootstrapAndSend(InetSocketAddress address, Packet packet, long timeout, int retries) throws NullPointerException, IllegalArgumentException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
 		} else if (address.getAddress() == null) {
@@ -514,8 +537,7 @@ public final class RakNet {
 			// Create bootstrap
 			Bootstrap bootstrap = new Bootstrap();
 			BootstrapHandler handler = new BootstrapHandler();
-			bootstrap.group(group).channel(NioDatagramChannel.class).option(ChannelOption.SO_BROADCAST, true)
-					.option(ChannelOption.SO_RCVBUF, maximumTransferUnit)
+			bootstrap.group(group).channel(NioDatagramChannel.class).option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_RCVBUF, maximumTransferUnit)
 					.option(ChannelOption.SO_SNDBUF, maximumTransferUnit).handler(handler);
 			Channel channel = bootstrap.bind(0).sync().channel();
 
@@ -538,11 +560,13 @@ public final class RakNet {
 	/**
 	 * Returns whether or not the server with the specified address is online.
 	 * 
-	 * @param address the address of the server.
+	 * @param address
+	 *            the address of the server.
 	 * @return <code>true</code> if the server is online, <code>false</code>
 	 *         otherwise.
-	 * @throws NullPointerException if the <code>address</code> or the IP address of
-	 *                              the <code>address</code> are <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> or the IP address of the
+	 *             <code>address</code> are <code>null</code>.
 	 */
 	public static boolean isServerOnline(InetSocketAddress address) throws NullPointerException {
 		if (address == null) {
@@ -570,12 +594,14 @@ public final class RakNet {
 	/**
 	 * Returns whether or not the server with the specified address is online.
 	 * 
-	 * @param address the IP address of the server.
-	 * @param port    the port of the server.
+	 * @param address
+	 *            the IP address of the server.
+	 * @param port
+	 *            the port of the server.
 	 * @return <code>true</code> if the server is online, <code>false</code>
 	 *         otherwise.
-	 * @throws NullPointerException if the <code>address</code> is
-	 *                              <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> is <code>null</code>.
 	 */
 	public static boolean isServerOnline(InetAddress address, int port) throws NullPointerException {
 		if (address == null) {
@@ -587,14 +613,17 @@ public final class RakNet {
 	/**
 	 * Returns whether or not the server with the specified address is online.
 	 * 
-	 * @param host the IP address of the server.
-	 * @param port the port of the server.
+	 * @param host
+	 *            the IP address of the server.
+	 * @param port
+	 *            the port of the server.
 	 * @return <code>true</code> if the server is online, <code>false</code>
 	 *         otherwise.
-	 * @throws NullPointerException if the <code>host</code> is <code>null</code>.
-	 * @throws UnknownHostException if no IP address for the <code>host</code> could
-	 *                              be found, or if a scope_id was specified for a
-	 *                              global IPv6 address.
+	 * @throws NullPointerException
+	 *             if the <code>host</code> is <code>null</code>.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public static boolean isServerOnline(String host, int port) throws NullPointerException, UnknownHostException {
 		if (host == null) {
@@ -604,14 +633,16 @@ public final class RakNet {
 	}
 
 	/**
-	 * Returns whether or not the server with the specified address is compatible
-	 * with the current client protocol.
+	 * Returns whether or not the server with the specified address is
+	 * compatible with the current client protocol.
 	 * 
-	 * @param address the address of the server.
-	 * @return <code>true</code> if the server is compatible with the current client
-	 *         protocol, <code>false</code> otherwise.
-	 * @throws NullPointerException if the <code>address</code> or the IP address of
-	 *                              the <code>address</code> are <code>null</code>.
+	 * @param address
+	 *            the address of the server.
+	 * @return <code>true</code> if the server is compatible with the current
+	 *         client protocol, <code>false</code> otherwise.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> or the IP address of the
+	 *             <code>address</code> are <code>null</code>.
 	 */
 	public static boolean isServerCompatible(InetSocketAddress address) throws NullPointerException {
 		if (address == null) {
@@ -641,15 +672,17 @@ public final class RakNet {
 	}
 
 	/**
-	 * Returns whether or not the server with the specified address is compatible
-	 * with the current client protocol.
+	 * Returns whether or not the server with the specified address is
+	 * compatible with the current client protocol.
 	 * 
-	 * @param address the IP address of the server.
-	 * @param port    the port of the server.
-	 * @return <code>true</code> if the server is compatible with the current client
-	 *         protocol, <code>false</code> otherwise.
-	 * @throws NullPointerException if the <code>address</code> is
-	 *                              <code>null</code>.
+	 * @param address
+	 *            the IP address of the server.
+	 * @param port
+	 *            the port of the server.
+	 * @return <code>true</code> if the server is compatible with the current
+	 *         client protocol, <code>false</code> otherwise.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> is <code>null</code>.
 	 */
 	public static boolean isServerCompatible(InetAddress address, int port) throws NullPointerException {
 		if (address == null) {
@@ -659,17 +692,20 @@ public final class RakNet {
 	}
 
 	/**
-	 * Returns whether or not the server with the specified address is compatible
-	 * with the current client protocol.
+	 * Returns whether or not the server with the specified address is
+	 * compatible with the current client protocol.
 	 * 
-	 * @param host the IP address of the server.
-	 * @param port the port of the server.
-	 * @return <code>true</code> if the server is compatible with the current client
-	 *         protocol, <code>false</code> otherwise.
-	 * @throws NullPointerException if the <code>host</code> is <code>null</code>.
-	 * @throws UnknownHostException if no IP address for the <code>host</code> could
-	 *                              be found, or if a scope_id was specified for a
-	 *                              global IPv6 address.
+	 * @param host
+	 *            the IP address of the server.
+	 * @param port
+	 *            the port of the server.
+	 * @return <code>true</code> if the server is compatible with the current
+	 *         client protocol, <code>false</code> otherwise.
+	 * @throws NullPointerException
+	 *             if the <code>host</code> is <code>null</code>.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
 	public static boolean isServerCompatible(String host, int port) throws NullPointerException, UnknownHostException {
 		if (host == null) {
@@ -681,11 +717,13 @@ public final class RakNet {
 	/**
 	 * Returns the identifier of the server with the specified address.
 	 * 
-	 * @param address the address of the server.
-	 * @return the identifier of the server, <code>null</code> if it could not be
-	 *         retrieved.
-	 * @throws NullPointerException if the <code>address</code> or the IP address of
-	 *                              the <code>address</code> are <code>null</code>.
+	 * @param address
+	 *            the address of the server.
+	 * @return the identifier of the server, <code>null</code> if it could not
+	 *         be retrieved.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> or the IP address of the
+	 *             <code>address</code> are <code>null</code>.
 	 */
 	public static Identifier getServerIdentifier(InetSocketAddress address) throws NullPointerException {
 		if (address == null) {
@@ -716,12 +754,14 @@ public final class RakNet {
 	/**
 	 * Returns the identifier of the server with the specified address.
 	 * 
-	 * @param address the IP address of the server.
-	 * @param port    the port of the server.
-	 * @return the identifier of the server, <code>null</code> if it could not be
-	 *         retrieved.
-	 * @throws NullPointerException if the <code>address</code> is
-	 *                              <code>null</code>.
+	 * @param address
+	 *            the IP address of the server.
+	 * @param port
+	 *            the port of the server.
+	 * @return the identifier of the server, <code>null</code> if it could not
+	 *         be retrieved.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> is <code>null</code>.
 	 */
 	public static Identifier getServerIdentifier(InetAddress address, int port) throws NullPointerException {
 		if (address == null) {
@@ -733,17 +773,19 @@ public final class RakNet {
 	/**
 	 * Returns the identifier of the server with the specified address.
 	 * 
-	 * @param host the IP address of the server.
-	 * @param port the port of the server.
-	 * @return the identifier of the server, <code>null</code> if it could not be
-	 *         retrieved.
-	 * @throws NullPointerException if the <code>host</code> is <code>null</code>.
-	 * @throws UnknownHostException if no IP address for the <code>host</code> could
-	 *                              be found, or if a scope_id was specified for a
-	 *                              global IPv6 address.
+	 * @param host
+	 *            the IP address of the server.
+	 * @param port
+	 *            the port of the server.
+	 * @return the identifier of the server, <code>null</code> if it could not
+	 *         be retrieved.
+	 * @throws NullPointerException
+	 *             if the <code>host</code> is <code>null</code>.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a scope_id was specified for a global IPv6 address.
 	 */
-	public static Identifier getServerIdentifier(String host, int port)
-			throws NullPointerException, UnknownHostException {
+	public static Identifier getServerIdentifier(String host, int port) throws NullPointerException, UnknownHostException {
 		if (host == null) {
 			throw new NullPointerException("IP address cannot be null");
 		}
@@ -754,13 +796,15 @@ public final class RakNet {
 	 * Returns the maximum transfer unit of the network card with the specified
 	 * address.
 	 * 
-	 * @param address the IP address. A <code>null</code> value will have the lowest
-	 *                valid maximum transfer unit be returned instead.
+	 * @param address
+	 *            the IP address. A <code>null</code> value will have the lowest
+	 *            valid maximum transfer unit be returned instead.
 	 * @return the maximum transfer unit of the network card with the specified
 	 *         address, <code>-1</code> if it could not be determined.
-	 * @throws RuntimeException if an exception is caught when determining the
-	 *                          lowest valid maximum transfer unit size despite the
-	 *                          safe checks put in place.
+	 * @throws RuntimeException
+	 *             if an exception is caught when determining the lowest valid
+	 *             maximum transfer unit size despite the safe checks put in
+	 *             place.
 	 */
 	public static int getMaximumTransferUnit(InetAddress address) throws RuntimeException {
 		// Calculate lowest valid maximum transfer unit
@@ -806,27 +850,29 @@ public final class RakNet {
 	 * <code>address</code> not being used. Instead, the
 	 * {@link InetSocketAddress#getAddress()} method is called to retrieve the
 	 * original {@link InetAddress}. If the <code>address</code> is
-	 * <code>null</code>, no <code>NullPointerException</code> will be thrown as the
-	 * possibility of a <code>null</code> value is accounted for.
+	 * <code>null</code>, no <code>NullPointerException</code> will be thrown as
+	 * the possibility of a <code>null</code> value is accounted for.
 	 * 
-	 * @param address the address. A <code>null</code> value will have the lowest
-	 *                valid maximum transfer unit be returned instead.
+	 * @param address
+	 *            the address. A <code>null</code> value will have the lowest
+	 *            valid maximum transfer unit be returned instead.
 	 * @return the maximum transfer unit of the network card with the specified
 	 *         address, <code>-1</code> if it could not be determined.
-	 * @throws RuntimeException if an exception is caught when determining the
-	 *                          lowest valid maximum transfer unit size despite the
-	 *                          safe checks put in place.
+	 * @throws RuntimeException
+	 *             if an exception is caught when determining the lowest valid
+	 *             maximum transfer unit size despite the safe checks put in
+	 *             place.
 	 */
 	public static int getMaximumTransferUnit(InetSocketAddress address) {
 		return getMaximumTransferUnit(address == null ? null : address.getAddress());
 	}
 
 	/**
-	 * Returns the lowest valid maximum transfer unit among all of the network cards
-	 * installed on the machine.
+	 * Returns the lowest valid maximum transfer unit among all of the network
+	 * cards installed on the machine.
 	 * 
-	 * @return the lowest valid maximum transfer unit among all of the network cards
-	 *         installed on the machine.
+	 * @return the lowest valid maximum transfer unit among all of the network
+	 *         cards installed on the machine.
 	 */
 	public static int getMaximumTransferUnit() {
 		return getMaximumTransferUnit((InetAddress) /* Solves ambiguity */ null);
@@ -844,16 +890,17 @@ public final class RakNet {
 	}
 
 	/**
-	 * Sets how many packets can be received in the span of a single second before
-	 * an address is blocked.
+	 * Sets how many packets can be received in the span of a single second
+	 * before an address is blocked.
 	 * <p>
-	 * One must take caution when setting this value, as setting it to low can cause
-	 * communication to become impossible.
+	 * One must take caution when setting this value, as setting it to low can
+	 * cause communication to become impossible.
 	 * 
-	 * @param maxPacketsPerSecond how many packets can be received in the span of a
-	 *                            single second before a peer is blocked.
-	 * @throws IllegalArgumentException if <code>maxPacketsPerSecond</code> is
-	 *                                  negative.
+	 * @param maxPacketsPerSecond
+	 *            how many packets can be received in the span of a single
+	 *            second before a peer is blocked.
+	 * @throws IllegalArgumentException
+	 *             if <code>maxPacketsPerSecond</code> is negative.
 	 */
 	public static void setMaxPacketsPerSecond(long maxPacketsPerSecond) throws IllegalArgumentException {
 		if (maxPacketsPerSecond < 0) {
@@ -880,18 +927,18 @@ public final class RakNet {
 	 * {@link com.whirvis.jraknet.protocol.login.ConnectionRequestAccepted
 	 * CONNECTION_REQUEST_ACCEPTED} packet.
 	 * <p>
-	 * Normally this does not need to be changed. However, some games have a custom
-	 * amount of system addresses that are sent during login.
+	 * Normally this does not need to be changed. However, some games have a
+	 * custom amount of system addresses that are sent during login.
 	 * 
-	 * @param systemAddressCount the system address count.
-	 * @throws IllegalArgumentException if the <code>systemAddressCount</code> is
-	 *                                  less than
-	 *                                  {@value #RAKNET_SYSTEM_ADDRESS_COUNT}.
+	 * @param systemAddressCount
+	 *            the system address count.
+	 * @throws IllegalArgumentException
+	 *             if the <code>systemAddressCount</code> is less than
+	 *             {@value #RAKNET_SYSTEM_ADDRESS_COUNT}.
 	 */
 	public static void setSystemAddressCount(int systemAddressCount) throws IllegalArgumentException {
 		if (systemAddressCount < RAKNET_SYSTEM_ADDRESS_COUNT) {
-			throw new IllegalArgumentException(
-					"System address count cannot be less than " + RAKNET_SYSTEM_ADDRESS_COUNT);
+			throw new IllegalArgumentException("System address count cannot be less than " + RAKNET_SYSTEM_ADDRESS_COUNT);
 		}
 		_systemAddressCount = systemAddressCount;
 	}
@@ -899,7 +946,8 @@ public final class RakNet {
 	/**
 	 * Converts the specified ID to a hex string.
 	 * 
-	 * @param id the ID to convert to a hex string.
+	 * @param id
+	 *            the ID to convert to a hex string.
 	 * @return the generated hex string.
 	 */
 	public static String toHexStringId(int id) {
@@ -913,9 +961,11 @@ public final class RakNet {
 	/**
 	 * Converts the ID of the specified packet to a hex string.
 	 * 
-	 * @param packet the packet to get the ID from.
+	 * @param packet
+	 *            the packet to get the ID from.
 	 * @return the generated hex string.
-	 * @throws NullPointerException if the <code>packet</code> is <code>null</code>.
+	 * @throws NullPointerException
+	 *             if the <code>packet</code> is <code>null</code>.
 	 */
 	public static String toHexStringId(RakNetPacket packet) throws NullPointerException {
 		if (packet == null) {
@@ -927,7 +977,8 @@ public final class RakNet {
 	/**
 	 * Parses the specified string to a <code>long</code>.
 	 * 
-	 * @param longStr the string to parse.
+	 * @param longStr
+	 *            the string to parse.
 	 * @return the string as a <code>long</code>, <code>-1</code> if it fails to
 	 *         parse.
 	 */
@@ -942,7 +993,8 @@ public final class RakNet {
 	/**
 	 * Parses the specified string to an <code>int</code>.
 	 * 
-	 * @param intStr the string to parse.
+	 * @param intStr
+	 *            the string to parse.
 	 * @return the string as an <code>int</code>, <code>-1</code> if it fails to
 	 *         parse.
 	 */
@@ -953,7 +1005,8 @@ public final class RakNet {
 	/**
 	 * Parses the specified string to a <code>short</code>.
 	 * 
-	 * @param shortStr the string to parse.
+	 * @param shortStr
+	 *            the string to parse.
 	 * @return the string as a <code>short</code>, <code>-1</code> if fails to
 	 *         parse.
 	 */
@@ -964,7 +1017,8 @@ public final class RakNet {
 	/**
 	 * Parses the specified string to a <code>byte</code>.
 	 * 
-	 * @param byteStr the string to parse.
+	 * @param byteStr
+	 *            the string to parse.
 	 * @return the string as a <code>byte</code>, <code>-1</code> if it fails to
 	 *         parse.
 	 */
@@ -976,17 +1030,19 @@ public final class RakNet {
 	 * Parses a single String as an address and port and converts it to an
 	 * <code>InetSocketAddress</code>.
 	 * 
-	 * @param address     the address to convert.
-	 * @param defaultPort the default port to use if one is not.
+	 * @param address
+	 *            the address to convert.
+	 * @param defaultPort
+	 *            the default port to use if one is not.
 	 * @return the parsed <code>InetSocketAddress</code>.
-	 * @throws UnknownHostException if the address is in an invalid format or if the
-	 *                              host cannot be found.
+	 * @throws UnknownHostException
+	 *             if the address is in an invalid format or if the host cannot
+	 *             be found.
 	 */
 	public static InetSocketAddress parseAddress(String address, int defaultPort) throws UnknownHostException {
 		String[] addressSplit = address.split(":");
 		if (addressSplit.length == 1 || addressSplit.length == 2) {
-			InetAddress inetAddress = InetAddress.getByName(!addressSplit[0].startsWith("/") ? addressSplit[0]
-					: addressSplit[0].substring(1, addressSplit[0].length()));
+			InetAddress inetAddress = InetAddress.getByName(!addressSplit[0].startsWith("/") ? addressSplit[0] : addressSplit[0].substring(1, addressSplit[0].length()));
 			int port = (addressSplit.length == 2 ? parseIntPassive(addressSplit[1]) : defaultPort);
 			if (port >= 0x0000 && port <= 0xFFFF) {
 				return new InetSocketAddress(inetAddress, port);
@@ -1002,11 +1058,12 @@ public final class RakNet {
 	 * Parses a single String as an address and port and converts it to an
 	 * <code>InetSocketAddress</code>.
 	 * 
-	 * @param address the address to convert.
+	 * @param address
+	 *            the address to convert.
 	 * @return the parsed <code>InetSocketAddress</code>.
-	 * @throws UnknownHostException if the address is in an invalid format, the host
-	 *                              cannot be found, or no port was specifed in the
-	 *                              <code>address</code>.
+	 * @throws UnknownHostException
+	 *             if the address is in an invalid format, the host cannot be
+	 *             found, or no port was specifed in the <code>address</code>.
 	 */
 	public static InetSocketAddress parseAddress(String address) throws UnknownHostException {
 		try {
@@ -1020,10 +1077,12 @@ public final class RakNet {
 	 * Parses a single String as an address and port and converts it to an
 	 * <code>InetSocketAddress</code>.
 	 * 
-	 * @param address     the address to convert.
-	 * @param defaultPort the default port to use if one is not.
-	 * @return the parsed <code>InetSocketAddress</code>, <code>null</code> if it
-	 *         fails to parse.
+	 * @param address
+	 *            the address to convert.
+	 * @param defaultPort
+	 *            the default port to use if one is not.
+	 * @return the parsed <code>InetSocketAddress</code>, <code>null</code> if
+	 *         it fails to parse.
 	 */
 	public static InetSocketAddress parseAddressPassive(String address, int defaultPort) {
 		try {
@@ -1037,9 +1096,10 @@ public final class RakNet {
 	 * Parses a single String as an address and port and converts it to an
 	 * <code>InetSocketAddress</code>.
 	 * 
-	 * @param address the address to convert.
-	 * @return the parsed <code>InetSocketAddress</code>, <code>null</code> if it
-	 *         fails to parse.
+	 * @param address
+	 *            the address to convert.
+	 * @return the parsed <code>InetSocketAddress</code>, <code>null</code> if
+	 *         it fails to parse.
 	 */
 	public static InetSocketAddress parseAddressPassive(String address) {
 		return parseAddressPassive(address, -1);
