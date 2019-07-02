@@ -114,6 +114,9 @@ public class VarInt {
 		boolean more = true;
 		int shift = 0;
 		while (more == true) {
+			if (shift >= max) {
+				throw new IndexOutOfBoundsException("VarInt overflow");
+			}
 			long bits = (long) (l >>> shift) & 0x7F;
 			shift += 7;
 			if (shift >= VARLONG_MAX_SIZE || (l >>> shift == 0)) {
@@ -147,6 +150,9 @@ public class VarInt {
 		boolean more = true;
 		int shift = 0;
 		while (more == true) {
+			if (shift >= max) {
+				throw new IndexOutOfBoundsException("VarInt overflow");
+			}
 			int bits = (i >>> shift) & 0x7F;
 			shift += 7;
 			if (shift >= VARINT_MAX_SIZE || (i >>> shift == 0)) {
