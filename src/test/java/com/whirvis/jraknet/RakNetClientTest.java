@@ -59,10 +59,8 @@ public final class RakNetClientTest {
 	/**
 	 * The entry point for the test.
 	 * 
-	 * @param args
-	 *            the program arguments. These values are ignored.
-	 * @throws RakNetException
-	 *             if a RakNet error occurs.
+	 * @param args the program arguments. These values are ignored.
+	 * @throws RakNetException if a RakNet error occurs.
 	 */
 	public static void main(String[] args) throws RakNetException {
 		RakNetClient client = new RakNetClient();
@@ -80,18 +78,22 @@ public final class RakNetClientTest {
 			}
 
 			@Override
-			public void onDisconnect(RakNetClient client, InetSocketAddress address, RakNetServerPeer peer, String reason) {
+			public void onDisconnect(RakNetClient client, InetSocketAddress address, RakNetServerPeer peer,
+					String reason) {
 				LOG.info("Disconnected from server");
 			}
 
 			@Override
-			public void onAcknowledge(RakNetClient client, RakNetServerPeer peer, Record record, EncapsulatedPacket packet) {
-				LOG.info(peer.getConnectionType().getName() + " server has acknowledged " + RakNetPacket.getName(packet.payload.readUnsignedByte()) + " packet");
+			public void onAcknowledge(RakNetClient client, RakNetServerPeer peer, Record record,
+					EncapsulatedPacket packet) {
+				LOG.info(peer.getConnectionType().getName() + " server has acknowledged "
+						+ RakNetPacket.getName(packet.payload.readUnsignedByte()) + " packet");
 			}
 
 			@Override
 			public void onLoss(RakNetClient client, RakNetServerPeer peer, Record record, EncapsulatedPacket packet) {
-				LOG.info(peer.getConnectionType().getName() + " server has not lost " + RakNetPacket.getName(packet.payload.readUnsignedByte()) + " packet");
+				LOG.info(peer.getConnectionType().getName() + " server has not lost "
+						+ RakNetPacket.getName(packet.payload.readUnsignedByte()) + " packet");
 			}
 
 			@Override

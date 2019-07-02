@@ -49,16 +49,13 @@ public final class NettyHandlerException extends RakNetClientException {
 	/**
 	 * Constructs a <code>NettyHandlerException</code>.
 	 * 
-	 * @param client
-	 *            the client that threw the exception.
-	 * @param handler
-	 *            the handler that caught the exception.
-	 * @param address
-	 *            the address of the sender that caused the exception.
-	 * @param cause
-	 *            the cause.
+	 * @param client  the client that threw the exception.
+	 * @param handler the handler that caught the exception.
+	 * @param address the address of the sender that caused the exception.
+	 * @param cause   the cause.
 	 */
-	public NettyHandlerException(RakNetClient client, RakNetClientHandler handler, InetSocketAddress address, Throwable cause) {
+	public NettyHandlerException(RakNetClient client, RakNetClientHandler handler, InetSocketAddress address,
+			Throwable cause) {
 		super(client, "Exception in handler \"" + cause.getMessage() + "\"");
 		this.handler = handler;
 		this.address = address;

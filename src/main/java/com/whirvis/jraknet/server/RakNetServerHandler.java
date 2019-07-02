@@ -61,30 +61,25 @@ public final class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	/**
 	 * Creates a RakNet server Netty handler.
 	 * 
-	 * @param server
-	 *            the server to send received packets to.
+	 * @param server the server to send received packets to.
 	 */
 	public RakNetServerHandler(RakNetServer server) {
-		this.log = LogManager.getLogger(RakNetServer.class.getSimpleName() + "-" + Long.toHexString(server.getGloballyUniqueId()).toUpperCase());
+		this.log = LogManager.getLogger(RakNetServer.class.getSimpleName() + "-"
+				+ Long.toHexString(server.getGloballyUniqueId()).toUpperCase());
 		this.server = server;
 		this.blocked = new ConcurrentHashMap<InetAddress, BlockedAddress>();
 	}
 
 	/**
-	 * Blocks the IP address. All currently connected clients with the IP
-	 * address will be disconnected with the same reason that the IP address was
-	 * blocked.
+	 * Blocks the IP address. All currently connected clients with the IP address
+	 * will be disconnected with the same reason that the IP address was blocked.
 	 * 
-	 * @param address
-	 *            the IP address to block.
-	 * @param reason
-	 *            the reason the address was blocked. A <code>null</code> reason
-	 *            will have <code>"Address blocked"</code> be used as the reason
-	 *            instead.
-	 * @param time
-	 *            how long the address will blocked in milliseconds.
-	 * @throws NullPointerException
-	 *             if <code>address</code> is <code>null</code>.
+	 * @param address the IP address to block.
+	 * @param reason  the reason the address was blocked. A <code>null</code> reason
+	 *                will have <code>"Address blocked"</code> be used as the reason
+	 *                instead.
+	 * @param time    how long the address will blocked in milliseconds.
+	 * @throws NullPointerException if <code>address</code> is <code>null</code>.
 	 */
 	protected void blockAddress(InetAddress address, String reason, long time) throws NullPointerException {
 		if (address == null) {
@@ -103,8 +98,7 @@ public final class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	/**
 	 * Unblocks the IP address.
 	 * 
-	 * @param address
-	 *            the IP address to unblock.
+	 * @param address the IP address to unblock.
 	 */
 	protected void unblockAddress(InetAddress address) {
 		if (address != null) {
@@ -118,10 +112,9 @@ public final class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	/**
 	 * Returns whether or not the IP address is blocked.
 	 * 
-	 * @param address
-	 *            the IP address.
-	 * @return <code>true</code> if the IP address is blocked,
-	 *         <code>false</code> otherwise.
+	 * @param address the IP address.
+	 * @return <code>true</code> if the IP address is blocked, <code>false</code>
+	 *         otherwise.
 	 */
 	public boolean isAddressBlocked(InetAddress address) {
 		return blocked.containsKey(address);
@@ -134,7 +127,7 @@ public final class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			DatagramPacket datagram = (DatagramPacket) msg;
 			InetSocketAddress sender = datagram.sender();
 			RakNetPacket packet = new RakNetPacket(datagram);
-			
+
 			// If an exception happens it's because of this address
 			this.causeAddress = sender;
 

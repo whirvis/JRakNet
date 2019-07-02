@@ -49,11 +49,9 @@ public final class NoFreeIncomingConnectionsException extends PeerFactoryExcepti
 	/**
 	 * Constructs a <code>NoFreeIncomingConnectionsException</code>.
 	 * 
-	 * @param client
-	 *            the client that attempted to a server with no free incoming
-	 *            connections.
-	 * @param address
-	 *            the address of the server with no free incoming connections.
+	 * @param client  the client that attempted to a server with no free incoming
+	 *                connections.
+	 * @param address the address of the server with no free incoming connections.
 	 */
 	public NoFreeIncomingConnectionsException(RakNetClient client, InetSocketAddress address) {
 		super(client, "Server has no free incoming connections");

@@ -50,11 +50,10 @@ public final class PacketDataOutputStream extends OutputStream implements DataOu
 	private final DataOutputStream dataOut;
 
 	/**
-	 * Creates a new packet output stream to write data to the specified
-	 * underlying packet.
+	 * Creates a new packet output stream to write data to the specified underlying
+	 * packet.
 	 * 
-	 * @param packet
-	 *            the underlying packet.
+	 * @param packet the underlying packet.
 	 */
 	public PacketDataOutputStream(Packet packet) {
 		this.packet = packet;
@@ -133,9 +132,8 @@ public final class PacketDataOutputStream extends OutputStream implements DataOu
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This method is implemented via a {@link DataOutputStream} which refers
-	 * back to this original stream to execute the {@link #writeUTF(String)}
-	 * method.
+	 * This method is implemented via a {@link DataOutputStream} which refers back
+	 * to this original stream to execute the {@link #writeUTF(String)} method.
 	 */
 	@Override
 	public void writeUTF(String s) throws IOException {

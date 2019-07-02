@@ -54,10 +54,8 @@ public class CommandHandler {
 	/**
 	 * Creates a command handler.
 	 * 
-	 * @param server
-	 *            the server that the command handler belongs to.
-	 * @throws NullPointerException
-	 *             if the <code>server</code> is <code>null</code>.
+	 * @param server the server that the command handler belongs to.
+	 * @throws NullPointerException if the <code>server</code> is <code>null</code>.
 	 */
 	public CommandHandler(ChatServer server) {
 		if (server == null) {
@@ -70,13 +68,12 @@ public class CommandHandler {
 	/**
 	 * Registers the specified command.
 	 * 
-	 * @param command
-	 *            the command to register.
-	 * @throws NullPointerException
-	 *             if the <code>command</code> is <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             if another command with the same label as the specified
-	 *             <code>command</code> already exists and cannot be overriden.
+	 * @param command the command to register.
+	 * @throws NullPointerException     if the <code>command</code> is
+	 *                                  <code>null</code>.
+	 * @throws IllegalArgumentException if another command with the same label as
+	 *                                  the specified <code>command</code> already
+	 *                                  exists and cannot be overriden.
 	 */
 	public void registerCommand(Command command) throws NullPointerException, IllegalArgumentException {
 		if (command == null) {
@@ -93,30 +90,31 @@ public class CommandHandler {
 	/**
 	 * Registers a command by its specified class.
 	 * <p>
-	 * For this method to function, the specified class must have a constructor
-	 * with the first and only argument being a {@link ChatServer}.
+	 * For this method to function, the specified class must have a constructor with
+	 * the first and only argument being a {@link ChatServer}.
 	 * 
-	 * @param commandClazz
-	 *            the command class.
-	 * @throws NullPointerException
-	 *             if the <code>commandClazz</code> is <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             if the <code>commandClazz</code> does not have the needed
-	 *             constructor for proper instantiation, it is inaccessable, or
-	 *             if another command with the same label as the newly
-	 *             instantiated command with the specified
-	 *             <code>commandClazz</code> already exists and cannot be
-	 *             overriden.
+	 * @param commandClazz the command class.
+	 * @throws NullPointerException     if the <code>commandClazz</code> is
+	 *                                  <code>null</code>.
+	 * @throws IllegalArgumentException if the <code>commandClazz</code> does not
+	 *                                  have the needed constructor for proper
+	 *                                  instantiation, it is inaccessable, or if
+	 *                                  another command with the same label as the
+	 *                                  newly instantiated command with the
+	 *                                  specified <code>commandClazz</code> already
+	 *                                  exists and cannot be overriden.
 	 * 
 	 */
-	public void registerCommand(Class<? extends Command> commandClazz) throws NullPointerException, IllegalArgumentException {
+	public void registerCommand(Class<? extends Command> commandClazz)
+			throws NullPointerException, IllegalArgumentException {
 		try {
 			if (commandClazz == null) {
 				throw new NullPointerException("Command class cannot be null");
 			}
 			Command command = (Command) commandClazz.getDeclaredConstructor(ChatServer.class).newInstance(server);
 			this.registerCommand(command);
-		} catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException | InstantiationException e) {
+		} catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+				| InstantiationException e) {
 			throw new IllegalArgumentException("Command lacks invalid constructor for proper instantiation");
 		} catch (IllegalAccessException e) {
 			throw new IllegalArgumentException("Command constructor must be accessible");
@@ -126,8 +124,7 @@ public class CommandHandler {
 	/**
 	 * Unregisters a command.
 	 * 
-	 * @param label
-	 *            the label of the command to unregister.
+	 * @param label the label of the command to unregister.
 	 */
 	public void unregisterCommand(String label) {
 		if (label != null) {
@@ -138,10 +135,8 @@ public class CommandHandler {
 	/**
 	 * Handles the specified input as a command.
 	 * 
-	 * @param input
-	 *            the input to process and handle.
-	 * @throws NullPointerException
-	 *             if the <code>input</code> is <code>null</code>.
+	 * @param input the input to process and handle.
+	 * @throws NullPointerException if the <code>input</code> is <code>null</code>.
 	 */
 	public void handleInput(String input) throws NullPointerException {
 		if (input == null) {

@@ -52,13 +52,10 @@ public final class ComboBoxTextChannelListener implements ActionListener {
 	/**
 	 * Constructs a <code>ComboBoxTextChannelListener</code>.
 	 * 
-	 * @param frame
-	 *            the frame that the listener belongs to.
-	 * @param client
-	 *            the client that the listener will signal.
-	 * @throws NullPointerException
-	 *             if the <code>frame</code> or <code>client</code> are
-	 *             <code>null</code>.
+	 * @param frame  the frame that the listener belongs to.
+	 * @param client the client that the listener will signal.
+	 * @throws NullPointerException if the <code>frame</code> or <code>client</code>
+	 *                              are <code>null</code>.
 	 */
 	protected ComboBoxTextChannelListener(ChatFrame frame, ChatClient client) {
 		if (frame == null) {

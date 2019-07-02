@@ -105,8 +105,8 @@ public final class Discovery {
 	/**
 	 * Returns the timestamp of the discovery system.
 	 * <p>
-	 * The timestamp of the discovery system is how long in milliseconds has
-	 * passed since it has been created.
+	 * The timestamp of the discovery system is how long in milliseconds has passed
+	 * since it has been created.
 	 * 
 	 * @return the timestamp of the discovery system.
 	 */
@@ -140,16 +140,15 @@ public final class Discovery {
 	/**
 	 * Sets the discovery mode.
 	 * <p>
-	 * If disabling the discovery system, all of the currently discovered
-	 * servers will be treated as if they had been forgotten. If discovery is
-	 * enabled once again later on, all servers listed for discovery via
-	 * {@link #addPort(int)} and {@link #addServer(InetSocketAddress)} will be
-	 * rediscovered. To stop this from occurring, they can be removed via
-	 * {@link #removePort(int)} and {@link #removeServer(DiscoveredServer)}
+	 * If disabling the discovery system, all of the currently discovered servers
+	 * will be treated as if they had been forgotten. If discovery is enabled once
+	 * again later on, all servers listed for discovery via {@link #addPort(int)}
+	 * and {@link #addServer(InetSocketAddress)} will be rediscovered. To stop this
+	 * from occurring, they can be removed via {@link #removePort(int)} and
+	 * {@link #removeServer(DiscoveredServer)}
 	 * 
-	 * @param mode
-	 *            the new discovery mode. A <code>null</code> value will have
-	 *            the discovery mode be set to {@link DiscoveryMode#DISABLED}.
+	 * @param mode the new discovery mode. A <code>null</code> value will have the
+	 *             discovery mode be set to {@link DiscoveryMode#DISABLED}.
 	 */
 	public static synchronized void setDiscoveryMode(DiscoveryMode mode) {
 		discoveryMode = (mode == null ? DiscoveryMode.DISABLED : mode);
@@ -170,13 +169,12 @@ public final class Discovery {
 	/**
 	 * Adds a {@link DiscoveryListener} to the discovery system.
 	 * <p>
-	 * Listeners are used to listen for events that occur relating to the
-	 * discovery system such as discovering servers, forgetting servers, etc.
+	 * Listeners are used to listen for events that occur relating to the discovery
+	 * system such as discovering servers, forgetting servers, etc.
 	 * 
-	 * @param listener
-	 *            the listener to add.
-	 * @throws NullPointerException
-	 *             if the <code>listener</code> is <code>null</code>.
+	 * @param listener the listener to add.
+	 * @throws NullPointerException if the <code>listener</code> is
+	 *                              <code>null</code>.
 	 */
 	public static synchronized void addListener(DiscoveryListener listener) throws NullPointerException {
 		if (listener == null) {
@@ -194,8 +192,7 @@ public final class Discovery {
 	/**
 	 * Removes a {@link DiscoveryListener} from the discovery system.
 	 * 
-	 * @param listener
-	 *            the listener to remove.
+	 * @param listener the listener to remove.
 	 */
 	public static void removeListener(DiscoveryListener listener) {
 		if (LISTENERS.remove(listener)) {
@@ -206,10 +203,8 @@ public final class Discovery {
 	/**
 	 * Calls an event.
 	 * 
-	 * @param event
-	 *            the event to call.
-	 * @throws NullPointerException
-	 *             if the <code>event</code> is <code>null</code>.
+	 * @param event the event to call.
+	 * @throws NullPointerException if the <code>event</code> is <code>null</code>.
 	 * @see DiscoveryListener
 	 */
 	protected static void callEvent(Consumer<? super DiscoveryListener> event) throws NullPointerException {
@@ -219,7 +214,8 @@ public final class Discovery {
 		for (DiscoveryListener listener : LISTENERS) {
 			if (listener.getClass().isAnnotationPresent(ThreadedListener.class)) {
 				ThreadedListener threadedListener = listener.getClass().getAnnotation(ThreadedListener.class);
-				new Thread(Discovery.class.getSimpleName() + (threadedListener.name().length() > 0 ? "-" : "") + threadedListener.name() + "-Thread-" + ++eventThreadCount) {
+				new Thread(Discovery.class.getSimpleName() + (threadedListener.name().length() > 0 ? "-" : "")
+						+ threadedListener.name() + "-Thread-" + ++eventThreadCount) {
 
 					@Override
 					public void run() {
@@ -236,12 +232,10 @@ public final class Discovery {
 	/**
 	 * Returns whether or not the specified ports are being broadcasted to.
 	 * 
-	 * @param ports
-	 *            the ports.
+	 * @param ports the ports.
 	 * @return <code>true</code> if all of the <code>ports</code> are being
 	 *         broadcasted to, <code>false</code> otherwise.
-	 * @throws NullPointerException
-	 *             if the <code>ports</code> are <code>null</code>.
+	 * @throws NullPointerException if the <code>ports</code> are <code>null</code>.
 	 */
 	public static boolean hasPorts(int... ports) throws NullPointerException {
 		if (ports == null) {
@@ -265,10 +259,9 @@ public final class Discovery {
 	/**
 	 * Returns whether or not the specified port is being broadcasted to.
 	 * 
-	 * @param port
-	 *            the port.
-	 * @return <code>true</code> if the <code>port</code> is being broadcasted
-	 *         to, <code>false</code> otherwise.
+	 * @param port the port.
+	 * @return <code>true</code> if the <code>port</code> is being broadcasted to,
+	 *         <code>false</code> otherwise.
 	 */
 	public static boolean hasPort(int port) {
 		return hasPorts(port);
@@ -294,16 +287,15 @@ public final class Discovery {
 	}
 
 	/**
-	 * Starts broadcasting to the specified ports on the local network for
-	 * server discovery.
+	 * Starts broadcasting to the specified ports on the local network for server
+	 * discovery.
 	 * <p>
-	 * It is also possible to discovery only certain servers on the local
-	 * network via {@link #addServer(InetSocketAddress)} if desired.
+	 * It is also possible to discovery only certain servers on the local network
+	 * via {@link #addServer(InetSocketAddress)} if desired.
 	 * 
-	 * @param ports
-	 *            the ports to start broadcasting to.
-	 * @throws IllegalArgumentException
-	 *             if one of the ports is not in between <code>0-65535</code>.
+	 * @param ports the ports to start broadcasting to.
+	 * @throws IllegalArgumentException if one of the ports is not in between
+	 *                                  <code>0-65535</code>.
 	 */
 	public static synchronized void addPorts(int... ports) throws IllegalArgumentException {
 		for (int port : ports) {
@@ -325,14 +317,12 @@ public final class Discovery {
 	 * Starts broadcasting to the specified port on the local network for server
 	 * discovery.
 	 * <p>
-	 * It is also possible to discovery only certain servers on the local
-	 * network via {@link #addServer(InetSocketAddress)} if desired.
+	 * It is also possible to discovery only certain servers on the local network
+	 * via {@link #addServer(InetSocketAddress)} if desired.
 	 * 
-	 * @param port
-	 *            the port to start broadcasting to.
-	 * @throws IllegalArgumentException
-	 *             if the <code>port</code> is not within the range of
-	 *             <code>0-65535</code>.
+	 * @param port the port to start broadcasting to.
+	 * @throws IllegalArgumentException if the <code>port</code> is not within the
+	 *                                  range of <code>0-65535</code>.
 	 */
 	public static void addPort(int port) throws IllegalArgumentException {
 		addPorts(port);
@@ -341,8 +331,7 @@ public final class Discovery {
 	/**
 	 * Stops broadcasting to the specified ports on the local network.
 	 * 
-	 * @param ports
-	 *            the ports to stop broadcasting to.
+	 * @param ports the ports to stop broadcasting to.
 	 */
 	public static void removePorts(int... ports) {
 		for (int port : ports) {
@@ -351,12 +340,11 @@ public final class Discovery {
 			}
 
 			/*
-			 * It would makes sense to check if the address is a local address
-			 * and not an external address. However, the broadcast address
-			 * 255.255.255.255 could never be used for external servers, so it
-			 * is not checked for here. As an extra safeguard, the
-			 * addExternalServer() method will not allow for an IP address that
-			 * is equivalent to that of the broadcast address 255.255.255.255.
+			 * It would makes sense to check if the address is a local address and not an
+			 * external address. However, the broadcast address 255.255.255.255 could never
+			 * be used for external servers, so it is not checked for here. As an extra
+			 * safeguard, the addExternalServer() method will not allow for an IP address
+			 * that is equivalent to that of the broadcast address 255.255.255.255.
 			 */
 			InetSocketAddress discoveryAddress = new InetSocketAddress(BROADCAST_ADDRESS, port);
 			if (DISCOVERY_ADDRESSES.remove(discoveryAddress) != null) {
@@ -368,8 +356,7 @@ public final class Discovery {
 	/**
 	 * Stops broadcasting to the specified port on the local network.
 	 * 
-	 * @param port
-	 *            the port to stop broadcasting to.
+	 * @param port the port to stop broadcasting to.
 	 */
 	public static void removePort(int port) {
 		removePorts(port);
@@ -403,16 +390,14 @@ public final class Discovery {
 	 * Sets the ports that will be broadcasted to on the local network.
 	 * <p>
 	 * This method is simply a shorthand for {@link #addPort(int)} and
-	 * {@link #removePort(int)}. The way this method works is by adding all
-	 * ports in the <code>ports</code> parameter that are not already up for
-	 * discovery, and removing all ports that are up for discovery but not found
-	 * in the <code>ports</code> parameter. If the <code>ports</code> parameter
-	 * is empty, the {@link #clearPorts()} method will be called instead.
+	 * {@link #removePort(int)}. The way this method works is by adding all ports in
+	 * the <code>ports</code> parameter that are not already up for discovery, and
+	 * removing all ports that are up for discovery but not found in the
+	 * <code>ports</code> parameter. If the <code>ports</code> parameter is empty,
+	 * the {@link #clearPorts()} method will be called instead.
 	 * 
-	 * @param ports
-	 *            the ports to broadcast to.
-	 * @throws NullPointerException
-	 *             if <code>ports</code> are <code>null</code>.
+	 * @param ports the ports to broadcast to.
+	 * @throws NullPointerException if <code>ports</code> are <code>null</code>.
 	 */
 	public static void setPorts(int... ports) throws NullPointerException {
 		if (ports == null) {
@@ -448,13 +433,12 @@ public final class Discovery {
 	 * Sets the port that will be broadcasted to on the local network.
 	 * <p>
 	 * This method is simply a shorthand for {@link #clearPorts()} and
-	 * {@link #addPort(int)}. The way this method works is simply by clearing
-	 * all the current ports and then adding the specified port.
+	 * {@link #addPort(int)}. The way this method works is simply by clearing all
+	 * the current ports and then adding the specified port.
 	 * 
-	 * @param port
-	 *            the port to broadcast to.
-	 * @throws IllegalArgumentException
-	 *             if the port is not within the range of <code>0-65535</code>.
+	 * @param port the port to broadcast to.
+	 * @throws IllegalArgumentException if the port is not within the range of
+	 *                                  <code>0-65535</code>.
 	 */
 	public static void setPort(int port) throws IllegalArgumentException {
 		clearPorts();
@@ -464,12 +448,11 @@ public final class Discovery {
 	/**
 	 * Returns whether or not the specified servers are being broadcasted to.
 	 * 
-	 * @param servers
-	 *            the servers
+	 * @param servers the servers
 	 * @return <code>true</code> if all of the <code>servers</code> are being
 	 *         broadcasted to, <code>false</code> otherwise.
-	 * @throws NullPointerException
-	 *             if the <code>servers</code> are <code>null</code>.
+	 * @throws NullPointerException if the <code>servers</code> are
+	 *                              <code>null</code>.
 	 */
 	public static boolean hasServers(InetSocketAddress... servers) throws NullPointerException {
 		if (servers == null) {
@@ -491,10 +474,9 @@ public final class Discovery {
 	/**
 	 * Returns whether or not the specified server is being broadcasted to.
 	 * 
-	 * @param server
-	 *            the server.
-	 * @return <code>true</code> if the <code>server</code> is being broadcasted
-	 *         to, <code>false</code> otherwise.
+	 * @param server the server.
+	 * @return <code>true</code> if the <code>server</code> is being broadcasted to,
+	 *         <code>false</code> otherwise.
 	 */
 	public static boolean hasServer(InetSocketAddress server) {
 		return hasServers(server);
@@ -518,20 +500,20 @@ public final class Discovery {
 	/**
 	 * Starts broadcasting to the specified server address for server discovery.
 	 * <p>
-	 * This allows for the discovery of servers on external networks. If
-	 * discovering servers on the local network, it is possible to discover all
-	 * servers running on a specified port via the {@link #addPort(int)} method.
+	 * This allows for the discovery of servers on external networks. If discovering
+	 * servers on the local network, it is possible to discover all servers running
+	 * on a specified port via the {@link #addPort(int)} method.
 	 * 
-	 * @param address
-	 *            the server address.
-	 * @throws NullPointerException
-	 *             if the <code>address</code> or the IP address of the
-	 *             <code>address</code> are <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             if the IP address of <code>address</code> is the broadcast
-	 *             address of {@value #BROADCAST_ADDRESS}.
+	 * @param address the server address.
+	 * @throws NullPointerException     if the <code>address</code> or the IP
+	 *                                  address of the <code>address</code> are
+	 *                                  <code>null</code>.
+	 * @throws IllegalArgumentException if the IP address of <code>address</code> is
+	 *                                  the broadcast address of
+	 *                                  {@value #BROADCAST_ADDRESS}.
 	 */
-	public static synchronized void addServer(InetSocketAddress address) throws NullPointerException, IllegalArgumentException {
+	public static synchronized void addServer(InetSocketAddress address)
+			throws NullPointerException, IllegalArgumentException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
 		} else if (address.getAddress() == null) {
@@ -551,20 +533,18 @@ public final class Discovery {
 	/**
 	 * Starts broadcasting to the specified server address for server discovery.
 	 * <p>
-	 * This allows for the discovery of servers on external networks. If
-	 * discovering on the local network, it is possible to discover all servers
-	 * running on a specified port via the {@link #addPort(int)} method.
+	 * This allows for the discovery of servers on external networks. If discovering
+	 * on the local network, it is possible to discover all servers running on a
+	 * specified port via the {@link #addPort(int)} method.
 	 * 
-	 * @param address
-	 *            the server IP address.
-	 * @param port
-	 *            the server port.
-	 * @throws NullPointerException
-	 *             if the <code>address</code> is <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             if the <code>port</code> is not in between
-	 *             <code>0-65535</code> or the <code>address</code> is the
-	 *             broadcast address of {@value #BROADCAST_ADDRESS}.
+	 * @param address the server IP address.
+	 * @param port    the server port.
+	 * @throws NullPointerException     if the <code>address</code> is
+	 *                                  <code>null</code>.
+	 * @throws IllegalArgumentException if the <code>port</code> is not in between
+	 *                                  <code>0-65535</code> or the
+	 *                                  <code>address</code> is the broadcast
+	 *                                  address of {@value #BROADCAST_ADDRESS}.
 	 */
 	public static void addServer(InetAddress address, int port) throws NullPointerException, IllegalArgumentException {
 		if (address == null) {
@@ -578,25 +558,24 @@ public final class Discovery {
 	/**
 	 * Starts broadcasting to the specified server address for server discovery.
 	 * <p>
-	 * This allows for the discovery of servers on external networks. If
-	 * discovering on the local network, it is possible to discover all servers
-	 * running on a specified port via the {@link #addPort(int)} method.
+	 * This allows for the discovery of servers on external networks. If discovering
+	 * on the local network, it is possible to discover all servers running on a
+	 * specified port via the {@link #addPort(int)} method.
 	 * 
-	 * @param host
-	 *            the server IP address.
-	 * @param port
-	 *            the server port.
-	 * @throws NullPointerException
-	 *             if the <code>host</code> is <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             if the <code>port</code> is not in between
-	 *             <code>0-65535</code> or the <code>host</code> is the
-	 *             broadcast address of {@value #BROADCAST_ADDRESS}.
-	 * @throws UnknownHostException
-	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 * @param host the server IP address.
+	 * @param port the server port.
+	 * @throws NullPointerException     if the <code>host</code> is
+	 *                                  <code>null</code>.
+	 * @throws IllegalArgumentException if the <code>port</code> is not in between
+	 *                                  <code>0-65535</code> or the
+	 *                                  <code>host</code> is the broadcast address
+	 *                                  of {@value #BROADCAST_ADDRESS}.
+	 * @throws UnknownHostException     if no IP address for the <code>host</code>
+	 *                                  could be found, or if a scope_id was
+	 *                                  specified for a global IPv6 address.
 	 */
-	public static void addServer(String host, int port) throws NullPointerException, IllegalArgumentException, UnknownHostException {
+	public static void addServer(String host, int port)
+			throws NullPointerException, IllegalArgumentException, UnknownHostException {
 		if (host == null) {
 			throw new NullPointerException("IP address cannot be null");
 		}
@@ -606,10 +585,9 @@ public final class Discovery {
 	/**
 	 * Stops broadcasting to the specified server address.
 	 * 
-	 * @param address
-	 *            the server address.
-	 * @throws IllegalArgumentException
-	 *             if the address is not that of an external server.
+	 * @param address the server address.
+	 * @throws IllegalArgumentException if the address is not that of an external
+	 *                                  server.
 	 */
 	public static void removeServer(InetSocketAddress address) throws IllegalArgumentException {
 		if (address == null) {
@@ -632,10 +610,8 @@ public final class Discovery {
 	/**
 	 * Stops broadcasting to the specified server address.
 	 * 
-	 * @param address
-	 *            the server IP address.
-	 * @param port
-	 *            the server port.
+	 * @param address the server IP address.
+	 * @param port    the server port.
 	 */
 	public static void removeServer(InetAddress address, int port) {
 		if (address != null && port >= 0x0000 && port <= 0xFFFF) {
@@ -646,13 +622,11 @@ public final class Discovery {
 	/**
 	 * Stops broadcasting to the specified server address.
 	 * 
-	 * @param host
-	 *            the server IP address.
-	 * @param port
-	 *            the server port.
-	 * @throws UnknownHostException
-	 *             if no IP address for the host could be found, or if a
-	 *             scope_id was specified for a global IPv6 address.
+	 * @param host the server IP address.
+	 * @param port the server port.
+	 * @throws UnknownHostException if no IP address for the host could be found, or
+	 *                              if a scope_id was specified for a global IPv6
+	 *                              address.
 	 */
 	public static void removeServer(String host, int port) throws UnknownHostException {
 		if (host != null) {
@@ -663,10 +637,9 @@ public final class Discovery {
 	/**
 	 * Stops broadcasting to the specified discovered server.
 	 * 
-	 * @param server
-	 *            the discovered server.
-	 * @throws IllegalArgumentException
-	 *             if the <code>server</code> is not an external server.
+	 * @param server the discovered server.
+	 * @throws IllegalArgumentException if the <code>server</code> is not an
+	 *                                  external server.
 	 */
 	public static void removeServer(DiscoveredServer server) throws IllegalArgumentException {
 		if (!server.isExternal()) {
@@ -678,19 +651,16 @@ public final class Discovery {
 	/**
 	 * Sets the servers that will be broadcasted to.
 	 * <p>
-	 * This method is simply a shorthand for
-	 * {@link #addServer(InetSocketAddress)} and
-	 * {@link #removeServer(InetSocketAddress)}. The way this method works is by
-	 * adding all servers in the <code>servers</code> parameter that are not
-	 * already up for discovery, and removing all servers that are up for
-	 * discovery but not found in the <code>servers</code> parameter. If the
-	 * <code>ports</code> parameter is empty, the {@link #clearServers()} method
-	 * will be called instead.
+	 * This method is simply a shorthand for {@link #addServer(InetSocketAddress)}
+	 * and {@link #removeServer(InetSocketAddress)}. The way this method works is by
+	 * adding all servers in the <code>servers</code> parameter that are not already
+	 * up for discovery, and removing all servers that are up for discovery but not
+	 * found in the <code>servers</code> parameter. If the <code>ports</code>
+	 * parameter is empty, the {@link #clearServers()} method will be called
+	 * instead.
 	 * 
-	 * @param servers
-	 *            the servers to broadcast to.
-	 * @throws NullPointerException
-	 *             if <code>servers</code> are <code>null</code>.
+	 * @param servers the servers to broadcast to.
+	 * @throws NullPointerException if <code>servers</code> are <code>null</code>.
 	 */
 	public static void setServers(InetSocketAddress... servers) throws NullPointerException {
 		if (servers == null) {
@@ -726,14 +696,13 @@ public final class Discovery {
 	 * Sets the server that will be broadcasted to.
 	 * <p>
 	 * This method is simply a shorthand for {@link #clearServers()} and
-	 * {@link #addServer(InetSocketAddress)}. The way this method works is
-	 * simply by clearing all the current ports and then adding the specified.
+	 * {@link #addServer(InetSocketAddress)}. The way this method works is simply by
+	 * clearing all the current ports and then adding the specified.
 	 * 
-	 * @param server
-	 *            the server to broadcast to.
-	 * @throws NullPointerException
-	 *             if the <code>server</code> or the <code>server</code> IP
-	 *             address are <code>null</code>.
+	 * @param server the server to broadcast to.
+	 * @throws NullPointerException if the <code>server</code> or the
+	 *                              <code>server</code> IP address are
+	 *                              <code>null</code>.
 	 */
 	public static void setServer(InetSocketAddress server) throws NullPointerException {
 		if (server == null) {
@@ -749,18 +718,15 @@ public final class Discovery {
 	 * Sets the server that will be broadcasted to.
 	 * <p>
 	 * This method is simply a shorthand for {@link #clearServers()} and
-	 * {@link #addServer(InetSocketAddress)}. The way this method works is
-	 * simply by clearing all the current ports and then adding the specified.
+	 * {@link #addServer(InetSocketAddress)}. The way this method works is simply by
+	 * clearing all the current ports and then adding the specified.
 	 * 
-	 * @param address
-	 *            the server IP address.
-	 * @param port
-	 *            the server port.
-	 * @throws NullPointerException
-	 *             if the <code>address</code> is <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             if the <code>port</code> is not in between
-	 *             <code>0-65535</code>.
+	 * @param address the server IP address.
+	 * @param port    the server port.
+	 * @throws NullPointerException     if the <code>address</code> is
+	 *                                  <code>null</code>.
+	 * @throws IllegalArgumentException if the <code>port</code> is not in between
+	 *                                  <code>0-65535</code>.
 	 */
 	public static void setServer(InetAddress address, int port) throws NullPointerException, IllegalArgumentException {
 		clearServers();
@@ -771,23 +737,21 @@ public final class Discovery {
 	 * Sets the server that will be broadcasted to.
 	 * <p>
 	 * This method is simply a shorthand for {@link #clearServers()} and
-	 * {@link #addServer(InetSocketAddress)}. The way this method works is
-	 * simply by clearing all the current ports and then adding the specified.
+	 * {@link #addServer(InetSocketAddress)}. The way this method works is simply by
+	 * clearing all the current ports and then adding the specified.
 	 * 
-	 * @param host
-	 *            the server address.
-	 * @param port
-	 *            the server port.
-	 * @throws NullPointerException
-	 *             if the <code>address</code> is <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             if the <code>port</code> is not in between
-	 *             <code>0-65535</code>.
-	 * @throws UnknownHostException
-	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 * @param host the server address.
+	 * @param port the server port.
+	 * @throws NullPointerException     if the <code>address</code> is
+	 *                                  <code>null</code>.
+	 * @throws IllegalArgumentException if the <code>port</code> is not in between
+	 *                                  <code>0-65535</code>.
+	 * @throws UnknownHostException     if no IP address for the <code>host</code>
+	 *                                  could be found, or if a scope_id was
+	 *                                  specified for a global IPv6 address.
 	 */
-	public static void setServer(String host, int port) throws NullPointerException, IllegalArgumentException, UnknownHostException {
+	public static void setServer(String host, int port)
+			throws NullPointerException, IllegalArgumentException, UnknownHostException {
 		clearServers();
 		addServer(host, port);
 	}
@@ -859,17 +823,16 @@ public final class Discovery {
 	/**
 	 * Updates discovery information for the server with the specified address.
 	 * 
-	 * @param sender
-	 *            the server address.
-	 * @param pong
-	 *            the decoded unconnected pong packet.
-	 * @throws NullPointerException
-	 *             if the <code>sender</code> is <code>null</code> or the IP
-	 *             address of the <code>sender</code> is <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             if the <code>pong</code> packet failed to decode.
+	 * @param sender the server address.
+	 * @param pong   the decoded unconnected pong packet.
+	 * @throws NullPointerException     if the <code>sender</code> is
+	 *                                  <code>null</code> or the IP address of the
+	 *                                  <code>sender</code> is <code>null</code>.
+	 * @throws IllegalArgumentException if the <code>pong</code> packet failed to
+	 *                                  decode.
 	 */
-	protected static synchronized void updateDiscoveryData(InetSocketAddress sender, UnconnectedPong pong) throws NullPointerException, IllegalArgumentException {
+	protected static synchronized void updateDiscoveryData(InetSocketAddress sender, UnconnectedPong pong)
+			throws NullPointerException, IllegalArgumentException {
 		if (sender == null) {
 			throw new NullPointerException("Sender cannot be null");
 		} else if (sender.getAddress() == null) {
@@ -894,7 +857,8 @@ public final class Discovery {
 				if (!pong.identifier.equals(discovered.getIdentifier())) {
 					Identifier oldIdentifier = discovered.getIdentifier();
 					discovered.setIdentifier(pong.identifier);
-					LOG.debug("Updated local server with address " + sender + " identifier to \"" + pong.identifier + "\"");
+					LOG.debug("Updated local server with address " + sender + " identifier to \"" + pong.identifier
+							+ "\"");
 					callEvent(listener -> listener.onServerIdentifierUpdate(discovered, oldIdentifier));
 				}
 			}

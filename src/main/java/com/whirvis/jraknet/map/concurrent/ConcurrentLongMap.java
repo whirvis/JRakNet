@@ -46,13 +46,10 @@ public final class ConcurrentLongMap<T> extends ConcurrentHashMap<Long, T> imple
 	private static final long serialVersionUID = 4324132003573381634L;
 
 	/**
-	 * Returns <tt>true</tt> if this map contains a mapping for the specified
-	 * key.
+	 * Returns <tt>true</tt> if this map contains a mapping for the specified key.
 	 *
-	 * @param key
-	 *            The key whose presence in this map is to be tested
-	 * @return <tt>true</tt> if this map contains a mapping for the specified
-	 *         key.
+	 * @param key The key whose presence in this map is to be tested
+	 * @return <tt>true</tt> if this map contains a mapping for the specified key.
 	 */
 	public boolean containsKey(long key) {
 		return super.containsKey(key);
@@ -62,8 +59,7 @@ public final class ConcurrentLongMap<T> extends ConcurrentHashMap<Long, T> imple
 	 * Returns <tt>true</tt> if this map maps one or more keys to the specified
 	 * value.
 	 *
-	 * @param value
-	 *            value whose presence in this map is to be tested
+	 * @param value value whose presence in this map is to be tested
 	 * @return <tt>true</tt> if this map maps one or more keys to the specified
 	 *         value
 	 */
@@ -72,24 +68,23 @@ public final class ConcurrentLongMap<T> extends ConcurrentHashMap<Long, T> imple
 	}
 
 	/**
-	 * Returns the value to which the specified key is mapped, or {@code null}
-	 * if this map contains no mapping for the key.
+	 * Returns the value to which the specified key is mapped, or {@code null} if
+	 * this map contains no mapping for the key.
 	 *
 	 * <p>
-	 * More formally, if this map contains a mapping from a key {@code k} to a
-	 * value {@code v} such that {@code (key==null ? k==null :
+	 * More formally, if this map contains a mapping from a key {@code k} to a value
+	 * {@code v} such that {@code (key==null ? k==null :
 	 * key.equals(k))}, then this method returns {@code v}; otherwise it returns
 	 * {@code null}. (There can be at most one such mapping.)
 	 *
 	 * <p>
-	 * A return value of {@code null} does not <i>necessarily</i> indicate that
-	 * the map contains no mapping for the key; it's also possible that the map
-	 * explicitly maps the key to {@code null}. The {@link #containsKey
-	 * containsKey} operation may be used to distinguish these two cases.
+	 * A return value of {@code null} does not <i>necessarily</i> indicate that the
+	 * map contains no mapping for the key; it's also possible that the map
+	 * explicitly maps the key to {@code null}. The {@link #containsKey containsKey}
+	 * operation may be used to distinguish these two cases.
 	 *
 	 * @see #put(long, Object)
-	 * @param key
-	 *            they key the value is mapped to.
+	 * @param key they key the value is mapped to.
 	 * @return the value to which the specified key is mapped.
 	 */
 	public T get(long key) {
@@ -97,18 +92,15 @@ public final class ConcurrentLongMap<T> extends ConcurrentHashMap<Long, T> imple
 	}
 
 	/**
-	 * Associates the specified value with the specified key in this map. If the
-	 * map previously contained a mapping for the key, the old value is
-	 * replaced.
+	 * Associates the specified value with the specified key in this map. If the map
+	 * previously contained a mapping for the key, the old value is replaced.
 	 *
-	 * @param key
-	 *            key with which the specified value is to be associated
-	 * @param value
-	 *            value to be associated with the specified key
-	 * @return the previous value associated with <tt>key</tt>, or <tt>null</tt>
-	 *         if there was no mapping for <tt>key</tt>. (A <tt>null</tt> return
-	 *         can also indicate that the map previously associated
-	 *         <tt>null</tt> with <tt>key</tt>.)
+	 * @param key   key with which the specified value is to be associated
+	 * @param value value to be associated with the specified key
+	 * @return the previous value associated with <tt>key</tt>, or <tt>null</tt> if
+	 *         there was no mapping for <tt>key</tt>. (A <tt>null</tt> return can
+	 *         also indicate that the map previously associated <tt>null</tt> with
+	 *         <tt>key</tt>.)
 	 */
 	public T put(long key, T value) {
 		return super.put(key, value);
@@ -117,12 +109,11 @@ public final class ConcurrentLongMap<T> extends ConcurrentHashMap<Long, T> imple
 	/**
 	 * Removes the mapping for the specified key from this map if present.
 	 *
-	 * @param key
-	 *            key whose mapping is to be removed from the map
-	 * @return the previous value associated with <tt>key</tt>, or <tt>null</tt>
-	 *         if there was no mapping for <tt>key</tt>. (A <tt>null</tt> return
-	 *         can also indicate that the map previously associated
-	 *         <tt>null</tt> with <tt>key</tt>.)
+	 * @param key key whose mapping is to be removed from the map
+	 * @return the previous value associated with <tt>key</tt>, or <tt>null</tt> if
+	 *         there was no mapping for <tt>key</tt>. (A <tt>null</tt> return can
+	 *         also indicate that the map previously associated <tt>null</tt> with
+	 *         <tt>key</tt>.)
 	 */
 	public T remove(long key) {
 		return super.remove(key);

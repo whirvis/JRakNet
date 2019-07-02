@@ -49,8 +49,7 @@ public final class InconsistentGuidException extends PeerFactoryException {
 	/**
 	 * Constructs an <code>InconsistentGuidException</code>.
 	 * 
-	 * @param client
-	 *            the client that threw the exception.
+	 * @param client the client that threw the exception.
 	 */
 	public InconsistentGuidException(RakNetClient client) {
 		super(client, "Server responded with inconsistent GUID");

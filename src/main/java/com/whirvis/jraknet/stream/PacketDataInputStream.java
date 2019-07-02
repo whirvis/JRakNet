@@ -59,8 +59,7 @@ public final class PacketDataInputStream extends InputStream implements DataInpu
 	 * Creates a packet input stream to read data from the specified underlying
 	 * packet.
 	 * 
-	 * @param packet
-	 *            the underlying packet.
+	 * @param packet the underlying packet.
 	 */
 	public PacketDataInputStream(Packet packet) {
 		this.packet = packet;
@@ -198,8 +197,8 @@ public final class PacketDataInputStream extends InputStream implements DataInpu
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This method is implemented via a {@link DataInputStream} which refers
-	 * back to this original stream to execute the {@link #readLine()} method.
+	 * This method is implemented via a {@link DataInputStream} which refers back to
+	 * this original stream to execute the {@link #readLine()} method.
 	 */
 	@Deprecated
 	@Override
@@ -210,8 +209,8 @@ public final class PacketDataInputStream extends InputStream implements DataInpu
 	/**
 	 * {@inheritDoc}
 	 * <p>
-	 * This method is implemented via a {@link DataInputStream} which refers
-	 * back to this original stream to execute the {@link #readLine()} method.
+	 * This method is implemented via a {@link DataInputStream} which refers back to
+	 * this original stream to execute the {@link #readLine()} method.
 	 */
 	@Override
 	public String readUTF() throws IOException, EOFException {

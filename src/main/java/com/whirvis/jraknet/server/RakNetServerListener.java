@@ -64,8 +64,7 @@ public interface RakNetServerListener {
 	/**
 	 * Called when the server has been started.
 	 * 
-	 * @param server
-	 *            the server.
+	 * @param server the server.
 	 */
 	public default void onStart(RakNetServer server) {
 	}
@@ -73,8 +72,7 @@ public interface RakNetServerListener {
 	/**
 	 * Called when the server has been shutdown.
 	 * 
-	 * @param server
-	 *            the server.
+	 * @param server the server.
 	 */
 	public default void onShutdown(RakNetServer server) {
 	}
@@ -82,10 +80,8 @@ public interface RakNetServerListener {
 	/**
 	 * Called when the server receives a ping from a client.
 	 * 
-	 * @param server
-	 *            the server.
-	 * @param ping
-	 *            the response that will be sent to the client.
+	 * @param server the server.
+	 * @param ping   the response that will be sent to the client.
 	 */
 	public default void onPing(RakNetServer server, ServerPing ping) {
 	}
@@ -96,12 +92,9 @@ public interface RakNetServerListener {
 	 * This is not the same as {@link #onLogin(RakNetServer, RakNetClientPeer)},
 	 * where the client has also completed connection and login.
 	 * 
-	 * @param server
-	 *            the server.
-	 * @param address
-	 *            the address of the client.
-	 * @param connectionType
-	 *            the connection type of the client.
+	 * @param server         the server.
+	 * @param address        the address of the client.
+	 * @param connectionType the connection type of the client.
 	 */
 	public default void onConnect(RakNetServer server, InetSocketAddress address, ConnectionType connectionType) {
 	}
@@ -110,14 +103,11 @@ public interface RakNetServerListener {
 	 * Called when a client has logged in to the server.
 	 * <p>
 	 * This is not the same as
-	 * {@link #onConnect(RakNetServer, InetSocketAddress, ConnectionType)},
-	 * where the client has only connected to the server and has not yet logged
-	 * in.
+	 * {@link #onConnect(RakNetServer, InetSocketAddress, ConnectionType)}, where
+	 * the client has only connected to the server and has not yet logged in.
 	 * 
-	 * @param server
-	 *            the server.
-	 * @param peer
-	 *            the client that logged in.
+	 * @param server the server.
+	 * @param peer   the client that logged in.
 	 */
 	public default void onLogin(RakNetServer server, RakNetClientPeer peer) {
 	}
@@ -125,38 +115,31 @@ public interface RakNetServerListener {
 	/**
 	 * Called when a client has disconnected from the server.
 	 * 
-	 * @param server
-	 *            the server.
-	 * @param address
-	 *            the address of the client that disconnected.
-	 * @param peer
-	 *            the client that disconnected, this will be <code>null</code>
-	 *            if the client has not yet logged in.
-	 * @param reason
-	 *            the reason the client disconnected.
+	 * @param server  the server.
+	 * @param address the address of the client that disconnected.
+	 * @param peer    the client that disconnected, this will be <code>null</code>
+	 *                if the client has not yet logged in.
+	 * @param reason  the reason the client disconnected.
 	 */
-	public default void onDisconnect(RakNetServer server, InetSocketAddress address, RakNetClientPeer peer, String reason) {
+	public default void onDisconnect(RakNetServer server, InetSocketAddress address, RakNetClientPeer peer,
+			String reason) {
 	}
 
 	/**
 	 * Called when a client is banned from the server.
 	 * <p>
-	 * When a client is banned from the server, they will be actively
-	 * disconnected with a
-	 * {@link com.whirvis.jraknet.protocol.connection.ConnectionBanned
-	 * CONNECTION_BANNED} packet. This is different from having an address
-	 * blocked, as all packets sent from the address will simply be ignored. The
-	 * server will never automatically ban a client. However, it will
-	 * automatically block an address if it is suspected of a
+	 * When a client is banned from the server, they will be actively disconnected
+	 * with a {@link com.whirvis.jraknet.protocol.connection.ConnectionBanned
+	 * CONNECTION_BANNED} packet. This is different from having an address blocked,
+	 * as all packets sent from the address will simply be ignored. The server will
+	 * never automatically ban a client. However, it will automatically block an
+	 * address if it is suspected of a
 	 * <a href="https://en.wikipedia.org/wiki/Denial-of-service_attack">DOS</a>
 	 * attack.
 	 * 
-	 * @param server
-	 *            the server.
-	 * @param address
-	 *            the address of the client.
-	 * @param reason
-	 *            the reason the client was banned.
+	 * @param server  the server.
+	 * @param address the address of the client.
+	 * @param reason  the reason the client was banned.
 	 */
 	public default void onBan(RakNetServer server, InetAddress address, String reason) {
 	}
@@ -164,10 +147,8 @@ public interface RakNetServerListener {
 	/**
 	 * Called when a client is unbanned from the server.
 	 * 
-	 * @param server
-	 *            the server.
-	 * @param address
-	 *            the address of the client.
+	 * @param server  the server.
+	 * @param address the address of the client.
 	 */
 	public default void onUnban(RakNetServer server, InetAddress address) {
 	}
@@ -175,26 +156,21 @@ public interface RakNetServerListener {
 	/**
 	 * Called when an address is blocked by the server.
 	 * <p>
-	 * When an address is blocked, all packets sent from it will simply be
-	 * ignored. This is different from a client being banned, as it will
-	 * actively be disconnected with a
+	 * When an address is blocked, all packets sent from it will simply be ignored.
+	 * This is different from a client being banned, as it will actively be
+	 * disconnected with a
 	 * {@link com.whirvis.jraknet.protocol.connection.ConnectionBanned
-	 * CONNECTION_BANNED} packet. The server will never automatically ban a
-	 * client. However, it will automatically block an address if it is
-	 * suspected of a
+	 * CONNECTION_BANNED} packet. The server will never automatically ban a client.
+	 * However, it will automatically block an address if it is suspected of a
 	 * <a href="https://en.wikipedia.org/wiki/Denial-of-service_attack">DOS</a>
 	 * attack.
 	 * 
-	 * @param server
-	 *            the server.
-	 * @param address
-	 *            the address that was blocked.
-	 * @param reason
-	 *            the reason the address was blocked.
-	 * @param time
-	 *            how long the address is blocked, with
-	 *            {@value BlockedAddress#PERMANENT_BLOCK} meaning the address is
-	 *            permanently blocked.
+	 * @param server  the server.
+	 * @param address the address that was blocked.
+	 * @param reason  the reason the address was blocked.
+	 * @param time    how long the address is blocked, with
+	 *                {@value BlockedAddress#PERMANENT_BLOCK} meaning the address is
+	 *                permanently blocked.
 	 */
 	public default void onBlock(RakNetServer server, InetAddress address, String reason, long time) {
 	}
@@ -202,10 +178,8 @@ public interface RakNetServerListener {
 	/**
 	 * Called when an address has been unblocked by the server.
 	 * 
-	 * @param server
-	 *            the server.
-	 * @param address
-	 *            the address that has been unblocked.
+	 * @param server  the server.
+	 * @param address the address that has been unblocked.
 	 */
 	public default void onUnblock(RakNetServer server, InetAddress address) {
 	}
@@ -213,29 +187,22 @@ public interface RakNetServerListener {
 	/**
 	 * Called when a message is acknowledged by a client.
 	 * 
-	 * @param server
-	 *            the server.
-	 * @param peer
-	 *            the client that acknwoledged the packet.
-	 * @param record
-	 *            the acknowledged record.
-	 * @param packet
-	 *            the acknowledged packet.
+	 * @param server the server.
+	 * @param peer   the client that acknwoledged the packet.
+	 * @param record the acknowledged record.
+	 * @param packet the acknowledged packet.
 	 */
-	public default void onAcknowledge(RakNetServer server, RakNetClientPeer peer, Record record, EncapsulatedPacket packet) {
+	public default void onAcknowledge(RakNetServer server, RakNetClientPeer peer, Record record,
+			EncapsulatedPacket packet) {
 	}
 
 	/**
 	 * Called when a message is lost by a client.
 	 * 
-	 * @param server
-	 *            the server.
-	 * @param peer
-	 *            the client that lost the packet.
-	 * @param record
-	 *            the lost record.
-	 * @param packet
-	 *            the lost packet.
+	 * @param server the server.
+	 * @param peer   the client that lost the packet.
+	 * @param record the lost record.
+	 * @param packet the lost packet.
 	 */
 	public default void onLoss(RakNetServer server, RakNetClientPeer peer, Record record, EncapsulatedPacket packet) {
 	}
@@ -244,52 +211,41 @@ public interface RakNetServerListener {
 	 * Called when a packet has been received from a client and is ready to be
 	 * handled.
 	 * 
-	 * @param server
-	 *            the server.
-	 * @param peer
-	 *            the client that sent the packet.
-	 * @param packet
-	 *            the packet received from the client.
-	 * @param channel
-	 *            the channel the packet was sent on.
+	 * @param server  the server.
+	 * @param peer    the client that sent the packet.
+	 * @param packet  the packet received from the client.
+	 * @param channel the channel the packet was sent on.
 	 */
 	public default void handleMessage(RakNetServer server, RakNetClientPeer peer, RakNetPacket packet, int channel) {
 	}
 
 	/**
-	 * Called when a packet with an ID below <code>ID_USER_PACKET_ENUM</code>
-	 * cannot be handled by the {@link RakNetClientPeer} because it is not
-	 * programmed to handle it.
+	 * Called when a packet with an ID below <code>ID_USER_PACKET_ENUM</code> cannot
+	 * be handled by the {@link RakNetClientPeer} because it is not programmed to
+	 * handle it.
 	 * <p>
 	 * This function can be used to add missing features from the regular RakNet
 	 * protocol that are absent in JRakNet if needed.
 	 * 
-	 * @param server
-	 *            the server.
-	 * @param peer
-	 *            the client that sent the packet.
-	 * @param packet
-	 *            the unknown packet.
-	 * @param channel
-	 *            the channel the packet was sent on.
+	 * @param server  the server.
+	 * @param peer    the client that sent the packet.
+	 * @param packet  the unknown packet.
+	 * @param channel the channel the packet was sent on.
 	 */
-	public default void handleUnknownMessage(RakNetServer server, RakNetClientPeer peer, RakNetPacket packet, int channel) {
+	public default void handleUnknownMessage(RakNetServer server, RakNetClientPeer peer, RakNetPacket packet,
+			int channel) {
 	}
 
 	/**
 	 * Called when the handler receives a packet after the server has already
 	 * handled it.
 	 * <p>
-	 * This method is useful for handling packets outside of the RakNet
-	 * protocol. All packets received here have already been handled by the
-	 * server.
+	 * This method is useful for handling packets outside of the RakNet protocol.
+	 * All packets received here have already been handled by the server.
 	 * 
-	 * @param server
-	 *            the server.
-	 * @param address
-	 *            the address of the sender.
-	 * @param buf
-	 *            the buffer of the received packet.
+	 * @param server  the server.
+	 * @param address the address of the sender.
+	 * @param buf     the buffer of the received packet.
 	 */
 	public default void handleNettyMessage(RakNetServer server, InetSocketAddress address, ByteBuf buf) {
 	}
@@ -297,15 +253,11 @@ public interface RakNetServerListener {
 	/**
 	 * Called when a handler exception has occurred.
 	 * <p>
-	 * These normally do not matter as long as the server handles them on its
-	 * own.
+	 * These normally do not matter as long as the server handles them on its own.
 	 * 
-	 * @param server
-	 *            the server.
-	 * @param address
-	 *            the address that caused the exception.
-	 * @param throwable
-	 *            the <code>Throwable</code> that was caught.
+	 * @param server    the server.
+	 * @param address   the address that caused the exception.
+	 * @param throwable the <code>Throwable</code> that was caught.
 	 */
 	public default void onHandlerException(RakNetServer server, InetSocketAddress address, Throwable throwable) {
 	}
@@ -313,12 +265,9 @@ public interface RakNetServerListener {
 	/**
 	 * Called when an exception thrown by a peer has been caught.
 	 * 
-	 * @param server
-	 *            the server.
-	 * @param peer
-	 *            the peer that caused the exception.
-	 * @param throwable
-	 *            the <code>Throwable</code> that was caught.
+	 * @param server    the server.
+	 * @param peer      the peer that caused the exception.
+	 * @param throwable the <code>Throwable</code> that was caught.
 	 */
 	public default void onPeerException(RakNetServer server, RakNetClientPeer peer, Throwable throwable) {
 	}

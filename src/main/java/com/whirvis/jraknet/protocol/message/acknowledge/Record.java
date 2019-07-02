@@ -54,8 +54,7 @@ public final class Record {
 	/**
 	 * Returns the sequence IDs contained within the specified records.
 	 * 
-	 * @param records
-	 *            the records to get the sequence IDs from.
+	 * @param records the records to get the sequence IDs from.
 	 * @return the sequence IDs contained within the specified records.
 	 */
 	public static int[] getSequenceIds(Record... records) {
@@ -81,8 +80,7 @@ public final class Record {
 	/**
 	 * Returns the sequence IDs contained within the specified records.
 	 * 
-	 * @param records
-	 *            the records to get the sequence IDs from.
+	 * @param records the records to get the sequence IDs from.
 	 * @return the sequence IDs contained within the specified records.
 	 */
 	public static int[] getSequenceIds(List<Record> records) {
@@ -90,12 +88,10 @@ public final class Record {
 	}
 
 	/**
-	 * Simplifies the specified sequence IDs into a <code>Record[]</code> with
-	 * all sequence IDs having their own dedicated record to make handling them
-	 * easier.
+	 * Simplifies the specified sequence IDs into a <code>Record[]</code> with all
+	 * sequence IDs having their own dedicated record to make handling them easier.
 	 * 
-	 * @param sequenceIds
-	 *            the sequence IDs to simplify.
+	 * @param sequenceIds the sequence IDs to simplify.
 	 * @return the simplified records
 	 */
 	public static Record[] simplify(int... sequenceIds) {
@@ -113,8 +109,7 @@ public final class Record {
 	 * sequence IDs within the records having their own dedicated record to make
 	 * handling them easier.
 	 * 
-	 * @param records
-	 *            the records to simplify.
+	 * @param records the records to simplify.
 	 * @return the simplified records
 	 */
 	public static Record[] simplify(Record... records) {
@@ -126,8 +121,7 @@ public final class Record {
 	 * sequence IDs within the records having their own dedicated record to make
 	 * handling them easier.
 	 * 
-	 * @param records
-	 *            the records to simplify.
+	 * @param records the records to simplify.
 	 * @return the simplified records
 	 */
 	public static Record[] simplify(List<Record> records) {
@@ -135,17 +129,16 @@ public final class Record {
 	}
 
 	/**
-	 * Condenses the specified records into a <code>Record[]</code> with all
-	 * ranges of sequence IDs being in ranged records to save memory.
+	 * Condenses the specified records into a <code>Record[]</code> with all ranges
+	 * of sequence IDs being in ranged records to save memory.
 	 * 
-	 * @param records
-	 *            the records to condense.
+	 * @param records the records to condense.
 	 * @return the condensed records.
 	 */
 	public static Record[] condense(Record... records) {
 		/*
-		 * Get sequence IDs and sort them in ascending order. This is crucial in
-		 * order for condensing to occur.
+		 * Get sequence IDs and sort them in ascending order. This is crucial in order
+		 * for condensing to occur.
 		 */
 		int[] sequenceIds = Record.getSequenceIds(records);
 		Arrays.sort(sequenceIds);
@@ -169,11 +162,10 @@ public final class Record {
 	}
 
 	/**
-	 * Condenses the specified records into a <code>Record[]</code> with all
-	 * ranges of sequence IDs being in ranged records to save memory.
+	 * Condenses the specified records into a <code>Record[]</code> with all ranges
+	 * of sequence IDs being in ranged records to save memory.
 	 * 
-	 * @param records
-	 *            the records to condense.
+	 * @param records the records to condense.
 	 * @return the condensed records.
 	 */
 	public static Record[] condense(List<Record> records) {
@@ -181,11 +173,10 @@ public final class Record {
 	}
 
 	/**
-	 * Condenses the specified sequence IDs into a <code>Record[]</code> with
-	 * all ranges of sequence IDs being in ranged records to save memory.
+	 * Condenses the specified sequence IDs into a <code>Record[]</code> with all
+	 * ranges of sequence IDs being in ranged records to save memory.
 	 * 
-	 * @param sequenceIds
-	 *            the sequence IDs to condense.
+	 * @param sequenceIds the sequence IDs to condense.
 	 * @return the condensed records.
 	 */
 	public static Record[] condense(int... sequenceIds) {
@@ -203,12 +194,9 @@ public final class Record {
 	/**
 	 * Creates a ranged record.
 	 * 
-	 * @param index
-	 *            the starting index.
-	 * @param endIndex
-	 *            the ending index.
-	 * @throws IllegalArgumentException
-	 *             if the <code>index</code> is negative.
+	 * @param index    the starting index.
+	 * @param endIndex the ending index.
+	 * @throws IllegalArgumentException if the <code>index</code> is negative.
 	 */
 	public Record(int index, int endIndex) throws IllegalArgumentException {
 		if (index < 0) {
@@ -222,11 +210,10 @@ public final class Record {
 	/**
 	 * Creates a single record.
 	 * 
-	 * @param id
-	 *            the sequence ID.
+	 * @param id the sequence ID.
 	 * 
-	 * @throws IllegalArgumentException
-	 *             if the <code>id</code> is less than <code>0</code>.
+	 * @throws IllegalArgumentException if the <code>id</code> is less than
+	 *                                  <code>0</code>.
 	 */
 	public Record(int id) throws IllegalArgumentException {
 		this(id, NOT_RANGED);
@@ -259,10 +246,8 @@ public final class Record {
 	/**
 	 * Sets the starting index of the record.
 	 * 
-	 * @param index
-	 *            the starting index.
-	 * @throws IllegalArgumentException
-	 *             if the <code>index</code> is negative.
+	 * @param index the starting index.
+	 * @throws IllegalArgumentException if the <code>index</code> is negative.
 	 */
 	public void setIndex(int index) throws IllegalArgumentException {
 		if (index < 0) {
@@ -275,8 +260,8 @@ public final class Record {
 	/**
 	 * Returns the ending index of the record.
 	 * 
-	 * @return the ending index of the record, {@value #NOT_RANGED} if the
-	 *         record is not ranged.
+	 * @return the ending index of the record, {@value #NOT_RANGED} if the record is
+	 *         not ranged.
 	 * @see #isRanged()
 	 */
 	public int getEndIndex() {
@@ -286,10 +271,9 @@ public final class Record {
 	/**
 	 * Sets the ending index of the record.
 	 * 
-	 * @param endIndex
-	 *            the ending index, a value of {@value #NOT_RANGED} or lower or
-	 *            to the value of the index itself indicates that the record is
-	 *            not ranged.
+	 * @param endIndex the ending index, a value of {@value #NOT_RANGED} or lower or
+	 *                 to the value of the index itself indicates that the record is
+	 *                 not ranged.
 	 */
 	public void setEndIndex(int endIndex) {
 		if (endIndex <= this.index) {
@@ -310,14 +294,13 @@ public final class Record {
 	}
 
 	/**
-	 * Returns the sequence ID contained within this record. This is the
-	 * equivalent of calling {@link #getIndex()}, however an error will be
-	 * thrown if the record is ranged.
+	 * Returns the sequence ID contained within this record. This is the equivalent
+	 * of calling {@link #getIndex()}, however an error will be thrown if the record
+	 * is ranged.
 	 * 
 	 * @return the sequence ID contained within this record.
-	 * @throws ArrayStoreException
-	 *             if the record is ranged according to the {@link #isRanged()}
-	 *             method.
+	 * @throws ArrayStoreException if the record is ranged according to the
+	 *                             {@link #isRanged()} method.
 	 * @see #getSequenceIds()
 	 */
 	public int getSequenceId() throws ArrayStoreException {

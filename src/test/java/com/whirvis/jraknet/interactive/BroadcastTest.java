@@ -109,22 +109,22 @@ public final class BroadcastTest {
 	/**
 	 * The entry point for the test.
 	 * 
-	 * @param args
-	 *            the program arguments. These values are ignored.
-	 * @throws ClassNotFoundException
-	 *             if the <code>LookAndFeel</code> class for the sustem could
-	 *             not be found.
-	 * @throws InstantiationException
-	 *             if a new instance of the <code>LookAndFeel</code> class could
-	 *             not be instantiated.
-	 * @throws IllegalAccessException
-	 *             if the class or initializer for the <code>LookAndFeel</code>
-	 *             class is inaccessible.
-	 * @throws UnsupportedLookAndFeelException
-	 *             if <code>lnf.isSupportedLookAndFeel()</code> is false for the
-	 *             instantiated <code>LookAndFeel</code> class.
+	 * @param args the program arguments. These values are ignored.
+	 * @throws ClassNotFoundException          if the <code>LookAndFeel</code> class
+	 *                                         for the sustem could not be found.
+	 * @throws InstantiationException          if a new instance of the
+	 *                                         <code>LookAndFeel</code> class could
+	 *                                         not be instantiated.
+	 * @throws IllegalAccessException          if the class or initializer for the
+	 *                                         <code>LookAndFeel</code> class is
+	 *                                         inaccessible.
+	 * @throws UnsupportedLookAndFeelException if
+	 *                                         <code>lnf.isSupportedLookAndFeel()</code>
+	 *                                         is false for the instantiated
+	 *                                         <code>LookAndFeel</code> class.
 	 */
-	public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
+	public static void main(String[] args) throws ClassNotFoundException, InstantiationException,
+			IllegalAccessException, UnsupportedLookAndFeelException {
 		UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 		BroadcastTest test = new BroadcastTest();
 		test.start();

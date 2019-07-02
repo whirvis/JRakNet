@@ -59,26 +59,21 @@ public final class RakNetServerPeer extends RakNetPeer implements RakNetPeerMess
 	/**
 	 * Creates a RakNet server peer.
 	 * 
-	 * @param client
-	 *            the client that is connected to the server.
-	 * @param address
-	 *            the address of the peer.
-	 * @param guid
-	 *            the globally unique ID of the peer.
-	 * @param maximumTransferUnit
-	 *            the maximum transfer unit of the peer.
-	 * @param connectionType
-	 *            the connection type of the peer.
-	 * @param channel
-	 *            the channel to communicate to the peer with.
+	 * @param client              the client that is connected to the server.
+	 * @param address             the address of the peer.
+	 * @param guid                the globally unique ID of the peer.
+	 * @param maximumTransferUnit the maximum transfer unit of the peer.
+	 * @param connectionType      the connection type of the peer.
+	 * @param channel             the channel to communicate to the peer with.
 	 */
-	public RakNetServerPeer(RakNetClient client, InetSocketAddress address, long guid, int maximumTransferUnit, ConnectionType connectionType, Channel channel) {
+	public RakNetServerPeer(RakNetClient client, InetSocketAddress address, long guid, int maximumTransferUnit,
+			ConnectionType connectionType, Channel channel) {
 		super(address, guid, maximumTransferUnit, connectionType, channel);
 		this.client = client;
 
 		/*
-		 * By the time this object is created, handshaking has begun between the
-		 * server and client to finish login after connection.
+		 * By the time this object is created, handshaking has begun between the server
+		 * and client to finish login after connection.
 		 */
 		this.setState(RakNetState.HANDSHAKING);
 	}
@@ -103,13 +98,17 @@ public final class RakNetServerPeer extends RakNetPeer implements RakNetPeerMess
 				newIncomingConnection.serverTimestamp = connectionRequestAccepted.serverTimestamp;
 				newIncomingConnection.encode();
 				if (!newIncomingConnection.failed()) {
-					this.loginRecord = this.sendMessage(Reliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT, newIncomingConnection);
-					this.getLogger().debug("Sent new incoming connection, waiting for acknowledgement before confirming login");
+					this.loginRecord = this.sendMessage(Reliability.RELIABLE_ORDERED_WITH_ACK_RECEIPT,
+							newIncomingConnection);
+					this.getLogger()
+							.debug("Sent new incoming connection, waiting for acknowledgement before confirming login");
 				} else {
-					client.disconnect("Failed to login (" + newIncomingConnection.getClass().getSimpleName() + " failed to encode)");
+					client.disconnect("Failed to login (" + newIncomingConnection.getClass().getSimpleName()
+							+ " failed to encode)");
 				}
 			} else {
-				client.disconnect("Failed to login (" + connectionRequestAccepted.getClass().getSimpleName() + " failed to decode)");
+				client.disconnect("Failed to login (" + connectionRequestAccepted.getClass().getSimpleName()
+						+ " failed to decode)");
 			}
 		} else if (packet.getId() == ID_DISCONNECTION_NOTIFICATION) {
 			client.disconnect("Server disconnected");
@@ -125,7 +124,8 @@ public final class RakNetServerPeer extends RakNetPeer implements RakNetPeerMess
 		if (record.equals(loginRecord.ackRecord)) {
 			this.timestamp = System.currentTimeMillis();
 			this.setState(RakNetState.LOGGED_IN);
-			this.getLogger().info("Logged in to server with globally unique ID " + Long.toHexString(this.getGloballyUniqueId()).toUpperCase());
+			this.getLogger().info("Logged in to server with globally unique ID "
+					+ Long.toHexString(this.getGloballyUniqueId()).toUpperCase());
 			client.callEvent(listener -> listener.onLogin(client, this));
 		}
 		client.callEvent(listener -> listener.onAcknowledge(client, this, record, packet));

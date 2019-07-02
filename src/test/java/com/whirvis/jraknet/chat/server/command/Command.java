@@ -62,26 +62,21 @@ public abstract class Command {
 	/**
 	 * Creates a command.
 	 * 
-	 * @param server
-	 *            the server that the command belongs to.
-	 * @param overridable
-	 *            <code>true</code> if the command can be overriden,
-	 *            <code>false</code> otherwise.
-	 * @param label
-	 *            the command label.
-	 * @param usage
-	 *            the command usage, a <code>null</code> value will have the
-	 *            <code>label</code> be used as the usage as well.
-	 * @param description
-	 *            the command description.
-	 * @throws NullPointerException
-	 *             if the <code>server</code>, <code>label</code>,
-	 *             <code>description</code> are <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             if an unoverridable command with the same <code>label</code>
-	 *             already exists.
+	 * @param server      the server that the command belongs to.
+	 * @param overridable <code>true</code> if the command can be overriden,
+	 *                    <code>false</code> otherwise.
+	 * @param label       the command label.
+	 * @param usage       the command usage, a <code>null</code> value will have the
+	 *                    <code>label</code> be used as the usage as well.
+	 * @param description the command description.
+	 * @throws NullPointerException     if the <code>server</code>,
+	 *                                  <code>label</code>, <code>description</code>
+	 *                                  are <code>null</code>.
+	 * @throws IllegalArgumentException if an unoverridable command with the same
+	 *                                  <code>label</code> already exists.
 	 */
-	protected Command(ChatServer server, boolean overridable, String label, String usage, String description) throws NullPointerException, IllegalArgumentException {
+	protected Command(ChatServer server, boolean overridable, String label, String usage, String description)
+			throws NullPointerException, IllegalArgumentException {
 		if (server == null) {
 			throw new NullPointerException("Chat server cannot be null");
 		} else if (label == null) {
@@ -105,43 +100,36 @@ public abstract class Command {
 	/**
 	 * Creates a command.
 	 * 
-	 * @param server
-	 *            the server that the command belongs to.
-	 * @param label
-	 *            the command label.
-	 * @param usage
-	 *            the command usage, a <code>null</code> value will have the
-	 *            <code>label</code> be used as the usage as well.
-	 * @param description
-	 *            the command description.
-	 * @throws NullPointerException
-	 *             if the <code>server</code>, <code>label</code>,
-	 *             <code>description</code> are <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             if an unoverridable command with the same <code>label</code>
-	 *             already exists.
+	 * @param server      the server that the command belongs to.
+	 * @param label       the command label.
+	 * @param usage       the command usage, a <code>null</code> value will have the
+	 *                    <code>label</code> be used as the usage as well.
+	 * @param description the command description.
+	 * @throws NullPointerException     if the <code>server</code>,
+	 *                                  <code>label</code>, <code>description</code>
+	 *                                  are <code>null</code>.
+	 * @throws IllegalArgumentException if an unoverridable command with the same
+	 *                                  <code>label</code> already exists.
 	 */
-	protected Command(ChatServer server, String label, String usage, String description) throws NullPointerException, IllegalArgumentException {
+	protected Command(ChatServer server, String label, String usage, String description)
+			throws NullPointerException, IllegalArgumentException {
 		this(server, true, label, usage, description);
 	}
 
 	/**
 	 * Creates a command.
 	 * 
-	 * @param server
-	 *            the server that the command belongs to.
-	 * @param label
-	 *            the command label.
-	 * @param description
-	 *            the command description.
-	 * @throws NullPointerException
-	 *             if the <code>server</code>, <code>label</code>,
-	 *             <code>description</code> are <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             if an unoverridable command with the same <code>label</code>
-	 *             already exists.
+	 * @param server      the server that the command belongs to.
+	 * @param label       the command label.
+	 * @param description the command description.
+	 * @throws NullPointerException     if the <code>server</code>,
+	 *                                  <code>label</code>, <code>description</code>
+	 *                                  are <code>null</code>.
+	 * @throws IllegalArgumentException if an unoverridable command with the same
+	 *                                  <code>label</code> already exists.
 	 */
-	protected Command(ChatServer server, String label, String description) throws NullPointerException, IllegalArgumentException {
+	protected Command(ChatServer server, String label, String description)
+			throws NullPointerException, IllegalArgumentException {
 		this(server, label, label, description);
 	}
 
@@ -194,10 +182,8 @@ public abstract class Command {
 	/**
 	 * Converts the remaining arguments to a single string from a single index.
 	 * 
-	 * @param startIndex
-	 *            the index to start from.
-	 * @param stringArray
-	 *            the array to convert to a single string.
+	 * @param startIndex  the index to start from.
+	 * @param stringArray the array to convert to a single string.
 	 * @return the converted string.
 	 */
 	protected final String remainingArguments(int startIndex, String[] stringArray) {
@@ -211,8 +197,7 @@ public abstract class Command {
 	/**
 	 * Handles the command with the specified arguments.
 	 * 
-	 * @param args
-	 *            the arguments.
+	 * @param args the arguments.
 	 * @return <code>true</code> if the command was handled successfully,
 	 *         <code>false</code> otherwise.
 	 */
