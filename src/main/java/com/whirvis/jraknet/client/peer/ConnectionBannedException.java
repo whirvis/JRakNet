@@ -49,10 +49,8 @@ public final class ConnectionBannedException extends PeerFactoryException {
 	/**
 	 * Constructs a <code>ConnectedionBannedException</code>.
 	 * 
-	 * @param client
-	 *            the client that is banned.
-	 * @param address
-	 *            the address of the server that banned the client's connection.
+	 * @param client  the client that is banned.
+	 * @param address the address of the server that banned the client's connection.
 	 */
 	public ConnectionBannedException(RakNetClient client, InetSocketAddress address) {
 		super(client, "Connection banned");

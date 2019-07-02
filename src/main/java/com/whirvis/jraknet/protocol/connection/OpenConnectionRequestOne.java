@@ -43,11 +43,11 @@ import com.whirvis.jraknet.RakNetPacket;
 public final class OpenConnectionRequestOne extends RakNetPacket {
 
 	/**
-	 * At the end of this packet in particular, the client pads the packet with
-	 * the remaining data left according the <code>maximumTransferUnit</code>.
+	 * At the end of this packet in particular, the client pads the packet with the
+	 * remaining data left according the <code>maximumTransferUnit</code>.
 	 * <p>
-	 * This value is equivalent to the size of the IP header (20 bytes) and the
-	 * size of the UDP header (8 bytes) combined.
+	 * This value is equivalent to the size of the IP header (20 bytes) and the size
+	 * of the UDP header (8 bytes) combined.
 	 */
 	private static final int MTU_PADDING = 28;
 
@@ -78,9 +78,8 @@ public final class OpenConnectionRequestOne extends RakNetPacket {
 	/**
 	 * Creates an <code>OPEN_CONNECTION_REQUEST_1</code> packet to be decoded.
 	 * 
-	 * @param packet
-	 *            the original packet whose data will be read from in the
-	 *            {@link #decode()} method.
+	 * @param packet the original packet whose data will be read from in the
+	 *               {@link #decode()} method.
 	 */
 	public OpenConnectionRequestOne(Packet packet) {
 		super(packet);

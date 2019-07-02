@@ -64,9 +64,8 @@ public final class AddChannel extends ChatPacket {
 	/**
 	 * Creates an <code>ADD_CHANNEL</code> packet to be decoded.
 	 * 
-	 * @param packet
-	 *            the original packet whose data will be read from in the
-	 *            {@link #decode()} method.
+	 * @param packet the original packet whose data will be read from in the
+	 *               {@link #decode()} method.
 	 */
 	public AddChannel(Packet packet) {
 		super(packet);

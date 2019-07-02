@@ -49,8 +49,8 @@ import com.whirvis.jraknet.protocol.message.acknowledge.Record;
 public final class EncapsulatedPacket implements Cloneable {
 
 	/**
-	 * Used to easily split and reassemble {@link EncapsulatedPacket
-	 * encapsulated packets}.
+	 * Used to easily split and reassemble {@link EncapsulatedPacket encapsulated
+	 * packets}.
 	 * 
 	 * @author Trent Summerlin
 	 * @since JRakNet v1.0.0
@@ -60,19 +60,18 @@ public final class EncapsulatedPacket implements Cloneable {
 		/**
 		 * Returns whether or not the packet needs to be split.
 		 * 
-		 * @param peer
-		 *            the peer the packet is being sent to.
-		 * @param encapsulated
-		 *            the encapsulated packet.
-		 * @return <code>true</code> if the packet needs to be split,
-		 *         <code>false</code> otherwise.
-		 * @throws NullPointerException
-		 *             if the <code>peer</code> or <code>encapsulated</code> is
-		 *             <code>null</code>.
-		 * @throws IllegalArgumentException
-		 *             if the <code>encapsulated</code> is already split.
+		 * @param peer         the peer the packet is being sent to.
+		 * @param encapsulated the encapsulated packet.
+		 * @return <code>true</code> if the packet needs to be split, <code>false</code>
+		 *         otherwise.
+		 * @throws NullPointerException     if the <code>peer</code> or
+		 *                                  <code>encapsulated</code> is
+		 *                                  <code>null</code>.
+		 * @throws IllegalArgumentException if the <code>encapsulated</code> is already
+		 *                                  split.
 		 */
-		public static boolean needsSplit(RakNetPeer peer, EncapsulatedPacket encapsulated) throws NullPointerException, IllegalArgumentException {
+		public static boolean needsSplit(RakNetPeer peer, EncapsulatedPacket encapsulated)
+				throws NullPointerException, IllegalArgumentException {
 			if (peer == null) {
 				throw new NullPointerException("Peer cannot be null");
 			} else if (encapsulated == null) {
@@ -86,21 +85,20 @@ public final class EncapsulatedPacket implements Cloneable {
 		/**
 		 * Splits the packet.
 		 * 
-		 * @param peer
-		 *            the peer.
-		 * @param encapsulated
-		 *            the packet to split.
+		 * @param peer         the peer.
+		 * @param encapsulated the packet to split.
 		 * @return the split up encapsulated packet.
 		 * 
-		 * @throws NullPointerException
-		 *             if the <code>peer</code> or <code>encapsulated</code> is
-		 *             <code>null</code>.
-		 * @throws IllegalArgumentException
-		 *             if the <code>encapsulated</code> is already split or if
-		 *             the packet is too small to be split according to
-		 *             {@link #needsSplit(RakNetPeer, EncapsulatedPacket)}.
+		 * @throws NullPointerException     if the <code>peer</code> or
+		 *                                  <code>encapsulated</code> is
+		 *                                  <code>null</code>.
+		 * @throws IllegalArgumentException if the <code>encapsulated</code> is already
+		 *                                  split or if the packet is too small to be
+		 *                                  split according to
+		 *                                  {@link #needsSplit(RakNetPeer, EncapsulatedPacket)}.
 		 */
-		public static EncapsulatedPacket[] split(RakNetPeer peer, EncapsulatedPacket encapsulated) throws NullPointerException, IllegalArgumentException {
+		public static EncapsulatedPacket[] split(RakNetPeer peer, EncapsulatedPacket encapsulated)
+				throws NullPointerException, IllegalArgumentException {
 			if (peer == null) {
 				throw new NullPointerException("Peer cannot be null");
 			} else if (encapsulated == null) {
@@ -112,7 +110,8 @@ public final class EncapsulatedPacket implements Cloneable {
 			}
 
 			// Split packet payload
-			int size = peer.getMaximumTransferUnit() - CustomPacket.MINIMUM_SIZE - EncapsulatedPacket.size(encapsulated.reliability, true);
+			int size = peer.getMaximumTransferUnit() - CustomPacket.MINIMUM_SIZE
+					- EncapsulatedPacket.size(encapsulated.reliability, true);
 			byte[] src = encapsulated.payload.array();
 			int payloadIndex = 0;
 			int splitIndex = 0;
@@ -155,18 +154,14 @@ public final class EncapsulatedPacket implements Cloneable {
 		/**
 		 * Creates a split packet container.
 		 * 
-		 * @param splitId
-		 *            the split ID.
-		 * @param splitCount
-		 *            the split count.
-		 * @param reliability
-		 *            the reliability.
-		 * @throws IllegalArgumentException
-		 *             if the <code>splitId</code> is negative or if the
-		 *             <code>splitCount</code> is greater than
-		 *             {@value RakNetPeer#MAX_SPLIT_COUNT}.
-		 * @throws NullPointerException
-		 *             if the <code>reliability</code> is <code>null</code>.
+		 * @param splitId     the split ID.
+		 * @param splitCount  the split count.
+		 * @param reliability the reliability.
+		 * @throws IllegalArgumentException if the <code>splitId</code> is negative or
+		 *                                  if the <code>splitCount</code> is greater
+		 *                                  than {@value RakNetPeer#MAX_SPLIT_COUNT}.
+		 * @throws NullPointerException     if the <code>reliability</code> is
+		 *                                  <code>null</code>.
 		 */
 		public Split(int splitId, int splitCount, Reliability reliability) {
 			if (splitId < 0) {
@@ -195,27 +190,30 @@ public final class EncapsulatedPacket implements Cloneable {
 		 * Updates the data for the split packet while also verifying that the
 		 * <code>EncapsulatedPacket</code> belongs to this split packet.
 		 * 
-		 * @param encapsulated
-		 *            the encapsulated packet chunk.
-		 * @return the packet if finished, <code>null</code> if data is still
-		 *         missing.
-		 * @throws NullPointerException
-		 *             if the <code>encapsulated</code> is <code>null</code>.
-		 * @throws IllegalArgumentException
-		 *             if the <code>encapsulated</code> is not part of the
-		 *             bigger split packet based on whether or not it is split,
-		 *             its <code>splitId</code>, <code>splitCount</code>, or
-		 *             <code>reliability</code>, or if the
-		 *             <code>splitIndex</code> is less than <code>0</code> or
-		 *             greater than or equal to the <code>splitCount</code> of
-		 *             the <code>encapsulated</code> packet, or another
-		 *             <code>encapsulated</code> packet has been registered with
-		 *             the same <code>splitIndex</code>.
+		 * @param encapsulated the encapsulated packet chunk.
+		 * @return the packet if finished, <code>null</code> if data is still missing.
+		 * @throws NullPointerException     if the <code>encapsulated</code> is
+		 *                                  <code>null</code>.
+		 * @throws IllegalArgumentException if the <code>encapsulated</code> is not part
+		 *                                  of the bigger split packet based on whether
+		 *                                  or not it is split, its
+		 *                                  <code>splitId</code>,
+		 *                                  <code>splitCount</code>, or
+		 *                                  <code>reliability</code>, or if the
+		 *                                  <code>splitIndex</code> is less than
+		 *                                  <code>0</code> or greater than or equal to
+		 *                                  the <code>splitCount</code> of the
+		 *                                  <code>encapsulated</code> packet, or another
+		 *                                  <code>encapsulated</code> packet has been
+		 *                                  registered with the same
+		 *                                  <code>splitIndex</code>.
 		 */
-		public EncapsulatedPacket update(EncapsulatedPacket encapsulated) throws NullPointerException, IllegalArgumentException {
+		public EncapsulatedPacket update(EncapsulatedPacket encapsulated)
+				throws NullPointerException, IllegalArgumentException {
 			if (encapsulated == null) {
 				throw new NullPointerException("Encapsulated packet cannot be null");
-			} else if (encapsulated.split != true || encapsulated.splitId != splitId || encapsulated.splitCount != splitCount || encapsulated.reliability != reliability) {
+			} else if (encapsulated.split != true || encapsulated.splitId != splitId
+					|| encapsulated.splitCount != splitCount || encapsulated.reliability != reliability) {
 				throw new IllegalArgumentException("This split packet does not belong to this one");
 			} else if (encapsulated.splitIndex < 0 || encapsulated.splitIndex >= encapsulated.splitCount) {
 				throw new IllegalArgumentException("Encapsulated packet split index out of range");
@@ -267,13 +265,10 @@ public final class EncapsulatedPacket implements Cloneable {
 	/**
 	 * Calculates the size of an encapsulated packet if it had been encoded.
 	 * 
-	 * @param reliability
-	 *            the reliability.
-	 * @param split
-	 *            <code>true</code> if the packet is split, <code>false</code>
-	 *            otherwise.
-	 * @param payload
-	 *            the payload, <code>null</code> if there is no payload.
+	 * @param reliability the reliability.
+	 * @param split       <code>true</code> if the packet is split,
+	 *                    <code>false</code> otherwise.
+	 * @param payload     the payload, <code>null</code> if there is no payload.
 	 * @return the size if it had been encoded.
 	 */
 	public static int size(Reliability reliability, boolean split, Packet payload) {
@@ -290,11 +285,9 @@ public final class EncapsulatedPacket implements Cloneable {
 	/**
 	 * Calculates the size of an encapsulated packet if it had been encoded.
 	 * 
-	 * @param reliability
-	 *            the reliability.
-	 * @param split
-	 *            <code>true</code> if the packet is split, <code>false</code>
-	 *            otherwise.
+	 * @param reliability the reliability.
+	 * @param split       <code>true</code> if the packet is split,
+	 *                    <code>false</code> otherwise.
 	 * @return the size.
 	 */
 	public static int size(Reliability reliability, boolean split) {
@@ -305,17 +298,15 @@ public final class EncapsulatedPacket implements Cloneable {
 	private EncapsulatedPacket clone;
 
 	/**
-	 * The acknowledgement record. This is only used if the reliability is of
-	 * the {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT}
-	 * type.
+	 * The acknowledgement record. This is only used if the reliability is of the
+	 * {@link Reliability#UNRELIABLE_WITH_ACK_RECEIPT WITH_ACK_RECEIPT} type.
 	 * <p>
-	 * This is <i>not</i> used for packet encoding. Rather, when a sender gets
-	 * an
+	 * This is <i>not</i> used for packet encoding. Rather, when a sender gets an
 	 * {@link com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgedPacket
 	 * ACK} packet, the event method
 	 * {@link com.whirvis.jraknet.client.RakNetClientListener#onAcknowledge(com.whirvis.jraknet.client.RakNetClient, com.whirvis.jraknet.peer.RakNetServerPeer, Record, EncapsulatedPacket)
-	 * onAcknowledge(RakNetClient, RakNetServerPeer, Record,
-	 * EncapsulatedPacket)} is called. Likewise, the same occurs when a
+	 * onAcknowledge(RakNetClient, RakNetServerPeer, Record, EncapsulatedPacket)} is
+	 * called. Likewise, the same occurs when a
 	 * {@link com.whirvis.jraknet.protocol.message.acknowledge.NotAcknowledgedPacket
 	 * NACK} packet is received with the exception of
 	 * {@link com.whirvis.jraknet.client.RakNetClientListener#onLoss(com.whirvis.jraknet.client.RakNetClient, com.whirvis.jraknet.peer.RakNetServerPeer, Record, EncapsulatedPacket)
@@ -336,10 +327,10 @@ public final class EncapsulatedPacket implements Cloneable {
 
 	/**
 	 * The message index. This is only ever used if the reliability is of the
-	 * {@link Reliability#RELIABLE RELIABLE} type. This should always be one
-	 * higher than the message index of the last reliable packet that was sent,
-	 * as it is used to let the receiver know whether or not they have missed a
-	 * reliable packet in transmission. This crucial in order for the
+	 * {@link Reliability#RELIABLE RELIABLE} type. This should always be one higher
+	 * than the message index of the last reliable packet that was sent, as it is
+	 * used to let the receiver know whether or not they have missed a reliable
+	 * packet in transmission. This crucial in order for the
 	 * {@link Reliability#RELIABLE_ORDERED RELIABLE_ORDERED} reliability to
 	 * function.
 	 * <p>
@@ -351,21 +342,21 @@ public final class EncapsulatedPacket implements Cloneable {
 	 * <li>4. Receiver does not receive reliable packet two as it is lost in
 	 * transmission.</li>
 	 * <li>5. Sender sends reliable packet three to receiver.</li>
-	 * <li>6. Receiver receives reliable packet three, and realizes that it has
-	 * lost reliable packet two, causing it to send a
+	 * <li>6. Receiver receives reliable packet three, and realizes that it has lost
+	 * reliable packet two, causing it to send a
 	 * {@link com.whirvis.jraknet.protocol.message.acknowledge.NotAcknowledgedPacket
 	 * NACK} packet.</li>
 	 * <li>7. Sender sends reliable packet two again.</li>
-	 * <li>8. Receiver receives reliable packet two and communication continues
-	 * as normal.</li>
+	 * <li>8. Receiver receives reliable packet two and communication continues as
+	 * normal.</li>
 	 * </ul>
 	 * <p>
 	 * When a receiver receives a reliable packet, it is also always supposed to
 	 * send an
 	 * {@link com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgedPacket
-	 * ACK} packet back to the sender. This lets the sender know that the packet
-	 * has been received so it can be removed from its cache. It is assumed that
-	 * the receiver sent an
+	 * ACK} packet back to the sender. This lets the sender know that the packet has
+	 * been received so it can be removed from its cache. It is assumed that the
+	 * receiver sent an
 	 * {@link com.whirvis.jraknet.protocol.message.acknowledge.AcknowledgedPacket
 	 * ACK} packet in each step describing the fact that it received a reliable
 	 * packet.
@@ -378,9 +369,9 @@ public final class EncapsulatedPacket implements Cloneable {
 	 * {@link Reliability#UNRELIABLE_SEQUENCED SEQUENCED} type.
 	 * <p>
 	 * This is similar to the <code>messageIndex</code>, however this is used to
-	 * determine when ordered packets are ordered and if a sequenced packet is
-	 * the newest one or not. On the other hand, <code>messageIndex</code> is
-	 * used to determine when reliable packets have been lost in transmission.
+	 * determine when ordered packets are ordered and if a sequenced packet is the
+	 * newest one or not. On the other hand, <code>messageIndex</code> is used to
+	 * determine when reliable packets have been lost in transmission.
 	 */
 	public int orderIndex;
 
@@ -390,12 +381,12 @@ public final class EncapsulatedPacket implements Cloneable {
 	 * {@link Reliability#UNRELIABLE_SEQUENCED SEQUENCED} type.
 	 * <p>
 	 * In total, there are a total of
-	 * {@value com.whirvis.jraknet.RakNet#CHANNEL_COUNT} channels that can be
-	 * used to send {@link Reliability#RELIABLE_ORDERED ORDERED} and
+	 * {@value com.whirvis.jraknet.RakNet#CHANNEL_COUNT} channels that can be used
+	 * to send {@link Reliability#RELIABLE_ORDERED ORDERED} and
 	 * {@link Reliability#UNRELIABLE_SEQUENCED SEQUENCED} packets on. Both have
-	 * their own set of these channels. It is good to make use of this if there
-	 * are many different operations that must be ordered or sequenced happening
-	 * at the same time, as it can help prevent clogging.
+	 * their own set of these channels. It is good to make use of this if there are
+	 * many different operations that must be ordered or sequenced happening at the
+	 * same time, as it can help prevent clogging.
 	 */
 	public byte orderChannel;
 
@@ -411,8 +402,8 @@ public final class EncapsulatedPacket implements Cloneable {
 
 	/**
 	 * The index of this split part of the packet in the overall packet. This is
-	 * used to determine the order in which to put the split packet back
-	 * together when each and every part has been received.
+	 * used to determine the order in which to put the split packet back together
+	 * when each and every part has been received.
 	 */
 	public int splitIndex;
 
@@ -424,15 +415,13 @@ public final class EncapsulatedPacket implements Cloneable {
 	/**
 	 * Encodes the packet.
 	 * 
-	 * @param buffer
-	 *            the buffer to write to.
-	 * @throws NullPointerException
-	 *             if the <code>reliability</code>, <code>payload</code>, or
-	 *             <code>buffer</code> are <code>null</code>, or if the
-	 *             reliability is reliable and the <code>ackRecord</code> is
-	 *             <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             if the <code>ackRecord</code> is ranged.
+	 * @param buffer the buffer to write to.
+	 * @throws NullPointerException     if the <code>reliability</code>,
+	 *                                  <code>payload</code>, or <code>buffer</code>
+	 *                                  are <code>null</code>, or if the reliability
+	 *                                  is reliable and the <code>ackRecord</code>
+	 *                                  is <code>null</code>.
+	 * @throws IllegalArgumentException if the <code>ackRecord</code> is ranged.
 	 */
 	public void encode(Packet buffer) throws NullPointerException, IllegalArgumentException {
 		if (buffer == null) {
@@ -472,12 +461,10 @@ public final class EncapsulatedPacket implements Cloneable {
 	/**
 	 * Decodes the packet.
 	 * 
-	 * @param buffer
-	 *            the buffer to read from.
-	 * @throws NullPointerException
-	 *             if the <code>buffer</code> is <code>null</code>, or if the
-	 *             <code>reliability</code> failed to lookup (normally due to an
-	 *             invalid ID).
+	 * @param buffer the buffer to read from.
+	 * @throws NullPointerException if the <code>buffer</code> is <code>null</code>,
+	 *                              or if the <code>reliability</code> failed to
+	 *                              lookup (normally due to an invalid ID).
 	 */
 	public void decode(Packet buffer) throws NullPointerException {
 		if (buffer == null) {
@@ -486,7 +473,8 @@ public final class EncapsulatedPacket implements Cloneable {
 		short flags = buffer.readUnsignedByte();
 		this.reliability = Reliability.lookup((flags & FLAG_RELIABILITY) >> FLAG_RELIABILITY_INDEX);
 		if (reliability == null) {
-			throw new NullPointerException("Failed to lookup reliability with ID " + ((flags & FLAG_RELIABILITY) >> FLAG_RELIABILITY_INDEX));
+			throw new NullPointerException(
+					"Failed to lookup reliability with ID " + ((flags & FLAG_RELIABILITY) >> FLAG_RELIABILITY_INDEX));
 		}
 		this.split = (flags & FLAG_SPLIT) > 0;
 		int length = buffer.readUnsignedShort() / Byte.SIZE;
@@ -517,12 +505,10 @@ public final class EncapsulatedPacket implements Cloneable {
 	/**
 	 * Returns whether or not the packet needs to be split.
 	 * 
-	 * @param peer
-	 *            the peer the packet is being sent to.
-	 * @return <code>true</code> if the packet needs to be split,
-	 *         <code>false</code> otherwise.
-	 * @throws NullPointerException
-	 *             if the <code>peer</code> is <code>null</code>.
+	 * @param peer the peer the packet is being sent to.
+	 * @return <code>true</code> if the packet needs to be split, <code>false</code>
+	 *         otherwise.
+	 * @throws NullPointerException if the <code>peer</code> is <code>null</code>.
 	 */
 	public boolean needsSplit(RakNetPeer peer) throws NullPointerException {
 		return Split.needsSplit(peer, this);
@@ -531,15 +517,12 @@ public final class EncapsulatedPacket implements Cloneable {
 	/**
 	 * Splits the packet.
 	 * 
-	 * @param peer
-	 *            the peer.
+	 * @param peer the peer.
 	 * @return the split up encapsulated packet.
-	 * @throws IllegalStateException
-	 *             if the <code>encapsulated</code> is already split or if the
-	 *             packet is too small to be split according to
-	 *             {@link #needsSplit(RakNetPeer)}.
-	 * @throws NullPointerException
-	 *             if the <code>peer</code> is <code>null</code>.
+	 * @throws IllegalStateException if the <code>encapsulated</code> is already
+	 *                               split or if the packet is too small to be split
+	 *                               according to {@link #needsSplit(RakNetPeer)}.
+	 * @throws NullPointerException  if the <code>peer</code> is <code>null</code>.
 	 */
 	public EncapsulatedPacket[] split(RakNetPeer peer) throws IllegalStateException, NullPointerException {
 		if (split == true) {
@@ -553,15 +536,12 @@ public final class EncapsulatedPacket implements Cloneable {
 	/**
 	 * Returns the cloned packet. If the packet has not yet been cloned, the
 	 * {@link #clone()} method will be called automatically. This method is
-	 * recommended for use over the {@link #clone()} method as it has checks put
-	 * in place to prevent a <code>CloneNotSupporteException</code> from being
-	 * thrown.
+	 * recommended for use over the {@link #clone()} method as it has checks put in
+	 * place to prevent a <code>CloneNotSupporteException</code> from being thrown.
 	 * 
-	 * @return the cloned packet, or the packet itself if it is the clone
-	 *         already.
-	 * @throws RuntimeException
-	 *             if a <code>CloneNotSupportedException</code> is caught
-	 *             despite the safe checks put in place.
+	 * @return the cloned packet, or the packet itself if it is the clone already.
+	 * @throws RuntimeException if a <code>CloneNotSupportedException</code> is
+	 *                          caught despite the safe checks put in place.
 	 */
 	public EncapsulatedPacket getClone() throws RuntimeException {
 		if (isClone == true) {
@@ -579,9 +559,8 @@ public final class EncapsulatedPacket implements Cloneable {
 	/**
 	 * {@inheritDoc}
 	 * 
-	 * @throws CloneNotSupportedException
-	 *             if the packet has already been cloned or if the packet is a
-	 *             clone.
+	 * @throws CloneNotSupportedException if the packet has already been cloned or
+	 *                                    if the packet is a clone.
 	 * @see #getClone()
 	 */
 	@Override
@@ -598,9 +577,10 @@ public final class EncapsulatedPacket implements Cloneable {
 
 	@Override
 	public String toString() {
-		return "EncapsulatedPacket [isClone=" + isClone + ", ackRecord=" + ackRecord + ", reliability=" + reliability + ", split=" + split + ", messageIndex=" + messageIndex
-				+ ", orderIndex=" + orderIndex + ", orderChannel=" + orderChannel + ", splitCount=" + splitCount + ", splitId=" + splitId + ", splitIndex=" + splitIndex
-				+ ", calculateSize()=" + size() + "]";
+		return "EncapsulatedPacket [isClone=" + isClone + ", ackRecord=" + ackRecord + ", reliability=" + reliability
+				+ ", split=" + split + ", messageIndex=" + messageIndex + ", orderIndex=" + orderIndex
+				+ ", orderChannel=" + orderChannel + ", splitCount=" + splitCount + ", splitId=" + splitId
+				+ ", splitIndex=" + splitIndex + ", calculateSize()=" + size() + "]";
 	}
 
 }

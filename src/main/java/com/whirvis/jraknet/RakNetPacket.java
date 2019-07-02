@@ -77,8 +77,9 @@ public class RakNetPacket extends Packet {
 	/**
 	 * The magic identifier.
 	 */
-	public final static byte[] MAGIC = new byte[] { (byte) 0x00, (byte) 0xFF, (byte) 0xFF, 0x00, (byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xFD, (byte) 0xFD,
-			(byte) 0xFD, (byte) 0xFD, (byte) 0x12, (byte) 0x34, (byte) 0x56, (byte) 0x78 };
+	public final static byte[] MAGIC = new byte[] { (byte) 0x00, (byte) 0xFF, (byte) 0xFF, 0x00, (byte) 0xFE,
+			(byte) 0xFE, (byte) 0xFE, (byte) 0xFE, (byte) 0xFD, (byte) 0xFD, (byte) 0xFD, (byte) 0xFD, (byte) 0x12,
+			(byte) 0x34, (byte) 0x56, (byte) 0x78 };
 
 	/**
 	 * The ID of the {@link com.whirvis.jraknet.protocol.status.ConnectedPing
@@ -167,22 +168,22 @@ public class RakNetPacket extends Packet {
 	/**
 	 * The ID of the <code>SND_RECEIPT_ACKED</code> packet.
 	 * <p>
-	 * In the original implementation of RakNet, when a packet is acknowledged
-	 * by a peer this packet is sent back through loopback to the original
-	 * sender of the packet with the acknoweldgeable reliability. Since this
-	 * implementation has listeners will special built in acknowledgement and
-	 * loss methods, this packet has no need for implementation.
+	 * In the original implementation of RakNet, when a packet is acknowledged by a
+	 * peer this packet is sent back through loopback to the original sender of the
+	 * packet with the acknoweldgeable reliability. Since this implementation has
+	 * listeners will special built in acknowledgement and loss methods, this packet
+	 * has no need for implementation.
 	 */
 	public static final short ID_SND_RECEIPT_ACKED = 0x0E;
 
 	/**
 	 * The ID of the <code>SND_RECEIPT_LOSS</code> packet.
 	 * <p>
-	 * In the original implementation of RakNet, when a packet is acknowledged
-	 * by a peer this packet is sent back through loopback to the original
-	 * sender of the packet with the acknoweldgeable reliability. Since this
-	 * implementation has listeners will special built in acknowledgement and
-	 * loss methods, this packet has no need for implementation.
+	 * In the original implementation of RakNet, when a packet is acknowledged by a
+	 * peer this packet is sent back through loopback to the original sender of the
+	 * packet with the acknoweldgeable reliability. Since this implementation has
+	 * listeners will special built in acknowledgement and loss methods, this packet
+	 * has no need for implementation.
 	 */
 	public static final short ID_SND_RECEIPT_LOSS = 0x0F;
 
@@ -204,8 +205,7 @@ public class RakNetPacket extends Packet {
 	public static final short ID_ALREADY_CONNECTED = 0x12;
 
 	/**
-	 * The ID of the
-	 * {@link com.whirvis.jraknet.protocol.login.NewIncomingConnection
+	 * The ID of the {@link com.whirvis.jraknet.protocol.login.NewIncomingConnection
 	 * NEW_INCOMING_CONNECTION} packet.
 	 */
 	public static final short ID_NEW_INCOMING_CONNECTION = 0x13;
@@ -226,8 +226,7 @@ public class RakNetPacket extends Packet {
 	public static final short ID_CONNECTION_LOST = 0x16;
 
 	/**
-	 * The ID of the
-	 * {@link com.whirvis.jraknet.protocol.connection.ConnectionBanned
+	 * The ID of the {@link com.whirvis.jraknet.protocol.connection.ConnectionBanned
 	 * CONNECTION_BANNED} packet.
 	 */
 	public static final short ID_CONNECTION_BANNED = 0x17;
@@ -662,32 +661,32 @@ public class RakNetPacket extends Packet {
 	public static final short ID_XBOX_LOBBY = 0x6C;
 
 	/**
-	 * The ID of the
-	 * <code>TWO_WAY_AUTHENTICATION_INCOMING_CHALLENEGE_SUCCESS</code> packet.
+	 * The ID of the <code>TWO_WAY_AUTHENTICATION_INCOMING_CHALLENEGE_SUCCESS</code>
+	 * packet.
 	 */
 	public static final short ID_TWO_WAY_AUTHENTICATION_INCOMING_CHALLENGE_SUCCESS = 0x6D;
 
 	/**
-	 * The ID of the
-	 * <code>TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_SUCCESS</code> packet.
+	 * The ID of the <code>TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_SUCCESS</code>
+	 * packet.
 	 */
 	public static final short ID_TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_SUCCESS = 0x6E;
 
 	/**
-	 * The ID of the
-	 * <code>TWO_WAY_AUTHENTICATION_INCOMING_CHALLENGE_FAILURE</code> packet.
+	 * The ID of the <code>TWO_WAY_AUTHENTICATION_INCOMING_CHALLENGE_FAILURE</code>
+	 * packet.
 	 */
 	public static final short ID_TWO_WAY_AUTHENTICATION_INCOMING_CHALLENGE_FAILURE = 0x6F;
 
 	/**
-	 * The ID of the
-	 * <code>TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_FAILURE</code> packet.
+	 * The ID of the <code>TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_FAILURE</code>
+	 * packet.
 	 */
 	public static final short ID_TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_FAILURE = 0x70;
 
 	/**
-	 * The ID of the
-	 * <code>TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_TIMEOUT</code> packet.
+	 * The ID of the <code>TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_TIMEOUT</code>
+	 * packet.
 	 */
 	public static final short ID_TWO_WAY_AUTHENTICATION_OUTGOING_CHALLENGE_TIMEOUT = 0x71;
 
@@ -792,14 +791,14 @@ public class RakNetPacket extends Packet {
 	public static final short ID_RESERVED_9 = 0x85;
 
 	/**
-	 * This is the first ID that the user can for the IDs of their packets.
-	 * Since packet IDs are written using {@link #writeUnsignedByte(int)}, the
-	 * highest packet ID that can be used is <code>0xFF</code>.
+	 * This is the first ID that the user can for the IDs of their packets. Since
+	 * packet IDs are written using {@link #writeUnsignedByte(int)}, the highest
+	 * packet ID that can be used is <code>0xFF</code>.
 	 * <p>
 	 * If one must have more than <code>121</code> packet IDs
-	 * (<code>0xFF - ID_USER_PACKET_ENUM</code>), then one can have a singular
-	 * ID that they use for all of their user packets with another field to be
-	 * the packet ID.
+	 * (<code>0xFF - ID_USER_PACKET_ENUM</code>), then one can have a singular ID
+	 * that they use for all of their user packets with another field to be the
+	 * packet ID.
 	 */
 	public static final short ID_USER_PACKET_ENUM = 0x86;
 
@@ -824,9 +823,8 @@ public class RakNetPacket extends Packet {
 	public static final short ID_CUSTOM_3 = 0x83;
 
 	/**
-	 * The ID of the
-	 * {@link com.whirvis.jraknet.protocol.message.CustomFourPacket CUSTOM_4}
-	 * packet.
+	 * The ID of the {@link com.whirvis.jraknet.protocol.message.CustomFourPacket
+	 * CUSTOM_4} packet.
 	 */
 	public static final short ID_CUSTOM_4 = 0x84;
 
@@ -902,17 +900,17 @@ public class RakNetPacket extends Packet {
 	private static boolean mappedNameIds;
 
 	/**
-	 * Maps all <code>public</code> packet IDs to their respective field names
-	 * and vice-versa.
+	 * Maps all <code>public</code> packet IDs to their respective field names and
+	 * vice-versa.
 	 * <p>
-	 * Packet IDs {@link #ID_CUSTOM_0}, {@link #ID_CUSTOM_1},
-	 * {@link #ID_CUSTOM_2}, {@link #ID_CUSTOM_3}, {@link #ID_CUSTOM_4},
-	 * {@link #ID_CUSTOM_5}, {@link #ID_CUSTOM_6}, {@link #ID_CUSTOM_7},
-	 * {@link #ID_CUSTOM_8}, {@link #ID_CUSTOM_9}, {@link #ID_CUSTOM_A},
-	 * {@link #ID_CUSTOM_B}, {@link #ID_CUSTOM_C}, {@link #ID_CUSTOM_D},
-	 * {@link #ID_CUSTOM_E}, {@link #ID_CUSTOM_F}, {@link #ID_ACK}, and
-	 * {@link #ID_NACK} will never are ignored as they are not only internal
-	 * packets but they also override other packets with the same ID.
+	 * Packet IDs {@link #ID_CUSTOM_0}, {@link #ID_CUSTOM_1}, {@link #ID_CUSTOM_2},
+	 * {@link #ID_CUSTOM_3}, {@link #ID_CUSTOM_4}, {@link #ID_CUSTOM_5},
+	 * {@link #ID_CUSTOM_6}, {@link #ID_CUSTOM_7}, {@link #ID_CUSTOM_8},
+	 * {@link #ID_CUSTOM_9}, {@link #ID_CUSTOM_A}, {@link #ID_CUSTOM_B},
+	 * {@link #ID_CUSTOM_C}, {@link #ID_CUSTOM_D}, {@link #ID_CUSTOM_E},
+	 * {@link #ID_CUSTOM_F}, {@link #ID_ACK}, and {@link #ID_NACK} will never are
+	 * ignored as they are not only internal packets but they also override other
+	 * packets with the same ID.
 	 */
 	private static void mapNameIds() {
 		if (mappedNameIds == false) {
@@ -921,7 +919,8 @@ public class RakNetPacket extends Packet {
 				if (field.getType().equals(short.class)) {
 					try {
 						short packetId = field.getShort(null);
-						if ((packetId >= ID_CUSTOM_0 && packetId <= ID_CUSTOM_F) || packetId == ID_ACK || packetId == ID_NACK) {
+						if ((packetId >= ID_CUSTOM_0 && packetId <= ID_CUSTOM_F) || packetId == ID_ACK
+								|| packetId == ID_NACK) {
 							continue; // Ignored as they override other packet
 										// IDs
 						}
@@ -930,8 +929,8 @@ public class RakNetPacket extends Packet {
 						PACKET_IDS.put(packetName, packetId);
 						if (currentName != null) {
 							if (!currentName.equals(packetName)) {
-								log.warn(
-										"Found duplicate ID " + RakNet.toHexStringId(packetId) + " for \"" + packetName + "\" and \"" + currentName + "\", overriding name and ID");
+								log.warn("Found duplicate ID " + RakNet.toHexStringId(packetId) + " for \"" + packetName
+										+ "\" and \"" + currentName + "\", overriding name and ID");
 							}
 						} else {
 							log.debug("Assigned packet ID " + RakNet.toHexStringId(packetId) + " to " + packetName);
@@ -949,21 +948,19 @@ public class RakNetPacket extends Packet {
 	 * Returns whether or not a packet with the specified ID exists as a RakNet
 	 * packet.
 	 * 
-	 * @param id
-	 *            the ID of the packet.
-	 * @return <code>true</code> if a packet with the ID exists as a RakNet
-	 *         packet, <code>false</code>.
+	 * @param id the ID of the packet.
+	 * @return <code>true</code> if a packet with the ID exists as a RakNet packet,
+	 *         <code>false</code>.
 	 */
 	public static boolean hasPacket(int id) {
 		return PACKET_NAMES.containsKey((short) id);
 	}
 
 	/**
-	 * Returns whether or not a packet with the specified name exists as a
-	 * RakNet packet.
+	 * Returns whether or not a packet with the specified name exists as a RakNet
+	 * packet.
 	 * 
-	 * @param name
-	 *            the name of the packet.
+	 * @param name the name of the packet.
 	 * @return <code>true</code> if a packet with the name exists as a RakNet
 	 *         packet, <code>false</code>.
 	 */
@@ -974,20 +971,18 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Returns the name of the packet with the specified ID.
 	 * <p>
-	 * Packet IDs {@link #ID_CUSTOM_0}, {@link #ID_CUSTOM_1},
-	 * {@link #ID_CUSTOM_2}, {@link #ID_CUSTOM_3}, {@link #ID_CUSTOM_4},
-	 * {@link #ID_CUSTOM_5}, {@link #ID_CUSTOM_6}, {@link #ID_CUSTOM_7},
-	 * {@link #ID_CUSTOM_8}, {@link #ID_CUSTOM_9}, {@link #ID_CUSTOM_A},
-	 * {@link #ID_CUSTOM_B}, {@link #ID_CUSTOM_C}, {@link #ID_CUSTOM_D},
-	 * {@link #ID_CUSTOM_E}, {@link #ID_CUSTOM_F}, {@link #ID_ACK}, and
-	 * {@link #ID_NACK} will never be returned as they are not only internal
-	 * packets but they also override other packets with the same ID.
+	 * Packet IDs {@link #ID_CUSTOM_0}, {@link #ID_CUSTOM_1}, {@link #ID_CUSTOM_2},
+	 * {@link #ID_CUSTOM_3}, {@link #ID_CUSTOM_4}, {@link #ID_CUSTOM_5},
+	 * {@link #ID_CUSTOM_6}, {@link #ID_CUSTOM_7}, {@link #ID_CUSTOM_8},
+	 * {@link #ID_CUSTOM_9}, {@link #ID_CUSTOM_A}, {@link #ID_CUSTOM_B},
+	 * {@link #ID_CUSTOM_C}, {@link #ID_CUSTOM_D}, {@link #ID_CUSTOM_E},
+	 * {@link #ID_CUSTOM_F}, {@link #ID_ACK}, and {@link #ID_NACK} will never be
+	 * returned as they are not only internal packets but they also override other
+	 * packets with the same ID.
 	 * 
-	 * @param id
-	 *            the ID of the packet.
+	 * @param id the ID of the packet.
 	 * @return the name of the packet with the specified ID, its hexadecimal ID
-	 *         according to {@link RakNet#toHexStringId(int)} if it does not
-	 *         exist.
+	 *         according to {@link RakNet#toHexStringId(int)} if it does not exist.
 	 */
 	public static String getName(int id) {
 		if (mappedNameIds == false) {
@@ -1002,21 +997,19 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Returns the name of the specified packet.
 	 * <p>
-	 * Packet IDs {@link #ID_CUSTOM_0}, {@link #ID_CUSTOM_1},
-	 * {@link #ID_CUSTOM_2}, {@link #ID_CUSTOM_3}, {@link #ID_CUSTOM_4},
-	 * {@link #ID_CUSTOM_5}, {@link #ID_CUSTOM_6}, {@link #ID_CUSTOM_7},
-	 * {@link #ID_CUSTOM_8}, {@link #ID_CUSTOM_9}, {@link #ID_CUSTOM_A},
-	 * {@link #ID_CUSTOM_B}, {@link #ID_CUSTOM_C}, {@link #ID_CUSTOM_D},
-	 * {@link #ID_CUSTOM_E}, {@link #ID_CUSTOM_F}, {@link #ID_ACK}, and
-	 * {@link #ID_NACK} will never be returned as they are not only internal
-	 * packets but they also override other packets with the same ID.
+	 * Packet IDs {@link #ID_CUSTOM_0}, {@link #ID_CUSTOM_1}, {@link #ID_CUSTOM_2},
+	 * {@link #ID_CUSTOM_3}, {@link #ID_CUSTOM_4}, {@link #ID_CUSTOM_5},
+	 * {@link #ID_CUSTOM_6}, {@link #ID_CUSTOM_7}, {@link #ID_CUSTOM_8},
+	 * {@link #ID_CUSTOM_9}, {@link #ID_CUSTOM_A}, {@link #ID_CUSTOM_B},
+	 * {@link #ID_CUSTOM_C}, {@link #ID_CUSTOM_D}, {@link #ID_CUSTOM_E},
+	 * {@link #ID_CUSTOM_F}, {@link #ID_ACK}, and {@link #ID_NACK} will never be
+	 * returned as they are not only internal packets but they also override other
+	 * packets with the same ID.
 	 * 
-	 * @param packet
-	 *            the packet.
+	 * @param packet the packet.
 	 * @return the name of the packet, its hexadecimal ID according to
 	 *         {@link RakNet#toHexStringId(int)} if it does not exist.
-	 * @throws NullPointerException
-	 *             if the <code>packet</code> is <code>null</code>.
+	 * @throws NullPointerException if the <code>packet</code> is <code>null</code>.
 	 */
 	public static String getName(RakNetPacket packet) throws NullPointerException {
 		if (packet == null) {
@@ -1028,10 +1021,9 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Returns the ID of the packet with the specified name.
 	 * 
-	 * @param name
-	 *            the name of the packet.
-	 * @return the ID of the packet with the specified name, <code>-1</code> if
-	 *         it does not exist.
+	 * @param name the name of the packet.
+	 * @return the ID of the packet with the specified name, <code>-1</code> if it
+	 *         does not exist.
 	 */
 	public static short getId(String name) {
 		if (mappedNameIds == false) {
@@ -1041,16 +1033,12 @@ public class RakNetPacket extends Packet {
 	}
 
 	/**
-	 * Returns whether or not a method with the specified name has been
-	 * overridden the method in the original specified class by the specified
-	 * class instance.
+	 * Returns whether or not a method with the specified name has been overridden
+	 * the method in the original specified class by the specified class instance.
 	 * 
-	 * @param instance
-	 *            the class instance.
-	 * @param clazz
-	 *            the original class.
-	 * @param methodName
-	 *            the name of the method.
+	 * @param instance   the class instance.
+	 * @param clazz      the original class.
+	 * @param methodName the name of the method.
 	 * @return <code>true</code> if the method has been overridden,
 	 *         <code>false</code> otherwise.
 	 */
@@ -1069,10 +1057,9 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Creates a RakNet packet.
 	 * 
-	 * @param id
-	 *            the ID of the packet.
-	 * @throws IllegalArgumentException
-	 *             if the <code>id</code> is not in between <code>0-255</code>.
+	 * @param id the ID of the packet.
+	 * @throws IllegalArgumentException if the <code>id</code> is not in between
+	 *                                  <code>0-255</code>.
 	 */
 	public RakNetPacket(int id) throws IllegalArgumentException {
 		super();
@@ -1087,12 +1074,10 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Creates a RakNet packet.
 	 * 
-	 * @param buffer
-	 *            the buffer to read from and write to. The buffer must have at
-	 *            least one byte to be read from for the ID.
-	 * @throws IllegalArgumentException
-	 *             if the <code>buffer</code> has less than <code>1</code>
-	 *             readable <code>byte</code>.
+	 * @param buffer the buffer to read from and write to. The buffer must have at
+	 *               least one byte to be read from for the ID.
+	 * @throws IllegalArgumentException if the <code>buffer</code> has less than
+	 *                                  <code>1</code> readable <code>byte</code>.
 	 */
 	public RakNetPacket(ByteBuf buffer) throws IllegalArgumentException {
 		super(buffer);
@@ -1107,12 +1092,11 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Creates a RakNet packet.
 	 * 
-	 * @param datagram
-	 *            the datagram packet to read from. The datagram must have at
-	 *            least one byte to be read from for the ID.
-	 * @throws IllegalArgumentException
-	 *             if the buffer contained within the datagram has less than
-	 *             <code>1</code> readable <code>byte</code>.
+	 * @param datagram the datagram packet to read from. The datagram must have at
+	 *                 least one byte to be read from for the ID.
+	 * @throws IllegalArgumentException if the buffer contained within the datagram
+	 *                                  has less than <code>1</code> readable
+	 *                                  <code>byte</code>.
 	 * @see #RakNetPacket(ByteBuf)
 	 */
 	public RakNetPacket(DatagramPacket datagram) throws IllegalArgumentException {
@@ -1122,12 +1106,10 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Creates a RakNet packet.
 	 * 
-	 * @param data
-	 *            the byte array to read to read from. The byte array must have
-	 *            at least one byte to be read from for the ID.
-	 * @throws IllegalArgumentException
-	 *             if the length of the <code>data</code> is less than
-	 *             <code>1</code>.
+	 * @param data the byte array to read to read from. The byte array must have at
+	 *             least one byte to be read from for the ID.
+	 * @throws IllegalArgumentException if the length of the <code>data</code> is
+	 *                                  less than <code>1</code>.
 	 * @see #RakNetPacket(ByteBuf)
 	 */
 	public RakNetPacket(byte[] data) throws IllegalArgumentException {
@@ -1137,15 +1119,14 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Creates a RakNet packet.
 	 * 
-	 * @param packet
-	 *            the packet to read from and write to. The packet must have at
-	 *            least one byte to be read from for the ID. If the packet is an
-	 *            instance of {@link RakNetPacket}, it will be casted and have
-	 *            its ID retrieved via {@link #getId()}.
-	 * @throws IllegalArgumentException
-	 *             if the packet size has less than <code>1</code> readable
-	 *             <code>byte</code> and is not an instance of
-	 *             {@link RakNetPacket}.
+	 * @param packet the packet to read from and write to. The packet must have at
+	 *               least one byte to be read from for the ID. If the packet is an
+	 *               instance of {@link RakNetPacket}, it will be casted and have
+	 *               its ID retrieved via {@link #getId()}.
+	 * @throws IllegalArgumentException if the packet size has less than
+	 *                                  <code>1</code> readable <code>byte</code>
+	 *                                  and is not an instance of
+	 *                                  {@link RakNetPacket}.
 	 */
 	public RakNetPacket(Packet packet) throws IllegalArgumentException {
 		super(packet);
@@ -1173,8 +1154,8 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Reads a magic array and returns whether or not it is valid.
 	 * 
-	 * @return <code>true</code> if the magic array was valid,
-	 *         <code>false</code> otherwise.
+	 * @return <code>true</code> if the magic array was valid, <code>false</code>
+	 *         otherwise.
 	 */
 	public final boolean readMagic() {
 		byte[] magicCheck = this.read(MAGIC.length);
@@ -1184,17 +1165,16 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Reads a {@link ConnectionType}.
 	 * <p>
-	 * This method will check to make sure if there is at least enough data to
-	 * read the the connection type magic before reading the data. This is due
-	 * to the fact that this is meant to be used strictly at the end of packets
-	 * that can be used to signify the protocol implementation of the sender.
+	 * This method will check to make sure if there is at least enough data to read
+	 * the the connection type magic before reading the data. This is due to the
+	 * fact that this is meant to be used strictly at the end of packets that can be
+	 * used to signify the protocol implementation of the sender.
 	 * 
 	 * @return a {@link ConnectionType}, {@link ConnectionType#VANILLA} if not
 	 *         enough data to read one is present.
-	 * @throws RakNetException
-	 *             if not enough data is present in the packet after the
-	 *             connection type magic or there are duplicate keys in the
-	 *             metadata.
+	 * @throws RakNetException if not enough data is present in the packet after the
+	 *                         connection type magic or there are duplicate keys in
+	 *                         the metadata.
 	 */
 	public final ConnectionType readConnectionType() throws RakNetException {
 		if (this.remaining() >= ConnectionType.MAGIC.length) {
@@ -1233,13 +1213,11 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Writes a {@link ConnectionType} to the packet.
 	 * 
-	 * @param connectionType
-	 *            the connection type, a <code>null</code> value will have
-	 *            {@link ConnectionType#JRAKNET} connection type be used
-	 *            instead.
+	 * @param connectionType the connection type, a <code>null</code> value will
+	 *                       have {@link ConnectionType#JRAKNET} connection type be
+	 *                       used instead.
 	 * @return the packet.
-	 * @throws RakNetException
-	 *             if there are too many values in the metadata.
+	 * @throws RakNetException if there are too many values in the metadata.
 	 */
 	public final Packet writeConnectionType(ConnectionType connectionType) throws RakNetException {
 		connectionType = (connectionType != null ? connectionType : ConnectionType.JRAKNET);
@@ -1263,10 +1241,9 @@ public class RakNetPacket extends Packet {
 	 * Writes the {@link ConnectionType#JRAKNET} connection type to the packet.
 	 * 
 	 * @return the packet.
-	 * @throws RuntimeException
-	 *             if a <code>RakNetException</code> is caught despite the fact
-	 *             that this method should never throw an error in the first
-	 *             place.
+	 * @throws RuntimeException if a <code>RakNetException</code> is caught despite
+	 *                          the fact that this method should never throw an
+	 *                          error in the first place.
 	 */
 	public final Packet writeConnectionType() throws RuntimeException {
 		try {
@@ -1277,8 +1254,8 @@ public class RakNetPacket extends Packet {
 	}
 
 	/**
-	 * Returns whether or not encoding is supported. If encoding is not
-	 * supported, calling {@link #encode()} will yield an
+	 * Returns whether or not encoding is supported. If encoding is not supported,
+	 * calling {@link #encode()} will yield an
 	 * <code>UnsupportedOperationException</code>.
 	 * 
 	 * @return <code>true</code> if encoding is supported, <code>false</code>
@@ -1291,16 +1268,16 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Encodes the packet.
 	 * 
-	 * @throws UnsupportedOperationException
-	 *             if encoding the packet is not supported.
+	 * @throws UnsupportedOperationException if encoding the packet is not
+	 *                                       supported.
 	 */
 	public void encode() throws UnsupportedOperationException {
 		throw new UnsupportedOperationException("Encoding not supported");
 	}
 
 	/**
-	 * Returns whether or not decoding is supported. If decoding is not
-	 * supported, calling {@link #decode()} will yield an
+	 * Returns whether or not decoding is supported. If decoding is not supported,
+	 * calling {@link #decode()} will yield an
 	 * <code>UnsupportedOperationException</code>.
 	 * 
 	 * @return <code>true</code> if decoding is supported, <code>false</code>
@@ -1313,8 +1290,8 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Decodes the packet.
 	 * 
-	 * @throws UnsupportedOperationException
-	 *             if decoding the packet is not supported.
+	 * @throws UnsupportedOperationException if decoding the packet is not
+	 *                                       supported.
 	 */
 	public void decode() throws UnsupportedOperationException {
 		throw new UnsupportedOperationException("Decoding not supported");
@@ -1323,17 +1300,15 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Updates the buffer.
 	 * 
-	 * @param buffer
-	 *            the buffer to read from and write to, a <code>null</code>
-	 *            value will have a new buffer be used instead.
-	 * @param updateId
-	 *            <code>true</code> if the ID should be updated,
-	 *            <code>false</code> otherwise.
+	 * @param buffer   the buffer to read from and write to, a <code>null</code>
+	 *                 value will have a new buffer be used instead.
+	 * @param updateId <code>true</code> if the ID should be updated,
+	 *                 <code>false</code> otherwise.
 	 * @return the packet.
-	 * @throws IndexOutOfBoundsException
-	 *             if <code>updateId</code> is <code>true</code> and the new
-	 *             buffer has less than <code>1</code> readable
-	 *             <code>byte</code>.
+	 * @throws IndexOutOfBoundsException if <code>updateId</code> is
+	 *                                   <code>true</code> and the new buffer has
+	 *                                   less than <code>1</code> readable
+	 *                                   <code>byte</code>.
 	 * @see #setBuffer(ByteBuf)
 	 */
 	public final RakNetPacket setBuffer(ByteBuf buffer, boolean updateId) throws IndexOutOfBoundsException {
@@ -1347,22 +1322,21 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Updates the buffer.
 	 * 
-	 * @param datagram
-	 *            the {@link DatagramPacket} whose buffer to read from and write
-	 *            to.
-	 * @param updateId
-	 *            <code>true</code> if the ID should be updated,
-	 *            <code>false</code> otherwise.
+	 * @param datagram the {@link DatagramPacket} whose buffer to read from and
+	 *                 write to.
+	 * @param updateId <code>true</code> if the ID should be updated,
+	 *                 <code>false</code> otherwise.
 	 * @return the packet.
-	 * @throws NullPointerException
-	 *             if the <code>datagram</code> packet is <code>null</code>.
-	 * @throws IndexOutOfBoundsException
-	 *             if <code>updateId</code> is <code>true</code> and the new
-	 *             buffer has less than <code>1</code> readable
-	 *             <code>byte</code>.
+	 * @throws NullPointerException      if the <code>datagram</code> packet is
+	 *                                   <code>null</code>.
+	 * @throws IndexOutOfBoundsException if <code>updateId</code> is
+	 *                                   <code>true</code> and the new buffer has
+	 *                                   less than <code>1</code> readable
+	 *                                   <code>byte</code>.
 	 * @see #setBuffer(DatagramPacket)
 	 */
-	public final RakNetPacket setBuffer(DatagramPacket datagram, boolean updateId) throws NullPointerException, IndexOutOfBoundsException {
+	public final RakNetPacket setBuffer(DatagramPacket datagram, boolean updateId)
+			throws NullPointerException, IndexOutOfBoundsException {
 		if (datagram == null) {
 			throw new NullPointerException("Datagram packet cannot be null");
 		}
@@ -1372,53 +1346,51 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Updates the buffer.
 	 * 
-	 * @param data
-	 *            the <code>byte[]</code> to create the new buffer from.
-	 * @param updateId
-	 *            <code>true</code> if the ID should be updated,
-	 *            <code>false</code> otherwise.
+	 * @param data     the <code>byte[]</code> to create the new buffer from.
+	 * @param updateId <code>true</code> if the ID should be updated,
+	 *                 <code>false</code> otherwise.
 	 * @return the packet.
-	 * @throws NullPointerException
-	 *             if the <code>data</code> is <code>null</code>.
-	 * @throws IndexOutOfBoundsException
-	 *             if <code>updateId</code> is <code>true</code> and the new
-	 *             buffer has less than <code>1</code> readable
-	 *             <code>byte</code>.
+	 * @throws NullPointerException      if the <code>data</code> is
+	 *                                   <code>null</code>.
+	 * @throws IndexOutOfBoundsException if <code>updateId</code> is
+	 *                                   <code>true</code> and the new buffer has
+	 *                                   less than <code>1</code> readable
+	 *                                   <code>byte</code>.
 	 * @see #setBuffer(byte[])
 	 */
-	public final RakNetPacket setBuffer(byte[] data, boolean updateId) throws NullPointerException, IndexOutOfBoundsException {
+	public final RakNetPacket setBuffer(byte[] data, boolean updateId)
+			throws NullPointerException, IndexOutOfBoundsException {
 		return this.setBuffer(Unpooled.copiedBuffer(data), updateId);
 	}
 
 	/**
 	 * Updates the buffer.
 	 * 
-	 * @param packet
-	 *            the packet whose buffer to copy to read from and write to.
-	 * @param updateId
-	 *            <code>true</code> if the ID should be updated,
-	 *            <code>false</code> otherwise.
+	 * @param packet   the packet whose buffer to copy to read from and write to.
+	 * @param updateId <code>true</code> if the ID should be updated,
+	 *                 <code>false</code> otherwise.
 	 * @return the packet.
-	 * @throws IndexOutOfBoundsException
-	 *             if <code>updateId</code> is <code>true</code> and the new
-	 *             buffer has less than <code>1</code> readable
-	 *             <code>byte</code>.
+	 * @throws IndexOutOfBoundsException if <code>updateId</code> is
+	 *                                   <code>true</code> and the new buffer has
+	 *                                   less than <code>1</code> readable
+	 *                                   <code>byte</code>.
 	 * @see #setBuffer(Packet)
 	 */
-	public final RakNetPacket setBuffer(Packet packet, boolean updateId) throws NullPointerException, IndexOutOfBoundsException {
+	public final RakNetPacket setBuffer(Packet packet, boolean updateId)
+			throws NullPointerException, IndexOutOfBoundsException {
 		return this.setBuffer(packet.copy(), updateId);
 	}
 
 	/**
 	 * Flips the packet.
 	 * 
-	 * @param updateId
-	 *            <code>true</code> if ID should be updated, <code>false</code>
-	 *            otherwise.
+	 * @param updateId <code>true</code> if ID should be updated, <code>false</code>
+	 *                 otherwise.
 	 * @return the packet.
-	 * @throws IndexOutOfBoundsException
-	 *             if <code>updateId</code> is <code>true</code> and the buffer
-	 *             has less than <code>1</code> readable <code>byte</code>.
+	 * @throws IndexOutOfBoundsException if <code>updateId</code> is
+	 *                                   <code>true</code> and the buffer has less
+	 *                                   than <code>1</code> readable
+	 *                                   <code>byte</code>.
 	 * @see #flip()
 	 */
 	public final RakNetPacket flip(boolean updateId) throws IndexOutOfBoundsException {
@@ -1433,9 +1405,8 @@ public class RakNetPacket extends Packet {
 	 * {@inheritDoc} After the packet has been flipped, an unsigined
 	 * <code>byte</code> will be read to get the ID.
 	 * 
-	 * @throws IndexOutOfBoundsException
-	 *             if the buffer has less than <code>1</code> readable
-	 *             <code>byte</code>.
+	 * @throws IndexOutOfBoundsException if the buffer has less than <code>1</code>
+	 *                                   readable <code>byte</code>.
 	 */
 	@Override
 	public Packet flip() throws IndexOutOfBoundsException {

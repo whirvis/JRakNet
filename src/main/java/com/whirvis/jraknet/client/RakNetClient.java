@@ -85,11 +85,11 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	public static final int[] DEFAULT_TRANSFER_UNIT_SIZES = new int[] { 1492, 1200, 576, RakNet.MINIMUM_MTU_SIZE };
 
 	/**
-	 * The amount of time to wait before the client broadcasts another ping to
-	 * the local network and all added external servers.
+	 * The amount of time to wait before the client broadcasts another ping to the
+	 * local network and all added external servers.
 	 * <p>
-	 * This was also determined based on Minecraft's frequency of broadcasting
-	 * pings to servers.
+	 * This was also determined based on Minecraft's frequency of broadcasting pings
+	 * to servers.
 	 */
 	public static final long PING_BROADCAST_WAIT_MILLIS = 1000L;
 
@@ -114,16 +114,16 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Creates a RakNet client.
 	 * 
-	 * @param address
-	 *            the address the client will bind to during connection. A
-	 *            <code>null</code> address will have the client bind to the
-	 *            wildcard address along with the client giving Netty the
-	 *            responsibility of choosing which port to bind to.
+	 * @param address the address the client will bind to during connection. A
+	 *                <code>null</code> address will have the client bind to the
+	 *                wildcard address along with the client giving Netty the
+	 *                responsibility of choosing which port to bind to.
 	 */
 	public RakNetClient(InetSocketAddress address) {
 		this.bindingAddress = address;
 		this.guid = UUID.randomUUID().getMostSignificantBits();
-		this.log = LogManager.getLogger(RakNetClient.class.getSimpleName() + "-" + Long.toHexString(guid).toUpperCase());
+		this.log = LogManager
+				.getLogger(RakNetClient.class.getSimpleName() + "-" + Long.toHexString(guid).toUpperCase());
 		this.timestamp = System.currentTimeMillis();
 		this.listeners = new ConcurrentLinkedQueue<RakNetClientListener>();
 	}
@@ -131,14 +131,12 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Creates a RakNet client.
 	 * 
-	 * @param address
-	 *            the IP address the client will bind to during connection. A
-	 *            <code>null</code> address will have the client bind to the
-	 *            wildcard address.
-	 * @param port
-	 *            the port the client will bind to during connection. A port of
-	 *            <code>0</code> will have the client give Netty the
-	 *            respsonsibility of choosing the port to bind to.
+	 * @param address the IP address the client will bind to during connection. A
+	 *                <code>null</code> address will have the client bind to the
+	 *                wildcard address.
+	 * @param port    the port the client will bind to during connection. A port of
+	 *                <code>0</code> will have the client give Netty the
+	 *                respsonsibility of choosing the port to bind to.
 	 */
 	public RakNetClient(InetAddress address, int port) {
 		this(new InetSocketAddress(address, port));
@@ -147,10 +145,9 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Creates a RakNet client.
 	 * 
-	 * @param address
-	 *            the IP address the client will bind to during connection. A
-	 *            <code>null</code> address will have the client bind to the
-	 *            wildcard address.
+	 * @param address the IP address the client will bind to during connection. A
+	 *                <code>null</code> address will have the client bind to the
+	 *                wildcard address.
 	 */
 	public RakNetClient(InetAddress address) {
 		this(new InetSocketAddress(address, 0));
@@ -159,17 +156,15 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Creates a RakNet client.
 	 * 
-	 * @param host
-	 *            the IP address the client will bind to during connection. A
-	 *            <code>null</code> address will have the client bind to the
-	 *            wildcard address.
-	 * @param port
-	 *            the port the client will bind to during connection. A port of
-	 *            <code>0</code> will have the client give Netty the
-	 *            respsonsibility of choosing the port to bind to.
-	 * @throws UnknownHostException
-	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 * @param host the IP address the client will bind to during connection. A
+	 *             <code>null</code> address will have the client bind to the
+	 *             wildcard address.
+	 * @param port the port the client will bind to during connection. A port of
+	 *             <code>0</code> will have the client give Netty the
+	 *             respsonsibility of choosing the port to bind to.
+	 * @throws UnknownHostException if no IP address for the <code>host</code> could
+	 *                              be found, or if a scope_id was specified for a
+	 *                              global IPv6 address.
 	 */
 	public RakNetClient(String host, int port) throws UnknownHostException {
 		this(InetAddress.getByName(host), port);
@@ -178,13 +173,12 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Creates a RakNet client.
 	 * 
-	 * @param host
-	 *            the IP address the client will bind to during connection. A
-	 *            <code>null</code> address will have the client bind to the
-	 *            wildcard address.
-	 * @throws UnknownHostException
-	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 * @param host the IP address the client will bind to during connection. A
+	 *             <code>null</code> address will have the client bind to the
+	 *             wildcard address.
+	 * @throws UnknownHostException if no IP address for the <code>host</code> could
+	 *                              be found, or if a scope_id was specified for a
+	 *                              global IPv6 address.
 	 */
 	public RakNetClient(String host) throws UnknownHostException {
 		this(host, 0);
@@ -193,10 +187,9 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Creates a RakNet client.
 	 * 
-	 * @param port
-	 *            the port the client will bind to during creation. A port of
-	 *            <code>0</code> will have the client give Netty the
-	 *            respsonsibility of choosing the port to bind to.
+	 * @param port the port the client will bind to during creation. A port of
+	 *             <code>0</code> will have the client give Netty the
+	 *             respsonsibility of choosing the port to bind to.
 	 */
 	public RakNetClient(int port) {
 		this(new InetSocketAddress(port));
@@ -242,16 +235,15 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * Listeners are used to listen for events that occur relating to the client
 	 * such as connecting to discovers, discovering local servers, and more.
 	 * 
-	 * @param listener
-	 *            the listener to add.
+	 * @param listener the listener to add.
 	 * @return the client.
-	 * @throws NullPointerException
-	 *             if the <code>listener</code> is <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             if the <code>listener</code> is another client that is not
-	 *             the client itself.
+	 * @throws NullPointerException     if the <code>listener</code> is
+	 *                                  <code>null</code>.
+	 * @throws IllegalArgumentException if the <code>listener</code> is another
+	 *                                  client that is not the client itself.
 	 */
-	public final RakNetClient addListener(RakNetClientListener listener) throws NullPointerException, IllegalArgumentException {
+	public final RakNetClient addListener(RakNetClientListener listener)
+			throws NullPointerException, IllegalArgumentException {
 		if (listener == null) {
 			throw new NullPointerException("Listener cannot be null");
 		} else if (listener instanceof RakNetClient && !this.equals(listener)) {
@@ -282,8 +274,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Removes a {@link RakNetClientListener} from the client.
 	 * 
-	 * @param listener
-	 *            the listener to remove.
+	 * @param listener the listener to remove.
 	 * @return the client.
 	 */
 	public final RakNetClient removeListener(RakNetClientListener listener) {
@@ -312,10 +303,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Calls an event.
 	 * 
-	 * @param event
-	 *            the event to call.
-	 * @throws NullPointerException
-	 *             if the <code>event</code> is <code>null</code>.
+	 * @param event the event to call.
+	 * @throws NullPointerException if the <code>event</code> is <code>null</code>.
 	 * @see RakNetClientListener
 	 */
 	public final void callEvent(Consumer<? super RakNetClientListener> event) throws NullPointerException {
@@ -325,7 +314,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		for (RakNetClientListener listener : listeners) {
 			if (listener.getClass().isAnnotationPresent(ThreadedListener.class)) {
 				ThreadedListener threadedListener = listener.getClass().getAnnotation(ThreadedListener.class);
-				new Thread(RakNetClient.class.getSimpleName() + (threadedListener.name().length() > 0 ? "-" : "") + threadedListener.name() + "-Thread-" + ++eventThreadCount) {
+				new Thread(RakNetClient.class.getSimpleName() + (threadedListener.name().length() > 0 ? "-" : "")
+						+ threadedListener.name() + "-Thread-" + ++eventThreadCount) {
 
 					@Override
 					public void run() {
@@ -356,11 +346,11 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	}
 
 	/**
-	 * Returns the address of the server the client is connecting to or is
-	 * connected to.
+	 * Returns the address of the server the client is connecting to or is connected
+	 * to.
 	 * 
-	 * @return the address of the server the client is connecting to or is
-	 *         connected to, <code>null</code> if the client is disconnected.
+	 * @return the address of the server the client is connecting to or is connected
+	 *         to, <code>null</code> if the client is disconnected.
 	 */
 	public InetSocketAddress getServerAddress() {
 		return this.serverAddress;
@@ -369,11 +359,11 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Returns the address the client is bound to.
 	 * <p>
-	 * This will be the value supplied during client creation until the client
-	 * has connected to a server using the {@link #connect(InetSocketAddress)}
-	 * method. Once the client has connected a server, the bind address will be
-	 * changed to the address returned from the channel's
-	 * {@link Channel#localAddress()} method.
+	 * This will be the value supplied during client creation until the client has
+	 * connected to a server using the {@link #connect(InetSocketAddress)} method.
+	 * Once the client has connected a server, the bind address will be changed to
+	 * the address returned from the channel's {@link Channel#localAddress()}
+	 * method.
 	 * 
 	 * @return the address the client is bound to.
 	 */
@@ -382,8 +372,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	}
 
 	/**
-	 * Returns the IP address the client is bound to based on the address
-	 * returned from {@link #getAddress()}.
+	 * Returns the IP address the client is bound to based on the address returned
+	 * from {@link #getAddress()}.
 	 * 
 	 * @return the IP address the client is bound to.
 	 */
@@ -392,8 +382,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	}
 
 	/**
-	 * Returns the port the client is bound to based on the address returned
-	 * from {@link #getAddress()}.
+	 * Returns the port the client is bound to based on the address returned from
+	 * {@link #getAddress()}.
 	 * 
 	 * @return the port the client is bound to.
 	 */
@@ -417,24 +407,24 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	}
 
 	/**
-	 * Sets the maximum transfer unit sizes that will be used by the client
-	 * during connection.
+	 * Sets the maximum transfer unit sizes that will be used by the client during
+	 * connection.
 	 * 
-	 * @param maximumTransferUnitSizes
-	 *            the maximum transfer unit sizes.
-	 * @throws NullPointerException
-	 *             if the <code>maximumTransferUnitSizes</code> is
-	 *             <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             if the <code>maximumTransferUnitSizes</code> is empty or one
-	 *             of its values is less than {@value RakNet#MINIMUM_MTU_SIZE}.
-	 * @throws RuntimeException
-	 *             if determining the maximum transfer unit for the network card
-	 *             with the client's bind address was a failure or no valid
-	 *             maximum transfer unit could be located for the network card
-	 *             that the client's binding address is bound to.
+	 * @param maximumTransferUnitSizes the maximum transfer unit sizes.
+	 * @throws NullPointerException     if the <code>maximumTransferUnitSizes</code>
+	 *                                  is <code>null</code>.
+	 * @throws IllegalArgumentException if the <code>maximumTransferUnitSizes</code>
+	 *                                  is empty or one of its values is less than
+	 *                                  {@value RakNet#MINIMUM_MTU_SIZE}.
+	 * @throws RuntimeException         if determining the maximum transfer unit for
+	 *                                  the network card with the client's bind
+	 *                                  address was a failure or no valid maximum
+	 *                                  transfer unit could be located for the
+	 *                                  network card that the client's binding
+	 *                                  address is bound to.
 	 */
-	public final void setMaximumTransferUnitSizes(int... maximumTransferUnitSizes) throws NullPointerException, IllegalArgumentException, RuntimeException {
+	public final void setMaximumTransferUnitSizes(int... maximumTransferUnitSizes)
+			throws NullPointerException, IllegalArgumentException, RuntimeException {
 		if (maximumTransferUnitSizes == null) {
 			throw new NullPointerException("Maximum transfer unit sizes cannot be null");
 		} else if (maximumTransferUnitSizes.length <= 0) {
@@ -445,20 +435,24 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		boolean foundTransferUnit = false;
 		int networkCardMaximumTransferUnit = RakNet.getMaximumTransferUnit(bindAddress.getAddress());
 		if (networkCardMaximumTransferUnit < 0) {
-			throw new RuntimeException(
-					"Failed to determine maximum transfer unit" + (bindAddress.getAddress() != null ? " for network card with address " + bindAddress.getAddress() : ""));
+			throw new RuntimeException("Failed to determine maximum transfer unit"
+					+ (bindAddress.getAddress() != null ? " for network card with address " + bindAddress.getAddress()
+							: ""));
 		}
 		ArrayList<MaximumTransferUnit> maximumTransferUnits = new ArrayList<MaximumTransferUnit>();
 		for (int i = 0; i < maximumTransferUnitSizes.length; i++) {
 			int maximumTransferUnitSize = maximumTransferUnitSizes[i];
 			if (maximumTransferUnitSize < RakNet.MINIMUM_MTU_SIZE) {
-				throw new IllegalArgumentException("Maximum transfer unit size must be higher than " + RakNet.MINIMUM_MTU_SIZE);
+				throw new IllegalArgumentException(
+						"Maximum transfer unit size must be higher than " + RakNet.MINIMUM_MTU_SIZE);
 			}
 			if (networkCardMaximumTransferUnit >= maximumTransferUnitSize) {
-				maximumTransferUnits.add(new MaximumTransferUnit(maximumTransferUnitSize, (i * 2) + (i + 1 < maximumTransferUnitSizes.length ? 2 : 1)));
+				maximumTransferUnits.add(new MaximumTransferUnit(maximumTransferUnitSize,
+						(i * 2) + (i + 1 < maximumTransferUnitSizes.length ? 2 : 1)));
 				foundTransferUnit = true;
 			} else {
-				log.warn("Valid maximum transfer unit " + maximumTransferUnitSize + " failed to register due to network card limitations");
+				log.warn("Valid maximum transfer unit " + maximumTransferUnitSize
+						+ " failed to register due to network card limitations");
 			}
 		}
 		this.maximumTransferUnits = maximumTransferUnits.toArray(new MaximumTransferUnit[maximumTransferUnits.size()]);
@@ -479,7 +473,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			registeredMaximumTransferUnitSizes[i] = this.maximumTransferUnits[i].getSize();
 		}
 		String registeredMaximumTransferUnitSizesStr = Arrays.toString(registeredMaximumTransferUnitSizes);
-		log.debug("Set maximum transfer unit sizes to " + registeredMaximumTransferUnitSizesStr.substring(1, registeredMaximumTransferUnitSizesStr.length() - 1));
+		log.debug("Set maximum transfer unit sizes to " + registeredMaximumTransferUnitSizesStr.substring(1,
+				registeredMaximumTransferUnitSizesStr.length() - 1));
 	}
 
 	/**
@@ -496,8 +491,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * Returns whether or not the client is connected.
 	 * <p>
 	 * The client is considered connected if the current state is
-	 * {@link RakNetState#CONNECTED} or has a higher order. This does not apply
-	 * to the {@link #isHandshaking()}, {@link #isLoggedIn()}, or
+	 * {@link RakNetState#CONNECTED} or has a higher order. This does not apply to
+	 * the {@link #isHandshaking()}, {@link #isLoggedIn()}, or
 	 * {@link #isDisconnected()} methods.
 	 * 
 	 * @return <code>true</code> if the client is connected, <code>false</code>
@@ -513,8 +508,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Returns whether or not the client is handshaking.
 	 * 
-	 * @return <code>true</code> if the client is handshaking,
-	 *         <code>false</code> otherwise.
+	 * @return <code>true</code> if the client is handshaking, <code>false</code>
+	 *         otherwise.
 	 */
 	public boolean isHandshaking() {
 		if (peer == null) {
@@ -539,8 +534,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Returns whether or not the client is disconnected.
 	 * 
-	 * @return <code>true</code> if the client is disconnected,
-	 *         <code>false</code> otherwise.
+	 * @return <code>true</code> if the client is disconnected, <code>false</code>
+	 *         otherwise.
 	 */
 	public boolean isDisconnected() {
 		if (peer == null) {
@@ -552,11 +547,11 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * {@inheritDoc}
 	 * 
-	 * @throws IllegalStateException
-	 *             if the client is not connected to a server.
+	 * @throws IllegalStateException if the client is not connected to a server.
 	 */
 	@Override
-	public final EncapsulatedPacket sendMessage(Reliability reliability, int channel, Packet packet) throws IllegalStateException {
+	public final EncapsulatedPacket sendMessage(Reliability reliability, int channel, Packet packet)
+			throws IllegalStateException {
 		if (!this.isConnected()) {
 			throw new IllegalStateException("Cannot send messages while not connected to a server");
 		}
@@ -566,19 +561,16 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Sends a Netty message over the channel raw.
 	 * <p>
-	 * This should be used sparingly, as if it is used incorrectly it could
-	 * break server peers entirely. In order to send a message to a peer, use
-	 * one of the
+	 * This should be used sparingly, as if it is used incorrectly it could break
+	 * server peers entirely. In order to send a message to a peer, use one of the
 	 * {@link com.whirvis.jraknet.peer.RakNetPeer#sendMessage(Reliability, ByteBuf)
 	 * sendMessage()} methods.
 	 * 
-	 * @param buf
-	 *            the buffer to send.
-	 * @param address
-	 *            the address to send the buffer to.
-	 * @throws NullPointerException
-	 *             if the <code>buf</code>, <code>address</code>, or IP address
-	 *             of <code>address</code> are <code>null</code>.
+	 * @param buf     the buffer to send.
+	 * @param address the address to send the buffer to.
+	 * @throws NullPointerException if the <code>buf</code>, <code>address</code>,
+	 *                              or IP address of <code>address</code> are
+	 *                              <code>null</code>.
 	 */
 	public final void sendNettyMessage(ByteBuf buf, InetSocketAddress address) throws NullPointerException {
 		if (buf == null) {
@@ -589,25 +581,23 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			throw new NullPointerException("IP address cannot be null");
 		}
 		channel.writeAndFlush(new DatagramPacket(buf, address));
-		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to " + address);
+		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to "
+				+ address);
 	}
 
 	/**
 	 * Sends a Netty message over the channel raw.
 	 * <p>
-	 * This should be used sparingly, as if it is used incorrectly it could
-	 * break server peers entirely. In order to send a message to a peer, use
-	 * one of the
+	 * This should be used sparingly, as if it is used incorrectly it could break
+	 * server peers entirely. In order to send a message to a peer, use one of the
 	 * {@link com.whirvis.jraknet.peer.RakNetPeer#sendMessage(Reliability, Packet)
 	 * sendMessage()} methods.
 	 * 
-	 * @param packet
-	 *            the packet to send.
-	 * @param address
-	 *            the address to send the packet to.
-	 * @throws NullPointerException
-	 *             if the <code>packet</code>, <code>address</code>, or IP
-	 *             address of <code>address</code> are <code>null</code>.
+	 * @param packet  the packet to send.
+	 * @param address the address to send the packet to.
+	 * @throws NullPointerException if the <code>packet</code>,
+	 *                              <code>address</code>, or IP address of
+	 *                              <code>address</code> are <code>null</code>.
 	 */
 	public final void sendNettyMessage(Packet packet, InetSocketAddress address) throws NullPointerException {
 		if (packet == null) {
@@ -619,19 +609,15 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Sends a Netty message over the channel raw.
 	 * <p>
-	 * This should be used sparingly, as if it is used incorrectly it could
-	 * break server peers entirely. In order to send a message to a peer, use
-	 * one of the
+	 * This should be used sparingly, as if it is used incorrectly it could break
+	 * server peers entirely. In order to send a message to a peer, use one of the
 	 * {@link com.whirvis.jraknet.peer.RakNetPeer#sendMessage(Reliability, int)
 	 * sendMessage()} methods.
 	 * 
-	 * @param packetId
-	 *            the packet ID to send.
-	 * @param address
-	 *            the address to send the packet to.
-	 * @throws NullPointerException
-	 *             if the <code>address</code> or IP address of
-	 *             <code>address</code> are <code>null</code>.
+	 * @param packetId the packet ID to send.
+	 * @param address  the address to send the packet to.
+	 * @throws NullPointerException if the <code>address</code> or IP address of
+	 *                              <code>address</code> are <code>null</code>.
 	 */
 	public final void sendNettyMessage(int packetId, InetSocketAddress address) throws NullPointerException {
 		this.sendNettyMessage(new RakNetPacket(packetId), address);
@@ -640,13 +626,10 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Handles a packet received by the {@link RakNetClientHandler}.
 	 * 
-	 * @param sender
-	 *            the address of the sender.
-	 * @param packet
-	 *            the packet to handle.
-	 * @throws NullPointerException
-	 *             if the <code>sender</code> or <code>packet</code> are
-	 *             <code>null</code>.
+	 * @param sender the address of the sender.
+	 * @param packet the packet to handle.
+	 * @throws NullPointerException if the <code>sender</code> or
+	 *                              <code>packet</code> are <code>null</code>.
 	 */
 	protected final void handleMessage(InetSocketAddress sender, RakNetPacket packet) throws NullPointerException {
 		if (sender == null) {
@@ -669,18 +652,16 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 
 	/**
 	 * Called by the {@link com.whirvis.jraknet.client.RakNetClientHandler
-	 * RakNetClientHander} when it catches a <code>Throwable</code> while
-	 * handling a packet.
+	 * RakNetClientHander} when it catches a <code>Throwable</code> while handling a
+	 * packet.
 	 * 
-	 * @param address
-	 *            the address that caused the exception.
-	 * @param cause
-	 *            the <code>Throwable</code> caught by the handler.
-	 * @throws NullPointerException
-	 *             if the cause <code>address</code> or <code>cause</code> are
-	 *             <code>null</code>.
+	 * @param address the address that caused the exception.
+	 * @param cause   the <code>Throwable</code> caught by the handler.
+	 * @throws NullPointerException if the cause <code>address</code> or
+	 *                              <code>cause</code> are <code>null</code>.
 	 */
-	protected final void handleHandlerException(InetSocketAddress address, Throwable cause) throws NullPointerException {
+	protected final void handleHandlerException(InetSocketAddress address, Throwable cause)
+			throws NullPointerException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
 		} else if (cause == null) {
@@ -701,15 +682,13 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Connects the client to a server.
 	 * 
-	 * @param address
-	 *            the address of the server to connect to.
-	 * @throws NullPointerException
-	 *             if the <code>address</code> or the IP address of the
-	 *             <code>address</code> is <code>null</code>.
-	 * @throws IllegalStateException
-	 *             if the client is currently connected to a server.
-	 * @throws RakNetException
-	 *             if an error occurs during connection or login.
+	 * @param address the address of the server to connect to.
+	 * @throws NullPointerException  if the <code>address</code> or the IP address
+	 *                               of the <code>address</code> is
+	 *                               <code>null</code>.
+	 * @throws IllegalStateException if the client is currently connected to a
+	 *                               server.
+	 * @throws RakNetException       if an error occurs during connection or login.
 	 */
 	public void connect(InetSocketAddress address) throws NullPointerException, IllegalStateException, RakNetException {
 		if (address == null) {
@@ -730,7 +709,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			this.handler = new RakNetClientHandler(this);
 			bootstrap.channel(NioDatagramChannel.class).group(group).handler(handler);
 			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false);
-			this.channel = (bindingAddress != null ? bootstrap.bind(bindingAddress) : bootstrap.bind(0)).sync().channel();
+			this.channel = (bindingAddress != null ? bootstrap.bind(bindingAddress) : bootstrap.bind(0)).sync()
+					.channel();
 			this.bindAddress = (InetSocketAddress) channel.localAddress();
 			this.setMaximumTransferUnitSizes(DEFAULT_TRANSFER_UNIT_SIZES);
 			log.debug("Initialized networking");
@@ -742,9 +722,11 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		MaximumTransferUnit[] units = MaximumTransferUnit.sort(maximumTransferUnits);
 		for (MaximumTransferUnit unit : maximumTransferUnits) {
 			unit.reset();
-			log.debug("Reset maximum transfer unit with size of " + unit.getSize() + " bytes (" + (unit.getSize() * 8) + " bits)");
+			log.debug("Reset maximum transfer unit with size of " + unit.getSize() + " bytes (" + (unit.getSize() * 8)
+					+ " bits)");
 		}
-		this.peerFactory = new PeerFactory(this, address, bootstrap, channel, units[0].getSize(), highestMaximumTransferUnitSize);
+		this.peerFactory = new PeerFactory(this, address, bootstrap, channel, units[0].getSize(),
+				highestMaximumTransferUnitSize);
 		log.debug("Reset maximum transfer units and created peer peerFactory");
 		peerFactory.startAssembly(units);
 
@@ -758,7 +740,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 
 		// Create and start peer update thread
 		RakNetClient client = this;
-		this.peerThread = new Thread(RakNetClient.class.getSimpleName() + "-Peer-Thread-" + Long.toHexString(guid).toUpperCase()) {
+		this.peerThread = new Thread(
+				RakNetClient.class.getSimpleName() + "-Peer-Thread-" + Long.toHexString(guid).toUpperCase()) {
 
 			@Override
 			public void run() {
@@ -793,21 +776,19 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Connects the client to a server.
 	 * 
-	 * @param address
-	 *            the IP address of the server to connect to.
-	 * @param port
-	 *            the port of the server to connect to.
-	 * @throws NullPointerException
-	 *             if the <code>address</code> is <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             if the <code>port</code> is not in between
-	 *             <code>0-65535</code>.
-	 * @throws IllegalStateException
-	 *             if the client is currently connected to a server.
-	 * @throws RakNetException
-	 *             if an error occurs during connection or login.
+	 * @param address the IP address of the server to connect to.
+	 * @param port    the port of the server to connect to.
+	 * @throws NullPointerException     if the <code>address</code> is
+	 *                                  <code>null</code>.
+	 * @throws IllegalArgumentException if the <code>port</code> is not in between
+	 *                                  <code>0-65535</code>.
+	 * @throws IllegalStateException    if the client is currently connected to a
+	 *                                  server.
+	 * @throws RakNetException          if an error occurs during connection or
+	 *                                  login.
 	 */
-	public final void connect(InetAddress address, int port) throws NullPointerException, IllegalArgumentException, IllegalStateException, RakNetException {
+	public final void connect(InetAddress address, int port)
+			throws NullPointerException, IllegalArgumentException, IllegalStateException, RakNetException {
 		if (address == null) {
 			throw new NullPointerException("IP address cannot be null");
 		} else if (port < 0x0000 || port > 0xFFFF) {
@@ -819,24 +800,22 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Connects the client to a server.
 	 * 
-	 * @param host
-	 *            the IP address of the server to connect to.
-	 * @param port
-	 *            the port of the server to connect to.
-	 * @throws NullPointerException
-	 *             if the <code>host</code> is <code>null</code>.
-	 * @throws IllegalArgumentException
-	 *             if the <code>port</code> is not within the range of
-	 *             <code>0-65535</code>.
-	 * @throws UnknownHostException
-	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
-	 * @throws IllegalStateException
-	 *             if the client is currently connected to a server.
-	 * @throws RakNetException
-	 *             if an error occurs during connection or login.
+	 * @param host the IP address of the server to connect to.
+	 * @param port the port of the server to connect to.
+	 * @throws NullPointerException     if the <code>host</code> is
+	 *                                  <code>null</code>.
+	 * @throws IllegalArgumentException if the <code>port</code> is not within the
+	 *                                  range of <code>0-65535</code>.
+	 * @throws UnknownHostException     if no IP address for the <code>host</code>
+	 *                                  could be found, or if a scope_id was
+	 *                                  specified for a global IPv6 address.
+	 * @throws IllegalStateException    if the client is currently connected to a
+	 *                                  server.
+	 * @throws RakNetException          if an error occurs during connection or
+	 *                                  login.
 	 */
-	public final void connect(String host, int port) throws NullPointerException, IllegalArgumentException, UnknownHostException, IllegalStateException, RakNetException {
+	public final void connect(String host, int port) throws NullPointerException, IllegalArgumentException,
+			UnknownHostException, IllegalStateException, RakNetException {
 		if (host == null) {
 			throw new NullPointerException("IP address cannot be null");
 		}
@@ -846,16 +825,15 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Connects the the client to the discovered server.
 	 * 
-	 * @param server
-	 *            the discovered server to connect to.
-	 * @throws NullPointerException
-	 *             if the discovered <code>server</code> is <code>null</code>.
-	 * @throws IllegalStateException
-	 *             if the client is currently connected to a server.
-	 * @throws RakNetException
-	 *             if an error occurs during connection or login.
+	 * @param server the discovered server to connect to.
+	 * @throws NullPointerException  if the discovered <code>server</code> is
+	 *                               <code>null</code>.
+	 * @throws IllegalStateException if the client is currently connected to a
+	 *                               server.
+	 * @throws RakNetException       if an error occurs during connection or login.
 	 */
-	public final void connect(DiscoveredServer server) throws NullPointerException, IllegalStateException, RakNetException {
+	public final void connect(DiscoveredServer server)
+			throws NullPointerException, IllegalStateException, RakNetException {
 		if (server == null) {
 			throw new NullPointerException("Discovered server cannot be null");
 		}
@@ -865,12 +843,9 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Disconnects the client from the server.
 	 * 
-	 * @param reason
-	 *            the reason for disconnection. A <code>null</code> reason will
-	 *            have <code>"Disconnected"</code> be used as the reason
-	 *            instead.
-	 * @throws IllegalStateException
-	 *             if the client is not connected to a server.
+	 * @param reason the reason for disconnection. A <code>null</code> reason will
+	 *               have <code>"Disconnected"</code> be used as the reason instead.
+	 * @throws IllegalStateException if the client is not connected to a server.
 	 */
 	public void disconnect(String reason) throws IllegalStateException {
 		if (peer == null) {
@@ -885,8 +860,10 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			peer.disconnect();
 			this.peer = null;
 		}
-		log.info("Disconnected from server with address " + peer.getAddress() + " with reason \"" + (reason == null ? "Disconnected" : reason) + "\"");
-		this.callEvent(listener -> listener.onDisconnect(this, serverAddress, peer, reason == null ? "Disconnected" : reason));
+		log.info("Disconnected from server with address " + peer.getAddress() + " with reason \""
+				+ (reason == null ? "Disconnected" : reason) + "\"");
+		this.callEvent(
+				listener -> listener.onDisconnect(this, serverAddress, peer, reason == null ? "Disconnected" : reason));
 
 		// Shutdown networking
 		channel.close();
@@ -902,12 +879,9 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Disconnects the client from the server.
 	 * 
-	 * @param reason
-	 *            the reason for disconnection. A <code>null</code> reason will
-	 *            have <code>"Disconnected"</code> be used as the reason
-	 *            instead.
-	 * @throws IllegalStateException
-	 *             if the client is not connected to a server.
+	 * @param reason the reason for disconnection. A <code>null</code> reason will
+	 *               have <code>"Disconnected"</code> be used as the reason instead.
+	 * @throws IllegalStateException if the client is not connected to a server.
 	 */
 	public final void disconnect(Throwable reason) throws IllegalStateException {
 		this.disconnect(reason != null ? RakNet.getStackTrace(reason) : null);
@@ -916,8 +890,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	/**
 	 * Disconnects the client from the server.
 	 * 
-	 * @throws IllegalStateException
-	 *             if the client is not connected to a server.
+	 * @throws IllegalStateException if the client is not connected to a server.
 	 */
 	public final void disconnect() throws IllegalStateException {
 		this.disconnect((String) /* Solves ambiguity */ null);
@@ -925,9 +898,11 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 
 	@Override
 	public String toString() {
-		return "RakNetClient [bindingAddress=" + bindingAddress + ", guid=" + guid + ", timestamp=" + timestamp + ", bindAddress=" + bindAddress + ", maximumTransferUnits="
-				+ Arrays.toString(maximumTransferUnits) + ", highestMaximumTransferUnitSize=" + highestMaximumTransferUnitSize + ", getProtocolVersion()=" + getProtocolVersion()
-				+ ", getTimestamp()=" + getTimestamp() + ", getAddress()=" + getAddress() + ", isConnected()=" + isConnected() + "]";
+		return "RakNetClient [bindingAddress=" + bindingAddress + ", guid=" + guid + ", timestamp=" + timestamp
+				+ ", bindAddress=" + bindAddress + ", maximumTransferUnits=" + Arrays.toString(maximumTransferUnits)
+				+ ", highestMaximumTransferUnitSize=" + highestMaximumTransferUnitSize + ", getProtocolVersion()="
+				+ getProtocolVersion() + ", getTimestamp()=" + getTimestamp() + ", getAddress()=" + getAddress()
+				+ ", isConnected()=" + isConnected() + "]";
 	}
 
 }

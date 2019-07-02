@@ -98,10 +98,9 @@ public class ChatClient extends RakNetClient {
 	/**
 	 * Creates a chat client.
 	 * 
-	 * @param frame
-	 *            the chat frame that client will display to.
-	 * @throws NullPointerException
-	 *             if the chat <code>frame</code> is <code>null</code>.
+	 * @param frame the chat frame that client will display to.
+	 * @throws NullPointerException if the chat <code>frame</code> is
+	 *                              <code>null</code>.
 	 */
 	private ChatClient(ChatFrame frame) throws NullPointerException {
 		if (frame == null) {
@@ -135,13 +134,11 @@ public class ChatClient extends RakNetClient {
 	/**
 	 * Sends a chat message to the specified channel.
 	 * 
-	 * @param message
-	 *            the message to send.
-	 * @param channel
-	 *            the channel to send the message to.
-	 * @throws InvalidChannelException
-	 *             if the <code>channel</code> ID is greater than or equal to
-	 *             {@value RakNet#CHANNEL_COUNT}.
+	 * @param message the message to send.
+	 * @param channel the channel to send the message to.
+	 * @throws InvalidChannelException if the <code>channel</code> ID is greater
+	 *                                 than or equal to
+	 *                                 {@value RakNet#CHANNEL_COUNT}.
 	 */
 	public void sendChatMessage(String message, int channel) throws NullPointerException, InvalidChannelException {
 		if (message == null) {
@@ -158,13 +155,10 @@ public class ChatClient extends RakNetClient {
 	/**
 	 * Requests to change the username.
 	 * 
-	 * @param username
-	 *            the new username.
-	 * @throws IllegalStateException
-	 *             if the client is not connected to a server.
-	 * @throws IllegalArgumentException
-	 *             if the <code>username</code> length is less than or equal
-	 *             <code>0</code>.
+	 * @param username the new username.
+	 * @throws IllegalStateException    if the client is not connected to a server.
+	 * @throws IllegalArgumentException if the <code>username</code> length is less
+	 *                                  than or equal <code>0</code>.
 	 */
 	public void updateUsername(String username) throws IllegalStateException, IllegalArgumentException {
 		if (peer == null) {
@@ -181,13 +175,11 @@ public class ChatClient extends RakNetClient {
 	/**
 	 * Sets the currently displayed channel.
 	 * 
-	 * @param channel
-	 *            the new channel to display.
-	 * @throws InvalidChannelException
-	 *             if the <code>channel</code> ID is greater than or equal to
-	 *             {@value RakNet#CHANNEL_COUNT}.
-	 * @throws NullPointerException
-	 *             if the <code>channel</code> does not exist.
+	 * @param channel the new channel to display.
+	 * @throws InvalidChannelException if the <code>channel</code> ID is greater
+	 *                                 than or equal to
+	 *                                 {@value RakNet#CHANNEL_COUNT}.
+	 * @throws NullPointerException    if the <code>channel</code> does not exist.
 	 */
 	public void setChannel(int channel) throws InvalidChannelException, NullPointerException {
 		if (channel >= RakNet.CHANNEL_COUNT) {
@@ -202,10 +194,9 @@ public class ChatClient extends RakNetClient {
 	/**
 	 * Adds the specified channel to the client.
 	 * 
-	 * @param channel
-	 *            the channel.
-	 * @throws NullPointerException
-	 *             if the <code>channel</code> is <code>null</code>.
+	 * @param channel the channel.
+	 * @throws NullPointerException if the <code>channel</code> is
+	 *                              <code>null</code>.
 	 */
 	public void addChannel(TextChannel channel) throws NullPointerException {
 		if (channel == null) {
@@ -218,8 +209,7 @@ public class ChatClient extends RakNetClient {
 	/**
 	 * Removes the channel from the client.
 	 * 
-	 * @param channel
-	 *            the ID of the channel to remove.
+	 * @param channel the ID of the channel to remove.
 	 */
 	public void removeChannel(int channel) {
 		if (channel < RakNet.CHANNEL_COUNT) {
@@ -241,8 +231,7 @@ public class ChatClient extends RakNetClient {
 	/**
 	 * Called when an error has been caught anywhere in the client.
 	 * 
-	 * @param throwable
-	 *            the caught error.
+	 * @param throwable the caught error.
 	 */
 	public void caughtError(Throwable throwable) {
 		frame.displayError(throwable);
@@ -346,8 +335,7 @@ public class ChatClient extends RakNetClient {
 	/**
 	 * The entry point for the chat client.
 	 * 
-	 * @param args
-	 *            the program arguments. These values are ignored.
+	 * @param args the program arguments. These values are ignored.
 	 */
 	public static void main(String[] args) {
 		ChatClient client = null;

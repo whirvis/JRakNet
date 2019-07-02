@@ -62,8 +62,7 @@ public class ChatPacket extends RakNetPacket {
 	public static final int ID_CHAT_MESSAGE = 0x89;
 
 	/**
-	 * The ID of the {@link UpdateUsernameRequest UPDATE_USERNAME_REQUEST}
-	 * packet.
+	 * The ID of the {@link UpdateUsernameRequest UPDATE_USERNAME_REQUEST} packet.
 	 */
 	public static final int ID_UPDATE_USERNAME_REQUEST = 0x90;
 
@@ -100,11 +99,9 @@ public class ChatPacket extends RakNetPacket {
 	/**
 	 * Creates a chat packet.
 	 * 
-	 * @param id
-	 *            The ID of the packet.
-	 * @throws IllegalArgumentException
-	 *             if the <code>id</code> is not in between
-	 *             <code>{@value RakNetPacket#ID_USER_PACKET_ENUM}-255</code>.
+	 * @param id The ID of the packet.
+	 * @throws IllegalArgumentException if the <code>id</code> is not in between
+	 *                                  <code>{@value RakNetPacket#ID_USER_PACKET_ENUM}-255</code>.
 	 */
 	protected ChatPacket(int id) throws IllegalArgumentException {
 		super(id);
@@ -116,8 +113,7 @@ public class ChatPacket extends RakNetPacket {
 	/**
 	 * Creates a chat packet.
 	 * 
-	 * @param packet
-	 *            the packet to read from and write to.
+	 * @param packet the packet to read from and write to.
 	 */
 	protected ChatPacket(Packet packet) {
 		super(packet);

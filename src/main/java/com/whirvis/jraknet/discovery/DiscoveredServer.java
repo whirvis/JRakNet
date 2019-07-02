@@ -44,8 +44,7 @@ import com.whirvis.jraknet.identifier.Identifier;
 public final class DiscoveredServer {
 
 	/**
-	 * The maximum time a server can not respond to a ping before it is
-	 * forgotten.
+	 * The maximum time a server can not respond to a ping before it is forgotten.
 	 */
 	public static final long SERVER_TIMEOUT_MILLIS = 5000L;
 
@@ -57,18 +56,15 @@ public final class DiscoveredServer {
 	/**
 	 * Constructs a <code>DiscoveredServer</code>.
 	 * 
-	 * @param address
-	 *            the discovered server's address.
-	 * @param external
-	 *            <code>true</code> if the server is an external server,
-	 *            <code>false</code> otherwise.
-	 * @param identifier
-	 *            the server's identifier.
-	 * @throws NullPointerException
-	 *             if the address, IP address, or identifier are
-	 *             <code>null</code>.
+	 * @param address    the discovered server's address.
+	 * @param external   <code>true</code> if the server is an external server,
+	 *                   <code>false</code> otherwise.
+	 * @param identifier the server's identifier.
+	 * @throws NullPointerException if the address, IP address, or identifier are
+	 *                              <code>null</code>.
 	 */
-	protected DiscoveredServer(InetSocketAddress address, boolean external, Identifier identifier) throws NullPointerException {
+	protected DiscoveredServer(InetSocketAddress address, boolean external, Identifier identifier)
+			throws NullPointerException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
 		} else if (address.getAddress() == null) {
@@ -92,26 +88,25 @@ public final class DiscoveredServer {
 	}
 
 	/**
-	 * Returns whether or not the server is an external server or was discovered
-	 * on the local network.
+	 * Returns whether or not the server is an external server or was discovered on
+	 * the local network.
 	 * <p>
-	 * If the server is on the local network yet was added to the external
-	 * server discovery list, this will yield <code>true</code>.
+	 * If the server is on the local network yet was added to the external server
+	 * discovery list, this will yield <code>true</code>.
 	 * 
 	 * @return <code>true</code> if the server is an external server,
-	 *         <code>false</code> if the server was discovered on the local
-	 *         network.
+	 *         <code>false</code> if the server was discovered on the local network.
 	 */
 	public boolean isExternal() {
 		return this.external;
 	}
 
 	/**
-	 * Returns how much time has passed since the server last sent back a
-	 * response in milliseconds.
+	 * Returns how much time has passed since the server last sent back a response
+	 * in milliseconds.
 	 * 
-	 * @return how much time has passed since the server last sent back a
-	 *         response in milliseconds.
+	 * @return how much time has passed since the server last sent back a response
+	 *         in milliseconds.
 	 */
 	public long getTimestamp() {
 		return System.currentTimeMillis() - timestamp;
@@ -120,11 +115,9 @@ public final class DiscoveredServer {
 	/**
 	 * Updates the last time the server sent a response back.
 	 * 
-	 * @param timestamp
-	 *            the new discovery timestamp.
-	 * @throws IllegalArgumentException
-	 *             if the <code>timestamp</code> is less than than the current
-	 *             discovery timestamp.
+	 * @param timestamp the new discovery timestamp.
+	 * @throws IllegalArgumentException if the <code>timestamp</code> is less than
+	 *                                  than the current discovery timestamp.
 	 */
 	public void setTimestamp(long timestamp) throws IllegalArgumentException {
 		if (timestamp < this.timestamp) {
@@ -156,10 +149,9 @@ public final class DiscoveredServer {
 	/**
 	 * Updates the identifier.
 	 * 
-	 * @param identifier
-	 *            the new identifier.
-	 * @throws NullPointerException
-	 *             if the <code>identifier</code> is <code>null</code>.
+	 * @param identifier the new identifier.
+	 * @throws NullPointerException if the <code>identifier</code> is
+	 *                              <code>null</code>.
 	 */
 	protected void setIdentifier(Identifier identifier) throws NullPointerException {
 		if (identifier == null) {
@@ -181,13 +173,14 @@ public final class DiscoveredServer {
 			return false;
 		}
 		DiscoveredServer ds = (DiscoveredServer) o;
-		return Objects.equals(address, ds.address) && Objects.equals(external, ds.external) && Objects.equals(timestamp, ds.timestamp) && Objects.equals(identifier, ds.identifier);
+		return Objects.equals(address, ds.address) && Objects.equals(external, ds.external)
+				&& Objects.equals(timestamp, ds.timestamp) && Objects.equals(identifier, ds.identifier);
 	}
 
 	@Override
 	public String toString() {
-		return "DiscoveredServer [address=" + address + ", external=" + external + ", timestamp=" + timestamp + ", identifier=" + identifier + ", getTimestamp()=" + getTimestamp()
-				+ "]";
+		return "DiscoveredServer [address=" + address + ", external=" + external + ", timestamp=" + timestamp
+				+ ", identifier=" + identifier + ", getTimestamp()=" + getTimestamp() + "]";
 	}
 
 }

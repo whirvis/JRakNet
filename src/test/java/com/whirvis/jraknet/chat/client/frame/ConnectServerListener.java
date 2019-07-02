@@ -53,13 +53,10 @@ public final class ConnectServerListener implements ActionListener {
 	/**
 	 * Constructs a <code>ConnectServerListener</code>.
 	 * 
-	 * @param frame
-	 *            the frame that the listener belongs to.
-	 * @param client
-	 *            the client that the listener will signal.
-	 * @throws NullPointerException
-	 *             if the <code>frame</code> or <code>client</code> are
-	 *             <code>null</code>.
+	 * @param frame  the frame that the listener belongs to.
+	 * @param client the client that the listener will signal.
+	 * @throws NullPointerException if the <code>frame</code> or <code>client</code>
+	 *                              are <code>null</code>.
 	 */
 	protected ConnectServerListener(ChatFrame frame, ChatClient client) throws NullPointerException {
 		if (frame == null) {
@@ -76,7 +73,8 @@ public final class ConnectServerListener implements ActionListener {
 		try {
 			if (frame.connected == false) {
 				frame.setInstructions(ChatClient.INSTRUCTIONS_CONNECTING);
-				client.connect(RakNet.parseAddressPassive(frame.txtServerAddress.getText(), RakNetTest.WHIRVIS_DEVELOPMENT_PORT));
+				client.connect(RakNet.parseAddressPassive(frame.txtServerAddress.getText(),
+						RakNetTest.WHIRVIS_DEVELOPMENT_PORT));
 			} else {
 				frame.txtServerAddress.setText("");
 				frame.txtClientUsername.setText("");

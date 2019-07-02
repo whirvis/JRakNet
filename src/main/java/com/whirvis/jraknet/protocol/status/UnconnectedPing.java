@@ -75,10 +75,10 @@ public class UnconnectedPing extends RakNetPacket implements Failable {
 	/**
 	 * Creates an <code>UNCONNECTED_PING</code> packet to be encoded.
 	 * 
-	 * @param requiresOpenConnections
-	 *            <code>true</code> if the server should only respond if it has
-	 *            open connections available, <code>false</code> if the server
-	 *            should unconditionally respond.
+	 * @param requiresOpenConnections <code>true</code> if the server should only
+	 *                                respond if it has open connections available,
+	 *                                <code>false</code> if the server should
+	 *                                unconditionally respond.
 	 * @see #encode()
 	 */
 	protected UnconnectedPing(boolean requiresOpenConnections) {
@@ -97,9 +97,8 @@ public class UnconnectedPing extends RakNetPacket implements Failable {
 	/**
 	 * Creates an <code>UNCONNECTED_PING</code> packet to be decoded.
 	 * 
-	 * @param packet
-	 *            the original packet whose data will be read from in the
-	 *            {@link #decode()} method.
+	 * @param packet the original packet whose data will be read from in the
+	 *               {@link #decode()} method.
 	 */
 	public UnconnectedPing(Packet packet) {
 		super(packet);

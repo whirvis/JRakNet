@@ -65,9 +65,8 @@ public final class ConnectionBanned extends RakNetPacket {
 	/**
 	 * Creates a <code>CONNECTION_BANNED</code> packet to be decoded.
 	 * 
-	 * @param packet
-	 *            the original packet whose data will be read from in the
-	 *            {@link #decode()} method.
+	 * @param packet the original packet whose data will be read from in the
+	 *               {@link #decode()} method.
 	 */
 	public ConnectionBanned(Packet packet) {
 		super(packet);

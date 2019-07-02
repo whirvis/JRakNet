@@ -59,9 +59,8 @@ public final class UpdateUsernameRequest extends ChatPacket {
 	/**
 	 * Creates an <code>UPDATE_USERNAME_REQUEST</code> packet to be decoded.
 	 * 
-	 * @param packet
-	 *            the original packet whose data will be read from in the
-	 *            {@link #decode()} method.
+	 * @param packet the original packet whose data will be read from in the
+	 *               {@link #decode()} method.
 	 */
 	public UpdateUsernameRequest(Packet packet) {
 		super(packet);

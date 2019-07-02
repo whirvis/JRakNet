@@ -57,9 +57,8 @@ public final class NotAcknowledgedPacket extends AcknowledgedPacket {
 	/**
 	 * Creates a <code>NACK</code> packet to be decoded.
 	 * 
-	 * @param packet
-	 *            the original packet whose data will be read from in the
-	 *            {@link #decode()} method.
+	 * @param packet the original packet whose data will be read from in the
+	 *               {@link #decode()} method.
 	 */
 	public NotAcknowledgedPacket(Packet packet) {
 		super(packet);

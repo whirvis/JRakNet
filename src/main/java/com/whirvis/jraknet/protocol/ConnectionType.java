@@ -53,17 +53,18 @@ import java.util.UUID;
 public final class ConnectionType {
 
 	public static final int MAX_METADATA_VALUES = 0xFF;
-	public static final byte[] MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B, 0x43, (byte) 0x54, (byte) 0x49 };
+	public static final byte[] MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B, 0x43,
+			(byte) 0x54, (byte) 0x49 };
 
 	/**
 	 * Converts the metadata keys and values to a {@link HashMap}.
 	 * 
-	 * @param metadata
-	 *            the metadata keys and values.
+	 * @param metadata the metadata keys and values.
 	 * @return the metadata as a {@link HashMap}.
-	 * @throws IllegalArgumentException
-	 *             if there is a key without a value or if there are more than
-	 *             {@value #MAX_METADATA_VALUES} metadata values.
+	 * @throws IllegalArgumentException if there is a key without a value or if
+	 *                                  there are more than
+	 *                                  {@value #MAX_METADATA_VALUES} metadata
+	 *                                  values.
 	 */
 	public static HashMap<String, String> createMetaData(String... metadata) throws IllegalArgumentException {
 		if (metadata.length % 2 != 0) {
@@ -86,12 +87,14 @@ public final class ConnectionType {
 	/**
 	 * A JRakNet connection.
 	 */
-	public static final ConnectionType JRAKNET = new ConnectionType(UUID.fromString("504da9b2-a31c-4db6-bcc3-18e5fe2fb178"), "JRakNet", "Java", "2.11.4-SNAPSHOT");
+	public static final ConnectionType JRAKNET = new ConnectionType(
+			UUID.fromString("504da9b2-a31c-4db6-bcc3-18e5fe2fb178"), "JRakNet", "Java", "2.11.4-SNAPSHOT");
 
 	/**
 	 * A RakLib connection.
 	 */
-	public static final ConnectionType RAKLIB = new ConnectionType(UUID.fromString("41fd1c2f-de79-4434-8fbc-82f3f71214c6"), "RakLib", "PHP", "0.12.3");
+	public static final ConnectionType RAKLIB = new ConnectionType(
+			UUID.fromString("41fd1c2f-de79-4434-8fbc-82f3f71214c6"), "RakLib", "PHP", "0.12.3");
 
 	private final UUID uuid;
 	private final String name;
@@ -103,27 +106,22 @@ public final class ConnectionType {
 	/**
 	 * Creates a connection type implementation descriptor.
 	 * 
-	 * @param uuid
-	 *            the universally unique ID of the implementation
-	 * @param name
-	 *            the name of the implementation.
-	 * @param language
-	 *            the name of the programming language the implementation was
-	 *            programmed in.
-	 * @param version
-	 *            the version of the implementation.
-	 * @param metadata
-	 *            the metadata of the implementation. Metadata for an
-	 *            implementation can be created using the
-	 *            {@link #createMetaData(String...)} method.
-	 * @param vanilla
-	 *            <code>true</code> if the implementation is a vanilla
-	 *            implementation, <code>false</code> otherwise.
-	 * @throws IllegalArgumentException
-	 *             if there are more than {@value #MAX_METADATA_VALUES} metadata
-	 *             values.
+	 * @param uuid     the universally unique ID of the implementation
+	 * @param name     the name of the implementation.
+	 * @param language the name of the programming language the implementation was
+	 *                 programmed in.
+	 * @param version  the version of the implementation.
+	 * @param metadata the metadata of the implementation. Metadata for an
+	 *                 implementation can be created using the
+	 *                 {@link #createMetaData(String...)} method.
+	 * @param vanilla  <code>true</code> if the implementation is a vanilla
+	 *                 implementation, <code>false</code> otherwise.
+	 * @throws IllegalArgumentException if there are more than
+	 *                                  {@value #MAX_METADATA_VALUES} metadata
+	 *                                  values.
 	 */
-	private ConnectionType(UUID uuid, String name, String language, String version, HashMap<String, String> metadata, boolean vanilla) throws IllegalArgumentException {
+	private ConnectionType(UUID uuid, String name, String language, String version, HashMap<String, String> metadata,
+			boolean vanilla) throws IllegalArgumentException {
 		this.uuid = uuid;
 		this.name = name;
 		this.language = language;
@@ -138,19 +136,14 @@ public final class ConnectionType {
 	/**
 	 * Creates a connection type implementation descriptor.
 	 * 
-	 * @param uuid
-	 *            the universally unique ID of the implementation
-	 * @param name
-	 *            the name of the implementation.
-	 * @param language
-	 *            the name of the programming language the implementation was
-	 *            programmed in.
-	 * @param version
-	 *            the version of the implementation.
-	 * @param metadata
-	 *            the metadata of the implementation. Metadata for an
-	 *            implementation can be created using the
-	 *            {@link #createMetaData(String...)} method.
+	 * @param uuid     the universally unique ID of the implementation
+	 * @param name     the name of the implementation.
+	 * @param language the name of the programming language the implementation was
+	 *                 programmed in.
+	 * @param version  the version of the implementation.
+	 * @param metadata the metadata of the implementation. Metadata for an
+	 *                 implementation can be created using the
+	 *                 {@link #createMetaData(String...)} method.
 	 */
 	public ConnectionType(UUID uuid, String name, String language, String version, HashMap<String, String> metadata) {
 		this(uuid, name, language, version, metadata, false);
@@ -159,14 +152,10 @@ public final class ConnectionType {
 	/**
 	 * Creates a connection type implementation descriptor.
 	 * 
-	 * @param uuid
-	 *            the universally unique ID of the implementation
-	 * @param name
-	 *            the name of the implementation.
-	 * @param language
-	 *            the programming language the implementation.
-	 * @param version
-	 *            the version of the implementation.
+	 * @param uuid     the universally unique ID of the implementation
+	 * @param name     the name of the implementation.
+	 * @param language the programming language the implementation.
+	 * @param version  the version of the implementation.
 	 */
 	public ConnectionType(UUID uuid, String name, String language, String version) {
 		this(uuid, name, language, version, new HashMap<String, String>());
@@ -211,8 +200,7 @@ public final class ConnectionType {
 	/**
 	 * Returns the value of the metadata with the specified key.
 	 * 
-	 * @param key
-	 *            the key of the value to retrieve.
+	 * @param key the key of the value to retrieve.
 	 * @return the value associated with the key, <code>null</code> if there is
 	 *         none.
 	 */
@@ -242,16 +230,15 @@ public final class ConnectionType {
 	}
 
 	/**
-	 * Returns whether or not this implementation and the specified
-	 * implementation are the same implementation based on the UUID.
+	 * Returns whether or not this implementation and the specified implementation
+	 * are the same implementation based on the UUID.
 	 * <p>
 	 * If the UUID of both implementations are <code>null</code> then
-	 * <code>false</code> will be returned since we have no logical way of
-	 * telling if the two implementations are actually the same as there are no
-	 * UUIDs to compare.
+	 * <code>false</code> will be returned since we have no logical way of telling
+	 * if the two implementations are actually the same as there are no UUIDs to
+	 * compare.
 	 * 
-	 * @param connectionType
-	 *            the connection type.
+	 * @param connectionType the connection type.
 	 * @return <code>true</code> if both implementations are the same,
 	 *         <code>false</code> otherwise.
 	 */
@@ -277,13 +264,15 @@ public final class ConnectionType {
 			return false;
 		}
 		ConnectionType ct = (ConnectionType) o;
-		return Objects.equals(uuid, ct.uuid) && Objects.equals(name, ct.name) && Objects.equals(language, ct.language) && Objects.equals(version, ct.version)
-				&& Objects.equals(metadata, ct.metadata) && Objects.equals(vanilla, ct.vanilla);
+		return Objects.equals(uuid, ct.uuid) && Objects.equals(name, ct.name) && Objects.equals(language, ct.language)
+				&& Objects.equals(version, ct.version) && Objects.equals(metadata, ct.metadata)
+				&& Objects.equals(vanilla, ct.vanilla);
 	}
 
 	@Override
 	public String toString() {
-		return "ConnectionType [uuid=" + uuid + ", name=" + name + ", language=" + language + ", version=" + version + ", metadata=" + metadata + ", vanilla=" + vanilla + "]";
+		return "ConnectionType [uuid=" + uuid + ", name=" + name + ", language=" + language + ", version=" + version
+				+ ", metadata=" + metadata + ", vanilla=" + vanilla + "]";
 	}
 
 }
