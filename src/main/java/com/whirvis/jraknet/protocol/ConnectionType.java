@@ -50,7 +50,7 @@ import java.util.UUID;
  * @since JRakNet v2.9.0
  * @see com.whirvis.jraknet.identifier.Identifier Identifier
  */
-public final class ConnectionType {
+public class ConnectionType {
 
 	public static final int MAX_METADATA_VALUES = 0xFF;
 	public static final byte[] MAGIC = new byte[] { (byte) 0x03, (byte) 0x08, (byte) 0x05, (byte) 0x0B, 0x43, (byte) 0x54, (byte) 0x49 };
@@ -86,7 +86,7 @@ public final class ConnectionType {
 	/**
 	 * A JRakNet connection.
 	 */
-	public static final ConnectionType JRAKNET = new ConnectionType(UUID.fromString("504da9b2-a31c-4db6-bcc3-18e5fe2fb178"), "JRakNet", "Java", "2.11.4-SNAPSHOT");
+	public static final ConnectionType JRAKNET = new ConnectionType(UUID.fromString("504da9b2-a31c-4db6-bcc3-18e5fe2fb178"), "JRakNet", "Java", "2.11.5-SNAPSHOT");
 
 	/**
 	 * A RakLib connection.
