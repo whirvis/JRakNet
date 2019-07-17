@@ -35,13 +35,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Utilites for reading and writing both <code>VarInt</code>s and
+ * Utilities for reading and writing both <code>VarInt</code>s and
  * <code>VarLong</code>s.
  * 
  * @author Whirvis T. Wheatley
  * @since JRakNet v2.11.4
  */
-public class VarInt {
+public final class VarInt {
 
 	/**
 	 * The maximum amount of bits a <code>VarInt</code> can be.
@@ -52,6 +52,10 @@ public class VarInt {
 	 * The maximum amount of bits a <code>VarLong</code> can be.
 	 */
 	public static final int VARLONG_MAX_SIZE = 70;
+	
+	private VarInt() {
+		// Static class
+	}
 
 	/**
 	 * Reads a <code>VarInt</code> from the specified {@link InputStream}.

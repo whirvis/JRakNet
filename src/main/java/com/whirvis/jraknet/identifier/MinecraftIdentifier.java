@@ -39,7 +39,7 @@ import com.whirvis.jraknet.RakNet;
  * @author Whirvis T. Wheatley
  * @since JRakNet v1.0.0
  */
-public final class MinecraftIdentifier extends Identifier {
+public class MinecraftIdentifier extends Identifier {
 
 	/**
 	 * The header found at the beginning of a Minecraft identifier.
