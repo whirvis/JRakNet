@@ -6,7 +6,7 @@
 	<!-- Maven coordinates -->
 	<groupId>com.whirvis</groupId>
 	<artifactId>jraknet</artifactId>
-	<version>2.11.5</version> <!-- Don't forget to update the JRakNet ConnectionType! -->
+	<version>2.11.6</version> <!-- Don't forget to update the JRakNet ConnectionType! -->
 	<packaging>jar</packaging>
 
 	<!-- Project information -->
@@ -86,21 +86,21 @@
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
-			<version>2.11.2</version>
+			<version>2.12.0</version>
 		</dependency>
 
 		<!-- Logging implementation -->
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
-			<version>2.11.2</version>
+			<version>2.12.0</version>
 		</dependency>
 
 		<!-- Networking -->
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-handler</artifactId>
-			<version>4.1.36.Final</version>
+			<version>4.1.38.Final</version>
 		</dependency>
 
 		<!-- UPnP (Universal Plug and Play) -->
