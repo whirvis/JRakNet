@@ -29,7 +29,11 @@
  */
 package com.whirvis.jraknet.discovery;
 
+import java.net.InetSocketAddress;
+
 import com.whirvis.jraknet.identifier.Identifier;
+
+import io.netty.buffer.ByteBuf;
 
 /**
  * Used to listen for events that occur in the {@link Discovery} system. In
@@ -70,6 +74,22 @@ public interface DiscoveryListener {
 	 *            the server that was forgotten.
 	 */
 	public default void onServerForgotten(DiscoveredServer server) {
+	}
+
+	/**
+	 * Called when the handler receives a packet after the server has already
+	 * handled it.
+	 * <p>
+	 * This method is useful for handling packets outside of the RakNet
+	 * protocol. All packets received here have already been handled by the
+	 * server.
+	 * 
+	 * @param address
+	 *            the address of the sender.
+	 * @param buf
+	 *            the buffer of the received packet.
+	 */
+	public default void handleNettyMessage(InetSocketAddress address, ByteBuf buf) {
 	}
 
 }

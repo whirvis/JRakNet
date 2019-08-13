@@ -52,7 +52,7 @@ public final class VarInt {
 	 * The maximum amount of bits a <code>VarLong</code> can be.
 	 */
 	public static final int VARLONG_MAX_SIZE = 70;
-	
+
 	private VarInt() {
 		// Static class
 	}

@@ -78,6 +78,7 @@ public final class DiscoveryHandler extends ChannelInboundHandlerAdapter {
 
 			// Check if the address is blocked
 			if (blocked.contains(sender.getAddress())) {
+				datagram.release(); // No longer needed
 				return; // Address blocked
 			}
 
@@ -90,7 +91,11 @@ public final class DiscoveryHandler extends ChannelInboundHandlerAdapter {
 					log.debug("Sent unconnected pong to discovery system");
 				}
 			}
-			datagram.content().release(); // No longer needed
+			Discovery.callEvent(listener -> {
+				datagram.content().readerIndex(0); // Reset index
+				listener.handleNettyMessage(sender, datagram.content());
+			});
+			datagram.release(); // No longer needed
 
 			// No exceptions occurred, release the suspect
 			this.causeAddress = null;
