@@ -142,7 +142,7 @@ public final class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			if (this.isAddressBlocked(sender.getAddress())) {
 				BlockedAddress status = blocked.get(sender.getAddress());
 				if (!status.shouldUnblock()) {
-					datagram.content().release(); // No longer needed
+					datagram.release(); // No longer needed
 					return; // Address still blocked
 				}
 				this.unblockAddress(sender.getAddress());
@@ -150,10 +150,12 @@ public final class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 
 			// Handle the packet and release the buffer
 			server.handleMessage(sender, packet);
-			datagram.content().readerIndex(0); // Reset position
 			log.debug("Sent packet to server and reset datagram buffer read position");
-			server.callEvent(listener -> listener.handleNettyMessage(server, sender, datagram.content()));
-			datagram.content().release(); // No longer needed
+			server.callEvent(listener -> {
+				datagram.content().readerIndex(0); // Reset index
+				listener.handleNettyMessage(server, sender, datagram.content());
+			});
+			datagram.release(); // No longer needed
 			log.debug("Sent datagram buffer to server and released it");
 
 			// No exceptions occurred, release the suspect

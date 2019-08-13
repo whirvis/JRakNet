@@ -85,7 +85,7 @@ public class Packet {
 	 *            the {@link DatagramPacket} to read from.
 	 */
 	public Packet(DatagramPacket datagram) {
-		this(Unpooled.copiedBuffer(datagram.content()));
+		this(datagram.content());
 	}
 
 	/**
@@ -102,11 +102,11 @@ public class Packet {
 	 * Creates a packet from an existing packet's buffer.
 	 * 
 	 * @param packet
-	 *            the packet whose buffer to copy and then read from and write
-	 *            to.
+	 *            the packet whose buffer to reference and then read from and
+	 *            write to.
 	 */
 	public Packet(Packet packet) {
-		this(Unpooled.copiedBuffer(packet.copy()));
+		this(packet.buffer());
 	}
 
 	/**
@@ -1349,11 +1349,20 @@ public class Packet {
 
 	/**
 	 * Returns the packet buffer.
+	 * <p>
+	 * This method will not increase the buffer's reference count via the
+	 * {@link ByteBuf#retain()} method. It is up to the original packet creator
+	 * to release this packet's buffer.
+	 * <p>
+	 * Packet buffers are released when they are actually sent over the internal
+	 * pipelines of either a server or a client. As a result, one does not
+	 * normally need to worry about releasing a packet buffer so long as they
+	 * plan to eventually send the packet.
 	 * 
 	 * @return the packet buffer.
 	 */
 	public ByteBuf buffer() {
-		return buffer.retain();
+		return this.buffer;
 	}
 
 	/**
@@ -1363,6 +1372,17 @@ public class Packet {
 	 */
 	public ByteBuf copy() {
 		return buffer.copy();
+	}
+
+	/**
+	 * Releases the packet's buffer.
+	 * 
+	 * @return <code>true</code> if and only if the reference count became
+	 *         <code>0</code> and this object has been deallocated,
+	 *         <code>false</code> otherwise.
+	 */
+	public boolean release() {
+		return buffer.release();
 	}
 
 	/**
@@ -1462,12 +1482,20 @@ public class Packet {
 
 	/**
 	 * Flips the packet.
+	 * <p>
+	 * Flipping the packet will cause the current internal buffer to be released
+	 * with the a new buffer taking it's place. The newly created buffer will
+	 * retain the reference count of the original buffer before it was
+	 * de-allocated.
 	 * 
 	 * @return the packet.
 	 */
 	public Packet flip() {
 		byte[] data = buffer.array();
+		int increment = buffer.refCnt();
+		buffer.release(increment); // No longer needed
 		this.buffer = Unpooled.copiedBuffer(data);
+		buffer.retain(increment);
 		return this;
 	}
 

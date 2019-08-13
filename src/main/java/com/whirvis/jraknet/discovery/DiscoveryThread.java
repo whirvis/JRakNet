@@ -145,7 +145,7 @@ public final class DiscoveryThread extends Thread {
 					log.error("Failed to encode unconnected ping, disabled discovery system");
 				}
 				for (InetSocketAddress address : Discovery.DISCOVERY_ADDRESSES.keySet()) {
-					channel.writeAndFlush(new DatagramPacket(ping.buffer(), address));
+					channel.writeAndFlush(new DatagramPacket(ping.buffer().retain(), address));
 				}
 				log.debug("Sent unconnected ping to " + Discovery.DISCOVERY_ADDRESSES.size() + " server" + (Discovery.DISCOVERY_ADDRESSES.size() == 1 ? "" : "s"));
 				this.lastPingBroadcast = currentTime;
