@@ -961,8 +961,8 @@ public class RakNetPacket extends Packet {
 	/**
 	 * Returns whether or not the specified packet exists as a RakNet packet.
 	 * 
-	 * @param id
-	 *            the ID of the packet.
+	 * @param packet
+	 *            the packet.
 	 * @return <code>true</code> if the specified packet exists as a RakNet
 	 *         packet, <code>false</code>.
 	 */
