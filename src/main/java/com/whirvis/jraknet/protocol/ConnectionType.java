@@ -86,7 +86,7 @@ public class ConnectionType {
 	/**
 	 * A JRakNet connection.
 	 */
-	public static final ConnectionType JRAKNET = new ConnectionType(UUID.fromString("504da9b2-a31c-4db6-bcc3-18e5fe2fb178"), "JRakNet", "Java", "2.11.8-SNAPSHOT");
+	public static final ConnectionType JRAKNET = new ConnectionType(UUID.fromString("504da9b2-a31c-4db6-bcc3-18e5fe2fb178"), "JRakNet", "Java", "2.11.8");
 
 	/**
 	 * A RakLib connection.
