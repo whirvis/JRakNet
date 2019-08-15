@@ -959,6 +959,21 @@ public class RakNetPacket extends Packet {
 	}
 
 	/**
+	 * Returns whether or not the specified packet exists as a RakNet packet.
+	 * 
+	 * @param id
+	 *            the ID of the packet.
+	 * @return <code>true</code> if the specified packet exists as a RakNet
+	 *         packet, <code>false</code>.
+	 */
+	public static boolean hasPacket(RakNetPacket packet) {
+		if (packet == null) {
+			return false;
+		}
+		return hasPacket(packet.getId());
+	}
+
+	/**
 	 * Returns whether or not a packet with the specified name exists as a
 	 * RakNet packet.
 	 * 
@@ -1015,12 +1030,10 @@ public class RakNetPacket extends Packet {
 	 *            the packet.
 	 * @return the name of the packet, its hexadecimal ID according to
 	 *         {@link RakNet#toHexStringId(int)} if it does not exist.
-	 * @throws NullPointerException
-	 *             if the <code>packet</code> is <code>null</code>.
 	 */
-	public static String getName(RakNetPacket packet) throws NullPointerException {
+	public static String getName(RakNetPacket packet) {
 		if (packet == null) {
-			throw new NullPointerException("Packet cannot be null");
+			return null;
 		}
 		return getName(packet.getId());
 	}

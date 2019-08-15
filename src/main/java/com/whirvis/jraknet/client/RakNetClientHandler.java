@@ -50,7 +50,7 @@ import io.netty.channel.socket.DatagramPacket;
  */
 public final class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 
-	private final Logger log;
+	private final Logger logger;
 	private final RakNetClient client;
 	private InetSocketAddress causeAddress;
 
@@ -61,7 +61,7 @@ public final class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 	 *            the client to send received packets to.
 	 */
 	protected RakNetClientHandler(RakNetClient client) {
-		this.log = LogManager.getLogger(RakNetClientHandler.class.getSimpleName() + "-" + Long.toHexString(client.getGloballyUniqueId()).toUpperCase());
+		this.logger = LogManager.getLogger(RakNetClientHandler.class.getSimpleName() + "[" + Long.toHexString(client.getGloballyUniqueId()).toUpperCase() + "]");
 		this.client = client;
 	}
 
@@ -78,13 +78,16 @@ public final class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 
 			// Handle the packet and release the buffer
 			client.handleMessage(sender, packet);
-			log.debug("Sent packet to client and reset datagram buffer read position");
+			logger.trace("Sent packet to client and reset datagram buffer read position");
 			client.callEvent(listener -> {
 				datagram.content().readerIndex(0); // Reset position
 				listener.handleNettyMessage(client, sender, datagram.content());
 			});
-			datagram.release(); // No longer needed
-			log.debug("Sent datagram buffer to client and released it");
+			if (datagram.release() /* No longer needed */) {
+				logger.trace("Released datagram");
+			} else {
+				logger.error("Memory leak: Failed to deallocate datagram when releasing it");
+			}
 
 			// No exceptions occurred, release the suspect
 			this.causeAddress = null;

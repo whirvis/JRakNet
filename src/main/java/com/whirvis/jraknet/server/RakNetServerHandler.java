@@ -53,7 +53,7 @@ import io.netty.channel.socket.DatagramPacket;
  */
 public final class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 
-	private final Logger log;
+	private final Logger logger;
 	private final RakNetServer server;
 	private final ConcurrentHashMap<InetAddress, BlockedAddress> blocked;
 	private InetSocketAddress causeAddress;
@@ -65,7 +65,7 @@ public final class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 	 *            the server to send received packets to.
 	 */
 	public RakNetServerHandler(RakNetServer server) {
-		this.log = LogManager.getLogger(RakNetServer.class.getSimpleName() + "-" + Long.toHexString(server.getGloballyUniqueId()).toUpperCase());
+		this.logger = LogManager.getLogger(RakNetServer.class.getSimpleName() + "-" + Long.toHexString(server.getGloballyUniqueId()).toUpperCase());
 		this.server = server;
 		this.blocked = new ConcurrentHashMap<InetAddress, BlockedAddress>();
 	}
@@ -97,7 +97,7 @@ public final class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			}
 		}
 		server.callEvent(listener -> listener.onBlock(server, address, reason, time));
-		log.info("Blocked address " + address + " due to \"" + reason + "\" for " + time + " milliseconds");
+		logger.info("Blocked address " + address + " due to \"" + reason + "\" for " + time + " milliseconds");
 	}
 
 	/**
@@ -110,7 +110,7 @@ public final class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 		if (address != null) {
 			if (blocked.remove(address) != null) {
 				server.callEvent(listener -> listener.onUnblock(server, address));
-				log.info("Unblocked address " + address);
+				logger.info("Unblocked address " + address);
 			}
 		}
 	}
@@ -150,13 +150,16 @@ public final class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 
 			// Handle the packet and release the buffer
 			server.handleMessage(sender, packet);
-			log.debug("Sent packet to server and reset datagram buffer read position");
+			logger.debug("Sent packet to server and reset datagram buffer read position");
 			server.callEvent(listener -> {
 				datagram.content().readerIndex(0); // Reset index
 				listener.handleNettyMessage(server, sender, datagram.content());
 			});
-			datagram.release(); // No longer needed
-			log.debug("Sent datagram buffer to server and released it");
+			if (datagram.release() /* No longer needed */) {
+				logger.trace("Released datagram");
+			} else {
+				logger.error("Memory leak: Failed to deallocate datagram when releasing it");
+			}
 
 			// No exceptions occurred, release the suspect
 			this.causeAddress = null;

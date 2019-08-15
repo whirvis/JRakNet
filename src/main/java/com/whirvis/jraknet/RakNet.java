@@ -40,6 +40,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.UUID;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.dosse.upnp.UPnP;
 import com.whirvis.jraknet.identifier.Identifier;
 import com.whirvis.jraknet.protocol.connection.IncompatibleProtocolVersion;
@@ -128,7 +131,7 @@ public final class RakNet {
 		@Override
 		public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 			if (msg instanceof DatagramPacket) {
-				this.packet = new RakNetPacket(((DatagramPacket) msg).content().retain());
+				this.packet = new RakNetPacket(((DatagramPacket) msg).content());
 			}
 		}
 
@@ -138,6 +141,8 @@ public final class RakNet {
 		}
 
 	}
+
+	private static final Logger LOGGER = LogManager.getLogger(RakNet.class);
 
 	/**
 	 * The length of IPv4 addresses.
@@ -323,21 +328,14 @@ public final class RakNet {
 	public static boolean isLocalAddress(InetAddress address) throws NullPointerException {
 		if (address == null) {
 			throw new NullPointerException("IP address cannot be null");
+		} else if (address.isAnyLocalAddress() || address.isLoopbackAddress()) {
+			return true;
 		}
-		byte[] ab = address.getAddress();
-		if (address.isSiteLocalAddress()) {
-			return true; // Local site address
-		} else if (ab.length >= 4) {
-			if (ab[0] == 127 && ab[1] == 0 && ab[2] == 0 && ab[3] >= 1 && ab[3] <= 8) {
-				return true; // Address is in range of 127.0.0.1-127.0.0.8
-			}
-		} else if (ab.length >= 16) {
-			if (ab[0] == 0 && ab[1] == 0 && ab[2] == 0 && ab[3] == 0 && ab[4] == 0 && ab[5] == 0 && ab[6] == 0 && ab[7] == 0 && ab[8] == 0 && ab[9] == 0 && ab[10] == 0
-					&& ab[11] == 0 && ab[12] == 0 && ab[13] == 0 && ab[14] == 0 && ab[15] == 1) {
-				return true; // Address is equal to 0:0:0:0:0:0:0:1
-			}
+		try {
+			return NetworkInterface.getByInetAddress(address) != null;
+		} catch (SocketException e) {
+			return false;
 		}
-		return false;
 	}
 
 	/**
@@ -351,7 +349,8 @@ public final class RakNet {
 	 *             if the <code>host</code> is <code>null</code>.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public static boolean isLocalAddress(String host) throws NullPointerException, UnknownHostException {
 		if (host == null) {
@@ -361,7 +360,7 @@ public final class RakNet {
 	}
 
 	/**
-	 * Returns whether or not the address is a local address.
+	 * Returns whether or not the specified address is a local address.
 	 * 
 	 * @param address
 	 *            the address.
@@ -378,6 +377,71 @@ public final class RakNet {
 			throw new NullPointerException("IP address cannot be null");
 		}
 		return isLocalAddress(address.getAddress());
+	}
+
+	/**
+	 * Returns whether or not the specified address is an address belonging to
+	 * this machine.
+	 * 
+	 * @param address
+	 *            the address.
+	 * @return <code>true</code> if the address is an address belonging to this
+	 *         machine, <code>false</code> otherwise.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> is <code>null</code>.
+	 */
+	public static boolean isSystemAddress(InetAddress address) throws NullPointerException {
+		if (address == null) {
+			throw new NullPointerException("Address cannot be null");
+		}
+		try {
+			return NetworkInterface.getByInetAddress(address) != null;
+		} catch (SocketException e) {
+			return false;
+		}
+	}
+
+	/**
+	 * Returns whether or not the specified IP address is an address belonging
+	 * to this machine.
+	 * 
+	 * @param host
+	 *            the IP address.
+	 * @return <code>true</code> if the address is is an address belonging to
+	 *         this machine, <code>false</code> otherwise.
+	 * @throws NullPointerException
+	 *             if the <code>host</code> is <code>null</code>.
+	 * @throws UnknownHostException
+	 *             if no IP address for the <code>host</code> could be found, or
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
+	 */
+	public static boolean isSystemAddress(String host) throws NullPointerException, UnknownHostException {
+		if (host == null) {
+			throw new NullPointerException("IP address cannot be null");
+		}
+		return isSystemAddress(InetAddress.getByName(host));
+	}
+
+	/**
+	 * Returns whether or not the specified address is an address belonging to
+	 * this machine.
+	 * 
+	 * @param address
+	 *            the address.
+	 * @return <code>true</code> if the address is an address belonging to this
+	 *         machine, <code>false</code> otherwise.
+	 * @throws NullPointerException
+	 *             if the <code>address</code> or the IP address of the
+	 *             <code>address</code> are <code>null</code>.
+	 */
+	public static boolean isSystemAddress(InetSocketAddress address) throws NullPointerException {
+		if (address == null) {
+			throw new NullPointerException("Address cannot be null");
+		} else if (address.getAddress() == null) {
+			throw new NullPointerException("IP address cannot be null");
+		}
+		return isSystemAddress(address.getAddress());
 	}
 
 	/**
@@ -623,7 +687,8 @@ public final class RakNet {
 	 *             if the <code>host</code> is <code>null</code>.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public static boolean isServerOnline(String host, int port) throws NullPointerException, UnknownHostException {
 		if (host == null) {
@@ -705,7 +770,8 @@ public final class RakNet {
 	 *             if the <code>host</code> is <code>null</code>.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public static boolean isServerCompatible(String host, int port) throws NullPointerException, UnknownHostException {
 		if (host == null) {
@@ -783,7 +849,8 @@ public final class RakNet {
 	 *             if the <code>host</code> is <code>null</code>.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public static Identifier getServerIdentifier(String host, int port) throws NullPointerException, UnknownHostException {
 		if (host == null) {
@@ -906,7 +973,11 @@ public final class RakNet {
 		if (maxPacketsPerSecond < 0) {
 			throw new IllegalArgumentException("Max packets per second cannot be negative");
 		}
+		boolean updated = _maxPacketsPerSecond != maxPacketsPerSecond;
 		_maxPacketsPerSecond = maxPacketsPerSecond;
+		if (updated == true) {
+			LOGGER.info("Set max packets per second to " + maxPacketsPerSecond);
+		}
 	}
 
 	/**
@@ -940,7 +1011,11 @@ public final class RakNet {
 		if (systemAddressCount < RAKNET_SYSTEM_ADDRESS_COUNT) {
 			throw new IllegalArgumentException("System address count cannot be less than " + RAKNET_SYSTEM_ADDRESS_COUNT);
 		}
+		boolean updated = _systemAddressCount != systemAddressCount;
 		_systemAddressCount = systemAddressCount;
+		if (updated == true) {
+			LOGGER.info("Set system address count to " + systemAddressCount);
+		}
 	}
 
 	/**
@@ -1063,7 +1138,7 @@ public final class RakNet {
 	 * @return the parsed <code>InetSocketAddress</code>.
 	 * @throws UnknownHostException
 	 *             if the address is in an invalid format, the host cannot be
-	 *             found, or no port was specifed in the <code>address</code>.
+	 *             found, or no port was specified in the <code>address</code>.
 	 */
 	public static InetSocketAddress parseAddress(String address) throws UnknownHostException {
 		try {

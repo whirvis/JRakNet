@@ -95,7 +95,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 
 	private final InetSocketAddress bindingAddress;
 	private final long guid;
-	private final Logger log;
+	private final Logger logger;
 	private final long timestamp;
 	private final ConcurrentLinkedQueue<RakNetClientListener> listeners;
 	private int eventThreadCount;
@@ -123,9 +123,12 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	public RakNetClient(InetSocketAddress address) {
 		this.bindingAddress = address;
 		this.guid = UUID.randomUUID().getMostSignificantBits();
-		this.log = LogManager.getLogger(RakNetClient.class.getSimpleName() + "-" + Long.toHexString(guid).toUpperCase());
+		this.logger = LogManager.getLogger(RakNetClient.class.getSimpleName() + "[" + Long.toHexString(guid).toUpperCase() + "]");
 		this.timestamp = System.currentTimeMillis();
 		this.listeners = new ConcurrentLinkedQueue<RakNetClientListener>();
+		if (this.getClass() != RakNetClient.class && RakNetClientListener.class.isAssignableFrom(this.getClass())) {
+			this.addSelfListener();
+		}
 	}
 
 	/**
@@ -138,7 +141,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * @param port
 	 *            the port the client will bind to during connection. A port of
 	 *            <code>0</code> will have the client give Netty the
-	 *            respsonsibility of choosing the port to bind to.
+	 *            responsibility of choosing the port to bind to.
 	 */
 	public RakNetClient(InetAddress address, int port) {
 		this(new InetSocketAddress(address, port));
@@ -166,10 +169,11 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * @param port
 	 *            the port the client will bind to during connection. A port of
 	 *            <code>0</code> will have the client give Netty the
-	 *            respsonsibility of choosing the port to bind to.
+	 *            responsibility of choosing the port to bind to.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public RakNetClient(String host, int port) throws UnknownHostException {
 		this(InetAddress.getByName(host), port);
@@ -184,7 +188,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *            wildcard address.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public RakNetClient(String host) throws UnknownHostException {
 		this(host, 0);
@@ -196,7 +201,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * @param port
 	 *            the port the client will bind to during creation. A port of
 	 *            <code>0</code> will have the client give Netty the
-	 *            respsonsibility of choosing the port to bind to.
+	 *            responsibility of choosing the port to bind to.
 	 */
 	public RakNetClient(int port) {
 		this(new InetSocketAddress(port));
@@ -259,9 +264,9 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		} else if (!listeners.contains(listener)) {
 			listeners.add(listener);
 			if (listener != this) {
-				log.info("Added listener of class " + listener.getClass().getName());
+				logger.info("Added listener of class " + listener.getClass().getName());
 			} else {
-				log.info("Added self listener");
+				logger.info("Added self listener");
 			}
 		}
 		return this;
@@ -289,9 +294,9 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	public final RakNetClient removeListener(RakNetClientListener listener) {
 		if (listeners.remove(listener)) {
 			if (listener != this) {
-				log.debug("Removed listener of class " + listener.getClass().getName());
+				logger.info("Removed listener of class " + listener.getClass().getName());
 			} else {
-				log.debug("Removed self listener");
+				logger.info("Removed self listener");
 			}
 		}
 		return this;
@@ -322,6 +327,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		if (event == null) {
 			throw new NullPointerException("Event cannot be null");
 		}
+		logger.trace("Called event of class " + event.getClass().getName() + " for " + listeners.size() + " listeners");
 		for (RakNetClientListener listener : listeners) {
 			if (listener.getClass().isAnnotationPresent(ThreadedListener.class)) {
 				ThreadedListener threadedListener = listener.getClass().getAnnotation(ThreadedListener.class);
@@ -458,7 +464,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 				maximumTransferUnits.add(new MaximumTransferUnit(maximumTransferUnitSize, (i * 2) + (i + 1 < maximumTransferUnitSizes.length ? 2 : 1)));
 				foundTransferUnit = true;
 			} else {
-				log.warn("Valid maximum transfer unit " + maximumTransferUnitSize + " failed to register due to network card limitations");
+				logger.warn("Valid maximum transfer unit " + maximumTransferUnitSize + " failed to register due to network card limitations");
 			}
 		}
 		this.maximumTransferUnits = maximumTransferUnits.toArray(new MaximumTransferUnit[maximumTransferUnits.size()]);
@@ -479,7 +485,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			registeredMaximumTransferUnitSizes[i] = this.maximumTransferUnits[i].getSize();
 		}
 		String registeredMaximumTransferUnitSizesStr = Arrays.toString(registeredMaximumTransferUnitSizes);
-		log.debug("Set maximum transfer unit sizes to " + registeredMaximumTransferUnitSizesStr.substring(1, registeredMaximumTransferUnitSizesStr.length() - 1));
+		logger.debug("Set maximum transfer unit sizes to " + registeredMaximumTransferUnitSizesStr.substring(1, registeredMaximumTransferUnitSizesStr.length() - 1));
 	}
 
 	/**
@@ -589,7 +595,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			throw new NullPointerException("IP address cannot be null");
 		}
 		channel.writeAndFlush(new DatagramPacket(buf, address));
-		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to " + address);
+		logger.trace("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to " + address);
 	}
 
 	/**
@@ -664,7 +670,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		} else if (peer != null) {
 			peer.handleInternal(packet);
 		}
-		log.debug("Handled " + RakNetPacket.getName(packet.getId()) + " packet");
+		logger.trace("Handled " + RakNetPacket.getName(packet) + " packet from " + sender);
 	}
 
 	/**
@@ -694,7 +700,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 				this.disconnect(cause);
 			}
 		}
-		log.debug("Handled exception " + cause.getClass().getName() + " caused by address " + address);
+		logger.warn("Handled exception " + cause.getClass().getName() + " caused by address " + address);
 		this.callEvent(listener -> listener.onHandlerException(this, address, cause));
 	}
 
@@ -719,7 +725,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		} else if (this.isConnected()) {
 			throw new IllegalStateException("Client is currently connected to a server");
 		} else if (listeners.isEmpty()) {
-			log.warn("Client has no listeners");
+			logger.warn("Client has no listeners");
 		}
 
 		// Initiate networking
@@ -733,7 +739,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			this.channel = (bindingAddress != null ? bootstrap.bind(bindingAddress) : bootstrap.bind(0)).sync().channel();
 			this.bindAddress = (InetSocketAddress) channel.localAddress();
 			this.setMaximumTransferUnitSizes(DEFAULT_TRANSFER_UNIT_SIZES);
-			log.debug("Initialized networking");
+			logger.debug("Initialized networking");
 		} catch (InterruptedException e) {
 			throw new RakNetException(e);
 		}
@@ -742,10 +748,10 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		MaximumTransferUnit[] units = MaximumTransferUnit.sort(maximumTransferUnits);
 		for (MaximumTransferUnit unit : maximumTransferUnits) {
 			unit.reset();
-			log.debug("Reset maximum transfer unit with size of " + unit.getSize() + " bytes (" + (unit.getSize() * 8) + " bits)");
+			logger.debug("Reset maximum transfer unit with size of " + unit.getSize() + " bytes (" + (unit.getSize() * 8) + " bits)");
 		}
 		this.peerFactory = new PeerFactory(this, address, bootstrap, channel, units[0].getSize(), highestMaximumTransferUnitSize);
-		log.debug("Reset maximum transfer units and created peer peerFactory");
+		logger.debug("Reset maximum transfer units and created peer peerFactory");
 		peerFactory.startAssembly(units);
 
 		// Send connection packet
@@ -754,7 +760,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		connectionRequest.timestamp = System.currentTimeMillis() - timestamp;
 		connectionRequest.encode();
 		peer.sendMessage(Reliability.RELIABLE_ORDERED, connectionRequest);
-		log.debug("Sent connection request to server");
+		logger.debug("Sent connection request to server");
 
 		// Create and start peer update thread
 		RakNetClient client = this;
@@ -786,8 +792,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 
 		};
 		peerThread.start();
-		log.debug("Created and started peer update thread");
-		log.info("Connected to server with address " + address);
+		logger.debug("Created and started peer update thread");
+		logger.info("Connected to server with address " + address);
 	}
 
 	/**
@@ -830,7 +836,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *             <code>0-65535</code>.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 * @throws IllegalStateException
 	 *             if the client is currently connected to a server.
 	 * @throws RakNetException
@@ -885,7 +892,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			peer.disconnect();
 			this.peer = null;
 		}
-		log.info("Disconnected from server with address " + peer.getAddress() + " with reason \"" + (reason == null ? "Disconnected" : reason) + "\"");
+		logger.info("Disconnected from server with address " + peer.getAddress() + (reason != null ? " with reason \"" + reason + "\"" : ""));
 		this.callEvent(listener -> listener.onDisconnect(this, serverAddress, peer, reason == null ? "Disconnected" : reason));
 
 		// Shutdown networking
@@ -896,7 +903,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		this.handler = null;
 		this.group = null;
 		this.bootstrap = null;
-		log.debug("Shutdown networking");
+		logger.debug("Shutdown networking");
 	}
 
 	/**
