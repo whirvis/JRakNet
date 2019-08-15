@@ -31,6 +31,7 @@ package com.whirvis.jraknet.discovery;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
@@ -64,7 +65,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
  */
 public final class DiscoveryThread extends Thread {
 
-	private final Logger log;
+	private final Logger logger;
 	private final Bootstrap bootstrap;
 	private final NioEventLoopGroup group;
 	private final DiscoveryHandler handler;
@@ -75,7 +76,7 @@ public final class DiscoveryThread extends Thread {
 	 * Allocates a discovery thread.
 	 */
 	protected DiscoveryThread() {
-		this.log = LogManager.getLogger(DiscoveryThread.class);
+		this.logger = LogManager.getLogger(DiscoveryThread.class);
 		this.bootstrap = new Bootstrap();
 		this.group = new NioEventLoopGroup();
 		this.handler = new DiscoveryHandler();
@@ -86,9 +87,9 @@ public final class DiscoveryThread extends Thread {
 		} catch (InterruptedException e) {
 			this.interrupt(); // Cause thread to immediately break out of loop
 			Discovery.setDiscoveryMode(DiscoveryMode.DISABLED);
-			log.error("Failed to bind channel necessary for broadcasting pings, disabled discovery system");
+			logger.error("Failed to bind channel necessary for broadcasting pings, disabled discovery system");
 		}
-		this.setName(log.getName());
+		this.setName(logger.getName());
 	}
 
 	/**
@@ -101,7 +102,7 @@ public final class DiscoveryThread extends Thread {
 	 */
 	@Override
 	public void run() throws IllegalStateException {
-		log.debug("Started discovery thread");
+		logger.debug("Started discovery thread");
 		while (!Discovery.LISTENERS.isEmpty() && !Discovery.DISCOVERY_ADDRESSES.isEmpty() && Discovery.discoveryMode != DiscoveryMode.DISABLED && !this.isInterrupted()) {
 			if (Discovery.thread != this) {
 				/*
@@ -130,7 +131,9 @@ public final class DiscoveryThread extends Thread {
 			}
 			Discovery.DISCOVERED.keySet().removeAll(forgottenServers);
 			if (!forgottenServers.isEmpty()) {
-				log.debug("Forgot " + forgottenServers.size() + " server" + (forgottenServers.size() == 1 ? "" : "s"));
+				String forgottenServersStr = Arrays.toString(forgottenServers.toArray(new InetSocketAddress[forgottenServers.size()]));
+				logger.debug("Forgot " + forgottenServers.size() + " server" + (forgottenServers.size() == 1 ? "" : "s") + " with address"
+						+ (forgottenServers.size() == 1 ? "" : "es") + " " + forgottenServersStr.substring(1, forgottenServersStr.length() - 1));
 			}
 
 			// Broadcast ping to local and external servers
@@ -142,12 +145,12 @@ public final class DiscoveryThread extends Thread {
 				if (ping.failed()) {
 					this.interrupt();
 					Discovery.setDiscoveryMode(DiscoveryMode.DISABLED);
-					log.error("Failed to encode unconnected ping, disabled discovery system");
+					logger.error("Failed to encode unconnected ping, disabled discovery system");
 				}
 				for (InetSocketAddress address : Discovery.DISCOVERY_ADDRESSES.keySet()) {
 					channel.writeAndFlush(new DatagramPacket(ping.buffer().retain(), address));
 				}
-				log.debug("Sent unconnected ping to " + Discovery.DISCOVERY_ADDRESSES.size() + " server" + (Discovery.DISCOVERY_ADDRESSES.size() == 1 ? "" : "s"));
+				logger.trace("Sent unconnected ping to " + Discovery.DISCOVERY_ADDRESSES.size() + " server" + (Discovery.DISCOVERY_ADDRESSES.size() == 1 ? "" : "s"));
 				this.lastPingBroadcast = currentTime;
 			}
 		}
@@ -164,7 +167,7 @@ public final class DiscoveryThread extends Thread {
 		this.channel = null;
 		if (Discovery.thread == this) {
 			Discovery.thread = null;
-			log.debug("Terminated discovery thread");
+			logger.debug("Terminated discovery thread");
 		}
 	}
 

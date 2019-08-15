@@ -611,9 +611,9 @@ public class Packet {
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found,
 	 *             the family for an IPv6 address was not
-	 *             {@value RakNet#AF_INET6}, a scope_id was specified for a
-	 *             global IPv6 address, or the address version is an unknown
-	 *             version.
+	 *             {@value RakNet#AF_INET6}, a <code>scope_id</code> was
+	 *             specified for a global IPv6 address, or the address version
+	 *             is an unknown version.
 	 */
 	public final InetSocketAddress readAddress() throws IndexOutOfBoundsException, UnknownHostException {
 		short version = this.readUnsignedByte();
@@ -1219,8 +1219,8 @@ public class Packet {
 	 *             <code>null</code>.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, if
-	 *             a scope_id was specified for a global IPv6 address, or the
-	 *             length of the address is not either
+	 *             a <code>scope_id</code> was specified for a global IPv6
+	 *             address, or the length of the address is not either
 	 *             {@value RakNet#IPV4_ADDRESS_LENGTH} or
 	 *             {@value RakNet#IPV6_ADDRESS_LENGTH} <code>byte</code>s.
 	 */
@@ -1265,8 +1265,8 @@ public class Packet {
 	 *             if the port is not in between <code>0-65535</code>.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could not be
-	 *             found, or if a scope_id was specified for a global IPv6
-	 *             address.
+	 *             found, or if a <code>scope_id</code> was specified for a
+	 *             global IPv6 address.
 	 */
 	public final Packet writeAddress(InetAddress host, int port) throws NullPointerException, IllegalArgumentException, UnknownHostException {
 		if (host == null) {
@@ -1291,8 +1291,8 @@ public class Packet {
 	 *             if the port is not in between <code>0-65535</code>.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could not be
-	 *             found, or if a scope_id was specified for a global IPv6
-	 *             address.
+	 *             found, or if a <code>scope_id</code> was specified for a
+	 *             global IPv6 address.
 	 */
 	public final Packet writeAddress(String host, int port) throws NullPointerException, IllegalArgumentException, UnknownHostException {
 		if (host == null) {

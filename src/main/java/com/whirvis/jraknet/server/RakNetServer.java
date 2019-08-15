@@ -34,6 +34,7 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -99,7 +100,7 @@ public class RakNetServer implements RakNetServerListener {
 
 	private final InetSocketAddress bindingAddress;
 	private final long guid;
-	private final Logger log;
+	private final Logger logger;
 	private final long pongId;
 	private final long timestamp;
 	private final int maximumTransferUnit;
@@ -166,7 +167,7 @@ public class RakNetServer implements RakNetServerListener {
 		UUID uuid = UUID.randomUUID();
 		this.bindingAddress = address;
 		this.guid = uuid.getMostSignificantBits();
-		this.log = LogManager.getLogger(RakNetServer.class.getSimpleName() + "-" + Long.toHexString(guid).toUpperCase());
+		this.logger = LogManager.getLogger(RakNetServer.class.getSimpleName() + "[" + Long.toHexString(guid).toUpperCase() + "]");
 		this.pongId = uuid.getLeastSignificantBits();
 		this.timestamp = System.currentTimeMillis();
 		this.maxConnections = maxConnections;
@@ -176,6 +177,9 @@ public class RakNetServer implements RakNetServerListener {
 		this.listeners = new ConcurrentLinkedQueue<RakNetServerListener>();
 		this.clients = new ConcurrentHashMap<InetSocketAddress, RakNetClientPeer>();
 		this.banned = new ConcurrentLinkedQueue<InetAddress>();
+		if (this.getClass() != RakNetServer.class && RakNetServerListener.class.isAssignableFrom(this.getClass())) {
+			this.addSelfListener();
+		}
 	}
 
 	/**
@@ -421,8 +425,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *            pings, even if server broadcasting is enabled.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>bindAddress</code> could be
-	 *             found, or if a scope_id was specified for a global IPv6
-	 *             address.
+	 *             found, or if a <code>scope_id</code> was specified for a
+	 *             global IPv6 address.
 	 * @throws NullPointerException
 	 *             if the address is <code>null</code>.
 	 * @throws IllegalArgumentException
@@ -457,8 +461,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *            pings, even if server broadcasting is enabled.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>bindAddress</code> could be
-	 *             found, or if a scope_id was specified for a global IPv6
-	 *             address.
+	 *             found, or if a <code>scope_id</code> was specified for a
+	 *             global IPv6 address.
 	 * @throws NullPointerException
 	 *             if the address is <code>null</code>.
 	 * @throws IllegalArgumentException
@@ -495,8 +499,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *            number of connections.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>bindAddress</code> could be
-	 *             found, or if a scope_id was specified for a global IPv6
-	 *             address.
+	 *             found, or if a <code>scope_id</code> was specified for a
+	 *             global IPv6 address.
 	 * @throws NullPointerException
 	 *             if the address is <code>null</code>.
 	 * @throws IllegalArgumentException
@@ -525,8 +529,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *            number of connections.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>bindAddress</code> could be
-	 *             found, or if a scope_id was specified for a global IPv6
-	 *             address.
+	 *             found, or if a <code>scope_id</code> was specified for a
+	 *             global IPv6 address.
 	 * @throws NullPointerException
 	 *             if the address is <code>null</code>.
 	 * @throws IllegalArgumentException
@@ -760,7 +764,11 @@ public class RakNetServer implements RakNetServerListener {
 		if (maxConnections < 0 && maxConnections != INFINITE_CONNECTIONS) {
 			throw new IllegalArgumentException("Maximum connections must be greater than or equal to 0 or " + INFINITE_CONNECTIONS + " for infinite connections");
 		}
+		boolean updated = this.maxConnections != maxConnections;
 		this.maxConnections = maxConnections;
+		if (updated == true) {
+			logger.info("Set maximum connections to " + (maxConnections == INFINITE_CONNECTIONS ? "infinite" : maxConnections));
+		}
 	}
 
 	/**
@@ -774,7 +782,7 @@ public class RakNetServer implements RakNetServerListener {
 		boolean wasBroadcasting = this.broadcastingEnabled;
 		this.broadcastingEnabled = enabled;
 		if (wasBroadcasting != enabled) {
-			log.info((enabled ? "Enabled" : "Disabled") + " broadcasting");
+			logger.info((enabled ? "Enabled" : "Disabled") + " broadcasting");
 		}
 	}
 
@@ -804,11 +812,14 @@ public class RakNetServer implements RakNetServerListener {
 	 *            the new identifier.
 	 */
 	public final void setIdentifier(Identifier identifier) {
+		boolean updated = !Objects.equals(this.identifier, identifier);
 		this.identifier = identifier;
-		if (identifier != null) {
-			log.info("Set identifier to \"" + identifier.build() + "\"");
-		} else {
-			log.info("Removed identifier");
+		if (updated == true) {
+			if (identifier != null) {
+				logger.info("Set identifier to \"" + identifier.build() + "\"");
+			} else {
+				logger.info("Removed identifier");
+			}
 		}
 	}
 
@@ -835,9 +846,9 @@ public class RakNetServer implements RakNetServerListener {
 		} else if (!listeners.contains(listener)) {
 			listeners.add(listener);
 			if (listener != this) {
-				log.info("Added listener of class " + listener.getClass().getName());
+				logger.info("Added listener of class " + listener.getClass().getName());
 			} else {
-				log.info("Added self listener");
+				logger.info("Added self listener");
 			}
 		}
 		return this;
@@ -863,7 +874,11 @@ public class RakNetServer implements RakNetServerListener {
 	 */
 	public final RakNetServer removeListener(RakNetServerListener listener) {
 		if (listeners.remove(listener)) {
-			log.info("Removed listener of class " + listener.getClass().getName());
+			if (listener != this) {
+				logger.info("Removed listener of class " + listener.getClass().getName());
+			} else {
+				logger.info("Removed self listener");
+			}
 		}
 		return this;
 	}
@@ -892,6 +907,7 @@ public class RakNetServer implements RakNetServerListener {
 		if (event == null) {
 			throw new NullPointerException("Event cannot be null");
 		}
+		logger.trace("Called event of class " + event.getClass().getName() + " for " + listeners.size() + " listeners");
 		for (RakNetServerListener listener : listeners) {
 			if (listener.getClass().isAnnotationPresent(ThreadedListener.class)) {
 				ThreadedListener threadedListener = listener.getClass().getAnnotation(ThreadedListener.class);
@@ -973,7 +989,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *         the server, <code>false</code> otherwise.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public final boolean hasClient(String host, int port) throws UnknownHostException {
 		return this.hasClient(InetAddress.getByName(host), port);
@@ -1009,7 +1026,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *         the server, <code>false</code> otherwise.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public final boolean hasClient(String host) throws UnknownHostException {
 		return this.hasClient(InetAddress.getByName(host));
@@ -1090,7 +1108,8 @@ public class RakNetServer implements RakNetServerListener {
 	 * @return the client with the address, <code>null</code> if there is none.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public final RakNetClientPeer getClient(String host, int port) throws UnknownHostException {
 		if (host != null) {
@@ -1107,7 +1126,8 @@ public class RakNetServer implements RakNetServerListener {
 	 * @return the clients with the IP address.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public final RakNetClientPeer[] getClient(String host) throws UnknownHostException {
 		ArrayList<RakNetClientPeer> peers = new ArrayList<RakNetClientPeer>();
@@ -1896,7 +1916,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *            the IP address.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 * @return <code>true</code> if the client address is banned,
 	 *         <code>false</code> otherwise.
 	 */
@@ -1917,6 +1938,7 @@ public class RakNetServer implements RakNetServerListener {
 			throw new NullPointerException("IP address cannot be null");
 		} else if (!banned.contains(address)) {
 			banned.add(address);
+			logger.debug("Banned IP address " + address);
 		}
 	}
 
@@ -1929,7 +1951,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the <code>host</code> is <code>null</code>.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public final void ban(String host) throws NullPointerException, UnknownHostException {
 		if (host == null) {
@@ -1945,7 +1968,9 @@ public class RakNetServer implements RakNetServerListener {
 	 *            the IP address to unban.
 	 */
 	public final void unban(InetAddress address) {
-		banned.remove(address);
+		if (banned.remove(address)) {
+			logger.debug("Unbanned IP address " + address);
+		}
 	}
 
 	/**
@@ -1955,7 +1980,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *            the IP address to unban.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public final void unban(String host) throws UnknownHostException {
 		if (host != null) {
@@ -1981,7 +2007,7 @@ public class RakNetServer implements RakNetServerListener {
 			return false; // No client to disconnect
 		}
 		peer.disconnect();
-		log.debug("Disconnected client with address " + address + " for \"" + (reason == null ? "Disconnected" : reason) + "\"");
+		logger.debug("Disconnected client with address " + address + " for \"" + (reason == null ? "Disconnected" : reason) + "\"");
 		this.callEvent(listener -> listener.onDisconnect(this, address, peer, reason == null ? "Disconnected" : reason));
 		return true;
 	}
@@ -2085,7 +2111,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *         otherwise.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public final boolean disconnect(String host, int port, String reason) throws UnknownHostException {
 		if (host == null) {
@@ -2109,7 +2136,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *         otherwise.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public final boolean disconnect(String host, int port, Throwable reason) throws UnknownHostException {
 		if (host == null) {
@@ -2129,7 +2157,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *         otherwise.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public final boolean disconnect(String host, int port) throws UnknownHostException {
 		return this.disconnect(host, port, (String) /* Solves ambiguity */ null);
@@ -2186,7 +2215,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *         otherwise.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public final boolean disconnect(String host, String reason) throws UnknownHostException {
 		if (host == null) {
@@ -2208,7 +2238,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *         otherwise.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public final boolean disconnect(String host, Throwable reason) throws UnknownHostException {
 		return this.disconnect(host, reason == null ? null : RakNet.getStackTrace(reason));
@@ -2223,7 +2254,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *         otherwise.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public final boolean disconnect(String host) throws UnknownHostException {
 		return this.disconnect(host, (String) /* Solves ambiguity */ null);
@@ -2424,7 +2456,7 @@ public class RakNetServer implements RakNetServerListener {
 		} else if (this.hasClient(address)) {
 			this.disconnect(address, RakNet.getStackTrace(cause));
 		}
-		log.warn("Handled exception " + cause.getClass().getName() + " caused by address " + address);
+		logger.warn("Handled exception " + cause.getClass().getName() + " caused by address " + address);
 		this.callEvent(listener -> listener.onHandlerException(this, address, cause));
 	}
 
@@ -2462,7 +2494,7 @@ public class RakNetServer implements RakNetServerListener {
 					if (!pong.failed()) {
 						this.sendNettyMessage(pong, sender);
 					} else {
-						log.error(pong.getClass().getSimpleName() + " packet failed to encode");
+						logger.error(pong.getClass().getSimpleName() + " packet failed to encode");
 					}
 				}
 			}
@@ -2516,7 +2548,7 @@ public class RakNetServer implements RakNetServerListener {
 				}
 			}
 		}
-		log.debug("Handled " + RakNetPacket.getName(packet.getId()) + " packet");
+		logger.trace("Handled " + RakNetPacket.getName(packet) + " packet from " + sender);
 	}
 
 	/**
@@ -2577,7 +2609,7 @@ public class RakNetServer implements RakNetServerListener {
 			throw new NullPointerException("IP address cannot be null");
 		}
 		channel.writeAndFlush(new DatagramPacket(buf, address));
-		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to " + address);
+		logger.trace("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to " + address);
 	}
 
 	/**
@@ -2647,7 +2679,7 @@ public class RakNetServer implements RakNetServerListener {
 		if (running == true) {
 			throw new IllegalStateException("Server is already running");
 		} else if (listeners.isEmpty()) {
-			log.warn("Server has no listeners");
+			logger.warn("Server has no listeners");
 		}
 		try {
 			this.bootstrap = new Bootstrap();
@@ -2662,7 +2694,7 @@ public class RakNetServer implements RakNetServerListener {
 			this.channel = (bindingAddress != null ? bootstrap.bind(bindingAddress) : bootstrap.bind(0)).sync().channel();
 			this.bindAddress = (InetSocketAddress) channel.localAddress();
 			this.running = true;
-			log.debug("Created and bound bootstrap");
+			logger.debug("Created and bound bootstrap");
 
 			// Create and start peer update thread
 			RakNetServer server = this;
@@ -2717,13 +2749,13 @@ public class RakNetServer implements RakNetServerListener {
 
 			};
 			peerThread.start();
-			log.debug("Created and started peer update thread");
+			logger.debug("Created and started peer update thread");
 			this.callEvent(listener -> listener.onStart(this));
 		} catch (InterruptedException e) {
 			this.running = false;
 			throw new RakNetException(e);
 		}
-		log.info("Started server");
+		logger.info("Started server");
 	}
 
 	/**
@@ -2752,7 +2784,7 @@ public class RakNetServer implements RakNetServerListener {
 		// Stop server
 		this.running = false;
 		peerThread.interrupt();
-		log.info("Shutdown server");
+		logger.info("Shutdown server" + (reason != null ? " for \"" + reason + "\"" : ""));
 
 		// Shutdown networking
 		channel.close();
@@ -2761,7 +2793,7 @@ public class RakNetServer implements RakNetServerListener {
 		this.handler = null;
 		this.group = null;
 		this.bootstrap = null;
-		log.debug("Shutdown networking");
+		logger.debug("Shutdown networking");
 		this.callEvent(listener -> listener.onShutdown(this));
 	}
 
@@ -2796,7 +2828,7 @@ public class RakNetServer implements RakNetServerListener {
 
 	@Override
 	public String toString() {
-		return "RakNetServer [bindingAddress=" + bindingAddress + ", guid=" + guid + ", log=" + log + ", pongId=" + pongId + ", timestamp=" + timestamp + ", maximumTransferUnit="
+		return "RakNetServer [bindingAddress=" + bindingAddress + ", guid=" + guid + ", pongId=" + pongId + ", timestamp=" + timestamp + ", maximumTransferUnit="
 				+ maximumTransferUnit + ", maxConnections=" + maxConnections + ", broadcastingEnabled=" + broadcastingEnabled + ", identifier=" + identifier + ", bindAddress="
 				+ bindAddress + ", running=" + running + ", getProtocolVersion()=" + getProtocolVersion() + ", getTimestamp()=" + getTimestamp() + ", getAddress()=" + getAddress()
 				+ ", getClientCount()=" + getClientCount() + "]";

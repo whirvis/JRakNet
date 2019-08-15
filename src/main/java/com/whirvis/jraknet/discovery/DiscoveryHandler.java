@@ -53,7 +53,7 @@ import io.netty.channel.socket.DatagramPacket;
  */
 public final class DiscoveryHandler extends ChannelInboundHandlerAdapter {
 
-	private Logger log;
+	private Logger logger;
 	private final ArrayList<InetAddress> blocked;
 	private InetSocketAddress causeAddress;
 
@@ -61,7 +61,7 @@ public final class DiscoveryHandler extends ChannelInboundHandlerAdapter {
 	 * Creates a discovery system Netty handler.
 	 */
 	protected DiscoveryHandler() {
-		this.log = LogManager.getLogger(DiscoveryHandler.class);
+		this.logger = LogManager.getLogger(DiscoveryHandler.class);
 		this.blocked = new ArrayList<InetAddress>();
 	}
 
@@ -88,14 +88,18 @@ public final class DiscoveryHandler extends ChannelInboundHandlerAdapter {
 				pong.decode();
 				if (!pong.failed()) {
 					Discovery.updateDiscoveryData(sender, pong);
-					log.debug("Sent unconnected pong to discovery system");
+					logger.trace("Sent unconnected pong to discovery system");
 				}
 			}
 			Discovery.callEvent(listener -> {
 				datagram.content().readerIndex(0); // Reset index
 				listener.handleNettyMessage(sender, datagram.content());
 			});
-			datagram.release(); // No longer needed
+			if (datagram.release() /* No longer needed */) {
+				logger.trace("Released datagram");
+			} else {
+				logger.error("Memory leak: Failed to deallocate datagram when releasing it");
+			}
 
 			// No exceptions occurred, release the suspect
 			this.causeAddress = null;
@@ -106,10 +110,10 @@ public final class DiscoveryHandler extends ChannelInboundHandlerAdapter {
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 		if (!blocked.contains(causeAddress.getAddress())) {
 			blocked.add(causeAddress.getAddress());
-			log.warn("Blocked address " + causeAddress.getAddress() + " that caused " + cause.getClass().getSimpleName()
+			logger.warn("Blocked address " + causeAddress.getAddress() + " that caused " + cause.getClass().getSimpleName()
 					+ " to be thrown, discovering servers from it will no longer be possible");
 		} else {
-			log.error("Blocked address still cause exception to be thrown", cause);
+			logger.error("Blocked address still cause exception to be thrown", cause);
 		}
 	}
 

@@ -60,6 +60,8 @@ import com.whirvis.jraknet.protocol.status.UnconnectedPong;
  */
 public final class Discovery {
 
+	private static final Logger LOGGER = LogManager.getLogger(Discovery.class);
+
 	/**
 	 * The address to broadcast to in order to discover servers on the local
 	 * network.
@@ -75,11 +77,6 @@ public final class Discovery {
 	 * The server is a server discovered on an external network.
 	 */
 	private static final boolean EXTERNAL_SERVER = true;
-
-	/**
-	 * The logger used by the discovery system.
-	 */
-	private static final Logger LOG = LogManager.getLogger(Discovery.class);
 
 	/**
 	 * The timestamp used in pings sent by the discovery system.
@@ -164,7 +161,7 @@ public final class Discovery {
 			thread = new DiscoveryThread();
 			thread.start();
 		}
-		LOG.debug("Set discovery mode to " + mode + (mode == DiscoveryMode.DISABLED ? ", forgot all servers" : ""));
+		LOGGER.debug("Set discovery mode to " + mode + (mode == DiscoveryMode.DISABLED ? ", forgot all servers" : ""));
 	}
 
 	/**
@@ -183,7 +180,7 @@ public final class Discovery {
 			throw new NullPointerException("Listener cannot be null");
 		} else if (!LISTENERS.contains(listener)) {
 			LISTENERS.add(listener);
-			LOG.debug("Added listener of class " + listener.getClass().getName());
+			LOGGER.debug("Added listener of class " + listener.getClass().getName());
 			if (thread == null) {
 				thread = new DiscoveryThread();
 				thread.start();
@@ -199,7 +196,7 @@ public final class Discovery {
 	 */
 	public static void removeListener(DiscoveryListener listener) {
 		if (LISTENERS.remove(listener)) {
-			LOG.debug("Removed listener of class " + listener.getClass().getName());
+			LOGGER.debug("Removed listener of class " + listener.getClass().getName());
 		}
 	}
 
@@ -216,6 +213,7 @@ public final class Discovery {
 		if (event == null) {
 			throw new NullPointerException("Event cannot be null");
 		}
+		LOGGER.trace("Called event of class " + event.getClass().getName() + " for " + LISTENERS.size() + " listeners");
 		for (DiscoveryListener listener : LISTENERS) {
 			if (listener.getClass().isAnnotationPresent(ThreadedListener.class)) {
 				ThreadedListener threadedListener = listener.getClass().getAnnotation(ThreadedListener.class);
@@ -312,7 +310,7 @@ public final class Discovery {
 			}
 			InetSocketAddress discoveryAddress = new InetSocketAddress(BROADCAST_ADDRESS, port);
 			if (DISCOVERY_ADDRESSES.put(discoveryAddress, LOCAL_SERVER) == null) {
-				LOG.debug("Added discovery port " + port);
+				LOGGER.debug("Added discovery port " + port);
 			}
 		}
 		if (thread == null && !DISCOVERY_ADDRESSES.isEmpty()) {
@@ -360,7 +358,7 @@ public final class Discovery {
 			 */
 			InetSocketAddress discoveryAddress = new InetSocketAddress(BROADCAST_ADDRESS, port);
 			if (DISCOVERY_ADDRESSES.remove(discoveryAddress) != null) {
-				LOG.debug("Removed discovery port " + port);
+				LOGGER.debug("Removed discovery port " + port);
 			}
 		}
 	}
@@ -395,7 +393,7 @@ public final class Discovery {
 					}
 				}
 			}
-			LOG.debug("Cleared discovery ports");
+			LOGGER.debug("Cleared discovery ports");
 		}
 	}
 
@@ -465,7 +463,7 @@ public final class Discovery {
 	 * Returns whether or not the specified servers are being broadcasted to.
 	 * 
 	 * @param servers
-	 *            the servers
+	 *            the servers.
 	 * @return <code>true</code> if all of the <code>servers</code> are being
 	 *         broadcasted to, <code>false</code> otherwise.
 	 * @throws NullPointerException
@@ -540,7 +538,17 @@ public final class Discovery {
 			throw new IllegalArgumentException("IP address cannot be broadcast address " + BROADCAST_ADDRESS);
 		}
 		if (DISCOVERY_ADDRESSES.put(address, EXTERNAL_SERVER) == null) {
-			LOG.debug("Added external server with address " + address + " for discovery");
+			/*
+			 * If another server with this address exists already, it means that
+			 * it has already been discovered locally. To remedy this, we remove
+			 * this discovered server entirely to let it be rediscovered again
+			 * as an external server.
+			 */
+			if (DISCOVERED.containsKey(address)) {
+				DiscoveredServer server = DISCOVERED.remove(address);
+				callEvent(listener -> listener.onServerForgotten(server));
+			}
+			LOGGER.debug("Added external server with address " + address + " for discovery");
 		}
 		if (thread == null) {
 			thread = new DiscoveryThread();
@@ -594,7 +602,8 @@ public final class Discovery {
 	 *             broadcast address of {@value #BROADCAST_ADDRESS}.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public static void addServer(String host, int port) throws NullPointerException, IllegalArgumentException, UnknownHostException {
 		if (host == null) {
@@ -625,7 +634,7 @@ public final class Discovery {
 			if (forgotten != null) {
 				callEvent(listener -> listener.onServerForgotten(forgotten));
 			}
-			LOG.debug("Removed external server with address " + address + " from discovery");
+			LOGGER.debug("Removed external server with address " + address + " from discovery");
 		}
 	}
 
@@ -652,7 +661,8 @@ public final class Discovery {
 	 *            the server port.
 	 * @throws UnknownHostException
 	 *             if no IP address for the host could be found, or if a
-	 *             scope_id was specified for a global IPv6 address.
+	 *             <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public static void removeServer(String host, int port) throws UnknownHostException {
 		if (host != null) {
@@ -785,7 +795,8 @@ public final class Discovery {
 	 *             <code>0-65535</code>.
 	 * @throws UnknownHostException
 	 *             if no IP address for the <code>host</code> could be found, or
-	 *             if a scope_id was specified for a global IPv6 address.
+	 *             if a <code>scope_id</code> was specified for a global IPv6
+	 *             address.
 	 */
 	public static void setServer(String host, int port) throws NullPointerException, IllegalArgumentException, UnknownHostException {
 		clearServers();
@@ -811,7 +822,7 @@ public final class Discovery {
 					}
 				}
 			}
-			LOG.debug("Cleared external servers from discovery");
+			LOGGER.debug("Cleared external servers from discovery");
 		}
 	}
 
@@ -886,7 +897,7 @@ public final class Discovery {
 			if (!DISCOVERED.containsKey(sender)) {
 				DiscoveredServer discovered = new DiscoveredServer(sender, external, pong.identifier);
 				DISCOVERED.put(sender, discovered);
-				LOG.info("Discovered " + (external ? "external" : "local") + " with address " + sender);
+				LOGGER.info("Discovered " + (external ? "external" : "local") + " with address " + sender);
 				callEvent(listener -> listener.onServerDiscovered(discovered));
 			} else {
 				DiscoveredServer discovered = DISCOVERED.get(sender);
@@ -894,7 +905,7 @@ public final class Discovery {
 				if (!pong.identifier.equals(discovered.getIdentifier())) {
 					Identifier oldIdentifier = discovered.getIdentifier();
 					discovered.setIdentifier(pong.identifier);
-					LOG.debug("Updated local server with address " + sender + " identifier to \"" + pong.identifier + "\"");
+					LOGGER.debug("Updated local server with address " + sender + " identifier to \"" + pong.identifier + "\"");
 					callEvent(listener -> listener.onServerIdentifierUpdate(discovered, oldIdentifier));
 				}
 			}

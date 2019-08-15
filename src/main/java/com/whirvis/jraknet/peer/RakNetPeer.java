@@ -158,7 +158,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 */
 	public static final long PEER_TIMEOUT = DETECTION_SEND_INTERVAL * 10;
 
-	private final Logger log;
+	private final Logger logger;
 	private final InetSocketAddress address;
 	private final long guid;
 	private final int maximumTransferUnit;
@@ -213,7 +213,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 *            the channel to communicate to the peer with.
 	 */
 	protected RakNetPeer(InetSocketAddress address, long guid, int maximumTransferUnit, ConnectionType connectionType, Channel channel) {
-		this.log = LogManager.getLogger(RakNetPeer.class.getSimpleName() + "-" + Long.toHexString(guid).toUpperCase());
+		this.logger = LogManager.getLogger(RakNetPeer.class.getSimpleName() + "-" + Long.toHexString(guid).toUpperCase());
 		this.address = address;
 		this.guid = guid;
 		this.maximumTransferUnit = maximumTransferUnit;
@@ -251,7 +251,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * @return the logger.
 	 */
 	protected final Logger getLogger() {
-		return this.log;
+		return this.logger;
 	}
 
 	/**
@@ -376,7 +376,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			throw new NullPointerException("State cannot be null");
 		}
 		this.state = state;
-		log.debug("Set state to " + state.name());
+		logger.debug("Set state to " + state.name());
 	}
 
 	/**
@@ -479,7 +479,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * @return the message index.
 	 */
 	public final int bumpMessageIndex() {
-		log.debug("Bumped message index from " + messageIndex + " to " + (messageIndex + 1));
+		logger.trace("Bumped message index from " + messageIndex + " to " + (messageIndex + 1));
 		return this.messageIndex++;
 	}
 
@@ -500,7 +500,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		this.latency = enabled ? latency : -1;
 		this.pongsReceived = enabled ? pongsReceived : 0;
 		if (wasEnabled != enabled) {
-			log.info((enabled ? "Enabled" : "Disabled") + " latency detection.");
+			logger.info((enabled ? "Enabled" : "Disabled") + " latency detection");
 		}
 	}
 
@@ -608,7 +608,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 					this.handleEncapsulated(encapsulated);
 				}
 			}
-			log.debug("Handled custom packet with sequence number " + custom.sequenceId);
+			logger.debug("Handled custom packet with sequence number " + custom.sequenceId);
 		} else if (packet.getId() == ID_NACK) {
 			NotAcknowledgedPacket notAcknowledged = new NotAcknowledgedPacket(packet);
 			notAcknowledged.decode();
@@ -667,9 +667,10 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				}
 				recoveryQueue.remove(record.getIndex());
 			}
-			log.debug("Handled ACK packet with " + acknowledged.records.length + " record" + (acknowledged.records.length == 1 ? "" : "s") + " "
+			logger.trace("Handled ACK packet with " + acknowledged.records.length + " record" + (acknowledged.records.length == 1 ? "" : "s") + " "
 					+ Arrays.toString(acknowledged.records));
 		}
+		logger.trace("Handled " + RakNetPacket.getName(packet));
 	}
 
 	/**
@@ -712,7 +713,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 						}
 					}
 					if (removeCount > 0) {
-						log.warn("Removed " + removeCount + " unreliable packets from the split queue due to an overflowing split queue");
+						logger.warn("Removed " + removeCount + " unreliable packets from the split queue due to an overflowing split queue");
 					}
 					if (splitQueue.size() > MAX_SPLITS_PER_QUEUE) {
 						throw new SplitQueueOverflowException();
@@ -753,7 +754,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				this.handleMessage0(encapsulated.orderChannel, new RakNetPacket(encapsulated.payload));
 			}
 		}
-		log.debug("Handled " + (encapsulated.split ? "split " : "") + "encapsulated packet with " + encapsulated.reliability + " reliability on channel "
+		logger.trace("Handled " + (encapsulated.split ? "split " : "") + "encapsulated packet with " + encapsulated.reliability + " reliability on channel "
 				+ encapsulated.orderChannel);
 	}
 
@@ -806,7 +807,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				}
 				this.totalLatency += responseTime;
 				this.latency = totalLatency / ++pongsReceived;
-				log.debug("Updated latency information (last latency timestamp: " + lastLatency + ", lowest latency: " + lowestLatency + ", highest latency: " + highestLatency
+				logger.debug("Updated latency information (last latency timestamp: " + lastLatency + ", lowest latency: " + lowestLatency + ", highest latency: " + highestLatency
 						+ ", total latency: " + totalLatency + ", pongs received: " + pongsReceived + ", average latency: " + latency + ")");
 			}
 
@@ -817,13 +818,13 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				long timestamp = timestampI.next().longValue();
 				if (currentTimestamp - timestamp >= PEER_TIMEOUT || latencyTimestamps.size() > 10) {
 					timestampI.remove();
-					log.debug("Cleared overdue ping response with timestamp " + timestamp);
+					logger.debug("Cleared overdue ping response with timestamp " + timestamp);
 				}
 			}
 		} else {
 			this.handleMessage(packet, channel);
 		}
-		log.debug("Handled packet with ID " + RakNetPacket.getName(packet.getId()));
+		logger.trace("Handled " + RakNetPacket.getName(packet) + "packet");
 	}
 
 	/**
@@ -849,7 +850,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		}
 		this.lastPacketSendTime = currentTime;
 		this.packetsSentThisSecond++;
-		log.debug("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to " + address);
+		logger.trace("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to " + address);
 	}
 
 	/**
@@ -925,13 +926,13 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				recoveryQueue.put(custom.sequenceId, reliable.toArray(new EncapsulatedPacket[reliable.size()]));
 			}
 		}
-		log.debug("Sent custom packet containing " + custom.messages.length + " encapsulated packet" + (custom.messages.length == 1 ? "" : "s") + " with sequence number "
+		logger.trace("Sent custom packet containing " + custom.messages.length + " encapsulated packet" + (custom.messages.length == 1 ? "" : "s") + " with sequence number "
 				+ custom.sequenceId);
 		for (int i = 0; i < custom.messages.length; i++) {
 			if (custom.messages[i].payload.size() > 0) {
-				log.debug("\tID of packet " + i + ": " + RakNetPacket.getName(custom.messages[i].payload.array()[0] & 0xFF));
+				logger.trace("\tID of packet " + i + ": " + RakNetPacket.getName(custom.messages[i].payload.array()[0] & 0xFF));
 			} else {
-				log.debug("\tID packet " + i + ": none (payload length is 0)");
+				logger.trace("\tID packet " + i + ": none (payload length is 0)");
 			}
 		}
 		return custom.sequenceId;
@@ -963,8 +964,8 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		acknowledged.records = records;
 		acknowledged.encode();
 		this.sendNettyMessage(acknowledged);
-		log.debug("Sent " + acknowledged.records.length + " record" + (acknowledged.records.length == 1 ? "" : "s") + " in " + (acknowledged.isAcknowledgement() ? "ACK" : "NACK")
-				+ " packet");
+		logger.trace("Sent " + acknowledged.records.length + " record" + (acknowledged.records.length == 1 ? "" : "s") + " in "
+				+ (acknowledged.isAcknowledgement() ? "ACK" : "NACK") + " packet");
 	}
 
 	@Override
@@ -984,11 +985,11 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		encapsulated.payload = packet;
 		if (reliability.isReliable()) {
 			encapsulated.messageIndex = this.bumpMessageIndex();
-			log.debug("Bumped message index from " + encapsulated.messageIndex + " to " + messageIndex);
+			logger.trace("Bumped message index from " + encapsulated.messageIndex + " to " + messageIndex);
 		}
 		if (reliability.isOrdered() || reliability.isSequenced()) {
 			encapsulated.orderIndex = reliability.isOrdered() ? orderSendIndex[channel]++ : sequenceSendIndex[channel]++;
-			log.debug("Bumped " + (reliability.isOrdered() ? "order" : "sequence") + " index from "
+			logger.trace("Bumped " + (reliability.isOrdered() ? "order" : "sequence") + " index from "
 					+ ((reliability.isOrdered() ? orderSendIndex[channel] : sequenceSendIndex[channel]) - 1) + " to "
 					+ (reliability.isOrdered() ? orderSendIndex[channel] : sequenceSendIndex[channel]) + " on channel " + channel);
 		}
@@ -999,12 +1000,12 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			for (EncapsulatedPacket split : encapsulated.split(this)) {
 				sendQueue.add(split);
 			}
-			log.debug("Split encapsulated packet and added it to the send queue");
+			logger.trace("Split encapsulated packet and added it to the send queue");
 		} else {
 			sendQueue.add(encapsulated);
-			log.debug("Added encapsulated packet to the send queue");
+			logger.trace("Added encapsulated packet to the send queue");
 		}
-		log.debug("Sent packet with size of " + packet.size() + " bytes (" + (packet.size() * 8) + " bits) with reliability " + reliability + " on channel " + channel);
+		logger.trace("Sent packet with size of " + packet.size() + " bytes (" + (packet.size() * 8) + " bits) with reliability " + reliability + " on channel " + channel);
 
 		/*
 		 * Return a copy of the encapsulated packet as if a single variable is

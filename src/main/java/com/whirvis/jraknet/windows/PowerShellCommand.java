@@ -161,7 +161,7 @@ public final class PowerShellCommand {
 
 	private static int commandIndex;
 
-	private final Logger log;
+	private final Logger logger;
 	private final String command;
 	private final HashMap<String, String> arguments;
 
@@ -173,7 +173,7 @@ public final class PowerShellCommand {
 	 *            {@value #ARGUMENT_PREFIX} before the argument name.
 	 */
 	public PowerShellCommand(String command) {
-		this.log = LogManager.getLogger("PowerShellCommand-" + commandIndex++);
+		this.logger = LogManager.getLogger("PowerShellCommand-" + commandIndex++);
 		this.command = command;
 		this.arguments = new HashMap<String, String>();
 	}
@@ -209,7 +209,7 @@ public final class PowerShellCommand {
 			throw new IllegalArgumentException("Value may not contain argument prefix");
 		}
 		arguments.put(argumentName, valueStr.toString());
-		log.debug("Set \"" + argumentName + "\" value to " + valueStr.toString());
+		logger.debug("Set \"" + argumentName + "\" value to " + valueStr.toString());
 		return this;
 	}
 
@@ -287,16 +287,16 @@ public final class PowerShellCommand {
 		} else {
 			try {
 				// Create server
-				log.debug("Creating PowerShell administrative server...");
+				logger.debug("Creating PowerShell administrative server...");
 				ServerSocket server = new ServerSocket(0);
 				server.setSoTimeout(POWERSHELL_ADMINISTRATIVE_TIMEOUT);
 				int state = 0;
 				long password = new Random().nextLong();
 				long startTime = System.currentTimeMillis();
-				log.debug("Created PowerShell administrative server  with password " + password + " on port " + server.getLocalPort());
+				logger.debug("Created PowerShell administrative server  with password " + password + " on port " + server.getLocalPort());
 
 				// Create client process
-				log.debug("Executing administrative PowerShell command...");
+				logger.debug("Executing administrative PowerShell command...");
 				String administrativeCommand = PowerShellCommand.POWERSHELL_EXECUTABLE + " Start-Process -Verb runAs javaw.exe \'" + "-cp \"$path\" "
 						+ PowerShellAdministrativeClient.class.getName() + " " + server.getLocalPort() + " " + password + " " + command + END_OF_TEXT + "\'";
 				if (getRunningJarFile() != null) {
@@ -310,14 +310,14 @@ public final class PowerShellCommand {
 				powerShell.getInputStream().close();
 				powerShell.waitFor();
 				if (powerShell.exitValue() != 0) {
-					log.debug("Failed to execute administrative PowerShell command");
+					logger.debug("Failed to execute administrative PowerShell command");
 					server.close();
 					return RESULT_COMMAND_EXECUTION_FAILED;
 				}
-				log.debug("Executed administrative PowerShell command");
+				logger.debug("Executed administrative PowerShell command");
 
 				// Wait for connection
-				log.debug("Waiting for connection from administrative PowerShell client...");
+				logger.debug("Waiting for connection from administrative PowerShell client...");
 				Socket connection = null;
 				try {
 					connection = server.accept();
@@ -327,7 +327,7 @@ public final class PowerShellCommand {
 				}
 				DataInputStream connectionIn = new DataInputStream(connection.getInputStream());
 				DataOutputStream connectionOut = new DataOutputStream(connection.getOutputStream());
-				log.debug("Administrative PowerShell client connected, waiting for password...");
+				logger.debug("Administrative PowerShell client connected, waiting for password...");
 				while (System.currentTimeMillis() - startTime <= POWERSHELL_ADMINISTRATIVE_TIMEOUT) {
 					Thread.sleep(0, 1); // Lower CPU usage
 					if (state == STATE_AUTHENTICATION && connectionIn.available() >= Long.BYTES) {
@@ -336,11 +336,11 @@ public final class PowerShellCommand {
 							connectionOut.writeInt(AUTHENTICATION_SUCCESS);
 							connectionOut.flush();
 							state = STATE_ERROR_RESULT;
-							log.debug("Administrative PowerShell client has authenticated, waiting for error results...");
+							logger.debug("Administrative PowerShell client has authenticated, waiting for error results...");
 						} else {
 							connectionOut.writeInt(AUTHENTICATION_FAILURE);
 							connectionOut.flush();
-							log.error("Administrative PowerShell client failed to authenticate");
+							logger.error("Administrative PowerShell client failed to authenticate");
 						}
 					} else if (state == STATE_ERROR_RESULT && connectionIn.available() >= 3) {
 						String errorResponse = connectionIn.readUTF().trim();
@@ -349,7 +349,7 @@ public final class PowerShellCommand {
 							return errorResponse;
 						}
 						state = STATE_RESULT;
-						log.debug("Administrative PowerShell client has sent error results, waiting for results...");
+						logger.debug("Administrative PowerShell client has sent error results, waiting for results...");
 					} else if (state == STATE_RESULT && connectionIn.available() >= 3) {
 						server.close();
 						return connectionIn.readUTF().trim();
@@ -357,7 +357,7 @@ public final class PowerShellCommand {
 				}
 				connection.close();
 				server.close();
-				log.debug("Destroyed adminstrative PowerShell server");
+				logger.debug("Destroyed adminstrative PowerShell server");
 				return RESULT_ADMINISTRATIVE_EXECUTION_FAILED;
 			} catch (IOException | InterruptedException e) {
 				return RESULT_ADMINISTRATIVE_EXECUTION_FAILED;
