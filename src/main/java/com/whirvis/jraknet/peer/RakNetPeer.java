@@ -608,7 +608,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 					this.handleEncapsulated(encapsulated);
 				}
 			}
-			logger.debug("Handled custom packet with sequence number " + custom.sequenceId);
+			logger.trace("Handled custom packet with sequence number " + custom.sequenceId);
 		} else if (packet.getId() == ID_NACK) {
 			NotAcknowledgedPacket notAcknowledged = new NotAcknowledgedPacket(packet);
 			notAcknowledged.decode();
@@ -807,7 +807,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				}
 				this.totalLatency += responseTime;
 				this.latency = totalLatency / ++pongsReceived;
-				logger.debug("Updated latency information (last latency timestamp: " + lastLatency + ", lowest latency: " + lowestLatency + ", highest latency: " + highestLatency
+				logger.trace("Updated latency information (last latency timestamp: " + lastLatency + ", lowest latency: " + lowestLatency + ", highest latency: " + highestLatency
 						+ ", total latency: " + totalLatency + ", pongs received: " + pongsReceived + ", average latency: " + latency + ")");
 			}
 
