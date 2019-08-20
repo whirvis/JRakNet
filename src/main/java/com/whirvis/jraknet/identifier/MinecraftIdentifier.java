@@ -201,8 +201,7 @@ public class MinecraftIdentifier extends Identifier {
 	 * @param identifier
 	 *            the identifier.
 	 * @throws NullPointerException
-	 *             if the <code>identifier</code> or its contents are
-	 *             <code>null</code>.
+	 *             if the <code>identifier</code> is <code>null</code>.
 	 * @throws IllegalArgumentException
 	 *             if the <code>identifier</code> is not a Minecraft identifier
 	 *             or there are missing fields.
@@ -300,8 +299,10 @@ public class MinecraftIdentifier extends Identifier {
 	 *             character {@value #SEPARATOR}.
 	 */
 	public void setServerName(String serverName) throws IllegalArgumentException {
-		if (serverName.contains(SEPARATOR)) {
-			throw new IllegalArgumentException("Server name cannot contain contain separator character");
+		if (serverName != null) {
+			if (serverName.contains(SEPARATOR)) {
+				throw new IllegalArgumentException("Server name cannot contain contain separator character");
+			}
 		}
 		this.serverName = serverName;
 	}
@@ -371,8 +372,10 @@ public class MinecraftIdentifier extends Identifier {
 	 *             character {@value #SEPARATOR}.
 	 */
 	public void setWorldName(String worldName) throws IllegalArgumentException {
-		if (worldName.contains(SEPARATOR)) {
-			throw new IllegalArgumentException("World name cannot contain contain separator character");
+		if (worldName != null) {
+			if (worldName.contains(SEPARATOR)) {
+				throw new IllegalArgumentException("World name cannot contain contain separator character");
+			}
 		}
 		this.worldName = worldName;
 	}
@@ -387,8 +390,10 @@ public class MinecraftIdentifier extends Identifier {
 	 *             {@value #SEPARATOR}.
 	 */
 	public void setGamemode(String gamemode) throws IllegalArgumentException {
-		if (gamemode.contains(SEPARATOR)) {
-			throw new IllegalArgumentException("Gamemode cannot contain contain separator character");
+		if (gamemode != null) {
+			if (gamemode.contains(SEPARATOR)) {
+				throw new IllegalArgumentException("Gamemode cannot contain contain separator character");
+			}
 		}
 		this.gamemode = gamemode;
 	}
