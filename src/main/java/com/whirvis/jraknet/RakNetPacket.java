@@ -911,8 +911,8 @@ public class RakNetPacket extends Packet {
 	 * {@link #ID_CUSTOM_8}, {@link #ID_CUSTOM_9}, {@link #ID_CUSTOM_A},
 	 * {@link #ID_CUSTOM_B}, {@link #ID_CUSTOM_C}, {@link #ID_CUSTOM_D},
 	 * {@link #ID_CUSTOM_E}, {@link #ID_CUSTOM_F}, {@link #ID_ACK}, and
-	 * {@link #ID_NACK} will never are ignored as they are not only internal
-	 * packets but they also override other packets with the same ID.
+	 * {@link #ID_NACK} are ignored as they are not only internal packets but
+	 * they also override other packets with the same ID.
 	 */
 	private static void mapNameIds() {
 		if (mappedNameIds == false) {
@@ -955,6 +955,9 @@ public class RakNetPacket extends Packet {
 	 *         packet, <code>false</code>.
 	 */
 	public static boolean hasPacket(int id) {
+		if (mappedNameIds == false) {
+			mapNameIds();
+		}
 		return PACKET_NAMES.containsKey((short) id);
 	}
 
@@ -983,6 +986,9 @@ public class RakNetPacket extends Packet {
 	 *         packet, <code>false</code>.
 	 */
 	public static boolean hasPacket(String name) {
+		if (mappedNameIds == false) {
+			mapNameIds();
+		}
 		return PACKET_IDS.containsKey(name);
 	}
 
