@@ -143,4 +143,4 @@ This is a simple RakNet client that attempts to connect to the main [LBSG](https
 
 <br>
 
-<a href="http://whirvis.com"><img src="https://i.imgur.com/20TbItJ.png" width="145" height="145"></a> <a href="https://github.com/JRakNet/JRakNet"><img src="https://i.imgur.com/heiZXpr.png" width="145" height="145" hspace="50"></a> <a href="https://github.com/OculusVR/RakNet"><img src="http://imgur.com/9p1asD8.png" width="145" height="145"></a> <a href="https://www.oculus.com/"><img src="http://i.imgur.com/PmrfSsc.png" height="145" /></a>
+<a href="http://whirvis.com"><img src="https://i.imgur.com/8c8FwFE.png" width="145" height="145"></a> <a href="https://github.com/JRakNet/JRakNet"><img src="https://i.imgur.com/CWCiNTP.png" width="145" height="145" hspace="50"></a> <a href="https://github.com/OculusVR/RakNet"><img src="https://i.imgur.com/nQo83J4.png" width="145" height="145"></a> <a href="https://www.oculus.com/"><img src="http://i.imgur.com/PmrfSsc.png" height="145" /></a>
