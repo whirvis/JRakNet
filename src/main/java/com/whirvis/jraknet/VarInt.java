@@ -121,7 +121,8 @@ public final class VarInt {
 	 *             if the <code>VarInt</code> exceeds the <code>max</code>
 	 *             amount of bits.
 	 */
-	public static void write(long l, OutputStream out, int max) throws NullPointerException, IllegalArgumentException, IOException, IndexOutOfBoundsException {
+	public static void write(long l, OutputStream out, int max)
+			throws NullPointerException, IllegalArgumentException, IOException, IndexOutOfBoundsException {
 		if (out == null) {
 			throw new NullPointerException("Output stream cannot be null");
 		} else if (max <= 0) {
@@ -164,7 +165,8 @@ public final class VarInt {
 	 *             if the <code>VarInt</code> exceeds the <code>max</code>
 	 *             amount of bits.
 	 */
-	public static void write(int i, OutputStream out, int max) throws NullPointerException, IllegalArgumentException, IOException, IndexOutOfBoundsException {
+	public static void write(int i, OutputStream out, int max)
+			throws NullPointerException, IllegalArgumentException, IOException, IndexOutOfBoundsException {
 		if (out == null) {
 			throw new NullPointerException("Output stream cannot be null");
 		} else if (max <= 0) {
@@ -220,7 +222,8 @@ public final class VarInt {
 	 *             if the <code>VarInt</code> exceeds {@value #VARINT_MAX_SIZE}
 	 *             bits.
 	 */
-	public static void writeVarInt(int i, OutputStream out) throws NullPointerException, IOException, IndexOutOfBoundsException {
+	public static void writeVarInt(int i, OutputStream out)
+			throws NullPointerException, IOException, IndexOutOfBoundsException {
 		write(i, out, VARINT_MAX_SIZE);
 	}
 
@@ -257,7 +260,8 @@ public final class VarInt {
 	 *             if the <code>VarLong</code> exceeds
 	 *             {@value #VARLONG_MAX_SIZE} bits.
 	 */
-	public static void writeVarLong(long l, OutputStream out) throws NullPointerException, IOException, IndexOutOfBoundsException {
+	public static void writeVarLong(long l, OutputStream out)
+			throws NullPointerException, IOException, IndexOutOfBoundsException {
 		write(l, out, VARLONG_MAX_SIZE);
 	}
 
@@ -281,7 +285,8 @@ public final class VarInt {
 	 *             if the <code>VarInt</code> exceeds the <code>max</code>
 	 *             amount of bits.
 	 */
-	public static long readUnsigned(InputStream in, int max) throws NullPointerException, IllegalArgumentException, IOException, IndexOutOfBoundsException {
+	public static long readUnsigned(InputStream in, int max)
+			throws NullPointerException, IllegalArgumentException, IOException, IndexOutOfBoundsException {
 		if (in == null) {
 			throw new NullPointerException("Input stream cannot be null");
 		} else if (max <= 0) {
@@ -327,7 +332,8 @@ public final class VarInt {
 	 *             if the <code>VarInt</code> exceeds the <code>max</code>
 	 *             amount of bits.
 	 */
-	public static void writeUnsigned(long l, OutputStream out, int max) throws IllegalArgumentException, NullPointerException, IOException, IndexOutOfBoundsException {
+	public static void writeUnsigned(long l, OutputStream out, int max)
+			throws IllegalArgumentException, NullPointerException, IOException, IndexOutOfBoundsException {
 		if (l < 0) {
 			throw new IllegalArgumentException("Value cannot be negative");
 		} else if (out == null) {
@@ -365,7 +371,8 @@ public final class VarInt {
 	 *             if the <code>VarInt</code> exceeds {@value #VARINT_MAX_SIZE}
 	 *             bits.
 	 */
-	public static long readUnsignedVarInt(InputStream in) throws NullPointerException, IOException, IndexOutOfBoundsException {
+	public static long readUnsignedVarInt(InputStream in)
+			throws NullPointerException, IOException, IndexOutOfBoundsException {
 		return readUnsigned(in, VARINT_MAX_SIZE);
 	}
 
@@ -385,7 +392,8 @@ public final class VarInt {
 	 * @throws IndexOutOfBoundsException
 	 *             if more than {@value #VARINT_MAX_SIZE} bits are written.
 	 */
-	public static void writeUnsignedVarInt(int i, OutputStream out) throws IllegalArgumentException, NullPointerException, IOException, IndexOutOfBoundsException {
+	public static void writeUnsignedVarInt(int i, OutputStream out)
+			throws IllegalArgumentException, NullPointerException, IOException, IndexOutOfBoundsException {
 		writeUnsigned(i, out, VARINT_MAX_SIZE);
 	}
 
@@ -405,7 +413,8 @@ public final class VarInt {
 	 * @throws IndexOutOfBoundsException
 	 *             if more than {@value #VARLONG_MAX_SIZE} bits are read.
 	 */
-	public static long readUnsignedVarLong(InputStream in) throws NullPointerException, IOException, IndexOutOfBoundsException {
+	public static long readUnsignedVarLong(InputStream in)
+			throws NullPointerException, IOException, IndexOutOfBoundsException {
 		return readUnsigned(in, VARLONG_MAX_SIZE);
 	}
 
@@ -426,7 +435,8 @@ public final class VarInt {
 	 * @throws IndexOutOfBoundsException
 	 *             if more than {@value #VARLONG_MAX_SIZE} bits are written.
 	 */
-	public static void writeUnsignedVarLong(long l, OutputStream out) throws IllegalArgumentException, NullPointerException, IOException, IndexOutOfBoundsException {
+	public static void writeUnsignedVarLong(long l, OutputStream out)
+			throws IllegalArgumentException, NullPointerException, IOException, IndexOutOfBoundsException {
 		writeUnsigned(l, out, VARLONG_MAX_SIZE);
 	}
 

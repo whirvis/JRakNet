@@ -1246,7 +1246,8 @@ public class Packet {
 			this.write(ipAddress);
 			this.writeInt(0x00); // Scope ID
 		} else {
-			throw new UnknownHostException("Unknown protocol for address with length of " + ipAddress.length + " bytes");
+			throw new UnknownHostException(
+					"Unknown protocol for address with length of " + ipAddress.length + " bytes");
 		}
 		return this;
 	}
@@ -1268,7 +1269,8 @@ public class Packet {
 	 *             found, or if a <code>scope_id</code> was specified for a
 	 *             global IPv6 address.
 	 */
-	public final Packet writeAddress(InetAddress host, int port) throws NullPointerException, IllegalArgumentException, UnknownHostException {
+	public final Packet writeAddress(InetAddress host, int port)
+			throws NullPointerException, IllegalArgumentException, UnknownHostException {
 		if (host == null) {
 			throw new NullPointerException("Host cannot be null");
 		} else if (port < 0x0000 || port > 0xFFFF) {
@@ -1294,7 +1296,8 @@ public class Packet {
 	 *             found, or if a <code>scope_id</code> was specified for a
 	 *             global IPv6 address.
 	 */
-	public final Packet writeAddress(String host, int port) throws NullPointerException, IllegalArgumentException, UnknownHostException {
+	public final Packet writeAddress(String host, int port)
+			throws NullPointerException, IllegalArgumentException, UnknownHostException {
 		if (host == null) {
 			throw new NullPointerException("Host cannot be null");
 		} else if (port < 0x0000 || port > 0xFFFF) {

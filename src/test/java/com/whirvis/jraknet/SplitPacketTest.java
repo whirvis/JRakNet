@@ -123,14 +123,16 @@ public final class SplitPacketTest {
 			}
 
 			@Override
-			public void onDisconnect(RakNetServer server, InetSocketAddress address, RakNetClientPeer peer, String reason) {
+			public void onDisconnect(RakNetServer server, InetSocketAddress address, RakNetClientPeer peer,
+					String reason) {
 				LOG.info("Server - Client from " + address + " disconnected (" + reason + ")");
 				System.exit(1);
 			}
 
 			@Override
 			public void handleMessage(RakNetServer server, RakNetClientPeer peer, RakNetPacket packet, int channel) {
-				LOG.info("Server - Received packet of " + packet.size() + " bytes from " + peer.getAddress() + ", checking data...");
+				LOG.info("Server - Received packet of " + packet.size() + " bytes from " + peer.getAddress()
+						+ ", checking data...");
 
 				// Check header byte
 				LOG.info("Server - Checking header byte...");
@@ -188,10 +190,11 @@ public final class SplitPacketTest {
 
 			@Override
 			public void onLogin(RakNetClient client, RakNetServerPeer peer) {
-				LOG.info("Client - Logged in to server with MTU " + peer.getMaximumTransferUnit() + ", calculating maximum packet size...");
+				LOG.info("Client - Logged in to server with MTU " + peer.getMaximumTransferUnit()
+						+ ", calculating maximum packet size...");
 				Packet packet = new RakNetPacket(SPLIT_START_ID);
-				int maximumPacketSize = (peer.getMaximumTransferUnit() - CustomPacket.MINIMUM_SIZE - EncapsulatedPacket.size(Reliability.RELIABLE_ORDERED, true))
-						* RakNetPeer.MAX_SPLIT_COUNT;
+				int maximumPacketSize = (peer.getMaximumTransferUnit() - CustomPacket.MINIMUM_SIZE
+						- EncapsulatedPacket.size(Reliability.RELIABLE_ORDERED, true)) * RakNetPeer.MAX_SPLIT_COUNT;
 
 				// Create giant packet
 				LOG.info("Client - Creating giant packet...");
@@ -209,7 +212,8 @@ public final class SplitPacketTest {
 			}
 
 			@Override
-			public void onDisconnect(RakNetClient client, InetSocketAddress address, RakNetServerPeer peer, String reason) {
+			public void onDisconnect(RakNetClient client, InetSocketAddress address, RakNetServerPeer peer,
+					String reason) {
 				LOG.error("Client - Lost connection to server (" + reason + ")");
 				System.exit(1);
 			}

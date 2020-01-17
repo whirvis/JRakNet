@@ -114,12 +114,14 @@ public final class ServerPing {
 			return false;
 		}
 		ServerPing sp = (ServerPing) o;
-		return Objects.equals(sender, sp.sender) && Objects.equals(connectionType, sp.connectionType) && Objects.equals(identifier, sp.identifier);
+		return Objects.equals(sender, sp.sender) && Objects.equals(connectionType, sp.connectionType)
+				&& Objects.equals(identifier, sp.identifier);
 	}
 
 	@Override
 	public String toString() {
-		return "ServerPing [sender=" + sender + ", identifier=" + identifier + ", connectionType=" + connectionType + "]";
+		return "ServerPing [sender=" + sender + ", identifier=" + identifier + ", connectionType=" + connectionType
+				+ "]";
 	}
 
 }

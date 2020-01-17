@@ -123,7 +123,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	public RakNetClient(InetSocketAddress address) {
 		this.bindingAddress = address;
 		this.guid = UUID.randomUUID().getMostSignificantBits();
-		this.logger = LogManager.getLogger(RakNetClient.class.getSimpleName() + "[" + Long.toHexString(guid).toUpperCase() + "]");
+		this.logger = LogManager
+				.getLogger(RakNetClient.class.getSimpleName() + "[" + Long.toHexString(guid).toUpperCase() + "]");
 		this.timestamp = System.currentTimeMillis();
 		this.listeners = new ConcurrentLinkedQueue<RakNetClientListener>();
 		if (this.getClass() != RakNetClient.class && RakNetClientListener.class.isAssignableFrom(this.getClass())) {
@@ -256,7 +257,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *             if the <code>listener</code> is another client that is not
 	 *             the client itself.
 	 */
-	public final RakNetClient addListener(RakNetClientListener listener) throws NullPointerException, IllegalArgumentException {
+	public final RakNetClient addListener(RakNetClientListener listener)
+			throws NullPointerException, IllegalArgumentException {
 		if (listener == null) {
 			throw new NullPointerException("Listener cannot be null");
 		} else if (listener instanceof RakNetClient && !this.equals(listener)) {
@@ -331,7 +333,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		for (RakNetClientListener listener : listeners) {
 			if (listener.getClass().isAnnotationPresent(ThreadedListener.class)) {
 				ThreadedListener threadedListener = listener.getClass().getAnnotation(ThreadedListener.class);
-				new Thread(RakNetClient.class.getSimpleName() + (threadedListener.name().length() > 0 ? "-" : "") + threadedListener.name() + "-Thread-" + ++eventThreadCount) {
+				new Thread(RakNetClient.class.getSimpleName() + (threadedListener.name().length() > 0 ? "-" : "")
+						+ threadedListener.name() + "-Thread-" + ++eventThreadCount) {
 
 					@Override
 					public void run() {
@@ -440,7 +443,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *             maximum transfer unit could be located for the network card
 	 *             that the client's binding address is bound to.
 	 */
-	public final void setMaximumTransferUnitSizes(int... maximumTransferUnitSizes) throws NullPointerException, IllegalArgumentException, RuntimeException {
+	public final void setMaximumTransferUnitSizes(int... maximumTransferUnitSizes)
+			throws NullPointerException, IllegalArgumentException, RuntimeException {
 		if (maximumTransferUnitSizes == null) {
 			throw new NullPointerException("Maximum transfer unit sizes cannot be null");
 		} else if (maximumTransferUnitSizes.length <= 0) {
@@ -451,20 +455,23 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		boolean foundTransferUnit = false;
 		int networkCardMaximumTransferUnit = RakNet.getMaximumTransferUnit(bindAddress.getAddress());
 		if (networkCardMaximumTransferUnit < 0) {
-			throw new RuntimeException(
-					"Failed to determine maximum transfer unit" + (bindAddress.getAddress() != null ? " for network card with address " + bindAddress.getAddress() : ""));
+			throw new RuntimeException("Failed to determine maximum transfer unit" + (bindAddress.getAddress() != null
+					? " for network card with address " + bindAddress.getAddress() : ""));
 		}
 		ArrayList<MaximumTransferUnit> maximumTransferUnits = new ArrayList<MaximumTransferUnit>();
 		for (int i = 0; i < maximumTransferUnitSizes.length; i++) {
 			int maximumTransferUnitSize = maximumTransferUnitSizes[i];
 			if (maximumTransferUnitSize < RakNet.MINIMUM_MTU_SIZE) {
-				throw new IllegalArgumentException("Maximum transfer unit size must be higher than " + RakNet.MINIMUM_MTU_SIZE);
+				throw new IllegalArgumentException(
+						"Maximum transfer unit size must be higher than " + RakNet.MINIMUM_MTU_SIZE);
 			}
 			if (networkCardMaximumTransferUnit >= maximumTransferUnitSize) {
-				maximumTransferUnits.add(new MaximumTransferUnit(maximumTransferUnitSize, (i * 2) + (i + 1 < maximumTransferUnitSizes.length ? 2 : 1)));
+				maximumTransferUnits.add(new MaximumTransferUnit(maximumTransferUnitSize,
+						(i * 2) + (i + 1 < maximumTransferUnitSizes.length ? 2 : 1)));
 				foundTransferUnit = true;
 			} else {
-				logger.warn("Valid maximum transfer unit " + maximumTransferUnitSize + " failed to register due to network card limitations");
+				logger.warn("Valid maximum transfer unit " + maximumTransferUnitSize
+						+ " failed to register due to network card limitations");
 			}
 		}
 		this.maximumTransferUnits = maximumTransferUnits.toArray(new MaximumTransferUnit[maximumTransferUnits.size()]);
@@ -485,7 +492,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			registeredMaximumTransferUnitSizes[i] = this.maximumTransferUnits[i].getSize();
 		}
 		String registeredMaximumTransferUnitSizesStr = Arrays.toString(registeredMaximumTransferUnitSizes);
-		logger.debug("Set maximum transfer unit sizes to " + registeredMaximumTransferUnitSizesStr.substring(1, registeredMaximumTransferUnitSizesStr.length() - 1));
+		logger.debug("Set maximum transfer unit sizes to " + registeredMaximumTransferUnitSizesStr.substring(1,
+				registeredMaximumTransferUnitSizesStr.length() - 1));
 	}
 
 	/**
@@ -562,7 +570,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *             if the client is not connected to a server.
 	 */
 	@Override
-	public final EncapsulatedPacket sendMessage(Reliability reliability, int channel, Packet packet) throws IllegalStateException {
+	public final EncapsulatedPacket sendMessage(Reliability reliability, int channel, Packet packet)
+			throws IllegalStateException {
 		if (!this.isConnected()) {
 			throw new IllegalStateException("Cannot send messages while not connected to a server");
 		}
@@ -595,7 +604,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			throw new NullPointerException("IP address cannot be null");
 		}
 		channel.writeAndFlush(new DatagramPacket(buf, address));
-		logger.trace("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to " + address);
+		logger.trace("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8)
+				+ " bits) to " + address);
 	}
 
 	/**
@@ -686,7 +696,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 *             if the cause <code>address</code> or <code>cause</code> are
 	 *             <code>null</code>.
 	 */
-	protected final void handleHandlerException(InetSocketAddress address, Throwable cause) throws NullPointerException {
+	protected final void handleHandlerException(InetSocketAddress address, Throwable cause)
+			throws NullPointerException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
 		} else if (cause == null) {
@@ -736,7 +747,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			this.handler = new RakNetClientHandler(this);
 			bootstrap.channel(NioDatagramChannel.class).group(group).handler(handler);
 			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false);
-			this.channel = (bindingAddress != null ? bootstrap.bind(bindingAddress) : bootstrap.bind(0)).sync().channel();
+			this.channel = (bindingAddress != null ? bootstrap.bind(bindingAddress) : bootstrap.bind(0)).sync()
+					.channel();
 			this.bindAddress = (InetSocketAddress) channel.localAddress();
 			this.setMaximumTransferUnitSizes(DEFAULT_TRANSFER_UNIT_SIZES);
 			logger.debug("Initialized networking");
@@ -748,9 +760,11 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		MaximumTransferUnit[] units = MaximumTransferUnit.sort(maximumTransferUnits);
 		for (MaximumTransferUnit unit : maximumTransferUnits) {
 			unit.reset();
-			logger.debug("Reset maximum transfer unit with size of " + unit.getSize() + " bytes (" + (unit.getSize() * 8) + " bits)");
+			logger.debug("Reset maximum transfer unit with size of " + unit.getSize() + " bytes ("
+					+ (unit.getSize() * 8) + " bits)");
 		}
-		this.peerFactory = new PeerFactory(this, address, bootstrap, channel, units[0].getSize(), highestMaximumTransferUnitSize);
+		this.peerFactory = new PeerFactory(this, address, bootstrap, channel, units[0].getSize(),
+				highestMaximumTransferUnitSize);
 		logger.debug("Reset maximum transfer units and created peer peerFactory");
 		peerFactory.startAssembly(units);
 
@@ -764,7 +778,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 
 		// Create and start peer update thread
 		RakNetClient client = this;
-		this.peerThread = new Thread(RakNetClient.class.getSimpleName() + "-Peer-Thread-" + Long.toHexString(guid).toUpperCase()) {
+		this.peerThread = new Thread(
+				RakNetClient.class.getSimpleName() + "-Peer-Thread-" + Long.toHexString(guid).toUpperCase()) {
 
 			@Override
 			public void run() {
@@ -813,7 +828,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * @throws RakNetException
 	 *             if an error occurs during connection or login.
 	 */
-	public final void connect(InetAddress address, int port) throws NullPointerException, IllegalArgumentException, IllegalStateException, RakNetException {
+	public final void connect(InetAddress address, int port)
+			throws NullPointerException, IllegalArgumentException, IllegalStateException, RakNetException {
 		if (address == null) {
 			throw new NullPointerException("IP address cannot be null");
 		} else if (port < 0x0000 || port > 0xFFFF) {
@@ -843,7 +859,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * @throws RakNetException
 	 *             if an error occurs during connection or login.
 	 */
-	public final void connect(String host, int port) throws NullPointerException, IllegalArgumentException, UnknownHostException, IllegalStateException, RakNetException {
+	public final void connect(String host, int port) throws NullPointerException, IllegalArgumentException,
+			UnknownHostException, IllegalStateException, RakNetException {
 		if (host == null) {
 			throw new NullPointerException("IP address cannot be null");
 		}
@@ -862,7 +879,8 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	 * @throws RakNetException
 	 *             if an error occurs during connection or login.
 	 */
-	public final void connect(DiscoveredServer server) throws NullPointerException, IllegalStateException, RakNetException {
+	public final void connect(DiscoveredServer server)
+			throws NullPointerException, IllegalStateException, RakNetException {
 		if (server == null) {
 			throw new NullPointerException("Discovered server cannot be null");
 		}
@@ -892,8 +910,10 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			peer.disconnect();
 			this.peer = null;
 		}
-		logger.info("Disconnected from server with address " + peer.getAddress() + (reason != null ? " with reason \"" + reason + "\"" : ""));
-		this.callEvent(listener -> listener.onDisconnect(this, serverAddress, peer, reason == null ? "Disconnected" : reason));
+		logger.info("Disconnected from server with address " + peer.getAddress()
+				+ (reason != null ? " with reason \"" + reason + "\"" : ""));
+		this.callEvent(
+				listener -> listener.onDisconnect(this, serverAddress, peer, reason == null ? "Disconnected" : reason));
 
 		// Shutdown networking
 		channel.close();
@@ -932,9 +952,11 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 
 	@Override
 	public String toString() {
-		return "RakNetClient [bindingAddress=" + bindingAddress + ", guid=" + guid + ", timestamp=" + timestamp + ", bindAddress=" + bindAddress + ", maximumTransferUnits="
-				+ Arrays.toString(maximumTransferUnits) + ", highestMaximumTransferUnitSize=" + highestMaximumTransferUnitSize + ", getProtocolVersion()=" + getProtocolVersion()
-				+ ", getTimestamp()=" + getTimestamp() + ", getAddress()=" + getAddress() + ", isConnected()=" + isConnected() + "]";
+		return "RakNetClient [bindingAddress=" + bindingAddress + ", guid=" + guid + ", timestamp=" + timestamp
+				+ ", bindAddress=" + bindAddress + ", maximumTransferUnits=" + Arrays.toString(maximumTransferUnits)
+				+ ", highestMaximumTransferUnitSize=" + highestMaximumTransferUnitSize + ", getProtocolVersion()="
+				+ getProtocolVersion() + ", getTimestamp()=" + getTimestamp() + ", getAddress()=" + getAddress()
+				+ ", isConnected()=" + isConnected() + "]";
 	}
 
 }

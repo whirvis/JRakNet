@@ -140,8 +140,8 @@ public class MinecraftIdentifier extends Identifier {
 	 *             {@value #SEPARATOR}, or if the <code>versionTag</code> is
 	 *             invalid.
 	 */
-	public MinecraftIdentifier(String serverName, int serverProtocol, String versionTag, int onlinePlayerCount, int maxPlayerCount, long guid, String worldName, String gamemode)
-			throws IllegalArgumentException {
+	public MinecraftIdentifier(String serverName, int serverProtocol, String versionTag, int onlinePlayerCount,
+			int maxPlayerCount, long guid, String worldName, String gamemode) throws IllegalArgumentException {
 		this.setServerName(serverName);
 		this.setServerProtocol(serverProtocol);
 		this.setVersionTag(versionTag);
@@ -444,7 +444,8 @@ public class MinecraftIdentifier extends Identifier {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(serverName, serverProtocol, versionTag, onlinePlayerCount, maxPlayerCount, guid, worldName, gamemode, legacy);
+		return Objects.hash(serverName, serverProtocol, versionTag, onlinePlayerCount, maxPlayerCount, guid, worldName,
+				gamemode, legacy);
 	}
 
 	@Override
@@ -455,9 +456,11 @@ public class MinecraftIdentifier extends Identifier {
 			return false;
 		}
 		MinecraftIdentifier mi = (MinecraftIdentifier) o;
-		return Objects.equals(serverName, mi.serverName) && Objects.equals(serverProtocol, mi.serverProtocol) && Objects.equals(versionTag, mi.versionTag)
-				&& Objects.equals(onlinePlayerCount, mi.onlinePlayerCount) && Objects.equals(maxPlayerCount, mi.maxPlayerCount) && Objects.equals(guid, mi.guid)
-				&& Objects.equals(worldName, mi.worldName) && Objects.equals(gamemode, mi.gamemode) && Objects.equals(legacy, mi.legacy);
+		return Objects.equals(serverName, mi.serverName) && Objects.equals(serverProtocol, mi.serverProtocol)
+				&& Objects.equals(versionTag, mi.versionTag) && Objects.equals(onlinePlayerCount, mi.onlinePlayerCount)
+				&& Objects.equals(maxPlayerCount, mi.maxPlayerCount) && Objects.equals(guid, mi.guid)
+				&& Objects.equals(worldName, mi.worldName) && Objects.equals(gamemode, mi.gamemode)
+				&& Objects.equals(legacy, mi.legacy);
 	}
 
 	/**
@@ -473,7 +476,8 @@ public class MinecraftIdentifier extends Identifier {
 		} else if (legacy == true) {
 			return this.createBuildString(serverName, serverProtocol, versionTag, onlinePlayerCount, maxPlayerCount);
 		}
-		return this.createBuildString(serverName, serverProtocol, versionTag, onlinePlayerCount, maxPlayerCount, guid, worldName, gamemode);
+		return this.createBuildString(serverName, serverProtocol, versionTag, onlinePlayerCount, maxPlayerCount, guid,
+				worldName, gamemode);
 	}
 
 }

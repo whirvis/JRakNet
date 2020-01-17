@@ -35,7 +35,7 @@ If you are wanting to use a snapshot version, use this repository and dependency
 <dependency>
     <groupId>com.whirvis</groupId>
     <artifactId>jraknet</artifactId>
-    <version>3.0.0-SNAPSHOT</version>
+    <version>2.12.1-SNAPSHOT</version>
 </dependency>
 ```
 

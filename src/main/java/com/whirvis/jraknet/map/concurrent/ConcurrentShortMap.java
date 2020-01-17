@@ -41,7 +41,8 @@ import com.whirvis.jraknet.map.DynamicKey;
  * @author Trent Summerlin
  * @since JRakNet v2.8.0
  */
-public final class ConcurrentShortMap<T> extends ConcurrentHashMap<Short, T> implements Map<Short, T>, DynamicKey<Short> {
+public final class ConcurrentShortMap<T> extends ConcurrentHashMap<Short, T>
+		implements Map<Short, T>, DynamicKey<Short> {
 
 	private static final long serialVersionUID = 4324132003573381634L;
 

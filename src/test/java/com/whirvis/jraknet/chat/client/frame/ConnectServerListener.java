@@ -76,7 +76,8 @@ public final class ConnectServerListener implements ActionListener {
 		try {
 			if (frame.connected == false) {
 				frame.setInstructions(ChatClient.INSTRUCTIONS_CONNECTING);
-				client.connect(RakNet.parseAddressPassive(frame.txtServerAddress.getText(), RakNetTest.WHIRVIS_DEVELOPMENT_PORT));
+				client.connect(RakNet.parseAddressPassive(frame.txtServerAddress.getText(),
+						RakNetTest.WHIRVIS_DEVELOPMENT_PORT));
 			} else {
 				frame.txtServerAddress.setText("");
 				frame.txtClientUsername.setText("");
