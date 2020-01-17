@@ -95,7 +95,8 @@ public final class ChannelCommand extends Command {
 				}
 				String oldName = channel.getName();
 				this.getServer().renameChannel(channelId, this.remainingArguments(2, args));
-				LOG.info("Renamed channel with ID " + channelId + " from \"" + oldName + "\" to \"" + channel.getName() + "\"");
+				LOG.info("Renamed channel with ID " + channelId + " from \"" + oldName + "\" to \"" + channel.getName()
+						+ "\"");
 				return true;
 			} else if (args[0].equalsIgnoreCase("remove")) {
 				if (channel == null) {
@@ -118,8 +119,8 @@ public final class ChannelCommand extends Command {
 				StringBuilder channelListBuilder = new StringBuilder("Registered channels:\n");
 				for (int i = 0; i < RakNet.CHANNEL_COUNT; i++) {
 					if (this.getServer().hasChannel(i)) {
-						channelListBuilder.append(
-								"\tChannel " + i + ": " + (lastChannel > 10 && i < 10 ? " " : "") + this.getServer().getChannel(i).getName() + (i != lastChannel ? "\n" : ""));
+						channelListBuilder.append("\tChannel " + i + ": " + (lastChannel > 10 && i < 10 ? " " : "")
+								+ this.getServer().getChannel(i).getName() + (i != lastChannel ? "\n" : ""));
 					}
 				}
 				LOG.info(channelListBuilder);

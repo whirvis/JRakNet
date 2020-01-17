@@ -85,7 +85,8 @@ public interface RakNetClientPeerMessenger {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, Packet packet) throws NullPointerException, InvalidChannelException;
+	public EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, Packet packet)
+			throws NullPointerException, InvalidChannelException;
 
 	/**
 	 * Sends a message to the specified peer.
@@ -114,8 +115,8 @@ public interface RakNetClientPeerMessenger {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel, Packet packet)
-			throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+	public default EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
+			Packet packet) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
 		return this.sendMessage(this.getGuid(peer), reliability, channel, packet);
 	}
 
@@ -144,7 +145,8 @@ public interface RakNetClientPeerMessenger {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, Packet... packets) throws NullPointerException, InvalidChannelException {
+	public default EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, Packet... packets)
+			throws NullPointerException, InvalidChannelException {
 		if (packets == null) {
 			throw new NullPointerException("Packets cannot be null");
 		}
@@ -182,8 +184,8 @@ public interface RakNetClientPeerMessenger {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel, Packet... packets)
-			throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+	public default EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
+			Packet... packets) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
 		return this.sendMessage(this.getGuid(peer), reliability, channel, packets);
 	}
 
@@ -207,7 +209,8 @@ public interface RakNetClientPeerMessenger {
 	 *             if the <code>reliability</code> or <code>packet</code> are
 	 *             <code>null</code>.
 	 */
-	public default EncapsulatedPacket sendMessage(long guid, Reliability reliability, Packet packet) throws NullPointerException {
+	public default EncapsulatedPacket sendMessage(long guid, Reliability reliability, Packet packet)
+			throws NullPointerException {
 		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, packet);
 	}
 
@@ -233,7 +236,8 @@ public interface RakNetClientPeerMessenger {
 	 * @throws IllegalArgumentException
 	 *             if the <code>peer</code> is not of the server.
 	 */
-	public default EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, Packet packet) throws NullPointerException, IllegalArgumentException {
+	public default EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, Packet packet)
+			throws NullPointerException, IllegalArgumentException {
 		return this.sendMessage(this.getGuid(peer), reliability, packet);
 	}
 
@@ -257,7 +261,8 @@ public interface RakNetClientPeerMessenger {
 	 *             if the <code>reliability</code> or <code>packets</code> are
 	 *             <code>null</code>.
 	 */
-	public default EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, Packet... packets) throws NullPointerException {
+	public default EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, Packet... packets)
+			throws NullPointerException {
 		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, packets);
 	}
 
@@ -283,7 +288,8 @@ public interface RakNetClientPeerMessenger {
 	 * @throws IllegalArgumentException
 	 *             if the <code>peer</code> is not of the server.
 	 */
-	public default EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, Packet... packets) throws NullPointerException, IllegalArgumentException {
+	public default EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, Packet... packets)
+			throws NullPointerException, IllegalArgumentException {
 		return this.sendMessage(this.getGuid(peer), reliability, packets);
 	}
 
@@ -312,7 +318,8 @@ public interface RakNetClientPeerMessenger {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, ByteBuf buf) throws NullPointerException, InvalidChannelException {
+	public default EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, ByteBuf buf)
+			throws NullPointerException, InvalidChannelException {
 		return this.sendMessage(guid, reliability, channel, new Packet(buf));
 	}
 
@@ -343,8 +350,8 @@ public interface RakNetClientPeerMessenger {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel, ByteBuf buf)
-			throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+	public default EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
+			ByteBuf buf) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
 		return this.sendMessage(this.getGuid(peer), reliability, channel, buf);
 	}
 
@@ -373,7 +380,8 @@ public interface RakNetClientPeerMessenger {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, ByteBuf... bufs) throws NullPointerException, InvalidChannelException {
+	public default EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, ByteBuf... bufs)
+			throws NullPointerException, InvalidChannelException {
 		if (bufs == null) {
 			throw new NullPointerException("Buffers cannot be null");
 		}
@@ -411,8 +419,8 @@ public interface RakNetClientPeerMessenger {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel, ByteBuf... bufs)
-			throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+	public default EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
+			ByteBuf... bufs) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
 		return this.sendMessage(this.getGuid(peer), reliability, bufs);
 	}
 
@@ -436,7 +444,8 @@ public interface RakNetClientPeerMessenger {
 	 *             if the <code>reliability</code> or <code>buf</code> are
 	 *             <code>null</code>.
 	 */
-	public default EncapsulatedPacket sendMessage(long guid, Reliability reliability, ByteBuf buf) throws NullPointerException {
+	public default EncapsulatedPacket sendMessage(long guid, Reliability reliability, ByteBuf buf)
+			throws NullPointerException {
 		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, buf);
 	}
 
@@ -462,7 +471,8 @@ public interface RakNetClientPeerMessenger {
 	 * @throws IllegalArgumentException
 	 *             if the <code>peer</code> is not of the server.
 	 */
-	public default EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, ByteBuf buf) throws NullPointerException, IllegalArgumentException {
+	public default EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, ByteBuf buf)
+			throws NullPointerException, IllegalArgumentException {
 		return this.sendMessage(this.getGuid(peer), reliability, buf);
 	}
 
@@ -486,7 +496,8 @@ public interface RakNetClientPeerMessenger {
 	 *             if the <code>reliability</code> or <code>bufs</code> are
 	 *             <code>null</code>.
 	 */
-	public default EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, ByteBuf... bufs) throws NullPointerException {
+	public default EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, ByteBuf... bufs)
+			throws NullPointerException {
 		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, bufs);
 	}
 
@@ -512,7 +523,8 @@ public interface RakNetClientPeerMessenger {
 	 * @throws IllegalArgumentException
 	 *             if the <code>peer</code> is not of the server.
 	 */
-	public default EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, ByteBuf... bufs) throws NullPointerException, IllegalArgumentException {
+	public default EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, ByteBuf... bufs)
+			throws NullPointerException, IllegalArgumentException {
 		return this.sendMessage(this.getGuid(peer), reliability, bufs);
 	}
 
@@ -540,7 +552,8 @@ public interface RakNetClientPeerMessenger {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, int packetId) throws NullPointerException, InvalidChannelException {
+	public default EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, int packetId)
+			throws NullPointerException, InvalidChannelException {
 		return this.sendMessage(guid, reliability, channel, new RakNetPacket(packetId));
 	}
 
@@ -571,8 +584,8 @@ public interface RakNetClientPeerMessenger {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel, int packetId)
-			throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+	public default EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
+			int packetId) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
 		return this.sendMessage(this.getGuid(peer), reliability, channel, packetId);
 	}
 
@@ -601,7 +614,8 @@ public interface RakNetClientPeerMessenger {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, int... packetIds) throws NullPointerException, InvalidChannelException {
+	public default EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, int... packetIds)
+			throws NullPointerException, InvalidChannelException {
 		if (packetIds == null) {
 			throw new NullPointerException("Packet IDs cannot be null");
 		}
@@ -639,8 +653,8 @@ public interface RakNetClientPeerMessenger {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public default EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel, int... packetIds)
-			throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+	public default EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
+			int... packetIds) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
 		return this.sendMessage(this.getGuid(peer), reliability, channel, packetIds);
 	}
 
@@ -663,7 +677,8 @@ public interface RakNetClientPeerMessenger {
 	 * @throws NullPointerException
 	 *             if the <code>reliability</code> is <code>null</code>.
 	 */
-	public default EncapsulatedPacket sendMessage(long guid, Reliability reliability, int packetId) throws NullPointerException {
+	public default EncapsulatedPacket sendMessage(long guid, Reliability reliability, int packetId)
+			throws NullPointerException {
 		return this.sendMessage(guid, reliability, new RakNetPacket(packetId));
 	}
 
@@ -689,7 +704,8 @@ public interface RakNetClientPeerMessenger {
 	 * @throws IllegalArgumentException
 	 *             if the <code>peer</code> is not of the server.
 	 */
-	public default EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int packetId) throws NullPointerException, IllegalArgumentException {
+	public default EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int packetId)
+			throws NullPointerException, IllegalArgumentException {
 		return this.sendMessage(this.getGuid(peer), reliability, packetId);
 	}
 
@@ -713,7 +729,8 @@ public interface RakNetClientPeerMessenger {
 	 *             if the <code>reliability</code> or <code>packetIds</code> are
 	 *             <code>null</code>.
 	 */
-	public default EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int... packetIds) throws NullPointerException {
+	public default EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int... packetIds)
+			throws NullPointerException {
 		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, packetIds);
 	}
 
@@ -739,7 +756,8 @@ public interface RakNetClientPeerMessenger {
 	 * @throws IllegalArgumentException
 	 *             if the <code>peer</code> is not of the server.
 	 */
-	public default EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int... packetIds) throws NullPointerException, IllegalArgumentException {
+	public default EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int... packetIds)
+			throws NullPointerException, IllegalArgumentException {
 		return this.sendMessage(this.getGuid(peer), reliability, packetIds);
 	}
 

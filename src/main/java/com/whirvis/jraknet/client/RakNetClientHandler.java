@@ -61,7 +61,8 @@ public final class RakNetClientHandler extends ChannelInboundHandlerAdapter {
 	 *            the client to send received packets to.
 	 */
 	protected RakNetClientHandler(RakNetClient client) {
-		this.logger = LogManager.getLogger(RakNetClientHandler.class.getSimpleName() + "[" + Long.toHexString(client.getGloballyUniqueId()).toUpperCase() + "]");
+		this.logger = LogManager.getLogger(RakNetClientHandler.class.getSimpleName() + "["
+				+ Long.toHexString(client.getGloballyUniqueId()).toUpperCase() + "]");
 		this.client = client;
 	}
 

@@ -97,7 +97,8 @@ public interface RakNetClientListener {
 	 * @param reason
 	 *            the reason for disconnection.
 	 */
-	public default void onDisconnect(RakNetClient client, InetSocketAddress address, RakNetServerPeer peer, String reason) {
+	public default void onDisconnect(RakNetClient client, InetSocketAddress address, RakNetServerPeer peer,
+			String reason) {
 	}
 
 	/**
@@ -112,7 +113,8 @@ public interface RakNetClientListener {
 	 * @param packet
 	 *            the acknowledged packet.
 	 */
-	public default void onAcknowledge(RakNetClient client, RakNetServerPeer peer, Record record, EncapsulatedPacket packet) {
+	public default void onAcknowledge(RakNetClient client, RakNetServerPeer peer, Record record,
+			EncapsulatedPacket packet) {
 	}
 
 	/**
@@ -163,7 +165,8 @@ public interface RakNetClientListener {
 	 * @param channel
 	 *            the channel the packet was sent on.
 	 */
-	public default void handleUnknownMessage(RakNetClient client, RakNetServerPeer peer, RakNetPacket packet, int channel) {
+	public default void handleUnknownMessage(RakNetClient client, RakNetServerPeer peer, RakNetPacket packet,
+			int channel) {
 	}
 
 	/**

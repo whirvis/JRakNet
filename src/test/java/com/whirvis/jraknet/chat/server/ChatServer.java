@@ -253,7 +253,8 @@ public final class ChatServer extends RakNetServer {
 	 *             if the <code>channel</code>. ID is greater than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}
 	 */
-	private void broadcastMessage(String message, int channel, boolean print) throws NullPointerException, InvalidChannelException {
+	private void broadcastMessage(String message, int channel, boolean print)
+			throws NullPointerException, InvalidChannelException {
 		if (message == null) {
 			throw new NullPointerException("Message cannot be null");
 		} else if (channel >= channels.length) {

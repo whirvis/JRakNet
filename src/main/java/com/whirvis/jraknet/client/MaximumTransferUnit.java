@@ -76,7 +76,8 @@ public final class MaximumTransferUnit {
 			unitMap.put(unit.getSize(), unit);
 		}
 		ArrayList<MaximumTransferUnit> unitList = new ArrayList<MaximumTransferUnit>();
-		NavigableMap<Integer, MaximumTransferUnit> unitTreeMap = new TreeMap<Integer, MaximumTransferUnit>(unitMap).descendingMap();
+		NavigableMap<Integer, MaximumTransferUnit> unitTreeMap = new TreeMap<Integer, MaximumTransferUnit>(unitMap)
+				.descendingMap();
 		Set<Entry<Integer, MaximumTransferUnit>> unitSet = unitTreeMap.entrySet();
 		Iterator<Entry<Integer, MaximumTransferUnit>> unitI = unitSet.iterator();
 		while (unitI.hasNext()) {
@@ -161,7 +162,8 @@ public final class MaximumTransferUnit {
 	 */
 	public int retry() throws IllegalStateException {
 		if (retriesLeft < 0) {
-			throw new IllegalStateException("No more retries left, use reset() in order to reuse a maximum transfer unit");
+			throw new IllegalStateException(
+					"No more retries left, use reset() in order to reuse a maximum transfer unit");
 		}
 		return this.retriesLeft--;
 	}

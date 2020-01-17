@@ -577,7 +577,8 @@ public final class RakNet {
 	 *             if the <code>timeout</code> or <code>retries</code> are less
 	 *             than or equal to <code>0</code>.
 	 */
-	private static RakNetPacket createBootstrapAndSend(InetSocketAddress address, Packet packet, long timeout, int retries) throws NullPointerException, IllegalArgumentException {
+	private static RakNetPacket createBootstrapAndSend(InetSocketAddress address, Packet packet, long timeout,
+			int retries) throws NullPointerException, IllegalArgumentException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
 		} else if (address.getAddress() == null) {
@@ -601,7 +602,8 @@ public final class RakNet {
 			// Create bootstrap
 			Bootstrap bootstrap = new Bootstrap();
 			BootstrapHandler handler = new BootstrapHandler();
-			bootstrap.group(group).channel(NioDatagramChannel.class).option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_RCVBUF, maximumTransferUnit)
+			bootstrap.group(group).channel(NioDatagramChannel.class).option(ChannelOption.SO_BROADCAST, true)
+					.option(ChannelOption.SO_RCVBUF, maximumTransferUnit)
 					.option(ChannelOption.SO_SNDBUF, maximumTransferUnit).handler(handler);
 			Channel channel = bootstrap.bind(0).sync().channel();
 
@@ -852,7 +854,8 @@ public final class RakNet {
 	 *             if a <code>scope_id</code> was specified for a global IPv6
 	 *             address.
 	 */
-	public static Identifier getServerIdentifier(String host, int port) throws NullPointerException, UnknownHostException {
+	public static Identifier getServerIdentifier(String host, int port)
+			throws NullPointerException, UnknownHostException {
 		if (host == null) {
 			throw new NullPointerException("IP address cannot be null");
 		}
@@ -1009,7 +1012,8 @@ public final class RakNet {
 	 */
 	public static void setSystemAddressCount(int systemAddressCount) throws IllegalArgumentException {
 		if (systemAddressCount < RAKNET_SYSTEM_ADDRESS_COUNT) {
-			throw new IllegalArgumentException("System address count cannot be less than " + RAKNET_SYSTEM_ADDRESS_COUNT);
+			throw new IllegalArgumentException(
+					"System address count cannot be less than " + RAKNET_SYSTEM_ADDRESS_COUNT);
 		}
 		boolean updated = _systemAddressCount != systemAddressCount;
 		_systemAddressCount = systemAddressCount;
@@ -1117,7 +1121,8 @@ public final class RakNet {
 	public static InetSocketAddress parseAddress(String address, int defaultPort) throws UnknownHostException {
 		String[] addressSplit = address.split(":");
 		if (addressSplit.length == 1 || addressSplit.length == 2) {
-			InetAddress inetAddress = InetAddress.getByName(!addressSplit[0].startsWith("/") ? addressSplit[0] : addressSplit[0].substring(1, addressSplit[0].length()));
+			InetAddress inetAddress = InetAddress.getByName(!addressSplit[0].startsWith("/") ? addressSplit[0]
+					: addressSplit[0].substring(1, addressSplit[0].length()));
 			int port = (addressSplit.length == 2 ? parseIntPassive(addressSplit[1]) : defaultPort);
 			if (port >= 0x0000 && port <= 0xFFFF) {
 				return new InetSocketAddress(inetAddress, port);

@@ -155,23 +155,28 @@ public class RakNetServer implements RakNetServerListener {
 	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
 	 *             {@value #AUTOMATIC_MTU}.
 	 */
-	public RakNetServer(InetSocketAddress address, int maximumTransferUnit, int maxConnections, Identifier identifier) throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(InetSocketAddress address, int maximumTransferUnit, int maxConnections, Identifier identifier)
+			throws NullPointerException, IllegalArgumentException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
 		} else if (maximumTransferUnit < RakNet.MINIMUM_MTU_SIZE && maximumTransferUnit != AUTOMATIC_MTU) {
-			throw new IllegalArgumentException("Maximum transfer unit must be no smaller than " + RakNet.MINIMUM_MTU_SIZE + " or equal to " + AUTOMATIC_MTU
-					+ " for the maximum transfer unit to be determined automatically");
+			throw new IllegalArgumentException(
+					"Maximum transfer unit must be no smaller than " + RakNet.MINIMUM_MTU_SIZE + " or equal to "
+							+ AUTOMATIC_MTU + " for the maximum transfer unit to be determined automatically");
 		} else if (maxConnections < 0 && maxConnections != INFINITE_CONNECTIONS) {
-			throw new IllegalArgumentException("Maximum connections must be greater than or equal to 0 or " + INFINITE_CONNECTIONS + " for infinite connections");
+			throw new IllegalArgumentException("Maximum connections must be greater than or equal to 0 or "
+					+ INFINITE_CONNECTIONS + " for infinite connections");
 		}
 		UUID uuid = UUID.randomUUID();
 		this.bindingAddress = address;
 		this.guid = uuid.getMostSignificantBits();
-		this.logger = LogManager.getLogger(RakNetServer.class.getSimpleName() + "[" + Long.toHexString(guid).toUpperCase() + "]");
+		this.logger = LogManager
+				.getLogger(RakNetServer.class.getSimpleName() + "[" + Long.toHexString(guid).toUpperCase() + "]");
 		this.pongId = uuid.getLeastSignificantBits();
 		this.timestamp = System.currentTimeMillis();
 		this.maxConnections = maxConnections;
-		this.maximumTransferUnit = maximumTransferUnit == AUTOMATIC_MTU ? RakNet.getMaximumTransferUnit(address) : maximumTransferUnit;
+		this.maximumTransferUnit = maximumTransferUnit == AUTOMATIC_MTU ? RakNet.getMaximumTransferUnit(address)
+				: maximumTransferUnit;
 		this.broadcastingEnabled = true;
 		this.identifier = identifier;
 		this.listeners = new ConcurrentLinkedQueue<RakNetServerListener>();
@@ -204,7 +209,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the maximum connections is less than <code>0</code> and
 	 *             not equal to {@value #INFINITE_CONNECTIONS}.
 	 */
-	public RakNetServer(InetSocketAddress address, int maxConnections, Identifier identifier) throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(InetSocketAddress address, int maxConnections, Identifier identifier)
+			throws NullPointerException, IllegalArgumentException {
 		this(address, AUTOMATIC_MTU, maxConnections, identifier);
 	}
 
@@ -239,7 +245,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
 	 *             {@value #AUTOMATIC_MTU}.
 	 */
-	public RakNetServer(InetSocketAddress address, int maximumTransferUnit, int maxConnections) throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(InetSocketAddress address, int maximumTransferUnit, int maxConnections)
+			throws NullPointerException, IllegalArgumentException {
 		this(address, maximumTransferUnit, maxConnections, null);
 	}
 
@@ -260,7 +267,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the maximum connections is less than <code>0</code> and
 	 *             not equal to {@value #INFINITE_CONNECTIONS}.
 	 */
-	public RakNetServer(InetSocketAddress address, int maxConnections) throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(InetSocketAddress address, int maxConnections)
+			throws NullPointerException, IllegalArgumentException {
 		this(address, AUTOMATIC_MTU, maxConnections);
 	}
 
@@ -302,7 +310,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
 	 *             {@value #AUTOMATIC_MTU}.
 	 */
-	public RakNetServer(InetAddress address, int port, int maximumTransferUnit, int maxConnections, Identifier identifier) throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(InetAddress address, int port, int maximumTransferUnit, int maxConnections,
+			Identifier identifier) throws NullPointerException, IllegalArgumentException {
 		this(new InetSocketAddress(address, port), maximumTransferUnit, maxConnections, identifier);
 	}
 
@@ -330,7 +339,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the maximum connections is less than <code>0</code> and
 	 *             not equal to {@value #INFINITE_CONNECTIONS}.
 	 */
-	public RakNetServer(InetAddress address, int port, int maxConnections, Identifier identifier) throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(InetAddress address, int port, int maxConnections, Identifier identifier)
+			throws NullPointerException, IllegalArgumentException {
 		this(address, port, AUTOMATIC_MTU, maxConnections, identifier);
 	}
 
@@ -367,7 +377,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
 	 *             {@value #AUTOMATIC_MTU}.
 	 */
-	public RakNetServer(InetAddress address, int port, int maximumTransferUnit, int maxConnections) throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(InetAddress address, int port, int maximumTransferUnit, int maxConnections)
+			throws NullPointerException, IllegalArgumentException {
 		this(address, port, maximumTransferUnit, maxConnections, null);
 	}
 
@@ -390,7 +401,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the maximum connections is less than <code>0</code> and
 	 *             not equal to {@value #INFINITE_CONNECTIONS}.
 	 */
-	public RakNetServer(InetAddress address, int port, int maxConnections) throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(InetAddress address, int port, int maxConnections)
+			throws NullPointerException, IllegalArgumentException {
 		this(address, port, AUTOMATIC_MTU, maxConnections);
 	}
 
@@ -469,7 +481,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the maximum connections is less than <code>0</code> and
 	 *             not equal to {@value #INFINITE_CONNECTIONS}.
 	 */
-	public RakNetServer(String host, int port, int maxConnections, Identifier identifier) throws UnknownHostException, NullPointerException, IllegalArgumentException {
+	public RakNetServer(String host, int port, int maxConnections, Identifier identifier)
+			throws UnknownHostException, NullPointerException, IllegalArgumentException {
 		this(host, port, AUTOMATIC_MTU, maxConnections, identifier);
 	}
 
@@ -510,7 +523,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
 	 *             {@value #AUTOMATIC_MTU}.
 	 */
-	public RakNetServer(String host, int port, int maximumTransferUnit, int maxConnections) throws UnknownHostException, NullPointerException, IllegalArgumentException {
+	public RakNetServer(String host, int port, int maximumTransferUnit, int maxConnections)
+			throws UnknownHostException, NullPointerException, IllegalArgumentException {
 		this(host, port, maximumTransferUnit, maxConnections, null);
 	}
 
@@ -537,7 +551,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the maximum connections is less than <code>0</code> and
 	 *             not equal to {@value #INFINITE_CONNECTIONS}.
 	 */
-	public RakNetServer(String host, int port, int maxConnections) throws UnknownHostException, NullPointerException, IllegalArgumentException {
+	public RakNetServer(String host, int port, int maxConnections)
+			throws UnknownHostException, NullPointerException, IllegalArgumentException {
 		this(host, port, AUTOMATIC_MTU, maxConnections);
 	}
 
@@ -575,7 +590,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
 	 *             {@value #AUTOMATIC_MTU}.
 	 */
-	public RakNetServer(int port, int maximumTransferUnit, int maxConnections, Identifier identifier) throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(int port, int maximumTransferUnit, int maxConnections, Identifier identifier)
+			throws NullPointerException, IllegalArgumentException {
 		this(new InetSocketAddress((InetAddress) null, port), maximumTransferUnit, maxConnections, identifier);
 	}
 
@@ -602,7 +618,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
 	 *             {@value #AUTOMATIC_MTU}.
 	 */
-	public RakNetServer(int port, int maxConnections, Identifier identifier) throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(int port, int maxConnections, Identifier identifier)
+			throws NullPointerException, IllegalArgumentException {
 		this(port, AUTOMATIC_MTU, maxConnections, identifier);
 	}
 
@@ -631,7 +648,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             {@value RakNet#MINIMUM_MTU_SIZE} and is not equal to
 	 *             {@value #AUTOMATIC_MTU}.
 	 */
-	public RakNetServer(int port, int maximumTransferUnit, int maxConnections) throws NullPointerException, IllegalArgumentException {
+	public RakNetServer(int port, int maximumTransferUnit, int maxConnections)
+			throws NullPointerException, IllegalArgumentException {
 		this(port, maximumTransferUnit, maxConnections, null);
 	}
 
@@ -762,12 +780,14 @@ public class RakNetServer implements RakNetServerListener {
 	 */
 	public final void setMaxConnections(int maxConnections) throws IllegalArgumentException {
 		if (maxConnections < 0 && maxConnections != INFINITE_CONNECTIONS) {
-			throw new IllegalArgumentException("Maximum connections must be greater than or equal to 0 or " + INFINITE_CONNECTIONS + " for infinite connections");
+			throw new IllegalArgumentException("Maximum connections must be greater than or equal to 0 or "
+					+ INFINITE_CONNECTIONS + " for infinite connections");
 		}
 		boolean updated = this.maxConnections != maxConnections;
 		this.maxConnections = maxConnections;
 		if (updated == true) {
-			logger.info("Set maximum connections to " + (maxConnections == INFINITE_CONNECTIONS ? "infinite" : maxConnections));
+			logger.info("Set maximum connections to "
+					+ (maxConnections == INFINITE_CONNECTIONS ? "infinite" : maxConnections));
 		}
 	}
 
@@ -838,7 +858,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the listener is another server that is not the server
 	 *             itself.
 	 */
-	public final RakNetServer addListener(RakNetServerListener listener) throws NullPointerException, IllegalArgumentException {
+	public final RakNetServer addListener(RakNetServerListener listener)
+			throws NullPointerException, IllegalArgumentException {
 		if (listener == null) {
 			throw new NullPointerException("Listener cannot be null");
 		} else if (listener instanceof RakNetClient && !this.equals(listener)) {
@@ -911,7 +932,8 @@ public class RakNetServer implements RakNetServerListener {
 		for (RakNetServerListener listener : listeners) {
 			if (listener.getClass().isAnnotationPresent(ThreadedListener.class)) {
 				ThreadedListener threadedListener = listener.getClass().getAnnotation(ThreadedListener.class);
-				new Thread(RakNetServer.class.getSimpleName() + (threadedListener.name().length() > 0 ? "-" : "") + threadedListener.name() + "-Thread-" + ++eventThreadCount) {
+				new Thread(RakNetServer.class.getSimpleName() + (threadedListener.name().length() > 0 ? "-" : "")
+						+ threadedListener.name() + "-Thread-" + ++eventThreadCount) {
 
 					@Override
 					public void run() {
@@ -1230,7 +1252,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, Packet packet) throws NullPointerException, IllegalArgumentException {
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, Packet packet)
+			throws NullPointerException, IllegalArgumentException {
 		if (reliability == null) {
 			throw new NullPointerException("Reliability cannot be null");
 		} else if (packet == null) {
@@ -1268,8 +1291,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel, Packet packet)
-			throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
+			Packet packet) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
 		return this.sendMessage(this.getGuid(peer), reliability, channel, packet);
 	}
 
@@ -1298,7 +1321,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, Packet... packets) throws NullPointerException, InvalidChannelException {
+	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, Packet... packets)
+			throws NullPointerException, InvalidChannelException {
 		if (packets == null) {
 			throw new NullPointerException("Packets cannot be null");
 		}
@@ -1336,8 +1360,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel, Packet... packets)
-			throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
+			Packet... packets) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
 		return this.sendMessage(this.getGuid(peer), reliability, channel, packets);
 	}
 
@@ -1361,7 +1385,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the <code>reliability</code> or <code>packet</code> are
 	 *             <code>null</code>.
 	 */
-	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, Packet packet) throws NullPointerException {
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, Packet packet)
+			throws NullPointerException {
 		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, packet);
 	}
 
@@ -1387,7 +1412,8 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws IllegalArgumentException
 	 *             if the <code>peer</code> is not of the server.
 	 */
-	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, Packet packet) throws NullPointerException, IllegalArgumentException {
+	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, Packet packet)
+			throws NullPointerException, IllegalArgumentException {
 		return this.sendMessage(this.getGuid(peer), reliability, packet);
 	}
 
@@ -1411,7 +1437,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the <code>reliability</code> or <code>packets</code> are
 	 *             <code>null</code>.
 	 */
-	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, Packet... packets) throws NullPointerException {
+	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, Packet... packets)
+			throws NullPointerException {
 		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, packets);
 	}
 
@@ -1437,7 +1464,8 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws IllegalArgumentException
 	 *             if the <code>peer</code> is not of the server.
 	 */
-	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, Packet... packets) throws NullPointerException, IllegalArgumentException {
+	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, Packet... packets)
+			throws NullPointerException, IllegalArgumentException {
 		return this.sendMessage(this.getGuid(peer), reliability, packets);
 	}
 
@@ -1466,7 +1494,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, ByteBuf buf) throws NullPointerException, InvalidChannelException {
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, ByteBuf buf)
+			throws NullPointerException, InvalidChannelException {
 		return this.sendMessage(guid, reliability, channel, new Packet(buf));
 	}
 
@@ -1497,8 +1526,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel, ByteBuf buf)
-			throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
+			ByteBuf buf) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
 		return this.sendMessage(this.getGuid(peer), reliability, channel, buf);
 	}
 
@@ -1527,7 +1556,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, ByteBuf... bufs) throws NullPointerException, InvalidChannelException {
+	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, ByteBuf... bufs)
+			throws NullPointerException, InvalidChannelException {
 		if (bufs == null) {
 			throw new NullPointerException("Buffers cannot be null");
 		}
@@ -1565,8 +1595,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel, ByteBuf... bufs)
-			throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
+			ByteBuf... bufs) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
 		return this.sendMessage(this.getGuid(peer), reliability, bufs);
 	}
 
@@ -1590,7 +1620,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the <code>reliability</code> or <code>buf</code> are
 	 *             <code>null</code>.
 	 */
-	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, ByteBuf buf) throws NullPointerException {
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, ByteBuf buf)
+			throws NullPointerException {
 		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, buf);
 	}
 
@@ -1616,7 +1647,8 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws IllegalArgumentException
 	 *             if the <code>peer</code> is not of the server.
 	 */
-	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, ByteBuf buf) throws NullPointerException, IllegalArgumentException {
+	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, ByteBuf buf)
+			throws NullPointerException, IllegalArgumentException {
 		return this.sendMessage(this.getGuid(peer), reliability, buf);
 	}
 
@@ -1640,7 +1672,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the <code>reliability</code> or <code>bufs</code> are
 	 *             <code>null</code>.
 	 */
-	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, ByteBuf... bufs) throws NullPointerException {
+	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, ByteBuf... bufs)
+			throws NullPointerException {
 		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, bufs);
 	}
 
@@ -1666,7 +1699,8 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws IllegalArgumentException
 	 *             if the <code>peer</code> is not of the server.
 	 */
-	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, ByteBuf... bufs) throws NullPointerException, IllegalArgumentException {
+	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, ByteBuf... bufs)
+			throws NullPointerException, IllegalArgumentException {
 		return this.sendMessage(this.getGuid(peer), reliability, bufs);
 	}
 
@@ -1694,7 +1728,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, int packetId) throws NullPointerException, InvalidChannelException {
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int channel, int packetId)
+			throws NullPointerException, InvalidChannelException {
 		return this.sendMessage(guid, reliability, channel, new RakNetPacket(packetId));
 	}
 
@@ -1725,8 +1760,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel, int packetId)
-			throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
+			int packetId) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
 		return this.sendMessage(this.getGuid(peer), reliability, channel, packetId);
 	}
 
@@ -1755,7 +1790,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, int... packetIds) throws NullPointerException, InvalidChannelException {
+	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int channel, int... packetIds)
+			throws NullPointerException, InvalidChannelException {
 		if (packetIds == null) {
 			throw new NullPointerException("Packet IDs cannot be null");
 		}
@@ -1793,8 +1829,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the channel is higher than or equal to
 	 *             {@value RakNet#CHANNEL_COUNT}.
 	 */
-	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel, int... packetIds)
-			throws NullPointerException, IllegalArgumentException, InvalidChannelException {
+	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int channel,
+			int... packetIds) throws NullPointerException, IllegalArgumentException, InvalidChannelException {
 		return this.sendMessage(this.getGuid(peer), reliability, channel, packetIds);
 	}
 
@@ -1817,7 +1853,8 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws NullPointerException
 	 *             if the <code>reliability</code> is <code>null</code>.
 	 */
-	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int packetId) throws NullPointerException {
+	public final EncapsulatedPacket sendMessage(long guid, Reliability reliability, int packetId)
+			throws NullPointerException {
 		return this.sendMessage(guid, reliability, new RakNetPacket(packetId));
 	}
 
@@ -1843,7 +1880,8 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws IllegalArgumentException
 	 *             if the <code>peer</code> is not of the server.
 	 */
-	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int packetId) throws NullPointerException, IllegalArgumentException {
+	public final EncapsulatedPacket sendMessage(RakNetClientPeer peer, Reliability reliability, int packetId)
+			throws NullPointerException, IllegalArgumentException {
 		return this.sendMessage(this.getGuid(peer), reliability, packetId);
 	}
 
@@ -1867,7 +1905,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the <code>reliability</code> or <code>packetIds</code> are
 	 *             <code>null</code>.
 	 */
-	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int... packetIds) throws NullPointerException {
+	public final EncapsulatedPacket[] sendMessage(long guid, Reliability reliability, int... packetIds)
+			throws NullPointerException {
 		return this.sendMessage(guid, reliability, RakNet.DEFAULT_CHANNEL, packetIds);
 	}
 
@@ -1893,7 +1932,8 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws IllegalArgumentException
 	 *             if the <code>peer</code> is not of the server.
 	 */
-	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int... packetIds) throws NullPointerException, IllegalArgumentException {
+	public final EncapsulatedPacket[] sendMessage(RakNetClientPeer peer, Reliability reliability, int... packetIds)
+			throws NullPointerException, IllegalArgumentException {
 		return this.sendMessage(this.getGuid(peer), reliability, packetIds);
 	}
 
@@ -2007,8 +2047,10 @@ public class RakNetServer implements RakNetServerListener {
 			return false; // No client to disconnect
 		}
 		peer.disconnect();
-		logger.debug("Disconnected client with address " + address + " for \"" + (reason == null ? "Disconnected" : reason) + "\"");
-		this.callEvent(listener -> listener.onDisconnect(this, address, peer, reason == null ? "Disconnected" : reason));
+		logger.debug("Disconnected client with address " + address + " for \""
+				+ (reason == null ? "Disconnected" : reason) + "\"");
+		this.callEvent(
+				listener -> listener.onDisconnect(this, address, peer, reason == null ? "Disconnected" : reason));
 		return true;
 	}
 
@@ -2448,7 +2490,8 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the cause <code>address</code> or <code>cause</code> are
 	 *             <code>null</code>.
 	 */
-	protected final void handleHandlerException(InetSocketAddress address, Throwable cause) throws NullPointerException {
+	protected final void handleHandlerException(InetSocketAddress address, Throwable cause)
+			throws NullPointerException {
 		if (address == null) {
 			throw new NullPointerException("Address cannot be null");
 		} else if (cause == null) {
@@ -2478,11 +2521,14 @@ public class RakNetServer implements RakNetServerListener {
 			throw new NullPointerException("Packet cannot be null");
 		} else if (clients.containsKey(sender)) {
 			clients.get(sender).handleInternal(packet);
-		} else if (packet.getId() == RakNetPacket.ID_UNCONNECTED_PING || packet.getId() == RakNetPacket.ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
+		} else if (packet.getId() == RakNetPacket.ID_UNCONNECTED_PING
+				|| packet.getId() == RakNetPacket.ID_UNCONNECTED_PING_OPEN_CONNECTIONS) {
 			UnconnectedPing ping = new UnconnectedPing(packet);
 			ping.decode();
-			if (!ping.failed() && (packet.getId() == RakNetPacket.ID_UNCONNECTED_PING || (clients.size() < maxConnections || maxConnections < 0)) && broadcastingEnabled == true
-					&& ping.magic == true) {
+			if (!ping.failed()
+					&& (packet.getId() == RakNetPacket.ID_UNCONNECTED_PING
+							|| (clients.size() < maxConnections || maxConnections < 0))
+					&& broadcastingEnabled == true && ping.magic == true) {
 				ServerPing pingEvent = new ServerPing(sender, ping.connectionType, identifier);
 				this.callEvent(listener -> listener.onPing(this, pingEvent));
 				if (pingEvent.getIdentifier() != null) {
@@ -2529,18 +2575,23 @@ public class RakNetServer implements RakNetServerListener {
 		} else if (packet.getId() == RakNetPacket.ID_OPEN_CONNECTION_REQUEST_2) {
 			OpenConnectionRequestTwo connectionRequestTwo = new OpenConnectionRequestTwo(packet);
 			connectionRequestTwo.decode();
-			if (!connectionRequestTwo.failed() && connectionRequestTwo.magic == true && connectionRequestTwo.maximumTransferUnit >= RakNet.MINIMUM_MTU_SIZE) {
+			if (!connectionRequestTwo.failed() && connectionRequestTwo.magic == true
+					&& connectionRequestTwo.maximumTransferUnit >= RakNet.MINIMUM_MTU_SIZE) {
 				RakNetPacket errorPacket = this.validateSender(sender, connectionRequestTwo.clientGuid);
 				if (errorPacket == null) {
 					OpenConnectionResponseTwo connectionResponseTwo = new OpenConnectionResponseTwo();
 					connectionResponseTwo.serverGuid = this.guid;
 					connectionResponseTwo.clientAddress = sender;
-					connectionResponseTwo.maximumTransferUnit = Math.min(connectionRequestTwo.maximumTransferUnit, maximumTransferUnit);
+					connectionResponseTwo.maximumTransferUnit = Math.min(connectionRequestTwo.maximumTransferUnit,
+							maximumTransferUnit);
 					connectionResponseTwo.encode();
 					if (!connectionResponseTwo.failed()) {
-						this.callEvent(listener -> listener.onConnect(this, sender, connectionRequestTwo.connectionType));
-						clients.put(sender, new RakNetClientPeer(this, connectionRequestTwo.connectionType, connectionRequestTwo.clientGuid,
-								connectionResponseTwo.maximumTransferUnit, channel, sender));
+						this.callEvent(
+								listener -> listener.onConnect(this, sender, connectionRequestTwo.connectionType));
+						clients.put(sender,
+								new RakNetClientPeer(this, connectionRequestTwo.connectionType,
+										connectionRequestTwo.clientGuid, connectionResponseTwo.maximumTransferUnit,
+										channel, sender));
 						this.sendNettyMessage(connectionResponseTwo, sender);
 					}
 				} else {
@@ -2609,7 +2660,8 @@ public class RakNetServer implements RakNetServerListener {
 			throw new NullPointerException("IP address cannot be null");
 		}
 		channel.writeAndFlush(new DatagramPacket(buf, address));
-		logger.trace("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8) + " bits) to " + address);
+		logger.trace("Sent netty message with size of " + buf.capacity() + " bytes (" + (buf.capacity() * 8)
+				+ " bits) to " + address);
 	}
 
 	/**
@@ -2689,16 +2741,20 @@ public class RakNetServer implements RakNetServerListener {
 
 			// Create bootstrap and bind channel
 			bootstrap.channel(NioDatagramChannel.class).group(group);
-			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false).option(ChannelOption.SO_SNDBUF, maximumTransferUnit)
-					.option(ChannelOption.SO_RCVBUF, maximumTransferUnit).option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(maximumTransferUnit));
-			this.channel = (bindingAddress != null ? bootstrap.bind(bindingAddress) : bootstrap.bind(0)).sync().channel();
+			bootstrap.option(ChannelOption.SO_BROADCAST, true).option(ChannelOption.SO_REUSEADDR, false)
+					.option(ChannelOption.SO_SNDBUF, maximumTransferUnit)
+					.option(ChannelOption.SO_RCVBUF, maximumTransferUnit)
+					.option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(maximumTransferUnit));
+			this.channel = (bindingAddress != null ? bootstrap.bind(bindingAddress) : bootstrap.bind(0)).sync()
+					.channel();
 			this.bindAddress = (InetSocketAddress) channel.localAddress();
 			this.running = true;
 			logger.debug("Created and bound bootstrap");
 
 			// Create and start peer update thread
 			RakNetServer server = this;
-			this.peerThread = new Thread(RakNetServer.class.getSimpleName() + "-Peer-Thread-" + Long.toHexString(guid).toUpperCase()) {
+			this.peerThread = new Thread(
+					RakNetServer.class.getSimpleName() + "-Peer-Thread-" + Long.toHexString(guid).toUpperCase()) {
 
 				@Override
 				public void run() {
@@ -2715,7 +2771,8 @@ public class RakNetServer implements RakNetServerListener {
 								try {
 									peer.update();
 									if (peer.getPacketsReceivedThisSecond() >= RakNet.getMaxPacketsPerSecond()) {
-										server.blockAddress(peer.getInetAddress(), "Too many packets", RakNet.MAX_PACKETS_PER_SECOND_BLOCK);
+										server.blockAddress(peer.getInetAddress(), "Too many packets",
+												RakNet.MAX_PACKETS_PER_SECOND_BLOCK);
 									}
 								} catch (Throwable throwable) {
 									server.callEvent(listener -> listener.onPeerException(server, peer, throwable));
@@ -2828,9 +2885,11 @@ public class RakNetServer implements RakNetServerListener {
 
 	@Override
 	public String toString() {
-		return "RakNetServer [bindingAddress=" + bindingAddress + ", guid=" + guid + ", pongId=" + pongId + ", timestamp=" + timestamp + ", maximumTransferUnit="
-				+ maximumTransferUnit + ", maxConnections=" + maxConnections + ", broadcastingEnabled=" + broadcastingEnabled + ", identifier=" + identifier + ", bindAddress="
-				+ bindAddress + ", running=" + running + ", getProtocolVersion()=" + getProtocolVersion() + ", getTimestamp()=" + getTimestamp() + ", getAddress()=" + getAddress()
+		return "RakNetServer [bindingAddress=" + bindingAddress + ", guid=" + guid + ", pongId=" + pongId
+				+ ", timestamp=" + timestamp + ", maximumTransferUnit=" + maximumTransferUnit + ", maxConnections="
+				+ maxConnections + ", broadcastingEnabled=" + broadcastingEnabled + ", identifier=" + identifier
+				+ ", bindAddress=" + bindAddress + ", running=" + running + ", getProtocolVersion()="
+				+ getProtocolVersion() + ", getTimestamp()=" + getTimestamp() + ", getAddress()=" + getAddress()
 				+ ", getClientCount()=" + getClientCount() + "]";
 	}
 

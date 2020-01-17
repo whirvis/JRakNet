@@ -109,14 +109,16 @@ public class CommandHandler {
 	 *             overriden.
 	 * 
 	 */
-	public void registerCommand(Class<? extends Command> commandClazz) throws NullPointerException, IllegalArgumentException {
+	public void registerCommand(Class<? extends Command> commandClazz)
+			throws NullPointerException, IllegalArgumentException {
 		try {
 			if (commandClazz == null) {
 				throw new NullPointerException("Command class cannot be null");
 			}
 			Command command = (Command) commandClazz.getDeclaredConstructor(ChatServer.class).newInstance(server);
 			this.registerCommand(command);
-		} catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException | InstantiationException e) {
+		} catch (IllegalArgumentException | InvocationTargetException | NoSuchMethodException
+				| InstantiationException e) {
 			throw new IllegalArgumentException("Command lacks invalid constructor for proper instantiation");
 		} catch (IllegalAccessException e) {
 			throw new IllegalArgumentException("Command constructor must be accessible");

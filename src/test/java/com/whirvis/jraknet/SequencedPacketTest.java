@@ -112,7 +112,8 @@ public final class SequencedPacketTest {
 			}
 
 			@Override
-			public void onDisconnect(RakNetServer server, InetSocketAddress address, RakNetClientPeer peer, String reason) {
+			public void onDisconnect(RakNetServer server, InetSocketAddress address, RakNetClientPeer peer,
+					String reason) {
 				LOG.info("Server - Client from " + address + " disconnected (" + reason + ")");
 				System.exit(1);
 			}
@@ -122,7 +123,8 @@ public final class SequencedPacketTest {
 				if (packet.getId() == SEQUENCE_HEADER_ID) {
 					int packetIndex = packet.readInt();
 					if (packetIndex - lastPacketIndex.intValue() > 1) {
-						LOG.info("Lost packets " + (lastPacketIndex.intValue() + 1) + "-" + (lastPacketIndex.intValue() + (packetIndex - lastPacketIndex.intValue()) - 1));
+						LOG.info("Lost packets " + (lastPacketIndex.intValue() + 1) + "-"
+								+ (lastPacketIndex.intValue() + (packetIndex - lastPacketIndex.intValue()) - 1));
 					}
 					lastPacketIndex.set(packetIndex);
 					packetReceiveCount++;
@@ -159,7 +161,8 @@ public final class SequencedPacketTest {
 
 			@Override
 			public void onLogin(RakNetClient client, RakNetServerPeer peer) {
-				LOG.info("Client - Logged in to server with MTU " + peer.getMaximumTransferUnit() + ", sending " + PACKET_SEND_COUNT + " packets...");
+				LOG.info("Client - Logged in to server with MTU " + peer.getMaximumTransferUnit() + ", sending "
+						+ PACKET_SEND_COUNT + " packets...");
 				int packetSize = 0;
 				startSend = System.currentTimeMillis();
 				for (int i = 0; i < PACKET_SEND_COUNT; i++) {
@@ -169,11 +172,13 @@ public final class SequencedPacketTest {
 					peer.sendMessage(Reliability.UNRELIABLE_SEQUENCED, sequencedPacket);
 				}
 				peer.sendMessage(Reliability.RELIABLE_SEQUENCED, SEQUENCE_END_ID);
-				LOG.info("Client - Sent " + PACKET_SEND_COUNT + " packets (" + packetSize + " bytes, " + (packetSize / 4) + " ints)");
+				LOG.info("Client - Sent " + PACKET_SEND_COUNT + " packets (" + packetSize + " bytes, "
+						+ (packetSize / 4) + " ints)");
 			}
 
 			@Override
-			public void onDisconnect(RakNetClient client, InetSocketAddress address, RakNetServerPeer peer, String reason) {
+			public void onDisconnect(RakNetClient client, InetSocketAddress address, RakNetServerPeer peer,
+					String reason) {
 				LOG.error("Client - Lost connection to server (" + reason + ")");
 				System.exit(1);
 			}
@@ -193,9 +198,12 @@ public final class SequencedPacketTest {
 	 * Prints the results of the test.
 	 */
 	private static void printResults() {
-		LOG.info("Server - Sequenced packet test finished, lost "
-				+ (packetReceiveCount >= PACKET_SEND_COUNT ? "no" : new DecimalFormat("##.##").format(100.0F - (((float) packetReceiveCount / PACKET_SEND_COUNT) * 100F)) + "% of")
-				+ " packets (Took " + (System.currentTimeMillis() - startSend) + "MS)");
+		LOG.info(
+				"Server - Sequenced packet test finished, lost "
+						+ (packetReceiveCount >= PACKET_SEND_COUNT ? "no"
+								: new DecimalFormat("##.##").format(
+										100.0F - (((float) packetReceiveCount / PACKET_SEND_COUNT) * 100F)) + "% of")
+						+ " packets (Took " + (System.currentTimeMillis() - startSend) + "MS)");
 		if (packetReceiveCount < PACKET_SEND_COUNT) {
 			ArrayList<Integer> lostPackets = new ArrayList<Integer>();
 			for (int i = 0; i < packetsReceived.length; i++) {

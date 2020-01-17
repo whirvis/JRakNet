@@ -91,13 +91,15 @@ public final class RakNetServerTest {
 
 			@Override
 			public void onPing(RakNetServer server, ServerPing ping) {
-				ping.setIdentifier(new MinecraftIdentifier("A JRakNet server test", RakNetTest.MINECRAFT_PROTOCOL_NUMBER, RakNetTest.MINECRAFT_VERSION, server.getClientCount(),
+				ping.setIdentifier(new MinecraftIdentifier("A JRakNet server test",
+						RakNetTest.MINECRAFT_PROTOCOL_NUMBER, RakNetTest.MINECRAFT_VERSION, server.getClientCount(),
 						server.getMaxConnections(), server.getGloballyUniqueId(), "New World", "Survival"));
 			}
 
 			@Override
 			public void onConnect(RakNetServer server, InetSocketAddress address, ConnectionType connectionType) {
-				LOG.info("Client from " + address + " has connected using the " + connectionType.getName() + " implementation, waiting for login");
+				LOG.info("Client from " + address + " has connected using the " + connectionType.getName()
+						+ " implementation, waiting for login");
 			}
 
 			@Override
@@ -108,26 +110,29 @@ public final class RakNetServerTest {
 			}
 
 			@Override
-			public void onDisconnect(RakNetServer server, InetSocketAddress address, RakNetClientPeer peer, String reason) {
+			public void onDisconnect(RakNetServer server, InetSocketAddress address, RakNetClientPeer peer,
+					String reason) {
 				LOG.info("Client from " + address + " " + (peer == null ? "failed to login" : "disconnected"));
 			}
 
 			@Override
-			public void onAcknowledge(RakNetServer server, RakNetClientPeer peer, Record record, EncapsulatedPacket packet) {
-				LOG.info(peer.getConnectionType().getName() + " client with address " + peer.getAddress() + " has received "
-						+ RakNetPacket.getName(packet.payload.readUnsignedByte()) + " packet");
+			public void onAcknowledge(RakNetServer server, RakNetClientPeer peer, Record record,
+					EncapsulatedPacket packet) {
+				LOG.info(peer.getConnectionType().getName() + " client with address " + peer.getAddress()
+						+ " has received " + RakNetPacket.getName(packet.payload.readUnsignedByte()) + " packet");
 			}
 
 			@Override
 			public void onLoss(RakNetServer server, RakNetClientPeer peer, Record record, EncapsulatedPacket packet) {
-				LOG.info(peer.getConnectionType().getName() + " client with address " + peer.getAddress() + " has lost " + RakNetPacket.getName(packet.payload.readUnsignedByte())
-						+ " packet");
+				LOG.info(peer.getConnectionType().getName() + " client with address " + peer.getAddress() + " has lost "
+						+ RakNetPacket.getName(packet.payload.readUnsignedByte()) + " packet");
 			}
 
 			@Override
 			public void handleMessage(RakNetServer server, RakNetClientPeer peer, RakNetPacket packet, int channel) {
-				LOG.info("Received packet from " + peer.getConnectionType().getName() + " client with address " + peer.getAddress() + " with packet ID "
-						+ RakNetPacket.getName(packet) + " on channel " + channel);
+				LOG.info("Received packet from " + peer.getConnectionType().getName() + " client with address "
+						+ peer.getAddress() + " with packet ID " + RakNetPacket.getName(packet) + " on channel "
+						+ channel);
 			}
 
 			@Override

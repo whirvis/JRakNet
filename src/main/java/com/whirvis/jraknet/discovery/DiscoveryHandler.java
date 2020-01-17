@@ -110,8 +110,9 @@ public final class DiscoveryHandler extends ChannelInboundHandlerAdapter {
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 		if (!blocked.contains(causeAddress.getAddress())) {
 			blocked.add(causeAddress.getAddress());
-			logger.warn("Blocked address " + causeAddress.getAddress() + " that caused " + cause.getClass().getSimpleName()
-					+ " to be thrown, discovering servers from it will no longer be possible");
+			logger.warn(
+					"Blocked address " + causeAddress.getAddress() + " that caused " + cause.getClass().getSimpleName()
+							+ " to be thrown, discovering servers from it will no longer be possible");
 		} else {
 			logger.error("Blocked address still cause exception to be thrown", cause);
 		}
