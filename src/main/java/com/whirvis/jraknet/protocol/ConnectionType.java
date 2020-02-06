@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2019 Trent Summerlin
+ * Copyright (c) 2016-2020 Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,6 @@ import java.util.UUID;
  * type protocol are:
  * <ul>
  * <li>JRakNet by Trent Summerlin</li>
- * <li>RakLib by PocketMine-MP</li>
  * </ul>
  * 
  * @author Trent Summerlin
