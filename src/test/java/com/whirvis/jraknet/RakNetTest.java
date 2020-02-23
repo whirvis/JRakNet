@@ -79,7 +79,7 @@ public final class RakNetTest {
 	public static final String MINECRAFT_VERSION = "1.10.0";
 
 	/**
-	 * The address of the Lifeboat Survival Games server.
+	 * The address of the LifeBoat Survival Games server.
 	 */
 	public static final InetSocketAddress LIFEBOAT_SURVIVAL_GAMES_ADDRESS = new InetSocketAddress("sg.lbsg.net",
 			MINECRAFT_DEFAULT_PORT);
@@ -118,7 +118,7 @@ public final class RakNetTest {
 		// Check if server is compatible
 		LOG.info("Checking compatibility... ");
 		if (RakNet.isServerCompatible(LIFEBOAT_SURVIVAL_GAMES_ADDRESS)) {
-			LOG.info("\tServer is incompatible");
+			LOG.info("\tServer is compatible");
 		} else {
 			throw new RakNetException("Server is incompatible, unable to proceed with testing");
 		}
