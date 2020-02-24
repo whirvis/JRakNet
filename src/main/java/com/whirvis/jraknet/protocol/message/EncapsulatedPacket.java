@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 Trent Summerlin
+ * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,7 +43,7 @@ import com.whirvis.jraknet.protocol.message.acknowledge.Record;
  * These packets are sent within {@link CustomPacket CUSTOM} packets after
  * initial connection has succeeded between the server and client.
  *
- * @author Trent Summerlin
+ * @author "Whirvis" Trent Summerlin
  * @since JRakNet v1.0.0
  */
 public final class EncapsulatedPacket implements Cloneable {
@@ -52,7 +52,7 @@ public final class EncapsulatedPacket implements Cloneable {
 	 * Used to easily split and reassemble {@link EncapsulatedPacket
 	 * encapsulated packets}.
 	 * 
-	 * @author Trent Summerlin
+	 * @author "Whirvis" Trent Summerlin
 	 * @since JRakNet v1.0.0
 	 */
 	public static final class Split {

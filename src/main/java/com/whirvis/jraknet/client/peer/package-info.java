@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 Trent Summerlin
+ * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@
  * using the {@link com.whirvis.jraknet.client.peer.PeerFactory PeerFactory}
  * class.
  * 
- * @author Trent Summerlin
+ * @author "Whirvis" Trent Summerlin
  * @since JRakNet v2.11.0
  */
 package com.whirvis.jraknet.client.peer;

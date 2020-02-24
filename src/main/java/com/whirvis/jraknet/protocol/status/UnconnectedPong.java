@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 Trent Summerlin
+ * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,7 @@ import com.whirvis.jraknet.protocol.Failable;
  * packets in order to give the client server information and show that it is
  * online.
  * 
- * @author Trent Summerlin
+ * @author "Whirvis" Trent Summerlin
  * @since JRakNet 1.0.0
  */
 public final class UnconnectedPong extends RakNetPacket implements Failable {

@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 Trent Summerlin
+ * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@
  * {@link com.whirvis.jraknet.Packet#getOutputStream() getOutputStream()}
  * methods.
  * 
- * @author Trent Summerlin
+ * @author "Whirvis" Trent Summerlin
  * @since JRakNet v2.1.0
  */
 package com.whirvis.jraknet.stream;

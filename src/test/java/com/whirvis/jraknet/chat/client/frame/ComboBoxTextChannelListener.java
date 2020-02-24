@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 Trent Summerlin
+ * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,7 +41,7 @@ import com.whirvis.jraknet.chat.client.ChatClient;
  * When a change in the currently selected channel has been detected, it will
  * signal the client to update its currently displayed channel.
  *
- * @author Trent Summerlin
+ * @author "Whirvis" Trent Summerlin
  * @since JRakNet v2.0.0
  */
 public final class ComboBoxTextChannelListener implements ActionListener {

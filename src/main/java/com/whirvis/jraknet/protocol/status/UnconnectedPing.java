@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 Trent Summerlin
+ * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +42,7 @@ import com.whirvis.jraknet.protocol.Failable;
  * sending directly to servers in order to get their status and descriptor, also
  * known as an {@link com.whirvis.jraknet.identifier.Identifier Identifier}.
  * 
- * @author Trent Summerlin
+ * @author "Whirvis" Trent Summerlin
  * @since JRakNet v1.0.0
  */
 public class UnconnectedPing extends RakNetPacket implements Failable {

@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 Trent Summerlin
+ * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,10 +42,10 @@ import java.util.UUID;
  * As of March 1st, 2019, the only known implementations using this connection
  * type protocol are:
  * <ul>
- * <li>JRakNet by Trent Summerlin</li>
+ * <li>JRakNet by "Whirvis" Trent Summerlin</li>
  * </ul>
  * 
- * @author Trent Summerlin
+ * @author "Whirvis" Trent Summerlin
  * @since JRakNet v2.9.0
  * @see com.whirvis.jraknet.identifier.Identifier Identifier
  */

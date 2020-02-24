@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 Trent Summerlin
+ * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,7 @@ import io.netty.channel.socket.DatagramPacket;
  * received packets to the discovery system so they can be handled. If any
  * errors occur while handling a packet, it will be ignored.
  *
- * @author Trent Summerlin
+ * @author "Whirvis" Trent Summerlin
  * @since JRakNet v2.11.0
  */
 public final class DiscoveryHandler extends ChannelInboundHandlerAdapter {

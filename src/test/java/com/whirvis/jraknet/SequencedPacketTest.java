@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 Trent Summerlin
+ * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -55,7 +55,7 @@ import com.whirvis.jraknet.server.RakNetServerListener;
  * {@link Reliability#UNRELIABLE_SEQUENCED UNRELIABLE_SEQUENCED} reliability,
  * and also reports if they were lost or received too late.
  * 
- * @author Trent Summerlin
+ * @author "Whirvis" Trent Summerlin
  * @since JRakNet v2.0.0
  */
 public final class SequencedPacketTest {
