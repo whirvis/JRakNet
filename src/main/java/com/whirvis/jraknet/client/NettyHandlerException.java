@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
+ * Copyright (c) 2016-2020 Trent "Whirvis" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +35,7 @@ import java.net.InetSocketAddress;
  * Signals that a <code>Throwable</code> was caught by the
  * {@link RakNetClientHandler}.
  *
- * @author "Whirvis" Trent Summerlin
+ * @author Trent "Whirvis" Summerlin
  * @since JRakNet v2.0.0
  */
 public final class NettyHandlerException extends RakNetClientException {

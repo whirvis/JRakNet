@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
+ * Copyright (c) 2016-2020 Trent "Whirvis" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,7 +33,7 @@ package com.whirvis.jraknet;
  * Signals that a packet channel in a sent or received packet is higher than the
  * limit of {@value RakNet#CHANNEL_COUNT}.
  *
- * @author "Whirvis" Trent Summerlin
+ * @author Trent "Whirvis" Summerlin
  * @since JRakNet v1.0.0
  */
 public final class InvalidChannelException extends IllegalArgumentException {

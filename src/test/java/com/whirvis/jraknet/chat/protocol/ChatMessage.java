@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
+ * Copyright (c) 2016-2020 Trent "Whirvis" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ import com.whirvis.jraknet.Packet;
  * {@link com.whirvis.jraknet.chat.server.ChatServer ChatServer}, it is to
  * indicate to that a message has been sent.
  * 
- * @author "Whirvis" Trent Summerlin
+ * @author Trent "Whirvis" Summerlin
  * @since JRakNet v2.0.0
  */
 public final class ChatMessage extends ChatPacket {

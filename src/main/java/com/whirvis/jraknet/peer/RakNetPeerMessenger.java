@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
+ * Copyright (c) 2016-2020 Trent "Whirvis" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,7 +51,7 @@ import io.netty.buffer.ByteBuf;
  * would be the exact same thing as grabbing the peer manually and then sending
  * it a message.
  * 
- * @author "Whirvis" Trent Summerlin
+ * @author Trent "Whirvis" Summerlin
  * @since JRakNet v2.11.0
  */
 public interface RakNetPeerMessenger {

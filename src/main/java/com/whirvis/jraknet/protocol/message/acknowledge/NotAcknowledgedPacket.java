@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
+ * Copyright (c) 2016-2020 Trent "Whirvis" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,7 +39,7 @@ import com.whirvis.jraknet.Packet;
  * know when the other side has lost their message in transmission, which can be
  * crucial during the login process.
  * 
- * @author "Whirvis" Trent Summerlin
+ * @author Trent "Whirvis" Summerlin
  * @since JRakNet v2.11.0
  * @see Record
  */

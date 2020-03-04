@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
+ * Copyright (c) 2016-2020 Trent "Whirvis" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,7 +49,7 @@ import com.whirvis.jraknet.identifier.MinecraftIdentifier;
 /**
  * The frame used to visualize the broadcast test.
  *
- * @author "Whirvis" Trent Summerlin
+ * @author Trent "Whirvis" Summerlin
  * @since JRakNet v2.0.0
  */
 public final class BroadcastFrame extends JFrame {
@@ -58,7 +58,7 @@ public final class BroadcastFrame extends JFrame {
 	 * Listens for discovery mode changes and then update the client
 	 * accordingly.
 	 *
-	 * @author "Whirvis" Trent Summerlin
+	 * @author Trent "Whirvis" Summerlin
 	 * @since JRakNet v2.0.0
 	 */
 	private final class RakNetBroadcastDiscoveryTypeListener implements ActionListener {
@@ -81,7 +81,7 @@ public final class BroadcastFrame extends JFrame {
 	 * Listens for discovery port changes and then update the client
 	 * accordingly.
 	 *
-	 * @author "Whirvis" Trent Summerlin
+	 * @author Trent "Whirvis" Summerlin
 	 * @since JRakNet v2.0.0
 	 */
 	private final class RakNetBroadcastUpdatePortListener implements ActionListener {

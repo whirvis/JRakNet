@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
+ * Copyright (c) 2016-2020 Trent "Whirvis" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -65,7 +65,7 @@ import io.netty.channel.socket.DatagramPacket;
 /**
  * Represents a connection to another machine, be it a server or a client.
  * 
- * @author "Whirvis" Trent Summerlin
+ * @author Trent "Whirvis" Summerlin
  * @since JRakNet v1.0.0
  */
 public abstract class RakNetPeer implements RakNetPeerMessenger {
@@ -74,7 +74,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * Used to store the message index for received reliable packets in a
 	 * condensed fashion.
 	 * 
-	 * @author "Whirvis" Trent Summerlin
+	 * @author Trent "Whirvis" Summerlin
 	 * @since JRakNet v2.11.0
 	 */
 	private static class ConcurrentMessageIndexList {

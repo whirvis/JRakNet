@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
+ * Copyright (c) 2016-2020 Trent "Whirvis" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -52,7 +52,7 @@ import com.whirvis.jraknet.chat.client.ChatClient;
 /**
  * The frame used to visualize the {@link ChatClient}.
  *
- * @author "Whirvis" Trent Summerlin
+ * @author Trent "Whirvis" Summerlin
  * @since JRakNet v2.0.0
  */
 public final class ChatFrame extends JFrame {
@@ -62,7 +62,7 @@ public final class ChatFrame extends JFrame {
 	 * uses the actual name of the channel, rather than defaulting to its
 	 * {@link TextChannel#toString()} method.
 	 * 
-	 * @author "Whirvis" Trent Summerlin
+	 * @author Trent "Whirvis" Summerlin
 	 * @since JRakNet v2.11.0
 	 */
 	private static class TextChannelRenderer extends DefaultListCellRenderer {

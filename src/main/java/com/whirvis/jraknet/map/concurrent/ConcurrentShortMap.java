@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
+ * Copyright (c) 2016-2020 Trent "Whirvis" Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@ import com.whirvis.jraknet.map.DynamicKey;
  * This class is used for using shorts as keys in normal maps without having to
  * worry about boxing them.
  *
- * @author "Whirvis" Trent Summerlin
+ * @author Trent "Whirvis" Summerlin
  * @since JRakNet v2.8.0
  */
 public final class ConcurrentShortMap<T> extends ConcurrentHashMap<Short, T>
