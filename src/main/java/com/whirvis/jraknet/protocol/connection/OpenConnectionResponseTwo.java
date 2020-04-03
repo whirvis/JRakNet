@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 Trent "Whirvis" Summerlin
+ * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,7 +44,7 @@ import com.whirvis.jraknet.protocol.Failable;
  * This is sent by the server to the client after receiving a
  * {@link OpenConnectionRequestTwo OPEN_CONNECTION_REQUEST_2} packet.
  * 
- * @author Trent "Whirvis" Summerlin
+ * @author "Whirvis" Trent Summerlin
  * @since JRakNet v1.0.0
  */
 public final class OpenConnectionResponseTwo extends RakNetPacket implements Failable {

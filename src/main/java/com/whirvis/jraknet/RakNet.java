@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 Trent "Whirvis" Summerlin
+ * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -65,7 +65,7 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
  * The main RakNet component class, containing protocol information and utility
  * methods.
  *
- * @author Trent "Whirvis" Summerlin
+ * @author "Whirvis" Trent Summerlin
  * @since JRakNet v1.0.0
  */
 public final class RakNet {
@@ -75,7 +75,7 @@ public final class RakNet {
 	 * relating to UPnP to be executed through the WaifUPnP without locking up
 	 * the main thread.
 	 * 
-	 * @author Trent "Whirvis" Summerlin
+	 * @author "Whirvis" Trent Summerlin
 	 * @since JRakNet v2.11.0
 	 * @see #onFinish(Runnable)
 	 * @see #wasSuccessful()
@@ -121,7 +121,7 @@ public final class RakNet {
 	 * {@link RakNet#createBootstrapAndSend(InetSocketAddress, Packet, long, int)}
 	 * method to wait for a packet.
 	 *
-	 * @author Trent "Whirvis" Summerlin
+	 * @author "Whirvis" Trent Summerlin
 	 * @since JRakNet v1.0.0
 	 */
 	private static final class BootstrapHandler extends ChannelInboundHandlerAdapter {

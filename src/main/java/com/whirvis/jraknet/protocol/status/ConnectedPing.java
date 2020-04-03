@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 Trent "Whirvis" Summerlin
+ * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,7 +38,7 @@ import com.whirvis.jraknet.RakNetPacket;
  * This packet is sent by either the client or server in order to get a response
  * to determine if the connection is still active.
  * 
- * @author Trent "Whirvis" Summerlin
+ * @author "Whirvis" Trent Summerlin
  * @since JRakNet v1.0.0
  */
 public final class ConnectedPing extends RakNetPacket {

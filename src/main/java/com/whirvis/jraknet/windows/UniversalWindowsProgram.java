@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 Trent "Whirvis" Summerlin
+ * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,7 +42,7 @@ import java.util.Objects;
  * behave differently with code intentionally not running or giving different
  * results.
  * 
- * @author Trent "Whirvis" Summerlin
+ * @author "Whirvis" Trent Summerlin
  * @since JRakNet v2.10.0
  */
 public final class UniversalWindowsProgram {

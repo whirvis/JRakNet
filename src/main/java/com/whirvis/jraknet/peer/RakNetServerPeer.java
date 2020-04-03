@@ -7,7 +7,7 @@
  *
  * the MIT License (MIT)
  *
- * Copyright (c) 2016-2020 Trent "Whirvis" Summerlin
+ * Copyright (c) 2016-2020 "Whirvis" Trent Summerlin
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +47,7 @@ import io.netty.channel.Channel;
 /**
  * A server connection that handles login and other server related protocols.
  *
- * @author Trent "Whirvis" Summerlin
+ * @author "Whirvis" Trent Summerlin
  * @since JRakNet v1.0.0
  */
 public final class RakNetServerPeer extends RakNetPeer implements RakNetPeerMessenger {
