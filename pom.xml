@@ -100,7 +100,7 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-handler</artifactId>
-			<version>4.1.45.Final</version>
+			<version>4.1.49.Final</version>
 		</dependency>
 
 		<!-- UPnP (Universal Plug and Play) -->
@@ -137,32 +137,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-clean-plugin</artifactId>
 				<version>3.0.0</version>
-			</plugin>
-
-			<!-- Add license header to sources -->
-			<plugin>
-				<groupId>com.mycila</groupId>
-				<artifactId>license-maven-plugin</artifactId>
-				<version>3.0</version>
-				<configuration>
-					<header>LICENSE</header>
-					<mapping>
-						<java>SLASHSTAR_STYLE</java>
-					</mapping>
-					<includes>
-						<include>src/test/java/**</include>
-						<include>src/main/java/**</include>
-					</includes>
-					<useDefaultExcludes>true</useDefaultExcludes>
-				</configuration>
-				<executions>
-					<execution>
-						<phase>validate</phase>
-						<goals>
-							<goal>format</goal>
-						</goals>
-					</execution>
-				</executions>
 			</plugin>
 
 			<!-- Copy and process resource files -->
@@ -260,6 +234,36 @@
 			</plugin>
 		</plugins>
 	</build>
+	
+	<pluginManagement>
+			<plugins>
+				<!-- Add license header to sources -->
+				<plugin>
+					<groupId>com.mycila</groupId>
+					<artifactId>license-maven-plugin</artifactId>
+					<version>3.0</version>
+					<configuration>
+						<header>LICENSE</header>
+						<mapping>
+							<java>SLASHSTAR_STYLE</java>
+						</mapping>
+						<includes>
+							<include>src/test/java/**</include>
+							<include>src/main/java/**</include>
+						</includes>
+						<useDefaultExcludes>true</useDefaultExcludes>
+					</configuration>
+					<executions>
+						<execution>
+							<phase>validate</phase>
+							<goals>
+								<goal>format</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+			</plugins>
+		</pluginManagement>
 
 	<!-- Build profiles -->
 	<profiles>
