@@ -199,12 +199,12 @@ public final class RakNet {
 	/**
 	 * The current supported server network protocol.
 	 */
-	public static final int SERVER_NETWORK_PROTOCOL = 9;
+	public static final int SERVER_NETWORK_PROTOCOL = 10;
 
 	/**
 	 * The current supported client network protocol.
 	 */
-	public static final int CLIENT_NETWORK_PROTOCOL = 9;
+	public static final int CLIENT_NETWORK_PROTOCOL = 10;
 
 	/**
 	 * The minimum maximum transfer unit size.

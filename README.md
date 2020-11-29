@@ -6,9 +6,9 @@ This library was meant to be used for Minecraft servers and clients, but can sti
 
 | Protocol Info             | Version |
 | --------------------------|:-------:|
-| Current protocol          | 9       |
-| Supported server protocol | 9       |
-| Supported client protocol | 9       |
+| Current protocol          | 10      |
+| Supported server protocol | 10      |
+| Supported client protocol | 10      |
 
 # Notes
 - Always use the newest version of JRakNet (with the exception of snapshots), including bug fix updates as they almost always fix major bugs, add new features, or have optimizations to make the API run faster. As a general rule, it is also not a good idea to fork this repository as it is almost always being updated like stated before. This means it is very possible for it to become out of date very quickly unless you are intending to create a new feature or fixing a bug to be merged back into the original repository through a pull request.
