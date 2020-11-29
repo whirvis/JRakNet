@@ -6,7 +6,7 @@
 	<!-- Maven coordinates -->
 	<groupId>com.whirvis</groupId>
 	<artifactId>jraknet</artifactId>
-	<version>2.12.3</version> <!-- Also update ConnectionType and README -->
+	<version>2.12.4-SNAPSHOT</version> <!-- Also update ConnectionType and README -->
 	<packaging>jar</packaging>
 
 	<!-- Project information -->
