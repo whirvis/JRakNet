@@ -78,7 +78,7 @@ public final class EncapsulatedPacket implements Cloneable {
 				throw new NullPointerException("Peer cannot be null");
 			} else if (encapsulated == null) {
 				throw new NullPointerException("Encapsulated packet cannot be null");
-			} else if (encapsulated.split == true) {
+			} else if (encapsulated.split) {
 				throw new IllegalArgumentException("Encapsulated packet is already split");
 			}
 			return CustomPacket.MINIMUM_SIZE + encapsulated.size() > peer.getMaximumTransferUnit();
@@ -107,7 +107,7 @@ public final class EncapsulatedPacket implements Cloneable {
 				throw new NullPointerException("Peer cannot be null");
 			} else if (encapsulated == null) {
 				throw new NullPointerException("Encapsulated packet cannot be null");
-			} else if (encapsulated.split == true) {
+			} else if (encapsulated.split) {
 				throw new NullPointerException("Encapsulated packet is already split");
 			} else if (!needsSplit(peer, encapsulated)) {
 				throw new IllegalArgumentException("Encapsulated packet is too small to be split");
@@ -182,7 +182,7 @@ public final class EncapsulatedPacket implements Cloneable {
 			this.splitId = splitId;
 			this.splitCount = splitCount;
 			this.reliability = reliability;
-			this.payloads = new IntMap<Packet>();
+			this.payloads = new IntMap<>();
 		}
 
 		/**
@@ -219,7 +219,7 @@ public final class EncapsulatedPacket implements Cloneable {
 				throws NullPointerException, IllegalArgumentException {
 			if (encapsulated == null) {
 				throw new NullPointerException("Encapsulated packet cannot be null");
-			} else if (encapsulated.split != true || encapsulated.splitId != splitId
+			} else if (!encapsulated.split || encapsulated.splitId != splitId
 					|| encapsulated.splitCount != splitCount || encapsulated.reliability != reliability) {
 				throw new IllegalArgumentException("This split packet does not belong to this one");
 			} else if (encapsulated.splitIndex < 0 || encapsulated.splitIndex >= encapsulated.splitCount) {
@@ -287,7 +287,7 @@ public final class EncapsulatedPacket implements Cloneable {
 			size += reliability.isReliable() ? 3 : 0;
 			size += reliability.isOrdered() || reliability.isSequenced() ? 4 : 0;
 		}
-		size += split == true ? 10 : 0;
+		size += split ? 10 : 0;
 		size += payload != null ? payload.size() : 0;
 		return size;
 	}
@@ -449,7 +449,7 @@ public final class EncapsulatedPacket implements Cloneable {
 		}
 		byte flags = 0x00;
 		flags |= reliability.getId() << FLAG_RELIABILITY_INDEX;
-		flags |= split == true ? FLAG_SPLIT : 0;
+		flags |= split ? FLAG_SPLIT : 0;
 		buffer.writeByte(flags);
 		buffer.writeUnsignedShort(payload.size() * Byte.SIZE);
 		if (ackRecord == null && reliability.requiresAck()) {
@@ -466,7 +466,7 @@ public final class EncapsulatedPacket implements Cloneable {
 			buffer.writeTriadLE(orderIndex);
 			buffer.writeUnsignedByte(orderChannel);
 		}
-		if (split == true) {
+		if (split) {
 			buffer.writeInt(splitCount);
 			buffer.writeUnsignedShort(splitId);
 			buffer.writeInt(splitIndex);
@@ -548,7 +548,7 @@ public final class EncapsulatedPacket implements Cloneable {
 	 *             if the <code>peer</code> is <code>null</code>.
 	 */
 	public EncapsulatedPacket[] split(RakNetPeer peer) throws IllegalStateException, NullPointerException {
-		if (split == true) {
+		if (split) {
 			throw new IllegalStateException("Already split");
 		} else if (!needsSplit(peer)) {
 			throw new IllegalStateException("Too small to be split");
@@ -570,7 +570,7 @@ public final class EncapsulatedPacket implements Cloneable {
 	 *             despite the safe checks put in place.
 	 */
 	public EncapsulatedPacket getClone() throws RuntimeException {
-		if (isClone == true) {
+		if (isClone) {
 			return this;
 		} else if (clone == null) {
 			try {
@@ -594,7 +594,7 @@ public final class EncapsulatedPacket implements Cloneable {
 	public EncapsulatedPacket clone() throws CloneNotSupportedException {
 		if (clone != null) {
 			throw new CloneNotSupportedException("Encapsulated packets can only be cloned once");
-		} else if (isClone == true) {
+		} else if (isClone) {
 			throw new CloneNotSupportedException("Clones of encapsulated packets cannot be cloned");
 		}
 		this.clone = (EncapsulatedPacket) super.clone();
