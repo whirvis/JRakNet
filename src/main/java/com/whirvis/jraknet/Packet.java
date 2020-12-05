@@ -158,7 +158,7 @@ public class Packet {
 	 *            the amount of <code>byte</code>s to skip.
 	 */
 	public final void skip(int length) {
-		buffer.skipBytes(length > this.remaining() ? this.remaining() : length);
+		buffer.skipBytes(Math.min(length, this.remaining()));
 	}
 
 	/**
@@ -666,8 +666,8 @@ public class Packet {
 		if (data == null) {
 			throw new NullPointerException("Data cannot be null");
 		}
-		for (int i = 0; i < data.length; i++) {
-			buffer.writeByte(data[i]);
+		for (byte datum : data) {
+			buffer.writeByte(datum);
 		}
 		return this;
 	}
@@ -894,7 +894,7 @@ public class Packet {
 		if (i < 0x00000000 || i > 0xFFFFFFFFL) {
 			throw new IllegalArgumentException("Value must be in between 0-4294967295");
 		}
-		buffer.writeInt(((int) i) & 0xFFFFFFFF);
+		buffer.writeInt(((int) i));
 		return this;
 	}
 
@@ -1234,8 +1234,8 @@ public class Packet {
 		int version = RakNet.getAddressVersion(address);
 		if (version == RakNet.IPV4) {
 			this.writeUnsignedByte(RakNet.IPV4);
-			for (int i = 0; i < ipAddress.length; i++) {
-				this.writeByte(~ipAddress[i] & 0xFF);
+			for (byte b : ipAddress) {
+				this.writeByte(~b & 0xFF);
 			}
 			this.writeUnsignedShort(address.getPort());
 		} else if (version == RakNet.IPV6) {
