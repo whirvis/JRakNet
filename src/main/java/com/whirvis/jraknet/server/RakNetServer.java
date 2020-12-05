@@ -179,10 +179,10 @@ public class RakNetServer implements RakNetServerListener {
 				: maximumTransferUnit;
 		this.broadcastingEnabled = true;
 		this.identifier = identifier;
-		this.listeners = new ConcurrentLinkedQueue<RakNetServerListener>();
-		this.clients = new ConcurrentHashMap<InetSocketAddress, RakNetClientPeer>();
-		this.banned = new ConcurrentLinkedQueue<InetAddress>();
-		if (this.getClass() != RakNetServer.class && RakNetServerListener.class.isAssignableFrom(this.getClass())) {
+		this.listeners = new ConcurrentLinkedQueue<>();
+		this.clients = new ConcurrentHashMap<>();
+		this.banned = new ConcurrentLinkedQueue<>();
+		if (this.getClass() != RakNetServer.class) {
 			this.addSelfListener();
 		}
 	}
@@ -785,7 +785,7 @@ public class RakNetServer implements RakNetServerListener {
 		}
 		boolean updated = this.maxConnections != maxConnections;
 		this.maxConnections = maxConnections;
-		if (updated == true) {
+		if (updated) {
 			logger.info("Set maximum connections to "
 					+ (maxConnections == INFINITE_CONNECTIONS ? "infinite" : maxConnections));
 		}
@@ -834,7 +834,7 @@ public class RakNetServer implements RakNetServerListener {
 	public final void setIdentifier(Identifier identifier) {
 		boolean updated = !Objects.equals(this.identifier, identifier);
 		this.identifier = identifier;
-		if (updated == true) {
+		if (updated) {
 			if (identifier != null) {
 				logger.info("Set identifier to \"" + identifier.build() + "\"");
 			} else {
@@ -1152,7 +1152,7 @@ public class RakNetServer implements RakNetServerListener {
 	 *             address.
 	 */
 	public final RakNetClientPeer[] getClient(String host) throws UnknownHostException {
-		ArrayList<RakNetClientPeer> peers = new ArrayList<RakNetClientPeer>();
+		ArrayList<RakNetClientPeer> peers = new ArrayList<>();
 		if (host != null) {
 			InetAddress inetAddress = InetAddress.getByName(host);
 			for (RakNetClientPeer peer : clients.values()) {
@@ -1175,7 +1175,7 @@ public class RakNetServer implements RakNetServerListener {
 		if (port < 0x0000 || port > 0xFFFF) {
 			return new RakNetClientPeer[0]; // Invalid port range
 		}
-		ArrayList<RakNetClientPeer> peers = new ArrayList<RakNetClientPeer>();
+		ArrayList<RakNetClientPeer> peers = new ArrayList<>();
 		for (RakNetClientPeer peer : clients.values()) {
 			if (peer.getPort() == port) {
 				peers.add(peer);
@@ -2528,7 +2528,7 @@ public class RakNetServer implements RakNetServerListener {
 			if (!ping.failed()
 					&& (packet.getId() == RakNetPacket.ID_UNCONNECTED_PING
 							|| (clients.size() < maxConnections || maxConnections < 0))
-					&& broadcastingEnabled == true && ping.magic == true) {
+					&& broadcastingEnabled && ping.magic) {
 				ServerPing pingEvent = new ServerPing(sender, ping.connectionType, identifier);
 				this.callEvent(listener -> listener.onPing(this, pingEvent));
 				if (pingEvent.getIdentifier() != null) {
@@ -2552,7 +2552,7 @@ public class RakNetServer implements RakNetServerListener {
 					this.disconnect(sender, "Client reinstantiated connection");
 				}
 			}
-			if (connectionRequestOne.magic == true) {
+			if (connectionRequestOne.magic) {
 				RakNetPacket errorPacket = this.validateSender(sender, NO_GUID);
 				if (errorPacket == null) {
 					if (connectionRequestOne.networkProtocol != this.getProtocolVersion()) {
@@ -2575,7 +2575,7 @@ public class RakNetServer implements RakNetServerListener {
 		} else if (packet.getId() == RakNetPacket.ID_OPEN_CONNECTION_REQUEST_2) {
 			OpenConnectionRequestTwo connectionRequestTwo = new OpenConnectionRequestTwo(packet);
 			connectionRequestTwo.decode();
-			if (!connectionRequestTwo.failed() && connectionRequestTwo.magic == true
+			if (!connectionRequestTwo.failed() && connectionRequestTwo.magic
 					&& connectionRequestTwo.maximumTransferUnit >= RakNet.MINIMUM_MTU_SIZE) {
 				RakNetPacket errorPacket = this.validateSender(sender, connectionRequestTwo.clientGuid);
 				if (errorPacket == null) {
@@ -2618,7 +2618,7 @@ public class RakNetServer implements RakNetServerListener {
 	 * @throws NullPointerException
 	 *             if the <code>sender</code> is <code>null</code>.
 	 */
-	private final RakNetPacket validateSender(InetSocketAddress sender, long guid) throws NullPointerException {
+	private RakNetPacket validateSender(InetSocketAddress sender, long guid) throws NullPointerException {
 		if (sender == null) {
 			throw new NullPointerException("Sender cannot be null");
 		} else if (this.hasClient(sender) || (this.hasClient(guid) && guid != NO_GUID)) {
@@ -2728,7 +2728,7 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if an error occurs during startup.
 	 */
 	public void start() throws IllegalStateException, RakNetException {
-		if (running == true) {
+		if (running) {
 			throw new IllegalStateException("Server is already running");
 		} else if (listeners.isEmpty()) {
 			logger.warn("Server has no listeners");
@@ -2758,8 +2758,8 @@ public class RakNetServer implements RakNetServerListener {
 
 				@Override
 				public void run() {
-					HashMap<RakNetClientPeer, Throwable> disconnected = new HashMap<RakNetClientPeer, Throwable>();
-					while (server.running == true && !this.isInterrupted()) {
+					HashMap<RakNetClientPeer, Throwable> disconnected = new HashMap<>();
+					while (server.running && !this.isInterrupted()) {
 						try {
 							Thread.sleep(0, 1); // Lower CPU usage
 						} catch (InterruptedException e) {
@@ -2828,7 +2828,7 @@ public class RakNetServer implements RakNetServerListener {
 	 *             if the server is not running.
 	 */
 	public void shutdown(String reason) throws IllegalStateException {
-		if (running == false) {
+		if (!running) {
 			throw new IllegalStateException("Server is not running");
 		}
 
