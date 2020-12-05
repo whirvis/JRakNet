@@ -90,9 +90,9 @@ public final class Discovery {
 
 	protected static DiscoveryMode discoveryMode = DiscoveryMode.ALL_CONNECTIONS;
 	protected static int eventThreadCount;
-	protected static final ConcurrentLinkedQueue<DiscoveryListener> LISTENERS = new ConcurrentLinkedQueue<DiscoveryListener>();
-	protected static final ConcurrentHashMap<InetSocketAddress, Boolean> DISCOVERY_ADDRESSES = new ConcurrentHashMap<InetSocketAddress, Boolean>();
-	protected static final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> DISCOVERED = new ConcurrentHashMap<InetSocketAddress, DiscoveredServer>();
+	protected static final ConcurrentLinkedQueue<DiscoveryListener> LISTENERS = new ConcurrentLinkedQueue<>();
+	protected static final ConcurrentHashMap<InetSocketAddress, Boolean> DISCOVERY_ADDRESSES = new ConcurrentHashMap<>();
+	protected static final ConcurrentHashMap<InetSocketAddress, DiscoveredServer> DISCOVERED = new ConcurrentHashMap<>();
 	protected static DiscoveryThread thread = null;
 
 	private Discovery() {
@@ -248,10 +248,10 @@ public final class Discovery {
 		} else if (ports.length <= 0) {
 			return false; // It is impossible to broadcast to zero ports
 		}
-		for (int i = 0; i < ports.length; i++) {
+		for (int port : ports) {
 			for (InetSocketAddress discoveryAddress : DISCOVERY_ADDRESSES.keySet()) {
 				if (discoveryAddress.getAddress().getHostAddress().equals(BROADCAST_ADDRESS)) {
-					if (discoveryAddress.getPort() == ports[i]) {
+					if (discoveryAddress.getPort() == port) {
 						continue;
 					}
 				}
@@ -279,9 +279,9 @@ public final class Discovery {
 	 * @return the ports that are being broadcasted to on the local network.
 	 */
 	public static int[] getPorts() {
-		ArrayList<Integer> portsBoxed = new ArrayList<Integer>();
+		ArrayList<Integer> portsBoxed = new ArrayList<>();
 		for (InetSocketAddress address : DISCOVERY_ADDRESSES.keySet()) {
-			if (DISCOVERY_ADDRESSES.get(address).booleanValue() == LOCAL_SERVER) {
+			if (DISCOVERY_ADDRESSES.get(address) == LOCAL_SERVER) {
 				portsBoxed.add(address.getPort());
 			}
 		}
@@ -385,7 +385,7 @@ public final class Discovery {
 			Iterator<InetSocketAddress> addresses = DISCOVERY_ADDRESSES.keySet().iterator();
 			while (addresses.hasNext()) {
 				InetSocketAddress address = addresses.next();
-				boolean type = DISCOVERY_ADDRESSES.get(address).booleanValue();
+				boolean type = DISCOVERY_ADDRESSES.get(address);
 				if (type == LOCAL_SERVER) {
 					addresses.remove();
 					DiscoveredServer forgotten = DISCOVERED.remove(address);
@@ -418,7 +418,7 @@ public final class Discovery {
 			throw new NullPointerException("Ports cannot be null");
 		} else if (ports.length > 0) {
 			// Convert to list for use of contains() method
-			ArrayList<Integer> portsList = new ArrayList<Integer>();
+			ArrayList<Integer> portsList = new ArrayList<>();
 			for (int port : ports) {
 				if (!portsList.contains(port)) {
 					portsList.add(port);
@@ -427,8 +427,8 @@ public final class Discovery {
 
 			// Add ports in the list that are not up for discovery
 			for (Integer port : portsList) {
-				if (!hasPort(port.intValue())) {
-					addPort(port.intValue());
+				if (!hasPort(port)) {
+					addPort(port);
 				}
 			}
 
@@ -476,9 +476,9 @@ public final class Discovery {
 		} else if (servers.length <= 0) {
 			return false; // It is impossible to broadcast to zero servers
 		}
-		for (int i = 0; i < servers.length; i++) {
+		for (InetSocketAddress server : servers) {
 			for (InetSocketAddress discoveryAddress : DISCOVERY_ADDRESSES.keySet()) {
-				if (discoveryAddress.getAddress().equals(servers[i].getAddress())) {
+				if (discoveryAddress.getAddress().equals(server.getAddress())) {
 					continue;
 				}
 				return false;
@@ -505,9 +505,9 @@ public final class Discovery {
 	 * @return the external servers that are being broadcasted to.
 	 */
 	public static InetSocketAddress[] getServers() {
-		ArrayList<InetSocketAddress> external = new ArrayList<InetSocketAddress>();
+		ArrayList<InetSocketAddress> external = new ArrayList<>();
 		for (InetSocketAddress address : DISCOVERY_ADDRESSES.keySet()) {
-			if (DISCOVERY_ADDRESSES.get(address).booleanValue() == EXTERNAL_SERVER) {
+			if (DISCOVERY_ADDRESSES.get(address) == EXTERNAL_SERVER) {
 				external.add(address);
 			}
 		}
@@ -630,7 +630,7 @@ public final class Discovery {
 			return; // No IP address
 		} else if (!DISCOVERY_ADDRESSES.containsKey(address)) {
 			return; // No address to remove
-		} else if (DISCOVERY_ADDRESSES.get(address).booleanValue() != EXTERNAL_SERVER) {
+		} else if (DISCOVERY_ADDRESSES.get(address) != EXTERNAL_SERVER) {
 			throw new IllegalArgumentException("Address must be that of an external server");
 		} else if (DISCOVERY_ADDRESSES.remove(address) != null) {
 			DiscoveredServer forgotten = DISCOVERED.remove(address);
@@ -710,7 +710,7 @@ public final class Discovery {
 			throw new NullPointerException("Servers cannot be null");
 		} else if (servers.length > 0) {
 			// Convert to list for use of contains() method
-			ArrayList<InetSocketAddress> serversList = new ArrayList<InetSocketAddress>();
+			ArrayList<InetSocketAddress> serversList = new ArrayList<>();
 			for (InetSocketAddress server : servers) {
 				if (!serversList.contains(server)) {
 					serversList.add(server);
@@ -817,7 +817,7 @@ public final class Discovery {
 			Iterator<InetSocketAddress> addresses = DISCOVERY_ADDRESSES.keySet().iterator();
 			while (addresses.hasNext()) {
 				InetSocketAddress address = addresses.next();
-				boolean type = DISCOVERY_ADDRESSES.get(address).booleanValue();
+				boolean type = DISCOVERY_ADDRESSES.get(address);
 				if (type == EXTERNAL_SERVER) {
 					addresses.remove();
 					DiscoveredServer forgotten = DISCOVERED.remove(address);
@@ -847,7 +847,7 @@ public final class Discovery {
 	 * @return the locally discovered servers.
 	 */
 	public static DiscoveredServer[] getLocal() {
-		ArrayList<DiscoveredServer> local = new ArrayList<DiscoveredServer>();
+		ArrayList<DiscoveredServer> local = new ArrayList<>();
 		for (DiscoveredServer server : DISCOVERED.values()) {
 			if (!server.isExternal()) {
 				local.add(server);
@@ -862,7 +862,7 @@ public final class Discovery {
 	 * @return the externally discovered servers.
 	 */
 	public static DiscoveredServer[] getExternal() {
-		ArrayList<DiscoveredServer> external = new ArrayList<DiscoveredServer>();
+		ArrayList<DiscoveredServer> external = new ArrayList<>();
 		for (DiscoveredServer server : DISCOVERED.values()) {
 			if (server.isExternal()) {
 				external.add(server);
@@ -895,7 +895,7 @@ public final class Discovery {
 		} else if (RakNet.isLocalAddress(sender) || DISCOVERY_ADDRESSES.containsKey(sender)) {
 			boolean external = !RakNet.isLocalAddress(sender);
 			if (DISCOVERY_ADDRESSES.containsKey(sender)) {
-				external = DISCOVERY_ADDRESSES.get(sender).booleanValue();
+				external = DISCOVERY_ADDRESSES.get(sender);
 			}
 
 			// Update server information
