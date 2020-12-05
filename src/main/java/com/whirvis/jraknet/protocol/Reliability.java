@@ -128,14 +128,14 @@ public enum Reliability {
 	 *             if both <code>ordered</code> and <code>sequenced</code> are
 	 *             <code>true</code>.
 	 */
-	private Reliability(int id, boolean reliable, boolean ordered, boolean sequenced, boolean requiresAck)
+	Reliability(int id, boolean reliable, boolean ordered, boolean sequenced, boolean requiresAck)
 			throws IllegalArgumentException {
 		this.id = (byte) id;
 		this.reliable = reliable;
 		this.ordered = ordered;
 		this.sequenced = sequenced;
 		this.requiresAck = requiresAck;
-		if (ordered == true && sequenced == true) {
+		if (ordered && sequenced) {
 			throw new IllegalArgumentException("A reliability cannot be both ordered and sequenced");
 		}
 	}
