@@ -100,7 +100,7 @@ public final class RakNetClientPeer extends RakNetPeer {
 		if (packet.getId() == ID_CONNECTION_REQUEST && this.isConnected()) {
 			ConnectionRequest request = new ConnectionRequest(packet);
 			request.decode();
-			if (request.clientGuid == this.getGloballyUniqueId() && request.useSecurity == false) {
+			if (request.clientGuid == this.getGloballyUniqueId() && !request.useSecurity) {
 				ConnectionRequestAccepted requestAccepted = new ConnectionRequestAccepted();
 				requestAccepted.clientAddress = this.getAddress();
 				requestAccepted.clientTimestamp = request.timestamp;
@@ -117,7 +117,7 @@ public final class RakNetClientPeer extends RakNetPeer {
 				String reason = "unknown error";
 				if (request.clientGuid != this.getGloballyUniqueId()) {
 					reason = "client GUID does not match";
-				} else if (request.useSecurity == true) {
+				} else if (request.useSecurity) {
 					reason = "client has security enabled";
 				}
 				this.sendMessage(Reliability.UNRELIABLE, ID_CONNECTION_ATTEMPT_FAILED);
