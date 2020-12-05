@@ -31,6 +31,7 @@ package com.whirvis.jraknet.protocol.login;
 
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNet;
@@ -81,9 +82,7 @@ public final class NewIncomingConnection extends RakNetPacket implements Failabl
 	public NewIncomingConnection() {
 		super(ID_NEW_INCOMING_CONNECTION);
 		this.systemAddresses = new InetSocketAddress[RakNet.getSystemAddressCount()];
-		for (int i = 0; i < systemAddresses.length; i++) {
-			systemAddresses[i] = RakNet.SYSTEM_ADDRESS;
-		}
+		Arrays.fill(systemAddresses, RakNet.SYSTEM_ADDRESS);
 	}
 
 	/**
