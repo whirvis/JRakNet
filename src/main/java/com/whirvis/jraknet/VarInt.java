@@ -132,16 +132,16 @@ public final class VarInt {
 		}
 		boolean more = true;
 		int shift = 0;
-		while (more == true) {
+		while (more) {
 			if (max != VARLONG_MAX_SIZE && shift >= max) {
 				throw new IndexOutOfBoundsException("VarInt overflow");
 			}
-			long bits = (long) (l >>> shift) & 0x7F;
+			long bits = (l >>> shift) & 0x7F;
 			shift += 7;
 			if (shift >= VARLONG_MAX_SIZE || (l >>> shift == 0)) {
 				more = false;
 			}
-			out.write((int) (bits | (more == true ? 0x80 : 0x00)));
+			out.write((int) (bits | (more ? 0x80 : 0x00)));
 		}
 	}
 
@@ -176,7 +176,7 @@ public final class VarInt {
 		}
 		boolean more = true;
 		int shift = 0;
-		while (more == true) {
+		while (more) {
 			if (max != VARINT_MAX_SIZE && shift >= max) {
 				throw new IndexOutOfBoundsException("VarInt overflow");
 			}
@@ -185,7 +185,7 @@ public final class VarInt {
 			if (shift >= VARINT_MAX_SIZE || (i >>> shift == 0)) {
 				more = false;
 			}
-			out.write(bits | (more == true ? 0x80 : 0x00));
+			out.write(bits | (more ? 0x80 : 0x00));
 		}
 	}
 
@@ -349,7 +349,7 @@ public final class VarInt {
 			if (shift >= max) {
 				throw new IndexOutOfBoundsException("VarInt overflow");
 			}
-			long bits = (long) (l >>> shift) & 0x7F;
+			long bits = (l >>> shift) & 0x7F;
 			moreBits = ((l >>> (shift + 7)) & 0x7F) != 0;
 			out.write((int) (bits | (moreBits ? 0x80 : 0x00)));
 			shift += 7;
