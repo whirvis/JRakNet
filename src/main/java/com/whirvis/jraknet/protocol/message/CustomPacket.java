@@ -127,7 +127,7 @@ public class CustomPacket extends RakNetPacket {
 	public void encode() {
 		this.writeTriadLE(sequenceId);
 		if (messages != null) {
-			ArrayList<EncapsulatedPacket> ackMessages = new ArrayList<EncapsulatedPacket>();
+			ArrayList<EncapsulatedPacket> ackMessages = new ArrayList<>();
 			for (EncapsulatedPacket packet : messages) {
 				if (packet.reliability.requiresAck()) {
 					packet.ackRecord = new Record(sequenceId);
@@ -142,8 +142,8 @@ public class CustomPacket extends RakNetPacket {
 	@Override
 	public void decode() {
 		this.sequenceId = this.readTriadLE();
-		ArrayList<EncapsulatedPacket> messages = new ArrayList<EncapsulatedPacket>();
-		ArrayList<EncapsulatedPacket> ackMessages = new ArrayList<EncapsulatedPacket>();
+		ArrayList<EncapsulatedPacket> messages = new ArrayList<>();
+		ArrayList<EncapsulatedPacket> ackMessages = new ArrayList<>();
 		while (this.remaining() >= EncapsulatedPacket.MINIMUM_SIZE) {
 			EncapsulatedPacket packet = new EncapsulatedPacket();
 			packet.decode(this);
