@@ -35,6 +35,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -85,7 +86,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		 * Constructs a <code>ConcurrentMesageIndexList</code>.
 		 */
 		public ConcurrentMessageIndexList() {
-			this.indexes = new ArrayList<Record>();
+			this.indexes = new ArrayList<>();
 		}
 
 		/**
@@ -98,9 +99,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			indexes.add(new Record(index));
 			Record[] condensed = Record.condense(indexes);
 			indexes.clear();
-			for (Record record : condensed) {
-				indexes.add(record);
-			}
+			Collections.addAll(indexes, condensed);
 		}
 
 		/**
@@ -226,26 +225,26 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		this.timeout = PEER_TIMEOUT;
 		this.lastPacketReceiveTime = System.currentTimeMillis();
 		this.reliablePackets = new ConcurrentMessageIndexList();
-		this.splitQueue = new ConcurrentIntMap<EncapsulatedPacket.Split>();
-		this.sendQueue = new ConcurrentLinkedQueue<EncapsulatedPacket>();
-		this.recoveryQueue = new ConcurrentIntMap<EncapsulatedPacket[]>();
-		this.ackReceiptPackets = new ConcurrentHashMap<EncapsulatedPacket, Integer>();
+		this.splitQueue = new ConcurrentIntMap<>();
+		this.sendQueue = new ConcurrentLinkedQueue<>();
+		this.recoveryQueue = new ConcurrentIntMap<>();
+		this.ackReceiptPackets = new ConcurrentHashMap<>();
 		this.receiveSequenceNumber = -1;
 		this.orderSendIndex = new int[RakNet.CHANNEL_COUNT];
 		this.orderReceiveIndex = new int[RakNet.CHANNEL_COUNT];
 		this.sequenceSendIndex = new int[RakNet.CHANNEL_COUNT];
 		this.sequenceReceiveIndex = new int[RakNet.CHANNEL_COUNT];
-		this.handleQueue = new ConcurrentIntMap<ConcurrentIntMap<EncapsulatedPacket>>();
+		this.handleQueue = new ConcurrentIntMap<>();
 		for (int i = 0; i < RakNet.CHANNEL_COUNT; i++) {
 			sequenceReceiveIndex[i] = -1;
-			handleQueue.put(i, new ConcurrentIntMap<EncapsulatedPacket>());
+			handleQueue.put(i, new ConcurrentIntMap<>());
 		}
 		this.latencyEnabled = true;
 		this.latency = -1;
 		this.lastLatency = -1;
 		this.lowestLatency = -1;
 		this.highestLatency = -1;
-		this.latencyTimestamps = new ArrayList<Long>();
+		this.latencyTimestamps = new ArrayList<>();
 	}
 
 	/**
@@ -639,10 +638,8 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				Record record = notAcknowledged.records[i];
 
 				// Notify peer of packets lost in transmission
-				Iterator<EncapsulatedPacket> ackReceiptPacketsI = ackReceiptPackets.keySet().iterator();
-				while (ackReceiptPacketsI.hasNext()) {
-					EncapsulatedPacket encapsulated = ackReceiptPacketsI.next();
-					int encapsulatedRecordIndex = ackReceiptPackets.get(encapsulated).intValue();
+				for (EncapsulatedPacket encapsulated : ackReceiptPackets.keySet()) {
+					int encapsulatedRecordIndex = ackReceiptPackets.get(encapsulated);
 					if (record.getIndex() == encapsulatedRecordIndex) {
 						this.onNotAcknowledge(record, encapsulated);
 						encapsulated.ackRecord = null;
@@ -663,7 +660,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				Iterator<EncapsulatedPacket> ackReceiptPacketsI = ackReceiptPackets.keySet().iterator();
 				while (ackReceiptPacketsI.hasNext()) {
 					EncapsulatedPacket encapsulated = ackReceiptPacketsI.next();
-					int encapsulatedRecordIndex = ackReceiptPackets.get(encapsulated).intValue();
+					int encapsulatedRecordIndex = ackReceiptPackets.get(encapsulated);
 					if (record.getIndex() == encapsulatedRecordIndex) {
 						this.onAcknowledge(record, encapsulated);
 						encapsulated.ackRecord = null;
@@ -692,13 +689,13 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 *             if the <code>encapsulated</code> packet is split, and adding
 	 *             it to the split queue would cause it to overflow.
 	 */
-	private final void handleEncapsulated(EncapsulatedPacket encapsulated)
+	private void handleEncapsulated(EncapsulatedPacket encapsulated)
 			throws InvalidChannelException, SplitQueueOverflowException {
 		if (encapsulated == null) {
 			throw new NullPointerException("Encapsulated packet cannot be null");
 		} else if (encapsulated.orderChannel >= RakNet.CHANNEL_COUNT) {
 			throw new InvalidChannelException(encapsulated.orderChannel);
-		} else if (encapsulated.split == true) {
+		} else if (encapsulated.split) {
 			if (!splitQueue.containsKey(encapsulated.splitId)) {
 				splitQueue.put(encapsulated.splitId, new EncapsulatedPacket.Split(encapsulated.splitId,
 						encapsulated.splitCount, encapsulated.reliability));
@@ -734,7 +731,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 				this.handleEncapsulated(stitched);
 			}
 		} else if (!encapsulated.reliability.isReliable()
-				|| (encapsulated.reliability.isReliable() && !reliablePackets.contains(encapsulated.messageIndex))) {
+				|| !reliablePackets.contains(encapsulated.messageIndex)) {
 			/*
 			 * Determine if the message should be handled based on its
 			 * reliability.
@@ -786,7 +783,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * @throws NullPointerException
 	 *             if the <code>packet</code> is <code>null</code>.
 	 */
-	private final void handleMessage0(int channel, RakNetPacket packet)
+	private void handleMessage0(int channel, RakNetPacket packet)
 			throws InvalidChannelException, NullPointerException {
 		if (channel >= RakNet.CHANNEL_COUNT) {
 			throw new InvalidChannelException(channel);
@@ -806,7 +803,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			pong.decode();
 
 			// Calculate latency
-			if (latencyEnabled == true && latencyTimestamps.contains(pong.timestamp)) {
+			if (latencyEnabled && latencyTimestamps.contains(pong.timestamp)) {
 				latencyTimestamps.remove(pong.timestamp);
 				long responseTime = lastPacketReceiveTime - lastPingSendTime;
 				this.lastLatency = responseTime;
@@ -830,7 +827,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 			long currentTimestamp = this.getTimestamp();
 			Iterator<Long> timestampI = latencyTimestamps.iterator();
 			while (timestampI.hasNext()) {
-				long timestamp = timestampI.next().longValue();
+				long timestamp = timestampI.next();
 				if (currentTimestamp - timestamp >= PEER_TIMEOUT || latencyTimestamps.size() > 10) {
 					timestampI.remove();
 					logger.debug("Cleared overdue ping response with timestamp " + timestamp);
@@ -906,7 +903,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * @throws IllegalArgumentException
 	 *             if the <code>messages</code> array is empty.
 	 */
-	private final int sendCustomPacket(boolean updateRecoveryQueue, EncapsulatedPacket... messages)
+	private int sendCustomPacket(boolean updateRecoveryQueue, EncapsulatedPacket... messages)
 			throws NullPointerException, IllegalArgumentException {
 		if (messages == null) {
 			throw new NullPointerException("Messages cannot be null");
@@ -932,7 +929,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 
 		// Send packet
 		this.sendNettyMessage(custom);
-		if (updateRecoveryQueue == true) {
+		if (updateRecoveryQueue) {
 			ArrayList<EncapsulatedPacket> reliable = new ArrayList<EncapsulatedPacket>();
 			for (EncapsulatedPacket packet : custom.messages) {
 				if (packet.reliability.isReliable()) {
@@ -972,14 +969,14 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 * @throws IllegalArgumentException
 	 *             if the <code>records</code> array is empty.
 	 */
-	private final void sendAcknowledge(boolean acknowledge, Record... records)
+	private void sendAcknowledge(boolean acknowledge, Record... records)
 			throws NullPointerException, IllegalArgumentException {
 		if (records == null) {
 			throw new NullPointerException("Records cannot be null");
 		} else if (records.length <= 0) {
 			throw new IllegalArgumentException("There must be a record to send");
 		}
-		AcknowledgedPacket acknowledged = acknowledge == true ? new AcknowledgedPacket() : new NotAcknowledgedPacket();
+		AcknowledgedPacket acknowledged = acknowledge ? new AcknowledgedPacket() : new NotAcknowledgedPacket();
 		acknowledged.records = records;
 		acknowledged.encode();
 		this.sendNettyMessage(acknowledged);
@@ -1019,9 +1016,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		// Add to send queue
 		if (encapsulated.needsSplit(this)) {
 			encapsulated.splitId = ++this.splitId % 65536;
-			for (EncapsulatedPacket split : encapsulated.split(this)) {
-				sendQueue.add(split);
-			}
+			Collections.addAll(sendQueue, encapsulated.split(this));
 			logger.trace("Split encapsulated packet and added it to the send queue");
 		} else {
 			sendQueue.add(encapsulated);
@@ -1053,7 +1048,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	 */
 	private final void update(boolean force) throws IllegalStateException, TimeoutException {
 		long currentTime = System.currentTimeMillis();
-		if (force == false) {
+		if (!force) {
 			if (this.isDisconnected()) {
 				throw new IllegalStateException("Peer disconnected");
 			} else if (this.hasTimedOut()) {
@@ -1063,14 +1058,14 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 
 		// Send keep alive packet
 		if (currentTime - lastPacketReceiveTime >= DETECTION_SEND_INTERVAL
-				&& currentTime - lastDetectionSendTime >= DETECTION_SEND_INTERVAL && latencyEnabled == false
+				&& currentTime - lastDetectionSendTime >= DETECTION_SEND_INTERVAL && !latencyEnabled
 				&& state == RakNetState.LOGGED_IN) {
 			this.sendMessage(Reliability.UNRELIABLE, ID_DETECT_LOST_CONNECTIONS);
 			this.lastDetectionSendTime = currentTime;
 		}
 
 		// Send ping to detect latency if it is enabled
-		if (latencyEnabled == true && currentTime - lastPingSendTime >= PING_SEND_INTERVAL
+		if (latencyEnabled && currentTime - lastPingSendTime >= PING_SEND_INTERVAL
 				&& state == RakNetState.LOGGED_IN) {
 			ConnectedPing ping = new ConnectedPing();
 			ping.timestamp = this.getTimestamp();
