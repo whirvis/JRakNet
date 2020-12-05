@@ -68,7 +68,7 @@ public final class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 		this.logger = LogManager.getLogger(RakNetServer.class.getSimpleName() + "-"
 				+ Long.toHexString(server.getGloballyUniqueId()).toUpperCase());
 		this.server = server;
-		this.blocked = new ConcurrentHashMap<InetAddress, BlockedAddress>();
+		this.blocked = new ConcurrentHashMap<>();
 	}
 
 	/**
