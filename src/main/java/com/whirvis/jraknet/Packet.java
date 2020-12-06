@@ -894,7 +894,7 @@ public class Packet {
 		if (i < 0x00000000 || i > 0xFFFFFFFFL) {
 			throw new IllegalArgumentException("Value must be in between 0-4294967295");
 		}
-		buffer.writeInt(((int) i));
+		buffer.writeInt((int) i);
 		return this;
 	}
 
@@ -924,7 +924,7 @@ public class Packet {
 		if (i < 0x00000000 || i > 0xFFFFFFFFL) {
 			throw new IllegalArgumentException("Value must be in between 0-4294967295");
 		}
-		buffer.writeIntLE(((int) i) & 0xFFFFFFFF);
+		buffer.writeIntLE((int) i);
 		return this;
 	}
 
