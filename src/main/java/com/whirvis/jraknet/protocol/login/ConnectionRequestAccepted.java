@@ -124,7 +124,7 @@ public final class ConnectionRequestAccepted extends RakNetPacket implements Fai
 			this.readShort(); // TODO: Discover usage
 			this.systemAddresses = new InetSocketAddress[RakNet.getSystemAddressCount()];
 			for (int i = 0; i < systemAddresses.length; i++) {
-				if (this.remaining() > Long.SIZE + Long.SIZE) {
+				if (this.remaining() > 16) {
 					this.systemAddresses[i] = this.readAddress();
 				} else {
 					this.systemAddresses[i] = RakNet.SYSTEM_ADDRESS;
