@@ -98,7 +98,7 @@ public final class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 			}
 		}
 		server.callEvent(listener -> listener.onBlock(server, address, reason, time));
-		logger.info("Blocked address " + address + " due to \"" + reason + "\" for " + time + " milliseconds");
+		logger.debug("Blocked address " + address + " due to \"" + reason + "\" for " + time + " milliseconds");
 	}
 
 	/**
@@ -111,7 +111,7 @@ public final class RakNetServerHandler extends ChannelInboundHandlerAdapter {
 		if (address != null) {
 			if (blocked.remove(address) != null) {
 				server.callEvent(listener -> listener.onUnblock(server, address));
-				logger.info("Unblocked address " + address);
+				logger.debug("Unblocked address " + address);
 			}
 		}
 	}
