@@ -836,9 +836,9 @@ public class RakNetServer implements RakNetServerListener {
 		this.identifier = identifier;
 		if (updated == true) {
 			if (identifier != null) {
-				logger.info("Set identifier to \"" + identifier.build() + "\"");
+				logger.debug("Set identifier to \"" + identifier.build() + "\"");
 			} else {
-				logger.info("Removed identifier");
+				logger.debug("Removed identifier");
 			}
 		}
 	}
@@ -867,9 +867,9 @@ public class RakNetServer implements RakNetServerListener {
 		} else if (!listeners.contains(listener)) {
 			listeners.add(listener);
 			if (listener != this) {
-				logger.info("Added listener of class " + listener.getClass().getName());
+				logger.debug("Added listener of class " + listener.getClass().getName());
 			} else {
-				logger.info("Added self listener");
+				logger.debug("Added self listener");
 			}
 		}
 		return this;
