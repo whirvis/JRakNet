@@ -786,7 +786,7 @@ public class RakNetServer implements RakNetServerListener {
 		boolean updated = this.maxConnections != maxConnections;
 		this.maxConnections = maxConnections;
 		if (updated == true) {
-			logger.info("Set maximum connections to "
+			logger.debug("Set maximum connections to "
 					+ (maxConnections == INFINITE_CONNECTIONS ? "infinite" : maxConnections));
 		}
 	}
@@ -802,7 +802,7 @@ public class RakNetServer implements RakNetServerListener {
 		boolean wasBroadcasting = this.broadcastingEnabled;
 		this.broadcastingEnabled = enabled;
 		if (wasBroadcasting != enabled) {
-			logger.info((enabled ? "Enabled" : "Disabled") + " broadcasting");
+			logger.debug((enabled ? "Enabled" : "Disabled") + " broadcasting");
 		}
 	}
 
@@ -896,9 +896,9 @@ public class RakNetServer implements RakNetServerListener {
 	public final RakNetServer removeListener(RakNetServerListener listener) {
 		if (listeners.remove(listener)) {
 			if (listener != this) {
-				logger.info("Removed listener of class " + listener.getClass().getName());
+				logger.debug("Removed listener of class " + listener.getClass().getName());
 			} else {
-				logger.info("Removed self listener");
+				logger.debug("Removed self listener");
 			}
 		}
 		return this;
@@ -2812,7 +2812,7 @@ public class RakNetServer implements RakNetServerListener {
 			this.running = false;
 			throw new RakNetException(e);
 		}
-		logger.info("Started server");
+		logger.debug("Started server");
 	}
 
 	/**
@@ -2841,7 +2841,7 @@ public class RakNetServer implements RakNetServerListener {
 		// Stop server
 		this.running = false;
 		peerThread.interrupt();
-		logger.info("Shutdown server" + (reason != null ? " for \"" + reason + "\"" : ""));
+		logger.debug("Shutdown server" + (reason != null ? " for \"" + reason + "\"" : ""));
 
 		// Shutdown networking
 		channel.close();
