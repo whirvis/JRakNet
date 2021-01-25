@@ -266,9 +266,9 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		} else if (!listeners.contains(listener)) {
 			listeners.add(listener);
 			if (listener != this) {
-				logger.info("Added listener of class " + listener.getClass().getName());
+				logger.debug("Added listener of class " + listener.getClass().getName());
 			} else {
-				logger.info("Added self listener");
+				logger.debug("Added self listener");
 			}
 		}
 		return this;
@@ -296,9 +296,9 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 	public final RakNetClient removeListener(RakNetClientListener listener) {
 		if (listeners.remove(listener)) {
 			if (listener != this) {
-				logger.info("Removed listener of class " + listener.getClass().getName());
+				logger.debug("Removed listener of class " + listener.getClass().getName());
 			} else {
-				logger.info("Removed self listener");
+				logger.debug("Removed self listener");
 			}
 		}
 		return this;
@@ -808,7 +808,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 		};
 		peerThread.start();
 		logger.debug("Created and started peer update thread");
-		logger.info("Connected to server with address " + address);
+		logger.debug("Connected to server with address " + address);
 	}
 
 	/**
@@ -910,7 +910,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			peer.disconnect();
 			this.peer = null;
 		}
-		logger.info("Disconnected from server with address " + peer.getAddress()
+		logger.debug("Disconnected from server with address " + peer.getAddress()
 				+ (reason != null ? " with reason \"" + reason + "\"" : ""));
 		this.callEvent(
 				listener -> listener.onDisconnect(this, serverAddress, peer, reason == null ? "Disconnected" : reason));

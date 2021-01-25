@@ -503,7 +503,7 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 		this.latency = enabled ? latency : -1;
 		this.pongsReceived = enabled ? pongsReceived : 0;
 		if (wasEnabled != enabled) {
-			logger.info((enabled ? "Enabled" : "Disabled") + " latency detection");
+			logger.debug((enabled ? "Enabled" : "Disabled") + " latency detection");
 		}
 	}
 

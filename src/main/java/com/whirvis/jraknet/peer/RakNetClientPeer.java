@@ -129,7 +129,7 @@ public final class RakNetClientPeer extends RakNetPeer {
 			if (!newIncomingConnection.failed()) {
 				this.timestamp = System.currentTimeMillis() - newIncomingConnection.clientTimestamp;
 				this.setState(RakNetState.LOGGED_IN);
-				this.getLogger().info("Client with globally unique ID "
+				this.getLogger().debug("Client with globally unique ID "
 						+ Long.toHexString(this.getGloballyUniqueId()).toUpperCase() + " has logged in");
 				server.callEvent(listener -> listener.onLogin(server, this));
 			} else {

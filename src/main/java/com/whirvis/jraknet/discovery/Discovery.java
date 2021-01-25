@@ -902,7 +902,7 @@ public final class Discovery {
 			if (!DISCOVERED.containsKey(sender)) {
 				DiscoveredServer discovered = new DiscoveredServer(sender, external, pong.identifier);
 				DISCOVERED.put(sender, discovered);
-				LOGGER.info("Discovered " + (external ? "external" : "local") + " with address " + sender);
+				LOGGER.debug("Discovered " + (external ? "external" : "local") + " with address " + sender);
 				callEvent(listener -> listener.onServerDiscovered(discovered));
 			} else {
 				DiscoveredServer discovered = DISCOVERED.get(sender);

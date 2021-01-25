@@ -130,7 +130,7 @@ public final class RakNetServerPeer extends RakNetPeer implements RakNetPeerMess
 		if (record.equals(loginRecord.ackRecord)) {
 			this.timestamp = System.currentTimeMillis();
 			this.setState(RakNetState.LOGGED_IN);
-			this.getLogger().info("Logged in to server with globally unique ID "
+			this.getLogger().debug("Logged in to server with globally unique ID "
 					+ Long.toHexString(this.getGloballyUniqueId()).toUpperCase());
 			client.callEvent(listener -> listener.onLogin(client, this));
 		}

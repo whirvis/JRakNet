@@ -979,7 +979,7 @@ public final class RakNet {
 		boolean updated = _maxPacketsPerSecond != maxPacketsPerSecond;
 		_maxPacketsPerSecond = maxPacketsPerSecond;
 		if (updated == true) {
-			LOGGER.info("Set max packets per second to " + maxPacketsPerSecond);
+			LOGGER.debug("Set max packets per second to " + maxPacketsPerSecond);
 		}
 	}
 
@@ -1018,7 +1018,7 @@ public final class RakNet {
 		boolean updated = _systemAddressCount != systemAddressCount;
 		_systemAddressCount = systemAddressCount;
 		if (updated == true) {
-			LOGGER.info("Set system address count to " + systemAddressCount);
+			LOGGER.debug("Set system address count to " + systemAddressCount);
 		}
 	}
 
