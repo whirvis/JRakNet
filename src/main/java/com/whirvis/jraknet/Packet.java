@@ -579,9 +579,7 @@ public class Packet {
 	 *             less readable bytes than are specified by the length.
 	 */
 	public final String readString() throws IndexOutOfBoundsException {
-		int len = this.readUnsignedShort();
-		byte[] data = this.read(len);
-		return new String(data);
+		return VarInt.readString(this.buffer);
 	}
 
 	/**
@@ -1182,9 +1180,7 @@ public class Packet {
 		if (s == null) {
 			throw new NullPointerException("String cannot be null");
 		}
-		byte[] data = s.getBytes();
-		this.writeUnsignedShort(data.length);
-		this.write(data);
+		VarInt.writeString(this.buffer, s);
 		return this;
 	}
 

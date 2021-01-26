@@ -29,10 +29,14 @@
  */
 package com.whirvis.jraknet;
 
+import io.netty.buffer.ByteBuf;
+import jdk.internal.util.Preconditions;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Utilities for reading and writing both <code>VarInt</code>s and
@@ -438,6 +442,81 @@ public final class VarInt {
 	public static void writeUnsignedVarLong(long l, OutputStream out)
 			throws IllegalArgumentException, NullPointerException, IOException, IndexOutOfBoundsException {
 		writeUnsigned(l, out, VARLONG_MAX_SIZE);
+	}
+
+	/**
+	 * reads the next VarInt from the given buffer.
+	 *
+	 * @param buf the buffer to read.
+	 *
+	 * @return the next VarInt.
+	 */
+	public static int readVarInt(final ByteBuf buf) {
+		int result = 0;
+		int indent = 0;
+		int b = buf.readByte();
+		while ((b & 0x80) == 0x80) {
+			if (indent >= 21){
+				throw new IllegalArgumentException("Too many bytes for a VarInt32.");
+			}
+			result += (b & 0x7f) << indent;
+			indent += 7;
+			b = buf.readByte();
+		}
+		result += (b & 0x7f) << indent;
+		return result;
+	}
+
+	/**
+	 * transfers the specified length of bytes from the buffer into a new byte array.
+	 *
+	 * @param buf the buffer to transfer from.
+	 * @param len the length of bytes to transfer.
+	 *
+	 * @return the new byte array.
+	 */
+	public static byte[] arr(final ByteBuf buf, final int len) {
+		final byte[] bytes = new byte[len];
+		buf.readBytes(bytes);
+		return bytes;
+	}
+
+	/**
+	 * reads the next String value from the byte stream represented by the given buffer.
+	 *
+	 * @param buf the buffer which to read the String.
+	 *
+	 * @return the next String value.
+	 */
+	public static String readString(final ByteBuf buf) {
+		final int len = readVarInt(buf);
+		final byte[] stringData = arr(buf, len);
+		return new String(stringData, StandardCharsets.UTF_8);
+	}
+
+	/**
+	 * encodes the given String into the given buffer using the Minecraft protocol format.
+	 *
+	 * @param buf the buffer which to write.
+	 * @param s the String to write.
+	 */
+	public static void writeString(final ByteBuf buf, final String s) {
+		writeVarInt(buf, s.length());
+		buf.writeBytes(s.getBytes(StandardCharsets.UTF_8));
+	}
+
+	/**
+	 * writes a VarInt value to the given buffer.
+	 *
+	 * @param buf the buffer to write.
+	 * @param i the VarInt to write.
+	 */
+	public static void writeVarInt(final ByteBuf buf, int i) {
+		while ((i & 0xFFFFFF80) != 0L) {
+			buf.writeByte(i & 0x7F | 0x80);
+			i >>>= 7;
+		}
+		buf.writeByte(i & 0x7F);
 	}
 
 }
