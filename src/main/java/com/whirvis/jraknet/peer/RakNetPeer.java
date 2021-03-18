@@ -322,6 +322,16 @@ public abstract class RakNetPeer implements RakNetPeerMessenger {
 	}
 
 	/**
+	 * Returns the channel of the peer, guaranteed to not be
+	 * <code>null</code>.
+	 *
+	 * @return the channel of the peer.
+	 */
+	public final Channel getChannel() {
+		return this.channel;
+	}
+
+	/**
 	 * Returns whether or not the peer is connected.
 	 * <p>
 	 * The peer is considered connected if the current state is
