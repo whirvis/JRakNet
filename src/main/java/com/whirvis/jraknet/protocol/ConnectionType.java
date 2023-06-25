@@ -71,7 +71,7 @@ public class ConnectionType {
 		} else if (metadata.length / 2 > MAX_METADATA_VALUES) {
 			throw new IllegalArgumentException("Too many metadata values");
 		}
-		HashMap<String, String> metadataMap = new HashMap<String, String>();
+		HashMap<String, String> metadataMap = new HashMap<>();
 		for (int i = 0; i < metadata.length; i += 2) {
 			metadataMap.put(metadata[i], metadata[i + 1]);
 		}
@@ -125,7 +125,7 @@ public class ConnectionType {
 		this.name = name;
 		this.language = language;
 		this.version = version;
-		this.metadata = metadata = (metadata != null ? metadata : new HashMap<String, String>());
+		this.metadata = metadata = (metadata != null ? metadata : new HashMap<>());
 		if (metadata.size() > MAX_METADATA_VALUES) {
 			throw new IllegalArgumentException("Too many metadata values");
 		}
@@ -166,7 +166,7 @@ public class ConnectionType {
 	 *            the version of the implementation.
 	 */
 	public ConnectionType(UUID uuid, String name, String language, String version) {
-		this(uuid, name, language, version, new HashMap<String, String>());
+		this(uuid, name, language, version, new HashMap<>());
 	}
 
 	/**

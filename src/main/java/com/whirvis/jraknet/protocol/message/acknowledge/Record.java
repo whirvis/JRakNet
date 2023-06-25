@@ -60,7 +60,7 @@ public final class Record {
 	 */
 	public static int[] getSequenceIds(Record... records) {
 		// Get sequence IDs from records
-		ArrayList<Integer> sequenceIdsList = new ArrayList<Integer>();
+		ArrayList<Integer> sequenceIdsList = new ArrayList<>();
 		for (Record record : records) {
 			for (int recordId : record.getSequenceIds()) {
 				if (!sequenceIdsList.contains(recordId)) {
@@ -99,10 +99,10 @@ public final class Record {
 	 * @return the simplified records
 	 */
 	public static Record[] simplify(int... sequenceIds) {
-		IntMap<Record> simplified = new IntMap<Record>();
-		for (int i = 0; i < sequenceIds.length; i++) {
-			if (!simplified.containsKey(sequenceIds[i])) {
-				simplified.put(sequenceIds[i], new Record(sequenceIds[i]));
+		IntMap<Record> simplified = new IntMap<>();
+		for (int sequenceId : sequenceIds) {
+			if (!simplified.containsKey(sequenceId)) {
+				simplified.put(sequenceId, new Record(sequenceId));
 			}
 		}
 		return simplified.values().toArray(new Record[simplified.size()]);
@@ -151,7 +151,7 @@ public final class Record {
 		Arrays.sort(sequenceIds);
 
 		// Condense records
-		ArrayList<Record> condensed = new ArrayList<Record>();
+		ArrayList<Record> condensed = new ArrayList<>();
 		for (int i = 0; i < sequenceIds.length; i++) {
 			int startIndex = sequenceIds[i];
 			int endIndex = startIndex;

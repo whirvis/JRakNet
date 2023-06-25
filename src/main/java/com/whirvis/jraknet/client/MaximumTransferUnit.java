@@ -68,20 +68,18 @@ public final class MaximumTransferUnit {
 		} else if (units.length <= 0) {
 			return new MaximumTransferUnit[0]; // Nothing to sort
 		}
-		IntMap<MaximumTransferUnit> unitMap = new IntMap<MaximumTransferUnit>();
+		IntMap<MaximumTransferUnit> unitMap = new IntMap<>();
 		for (MaximumTransferUnit unit : units) {
 			if (unit == null) {
 				throw new NullPointerException("Maximum transfer unit cannot be null");
 			}
 			unitMap.put(unit.getSize(), unit);
 		}
-		ArrayList<MaximumTransferUnit> unitList = new ArrayList<MaximumTransferUnit>();
-		NavigableMap<Integer, MaximumTransferUnit> unitTreeMap = new TreeMap<Integer, MaximumTransferUnit>(unitMap)
+		ArrayList<MaximumTransferUnit> unitList = new ArrayList<>();
+		NavigableMap<Integer, MaximumTransferUnit> unitTreeMap = new TreeMap<>(unitMap)
 				.descendingMap();
 		Set<Entry<Integer, MaximumTransferUnit>> unitSet = unitTreeMap.entrySet();
-		Iterator<Entry<Integer, MaximumTransferUnit>> unitI = unitSet.iterator();
-		while (unitI.hasNext()) {
-			Entry<Integer, MaximumTransferUnit> unitEntry = unitI.next();
+		for (Entry<Integer, MaximumTransferUnit> unitEntry : unitSet) {
 			unitList.add(unitEntry.getValue());
 		}
 		return unitList.toArray(new MaximumTransferUnit[unitList.size()]);

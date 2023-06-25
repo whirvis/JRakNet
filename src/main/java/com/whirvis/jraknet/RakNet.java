@@ -108,7 +108,7 @@ public final class RakNet {
 		 *             if the UPnP code is still being executed.
 		 */
 		public boolean wasSuccessful() throws IllegalStateException {
-			if (finished == false) {
+			if (!finished) {
 				throw new IllegalStateException("UPnP code is still being executed");
 			}
 			return this.success;
@@ -242,7 +242,7 @@ public final class RakNet {
 	 */
 	public static final int MINECRAFT_SYSTEM_ADDRESS_COUNT = 20;
 
-	private static final HashMap<InetAddress, Integer> MAXIMUM_TRANSFER_UNIT_SIZES = new HashMap<InetAddress, Integer>();
+	private static final HashMap<InetAddress, Integer> MAXIMUM_TRANSFER_UNIT_SIZES = new HashMap<>();
 	private static int _lowestMaximumTransferUnitSize = -1;
 	private static long _maxPacketsPerSecond = 500;
 	private static int _systemAddressCount = RAKNET_SYSTEM_ADDRESS_COUNT;
@@ -611,8 +611,7 @@ public final class RakNet {
 			while (retries > 0 && received == null && !Thread.currentThread().isInterrupted()) {
 				long sendTime = System.currentTimeMillis();
 				channel.writeAndFlush(new DatagramPacket(packet.buffer(), address));
-				while (System.currentTimeMillis() - sendTime < timeout && handler.packet == null)
-					; // Wait for either a timeout or a response
+				while (System.currentTimeMillis() - sendTime < timeout && handler.packet == null); // Wait for either a timeout or a response
 				received = handler.packet;
 				retries--;
 			}
@@ -649,7 +648,7 @@ public final class RakNet {
 			if (packet.getId() == RakNetPacket.ID_OPEN_CONNECTION_REPLY_1) {
 				OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne(packet);
 				connectionResponseOne.decode();
-				if (connectionResponseOne.magic == true) {
+				if (connectionResponseOne.magic) {
 					return true;
 				}
 			}
@@ -726,7 +725,7 @@ public final class RakNet {
 			if (packet.getId() == RakNetPacket.ID_OPEN_CONNECTION_REPLY_1) {
 				OpenConnectionResponseOne connectionResponseOne = new OpenConnectionResponseOne(packet);
 				connectionResponseOne.decode();
-				if (connectionResponseOne.magic == true) {
+				if (connectionResponseOne.magic) {
 					return true;
 				}
 			} else if (packet.getId() == RakNetPacket.ID_INCOMPATIBLE_PROTOCOL_VERSION) {
@@ -811,7 +810,7 @@ public final class RakNet {
 			if (packet.getId() == RakNetPacket.ID_UNCONNECTED_PONG) {
 				UnconnectedPong pong = new UnconnectedPong(packet);
 				pong.decode();
-				if (!pong.failed() && pong.magic == true) {
+				if (!pong.failed() && pong.magic) {
 					return pong.identifier;
 				}
 			}
@@ -908,7 +907,7 @@ public final class RakNet {
 				MAXIMUM_TRANSFER_UNIT_SIZES.put(address, _lowestMaximumTransferUnitSize);
 			}
 		}
-		return MAXIMUM_TRANSFER_UNIT_SIZES.get(address).intValue();
+		return MAXIMUM_TRANSFER_UNIT_SIZES.get(address);
 	}
 
 	/**
@@ -978,7 +977,7 @@ public final class RakNet {
 		}
 		boolean updated = _maxPacketsPerSecond != maxPacketsPerSecond;
 		_maxPacketsPerSecond = maxPacketsPerSecond;
-		if (updated == true) {
+		if (updated) {
 			LOGGER.info("Set max packets per second to " + maxPacketsPerSecond);
 		}
 	}
@@ -1017,7 +1016,7 @@ public final class RakNet {
 		}
 		boolean updated = _systemAddressCount != systemAddressCount;
 		_systemAddressCount = systemAddressCount;
-		if (updated == true) {
+		if (updated) {
 			LOGGER.info("Set system address count to " + systemAddressCount);
 		}
 	}
@@ -1122,7 +1121,7 @@ public final class RakNet {
 		String[] addressSplit = address.split(":");
 		if (addressSplit.length == 1 || addressSplit.length == 2) {
 			InetAddress inetAddress = InetAddress.getByName(!addressSplit[0].startsWith("/") ? addressSplit[0]
-					: addressSplit[0].substring(1, addressSplit[0].length()));
+					: addressSplit[0].substring(1));
 			int port = (addressSplit.length == 2 ? parseIntPassive(addressSplit[1]) : defaultPort);
 			if (port >= 0x0000 && port <= 0xFFFF) {
 				return new InetSocketAddress(inetAddress, port);

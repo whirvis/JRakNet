@@ -136,10 +136,10 @@ public final class UniversalWindowsProgram {
 			return true; // Not running on Windows 10
 		}
 		boolean exempted = isLoopbackExempt();
-		if (exempt == true && exempted == false) {
+		if (exempt && !exempted) {
 			return CHECKNETISOLATION_LOOPBACKEXEMPT_ADD.setArgument(APPLICATION_ARGUMENT, this.getApplicationId())
 					.execute(true).equals(PowerShellCommand.RESULT_OK);
-		} else if (exempt == false && exempted == true) {
+		} else if (!exempt && exempted) {
 			return CHECKNETISOLATION_LOOPBACKEXEMPT_DELETE.setArgument(APPLICATION_ARGUMENT, this.getApplicationId())
 					.execute(true).equals(PowerShellCommand.RESULT_OK);
 		}

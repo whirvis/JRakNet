@@ -31,6 +31,7 @@ package com.whirvis.jraknet.protocol.login;
 
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 import com.whirvis.jraknet.Packet;
 import com.whirvis.jraknet.RakNet;
@@ -82,9 +83,7 @@ public final class ConnectionRequestAccepted extends RakNetPacket implements Fai
 	public ConnectionRequestAccepted() {
 		super(ID_CONNECTION_REQUEST_ACCEPTED);
 		this.systemAddresses = new InetSocketAddress[RakNet.getSystemAddressCount()];
-		for (int i = 0; i < systemAddresses.length; i++) {
-			systemAddresses[i] = RakNet.SYSTEM_ADDRESS;
-		}
+		Arrays.fill(systemAddresses, RakNet.SYSTEM_ADDRESS);
 	}
 
 	/**
@@ -103,8 +102,8 @@ public final class ConnectionRequestAccepted extends RakNetPacket implements Fai
 		try {
 			this.writeAddress(clientAddress);
 			this.writeShort(0);
-			for (int i = 0; i < systemAddresses.length; i++) {
-				this.writeAddress(systemAddresses[i]);
+			for (InetSocketAddress systemAddress : systemAddresses) {
+				this.writeAddress(systemAddress);
 			}
 			this.writeLong(clientTimestamp);
 			this.writeLong(serverTimestamp);

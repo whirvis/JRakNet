@@ -484,7 +484,7 @@ public class RakNetClient implements RakNetPeerMessenger, RakNetClientListener {
 			}
 		}
 		this.highestMaximumTransferUnitSize = highestMaximumTransferUnit;
-		if (foundTransferUnit == false) {
+		if (!foundTransferUnit) {
 			throw new RuntimeException("No compatible maximum transfer unit found for machine network cards");
 		}
 		int[] registeredMaximumTransferUnitSizes = new int[maximumTransferUnits.size()];

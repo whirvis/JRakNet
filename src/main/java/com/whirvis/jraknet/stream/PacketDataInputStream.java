@@ -68,7 +68,7 @@ public final class PacketDataInputStream extends InputStream implements DataInpu
 	}
 
 	@Override
-	public int read() throws IOException, EOFException {
+	public int read() throws IOException {
 		if (packet.remaining() > 0) {
 			return packet.readUnsignedByte();
 		}
@@ -76,7 +76,7 @@ public final class PacketDataInputStream extends InputStream implements DataInpu
 	}
 
 	@Override
-	public void readFully(byte[] b) throws IOException, EOFException {
+	public void readFully(byte[] b) throws IOException {
 		for (int i = 0; i < b.length; i++) {
 			b[i] = packet.readByte();
 			if (b[i] == EOF) {
@@ -86,7 +86,7 @@ public final class PacketDataInputStream extends InputStream implements DataInpu
 	}
 
 	@Override
-	public void readFully(byte[] b, int off, int len) throws IOException, EOFException {
+	public void readFully(byte[] b, int off, int len) throws IOException {
 		for (int i = off; i < len; i++) {
 			b[i] = packet.readByte();
 			if (b[i] == EOF) {
@@ -96,7 +96,7 @@ public final class PacketDataInputStream extends InputStream implements DataInpu
 	}
 
 	@Override
-	public int skipBytes(int n) throws IOException, EOFException {
+	public int skipBytes(int n) throws IOException {
 		int skipped = 0;
 		while (skipped < n && packet.remaining() > 0) {
 			packet.readByte();
@@ -106,7 +106,7 @@ public final class PacketDataInputStream extends InputStream implements DataInpu
 	}
 
 	@Override
-	public boolean readBoolean() throws IOException, EOFException {
+	public boolean readBoolean() throws IOException {
 		try {
 			return packet.readBoolean();
 		} catch (IndexOutOfBoundsException e) {
@@ -115,7 +115,7 @@ public final class PacketDataInputStream extends InputStream implements DataInpu
 	}
 
 	@Override
-	public byte readByte() throws IOException, EOFException {
+	public byte readByte() throws IOException {
 		try {
 			return packet.readByte();
 		} catch (IndexOutOfBoundsException e) {
@@ -124,7 +124,7 @@ public final class PacketDataInputStream extends InputStream implements DataInpu
 	}
 
 	@Override
-	public int readUnsignedByte() throws IOException, EOFException {
+	public int readUnsignedByte() throws IOException {
 		try {
 			return packet.readUnsignedByte();
 		} catch (IndexOutOfBoundsException e) {
@@ -133,7 +133,7 @@ public final class PacketDataInputStream extends InputStream implements DataInpu
 	}
 
 	@Override
-	public short readShort() throws IOException, EOFException {
+	public short readShort() throws IOException {
 		try {
 			return packet.readShort();
 		} catch (IndexOutOfBoundsException e) {
@@ -142,7 +142,7 @@ public final class PacketDataInputStream extends InputStream implements DataInpu
 	}
 
 	@Override
-	public int readUnsignedShort() throws IOException, EOFException {
+	public int readUnsignedShort() throws IOException {
 		try {
 			return packet.readUnsignedShort();
 		} catch (IndexOutOfBoundsException e) {
@@ -151,7 +151,7 @@ public final class PacketDataInputStream extends InputStream implements DataInpu
 	}
 
 	@Override
-	public char readChar() throws IOException, EOFException {
+	public char readChar() throws IOException {
 		try {
 			return (char) packet.readUnsignedShort();
 		} catch (IndexOutOfBoundsException e) {
@@ -160,7 +160,7 @@ public final class PacketDataInputStream extends InputStream implements DataInpu
 	}
 
 	@Override
-	public int readInt() throws IOException, EOFException {
+	public int readInt() throws IOException {
 		try {
 			return packet.readInt();
 		} catch (IndexOutOfBoundsException e) {
@@ -169,7 +169,7 @@ public final class PacketDataInputStream extends InputStream implements DataInpu
 	}
 
 	@Override
-	public long readLong() throws IOException, EOFException {
+	public long readLong() throws IOException {
 		try {
 			return packet.readLong();
 		} catch (IndexOutOfBoundsException e) {
@@ -178,7 +178,7 @@ public final class PacketDataInputStream extends InputStream implements DataInpu
 	}
 
 	@Override
-	public float readFloat() throws IOException, EOFException {
+	public float readFloat() throws IOException {
 		try {
 			return packet.readFloat();
 		} catch (IndexOutOfBoundsException e) {
@@ -187,7 +187,7 @@ public final class PacketDataInputStream extends InputStream implements DataInpu
 	}
 
 	@Override
-	public double readDouble() throws IOException, EOFException {
+	public double readDouble() throws IOException {
 		try {
 			return packet.readDouble();
 		} catch (IndexOutOfBoundsException e) {
@@ -214,7 +214,7 @@ public final class PacketDataInputStream extends InputStream implements DataInpu
 	 * back to this original stream to execute the {@link #readLine()} method.
 	 */
 	@Override
-	public String readUTF() throws IOException, EOFException {
+	public String readUTF() throws IOException {
 		return dataIn.readUTF();
 	}
 

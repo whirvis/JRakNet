@@ -71,8 +71,8 @@ public final class PowerShellAdministrativeClient {
 	 *             if an I/O error occurs.
 	 */
 	private static String ioStr(InputStream in) throws IOException {
-		String str = new String();
-		String next = null;
+		String str = "";
+		String next;
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 		while ((next = reader.readLine()) != null) {
 			str += next + "\n";

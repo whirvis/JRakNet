@@ -29,8 +29,6 @@
  */
 package com.whirvis.jraknet;
 
-import com.whirvis.jraknet.RakNetPacket;
-
 /**
  * Signals that a packet critical to the current task at hand failed to encode
  * or decode correctly.

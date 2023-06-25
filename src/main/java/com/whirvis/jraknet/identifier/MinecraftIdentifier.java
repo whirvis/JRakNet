@@ -473,7 +473,7 @@ public class MinecraftIdentifier extends Identifier {
 	public String build() throws IllegalArgumentException {
 		if (!verifyVersionTag(versionTag)) {
 			throw new IllegalArgumentException("Invalid version tag");
-		} else if (legacy == true) {
+		} else if (legacy) {
 			return this.createBuildString(serverName, serverProtocol, versionTag, onlinePlayerCount, maxPlayerCount);
 		}
 		return this.createBuildString(serverName, serverProtocol, versionTag, onlinePlayerCount, maxPlayerCount, guid,

@@ -123,7 +123,7 @@ public final class DiscoveryThread extends Thread {
 			long currentTime = System.currentTimeMillis();
 
 			// Forget servers that have taken too long to respond back
-			ArrayList<InetSocketAddress> forgottenServers = new ArrayList<InetSocketAddress>();
+			ArrayList<InetSocketAddress> forgottenServers = new ArrayList<>();
 			for (InetSocketAddress address : Discovery.DISCOVERED.keySet()) {
 				DiscoveredServer discovered = Discovery.DISCOVERED.get(address);
 				if (discovered.hasTimedOut()) {

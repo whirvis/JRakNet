@@ -40,6 +40,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Random;
@@ -60,7 +61,7 @@ import org.apache.logging.log4j.Logger;
 public final class PowerShellCommand {
 
 	private static final String POWERSHELL_EXECUTABLE = "powershell.exe";
-	private static final Charset POWERSHELL_BASE64_CHARSET = Charset.forName("UTF-16LE");
+	private static final Charset POWERSHELL_BASE64_CHARSET = StandardCharsets.UTF_16LE;
 	private static final char END_OF_TEXT = (char) 0x03;
 	private static final int POWERSHELL_ADMINISTRATIVE_TIMEOUT = 10000;
 	private static final int AUTHENTICATION_FAILURE = 0x00;
@@ -146,17 +147,17 @@ public final class PowerShellCommand {
 		if (in == null) {
 			throw new NullPointerException("Input stream cannot be null");
 		}
-		String str = new String();
-		String next = null;
+		StringBuilder str = new StringBuilder();
+		String next;
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 		while ((next = reader.readLine()) != null) {
-			str += next + "\n";
+			str.append(next).append("\n");
 		}
 		reader.close();
 		if (str.length() > 1) {
 			return str.substring(0, str.length() - 1);
 		}
-		return str;
+		return str.toString();
 	}
 
 	private static int commandIndex;
@@ -175,7 +176,7 @@ public final class PowerShellCommand {
 	public PowerShellCommand(String command) {
 		this.logger = LogManager.getLogger("PowerShellCommand-" + commandIndex++);
 		this.command = command;
-		this.arguments = new HashMap<String, String>();
+		this.arguments = new HashMap<>();
 	}
 
 	/**
@@ -260,9 +261,9 @@ public final class PowerShellCommand {
 		arguments.clear();
 		command += Base64.getEncoder().encodeToString(encodedCommand.getBytes(POWERSHELL_BASE64_CHARSET));
 
-		if (requiresElevation == false) {
+		if (!requiresElevation) {
 			// Create process and execute command
-			Process powerShell = null;
+			Process powerShell;
 			try {
 				powerShell = Runtime.getRuntime().exec(command);
 				powerShell.getOutputStream().close();
@@ -299,9 +300,9 @@ public final class PowerShellCommand {
 				// Create client process
 				logger.debug("Executing administrative PowerShell command...");
 				String administrativeCommand = PowerShellCommand.POWERSHELL_EXECUTABLE
-						+ " Start-Process -Verb runAs javaw.exe \'" + "-cp \"$path\" "
+						+ " Start-Process -Verb runAs javaw.exe '" + "-cp \"$path\" "
 						+ PowerShellAdministrativeClient.class.getName() + " " + server.getLocalPort() + " " + password
-						+ " " + command + END_OF_TEXT + "\'";
+						+ " " + command + END_OF_TEXT + "'";
 				if (getRunningJarFile() != null) {
 					administrativeCommand = administrativeCommand.replace("$path",
 							getRunningJarFile().getAbsolutePath());
@@ -323,7 +324,7 @@ public final class PowerShellCommand {
 
 				// Wait for connection
 				logger.debug("Waiting for connection from administrative PowerShell client...");
-				Socket connection = null;
+				Socket connection;
 				try {
 					connection = server.accept();
 				} catch (IOException e) {

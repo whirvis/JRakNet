@@ -62,7 +62,7 @@ public final class DiscoveryHandler extends ChannelInboundHandlerAdapter {
 	 */
 	protected DiscoveryHandler() {
 		this.logger = LogManager.getLogger(DiscoveryHandler.class);
-		this.blocked = new ArrayList<InetAddress>();
+		this.blocked = new ArrayList<>();
 	}
 
 	@Override

@@ -67,12 +67,12 @@ public class RakNetPacket extends Packet {
 	/**
 	 * The cached packet names, mapped by their ID.
 	 */
-	private static final ShortMap<String> PACKET_NAMES = new ShortMap<String>();
+	private static final ShortMap<String> PACKET_NAMES = new ShortMap<>();
 
 	/**
 	 * The cached packet IDs, mapped by their name.
 	 */
-	private static final HashMap<String, Short> PACKET_IDS = new HashMap<String, Short>();
+	private static final HashMap<String, Short> PACKET_IDS = new HashMap<>();
 
 	/**
 	 * The magic identifier.
@@ -916,7 +916,7 @@ public class RakNetPacket extends Packet {
 	 * they also override other packets with the same ID.
 	 */
 	private static void mapNameIds() {
-		if (mappedNameIds == false) {
+		if (!mappedNameIds) {
 			Logger log = LogManager.getLogger(RakNetPacket.class);
 			for (Field field : RakNetPacket.class.getFields()) {
 				if (field.getType().equals(short.class)) {
@@ -957,7 +957,7 @@ public class RakNetPacket extends Packet {
 	 *         packet, <code>false</code>.
 	 */
 	public static boolean hasPacket(int id) {
-		if (mappedNameIds == false) {
+		if (!mappedNameIds) {
 			mapNameIds();
 		}
 		return PACKET_NAMES.containsKey((short) id);
@@ -988,7 +988,7 @@ public class RakNetPacket extends Packet {
 	 *         packet, <code>false</code>.
 	 */
 	public static boolean hasPacket(String name) {
-		if (mappedNameIds == false) {
+		if (!mappedNameIds) {
 			mapNameIds();
 		}
 		return PACKET_IDS.containsKey(name);
@@ -1055,7 +1055,7 @@ public class RakNetPacket extends Packet {
 	 *         it does not exist.
 	 */
 	public static short getId(String name) {
-		if (mappedNameIds == false) {
+		if (!mappedNameIds) {
 			mapNameIds();
 		}
 		return PACKET_IDS.containsKey(name) ? PACKET_IDS.get(name) : -1;
@@ -1228,7 +1228,7 @@ public class RakNetPacket extends Packet {
 				String name = this.readString();
 				String language = this.readString();
 				String version = this.readString();
-				HashMap<String, String> metadata = new HashMap<String, String>();
+				HashMap<String, String> metadata = new HashMap<>();
 				int metadataLength = this.readUnsignedByte();
 				for (int i = 0; i < metadataLength; i++) {
 					String key = this.readString();
@@ -1362,7 +1362,7 @@ public class RakNetPacket extends Packet {
 	 */
 	public final RakNetPacket setBuffer(ByteBuf buffer, boolean updateId) throws IndexOutOfBoundsException {
 		super.setBuffer(buffer);
-		if (updateId == true) {
+		if (updateId) {
 			this.id = this.readUnsignedByte();
 		}
 		return this;
@@ -1450,7 +1450,7 @@ public class RakNetPacket extends Packet {
 	 */
 	public final RakNetPacket flip(boolean updateId) throws IndexOutOfBoundsException {
 		super.flip();
-		if (updateId == true) {
+		if (updateId) {
 			this.id = this.readUnsignedByte();
 		}
 		return this;
